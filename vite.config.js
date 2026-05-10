@@ -24,17 +24,15 @@ export default defineConfig(({ mode }) => {
 
     build: {
       outDir: 'dist',
-      sourcemap: !!env.VITE_SENTRY_DSN, // source maps only when Sentry is enabled
+      sourcemap: !!env.VITE_SENTRY_DSN,
+
       rollupOptions: {
         output: {
-          manualChunks: {
-            // Split large vendors into separate chunks for faster loading
-            vendor:  ['react', 'react-dom', 'react-router-dom'],
-            socket:  ['socket.io-client'],
-            sentry:  ['@sentry/react'],
-          },
-        },
+          // ✅ SAFE: avoid manualChunks crash
+          manualChunks: undefined
+        }
       },
+
       chunkSizeWarningLimit: 800,
     },
 
