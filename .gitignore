@@ -1,0 +1,78 @@
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+.pnp
+.pnp.js
+
+# ==========================
+# Build output
+# ==========================
+dist/
+.vite/
+
+# Old frontend leftovers (safe to keep for cleanup)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ==========================
+# Environment files (NEVER COMMIT)
+# ==========================
+.env
+.env.local
+.env.production
+.env.development
+
+backend/.env
+frontend/.env
+
+# ==========================
+# Logs
+# ==========================
+*.log
+logs/
+
+# ==========================
+# Uploads / user files
+# ==========================
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# ==========================
+# OS files
+# ==========================
+.DS_Store
+Thumbs.db
+
+# ==========================
+# Editors / IDE
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================
+# Testing / coverage
+# ==========================
+coverage/
+.nyc_output/
+
+# ==========================
+# Cache / temp
+# ==========================
+.cache/
+.temp/
+tmp/
+
+# ==========================
+# Vercel
+# ==========================
+.vercel/
+
+# ==========================
+# Backup files
+# ==========================
+*.gz
+*.dump
