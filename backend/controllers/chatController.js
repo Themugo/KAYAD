@@ -4,34 +4,85 @@ import Chat from "../models/Chat.js";
 import mongoose from "mongoose";
 
 // =============================
+// 💬 START / CREATE CHAT
+// =============================
+export const startChat = async (req, res) => {
+  try {
+    const { participantId, carId } = req.body;
+
+    if (!participantId) {
+      return res.status(400).json({ message: "participantId required" });
+    }
+
+    const participants = [req.user.id, participantId].sort();
+    const filter = { participants: { $all: participants, $size: 2 } };
+    if (carId) filter.car = carId;
+
+    let chat = await Chat.findOne(filter).populate("participants", "name avatar");
+
+    if (!chat) {
+      chat = await Chat.create({
+        participants,
+        car: carId || null,
+      });
+      chat = await chat.populate("participants", "name avatar");
+    }
+
+    res.status(201).json({ success: true, chat });
+  } catch (error) {
+    console.error("❌ START CHAT ERROR:", error);
+    res.status(500).json({ message: "Failed to start chat" });
+  }
+};
+
+// =============================
+// 📥 GET USER CHATS (INBOX)
+// =============================
+export const getUserChats = async (req, res) => {
+  try {
+    const chats = await Chat.find({ participants: req.user.id })
+      .populate("participants", "name avatar")
+      .populate("car", "title images price")
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    res.json({ success: true, chats });
+  } catch (error) {
+    console.error("❌ GET USER CHATS ERROR:", error);
+    res.status(500).json({ message: "Failed to fetch chats" });
+  }
+};
+
+// =============================
 // 📤 SEND MESSAGE
 // =============================
 export const sendMessage = async (req, res) => {
   try {
-    const { chatId, text } = req.body;
+    const { text } = req.body;
+    const { chatId } = req.params;
 
     if (!chatId || !text) {
-      return res.status(400).json({
-        message: "chatId and text are required",
-      });
+      return res.status(400).json({ message: "chatId and text required" });
     }
 
-    // ✅ validate object id
     if (!mongoose.Types.ObjectId.isValid(chatId)) {
-      return res.status(400).json({
-        message: "Invalid chatId",
-      });
+      return res.status(400).json({ message: "Invalid chatId" });
     }
 
-    const message = await Chat.create({
-      chatId,
-      sender: req.user.id,
-      text,
-    });
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
 
-    // =============================
-    // 🔥 REALTIME EMIT
-    // =============================
+    if (!chat.participants.some((p) => p.toString() === req.user.id)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    const messageData = { sender: req.user.id, text };
+    await chat.addMessage(messageData);
+
+    const message = chat.messages[chat.messages.length - 1];
+
     if (global.io) {
       global.io.to(chatId).emit("newMessage", {
         _id: message._id,
@@ -43,7 +94,6 @@ export const sendMessage = async (req, res) => {
     }
 
     res.status(201).json(message);
-
   } catch (error) {
     console.error("❌ SEND MESSAGE ERROR:", error);
     res.status(500).json({ message: "Failed to send message" });
@@ -58,17 +108,23 @@ export const getMessages = async (req, res) => {
     const { chatId } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(chatId)) {
-      return res.status(400).json({
-        message: "Invalid chatId",
-      });
+      return res.status(400).json({ message: "Invalid chatId" });
     }
 
-    const messages = await Chat.find({ chatId })
-      .sort({ createdAt: 1 })
-      .limit(200); // 🔥 prevent overload
+    const chat = await Chat.findById(chatId).populate(
+      "messages.sender",
+      "name avatar"
+    );
 
-    res.json(messages);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
 
+    if (!chat.participants.some((p) => p.toString() === req.user.id)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    res.json({ success: true, messages: chat.messages });
   } catch (error) {
     console.error("❌ GET MESSAGES ERROR:", error);
     res.status(500).json({ message: "Failed to fetch messages" });
@@ -76,45 +132,57 @@ export const getMessages = async (req, res) => {
 };
 
 // =============================
-// 🧹 DELETE MESSAGE (OPTIONAL)
+// 👀 MARK AS SEEN
 // =============================
-export const deleteMessage = async (req, res) => {
+export const markAsSeen = async (req, res) => {
   try {
-    const message = await Chat.findById(req.params.id);
+    const { chatId } = req.params;
 
-    if (!message) {
-      return res.status(404).json({ message: "Message not found" });
+    if (!mongoose.Types.ObjectId.isValid(chatId)) {
+      return res.status(400).json({ message: "Invalid chatId" });
     }
 
-    // 🔒 only sender can delete
-    if (message.sender.toString() !== req.user.id) {
-      return res.status(403).json({ message: "Not allowed" });
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
     }
 
-    await message.deleteOne();
+    await chat.markAsSeen(req.user.id);
 
-    res.json({ message: "Deleted" });
+    if (global.io) {
+      global.io.to(chatId).emit("messagesSeen", { chatId, userId: req.user.id });
+    }
 
+    res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ message: "Delete failed" });
+    console.error("❌ MARK AS SEEN ERROR:", error);
+    res.status(500).json({ message: "Failed" });
   }
 };
 
 // =============================
-// 👀 MARK AS READ (OPTIONAL)
+// 🧹 DELETE / LEAVE CHAT
 // =============================
-export const markAsRead = async (req, res) => {
+export const deleteChat = async (req, res) => {
   try {
-    const { chatId } = req.params;
+    const chat = await Chat.findById(req.params.chatId);
 
-    await Chat.updateMany(
-      { chatId, read: false },
-      { read: true }
+    if (!chat) {
+      return res.status(404).json({ message: "Chat not found" });
+    }
+
+    chat.participants = chat.participants.filter(
+      (p) => p.toString() !== req.user.id
     );
 
-    res.json({ message: "Marked as read" });
+    if (chat.participants.length === 0) {
+      await chat.deleteOne();
+    } else {
+      await chat.save();
+    }
 
+    res.json({ success: true, message: "Left chat" });
   } catch (error) {
-    res.status(500).json({ message: "Failed" });
+    res.status(500).json({ message: "Failed to leave chat" });
   }
 };

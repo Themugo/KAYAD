@@ -1,53 +1,74 @@
-import Bid from "../models/Bid.js";
-import Car from "../models/Car.js";
+import mongoose from "mongoose";
 
-// =============================
-// 🤖 AUTO BID ENGINE
-// =============================
-export const processAutoBids = async (carId, newAmount, lastUserId) => {
-  try {
-    const autoBidders = await Bid.getAutoBidders(carId);
+const messageSchema = new mongoose.Schema(
+  {
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    text: {
+      type: String,
+      trim: true,
+      default: "",
+      maxlength: 2000,
+    },
+    attachments: [
+      {
+        url: String,
+        type: { type: String, enum: ["image", "video", "file"] },
+      },
+    ],
+    seenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: true }
+);
 
-    if (!autoBidders.length) return null;
+const chatSchema = new mongoose.Schema(
+  {
+    participants: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    ],
+    car: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Car",
+      default: null,
+    },
+    messages: [messageSchema],
+    isBlocked: { type: Boolean, default: false },
+    lastMessage: {
+      text: String,
+      sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      createdAt: Date,
+    },
+  },
+  { timestamps: true }
+);
 
-    let highest = newAmount;
-    let winner = lastUserId;
+chatSchema.index({ participants: 1 });
+chatSchema.index({ updatedAt: -1 });
 
-    for (const bidder of autoBidders) {
-      // 🚫 skip last bidder
-      if (bidder.user.toString() === lastUserId.toString()) continue;
-
-      if (bidder.maxBid > highest) {
-        const nextBid = Math.min(bidder.maxBid, highest + 1000); // 🔥 increment
-
-        const autoBid = await Bid.create({
-          carId,
-          user: bidder.user,
-          amount: nextBid,
-          maxBid: bidder.maxBid,
-          isAuto: true,
-          phone: bidder.phone,
-          status: "paid",
-        });
-
-        highest = nextBid;
-        winner = bidder.user;
-
-        console.log("🤖 Auto bid placed:", nextBid);
-      }
-    }
-
-    // 🔥 update car
-    await Car.findByIdAndUpdate(carId, {
-      currentBid: highest,
-      highestBidder: winner,
-      $inc: { bidsCount: 1 },
-    });
-
-    return { highest, winner };
-
-  } catch (err) {
-    console.error("❌ AUTO BID ERROR:", err);
-    return null;
-  }
+chatSchema.methods.addMessage = function (messageData) {
+  this.messages.push(messageData);
+  this.lastMessage = {
+    text: messageData.text,
+    sender: messageData.sender,
+    createdAt: new Date(),
+  };
+  return this.save();
 };
+
+chatSchema.methods.markAsSeen = function (userId) {
+  const recentMessages = this.messages.slice(-50);
+  for (const msg of recentMessages) {
+    if (!msg.seenBy.some((id) => id.toString() === userId.toString())) {
+      msg.seenBy.push(userId);
+    }
+  }
+  return this.save();
+};
+
+const Chat =
+  mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+
+export default Chat;

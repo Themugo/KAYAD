@@ -9,140 +9,21 @@ import {
   startChat,
   getUserChats,
   markAsSeen,
+  deleteChat,
 } from "../controllers/chatController.js";
-
-import Chat from "../models/Chat.js";
 
 const router = express.Router();
 
-// =============================
-// ⚙️ PAGINATION HELPER
-// =============================
-const getPagination = (req) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const skip = (page - 1) * limit;
+router.post("/", protect, asyncHandler(startChat));
 
-  return { page, limit, skip };
-};
+router.get("/", protect, asyncHandler(getUserChats));
 
-// =============================
-// 💬 START / CREATE CHAT
-// =============================
-router.post(
-  "/",
-  protect,
-  asyncHandler(startChat)
-);
+router.get("/:chatId/messages", protect, validateObjectId, asyncHandler(getMessages));
 
-// =============================
-// 📥 GET USER CHATS (INBOX)
-// =============================
-router.get(
-  "/",
-  protect,
-  asyncHandler(async (req, res) => {
-    const chats = await Chat.find({
-      participants: req.user.id,
-    })
-      .populate("participants", "name avatar")
-      .populate("car", "title images price")
-      .sort({ updatedAt: -1 })
-      .lean();
+router.post("/:chatId/message", protect, validateObjectId, asyncHandler(sendMessage));
 
-    res.json({
-      success: true,
-      chats,
-    });
-  })
-);
+router.post("/:chatId/seen", protect, validateObjectId, asyncHandler(markAsSeen));
 
-// =============================
-// 📜 GET MESSAGES (PAGINATED)
-// =============================
-router.get(
-  "/:chatId/messages",
-  protect,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const { page, limit, skip } = getPagination(req);
-
-    const chat = await Chat.findById(req.params.chatId);
-
-    if (!chat) {
-      return res.status(404).json({
-        message: "Chat not found",
-      });
-    }
-
-    // 🔒 ACCESS CONTROL
-    if (!chat.participants.includes(req.user.id)) {
-      return res.status(403).json({
-        message: "Not authorized",
-      });
-    }
-
-    const messages = chat.messages
-      .slice(-limit * page) // simple pagination
-      .slice(0, limit)
-      .reverse();
-
-    res.json({
-      success: true,
-      messages,
-      page,
-    });
-  })
-);
-
-// =============================
-// 📤 SEND MESSAGE
-// =============================
-router.post(
-  "/:chatId/message",
-  protect,
-  validateObjectId,
-  asyncHandler(sendMessage)
-);
-
-// =============================
-// 👀 MARK CHAT AS SEEN
-// =============================
-router.post(
-  "/:chatId/seen",
-  protect,
-  validateObjectId,
-  asyncHandler(markAsSeen)
-);
-
-// =============================
-// ❌ DELETE / LEAVE CHAT
-// =============================
-router.delete(
-  "/:chatId",
-  protect,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const chat = await Chat.findById(req.params.chatId);
-
-    if (!chat) {
-      return res.status(404).json({
-        message: "Chat not found",
-      });
-    }
-
-    // remove user from participants
-    chat.participants = chat.participants.filter(
-      (p) => p.toString() !== req.user.id
-    );
-
-    await chat.save();
-
-    res.json({
-      success: true,
-      message: "Left chat",
-    });
-  })
-);
+router.delete("/:chatId", protect, validateObjectId, asyncHandler(deleteChat));
 
 export default router;
