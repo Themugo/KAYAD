@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // =============================
@@ -278,15 +279,14 @@ export const updateProfile = async (req, res) => {
   try {
     const { name, phone, location, businessName, bio } = req.body;
 
-    const allowedUpdates = {};
-    if (name)         allowedUpdates.name = name.trim();
-    if (phone)        allowedUpdates.phone = phone.trim();
-    if (location)     allowedUpdates.location = location.trim();
-    if (businessName) allowedUpdates.businessName = businessName.trim();
-    if (bio !== undefined) allowedUpdates.bio = bio.trim();
+    const updates = {};
+    if (name)         updates.name = name.trim();
+    if (phone)        updates.phone = phone.trim();
+    if (location)     updates.location = location.trim();
+    if (businessName) updates.businessName = businessName.trim();
+    if (bio !== undefined) updates.bio = bio.trim();
 
-    const user = await (await import("../models/User.js")).default
-      .findByIdAndUpdate(req.user.id, allowedUpdates, { new: true, runValidators: true })
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
       .select("-password");
 
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -310,9 +310,6 @@ export const changePassword = async (req, res) => {
     if (newPassword.length < 6) {
       return res.status(400).json({ message: "New password must be at least 6 characters" });
     }
-
-    const User = (await import("../models/User.js")).default;
-    const bcrypt = (await import("bcryptjs")).default;
 
     const user = await User.findById(req.user.id).select("+password");
     if (!user) return res.status(404).json({ message: "User not found" });

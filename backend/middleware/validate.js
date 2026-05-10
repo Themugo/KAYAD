@@ -154,7 +154,7 @@ export const validatePayment = (req, res, next) => {
 // 🆔 VALIDATE OBJECT ID
 // =============================
 export const validateObjectId = (req, res, next) => {
-  const id = req.params.id || req.params.carId;
+  const id = req.params.id || req.params.carId || req.params.chatId;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     return badRequest(res, "Invalid ID", req);
