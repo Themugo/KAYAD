@@ -41,55 +41,69 @@ export default function HomePage() {
   return (
     <div className="page">
 
-      {/* ═══ HERO ═══════════════════════════════════════════ */}
+      {/* ═══ COMPACT MARKET CARD ════════════════════════════ */}
       <section className="hero-gradient" style={{
-        padding: '80px 0 100px',
+        padding: '48px 0',
         borderBottom: '1px solid var(--border)',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Background grid pattern */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(circle, var(--border) 1px, transparent 1px)',
-          backgroundSize: '40px 40px', opacity: 0.3, pointerEvents: 'none',
-        }}/>
+        <div className="container">
+          <div className="card" style={{
+            padding: '28px 32px',
+            border: '1px solid var(--border-soft)',
+            background: 'var(--card)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'space-between' }}>
+              {/* Brand + Tagline */}
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
+                  Kenya's Premium Car Marketplace
+                </div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 600, color: 'var(--text)' }}>
+                  Gari Motors
+                </div>
+              </div>
 
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ maxWidth: 700 }}>
-            <div style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 16 }}>
-              Kenya's #1 Premium Car Marketplace
+              {/* Feature Badges */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {[
+                  { icon: '⚡', label: 'Live Bidding' },
+                  { icon: '🔒', label: 'Escrow' },
+                  { icon: '✅', label: 'Verified Dealers' },
+                ].map(f => (
+                  <span key={f.label} style={{
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: 100, padding: '4px 12px', fontSize: 11, fontWeight: 600,
+                    color: 'var(--gold-light)', display: 'flex', alignItems: 'center', gap: 4,
+                  }}>
+                    {f.icon} {f.label}
+                  </span>
+                ))}
+              </div>
             </div>
-            <h1 style={{ marginBottom: 20, lineHeight: 1.1 }}>
-              Find, Bid & Own Your{' '}
-              <span style={{
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-                background: 'linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%)',
-                backgroundClip: 'text',
-              }}>
-                Dream Car
-              </span>
-            </h1>
-            <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: 40, maxWidth: 560, lineHeight: 1.7 }}>
-              Live auctions with M-Pesa bid commitments. Secure escrow payments.
-              Verified dealers. Beat Jiji. Beat OLX. This is different.
-            </p>
 
-            {/* ─── Search Bar ─── */}
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: 0, maxWidth: 560 }}>
-              <input
-                className="input"
-                placeholder="Search brand, model, city..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none' }}
-              />
-              <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0 }}>
-                🔍 Search
-              </button>
-            </form>
+            {/* Search + CTAs */}
+            <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+              <form onSubmit={handleSearch} style={{ display: 'flex', gap: 0, flex: 1, minWidth: 240, maxWidth: 440 }}>
+                <input
+                  className="input"
+                  placeholder="Search brand, model, city..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none' }}
+                />
+                <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0, padding: '8px 18px' }}>
+                  🔍 Search
+                </button>
+              </form>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Link to="/register" className="btn btn-gold btn-sm">Start Listing Free</Link>
+                <Link to="/cars" className="btn btn-outline btn-sm">Browse Market</Link>
+              </div>
+            </div>
 
-            {/* Quick Filters */}
-            <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
+            {/* Quick Filter Pills */}
+            <div style={{ display: 'flex', gap: 6, marginTop: 12, flexWrap: 'wrap' }}>
               {['Under 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
                 <button
                   key={tag}
@@ -101,7 +115,7 @@ export default function HomePage() {
                   }}
                   style={{
                     background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 100, padding: '5px 14px', fontSize: 12,
+                    borderRadius: 100, padding: '3px 10px', fontSize: 11,
                     color: 'var(--text-muted)', cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
@@ -117,24 +131,45 @@ export default function HomePage() {
       </section>
 
       {/* ═══ STATS BAR ══════════════════════════════════════ */}
-      <section style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '28px 0' }}>
+      <section style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '24px 0' }}>
         <div className="container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
             {STATS.map(s => (
               <div key={s.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 600, color: 'var(--gold-light)' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--gold-light)' }}>
                   {s.value}
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{s.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* ═══ FEATURED CARS ══════════════════════════════════ */}
+      <section style={{ padding: '48px 0' }}>
+        <div className="container">
+          <div className="section-header">
+            <div>
+              <div className="section-eyebrow">Trending</div>
+              <h2>Most Viewed</h2>
+            </div>
+            <Link to="/cars" className="btn btn-outline btn-sm">Browse All →</Link>
+          </div>
+
+          {loading ? (
+            <div className="loading-center"><div className="spinner" /></div>
+          ) : (
+            <div className="car-grid">
+              {featured.map(car => <CarCard key={car._id} car={car} />)}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ═══ LIVE AUCTIONS ══════════════════════════════════ */}
       {liveAuctions.length > 0 && (
-        <section style={{ padding: '60px 0' }}>
+        <section style={{ padding: '48px 0', background: 'var(--surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
           <div className="container">
             <div className="section-header">
               <div>
@@ -180,62 +215,6 @@ export default function HomePage() {
           </div>
         </section>
       )}
-
-      {/* ═══ HOW IT WORKS ══════════════════════════════════ */}
-      <section style={{ padding: '60px 0', background: 'var(--surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <div className="section-eyebrow">Our Edge</div>
-            <h2>Why Gari Motors Wins</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
-            {[
-              {
-                icon: '⚡',
-                title: 'Live Bidding',
-                desc: 'Real-time M-Pesa bid commitments go directly to dealers. No escrow holding — you pay to show seriousness.',
-              },
-              {
-                icon: '🔒',
-                title: 'Escrow Protection',
-                desc: 'Final unit payment is held in escrow until both parties confirm the deal. Release or refund controlled by admin.',
-              },
-              {
-                icon: '✅',
-                title: 'Verified Dealers',
-                desc: 'Every dealer is screened and approved. Fraud scores, trust ratings, and full audit trail on every listing.',
-              },
-            ].map(f => (
-              <div key={f.title} className="card" style={{ padding: 28, textAlign: 'center' }}>
-                <div style={{ fontSize: 42, marginBottom: 16 }}>{f.icon}</div>
-                <h3 style={{ marginBottom: 12 }}>{f.title}</h3>
-                <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.7 }}>{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ FEATURED CARS ══════════════════════════════════ */}
-      <section style={{ padding: '60px 0' }}>
-        <div className="container">
-          <div className="section-header">
-            <div>
-              <div className="section-eyebrow">Trending</div>
-              <h2>Most Viewed</h2>
-            </div>
-            <Link to="/cars" className="btn btn-outline btn-sm">Browse All →</Link>
-          </div>
-
-          {loading ? (
-            <div className="loading-center"><div className="spinner" /></div>
-          ) : (
-            <div className="car-grid">
-              {featured.map(car => <CarCard key={car._id} car={car} />)}
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* ═══ BRANDS ══════════════════════════════════════════ */}
       <section style={{ padding: '48px 0', background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
