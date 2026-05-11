@@ -9,7 +9,7 @@ const DEAL_COLORS = {
   overpriced: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', label: '↑ High Price'  },
 };
 
-export default function CarCard({ car }) {
+export default function CarCard({ car, isComparing, onToggleCompare, compareCount }) {
   const img = car.images?.[0]?.url || car.images?.[0];
   const deal = car.dealRating ? DEAL_COLORS[car.dealRating] : null;
   const isLive = car.auctionStatus === 'live';
@@ -46,6 +46,26 @@ export default function CarCard({ car }) {
               {deal.label}
             </div>
           )}
+          {/* Compare button */}
+          {onToggleCompare && (
+            <button
+              onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
+              title={isComparing ? 'Remove from compare' : compareCount >= 4 ? 'Max 4 for comparison' : 'Add to compare'}
+              style={{
+                position: 'absolute', bottom: 10, left: 10,
+                background: isComparing ? 'var(--gold)' : 'rgba(10,22,40,0.8)',
+                border: `1px solid ${isComparing ? 'var(--gold)' : 'var(--border)'}`,
+                borderRadius: 6, padding: '3px 8px', fontSize: 11,
+                color: isComparing ? '#0A1628' : 'var(--text)',
+                cursor: compareCount >= 4 && !isComparing ? 'not-allowed' : 'pointer',
+                fontWeight: 600, opacity: compareCount >= 4 && !isComparing ? 0.5 : 1,
+                backdropFilter: 'blur(4px)',
+              }}
+            >
+              {isComparing ? '✓ Comparing' : '⇄ Compare'}
+            </button>
+          )}
+
           {/* Bid count badge */}
           {car.bidsCount > 0 && (
             <div style={{

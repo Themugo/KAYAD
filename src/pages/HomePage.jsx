@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { carsAPI, formatKES } from '../api/api';
+import { MOCK_CARS } from '../data/mockCars';
 import CarCard from '../components/CarCard';
 import { CountdownDisplay } from '../hooks/useCountdown';
 
@@ -22,11 +23,13 @@ export default function HomePage() {
 
   useEffect(() => {
     Promise.all([
-      carsAPI.list({ limit: 6, sort: '-views' }),
-      carsAPI.list({ limit: 4, auction: '1', auctionStatus: 'live' }),
+      carsAPI.list({ limit: 6, sort: '-views' }).catch(() => ({ cars: [] })),
+      carsAPI.list({ limit: 4, auction: '1', auctionStatus: 'live' }).catch(() => ({ cars: [] })),
     ]).then(([feat, auction]) => {
-      setFeatured(feat.cars || feat.data || []);
-      setLiveAuctions(auction.cars || auction.data || []);
+      const apiFeatured = feat.cars || feat.data || [];
+      const apiAuctions = auction.cars || auction.data || [];
+      setFeatured(apiFeatured.length > 0 ? apiFeatured : MOCK_CARS.filter(c => c.isPromoted).slice(0, 6));
+      setLiveAuctions(apiAuctions.length > 0 ? apiAuctions : MOCK_CARS.filter(c => c.auctionStatus === 'live').slice(0, 4));
     }).finally(() => setLoading(false));
   }, []);
 

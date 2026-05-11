@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, reviewsAPI, chatAPI, formatKES } from '../api/api';
+import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import PaymentModal from '../components/PaymentModal';
@@ -26,15 +27,14 @@ export default function CarDetailPage() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      carsAPI.get(id),
+      carsAPI.get(id).catch(() => ({ car: null })),
       carsAPI.insights(id).catch(() => null),
-      car?.dealer?._id ? reviewsAPI.forDealer(car.dealer._id).catch(() => ({ reviews: [] })) : Promise.resolve({ reviews: [] }),
     ]).then(([carData, ins]) => {
-      const c = carData.car || carData.data || carData;
+      let c = carData?.car || carData?.data || carData;
+      if (!c || !c._id) c = getMockCar(id);
       setCar(c);
       setInsights(ins?.data || null);
-      // Track click
-      carsAPI.trackClick(id).catch(() => {});
+      if (c) carsAPI.trackClick(id).catch(() => {});
       if (c?.dealer?._id) {
         reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
       }
