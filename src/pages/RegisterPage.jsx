@@ -150,7 +150,7 @@ export default function RegisterPage() {
               )}
 
               {role === 'dealer' && (
-                <div style={{ background: 'rgba(200,150,42,0.08)', border: '1px solid rgba(200,150,42,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+                <div style={{ background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
                   ⚠ Dealer accounts require admin approval. You can still log in and prepare listings while awaiting approval.
                 </div>
               )}

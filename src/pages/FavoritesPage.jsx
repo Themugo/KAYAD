@@ -135,10 +135,10 @@ export default function FavoritesPage() {
                     onClick={() => toggleCompare(car._id)}
                     title="Add to compare"
                     style={{
-                      background: compare.includes(car._id) ? 'var(--gold)' : 'rgba(7,9,12,0.85)',
+                      background: compare.includes(car._id) ? 'var(--gold)' : 'rgba(10,22,40,0.85)',
                       border: `1px solid ${compare.includes(car._id) ? 'var(--gold)' : 'var(--border)'}`,
                       borderRadius: 6, padding: '4px 8px', fontSize: 11,
-                      color: compare.includes(car._id) ? '#07090C' : 'var(--text)',
+                      color: compare.includes(car._id) ? '#0A1628' : 'var(--text)',
                       cursor: 'pointer', fontWeight: 600, backdropFilter: 'blur(4px)',
                     }}
                   >
@@ -148,7 +148,7 @@ export default function FavoritesPage() {
                     onClick={() => handleRemove(car._id)}
                     title="Remove from favourites"
                     style={{
-                      background: 'rgba(7,9,12,0.85)', border: '1px solid var(--border)',
+                      background: 'rgba(10,22,40,0.85)', border: '1px solid var(--border)',
                       borderRadius: 6, padding: '4px 8px', fontSize: 13,
                       color: 'var(--red)', cursor: 'pointer', backdropFilter: 'blur(4px)',
                     }}

@@ -140,7 +140,7 @@ export default function ChatPage() {
                       <div style={{
                         width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
                         background: 'var(--gold)', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontSize: 14, color: '#07090C', fontWeight: 700,
+                        justifyContent: 'center', fontSize: 14, color: '#0A1628', fontWeight: 700,
                       }}>
                         {(other?.name || '?')[0].toUpperCase()}
                       </div>
@@ -159,7 +159,7 @@ export default function ChatPage() {
                       )}
                       {chat.unreadCount > 0 && (
                         <span style={{
-                          background: 'var(--gold)', color: '#07090C',
+                          background: 'var(--gold)', color: '#0A1628',
                           borderRadius: '50%', width: 18, height: 18,
                           fontSize: 10, fontWeight: 700,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -187,7 +187,7 @@ export default function ChatPage() {
                 const other = otherParticipant(activeChat);
                 return (
                   <>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#07090C', fontWeight: 700 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#0A1628', fontWeight: 700 }}>
                       {(other?.name || '?')[0].toUpperCase()}
                     </div>
                     <div>

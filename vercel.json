@@ -4,6 +4,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://gari-backend.onrender.com/api/$1" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }

@@ -180,7 +180,7 @@ export default function CarsPage() {
                       const p = i + 1;
                       return (
                         <button key={p} className="btn btn-sm" onClick={() => fetchCars(p)}
-                          style={{ background: page === p ? 'var(--gold)' : 'var(--surface)', color: page === p ? '#07090C' : 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                          style={{ background: page === p ? 'var(--gold)' : 'var(--surface)', color: page === p ? '#0A1628' : 'var(--text-muted)', border: '1px solid var(--border)' }}>
                           {p}
                         </button>
                       );

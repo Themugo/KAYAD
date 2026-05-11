@@ -184,7 +184,7 @@ export default function AuctionLivePage() {
                         border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 12, fontWeight: 700,
-                        color: i === 0 ? '#07090C' : 'var(--text-muted)',
+                        color: i === 0 ? '#0A1628' : 'var(--text-muted)',
                       }}>
                         {i === 0 ? '👑' : `#${bidCount - i}`}
                       </div>
@@ -214,7 +214,7 @@ export default function AuctionLivePage() {
             <div style={{ position: 'sticky', top: 88 }}>
 
               {/* Current Bid Display */}
-              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(200,150,42,0.3)' }}>
+              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(212,168,67,0.3)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
@@ -247,7 +247,7 @@ export default function AuctionLivePage() {
                         onClick={() => setBidAmount(String(amt))}
                         style={{
                           background: bidAmount === String(amt) ? 'var(--gold)' : 'var(--surface)',
-                          color: bidAmount === String(amt) ? '#07090C' : 'var(--text-muted)',
+                          color: bidAmount === String(amt) ? '#0A1628' : 'var(--text-muted)',
                           border: `1px solid ${bidAmount === String(amt) ? 'var(--gold)' : 'var(--border)'}`,
                           borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer',
                           fontWeight: bidAmount === String(amt) ? 700 : 400,
@@ -326,7 +326,7 @@ export default function AuctionLivePage() {
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Seller</div>
                   <div style={{ display: 'flex', align: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#07090C', fontWeight: 700 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700 }}>
                       {(car.dealer?.name || 'D')[0].toUpperCase()}
                     </div>
                     <div>

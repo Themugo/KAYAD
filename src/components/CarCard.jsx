@@ -5,7 +5,7 @@ import { formatKES } from '../api/api';
 const DEAL_COLORS = {
   great:      { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', label: '🔥 Great Deal' },
   good:       { bg: 'rgba(59,130,246,0.1)', color: '#3B82F6', label: '👍 Good Price' },
-  fair:       { bg: 'rgba(200,150,42,0.1)', color: '#C8962A', label: '✓ Fair Price' },
+  fair:       { bg: 'rgba(212,168,67,0.1)', color: '#D4A843', label: '✓ Fair Price' },
   overpriced: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', label: '↑ High Price'  },
 };
 
@@ -50,7 +50,7 @@ export default function CarCard({ car }) {
           {car.bidsCount > 0 && (
             <div style={{
               position: 'absolute', bottom: 10, right: 10,
-              background: 'rgba(7,9,12,0.8)', color: 'var(--gold-light)',
+              background: 'rgba(10,22,40,0.8)', color: 'var(--gold-light)',
               fontSize: 11, padding: '3px 8px', borderRadius: 6, fontWeight: 600,
             }}>
               {car.bidsCount} bid{car.bidsCount !== 1 ? 's' : ''}

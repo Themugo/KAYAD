@@ -194,7 +194,7 @@ export default function DealerAnalytics() {
                   border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 13, fontWeight: 700,
-                  color: i === 0 ? '#07090C' : 'var(--text-muted)',
+                  color: i === 0 ? '#0A1628' : 'var(--text-muted)',
                 }}>
                   {i + 1}
                 </div>

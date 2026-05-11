@@ -266,7 +266,7 @@ export default function AdminAuctions() {
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
-            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(200,150,42,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
+            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Starting Price</div>
               <div className="price-tag" style={{ fontSize: '1.6rem' }}>{formatKES(selected.price)}</div>
             </div>
@@ -326,7 +326,7 @@ export default function AdminAuctions() {
                 {winnerModal.bids.sort((a, b) => b.amount - a.amount).map((bid, i) => (
                   <div key={bid._id} style={{
                     background: i === 0 ? 'var(--gold-glow)' : 'var(--surface)',
-                    border: `1px solid ${i === 0 ? 'rgba(200,150,42,0.3)' : 'var(--border)'}`,
+                    border: `1px solid ${i === 0 ? 'rgba(212,168,67,0.3)' : 'var(--border)'}`,
                     borderRadius: 'var(--radius)', padding: '14px 16px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>

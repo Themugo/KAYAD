@@ -97,7 +97,7 @@ export default function Navbar() {
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         height: 72, display: 'flex', alignItems: 'center',
-        background: 'rgba(7,9,12,0.95)', backdropFilter: 'blur(20px)',
+        background: 'rgba(10,22,40,0.95)', backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border)',
       }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 28, width: '100%' }}>
@@ -218,7 +218,7 @@ export default function Navbar() {
                       width: 28, height: 28, borderRadius: '50%',
                       background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 12, color: '#07090C', fontWeight: 700, flexShrink: 0,
+                      fontSize: 12, color: '#0A1628', fontWeight: 700, flexShrink: 0,
                     }}>{initials(user?.name)}</div>
                     <span style={{ fontSize: 13, fontWeight: 500, maxWidth: 90, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text)' }}>
                       {user?.name?.split(' ')[0]}
@@ -304,7 +304,7 @@ export default function Navbar() {
                     width: 44, height: 44, borderRadius: '50%',
                     background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, color: '#07090C', fontWeight: 700, flexShrink: 0,
+                    fontSize: 18, color: '#0A1628', fontWeight: 700, flexShrink: 0,
                   }}>{initials(user?.name)}</div>
                   <div>
                     <div style={{ fontWeight: 700 }}>{user?.name}</div>

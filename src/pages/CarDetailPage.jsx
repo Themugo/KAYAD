@@ -248,7 +248,7 @@ export default function CarDetailPage() {
 
                 {/* Price */}
                 <div style={{
-                  background: 'var(--gold-glow)', border: '1px solid rgba(200,150,42,0.15)',
+                  background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.15)',
                   borderRadius: 'var(--radius)', padding: '16px', marginBottom: 20,
                 }}>
                   {isLive && car.currentBid > 0 ? (
@@ -332,7 +332,7 @@ export default function CarDetailPage() {
                       <div style={{
                         width: 40, height: 40, borderRadius: '50%',
                         background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#07090C', fontWeight: 700, fontSize: 16,
+                        color: '#0A1628', fontWeight: 700, fontSize: 16,
                       }}>
                         {(car.dealer?.name || 'D')[0].toUpperCase()}
                       </div>

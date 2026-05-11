@@ -128,7 +128,7 @@ export default function AdminUsers() {
                             width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                             background: u.isBanned ? 'var(--red)' : 'var(--gold)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, color: '#07090C', fontWeight: 700,
+                            fontSize: 14, color: '#0A1628', fontWeight: 700,
                           }}>{initials(u.name)}</div>
                           <div>
                             <div style={{ fontWeight: 600, fontSize: 13 }}>{u.name}</div>
@@ -188,7 +188,7 @@ export default function AdminUsers() {
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: selected.isBanned ? 'var(--red)' : 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#07090C', fontWeight: 700 }}>
+                <div style={{ width: 52, height: 52, borderRadius: '50%', background: selected.isBanned ? 'var(--red)' : 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#0A1628', fontWeight: 700 }}>
                   {initials(selected.name)}
                 </div>
                 <div>

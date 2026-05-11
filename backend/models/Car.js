@@ -56,6 +56,7 @@ const carSchema = new mongoose.Schema(
     // =============================
     // 🔥 MARKETPLACE FEATURES
     // =============================
+    status: { type: String, enum: ["active", "sold", "pending"], default: "active", index: true },
     allowBuy: { type: Boolean, default: true },
     allowBid: { type: Boolean, default: false },
 

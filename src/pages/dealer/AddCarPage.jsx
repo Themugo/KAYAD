@@ -186,7 +186,7 @@ export default function AddCarPage() {
                         background: form[opt.key] ? 'var(--gold)' : 'transparent',
                         border: `2px solid ${form[opt.key] ? 'var(--gold)' : 'var(--border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#07090C', fontSize: 12, fontWeight: 700,
+                        color: '#0A1628', fontSize: 12, fontWeight: 700,
                       }}>
                         {form[opt.key] && '✓'}
                       </div>
@@ -250,7 +250,7 @@ export default function AddCarPage() {
                       {i === 0 && (
                         <div style={{
                           position: 'absolute', top: 4, left: 4, background: 'var(--gold)',
-                          color: '#07090C', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
+                          color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,
                         }}>MAIN</div>
                       )}
                     </div>

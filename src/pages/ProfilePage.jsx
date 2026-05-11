@@ -87,7 +87,7 @@ export default function ProfilePage() {
             width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
             background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 30, color: '#07090C', fontWeight: 700,
+            fontSize: 30, color: '#0A1628', fontWeight: 700,
             boxShadow: '0 0 0 3px var(--gold-glow-strong)',
           }}>
             {initials(user?.name)}

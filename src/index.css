@@ -1,24 +1,24 @@
 /* ============================================
    GARI MOTORS — GLOBAL DESIGN SYSTEM
    Premium Kenyan Automotive Marketplace
-   Aesthetic: Dark luxury + rich amber gold
+   Aesthetic: Navy luxury + radiant gold
    ============================================ */
 
 :root {
-  /* Core Palette */
-  --bg:          #07090C;
-  --surface:     #0F1318;
-  --card:        #151A22;
-  --card-hover:  #1C2330;
-  --border:      #1E2530;
-  --border-soft: #252E3D;
+  /* Core Palette — Navy */
+  --bg:          #0A1628;
+  --surface:     #0F2038;
+  --card:        #162A48;
+  --card-hover:  #1D3560;
+  --border:      #1E3A5F;
+  --border-soft: #2A4A78;
 
-  /* Gold System */
-  --gold:        #C8962A;
-  --gold-light:  #E8B84B;
-  --gold-muted:  #8A6A1E;
-  --gold-glow:   rgba(200,150,42,0.12);
-  --gold-glow-strong: rgba(200,150,42,0.25);
+  /* Gold System — Radiant */
+  --gold:        #D4A843;
+  --gold-light:  #F0CC6A;
+  --gold-muted:  #A88228;
+  --gold-glow:   rgba(212,168,67,0.12);
+  --gold-glow-strong: rgba(212,168,67,0.25);
 
   /* Text */
   --text:        #E2DDD5;
@@ -515,8 +515,8 @@ select.input { cursor: pointer; }
 
 /* ─────── HERO GRADIENT ─────── */
 .hero-gradient {
-  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(200,150,42,0.15), transparent),
-              radial-gradient(ellipse 60% 40% at 80% 50%, rgba(200,150,42,0.06), transparent);
+  background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,168,67,0.15), transparent),
+              radial-gradient(ellipse 60% 40% at 80% 50%, rgba(212,168,67,0.06), transparent);
 }
 
 /* ─────── CAR IMAGE ASPECT ─────── */

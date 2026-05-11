@@ -144,7 +144,7 @@ export default function HomePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
               {liveAuctions.map(car => (
                 <Link key={car._id} to={`/auction/${car._id}`} style={{ display: 'block' }}>
-                  <div className="card" style={{ border: '1px solid rgba(200,150,42,0.25)', cursor: 'pointer' }}>
+                  <div className="card" style={{ border: '1px solid rgba(212,168,67,0.25)', cursor: 'pointer' }}>
                     <div className="car-img-wrap">
                       {car.images?.[0]?.url ? (
                         <img src={car.images[0].url} alt={car.title} loading="lazy" />
@@ -262,7 +262,7 @@ export default function HomePage() {
       {/* ═══ CTA BANNER ══════════════════════════════════════ */}
       <section style={{
         padding: '64px 0',
-        background: 'linear-gradient(135deg, rgba(200,150,42,0.12) 0%, transparent 60%)',
+        background: 'linear-gradient(135deg, rgba(212,168,67,0.12) 0%, transparent 60%)',
         borderTop: '1px solid var(--border)',
       }}>
         <div className="container" style={{ textAlign: 'center' }}>
