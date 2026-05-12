@@ -127,10 +127,10 @@ export default function EditCarPage() {
                   <input className="input" value={form.model} onChange={e => set('model', e.target.value)} />
                 </Field>
                 <Field label="Year">
-                  <input className="input" type="number" value={form.year} onChange={e => set('year', e.target.value)} />
+                  <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" value={form.year} onChange={e => set('year', e.target.value)} />
                 </Field>
                 <Field label="Price (KES)">
-                  <input className="input" type="number" value={form.price} onChange={e => set('price', e.target.value)} />
+                  <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" value={form.price} onChange={e => set('price', e.target.value)} />
                 </Field>
                 <Field label="Fuel">
                   <input className="input" value={form.fuel} onChange={e => set('fuel', e.target.value)} />
@@ -139,7 +139,7 @@ export default function EditCarPage() {
                   <input className="input" value={form.transmission} onChange={e => set('transmission', e.target.value)} />
                 </Field>
                 <Field label="Mileage (km)">
-                  <input className="input" type="number" value={form.mileage} onChange={e => set('mileage', e.target.value)} />
+                  <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" value={form.mileage} onChange={e => set('mileage', e.target.value)} />
                 </Field>
                 <Field label="Dealer Phone">
                   <input className="input" value={form.dealerPhone} onChange={e => set('dealerPhone', e.target.value)} />

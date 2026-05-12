@@ -118,7 +118,7 @@ export default function AddCarPage() {
                   <input className="input" placeholder="e.g. Land Cruiser" value={form.model} onChange={e => set('model', e.target.value)} />
                 </Field>
                 <Field label="Year">
-                  <input className="input" type="number" min={1990} max={new Date().getFullYear() + 1}
+                  <input className="input" type="text" inputMode="numeric" pattern="[0-9]*"
                     value={form.year} onChange={e => set('year', e.target.value)} />
                 </Field>
                 <SelectField label="Body Type" field="bodyType" options={BODIES} />
@@ -143,7 +143,7 @@ export default function AddCarPage() {
                 <SelectField label="Fuel Type" field="fuel" options={FUELS} />
                 <SelectField label="Transmission" field="transmission" options={TRANS} />
                 <Field label="Mileage (km)">
-                  <input className="input" type="number" placeholder="e.g. 45000" value={form.mileage} onChange={e => set('mileage', e.target.value)} />
+                  <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 45000" value={form.mileage} onChange={e => set('mileage', e.target.value)} />
                 </Field>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function AddCarPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <h3 style={{ marginBottom: 4 }}>Pricing & Listing Mode</h3>
               <Field label="Asking Price (KES) *">
-                <input className="input" type="number" placeholder="e.g. 3500000" value={form.price} onChange={e => set('price', e.target.value)} />
+                <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 3500000" value={form.price} onChange={e => set('price', e.target.value)} />
               </Field>
 
               {/* Listing mode */}
