@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { carsAPI, formatKES } from '../api/api';
+import { filterMockCars } from '../data/mockCars';
 import CarCard from '../components/CarCard';
 import { SkeletonGrid } from '../components/Skeleton';
 
@@ -58,8 +59,10 @@ export default function HomePage() {
       setTotal(data.pagination?.total || data.total || 0);
       setPage(pg);
     } catch {
-      setCars([]);
-      setTotal(0);
+      const filtered = filterMockCars(filters);
+      const start = (pg - 1) * LIMIT;
+      setCars(filtered.slice(start, start + LIMIT));
+      setTotal(filtered.length);
       setPage(pg);
     } finally {
       setLoading(false);
