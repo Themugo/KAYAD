@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'icon.svg'],
         manifest: {
-          name: 'Gari Motors – Kenya\'s Premium Car Marketplace',
-          short_name: 'Gari Motors',
+          name: 'Kayad – Kenya\'s Premium Car Marketplace',
+          short_name: 'Kayad',
           description: 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.',
           theme_color: '#0A1628',
           background_color: '#0A1628',

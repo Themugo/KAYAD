@@ -16,7 +16,7 @@ const TYPE_META = {
   },
   listing: {
     label: 'Listing Fee',
-    desc: 'One-time listing fee paid to Gari Motors platform to publish your car listing.',
+    desc: 'One-time listing fee paid to Kayad platform to publish your car listing.',
     sub: 'Platform fee · One-time payment',
   },
 };

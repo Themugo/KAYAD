@@ -1,4 +1,4 @@
-# docker-compose.yml — Full Gari Motors stack
+# docker-compose.yml — Full Kayad stack
 # Usage: docker compose up -d
 # Requires: .env file in root with MONGO_URI, MPESA_*, CLOUDINARY_*, JWT_SECRET
 
@@ -11,7 +11,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: gari-backend
+    container_name: kayad-backend
     restart: unless-stopped
     ports:
       - "5000:5000"
@@ -25,7 +25,7 @@ services:
     volumes:
       - ./backend/uploads:/app/uploads
     networks:
-      - gari-net
+      - kayad-net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
@@ -37,7 +37,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: gari-frontend
+    container_name: kayad-frontend
     restart: unless-stopped
     ports:
       - "80:80"
@@ -48,26 +48,26 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       # - ./ssl:/etc/ssl/certs:ro          # SSL certificates (create ssl/ dir if needed)
     networks:
-      - gari-net
+      - kayad-net
 
   # ── MongoDB (local dev only) ─────────────────────────────
   # For production, use MongoDB Atlas instead — remove this service
   mongo:
     image: mongo:7
-    container_name: gari-mongo
+    container_name: kayad-mongo
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_DATABASE: gari-motors
+      MONGO_INITDB_DATABASE: kayad
     volumes:
       - mongo-data:/data/db
     networks:
-      - gari-net
+      - kayad-net
 
 volumes:
   mongo-data:
 
 networks:
-  gari-net:
+  kayad-net:
     driver: bridge

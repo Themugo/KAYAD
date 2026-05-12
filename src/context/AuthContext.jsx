@@ -7,7 +7,7 @@ const AuthCtx = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUserState]  = useState(null);
-  const [token, setToken]     = useState(() => localStorage.getItem('gari_token'));
+  const [token, setToken]     = useState(() => localStorage.getItem('kayad_token'));
   const [loading, setLoading] = useState(true);
 
   const setUser = (u) => {
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
     if (token) {
       authAPI.me()
         .then(data => setUser(data.user))
-        .catch(() => { localStorage.removeItem('gari_token'); setToken(null); })
+        .catch(() => { localStorage.removeItem('kayad_token'); setToken(null); })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async ({ email, password }) => {
     const data = await authAPI.login({ email, password });
-    localStorage.setItem('gari_token', data.token);
+    localStorage.setItem('kayad_token', data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (body) => {
     const data = await authAPI.register(body);
-    localStorage.setItem('gari_token', data.token);
+    localStorage.setItem('kayad_token', data.token);
     setToken(data.token);
     setUser(data.user);
     return data;
@@ -45,7 +45,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try { await authAPI.logout(); } catch { /* ignore */ }
-    localStorage.removeItem('gari_token');
+    localStorage.removeItem('kayad_token');
     setToken(null);
     setUser(null);
   }, []);

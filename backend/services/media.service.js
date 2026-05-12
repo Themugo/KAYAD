@@ -7,7 +7,7 @@ import fs from "fs";
 export const uploadToCloudinary = async (filePath) => {
   try {
     const res = await cloudinary.uploader.upload(filePath, {
-      folder: "giclan/cars",
+      folder: "kayad/cars",
       resource_type: "image",
       transformation: [
         { width: 1200, height: 800, crop: "limit" }, // resize

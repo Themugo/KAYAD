@@ -114,7 +114,7 @@ export default function Navbar() {
             }}>🚗</div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', lineHeight: 1 }}>
-                Gari Motors
+                Kayad
               </div>
               <div style={{ fontSize: 9, color: 'var(--gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                 Kenya's Premium Market

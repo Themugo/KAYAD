@@ -30,7 +30,7 @@ export default function RegisterPage() {
       const body = { ...form, role };
       if (role !== 'dealer' && role !== 'broker') { delete body.businessName; delete body.location; }
       const data = await register(body);
-      toast('Account created! Welcome to Gari Motors', 'success');
+      toast('Account created! Welcome to Kayad', 'success');
       const dest = role === 'dealer' || role === 'broker' ? '/dealer' : redirectTo;
       navigate(dest, { replace: true });
     } catch (err) {

@@ -6,9 +6,9 @@
 
 import nodemailer from "nodemailer";
 
-const APP_NAME = process.env.APP_NAME || "Gari Motors";
-const APP_URL  = process.env.FRONTEND_URL || "https://garimotors.co.ke";
-const FROM     = process.env.EMAIL_FROM || `noreply@garimotors.co.ke`;
+const APP_NAME = process.env.APP_NAME || "Kayad";
+const APP_URL  = process.env.FRONTEND_URL || "https://kayad.space";
+const FROM     = process.env.EMAIL_FROM || `noreply@kayad.space`;
 const ENABLED  = !!process.env.EMAIL_HOST;
 
 // ── TRANSPORTER ───────────────────────────────────────────────
@@ -157,7 +157,7 @@ export const sendDealerApprovedEmail = (user) =>
       ${para(`Congratulations ${user.name}, your dealer account has been verified. You can now list cars, run live auctions, and accept M-Pesa payments.`)}
       ${btn("Start Listing →", `${APP_URL}/dealer/add-car`)}
       ${divider()}
-      ${para("Questions? Contact us at <a href='mailto:dealers@garimotors.co.ke' style='color:#C8962A;'>dealers@garimotors.co.ke</a>")}
+      ${para("Questions? Contact us at <a href='mailto:dealers@kayad.space' style='color:#C8962A;'>dealers@kayad.space</a>")}
     `, "Dealer Approved"),
   });
 
@@ -213,7 +213,7 @@ export const sendAuctionWonEmail = (user, car, amount) =>
 export const sendPaymentConfirmedEmail = (user, payment, car) =>
   sendEmail({
     to: user.email,
-    subject: `✅ Payment confirmed — ${car?.title || "Gari Motors"}`,
+    subject: `✅ Payment confirmed — ${car?.title || "Kayad"}`,
     html: layout(`
       ${heading("M-Pesa Payment Confirmed")}
       ${para("Your payment has been received and is now held in secure escrow.")}
@@ -235,7 +235,7 @@ export const sendEscrowReleasedEmail = (seller, escrow, car) =>
       ${para("The escrow for your vehicle sale has been released. Funds should reflect in your M-Pesa within minutes.")}
       ${highlight("Amount Released", `KES ${Number(escrow.amount).toLocaleString("en-KE")}`, true)}
       ${car?.title ? highlight("Vehicle", car.title) : ""}
-      ${para("Thank you for selling on Gari Motors. List more vehicles to keep growing your business.")}
+      ${para("Thank you for selling on Kayad. List more vehicles to keep growing your business.")}
       ${btn("List Another Car →", `${APP_URL}/dealer/add-car`)}
     `, "Funds Released"),
   });

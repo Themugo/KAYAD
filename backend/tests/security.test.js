@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import dotenv   from "dotenv";
 dotenv.config({ path: ".env.test" });
 
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/gari-test";
+process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV   = "test";
 

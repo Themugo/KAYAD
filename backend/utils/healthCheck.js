@@ -15,7 +15,7 @@ const START_TIME = Date.now();
 const shallowHealth = (req, res) => {
   res.json({
     status: "ok",
-    service: "Gari Motors API",
+    service: "Kayad API",
     version: process.env.APP_VERSION || "1.0.0",
     uptime: Math.round((Date.now() - START_TIME) / 1000),
     env: process.env.NODE_ENV,

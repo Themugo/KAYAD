@@ -46,7 +46,7 @@ const T = {
 // =============================
 // 📤 UPLOAD IMAGE (SAFE)
 // =============================
-export const uploadImage = async (file, folder = "giclan/cars") => {
+export const uploadImage = async (file, folder = "kayad/cars") => {
   try {
     // 🔥 SUPPORT BOTH MEMORY + DISK
     const uploadOptions = {

@@ -6,7 +6,7 @@ import dotenv  from "dotenv";
 dotenv.config({ path: ".env.test" });
 
 // Use a test database
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/gari-test";
+process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV   = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";

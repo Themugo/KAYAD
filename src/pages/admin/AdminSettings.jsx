@@ -14,8 +14,8 @@ const Field = ({ label, hint, children }) => (
 );
 
 const DEFAULTS = {
-  platformName: 'Giclan Motors',
-  supportEmail: 'support@giclanmotors.co.ke',
+  platformName: 'Kayad',
+  supportEmail: 'support@kayad.space',
   supportPhone: '254700100200',
   dealerCommission: 5,
   bidCommitmentPct: 5,

@@ -31,7 +31,7 @@ export default function ForcePasswordChange() {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      localStorage.setItem('gari_token', data.token);
+      localStorage.setItem('kayad_token', data.token);
       setUser(data.user);
       toast('🔐 System ownership verified. Password updated.', 'success');
       navigate('/admin/settings', { replace: true });

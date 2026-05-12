@@ -206,7 +206,7 @@ const bootstrap = async () => {
 
     server.listen(PORT, () => {
       console.log("");
-      console.log("  🚗 Gari Motors API");
+      console.log("  🚗 Kayad API");
       console.log(`  ├─ URL:      http://localhost:${PORT}`);
       console.log(`  ├─ Env:      ${NODE_ENV}`);
       console.log(`  ├─ CORS:     ${FRONTEND}`);

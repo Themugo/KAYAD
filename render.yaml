@@ -1,9 +1,9 @@
-# render.yaml — Gari Motors Backend
+# render.yaml — Kayad Backend
 # Deploy on Render: Connect GitHub repo → Render auto-detects this file
 
 services:
   - type: web
-    name: gari-backend
+    name: kayad-backend
     env: node
     buildCommand: cd backend && npm install
     startCommand: cd backend && node server.js

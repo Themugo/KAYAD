@@ -359,14 +359,14 @@ export default function HomePage() {
       {/* ─── Footer ─── */}
       <footer style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '32px 0', textAlign: 'center' }}>
         <div className="container">
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 12, fontWeight: 600 }}>Gari Motors</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 12, fontWeight: 600 }}>Kayad</div>
           <div style={{ display: 'flex', gap: 20, justifyContent: 'center', fontSize: 12, color: 'var(--text-dim)', flexWrap: 'wrap' }}>
             <Link to="/" style={{ color: 'var(--text-muted)' }}>Browse Cars</Link>
             <Link to="/?auctionStatus=live" style={{ color: 'var(--text-muted)' }}>Live Auctions</Link>
             <Link to="/register?role=dealer" style={{ color: 'var(--text-muted)' }}>List Your Car</Link>
           </div>
           <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: 11 }}>
-            © {new Date().getFullYear()} Gari Motors Ltd. All rights reserved.
+            © {new Date().getFullYear()} Kayad Ltd. All rights reserved.
           </div>
         </div>
       </footer>

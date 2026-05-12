@@ -5,8 +5,8 @@
 # Run ONCE on the server: bash scripts/setup-cron.sh
 # ─────────────────────────────────────────────────────────────
 
-APP_DIR="/var/www/gari-motors/backend"
-LOG_DIR="/var/log/gari"
+APP_DIR="/var/www/kayad/backend"
+LOG_DIR="/var/log/kayad"
 
 mkdir -p "$LOG_DIR"
 
@@ -36,7 +36,7 @@ add_cron "0 3 * * * certbot renew --quiet --post-hook 'systemctl reload nginx' >
 add_cron "0 4 * * 0 find $LOG_DIR -name '*.log' -size +50M -exec truncate -s 0 {} \; >> $LOG_DIR/maintenance.log 2>&1"
 
 # Health check ping (fallback if UptimeRobot isn't set up yet)
-# add_cron "*/5 * * * * curl -sf http://localhost:5000/health > /dev/null || pm2 restart gari-backend"
+# add_cron "*/5 * * * * curl -sf http://localhost:5000/health > /dev/null || pm2 restart kayad-backend"
 
 # Write updated crontab
 echo "$CURRENT" | crontab -

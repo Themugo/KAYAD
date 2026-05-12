@@ -1,7 +1,7 @@
 {
-  "name": "gari-motors-backend",
+  "name": "kayad-backend",
   "version": "2.0.0",
-  "description": "Gari Motors API — Live Auctions, M-Pesa, Escrow",
+  "description": "Kayad API — Live Auctions, M-Pesa, Escrow",
   "main": "server.js",
   "type": "module",
   "scripts": {

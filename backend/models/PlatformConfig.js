@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const platformConfigSchema = new mongoose.Schema({
   // Platform Info
-  platformName:      { type: String, default: "Giclan Motors" },
+  platformName:      { type: String, default: "Kayad" },
   supportEmail:      { type: String, default: "" },
   supportPhone:      { type: String, default: "" },
 
@@ -41,7 +41,7 @@ const platformConfigSchema = new mongoose.Schema({
     matchThresholdMins: { type: Number, default: 1440 },
     schedule:          { type: String, default: "every 6 hours" },
     notifyOnMismatch:  { type: Boolean, default: true },
-    defaultNarration:  { type: String, default: "Giclan Motors Vehicle Payment" },
+    defaultNarration:  { type: String, default: "Kayad Vehicle Payment" },
   },
 }, { timestamps: true });
 

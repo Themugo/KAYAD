@@ -3,7 +3,7 @@
 # Usage: bash scripts/deploy.sh
 set -e
 
-echo "🚀 Deploying Gari Motors..."
+echo "🚀 Deploying Kayad..."
 
 # 1. Pull latest code
 git pull origin main

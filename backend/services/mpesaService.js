@@ -27,7 +27,7 @@ const loadConfig = async (overrides = {}) => {
     consumerSecret: ENV_SECRET,
     shortCode: ENV_SHORTCODE,
     passkey: ENV_PASSKEY,
-    callbackUrl: ENV_CALLBACK || "https://gari-backend.onrender.com/api/payments/callback",
+    callbackUrl: ENV_CALLBACK || "https://kayad-backend.onrender.com/api/payments/callback",
   };
 
   // Override with DB config if available
@@ -113,7 +113,7 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
       PartyB: cfg.shortCode,
       PhoneNumber: formatPhone(phone),
       CallBackURL: cfg.callbackUrl,
-      AccountReference: "GICLAN",
+      AccountReference: "KAYAD",
       TransactionDesc: "Car payment",
     };
 

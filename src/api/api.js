@@ -1,6 +1,6 @@
 // src/api/api.js
 // ============================================================
-// GARI MOTORS — FULL API LAYER
+// KAYAD — FULL API LAYER
 // Every backend route mapped exactly to the Express routes
 // ============================================================
 
@@ -29,7 +29,7 @@ const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 4000 }
 
 // Attach JWT from localStorage on every request
 api.interceptors.request.use(cfg => {
-  const token = localStorage.getItem('gari_token');
+  const token = localStorage.getItem('kayad_token');
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
@@ -61,7 +61,7 @@ api.interceptors.response.use(
       _refreshing = true;
       try {
         const { data } = await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true });
-        localStorage.setItem('gari_token', data.token);
+        localStorage.setItem('kayad_token', data.token);
         _queue.forEach(p => p.res(data.token));
         _queue = [];
         orig.headers.Authorization = `Bearer ${data.token}`;
@@ -69,7 +69,7 @@ api.interceptors.response.use(
       } catch {
         _queue.forEach(p => p.rej());
         _queue = [];
-        localStorage.removeItem('gari_token');
+        localStorage.removeItem('kayad_token');
         window.location.href = '/login';
       } finally {
         _refreshing = false;
@@ -106,7 +106,7 @@ function withDemo(realObj, demoObj) {
 // ============================================================
 // Check if the stored token is a demo token (base64-encoded JSON with @demo.com email)
 const isDemoToken = () => {
-  const t = localStorage.getItem('gari_token');
+  const t = localStorage.getItem('kayad_token');
   if (!t) return false;
   try {
     const p = JSON.parse(atob(t));

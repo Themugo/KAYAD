@@ -17,7 +17,7 @@ const decodeFakeJWT = (token) => {
 };
 
 const getDemoUser = () => {
-  const token = localStorage.getItem('gari_token');
+  const token = localStorage.getItem('kayad_token');
   if (!token) return null;
   const decoded = decodeFakeJWT(token);
   if (!decoded) return null;
@@ -33,7 +33,7 @@ const withUser = (fn) => (...args) => {
 const wrapSuccess = (data) => ({ success: true, ...data });
 
 const makeEmail = (name) =>
-  `${name?.toLowerCase().replace(/[^a-z]/g, '')}@gari.co.ke`;
+  `${name?.toLowerCase().replace(/[^a-z]/g, '')}@kayad.space`;
 
 const transformCar = (c) => ({
   ...c,
@@ -489,7 +489,7 @@ const demoAdmin = {
 
   getConfig: async () => {
     await delay();
-    return wrapSuccess({ config: { platformName: 'Gari Motors', dealerCommission: 5, bidCommitmentPct: 5 } });
+    return wrapSuccess({ config: { platformName: 'Kayad', dealerCommission: 5, bidCommitmentPct: 5 } });
   },
 
   updateConfig: async (body) => {

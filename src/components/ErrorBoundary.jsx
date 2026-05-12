@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[Gari Motors] Uncaught error:', error, info);
+    console.error('[Kayad] Uncaught error:', error, info);
   }
 
   render() {

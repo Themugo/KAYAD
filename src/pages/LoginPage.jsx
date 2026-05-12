@@ -43,7 +43,7 @@ export function LoginPage() {
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🚗</div>
           <h2 style={{ marginBottom: 6 }}>Welcome Back</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Sign in to your Gari Motors account</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Sign in to your Kayad account</p>
         </div>
 
         <div className="card" style={{ padding: 32 }}>
