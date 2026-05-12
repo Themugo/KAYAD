@@ -51,7 +51,7 @@ export const setAuthCookies = (res, accessToken, refreshToken) => {
 // =============================
 export const verifyToken = (token) => {
   try {
-    return jwt.verify(token, config.JWT_SECRET);
+    return jwt.verify(token, process.env.JWT_SECRET);
   } catch {
     return null;
   }

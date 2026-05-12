@@ -4,11 +4,12 @@ import jwt from "jsonwebtoken";
 import { formatPhone } from "../utils/format.js";
 
 // =============================
-// 🔐 CONFIG (checked at runtime, not import time — dotenv hasn't loaded yet)
+// 🔐 CONFIG (read at function call time, not import time — dotenv hasn't loaded yet)
 // =============================
 
-const ACCESS_SECRET = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+let ACCESS_SECRET, REFRESH_SECRET;
+const getAccess  = () => ACCESS_SECRET  || (ACCESS_SECRET  = process.env.JWT_SECRET);
+const getRefresh = () => REFRESH_SECRET || (REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET);
 
 const ACCESS_EXPIRES = "15m";
 const REFRESH_EXPIRES = "7d";
@@ -23,7 +24,7 @@ const generateAccessToken = (user) => {
       role: user.role,
       tokenVersion: user.tokenVersion || 0,
     },
-    ACCESS_SECRET,
+    getAccess(),
     { expiresIn: ACCESS_EXPIRES }
   );
 };
@@ -34,7 +35,7 @@ const generateRefreshToken = (user) => {
       id: user._id,
       tokenVersion: user.tokenVersion || 0,
     },
-    REFRESH_SECRET,
+    getRefresh(),
     { expiresIn: REFRESH_EXPIRES }
   );
 };
@@ -186,7 +187,7 @@ export const refreshToken = async (req, res) => {
     let decoded;
 
     try {
-      decoded = jwt.verify(token, REFRESH_SECRET);
+      decoded = jwt.verify(token, getRefresh());
     } catch {
       return res.status(403).json({
         success: false,

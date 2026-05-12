@@ -1,8 +1,12 @@
 // src/pages/dealer/EditCarPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
+import { carsAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+
+const Field = ({ label, children }) => (
+  <div className="input-group"><label className="input-label">{label}</label>{children}</div>
+);
 import { useAuth } from '../../context/AuthContext';
 import { isDemoMode } from '../../api/api';
 
@@ -115,10 +119,6 @@ export default function EditCarPage() {
         <button className="btn btn-gold" onClick={() => navigate('/dealer')}>My Listings</button>
       </div>
     </div>
-  );
-
-  const Field = ({ label, children }) => (
-    <div className="input-group"><label className="input-label">{label}</label>{children}</div>
   );
 
   return (

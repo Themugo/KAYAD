@@ -3,6 +3,16 @@ import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 
+const Field = ({ label, hint, children }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+    <label style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>
+      {label}
+      {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
+    </label>
+    {children}
+  </div>
+);
+
 const DEFAULTS = {
   platformName: 'Giclan Motors',
   supportEmail: 'support@giclanmotors.co.ke',
@@ -119,16 +129,6 @@ export default function AdminSettings() {
   };
 
 
-
-  const Field = ({ label, hint, children }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-      <label style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>
-        {label}
-        {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
-      </label>
-      {children}
-    </div>
-  );
 
   const tabs = useMemo(() => {
     const all = [

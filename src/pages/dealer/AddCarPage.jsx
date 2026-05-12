@@ -10,6 +10,10 @@ const TRANS   = ['Automatic','Manual','CVT','Semi-Automatic'];
 const BODIES  = ['SUV','Sedan','Hatchback','Pickup','Wagon','Van','Coupe','Convertible','Bus'];
 const CITIES  = ['Nairobi','Mombasa','Kisumu','Nakuru','Eldoret','Thika','Nyeri','Machakos','Meru'];
 
+const Field = ({ label, children }) => (
+  <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>
+);
+
 export default function AddCarPage() {
   const { toast }  = useToast();
   const navigate   = useNavigate();
@@ -55,10 +59,6 @@ export default function AddCarPage() {
       setLoading(false);
     }
   };
-
-  const Field = ({ label, children }) => (
-    <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>
-  );
 
   const SelectField = ({ label, field, options }) => (
     <Field label={label}>

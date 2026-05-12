@@ -3,6 +3,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { authAPI } from '../../api/api';
 
+const Field = ({ label, children }) => (
+  <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>
+);
+
 export default function DealerSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -96,10 +100,6 @@ export default function DealerSettings() {
       setSaving(false);
     }
   };
-
-  const Field = ({ label, children }) => (
-    <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>
-  );
 
   return (
     <div className="page">
