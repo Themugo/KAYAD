@@ -632,3 +632,17 @@ select.input { cursor: pointer; }
   .hamburger { display: flex; }
   .desktop-nav { display: none !important; }
 }
+
+/* ─────── PWA SAFE AREA ─────── */
+.page {
+  padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+nav {
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(72px + env(safe-area-inset-top, 0px)) !important;
+}
+.mobile-menu-panel {
+  padding-top: calc(80px + env(safe-area-inset-top, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
