@@ -30,9 +30,10 @@ export default function EditCarPage() {
       setCar(c);
       setForm({
         title: c.title || '', brand: c.brand || '', model: c.model || '',
-        year: c.year || '', price: c.price || '', fuel: c.fuel || '',
-        transmission: c.transmission || '', bodyType: c.bodyType || '',
-        mileage: c.mileage || '', dealerPhone: c.dealerPhone || '',
+        year: String(c.year || ''), price: String(c.price || ''),
+        fuel: c.fuel || '', transmission: c.transmission || '',
+        bodyType: c.bodyType || '', mileage: String(c.mileage || ''),
+        dealerPhone: c.dealerPhone || '',
         allowBuy: c.allowBuy ?? true, allowBid: c.allowBid ?? false,
         auctionEnd: c.auctionEnd ? new Date(c.auctionEnd).toISOString().slice(0, 16) : '',
       });

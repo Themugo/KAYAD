@@ -19,7 +19,7 @@ export default function AddCarPage() {
   const [step, setStep]       = useState(1);
 
   const [form, setForm] = useState({
-    title: '', brand: '', model: '', year: new Date().getFullYear(),
+    title: '', brand: '', model: '', year: '',
     price: '', fuel: '', transmission: '', bodyType: '', mileage: '',
     city: '', address: '', dealerPhone: '',
     allowBuy: true, allowBid: false,
