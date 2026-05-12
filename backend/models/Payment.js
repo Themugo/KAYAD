@@ -40,6 +40,7 @@ const paymentSchema = new mongoose.Schema(
         "buy",
         "listing",
         "subscription",
+        "escrow",
       ],
       required: true,
       index: true,
@@ -118,6 +119,15 @@ const paymentSchema = new mongoose.Schema(
     dealerAmount: {
       type: Number,
       default: 0,
+    },
+
+    // =============================
+    // 🚗 CAR REFERENCE (for socket emissions + escrow)
+    // =============================
+    car: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Car",
+      index: true,
     },
 
     // =============================

@@ -11,6 +11,8 @@ import {
 
 import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
+import Bid from "../models/Bid.js";
+import Escrow from "../models/Escrow.js";
 
 const router = express.Router();
 
@@ -141,25 +143,32 @@ router.get(
 router.get(
   "/summary",
   asyncHandler(async (req, res) => {
-    const [totalCars, soldCars, totalRevenue] = await Promise.all([
-      Car.countDocuments({ dealer: req.user.id }),
-      Car.countDocuments({ dealer: req.user.id, sold: true }),
+    const dealerId = req.user.id;
+
+    const [totalCars, soldCars, totalRevenueAgg, carViewsAgg, liveAuctions, pendingEscrows] = await Promise.all([
+      Car.countDocuments({ dealer: dealerId }),
+      Car.countDocuments({ dealer: dealerId, sold: true }),
 
       Payment.aggregate([
-        {
-          $match: {
-            user: req.user._id,
-            status: "success",
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: "$dealerAmount" },
-          },
-        },
+        { $match: { user: req.user._id, status: "success" } },
+        { $group: { _id: null, total: { $sum: "$dealerAmount" } } },
       ]),
+
+      Car.aggregate([
+        { $match: { dealer: dealerId } },
+        { $group: { _id: null, totalViews: { $sum: "$views" } } },
+      ]),
+
+      Car.countDocuments({ dealer: dealerId, auctionStatus: "live" }),
+
+      Escrow.countDocuments({ seller: dealerId, status: "held" }),
     ]);
+
+    const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
+
+    const totalBids = await Bid.countDocuments({
+      carId: { $in: dealerCarIds },
+    });
 
     res.json({
       success: true,
@@ -167,7 +176,11 @@ router.get(
         totalCars,
         soldCars,
         activeCars: totalCars - soldCars,
-        totalRevenue: totalRevenue[0]?.total || 0,
+        liveAuctions,
+        totalRevenue: totalRevenueAgg[0]?.total || 0,
+        totalViews: carViewsAgg[0]?.totalViews || 0,
+        totalBids,
+        pendingEscrows,
       },
     });
   })
@@ -191,6 +204,68 @@ router.get(
         sold,
         active: cars - sold,
       },
+    });
+  })
+);
+
+// =============================
+// ⚡ BIDS ON DEALER'S CARS
+// =============================
+router.get(
+  "/bids",
+  asyncHandler(async (req, res) => {
+    const { page, limit, skip } = getPagination(req);
+
+    const dealerCars = await Car.find({ dealer: req.user.id }).distinct("_id");
+
+    const filter = { carId: { $in: dealerCars } };
+
+    if (req.query.status) filter.status = req.query.status;
+
+    const [bids, total] = await Promise.all([
+      Bid.find(filter)
+        .populate("user", "name email")
+        .populate("carId", "title price images")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+
+      Bid.countDocuments(filter),
+    ]);
+
+    const formatted = bids.map(b => ({
+      ...b,
+      carTitle: b.carId?.title || "Unknown",
+      carPrice: b.carId?.price || 0,
+      carImage: b.carId?.images?.[0]?.url || null,
+      bidderName: b.user?.name || "Anonymous",
+      bidderEmail: b.user?.email || "",
+    }));
+
+    res.json({
+      success: true,
+      bids: formatted,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  })
+);
+
+// =============================
+// 🔒 ESCROWS WHERE DEALER IS SELLER
+// =============================
+router.get(
+  "/escrows",
+  asyncHandler(async (req, res) => {
+    const escrows = await Escrow.find({ seller: req.user.id })
+      .populate("car", "title price images")
+      .populate("buyer", "name email")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({
+      success: true,
+      escrows,
     });
   })
 );

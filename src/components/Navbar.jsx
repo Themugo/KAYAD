@@ -250,6 +250,7 @@ export default function Navbar() {
                         { to: '/chat',      icon: '💬', label: 'Messages' },
                         ...(isDealer ? [{ to: '/dealer', icon: '🏪', label: 'Dealer Hub' }] : []),
                         ...(isAdmin  ? [{ to: '/admin',  icon: '🔑', label: 'Admin Panel' }] : []),
+                        ...(isAdmin  ? [{ to: '/admin/settings', icon: '⚙', label: 'Settings' }] : []),
                       ].map(item => (
                         <Link key={item.to} to={item.to} style={{
                           display: 'flex', alignItems: 'center', gap: 10,
@@ -352,10 +353,7 @@ export default function Navbar() {
             {isAdmin && (
               <>
                 <div style={{ padding: '8px 20px 4px', fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 8 }}>Admin</div>
-                <NavLink to="/admin"           mobile>🔑 Dashboard</NavLink>
-                <NavLink to="/admin/users"     mobile>👥 Users</NavLink>
-                <NavLink to="/admin/auctions"  mobile>🔴 Auctions</NavLink>
-                <NavLink to="/admin/escrows"   mobile>🔒 Escrow</NavLink>
+                <NavLink to="/admin" mobile>📊 Reports Dashboard</NavLink>
               </>
             )}
 

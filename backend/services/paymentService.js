@@ -31,7 +31,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   let mode = "mock";
 
   try {
-    const stkRes = await stkPush(formattedPhone, amount, carId);
+    const stkRes = await stkPush(formattedPhone, amount);
     if (stkRes?.CheckoutRequestID) {
       checkoutID = stkRes.CheckoutRequestID;
       mode = "mpesa";
@@ -87,6 +87,15 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     { $or: [{ checkoutRequestID }, { checkoutRequestId: checkoutRequestID }] },
     { status: "success", mpesaReceipt: receipt }
   ).catch(() => {});
+
+  // If escrow payment, mark escrow as held
+  if (payment.type === "escrow") {
+    const Escrow = (await import("../models/Escrow.js")).default;
+    const escrow = await Escrow.findOne({ payment: payment._id });
+    if (escrow && escrow.status === "pending") {
+      await escrow.markFunded();
+    }
+  }
 
   // ── EMIT: user gets real-time confirmation ──────────────────
   const io = global.io;

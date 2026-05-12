@@ -1,128 +1,180 @@
 // src/pages/admin/AdminDashboard.jsx
-import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { adminAPI, escrowAPI, bidsAPI, formatKES } from '../../api/api';
-import { useSocket } from '../../context/SocketContext';
+import { useState, useEffect } from 'react';
+import { carsAPI, adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { timeAgo } from '../../utils/helpers';
+import { SkeletonStat, SkeletonRow, SkeletonText } from '../../components/Skeleton';
 
-const SECTIONS = [
-  { to: '/admin/users', icon: '👥', label: 'Users', desc: 'Buyers, dealers, approvals, bans', color: 'var(--blue)' },
-  { to: '/admin/cars', icon: '🚗', label: 'Listings', desc: 'Review, feature, delete listings', color: 'var(--green)' },
-  { to: '/admin/bids', icon: '⚡', label: 'Bids', desc: 'Monitor, fraud-check, set winners', color: 'var(--gold)' },
-  { to: '/admin/auctions', icon: '🔴', label: 'Auctions', desc: 'Start, end, extend live auctions', color: 'var(--red)' },
-  { to: '/admin/escrows', icon: '🔒', label: 'Escrow', desc: 'Release or refund held funds', color: 'var(--purple)' },
-];
-
-function StatCard({ label, val, icon, color, sub, href }) {
-  const inner = (
-    <div
-      className="stat-box"
-      style={{ cursor: href ? 'pointer' : 'default' }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+function ReportCard({ icon, label, val, color }) {
+  return (
+    <div className="stat-box">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div className="stat-label">{label}</div>
-          <div className="stat-value" style={{ color, fontSize: '1.6rem' }}>
-            {val}
-          </div>
-          {sub && <div className="stat-sub">{sub}</div>}
+          <div className="stat-value" style={{ color, fontSize: '1.5rem' }}>{val}</div>
         </div>
-        <span style={{ fontSize: 26, opacity: 0.8 }}>{icon}</span>
+        <span style={{ fontSize: 28, opacity: 0.7 }}>{icon}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminDashboard() {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState(null);
+  const [cars, setCars] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      adminAPI.stats(),
+      carsAPI.list({ limit: 50 }),
+    ])
+      .then(([s, c]) => {
+        setStats(s.stats || s.data || s);
+        const carList = c.cars || c.data || [];
+        setCars(carList);
+      })
+      .catch(() => toast('Could not load reports', 'warning'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return (
+    <div className="page">
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1100 }}>
+        <div style={{ marginBottom: 28 }}>
+          <div className="section-eyebrow">Admin</div>
+          <h2>Reports Dashboard</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 32 }}>
+          {[1,2,3,4,5].map(i => <SkeletonStat key={i} />)}
+        </div>
+        <div className="card" style={{ marginBottom: 24, padding: '16px 20px 0' }}>
+          <SkeletonText lines={1} />
+          <div style={{ marginTop: 16 }}>{[1,2,3,4].map(i => <SkeletonRow key={i} />)}</div>
+        </div>
+        <div className="card" style={{ padding: '16px 20px 0' }}>
+          <SkeletonText lines={1} />
+          <div style={{ marginTop: 16 }}>{[1,2,3,4,5].map(i => <SkeletonRow key={i} />)}</div>
+        </div>
       </div>
     </div>
   );
 
-  return href ? <Link to={href}>{inner}</Link> : inner;
-}
-
-export default function AdminDashboard() {
-  const { joinAdmin, on } = useSocket();
-  const { toast } = useToast();
-
-  const [stats, setStats] = useState(null);
-  const [escrows, setEscrows] = useState([]);
-  const [recentBids, setRecentBids] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [liveEvents, setLiveEvents] = useState([]);
-  const eventsRef = useRef([]);
-
-  useEffect(() => {
-    joinAdmin();
-
-    Promise.all([
-      adminAPI.stats(),
-      escrowAPI.all({ limit: 5, status: 'funded' }),
-      bidsAPI.adminAll({ limit: 8, sort: '-createdAt' }),
-    ])
-      .then(([s, e, b]) => {
-        setStats(s.stats || s.data || s);
-        setEscrows(e.escrows || e.data || []);
-        setRecentBids(b.bids || b.data || []);
-      })
-      .catch(() => toast('Could not load some stats', 'warning'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const push = (icon, msg) => {
-      const event = { icon, msg, time: Date.now(), id: Math.random() };
-      eventsRef.current = [event, ...eventsRef.current.slice(0, 19)];
-      setLiveEvents([...eventsRef.current]);
-    };
-
-    const offs = [
-      on('auctionUpdate', d => push('⚡', `New bid of ${formatKES(d.currentBid)} on auction`)),
-      on('auctionEnded', d => push('🏁', 'Auction ended — winner declared')),
-      on('paymentSuccess', d => push('✅', `M-Pesa payment confirmed: ${d.receipt || ''}`)),
-      on('paymentFailed', d => push('❌', `Payment failed: ${d.checkoutID?.slice(-8) || ''}`)),
-      on('escrowReleased', d => push('💰', `Escrow ${d.escrowId?.slice(-6)} released`)),
-      on('escrowRefunded', d => push('↩️', `Escrow ${d.escrowId?.slice(-6)} refunded`)),
-      on('newBid', d => push('🏷', `New bid: ${formatKES(d.amount)}`)),
-    ];
-
-    return () => offs.forEach(f => f?.());
-  }, [on]);
-
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
-
   const s = stats || {};
-  const fundedEscrowTotal = escrows.reduce((acc, e) => acc + (e.amount || 0), 0);
+
+  // ── Dealer-wise aggregation ──
+  const dealerMap = {};
+  cars.forEach(car => {
+    const dealerId = car.dealer?._id || 'unknown';
+    const dealerName = car.dealer?.name || 'Unknown Dealer';
+    if (!dealerMap[dealerId]) dealerMap[dealerId] = { name: dealerName, carCount: 0, totalViews: 0, cars: [] };
+    dealerMap[dealerId].carCount++;
+    dealerMap[dealerId].totalViews += car.views || 0;
+    dealerMap[dealerId].cars.push(car);
+  });
+  const dealerRows = Object.entries(dealerMap)
+    .map(([id, d]) => ({ id, ...d }))
+    .sort((a, b) => b.carCount - a.carCount);
+
+  // ── Most viewed cars ──
+  const topCars = [...cars]
+    .sort((a, b) => (b.views || 0) - (a.views || 0))
+    .slice(0, 15);
+
+  const statusBadge = (car) => {
+    if (car.auctionStatus === 'live') return <span className="badge badge-green">Live</span>;
+    if (car.auctionStatus === 'ended') return <span className="badge badge-muted">Ended</span>;
+    if (car.auctionStatus === 'sold') return <span className="badge badge-gold">Sold</span>;
+    return <span className="badge badge-muted">Draft</span>;
+  };
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1100 }}>
 
-        <div style={{ marginBottom: 32 }}>
-          <h2>Admin Dashboard</h2>
-          <p style={{ color: 'var(--text-muted)' }}>
-            Real-time overview of platform activity.
+        <div style={{ marginBottom: 28 }}>
+          <div className="section-eyebrow">Admin</div>
+          <h2>Reports Dashboard</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+            Read-only platform analytics — cars listed per dealer and car viewership.
           </p>
         </div>
 
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-          <StatCard href="/admin/users" label="Users" val={(s.totalUsers || 0).toLocaleString()} icon="👥" color="var(--blue)" />
-          <StatCard href="/admin/cars" label="Cars" val={(s.totalCars || 0).toLocaleString()} icon="🚗" color="var(--green)" />
-          <StatCard href="/admin/bids" label="Bids" val={(s.totalBids || 0).toLocaleString()} icon="⚡" color="var(--gold)" />
-          <StatCard href="/admin/escrows" label="Escrow" val={formatKES(s.escrowTotal || 0)} icon="🔒" color="var(--purple)" />
+        {/* ── Summary Stats ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 32 }}>
+          <ReportCard icon="👥" label="Total Users" val={(s.totalUsers || 0).toLocaleString()} color="var(--blue)" />
+          <ReportCard icon="🚗" label="Total Cars" val={(s.totalCars || 0).toLocaleString()} color="var(--green)" />
+          <ReportCard icon="⚡" label="Total Bids" val={(s.totalBids || 0).toLocaleString()} color="var(--gold)" />
+          <ReportCard icon="💰" label="Revenue" val={formatKES(s.revenue || 0)} color="var(--purple)" />
+          <ReportCard icon="📋" label="Dealers" val={String(dealerRows.length)} color="var(--orange)" />
         </div>
 
-        {/* Management */}
-        <h3 style={{ margin: '20px 0 10px', fontSize: 11, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-          Management Sections
-        </h3>
+        {/* ── Cars Listed By Dealer ── */}
+        <div className="card" style={{ marginBottom: 24, padding: 0 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: 16 }}>📊 Cars Listed by Dealer</h3>
+          </div>
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Dealer</th>
+                  <th style={{ textAlign: 'center' }}>Cars Listed</th>
+                  <th style={{ textAlign: 'center' }}>Total Views</th>
+                  <th style={{ textAlign: 'center' }}>Avg Views / Car</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dealerRows.map(d => (
+                  <tr key={d.id}>
+                    <td style={{ fontWeight: 600 }}>{d.name}</td>
+                    <td style={{ textAlign: 'center' }}>{d.carCount}</td>
+                    <td style={{ textAlign: 'center' }}>{(d.totalViews || 0).toLocaleString()}</td>
+                    <td style={{ textAlign: 'center' }}>{d.carCount ? Math.round((d.totalViews || 0) / d.carCount).toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+                {dealerRows.length === 0 && (
+                  <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 32 }}>No dealer data available</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
-          {SECTIONS.map(sec => (
-            <Link key={sec.to} to={sec.to}>
-              <div className="card" style={{ padding: 20, textAlign: 'center' }}>
-                <div style={{ fontSize: 32 }}>{sec.icon}</div>
-                <div style={{ color: sec.color, fontWeight: 600 }}>{sec.label}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{sec.desc}</div>
-              </div>
-            </Link>
-          ))}
+        {/* ── Most Viewed Cars ── */}
+        <div className="card" style={{ padding: 0 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: 16 }}>👁 Most Viewed Cars</h3>
+          </div>
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Car</th>
+                  <th>Dealer / Seller</th>
+                  <th style={{ textAlign: 'center' }}>Views</th>
+                  <th style={{ textAlign: 'center' }}>Bids</th>
+                  <th style={{ textAlign: 'center' }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topCars.map(car => (
+                  <tr key={car._id}>
+                    <td style={{ fontWeight: 600, fontSize: 13 }}>{car.title}</td>
+                    <td style={{ fontSize: 13, color: 'var(--text-muted)' }}>{car.dealer?.name || 'Unknown'}</td>
+                    <td style={{ textAlign: 'center', fontWeight: 600, color: car.views > 1000 ? 'var(--gold)' : undefined }}>
+                      {(car.views || 0).toLocaleString()}
+                    </td>
+                    <td style={{ textAlign: 'center' }}>{car.bidsCount || 0}</td>
+                    <td style={{ textAlign: 'center' }}>{statusBadge(car)}</td>
+                  </tr>
+                ))}
+                {topCars.length === 0 && (
+                  <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 32 }}>No car data available</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
       </div>

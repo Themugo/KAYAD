@@ -101,7 +101,7 @@ export default function ChatPage() {
 
   return (
     <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', flex: 1, overflow: 'hidden', marginTop: 72 }}>
+      <div className="chat-layout grid-sidebar-chat" style={{ flex: 1, overflow: 'hidden' }}>
 
         {/* ─── Chat List ─── */}
         <div style={{

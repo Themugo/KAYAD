@@ -65,7 +65,7 @@ export default function AdminUsers() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>

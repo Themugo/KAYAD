@@ -112,7 +112,7 @@ export default function AdminAuctions() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 28 }}>
           <div className="section-eyebrow">Admin</div>
@@ -123,7 +123,7 @@ export default function AdminAuctions() {
         </div>
 
         {/* Stats bar */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
+        <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
             { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: '🔴' },
             { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold-light)', icon: '⏸' },

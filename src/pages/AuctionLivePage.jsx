@@ -110,7 +110,7 @@ export default function AuctionLivePage() {
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         {/* ─── Header ─── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
@@ -130,15 +130,15 @@ export default function AuctionLivePage() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 28 }}>
+        <div className="grid-sidebar-right" style={{ gap: 28, gridTemplateColumns: '1fr 380px' }}>
 
           {/* ─── LEFT: Car + Bid History ─── */}
           <div>
             {/* Car image */}
             <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20, position: 'relative' }}>
               <div style={{ aspectRatio: '16/9', background: 'var(--surface)' }}>
-                {car.images?.[0]?.url ? (
-                  <img src={car.images[0].url} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {car.images?.[0] ? (
+                  <img src={car.images[0]?.url || car.images[0]} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80, color: 'var(--text-dim)' }}>🚗</div>
                 )}
@@ -325,7 +325,7 @@ export default function AuctionLivePage() {
               {car.dealer && (
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Seller</div>
-                  <div style={{ display: 'flex', align: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700 }}>
                       {(car.dealer?.name || 'D')[0].toUpperCase()}
                     </div>

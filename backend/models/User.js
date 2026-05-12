@@ -32,10 +32,18 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "dealer", "admin"],
+      enum: ["user", "dealer", "admin", "superadmin", "subadmin"],
       default: "user",
       index: true,
     },
+
+    department: {
+      type: String,
+      enum: ["", "finance", "hr", "marketing", "tech-support"],
+      default: "",
+    },
+
+    permissions: [String],
 
     isBanned: {
       type: Boolean,
@@ -70,6 +78,21 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    bio: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    // =============================
+    // 💳 PAYMENT SETTINGS
+    // =============================
+    mpesaBusiness: { type: String, trim: true, default: "" },
+    mpesaBusinessName: { type: String, trim: true, default: "" },
+    bankName: { type: String, trim: true, default: "" },
+    bankAccount: { type: String, trim: true, default: "" },
+    bankBranch: { type: String, trim: true, default: "" },
+
     approved: {
       type: Boolean,
       default: false,
@@ -81,6 +104,17 @@ const userSchema = new mongoose.Schema(
       default: 4.5,
       min: 0,
       max: 5,
+    },
+
+    // =============================
+    // 👁 DEALER VISIBILITY
+    // =============================
+    visibility: {
+      showPhone: { type: Boolean, default: true },
+      showEmail: { type: Boolean, default: true },
+      showLocation: { type: Boolean, default: true },
+      chatEnabled: { type: Boolean, default: true },
+      autoApproveReviews: { type: Boolean, default: false },
     },
 
     // =============================

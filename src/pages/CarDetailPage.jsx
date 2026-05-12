@@ -1,4 +1,3 @@
-// src/pages/CarDetailPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, reviewsAPI, chatAPI, formatKES } from '../api/api';
@@ -13,50 +12,51 @@ export default function CarDetailPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [car, setCar]           = useState(null);
-  const [insights, setInsights] = useState(null);
-  const [reviews, setReviews]   = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [imgIdx, setImgIdx]     = useState(0);
-  const [showPayModal, setShowPayModal] = useState(false);
-  const [isFav, setIsFav]       = useState(false);
+  const [car, setCar] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [imgIdx, setImgIdx] = useState(0);
+  const [showEscrowModal, setShowEscrowModal] = useState(false);
+  const [isFav, setIsFav] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      carsAPI.get(id).catch(() => ({ car: null })),
-      carsAPI.insights(id).catch(() => null),
-    ]).then(([carData, ins]) => {
-      let c = carData?.car || carData?.data || carData;
-      if (!c || !c._id) c = getMockCar(id);
-      setCar(c);
-      setInsights(ins?.data || null);
-      if (c) carsAPI.trackClick(id).catch(() => {});
-      if (c?.dealer?._id) {
-        reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
-      }
-    }).finally(() => setLoading(false));
+    carsAPI.get(id)
+      .then(data => {
+        let c = data?.car || data?.data || data;
+        if (!c || !c._id) c = getMockCar(id);
+        setCar(c);
+        if (c) carsAPI.trackClick(id).catch(() => {});
+        if (c?.dealer?._id) {
+          reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
+        }
+      })
+      .catch(() => { setCar(getMockCar(id)); })
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const handleBuy = () => {
-    if (!isAuth) { navigate('/login'); return; }
-    setShowPayModal(true);
+  const redirectToRegister = () => navigate(`/register?redirect=/cars/${id}`);
+
+  const handleEscrowBuy = () => {
+    if (!isAuth) { redirectToRegister(); return; }
+    setShowEscrowModal(true);
   };
 
   const handleFav = async () => {
-    if (!isAuth) { navigate('/login'); return; }
+    if (!isAuth) { redirectToRegister(); return; }
     try {
       await carsAPI.toggleFav(id);
       setIsFav(!isFav);
-      toast(isFav ? 'Removed from favourites' : '❤️ Added to favourites', 'success');
+      toast(isFav ? 'Removed from favourites' : 'Added to favourites', 'success');
     } catch { toast('Failed', 'error'); }
   };
 
   const handleChat = async () => {
-    if (!isAuth) { navigate('/login'); return; }
+    if (!isAuth) { redirectToRegister(); return; }
+    if (car.chatDisabled) { toast('Chat is disabled by this dealer', 'error'); return; }
     setStartingChat(true);
     try {
       const data = await chatAPI.start({ carId: id, participantId: car.dealer?._id });
@@ -80,35 +80,29 @@ export default function CarDetailPage() {
     finally { setSubmittingReview(false); }
   };
 
+  const prevImg = () => setImgIdx(i => (i > 0 ? i - 1 : (car?.images?.length || 1) - 1));
+  const nextImg = () => setImgIdx(i => (i < (car?.images?.length || 1) - 1 ? i + 1 : 0));
+
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
   if (!car) return <div className="page loading-center"><h3>Car not found</h3></div>;
 
   const images = car.images || [];
   const isOwner = user?.id === car.dealer?._id?.toString() || user?.id === car.dealer?.toString();
   const isLive  = car.auctionStatus === 'live';
-
-  const DEAL_INFO = {
-    great:      { color: 'var(--green)',  label: '🔥 Great Deal — Below Market' },
-    good:       { color: 'var(--blue)',   label: '👍 Good Price' },
-    fair:       { color: 'var(--gold)',   label: '✓ Fair Market Price' },
-    overpriced: { color: 'var(--red)',    label: '⚠ Above Market Price' },
-  };
-  const dealInfo = car.dealRating ? DEAL_INFO[car.dealRating] : null;
+  const dealer  = car.dealer;
+  const dealerVisibility = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
-        {/* Breadcrumb */}
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
           <Link to="/">Home</Link> · <Link to="/cars">Cars</Link> · {car.title}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 32 }}>
+        <div className="grid-sidebar-right" style={{ gap: 32 }}>
 
-          {/* ─── LEFT ─── */}
           <div>
-            {/* Image Gallery */}
             <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 16 }}>
               <div style={{ aspectRatio: '16/9', background: 'var(--surface)', position: 'relative' }}>
                 {images.length > 0 ? (
@@ -120,7 +114,26 @@ export default function CarDetailPage() {
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 72, color: 'var(--text-dim)' }}>🚗</div>
                 )}
-                {/* Auction badge */}
+
+                {images.length > 1 && (
+                  <>
+                    <button onClick={prevImg} style={{
+                      position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+                      background: 'rgba(10,22,40,0.7)', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '50%', width: 40, height: 40, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                      color: 'white', fontSize: 18, backdropFilter: 'blur(4px)',
+                    }}>‹</button>
+                    <button onClick={nextImg} style={{
+                      position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                      background: 'rgba(10,22,40,0.7)', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '50%', width: 40, height: 40, display: 'flex',
+                      alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                      color: 'white', fontSize: 18, backdropFilter: 'blur(4px)',
+                    }}>›</button>
+                  </>
+                )}
+
                 {isLive && (
                   <div style={{ position: 'absolute', top: 16, left: 16 }}>
                     <span className="badge badge-green" style={{ fontSize: 12 }}>
@@ -128,9 +141,16 @@ export default function CarDetailPage() {
                     </span>
                   </div>
                 )}
+
+                <div style={{
+                  position: 'absolute', bottom: 12, right: 12,
+                  background: 'rgba(10,22,40,0.8)', backdropFilter: 'blur(4px)',
+                  borderRadius: 6, padding: '4px 10px', fontSize: 11, color: 'white',
+                }}>
+                  {imgIdx + 1} / {images.length}
+                </div>
               </div>
 
-              {/* Thumbnails */}
               {images.length > 1 && (
                 <div style={{ display: 'flex', gap: 8, padding: '12px 0', overflowX: 'auto' }}>
                   {images.map((img, i) => (
@@ -138,9 +158,10 @@ export default function CarDetailPage() {
                       key={i}
                       onClick={() => setImgIdx(i)}
                       style={{
-                        width: 72, height: 52, flexShrink: 0, borderRadius: 6,
-                        overflow: 'hidden', cursor: 'pointer',
-                        border: `2px solid ${i === imgIdx ? 'var(--gold)' : 'var(--border)'}`,
+                        width: 80, height: 56, flexShrink: 0, borderRadius: 6,
+                        overflow: 'hidden', cursor: 'pointer', opacity: i === imgIdx ? 1 : 0.5,
+                        border: `2px solid ${i === imgIdx ? 'var(--gold)' : 'transparent'}`,
+                        transition: 'all 0.15s',
                       }}
                     >
                       <img src={img?.url || img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -150,50 +171,92 @@ export default function CarDetailPage() {
               )}
             </div>
 
-            {/* Specs */}
             <div className="card" style={{ padding: 24, marginBottom: 20 }}>
-              <h3 style={{ marginBottom: 20 }}>Specifications</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              <h3 style={{ marginBottom: 20 }}>Full Specifications</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 16 }}>
                 {[
                   { label: 'Brand', val: car.brand },
                   { label: 'Model', val: car.model },
                   { label: 'Year', val: car.year },
-                  { label: 'Fuel', val: car.fuel },
+                  { label: 'Fuel Type', val: car.fuel },
                   { label: 'Transmission', val: car.transmission },
                   { label: 'Body Type', val: car.bodyType },
                   { label: 'Mileage', val: car.mileage ? `${Number(car.mileage).toLocaleString()} km` : null },
+                  { label: 'Color', val: car.color },
+                  { label: 'Engine', val: car.engine },
+                  { label: 'Drivetrain', val: car.drivetrain },
                   { label: 'Location', val: car.location?.city },
-                  { label: 'Dealer Phone', val: car.dealerPhone },
+                  { label: 'Condition', val: car.condition },
                 ].filter(s => s.val).map(s => (
                   <div key={s.label}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
-                    <div style={{ fontWeight: 600, marginTop: 4 }}>{s.val}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>{s.label}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{s.val}</div>
                   </div>
                 ))}
               </div>
+
+              {car.description && (
+                <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Description</div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{car.description}</p>
+                </div>
+              )}
             </div>
 
-            {/* Market Insights */}
-            {insights && (
-              <div className="card" style={{ padding: 20, marginBottom: 20 }}>
-                <h3 style={{ marginBottom: 16 }}>💡 Price Intelligence</h3>
-                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Avg Market Price</div>
-                    <div className="price-tag">{formatKES(insights.avgMarketPrice)}</div>
-                  </div>
-                  {dealInfo && (
-                    <div style={{ background: 'var(--surface)', border: `1px solid ${dealInfo.color}30`, borderRadius: 8, padding: '8px 14px' }}>
-                      <span style={{ color: dealInfo.color, fontWeight: 600, fontSize: 13 }}>{dealInfo.label}</span>
-                    </div>
-                  )}
+            {car.features?.length > 0 && (
+              <div className="card" style={{ padding: 24, marginBottom: 20 }}>
+                <h3 style={{ marginBottom: 16 }}>Features & Options</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {car.features.map((f, i) => (
+                    <span key={i} style={{
+                      background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)',
+                      borderRadius: 100, padding: '5px 14px', fontSize: 12, color: 'var(--gold-light)',
+                    }}>✓ {f}</span>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Reviews */}
+            {dealer && (
+              <div className="card" style={{ padding: 24, marginBottom: 20 }}>
+                <h3 style={{ marginBottom: 16 }}>About the Dealer</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: '50%',
+                    background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#0A1628', fontWeight: 700, fontSize: 20, flexShrink: 0,
+                  }}>
+                    {(dealer.name || 'D')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 15 }}>{dealer.name || 'Dealer'}</div>
+                    {dealer.dealerRating && (
+                      <div style={{ color: 'var(--gold)', fontSize: 13 }}>
+                        {'★'.repeat(Math.round(dealer.dealerRating))} {dealer.dealerRating}/5
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {dealer.businessName && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>🏪 {dealer.businessName}</div>
+                )}
+                {dealer.location && dealerVisibility.showLocation && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>📍 {dealer.location}</div>
+                )}
+                {dealer.phone && dealerVisibility.showPhone && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>📞 {dealer.phone}</div>
+                )}
+                {dealer.email && dealerVisibility.showEmail && (
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>✉️ {dealer.email}</div>
+                )}
+                {!dealerVisibility.showLocation && !dealerVisibility.showPhone && !dealerVisibility.showEmail && (
+                  <div style={{ fontSize: 12, color: 'var(--text-dim)', fontStyle: 'italic' }}>Contact info hidden by dealer — use chat to reach them.</div>
+                )}
+              </div>
+            )}
+
             <div className="card" style={{ padding: 24 }}>
-              <h3 style={{ marginBottom: 20 }}>⭐ Dealer Reviews</h3>
+              <h3 style={{ marginBottom: 20 }}>Dealer Reviews</h3>
               {reviews.length === 0 ? (
                 <div style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>No reviews yet. Be the first!</div>
               ) : reviews.slice(0, 4).map(r => (
@@ -229,11 +292,9 @@ export default function CarDetailPage() {
             </div>
           </div>
 
-          {/* ─── RIGHT PANEL ─── */}
           <div>
             <div style={{ position: 'sticky', top: 88 }}>
               <div className="card" style={{ padding: 24 }}>
-                {/* Title & Badges */}
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                     {car.isVerifiedDealer && <span className="badge badge-blue">✓ Verified Dealer</span>}
@@ -246,7 +307,6 @@ export default function CarDetailPage() {
                   )}
                 </div>
 
-                {/* Price */}
                 <div style={{
                   background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.15)',
                   borderRadius: 'var(--radius)', padding: '16px', marginBottom: 20,
@@ -270,8 +330,7 @@ export default function CarDetailPage() {
                   )}
                 </div>
 
-                {/* Stats */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
+                <div className="grid-3" style={{ marginBottom: 20 }}>
                   {[
                     { icon: '👁', val: car.views || 0, label: 'Views' },
                     { icon: '❤️', val: car.favoritesCount || 0, label: 'Saved' },
@@ -285,7 +344,6 @@ export default function CarDetailPage() {
                   ))}
                 </div>
 
-                {/* CTAs */}
                 {isOwner ? (
                   <Link to={`/dealer/edit/${car._id}`} className="btn btn-outline btn-full" style={{ display: 'flex', justifyContent: 'center' }}>
                     ✏ Edit Listing
@@ -296,21 +354,26 @@ export default function CarDetailPage() {
                       <Link to={`/auction/${car._id}`} className="btn btn-gold btn-full btn-lg" style={{ justifyContent: 'center' }}>
                         ⚡ Join Live Auction
                       </Link>
-                    ) : car.allowBuy && (
-                      <button className="btn btn-gold btn-full" onClick={handleBuy}>
-                        💳 Buy via M-Pesa
-                      </button>
+                    ) : (
+                      <>
+                        {car.allowBuy && (
+                          <button className="btn btn-gold btn-full" onClick={handleEscrowBuy}>
+                            🔒 Buy via Escrow
+                          </button>
+                        )}
+                        {car.allowBid && (
+                          <button className="btn btn-outline btn-full" onClick={() => navigate(`/auction/${car._id}`)}>
+                            🏷 Place a Bid
+                          </button>
+                        )}
+                      </>
                     )}
 
-                    {car.allowBid && !isLive && (
-                      <button className="btn btn-outline btn-full" onClick={() => navigate(`/auction/${car._id}`)}>
-                        🏷 Place a Bid
+                    {!car.chatDisabled && dealerVisibility.chatEnabled && (
+                      <button className="btn btn-outline btn-full" onClick={handleChat} disabled={startingChat}>
+                        💬 {startingChat ? 'Opening chat...' : 'Message Dealer'}
                       </button>
                     )}
-
-                    <button className="btn btn-outline btn-full" onClick={handleChat} disabled={startingChat}>
-                      💬 {startingChat ? 'Opening chat...' : 'Message Dealer'}
-                    </button>
 
                     <button
                       className={`btn btn-sm btn-full ${isFav ? 'btn-outline' : 'btn-ghost'}`}
@@ -322,8 +385,7 @@ export default function CarDetailPage() {
                   </div>
                 )}
 
-                {/* Dealer Info */}
-                {car.dealer && (
+                {dealer && (
                   <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
                       Listed by
@@ -334,13 +396,13 @@ export default function CarDetailPage() {
                         background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         color: '#0A1628', fontWeight: 700, fontSize: 16,
                       }}>
-                        {(car.dealer?.name || 'D')[0].toUpperCase()}
+                        {(dealer.name || 'D')[0].toUpperCase()}
                       </div>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{car.dealer?.name || 'Dealer'}</div>
-                        {car.dealer?.dealerRating && (
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{dealer.name || 'Dealer'}</div>
+                        {dealer.dealerRating && (
                           <div style={{ color: 'var(--gold)', fontSize: 12 }}>
-                            {'★'.repeat(Math.round(car.dealer.dealerRating))} {car.dealer.dealerRating}/5
+                            {'★'.repeat(Math.round(dealer.dealerRating))} {dealer.dealerRating}/5
                           </div>
                         )}
                       </div>
@@ -349,10 +411,9 @@ export default function CarDetailPage() {
                 )}
               </div>
 
-              {/* Escrow Info Card */}
               <div className="card" style={{ padding: 16, marginTop: 12 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                  🔒 <strong>Escrow Protected.</strong> Final payment is held securely until you confirm receipt of the car. Your money is safe.
+                  🔒 <strong>Escrow Protected.</strong> Your full payment is held securely in escrow until you confirm receipt of the car. No money goes directly to the seller until you approve. If anything goes wrong, you get a full refund.
                 </div>
               </div>
             </div>
@@ -360,14 +421,14 @@ export default function CarDetailPage() {
         </div>
       </div>
 
-      {showPayModal && (
+      {showEscrowModal && (
         <PaymentModal
           amount={car.price}
           carId={car._id}
-          type="buy"
+          type="escrow"
           title={`Buy: ${car.title}`}
-          onClose={() => setShowPayModal(false)}
-          onSuccess={() => toast('Purchase initiated! Check your escrow.', 'success')}
+          onClose={() => setShowEscrowModal(false)}
+          onSuccess={() => toast('Escrow funded! The seller will be notified.', 'success')}
         />
       )}
     </div>

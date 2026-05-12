@@ -138,13 +138,25 @@ export const getCars = async (req, res) => {
 // =============================
 export const getCar = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id).lean();
+    const car = await Car.findById(req.params.id)
+      .populate("dealer", "name email phone location businessName bio visibility dealerRating approved")
+      .lean();
 
     if (!car) {
       return res.status(404).json({
         success: false,
         message: "Car not found",
       });
+    }
+
+    // Apply dealer visibility filters
+    if (car.dealer?.visibility) {
+      const vis = car.dealer.visibility;
+      if (!vis.showPhone)   { car.dealerPhone = undefined; if (car.dealer) car.dealer.phone = undefined; }
+      if (!vis.showEmail)   { if (car.dealer) car.dealer.email = undefined; }
+      if (!vis.showLocation) { if (car.dealer) car.dealer.location = undefined; }
+      if (!vis.chatEnabled) { car.chatDisabled = true; }
+      delete car.dealer?.visibility;
     }
 
     // 🔥 non-blocking analytics

@@ -1,20 +1,38 @@
-// src/components/PaymentModal.jsx
 import { useState, useEffect } from 'react';
 import { paymentsAPI, formatKES } from '../api/api';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 
-export default function PaymentModal({ onClose, amount, carId, type = 'buy', onSuccess, title }) {
+const TYPE_META = {
+  escrow: {
+    label: 'Escrow Payment',
+    desc: 'Your payment is held securely in escrow until you confirm receipt of the car. Funds are only released to the seller after your approval.',
+    sub: 'Held in escrow · Released on your confirmation',
+  },
+  bid: {
+    label: 'Bid Security Deposit',
+    desc: 'This is a bid security deposit paid to the seller to secure your bid. It shows you are a serious buyer.',
+    sub: 'Paid to the seller · Non-refundable if you win',
+  },
+  listing: {
+    label: 'Listing Fee',
+    desc: 'One-time listing fee paid to Gari Motors platform to publish your car listing.',
+    sub: 'Platform fee · One-time payment',
+  },
+};
+
+export default function PaymentModal({ onClose, amount, carId, type = 'escrow', onSuccess, title }) {
   const { on } = useSocket();
   const { toast } = useToast();
 
+  const meta = TYPE_META[type] || TYPE_META.escrow;
+
   const [phone, setPhone]           = useState('');
   const [loading, setLoading]       = useState(false);
-  const [stage, setStage]           = useState('input'); // input | waiting | success | failed
+  const [stage, setStage]           = useState('input');
   const [checkoutId, setCheckoutId] = useState(null);
   const [pollInterval, setPoll]     = useState(null);
 
-  // Listen for real-time payment result
   useEffect(() => {
     if (!checkoutId) return;
 
@@ -22,7 +40,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
       if (data.checkoutID === checkoutId) {
         clearInterval(pollInterval);
         setStage('success');
-        toast('Payment confirmed via M-Pesa! 🎉', 'success');
+        toast('Payment confirmed!', 'success');
         setTimeout(() => { onSuccess?.(); onClose(); }, 2000);
       }
     });
@@ -38,7 +56,6 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
     return () => { offSuccess(); offFailed(); };
   }, [checkoutId, pollInterval]);
 
-  // Fallback polling every 5s while waiting
   useEffect(() => {
     if (stage !== 'waiting' || !checkoutId) return;
 
@@ -48,7 +65,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
         if (data.payment?.status === 'success') {
           clearInterval(interval);
           setStage('success');
-          toast('Payment confirmed! 🎉', 'success');
+          toast('Payment confirmed!', 'success');
           setTimeout(() => { onSuccess?.(); onClose(); }, 1800);
         } else if (data.payment?.status === 'failed') {
           clearInterval(interval);
@@ -81,7 +98,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
       });
       setCheckoutId(data.checkoutRequestID || data.checkoutID);
       setStage('waiting');
-      toast('STK push sent! Check your phone 📱', 'info');
+      toast('STK push sent! Check your phone', 'info');
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to initiate payment', 'error');
     } finally {
@@ -93,18 +110,16 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
 
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              M-Pesa Payment
+              {meta.label}
             </div>
             <h3 style={{ marginTop: 4 }}>{title || 'Complete Payment'}</h3>
           </div>
           <button onClick={onClose} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)', fontSize: 16 }}>✕</button>
         </div>
 
-        {/* Amount display */}
         <div style={{
           background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.2)',
           borderRadius: 'var(--radius)', padding: '16px', marginBottom: 24, textAlign: 'center',
@@ -113,7 +128,6 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
           <div className="price-tag" style={{ fontSize: '2rem', marginTop: 4 }}>{formatKES(amount)}</div>
         </div>
 
-        {/* Stages */}
         {stage === 'input' && (
           <>
             <div className="input-group" style={{ marginBottom: 20 }}>
@@ -128,8 +142,8 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
                   maxLength={13}
                 />
               </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                Funds go directly to the seller — not to us.
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginTop: 8 }}>
+                {meta.desc}
               </div>
             </div>
 
@@ -141,9 +155,8 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
               {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Sending...</> : '📲 Send STK Push'}
             </button>
 
-            {/* M-Pesa logo branding */}
             <div style={{ marginTop: 16, textAlign: 'center', color: 'var(--text-dim)', fontSize: 12 }}>
-              Powered by <strong style={{ color: '#00A651' }}>M-Pesa</strong> · Payments go to the dealer directly
+              Powered by <strong style={{ color: '#00A651' }}>M-Pesa</strong> · {meta.sub}
             </div>
           </>
         )}
@@ -167,7 +180,11 @@ export default function PaymentModal({ onClose, amount, carId, type = 'buy', onS
           <div style={{ textAlign: 'center', padding: '20px 0' }}>
             <div style={{ fontSize: 56, marginBottom: 12 }}>✅</div>
             <h3 style={{ color: 'var(--green)', marginBottom: 8 }}>Payment Confirmed!</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Your M-Pesa payment was received successfully.</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
+              {type === 'escrow' ? 'Your payment is held in escrow. The seller will be notified.' :
+               type === 'bid' ? 'Your bid security deposit has been paid to the seller.' :
+               'Your listing fee has been received.'}
+            </p>
           </div>
         )}
 

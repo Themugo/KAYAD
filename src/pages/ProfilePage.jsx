@@ -3,9 +3,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { paymentsAPI, reviewsAPI, carsAPI, formatKES } from '../api/api';
-import api from '../api/api';
+import { authAPI, paymentsAPI, reviewsAPI, carsAPI, formatKES } from '../api/api';
 import { timeAgo, formatDate, initials, validatePassword } from '../utils/helpers';
+import { SkeletonRow, SkeletonText } from '../components/Skeleton';
 
 const TABS = ['Profile', 'Security', 'Activity', 'Reviews'];
 
@@ -48,7 +48,7 @@ export default function ProfilePage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const { data } = await api.put('/auth/profile', form);
+      const data = await authAPI.updateProfile(form);
       setUser(data.user);
       toast('Profile updated!', 'success');
     } catch (err) {
@@ -62,7 +62,7 @@ export default function ProfilePage() {
     if (pwForm.newPw !== pwForm.confirm)  { toast('Passwords do not match', 'error'); return; }
     setChangingPw(true);
     try {
-      await api.put('/auth/change-password', { currentPassword: pwForm.current, newPassword: pwForm.newPw });
+      await authAPI.changePassword({ currentPassword: pwForm.current, newPassword: pwForm.newPw });
       toast('Password changed!', 'success');
       setPwForm({ current: '', newPw: '', confirm: '' });
     } catch (err) {
@@ -79,7 +79,7 @@ export default function ProfilePage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '40px 24px', maxWidth: 780 }}>
+      <div className="container" style={{ paddingTop: 40, paddingBottom: 40, maxWidth: 780 }}>
 
         {/* ─── Header card ─── */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, marginBottom: 36, flexWrap: 'wrap' }}>
@@ -143,7 +143,7 @@ export default function ProfilePage() {
           <div className="card" style={{ padding: 28 }}>
             <h3 style={{ marginBottom: 24 }}>Personal Details</h3>
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="grid-2">
                 <div className="input-group">
                   <label className="input-label">Full Name</label>
                   <input className="input" value={form.name} onChange={e => set('name', e.target.value)} />
@@ -228,7 +228,7 @@ export default function ProfilePage() {
             </div>
             <div className="card" style={{ padding: 24 }}>
               <h3 style={{ marginBottom: 16 }}>Account Info</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+              <div className="grid-2">
                 {[
                   { label: 'User ID', val: `#${user?._id?.slice(-10) || '—'}`, mono: true },
                   { label: 'Role', val: user?.role },
@@ -252,7 +252,7 @@ export default function ProfilePage() {
               <h3 style={{ fontSize: '1rem' }}>💳 Transaction History</h3>
             </div>
             {loading ? (
-              <div className="loading-center" style={{ padding: 40 }}><div className="spinner" /></div>
+              <div style={{ padding: 16 }}>{[1,2,3,4,5].map(i => <SkeletonRow key={i} />)}</div>
             ) : activity.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}>
                 <div className="empty-icon">💳</div>
@@ -290,7 +290,17 @@ export default function ProfilePage() {
           <div className="card" style={{ padding: 24 }}>
             <h3 style={{ marginBottom: 20 }}>⭐ Reviews About Me</h3>
             {loading ? (
-              <div className="loading-center" style={{ padding: 32 }}><div className="spinner" /></div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {[1,2,3].map(i => (
+                  <div key={i} style={{ padding: '16px 0', borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--surface)' }} />
+                      <SkeletonText lines={2} />
+                    </div>
+                    <div style={{ marginLeft: 42 }}><SkeletonText lines={2} /></div>
+                  </div>
+                ))}
+              </div>
             ) : reviews.length === 0 ? (
               <div className="empty-state" style={{ padding: 32 }}>
                 <div className="empty-icon">⭐</div>

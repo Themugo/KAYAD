@@ -71,7 +71,7 @@ export default function AddCarPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px', maxWidth: 800 }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 800 }}>
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
@@ -112,7 +112,7 @@ export default function AddCarPage() {
                 <input className="input" placeholder="e.g. 2020 Toyota Land Cruiser V8 — Excellent Condition"
                   value={form.title} onChange={e => set('title', e.target.value)} />
               </Field>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="grid-2">
                 <SelectField label="Brand *" field="brand" options={BRANDS} />
                 <Field label="Model">
                   <input className="input" placeholder="e.g. Land Cruiser" value={form.model} onChange={e => set('model', e.target.value)} />
@@ -123,7 +123,7 @@ export default function AddCarPage() {
                 </Field>
                 <SelectField label="Body Type" field="bodyType" options={BODIES} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="grid-2">
                 <SelectField label="City" field="city" options={CITIES} />
                 <Field label="Dealer Phone">
                   <input className="input" placeholder="0712 345 678" value={form.dealerPhone} onChange={e => set('dealerPhone', e.target.value)} />
@@ -139,7 +139,7 @@ export default function AddCarPage() {
           {step === 2 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <h3 style={{ marginBottom: 4 }}>Vehicle Specs</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="grid-2">
                 <SelectField label="Fuel Type" field="fuel" options={FUELS} />
                 <SelectField label="Transmission" field="transmission" options={TRANS} />
                 <Field label="Mileage (km)">
@@ -243,7 +243,7 @@ export default function AddCarPage() {
               </div>
 
               {previews.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                <div className="grid-4" style={{ gap: 8 }}>
                   {previews.map((src, i) => (
                     <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
                       <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

@@ -496,17 +496,29 @@ select.input { cursor: pointer; }
 .sidebar-link:hover { color: var(--text); background: var(--card); }
 .sidebar-link.active { color: var(--gold); background: var(--gold-glow); border-left-color: var(--gold); }
 
+/* ─────── RESPONSIVE GRID UTILITIES ─────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-sidebar-right { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
+.grid-sidebar-chat { display: grid; grid-template-columns: 300px 1fr; gap: 0; }
+.chat-layout { margin-top: 0; }
+
 /* ─────── RESPONSIVE ─────── */
+@media (max-width: 1024px) {
+  .sidebar-layout { grid-template-columns: 220px 1fr; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
   .sidebar-layout { grid-template-columns: 1fr; }
   .sidebar { display: none; }
   .car-grid { grid-template-columns: 1fr; }
   .container { padding: 0 16px; }
   .modal-box { padding: 24px 20px; }
-}
-
-@media (max-width: 1024px) {
-  .sidebar-layout { grid-template-columns: 220px 1fr; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-sidebar-right { grid-template-columns: 1fr; }
+  .grid-sidebar-chat { grid-template-columns: 1fr; }
 }
 
 /* ─────── ANIMATIONS ─────── */

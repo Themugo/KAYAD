@@ -59,7 +59,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '40px 24px' }}>
+      <div className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
 
         {/* Header */}
         <div className="section-header">

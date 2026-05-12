@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function EditCarPage() {
   const { id }     = useParams();
   const { toast }  = useToast();
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate   = useNavigate();
   const [car, setCar]       = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,10 +16,17 @@ export default function EditCarPage() {
   const [form, setForm]     = useState({});
   const [auctionAction, setAuctionAction] = useState(null);
   const [extendHours, setExtendHours]     = useState(2);
+  const [ownershipError, setOwnershipError] = useState(false);
 
   useEffect(() => {
     carsAPI.get(id).then(d => {
       const c = d.car || d.data || d;
+      // Ownership check — only the listing owner can edit
+      if (c?.dealer?._id && c.dealer._id !== user?._id) {
+        setOwnershipError(true);
+        setCar(c);
+        return;
+      }
       setCar(c);
       setForm({
         title: c.title || '', brand: c.brand || '', model: c.model || '',
@@ -77,6 +84,19 @@ export default function EditCarPage() {
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
   if (!car) return <div className="page loading-center"><h3>Car not found</h3></div>;
+  if (ownershipError) return (
+    <div className="page loading-center" style={{ flexDirection: 'column', gap: 16 }}>
+      <div style={{ fontSize: 48 }}>🚫</div>
+      <h3>Access Denied</h3>
+      <p style={{ color: 'var(--text-muted)', textAlign: 'center', maxWidth: 400 }}>
+        You can only edit your own listings. This car was listed by <strong>{car.dealer?.name}</strong>.
+      </p>
+      <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+        <button className="btn btn-outline" onClick={() => navigate(-1)}>← Go Back</button>
+        <button className="btn btn-gold" onClick={() => navigate('/dealer')}>My Listings</button>
+      </div>
+    </div>
+  );
 
   const Field = ({ label, children }) => (
     <div className="input-group"><label className="input-label">{label}</label>{children}</div>
@@ -84,7 +104,7 @@ export default function EditCarPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px', maxWidth: 760 }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 760 }}>
         <div style={{ marginBottom: 32 }}>
           <div className="section-eyebrow">Dealer Hub</div>
           <h2>Edit: {car.title}</h2>

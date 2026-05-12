@@ -50,7 +50,7 @@ export default function EscrowPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '40px 24px' }}>
+      <div className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div className="section-eyebrow">Finance</div>
         <h2 style={{ marginBottom: 8 }}>🔒 My Escrow</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 32 }}>
@@ -59,7 +59,7 @@ export default function EscrowPage() {
 
         {/* ─── How it works ─── */}
         <div className="card" style={{ padding: 20, marginBottom: 28 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, textAlign: 'center' }}>
+          <div className="grid-4" style={{ textAlign: 'center' }}>
             {[
               { step: '1', icon: '💳', label: 'You Pay', desc: 'Full amount via M-Pesa into escrow' },
               { step: '2', icon: '🔒', label: 'Funds Locked', desc: 'Admin holds payment securely' },
@@ -79,7 +79,7 @@ export default function EscrowPage() {
         </div>
 
         {/* ─── Summary ─── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 28 }}>
+        <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
             { label: 'Total Escrows',    val: escrows.length, icon: '🔒', color: 'var(--text)' },
             { label: 'Currently Locked', val: formatKES(totalLocked),   icon: '💰', color: 'var(--blue)' },

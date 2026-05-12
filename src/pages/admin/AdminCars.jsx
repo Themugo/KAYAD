@@ -62,7 +62,7 @@ export default function AdminCars() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>
@@ -109,8 +109,8 @@ export default function AdminCars() {
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 52, height: 36, borderRadius: 4, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
-                            {car.images?.[0]?.url
-                              ? <img src={car.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            {car.images?.[0]
+                              ? <img src={car.images[0]?.url || car.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                               : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>🚗</div>
                             }
                           </div>
@@ -194,9 +194,9 @@ export default function AdminCars() {
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
-            {selected.images?.[0]?.url && (
+            {selected.images?.[0] && (
               <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 20 }}>
-                <img src={selected.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={selected.images[0]?.url || selected.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             )}
 

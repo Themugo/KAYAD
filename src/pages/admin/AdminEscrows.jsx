@@ -73,7 +73,7 @@ export default function AdminEscrows() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 28 }}>
           <div className="section-eyebrow">Admin</div>
@@ -84,7 +84,7 @@ export default function AdminEscrows() {
         </div>
 
         {/* Summary stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
+        <div className="grid-4" style={{ marginBottom: 28 }}>
           {[
             { label: 'Total Escrows', val: total, icon: '🔒', color: 'var(--text)' },
             { label: 'Awaiting Release', val: counts.funded || 0, icon: '💰', color: 'var(--blue)' },

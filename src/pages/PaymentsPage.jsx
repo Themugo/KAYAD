@@ -57,12 +57,12 @@ export default function PaymentsPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '40px 24px' }}>
+      <div className="container" style={{ paddingTop: 40, paddingBottom: 40 }}>
         <div className="section-eyebrow">Finance</div>
         <h2 style={{ marginBottom: 32 }}>💳 Payment History</h2>
 
         {/* ─── Summary Cards ─── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 32 }}>
+        <div className="grid-4" style={{ marginBottom: 32 }}>
           {[
             { label: 'Total Spent',    val: formatKES(totalSpent),  icon: '💰', color: 'var(--gold-light)' },
             { label: 'Successful',     val: successCount,            icon: '✅', color: 'var(--green)' },

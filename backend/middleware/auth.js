@@ -85,6 +85,8 @@ export const protect = async (req, res, next) => {
       role: user.role,
       name: user.name,
       email: user.email,
+      department: user.department || "",
+      permissions: user.permissions || [],
     };
 
     next();
@@ -103,7 +105,7 @@ export const protect = async (req, res, next) => {
 // 👑 ADMIN ONLY
 // =============================
 export const adminOnly = (req, res, next) => {
-  if (!req.user || req.user.role !== "admin") {
+  if (!req.user || !["admin", "superadmin", "subadmin"].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
       message: "Admin access only",
@@ -117,7 +119,7 @@ export const adminOnly = (req, res, next) => {
 // 🧑‍💼 DEALER (ADMIN INCLUDED)
 // =============================
 export const dealerOnly = (req, res, next) => {
-  if (!req.user || !["dealer", "admin"].includes(req.user.role)) {
+  if (!req.user || !["dealer", "admin", "superadmin"].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
       message: "Dealer access only",
@@ -146,6 +148,20 @@ export const allowRoles = (...roles) => {
 // =============================
 // 🪶 OPTIONAL AUTH (PUBLIC ROUTES)
 // =============================
+// =============================
+// 🧩 SUBADMIN DEPARTMENT ACCESS
+// =============================
+export const subadminAccess = (...allowedDepartments) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    if (req.user.role === "admin" || req.user.role === "superadmin") return next();
+    if (req.user.role === "subadmin" && allowedDepartments.includes(req.user.department)) return next();
+    return res.status(403).json({ success: false, message: "Department access denied" });
+  };
+};
+
 export const optionalAuth = async (req, res, next) => {
   try {
     let token;

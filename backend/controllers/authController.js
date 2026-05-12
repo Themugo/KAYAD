@@ -1,12 +1,11 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { formatPhone } from "../utils/format.js";
 
 // =============================
-// 🔐 CONFIG
+// 🔐 CONFIG (checked at runtime, not import time — dotenv hasn't loaded yet)
 // =============================
-if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is required");
-if (!process.env.REFRESH_TOKEN_SECRET) throw new Error("REFRESH_TOKEN_SECRET is required");
 
 const ACCESS_SECRET = process.env.JWT_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
@@ -105,12 +104,18 @@ export const register = async (req, res) => {
       });
     }
 
+    const { role: requestedRole } = req.body;
+    const role = requestedRole === "dealer" ? "dealer" : "user";
+    const extra = role === "dealer" ? { approved: false, businessName: req.body.businessName || "", location: req.body.location || "" } : {};
+
     const user = await User.create({
       name,
       email,
       password,
-      role: "user",
+      role,
       tokenVersion: 0,
+      phone: req.body.phone || "",
+      ...extra,
     });
 
     return sendAuthResponse(res, user);
@@ -277,14 +282,20 @@ export const getProfile = async (req, res) => {
 // ============================================================
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, location, businessName, bio } = req.body;
+    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch } = req.body;
 
     const updates = {};
-    if (name)         updates.name = name.trim();
-    if (phone)        updates.phone = phone.trim();
-    if (location)     updates.location = location.trim();
-    if (businessName) updates.businessName = businessName.trim();
-    if (bio !== undefined) updates.bio = bio.trim();
+    if (name)              updates.name = name.trim();
+    if (phone)             updates.phone = formatPhone(phone) || phone.trim();
+    if (location)          updates.location = location.trim();
+    if (businessName)      updates.businessName = businessName.trim();
+    if (bio !== undefined)  updates.bio = bio.trim();
+    if (visibility)        updates.visibility = visibility;
+    if (mpesaBusiness !== undefined)     updates.mpesaBusiness = mpesaBusiness.trim();
+    if (mpesaBusinessName !== undefined) updates.mpesaBusinessName = mpesaBusinessName.trim();
+    if (bankName !== undefined)          updates.bankName = bankName.trim();
+    if (bankAccount !== undefined)       updates.bankAccount = bankAccount.trim();
+    if (bankBranch !== undefined)        updates.bankBranch = bankBranch.trim();
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
       .select("-password");

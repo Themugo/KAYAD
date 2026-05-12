@@ -55,7 +55,7 @@ export default function DealerAnalytics() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
@@ -80,7 +80,7 @@ export default function DealerAnalytics() {
         </div>
 
         {/* ─── Top KPIs ─── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
+        <div className="grid-4" style={{ marginBottom: 28 }}>
           {[
             { label: 'Total Listings',    val: summary?.totalCars || 0,                    icon: '🚗', color: 'var(--text)' },
             { label: 'Total Views',       val: compactNumber(analytics?.totalViews || 0),  icon: '👁', color: 'var(--blue)' },
@@ -99,7 +99,7 @@ export default function DealerAnalytics() {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+        <div className="grid-2" style={{ marginBottom: 20 }}>
 
           {/* ─── Monthly Revenue Chart ─── */}
           <div className="card" style={{ padding: 24 }}>

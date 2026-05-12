@@ -11,9 +11,9 @@ export const formatPhone = (phone) => {
   if (phone.startsWith("0")) phone = "254" + phone.slice(1);
   if (phone.startsWith("+254")) phone = phone.slice(1);
 
-  // ✅ VALIDATE (Kenya numbers: 2547XXXXXXXX)
-  if (!/^2547\d{8}$/.test(phone)) {
-    return null; // 🔥 reject invalid numbers
+  // ✅ VALIDATE (Kenya numbers: 2547 or 2541 + 8 digits)
+  if (!/^254(7|1)\d{8}$/.test(phone)) {
+    return null;
   }
 
   return phone;

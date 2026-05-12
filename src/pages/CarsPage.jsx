@@ -4,6 +4,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { carsAPI, formatKES } from '../api/api';
 import { MOCK_CARS, MOCK_FILTERS, filterMockCars, getMockCar } from '../data/mockCars';
 import CarCard from '../components/CarCard';
+import { SkeletonGrid } from '../components/Skeleton';
 
 const BRANDS       = ['All', ...MOCK_FILTERS.brands, 'Mitsubishi'];
 const FUELS        = ['All', ...MOCK_FILTERS.fuels, 'Hybrid', 'Electric'];
@@ -113,7 +114,7 @@ export default function CarsPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         {/* ─── Header ─── */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
@@ -228,7 +229,7 @@ export default function CarsPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: showFilters ? '260px 1fr' : '1fr', gap: 28 }}>
+        <div className="sidebar-layout" style={{ gridTemplateColumns: showFilters ? '260px 1fr' : '1fr', gap: 28, minHeight: 'auto' }}>
 
           {/* ─── FILTERS SIDEBAR ─── */}
           {showFilters && (
@@ -250,7 +251,7 @@ export default function CarsPage() {
                 {/* Price Range */}
                 <div>
                   <label className="input-label">Price Range (KES)</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 6 }}>
+                  <div className="grid-2" style={{ marginTop: 6 }}>
                     <input className="input" placeholder="Min" type="number" value={filters.minPrice}
                       onChange={e => setFilter('minPrice', e.target.value)} />
                     <input className="input" placeholder="Max" type="number" value={filters.maxPrice}
@@ -261,7 +262,7 @@ export default function CarsPage() {
                 {/* Year Range */}
                 <div>
                   <label className="input-label">Year</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 6 }}>
+                  <div className="grid-2" style={{ marginTop: 6 }}>
                     <input className="input" placeholder="From" type="number" value={filters.minYear}
                       onChange={e => setFilter('minYear', e.target.value)} />
                     <input className="input" placeholder="To" type="number" value={filters.maxYear}
@@ -289,7 +290,7 @@ export default function CarsPage() {
           {/* ─── CARS GRID ─── */}
           <div>
             {loading ? (
-              <div className="loading-center"><div className="spinner" /></div>
+              <SkeletonGrid count={6} />
             ) : cars.length === 0 ? (
               <div className="empty-state">
                 <div className="empty-icon">🚗</div>

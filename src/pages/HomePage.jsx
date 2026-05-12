@@ -1,36 +1,25 @@
-// src/pages/HomePage.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { carsAPI, formatKES } from '../api/api';
-import { MOCK_CARS } from '../data/mockCars';
+import { useAuth } from '../context/AuthContext';
 import CarCard from '../components/CarCard';
-import { CountdownDisplay } from '../hooks/useCountdown';
-
-const BRANDS = ['Toyota', 'Mercedes', 'BMW', 'Land Rover', 'Subaru', 'Mazda', 'Nissan', 'Honda', 'Volkswagen', 'Lexus'];
-const STATS = [
-  { value: '12,400+', label: 'Cars Listed' },
-  { value: 'KES 2.1B+', label: 'Transacted' },
-  { value: '840+', label: 'Verified Dealers' },
-  { value: '99.8%', label: 'Escrow Success Rate' },
-];
+import { SkeletonGrid } from '../components/Skeleton';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [search, setSearch]           = useState('');
-  const [featured, setFeatured]       = useState([]);
-  const [liveAuctions, setLiveAuctions] = useState([]);
-  const [loading, setLoading]         = useState(true);
+  const { isAuth, isDealer, isAdmin } = useAuth();
+  const [search, setSearch] = useState('');
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      carsAPI.list({ limit: 6, sort: '-views' }).catch(() => ({ cars: [] })),
-      carsAPI.list({ limit: 4, auction: '1', auctionStatus: 'live' }).catch(() => ({ cars: [] })),
-    ]).then(([feat, auction]) => {
-      const apiFeatured = feat.cars || feat.data || [];
-      const apiAuctions = auction.cars || auction.data || [];
-      setFeatured(apiFeatured.length > 0 ? apiFeatured : MOCK_CARS.filter(c => c.isPromoted).slice(0, 6));
-      setLiveAuctions(apiAuctions.length > 0 ? apiAuctions : MOCK_CARS.filter(c => c.auctionStatus === 'live').slice(0, 4));
-    }).finally(() => setLoading(false));
+    carsAPI.list({ limit: 8, sort: '-createdAt' })
+      .then(data => {
+        const list = data.cars || data.data || [];
+        setCars(list);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const handleSearch = (e) => {
@@ -41,232 +30,122 @@ export default function HomePage() {
   return (
     <div className="page">
 
-      {/* ═══ COMPACT MARKET CARD ════════════════════════════ */}
-      <section className="hero-gradient" style={{
-        padding: '48px 0',
+      {/* Hero */}
+      <section style={{
+        padding: '60px 0 48px',
+        background: 'linear-gradient(180deg, var(--card) 0%, rgba(10,22,40,0.98) 100%)',
         borderBottom: '1px solid var(--border)',
-        position: 'relative', overflow: 'hidden',
       }}>
-        <div className="container">
-          <div className="card" style={{
-            padding: '28px 32px',
-            border: '1px solid var(--border-soft)',
-            background: 'var(--card)',
+        <div className="container" style={{ textAlign: 'center' }}>
+          <div style={{
+            fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.18em',
+            textTransform: 'uppercase', marginBottom: 12,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              {/* Brand + Tagline */}
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 4 }}>
-                  Kenya's Premium Car Marketplace
-                </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 600, color: 'var(--text)' }}>
-                  Gari Motors
-                </div>
-              </div>
-
-              {/* Feature Badges */}
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {[
-                  { icon: '⚡', label: 'Live Bidding' },
-                  { icon: '🔒', label: 'Escrow' },
-                  { icon: '✅', label: 'Verified Dealers' },
-                ].map(f => (
-                  <span key={f.label} style={{
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 100, padding: '4px 12px', fontSize: 11, fontWeight: 600,
-                    color: 'var(--gold-light)', display: 'flex', alignItems: 'center', gap: 4,
-                  }}>
-                    {f.icon} {f.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Search + CTAs */}
-            <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-              <form onSubmit={handleSearch} style={{ display: 'flex', gap: 0, flex: 1, minWidth: 240, maxWidth: 440 }}>
-                <input
-                  className="input"
-                  placeholder="Search brand, model, city..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none' }}
-                />
-                <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0, padding: '8px 18px' }}>
-                  🔍 Search
-                </button>
-              </form>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Link to="/register" className="btn btn-gold btn-sm">Start Listing Free</Link>
-                <Link to="/cars" className="btn btn-outline btn-sm">Browse Market</Link>
-              </div>
-            </div>
-
-            {/* Quick Filter Pills */}
-            <div style={{ display: 'flex', gap: 6, marginTop: 12, flexWrap: 'wrap' }}>
-              {['Under 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => {
-                    if (tag === 'Live Auction') navigate('/cars?auctionStatus=live');
-                    else if (tag === 'Under 1M') navigate('/cars?maxPrice=1000000');
-                    else if (tag === 'Nairobi') navigate('/cars?city=Nairobi');
-                    else navigate(`/cars?search=${tag}`);
-                  }}
-                  style={{
-                    background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 100, padding: '3px 10px', fontSize: 11,
-                    color: 'var(--text-muted)', cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.color = 'var(--gold)'; }}
-                  onMouseLeave={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.color = 'var(--text-muted)'; }}
-                >
-                  {tag}
-                </button>
-              ))}
-            </div>
+            Kenya's Premium Car Marketplace
           </div>
-        </div>
-      </section>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, marginBottom: 12, lineHeight: 1.15 }}>
+            Find Your Next Car<br />
+            <span style={{ color: 'var(--gold-light)' }}>With Confidence</span>
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 480, margin: '0 auto 24px' }}>
+            Browse thousands of verified listings from trusted dealers across Kenya.
+            Live auctions, M-Pesa payments, and escrow protection included.
+          </p>
 
-      {/* ═══ STATS BAR ══════════════════════════════════════ */}
-      <section style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', padding: '24px 0' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24 }}>
-            {STATS.map(s => (
-              <div key={s.label} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 600, color: 'var(--gold-light)' }}>
-                  {s.value}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 0, maxWidth: 520, margin: '0 auto 20px' }}>
+            <input
+              className="input"
+              placeholder="Search brand, model, or city..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none', height: 48, fontSize: 14 }}
+            />
+            <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0, padding: '0 28px', height: 48, fontSize: 14 }}>
+              Search Cars
+            </button>
+          </form>
 
-      {/* ═══ FEATURED CARS ══════════════════════════════════ */}
-      <section style={{ padding: '48px 0' }}>
-        <div className="container">
-          <div className="section-header">
-            <div>
-              <div className="section-eyebrow">Trending</div>
-              <h2>Most Viewed</h2>
-            </div>
-            <Link to="/cars" className="btn btn-outline btn-sm">Browse All →</Link>
-          </div>
-
-          {loading ? (
-            <div className="loading-center"><div className="spinner" /></div>
-          ) : (
-            <div className="car-grid">
-              {featured.map(car => <CarCard key={car._id} car={car} />)}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ═══ LIVE AUCTIONS ══════════════════════════════════ */}
-      {liveAuctions.length > 0 && (
-        <section style={{ padding: '48px 0', background: 'var(--surface)', borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <div className="section-eyebrow">🔴 Happening Now</div>
-                <h2>Live Auctions</h2>
-              </div>
-              <Link to="/cars?auctionStatus=live" className="btn btn-outline btn-sm">View All →</Link>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
-              {liveAuctions.map(car => (
-                <Link key={car._id} to={`/auction/${car._id}`} style={{ display: 'block' }}>
-                  <div className="card" style={{ border: '1px solid rgba(212,168,67,0.25)', cursor: 'pointer' }}>
-                    <div className="car-img-wrap">
-                      {car.images?.[0]?.url ? (
-                        <img src={car.images[0].url} alt={car.title} loading="lazy" />
-                      ) : (
-                        <div className="car-img-placeholder">🚗</div>
-                      )}
-                      <div style={{ position: 'absolute', top: 10, left: 10 }}>
-                        <span className="badge badge-green">
-                          <span className="live-dot" /> LIVE
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ padding: 16 }}>
-                      <h3 style={{ fontSize: '1rem', marginBottom: 10 }}>{car.title}</h3>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Current Bid</div>
-                          <div className="price-tag">{formatKES(car.currentBid || car.price)}</div>
-                        </div>
-                        {car.auctionEnd && <CountdownDisplay endTime={car.auctionEnd} />}
-                      </div>
-                      <div style={{ marginTop: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-                        {car.bidsCount || 0} bids · Tap to join
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ═══ BRANDS ══════════════════════════════════════════ */}
-      <section style={{ padding: '48px 0', background: 'var(--surface)', borderTop: '1px solid var(--border)' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 28 }}>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Browse by Brand</div>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
-            {BRANDS.map(brand => (
-              <Link key={brand} to={`/cars?brand=${brand}`}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+            {['Under KSh 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
+              <button
+                key={tag}
+                onClick={() => {
+                  if (tag === 'Live Auction') navigate('/cars?auctionStatus=live');
+                  else if (tag === 'Under KSh 1M') navigate('/cars?maxPrice=1000000');
+                  else if (tag === 'Nairobi') navigate('/cars?city=Nairobi');
+                  else navigate(`/cars?search=${tag}`);
+                }}
                 style={{
-                  background: 'var(--card)', border: '1px solid var(--border)',
-                  borderRadius: 8, padding: '10px 20px',
-                  fontSize: 14, fontWeight: 500, color: 'var(--text-muted)',
+                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  borderRadius: 100, padding: '6px 16px', fontSize: 12,
+                  color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500,
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.color = 'var(--gold)'; }}
                 onMouseLeave={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.color = 'var(--text-muted)'; }}
               >
-                {brand}
-              </Link>
+                {tag}
+              </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ CTA BANNER ══════════════════════════════════════ */}
-      <section style={{
-        padding: '64px 0',
-        background: 'linear-gradient(135deg, rgba(212,168,67,0.12) 0%, transparent 60%)',
-        borderTop: '1px solid var(--border)',
-      }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ marginBottom: 12 }}>Are You a Dealer?</h2>
-          <p style={{ color: 'var(--text-muted)', marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
-            List your inventory, run live auctions, get paid via M-Pesa. The most powerful car dealer platform in Kenya.
-          </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
-            <Link to="/register" className="btn btn-gold btn-lg">Start Listing Free</Link>
-            <Link to="/cars"     className="btn btn-outline btn-lg">Browse Market</Link>
+      {/* Featured cars */}
+      <section style={{ padding: '48px 0' }}>
+        <div className="container">
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            marginBottom: 24,
+          }}>
+            <div>
+              <h2 style={{ marginBottom: 4 }}>Latest Listings</h2>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Recently added vehicles from verified dealers</p>
+            </div>
+            <Link to="/cars" className="btn btn-outline btn-sm" style={{ color: 'var(--gold)', borderColor: 'rgba(212,168,67,0.2)' }}>
+              Browse All →
+            </Link>
           </div>
+
+          {loading ? (
+            <SkeletonGrid count={4} />
+          ) : cars.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-icon">🚗</div>
+              <h3>No cars yet</h3>
+              <p>Check back soon for new listings</p>
+            </div>
+          ) : (
+            <div className="car-grid">
+              {cars.map(car => <CarCard key={car._id} car={car} />)}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Footer */}
+      {/* CTA */}
+      <section style={{ padding: '48px 0', background: 'var(--card)', borderTop: '1px solid var(--border)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🚗</div>
+          <h2 style={{ marginBottom: 8 }}>Ready to Sell Your Car?</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 440, margin: '0 auto 20px' }}>
+            List your inventory, run live auctions, and get paid securely via M-Pesa escrow.
+          </p>
+          <Link to="/register" className="btn btn-gold btn-lg">
+            {isDealer ? 'Go to Dealer Hub' : 'Get Started Free'}
+          </Link>
+        </div>
+      </section>
+
       <footer style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '32px 0', textAlign: 'center' }}>
         <div className="container">
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 8 }}>Gari Motors</div>
-          <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-            Kenya's Premium Car Marketplace · Live Auctions · M-Pesa · Escrow
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 12, fontWeight: 600 }}>Gari Motors</div>
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', fontSize: 12, color: 'var(--text-dim)', flexWrap: 'wrap' }}>
+            <Link to="/cars" style={{ color: 'var(--text-muted)' }}>Browse Cars</Link>
+            <Link to="/cars?auctionStatus=live" style={{ color: 'var(--text-muted)' }}>Live Auctions</Link>
+            <Link to="/register" style={{ color: 'var(--text-muted)' }}>List Your Car</Link>
           </div>
-          <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: 12 }}>
+          <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: 11 }}>
             © {new Date().getFullYear()} Gari Motors Ltd. All rights reserved.
           </div>
         </div>

@@ -50,12 +50,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const isAdmin  = user?.role === 'admin';
-  const isDealer = user?.role === 'dealer' || user?.role === 'admin';
-  const isAuth   = !!user;
+  const isAdmin       = user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'subadmin';
+  const isDealer      = user?.role === 'dealer' || user?.role === 'admin' || user?.role === 'superadmin' || user?.role === 'subadmin';
+  const isSuperAdmin  = user?.role === 'superadmin';
+  const isSubAdmin    = user?.role === 'subadmin';
+  const isAuth        = !!user;
+  const department    = user?.department || '';
+  const isSubDept     = (dept) => isSubAdmin && department === dept;
 
   return (
-    <AuthCtx.Provider value={{ user, token, loading, isAuth, isAdmin, isDealer, login, register, logout, setUser }}>
+    <AuthCtx.Provider value={{ user, token, loading, isAuth, isAdmin, isDealer, isSuperAdmin, isSubAdmin, department, isSubDept, login, register, logout, setUser }}>
       {children}
     </AuthCtx.Provider>
   );

@@ -65,7 +65,7 @@ export default function AdminBids() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: '32px 24px' }}>
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>
@@ -73,7 +73,7 @@ export default function AdminBids() {
         </div>
 
         {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 24 }}>
+        <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
             { label: 'Total Bids',    val: total.toLocaleString(),   icon: '⚡', color: 'var(--gold)' },
             { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: '✅', color: 'var(--green)' },

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,9 +19,15 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form);
+      const data = await login(form);
       toast('Welcome back! 🚗', 'success');
-      navigate(from, { replace: true });
+      const u = data.user || user;
+      const role = u?.role;
+      if (u?.mustChangePassword) {
+        navigate('/force-password-change', { replace: true }); return;
+      }
+      const dest = role === 'dealer' ? '/dealer' : role === 'admin' || role === 'superadmin' ? '/admin' : from;
+      navigate(dest, { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid credentials', 'error');
     } finally {
