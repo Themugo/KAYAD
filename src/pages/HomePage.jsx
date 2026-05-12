@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { carsAPI, formatKES } from '../api/api';
+import { carsAPI, formatKES, isDemoMode } from '../api/api';
 import { filterMockCars } from '../data/mockCars';
 import CarCard from '../components/CarCard';
 import { SkeletonGrid } from '../components/Skeleton';
@@ -50,20 +50,25 @@ export default function HomePage() {
 
   const fetchCars = useCallback(async (pg = 1) => {
     setLoading(true);
-    try {
-      const params = { page: pg, limit: LIMIT };
-      Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
-      const data = await carsAPI.list(params);
-      const apiCars = data.cars || data.data || [];
-      setCars(apiCars);
-      setTotal(data.pagination?.total || data.total || 0);
-      setPage(pg);
-    } catch {
+    const loadMock = () => {
       const filtered = filterMockCars(filters);
       const start = (pg - 1) * LIMIT;
       setCars(filtered.slice(start, start + LIMIT));
       setTotal(filtered.length);
       setPage(pg);
+    };
+    try {
+      if (isDemoMode()) { loadMock(); return; }
+      const params = { page: pg, limit: LIMIT };
+      Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
+      const data = await carsAPI.list(params);
+      const apiCars = data.cars || data.data || [];
+      if (apiCars.length === 0) { loadMock(); return; }
+      setCars(apiCars);
+      setTotal(data.pagination?.total || data.total || 0);
+      setPage(pg);
+    } catch {
+      loadMock();
     } finally {
       setLoading(false);
     }
@@ -102,10 +107,19 @@ export default function HomePage() {
   };
 
   const pillSearch = (tag) => {
-    if (tag === 'Live Auction') setFilter('auctionStatus', 'live');
-    else if (tag === 'Under KSh 1M') setFilter('maxPrice', '1000000');
-    else if (tag === 'Nairobi') setFilter('city', 'Nairobi');
-    else setFilter('search', tag);
+    const map = {
+      'Live Auction': { auctionStatus: 'live' },
+      'Under KSh 1M': { maxPrice: '1000000' },
+      'Nairobi': { city: 'Nairobi' },
+      'SUVs': { bodyType: 'SUV' },
+      'Sedans': { bodyType: 'Sedan' },
+    };
+    const vals = map[tag];
+    if (vals) {
+      Object.entries(vals).forEach(([k, v]) => setFilter(k, v));
+    } else {
+      setFilter('search', tag);
+    }
   };
 
   const SelectFilter = ({ label, options, value, onChange }) => (
@@ -146,6 +160,8 @@ export default function HomePage() {
             <input
               className="input"
               placeholder="Search brand, model, or city..."
+              value={filters.search}
+              onChange={e => setFilter('search', e.target.value)}
               style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none', height: 48, fontSize: 14 }}
             />
             <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0, padding: '0 28px', height: 48, fontSize: 14 }}>

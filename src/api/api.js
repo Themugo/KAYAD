@@ -25,7 +25,7 @@ export const isDemoMode = () => __DEMO_MODE__;
 })();
 
 // ─── AXIOS INSTANCE ───────────────────────────────────────────
-const api = axios.create({ baseURL: BASE, withCredentials: true });
+const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 4000 });
 
 // Attach JWT from localStorage on every request
 api.interceptors.request.use(cfg => {

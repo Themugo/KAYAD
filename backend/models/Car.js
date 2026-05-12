@@ -30,6 +30,9 @@ const carSchema = new mongoose.Schema(
     transmission: { type: String },
     mileage: Number,
     bodyType: String,
+    color: String,
+    description: String,
+    features: [String],
 
     // =============================
     // 🖼 IMAGES (CLOUDINARY)
