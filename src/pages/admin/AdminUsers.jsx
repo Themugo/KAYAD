@@ -43,7 +43,7 @@ export default function AdminUsers() {
     try {
       await adminAPI.toggleBan(u._id);
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, isBanned: !x.isBanned } : x));
-      if (selected?._id === u._id) setSelected(x => ({ ...x, isBanned: !x.isBanned }));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, isBanned: !prev.isBanned } : prev);
       toast(u.isBanned ? '✅ User unbanned' : '🚫 User banned', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
@@ -54,7 +54,7 @@ export default function AdminUsers() {
     try {
       await adminAPI.approveDealer(u._id);
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true } : x));
-      if (selected?._id === u._id) setSelected(x => ({ ...x, approved: true }));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, approved: true } : prev);
       toast('✅ Dealer approved!', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }

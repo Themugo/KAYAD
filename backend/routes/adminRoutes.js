@@ -164,6 +164,58 @@ router.post(
 );
 
 // =============================
+// 💼 UPDATE SELLER FINANCIAL SETTINGS
+// =============================
+router.put(
+  "/users/:id/seller-settings",
+  adminOrSuper,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const allowed = ["commission", "waiver", "discount"];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) {
+        user[key] = req.body[key];
+      }
+    }
+
+    await user.save();
+
+    await AuditLog.create({
+      action: `Seller settings updated for ${user.name || user.email}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+      details: { userId: user._id, changes: req.body },
+    });
+
+    res.json({
+      success: true,
+      message: "Seller settings updated",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        businessName: user.businessName,
+        commission: user.commission,
+        waiver: user.waiver,
+        discount: user.discount,
+        approved: user.approved,
+        isBanned: user.isBanned,
+        dealerRating: user.dealerRating,
+      },
+    });
+  })
+);
+
+// =============================
 // 🚗 GET CARS (PAGINATED + FILTER + SEARCH)
 // =============================
 router.get(

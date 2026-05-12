@@ -1,51 +1,85 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { formatKES } from '../../api/api';
-
-const DEMO_SELLERS = [
-  { id: 'demo-dealer-1', businessName: 'Nairobi Auto Hub Ltd', name: 'Peter Kamau', email: 'dealer@demo.com', phone: '254723456789', status: 'approved', createdAt: new Date(Date.now() - 180 * 86400000).toISOString(), commission: 5, waiver: 0, discount: 0, totalSales: 18500000, listingCount: 8, rating: 4.7 },
-  { id: 'dealer-coast1', businessName: 'Coast Auto Traders', name: 'Hassan Ali', email: 'hassan@coastauto.co.ke', phone: '254741234567', status: 'approved', createdAt: new Date(Date.now() - 120 * 86400000).toISOString(), commission: 5, waiver: 0, discount: 0, totalSales: 9200000, listingCount: 5, rating: 4.3 },
-  { id: 'dealer-nakuru1', businessName: 'Nakuru Auto Deals', name: 'Grace Wanjiku', email: 'grace@nakuruauto.co.ke', phone: '254751234567', status: 'approved', createdAt: new Date(Date.now() - 60 * 86400000).toISOString(), commission: 5, waiver: 15000, discount: 2, totalSales: 2900000, listingCount: 3, rating: 3.9 },
-  { id: 'dealer-eldoret1', businessName: 'Eldoret Motors', name: 'Kiprop Rono', email: 'kiprop@eldoretmotors.co.ke', phone: '254761234567', status: 'approved', createdAt: new Date(Date.now() - 45 * 86400000).toISOString(), commission: 5, waiver: 0, discount: 0, totalSales: 3100000, listingCount: 2, rating: 4.0 },
-  { id: 'admin-target-2', businessName: 'Omondi Auto Traders', name: 'David Omondi', email: 'david@example.com', phone: '254771234567', status: 'pending', createdAt: new Date(Date.now() - 5 * 86400000).toISOString(), commission: 5, waiver: 0, discount: 0, totalSales: 0, listingCount: 0, rating: 0 },
-];
 
 export default function AdminSellers() {
   const { toast } = useToast();
-  const [sellers, setSellers] = useState(DEMO_SELLERS);
+  const [sellers, setSellers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
 
-  const toggleStatus = (id) => {
-    setSellers(prev => prev.map(s => {
-      if (s.id !== id) return s;
-      const newStatus = s.status === 'approved' ? 'suspended' : s.status === 'pending' ? 'approved' : 'approved';
-      toast(`${s.businessName} is now ${newStatus}`, 'success');
-      return { ...s, status: newStatus };
-    }));
+  const fetchSellers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const roleParam = filter !== 'all' ? 'dealer' : undefined;
+      const data = await adminAPI.users({ role: roleParam, search: search || undefined });
+      const users = data.users || data.data || [];
+      const mapped = users.map(u => ({
+        id: u._id,
+        businessName: u.businessName || u.name,
+        name: u.name,
+        email: u.email,
+        phone: u.phone || '—',
+        status: u.isBanned ? 'suspended' : u.approved ? 'approved' : 'pending',
+        commission: u.commission ?? 5,
+        waiver: u.waiver ?? 0,
+        discount: u.discount ?? 0,
+        totalSales: u.totalSales || 0,
+        listingCount: u.listingCount || 0,
+        rating: u.dealerRating || 0,
+        createdAt: u.createdAt,
+      }));
+      const filtered = filter === 'pending' ? mapped.filter(s => s.status === 'pending')
+        : filter === 'suspended' ? mapped.filter(s => s.status === 'suspended')
+        : filter === 'approved' ? mapped.filter(s => s.status === 'approved')
+        : mapped;
+      setSellers(filtered);
+    } catch {
+      setSellers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [filter, search]);
+
+  useEffect(() => { fetchSellers(); }, [fetchSellers]);
+
+  const toggleStatus = async (id, currentStatus) => {
+    try {
+      if (currentStatus === 'pending') {
+        await adminAPI.approveDealer(id);
+        toast('Dealer approved', 'success');
+      } else {
+        await adminAPI.toggleBan(id);
+        toast(currentStatus === 'approved' ? 'Seller suspended' : 'Seller reinstated', 'success');
+      }
+      fetchSellers();
+    } catch {
+      toast('Failed to update seller status', 'error');
+    }
   };
 
   const updateSeller = (id, field, val) => {
     setSellers(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
   };
 
-  const saveSeller = (id) => {
-    setEditing(null);
-    toast('Seller settings saved', 'success');
-  };
-
-  const filtered = sellers.filter(s => {
-    if (filter === 'pending' && s.status !== 'pending') return false;
-    if (filter === 'suspended' && s.status !== 'suspended') return false;
-    if (filter === 'approved' && s.status !== 'approved') return false;
-    if (search) {
-      const q = search.toLowerCase();
-      return s.businessName.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q);
+  const saveSeller = async (id) => {
+    const seller = sellers.find(s => s.id === id);
+    if (!seller) return;
+    try {
+      await adminAPI.updateSellerSettings(id, {
+        commission: seller.commission,
+        waiver: seller.waiver,
+        discount: seller.discount,
+      });
+      setEditing(null);
+      toast('Seller settings saved', 'success');
+    } catch {
+      toast('Failed to save seller settings', 'error');
     }
-    return true;
-  });
+  };
 
   return (
     <div className="page">
@@ -77,13 +111,15 @@ export default function AdminSellers() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.length === 0 ? (
+                {loading ? (
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading sellers...</td></tr>
+                ) : sellers.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>No sellers found</div>
                     <div style={{ fontSize: 13 }}>Try adjusting your search or filter</div>
                   </td></tr>
-                ) : filtered.map(s => (
+                ) : sellers.map(s => (
                   <tr key={s.id} style={{ cursor: 'pointer' }} onClick={() => setSelected(selected?.id === s.id ? null : s)}>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{s.businessName}</div>
@@ -137,7 +173,7 @@ export default function AdminSellers() {
                           <button className="btn btn-outline btn-sm" onClick={() => setEditing(s.id)}>✏ Price</button>
                         )}
                         <button className={`btn btn-sm ${s.status === 'approved' ? 'btn-danger' : 'btn-gold'}`}
-                          onClick={() => toggleStatus(s.id)}>
+                          onClick={() => toggleStatus(s.id, s.status)}>
                           {s.status === 'approved' ? 'Suspend' : s.status === 'pending' ? 'Approve' : 'Reinstate'}
                         </button>
                       </div>

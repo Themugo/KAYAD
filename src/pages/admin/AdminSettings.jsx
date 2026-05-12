@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
@@ -130,14 +130,15 @@ export default function AdminSettings() {
     </div>
   );
 
-  const tabs = [
-    { id: 'general', label: '⚙ General' },
-    { id: 'payments', label: '💳 Payments' },
-    { id: 'reconciliation', label: '🔄 Reconciliation' },
-    { id: 'audit', label: '📋 Audit Log' },
-  ];
-
-  if (!isSuperAdmin) tabs.splice(3, 1);
+  const tabs = useMemo(() => {
+    const all = [
+      { id: 'general', label: '⚙ General' },
+      { id: 'payments', label: '💳 Payments' },
+      { id: 'reconciliation', label: '🔄 Reconciliation' },
+      { id: 'audit', label: '📋 Audit Log' },
+    ];
+    return isSuperAdmin ? all : all.slice(0, 3);
+  }, [isSuperAdmin]);
 
   if (loading) {
     return (

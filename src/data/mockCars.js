@@ -1,4 +1,5 @@
-const IMAGES = {
+// ─── Dedicated images per car (2 each) ──────────────────────────
+const DEDICATED = {
   landcruiser: [
     'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=600&h=400&fit=crop',
     'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=400&fit=crop',
@@ -49,6 +50,44 @@ const IMAGES = {
   ],
 };
 
+// ─── Shared image pool (24 car photos) ──────────────────────────
+const SHARED = [
+  'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d1?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1607016284316-6e1019c28e23?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1603584173870-7f23fd4c2b4b?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1606664444110-0c1e1e84b8fe?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1511919886926-f7fb7d0c6e2c?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1581540222194-0def2dda95b8?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1570733117311-d990c3816c47?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1605816988069-b11383b5076e?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1583267746897-3e42c7e14754?w=600&h=400&fit=crop',
+  'https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=600&h=400&fit=crop',
+];
+
+// Build IMAGES: each entry = 2 dedicated + 6 from SHARED at rolling offset
+const IMAGES = {};
+const _keys = Object.keys(DEDICATED);
+_keys.forEach((key, i) => {
+  const start = (i * 6) % 24;
+  IMAGES[key] = [...DEDICATED[key], ...SHARED.slice(start, start + 6)];
+});
+
+const ADMIN_DEALER = { _id: 'demo-admin-1', name: 'Admin User', dealerRating: 5 };
+
 const now = Date.now();
 const DAY = 86400000;
 
@@ -78,7 +117,7 @@ export const MOCK_CARS = [
     isPromoted: true,
     isVerifiedDealer: true,
     dealRating: 'great',
-    dealer: { _id: 'dealer-premium1', name: 'Premium Motors Ltd', dealerRating: 4.8 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-mb1',
@@ -105,7 +144,7 @@ export const MOCK_CARS = [
     isPromoted: true,
     isVerifiedDealer: true,
     dealRating: 'fair',
-    dealer: { _id: 'dealer-luxury1', name: 'Luxury Auto Imports', dealerRating: 4.6 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-bmw1',
@@ -132,7 +171,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: true,
     dealRating: 'great',
-    dealer: { _id: 'dealer-coast1', name: 'Coast Auto Traders', dealerRating: 4.3 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-sub1',
@@ -159,7 +198,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: true,
     dealRating: 'good',
-    dealer: { _id: 'dealer-kenya1', name: 'Kenya Car Mart', dealerRating: 4.1 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-nis1',
@@ -186,7 +225,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: false,
     dealRating: 'good',
-    dealer: { _id: 'dealer-nakuru1', name: 'Nakuru Auto Deals', dealerRating: 3.9 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-maz1',
@@ -213,7 +252,7 @@ export const MOCK_CARS = [
     isPromoted: true,
     isVerifiedDealer: true,
     dealRating: 'great',
-    dealer: { _id: 'dealer-premium1', name: 'Premium Motors Ltd', dealerRating: 4.8 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-rr1',
@@ -240,7 +279,7 @@ export const MOCK_CARS = [
     isPromoted: true,
     isVerifiedDealer: true,
     dealRating: 'overpriced',
-    dealer: { _id: 'dealer-luxury1', name: 'Luxury Auto Imports', dealerRating: 4.6 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-aud1',
@@ -267,7 +306,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: true,
     dealRating: 'good',
-    dealer: { _id: 'dealer-premium1', name: 'Premium Motors Ltd', dealerRating: 4.8 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-lex1',
@@ -294,7 +333,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: true,
     dealRating: 'fair',
-    dealer: { _id: 'dealer-coast1', name: 'Coast Auto Traders', dealerRating: 4.3 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-vw1',
@@ -321,7 +360,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: false,
     dealRating: 'great',
-    dealer: { _id: 'dealer-eldoret1', name: 'Eldoret Motors', dealerRating: 4.0 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-hon1',
@@ -348,7 +387,7 @@ export const MOCK_CARS = [
     isPromoted: false,
     isVerifiedDealer: false,
     dealRating: 'good',
-    dealer: { _id: 'dealer-kenya1', name: 'Kenya Car Mart', dealerRating: 4.1 },
+    dealer: ADMIN_DEALER,
   },
   {
     _id: 'mock-pick1',
@@ -375,18 +414,11 @@ export const MOCK_CARS = [
     isPromoted: true,
     isVerifiedDealer: true,
     dealRating: 'great',
-    dealer: { _id: 'dealer-kenya1', name: 'Kenya Car Mart', dealerRating: 4.1 },
+    dealer: ADMIN_DEALER,
   },
 ];
 
-export const MOCK_DEALERS = [
-  { _id: 'dealer-premium1', name: 'Premium Motors Ltd', dealerRating: 4.8 },
-  { _id: 'dealer-luxury1', name: 'Luxury Auto Imports', dealerRating: 4.6 },
-  { _id: 'dealer-coast1', name: 'Coast Auto Traders', dealerRating: 4.3 },
-  { _id: 'dealer-kenya1', name: 'Kenya Car Mart', dealerRating: 4.1 },
-  { _id: 'dealer-nakuru1', name: 'Nakuru Auto Deals', dealerRating: 3.9 },
-  { _id: 'dealer-eldoret1', name: 'Eldoret Motors', dealerRating: 4.0 },
-];
+export const MOCK_DEALERS = [ADMIN_DEALER];
 
 export const MOCK_FILTERS = {
   brands: [...new Set(MOCK_CARS.map(c => c.brand))],

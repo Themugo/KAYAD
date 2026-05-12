@@ -479,6 +479,38 @@ const demoAdmin = {
     await delay();
     return wrapSuccess({ message: 'Car deleted' });
   },
+
+  updateSellerSettings: async (userId, body) => {
+    await delay();
+    const user = DEMO_ADMIN_USERS.find(u => u._id === userId) || {};
+    const updated = { ...user, ...body };
+    return wrapSuccess({ message: 'Seller settings updated', user: updated });
+  },
+
+  getConfig: async () => {
+    await delay();
+    return wrapSuccess({ config: { platformName: 'Gari Motors', dealerCommission: 5, bidCommitmentPct: 5 } });
+  },
+
+  updateConfig: async (body) => {
+    await delay();
+    return wrapSuccess({ config: body, message: 'Config updated' });
+  },
+
+  getAuditLog: async (params = {}) => {
+    await delay();
+    return wrapSuccess({ entries: [], pagination: { total: 0, page: 1, limit: 50, pages: 0 } });
+  },
+
+  appendAuditLog: async (body) => {
+    await delay();
+    return wrapSuccess({ entry: { ...body, _id: 'demo-audit-' + Date.now(), createdAt: new Date().toISOString() } });
+  },
+
+  testMpesa: async (body) => {
+    await delay(1000, 2000);
+    return wrapSuccess({ message: 'STK push sent', checkoutRequestID: 'demo-checkout-' + Date.now() });
+  },
 };
 
 // ─── Demo Auction Admin API ───────────────────────────────────────

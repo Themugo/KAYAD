@@ -34,6 +34,12 @@ import DealerSettings   from './pages/dealer/DealerSettings';
 
 // Admin pages
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminUsers     from './pages/admin/AdminUsers';
+import AdminCars      from './pages/admin/AdminCars';
+import AdminBids      from './pages/admin/AdminBids';
+import AdminEscrows   from './pages/admin/AdminEscrows';
+import AdminAuctions  from './pages/admin/AdminAuctions';
+import AdminSellers   from './pages/admin/AdminSellers';
 import AdminSettings  from './pages/admin/AdminSettings';
 
 export default function App() {
@@ -70,8 +76,14 @@ export default function App() {
                   <Route path="/dealer/settings"    element={<RequireDealer><DealerSettings /></RequireDealer>} />
 
                   {/* ── Admin ── */}
-                  <Route path="/admin"           element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
-                  <Route path="/admin/settings"  element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+                  <Route path="/admin"             element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+                  <Route path="/admin/users"       element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
+                  <Route path="/admin/cars"        element={<RequireAdmin><AdminCars /></RequireAdmin>} />
+                  <Route path="/admin/bids"        element={<RequireAdmin><AdminBids /></RequireAdmin>} />
+                  <Route path="/admin/escrows"     element={<RequireAdmin><AdminEscrows /></RequireAdmin>} />
+                  <Route path="/admin/auctions"    element={<RequireAdmin><AdminAuctions /></RequireAdmin>} />
+                  <Route path="/admin/sellers"     element={<RequireAdmin><AdminSellers /></RequireAdmin>} />
+                  <Route path="/admin/settings"    element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
 
                   {/* ── Fallback ── */}
                   <Route path="/404" element={<NotFoundPage />} />

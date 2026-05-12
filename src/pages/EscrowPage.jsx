@@ -124,7 +124,6 @@ export default function EscrowPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {filtered.map(e => {
               const meta = STATUS_META[e.status] || { label: e.status, badge: 'badge-muted', icon: '•', desc: '' };
-              const isBuyer  = e.buyer?._id === e.buyer;   // simplified check
               return (
                 <div key={e._id} className="card" style={{
                   padding: 20, cursor: 'pointer',

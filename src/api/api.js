@@ -220,6 +220,9 @@ const _adminAPI = {
   cars:          (params)    => api.get('/admin/cars', { params }).then(unwrap),
   deleteCar:     (carId)     => api.delete(`/admin/cars/${carId}`).then(unwrap),
 
+  // Seller Settings
+  updateSellerSettings: (userId, body) => api.put(`/admin/users/${userId}/seller-settings`, body).then(unwrap),
+
   // Platform Config
   getConfig:      ()          => api.get('/admin/config').then(unwrap),
   updateConfig:   (body)      => api.put('/admin/config', body).then(unwrap),

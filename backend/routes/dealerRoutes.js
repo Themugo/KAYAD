@@ -2,13 +2,6 @@ import express from "express";
 import { protect, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
-import {
-  getEarnings,
-  getMyCars,
-  getDealerAnalytics,
-  getDealerSummary,
-} from "../controllers/dealerController.js";
-
 import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";

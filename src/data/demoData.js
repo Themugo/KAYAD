@@ -1,3 +1,33 @@
+// ─── Car images using picsum.photos (reliable placeholder service) ─
+const S = (seed) => `https://picsum.photos/seed/${seed}/600/400`;
+
+const DEDICATED = {
+  lc:  [S('landcruiser1'), S('landcruiser2')],
+  mb:  [S('mercedes1'),    S('mercedes2')],
+  bmw: [S('bmw1'),         S('bmw2')],
+  sub: [S('subaru1'),      S('subaru2')],
+  nis: [S('nissan1'),      S('nissan2')],
+  maz: [S('mazda1'),       S('mazda2')],
+  rr:  [S('rangerover1'),  S('rangerover2')],
+  audi:[S('audi1'),        S('audi2')],
+  lex: [S('lexus1'),       S('lexus2')],
+  vw:  [S('vw1'),          S('vw2')],
+  hon: [S('honda1'),       S('honda2')],
+  pick:[S('hilux1'),       S('hilux2')],
+};
+
+const SHARED = Array.from({ length: 24 }, (_, i) => S(`shared${i}`));
+
+// Build IMG: each entry = 2 dedicated + 6 from SHARED at rolling offset
+const IMG = {};
+const _k = Object.keys(DEDICATED);
+_k.forEach((key, i) => {
+  const start = (i * 6) % 24;
+  IMG[key] = [...DEDICATED[key], ...SHARED.slice(start, start + 6)];
+});
+
+const ADMIN_DEALER = { _id: 'demo-admin-1', name: 'Admin User', dealerRating: 5 };
+
 const now = Date.now();
 const DAY = 86400000;
 
@@ -67,34 +97,19 @@ export const DEMO_USERS = {
   },
 };
 
-const IMG = {
-  lc: ['https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=400&fit=crop'],
-  mb: ['https://images.unsplash.com/photo-1618843479313-40f8afb4b4d1?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop'],
-  bmw: ['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop'],
-  sub: ['https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop'],
-  nis: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=600&h=400&fit=crop'],
-  maz: ['https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&h=400&fit=crop'],
-  rr: ['https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1607016284316-6e1019c28e23?w=600&h=400&fit=crop'],
-  audi: ['https://images.unsplash.com/photo-1603584173870-7f23fd4c2b4b?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1606664444110-0c1e1e84b8fe?w=600&h=400&fit=crop'],
-  lex: ['https://images.unsplash.com/photo-1511919886926-f7fb7d0c6e2c?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1581540222194-0def2dda95b8?w=600&h=400&fit=crop'],
-  vw: ['https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1570733117311-d990c3816c47?w=600&h=400&fit=crop'],
-  hon: ['https://images.unsplash.com/photo-1605816988069-b11383b5076e?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&h=400&fit=crop'],
-  pick: ['https://images.unsplash.com/photo-1583267746897-3e42c7e14754?w=600&h=400&fit=crop','https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=600&h=400&fit=crop'],
-};
-
 export const DEMO_CARS = [
-  { _id:'car-lc1', title:'Toyota Land Cruiser V8 2021', brand:'Toyota', price:8500000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:45000, bodyType:'SUV', color:'Black', location:{city:'Nairobi'}, description:'2021 Toyota Land Cruiser V8 in pristine condition. Full service history, leather interior, sunroof, 7 seats.', features:['Leather Seats','Sunroof','7 Seats','4WD','Bluetooth','Reverse Camera'], images:IMG.lc, views:1842, bidsCount:14, currentBid:3200000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+3*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7,phone:'254723456789'} },
-  { _id:'car-mb1', title:'Mercedes-Benz GLE 350d 2022', brand:'Mercedes', price:12000000, year:2022, fuel:'Diesel', transmission:'Automatic', mileage:22000, bodyType:'SUV', color:'White', location:{city:'Nairobi'}, description:'Mercedes GLE 350d AMG package, panoramic roof, premium sound. One owner.', features:['AMG Package','Panoramic Roof','Premium Sound','Leather','Heated Seats','360 Camera'], images:IMG.mb, views:2103, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:true, isVerifiedDealer:true, dealRating:'fair', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-bmw1', title:'BMW X5 M Sport 2020', brand:'BMW', price:6200000, year:2020, fuel:'Petrol', transmission:'Automatic', mileage:38000, bodyType:'SUV', color:'Blue', location:{city:'Mombasa'}, description:'BMW X5 M Sport with full M package. Sport exhaust, adaptive suspension.', features:['M Sport Package','Sport Exhaust','Adaptive Suspension','Comfort Access','HUD','Wireless Charging'], images:IMG.bmw, views:1567, bidsCount:8, currentBid:4100000, allowBid:true, allowBuy:false, auctionStatus:'live', auctionEnd:new Date(now+1.5*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'great', dealer:{_id:'dealer-coast1',name:'Coast Auto Traders',dealerRating:4.3} },
-  { _id:'car-sub1', title:'Subaru Forester XT 2021', brand:'Subaru', price:3800000, year:2021, fuel:'Petrol', transmission:'Automatic', mileage:28000, bodyType:'SUV', color:'Silver', location:{city:'Nairobi'}, description:'Subaru Forester XT Turbo. Leather, sunroof, Eyesight safety suite.', features:['Turbo','Sunroof','Leather Seats','Eyesight','All Wheel Drive','Cruise Control'], images:IMG.sub, views:982, bidsCount:3, currentBid:2850000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+0.5*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'good', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-nis1', title:'Nissan X-Trail 2022', brand:'Nissan', price:2900000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:18000, bodyType:'SUV', color:'Grey', location:{city:'Nakuru'}, description:'Nissan X-Trail 7-seater, push start, keyless entry, touchscreen infotainment.', features:['7 Seats','Push Start','Keyless Entry','Touchscreen','Bluetooth','AC'], images:IMG.nis, views:734, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'dealer-nakuru1',name:'Nakuru Auto Deals',dealerRating:3.9} },
-  { _id:'car-maz1', title:'Mazda CX-5 2023', brand:'Mazda', price:4200000, year:2023, fuel:'Petrol', transmission:'Automatic', mileage:12000, bodyType:'SUV', color:'Red', location:{city:'Nairobi'}, description:'Mazda CX-5 KODO design, SkyActiv technology, Bose sound system. Only 12k km.', features:['Bose Sound','SkyActiv','Leather','Sunroof','Blind Spot Monitoring','Apple CarPlay'], images:IMG.maz, views:1289, bidsCount:5, currentBid:3600000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+2*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-rr1', title:'Land Rover Range Rover Sport 2020', brand:'Land Rover', price:15000000, year:2020, fuel:'Diesel', transmission:'Automatic', mileage:35000, bodyType:'SUV', color:'Black', location:{city:'Nairobi'}, description:'Range Rover Sport HSE Dynamic. Supercharged V6, air suspension, Meridian sound.', features:['Air Suspension','Meridian Sound','Supercharged','Terrain Response','Leather','Rear Entertainment'], images:IMG.rr, views:3210, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:true, isVerifiedDealer:true, dealRating:'overpriced', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-aud1', title:'Audi A4 2.0 TFSI 2021', brand:'Audi', price:3800000, year:2021, fuel:'Petrol', transmission:'Automatic', mileage:25000, bodyType:'Sedan', color:'White', location:{city:'Nairobi'}, description:'Audi A4 Quattro. Virtual cockpit, Bang & Olufsen sound, S-Line package. Executive sedan.', features:['Quattro AWD','Virtual Cockpit','Bang & Olufsen','S-Line','Sunroof','Adaptive Cruise'], images:IMG.audi, views:876, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:true, dealRating:'good', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-lex1', title:'Lexus ES 350 2022', brand:'Lexus', price:5200000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:15000, bodyType:'Sedan', color:'Silver', location:{city:'Mombasa'}, description:'Lexus ES 350 Luxury Package. Mark Levinson sound, semi-aniline leather. Premium sedan.', features:['Mark Levinson','Semi-Aniline Leather','Radar Cruise','Heated/Ventilated Seats','Moonroof','360 Camera'], images:IMG.lex, views:654, bidsCount:2, currentBid:6200000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+4*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'fair', dealer:{_id:'dealer-coast1',name:'Coast Auto Traders',dealerRating:4.3} },
-  { _id:'car-vw1', title:'Volkswagen Passat 2021', brand:'Volkswagen', price:2600000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:32000, bodyType:'Sedan', color:'Blue', location:{city:'Eldoret'}, description:'VW Passat 2.0 TDI. Comfortline trim, spacious interior, great fuel economy.', features:['Diesel','Spacious Interior','Bluetooth','Rear Camera','Parking Sensors','Cruise Control'], images:IMG.vw, views:521, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'great', dealer:{_id:'dealer-eldoret1',name:'Eldoret Motors',dealerRating:4.0} },
-  { _id:'car-hon1', title:'Honda Accord 2022', brand:'Honda', price:3100000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:20000, bodyType:'Sedan', color:'Grey', location:{city:'Nairobi'}, description:'Honda Accord 2022, top of the line. Honda Sensing safety suite, leather, moonroof.', features:['Honda Sensing','Leather','Moonroof','Apple CarPlay','Wireless Charging','Lane Keep Assist'], images:IMG.hon, views:445, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
-  { _id:'car-pick1', title:'Toyota Hilux Double Cabin 2021', brand:'Toyota', price:4200000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:40000, bodyType:'Pickup', color:'White', location:{city:'Nairobi'}, description:'Toyota Hilux Double Cabin 4x4. Workhorse of Africa. Well maintained.', features:['4x4','Double Cabin','Canopy','Bluetooth','AC','Power Windows'], images:IMG.pick, views:1678, bidsCount:10, currentBid:3100000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+1*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd',dealerRating:4.7} },
+  { _id:'car-lc1', title:'Toyota Land Cruiser V8 2021', brand:'Toyota', price:8500000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:45000, bodyType:'SUV', color:'Black', location:{city:'Nairobi'}, description:'2021 Toyota Land Cruiser V8 in pristine condition. Full service history, leather interior, sunroof, 7 seats.', features:['Leather Seats','Sunroof','7 Seats','4WD','Bluetooth','Reverse Camera'], images:IMG.lc, views:1842, bidsCount:14, currentBid:3200000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+3*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:ADMIN_DEALER },
+  { _id:'car-mb1', title:'Mercedes-Benz GLE 350d 2022', brand:'Mercedes', price:12000000, year:2022, fuel:'Diesel', transmission:'Automatic', mileage:22000, bodyType:'SUV', color:'White', location:{city:'Nairobi'}, description:'Mercedes GLE 350d AMG package, panoramic roof, premium sound. One owner.', features:['AMG Package','Panoramic Roof','Premium Sound','Leather','Heated Seats','360 Camera'], images:IMG.mb, views:2103, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:true, isVerifiedDealer:true, dealRating:'fair', dealer:ADMIN_DEALER },
+  { _id:'car-bmw1', title:'BMW X5 M Sport 2020', brand:'BMW', price:6200000, year:2020, fuel:'Petrol', transmission:'Automatic', mileage:38000, bodyType:'SUV', color:'Blue', location:{city:'Mombasa'}, description:'BMW X5 M Sport with full M package. Sport exhaust, adaptive suspension.', features:['M Sport Package','Sport Exhaust','Adaptive Suspension','Comfort Access','HUD','Wireless Charging'], images:IMG.bmw, views:1567, bidsCount:8, currentBid:4100000, allowBid:true, allowBuy:false, auctionStatus:'live', auctionEnd:new Date(now+1.5*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'great', dealer:ADMIN_DEALER },
+  { _id:'car-sub1', title:'Subaru Forester XT 2021', brand:'Subaru', price:3800000, year:2021, fuel:'Petrol', transmission:'Automatic', mileage:28000, bodyType:'SUV', color:'Silver', location:{city:'Nairobi'}, description:'Subaru Forester XT Turbo. Leather, sunroof, Eyesight safety suite.', features:['Turbo','Sunroof','Leather Seats','Eyesight','All Wheel Drive','Cruise Control'], images:IMG.sub, views:982, bidsCount:3, currentBid:2850000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+0.5*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'good', dealer:ADMIN_DEALER },
+  { _id:'car-nis1', title:'Nissan X-Trail 2022', brand:'Nissan', price:2900000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:18000, bodyType:'SUV', color:'Grey', location:{city:'Nakuru'}, description:'Nissan X-Trail 7-seater, push start, keyless entry, touchscreen infotainment.', features:['7 Seats','Push Start','Keyless Entry','Touchscreen','Bluetooth','AC'], images:IMG.nis, views:734, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:ADMIN_DEALER },
+  { _id:'car-maz1', title:'Mazda CX-5 2023', brand:'Mazda', price:4200000, year:2023, fuel:'Petrol', transmission:'Automatic', mileage:12000, bodyType:'SUV', color:'Red', location:{city:'Nairobi'}, description:'Mazda CX-5 KODO design, SkyActiv technology, Bose sound system. Only 12k km.', features:['Bose Sound','SkyActiv','Leather','Sunroof','Blind Spot Monitoring','Apple CarPlay'], images:IMG.maz, views:1289, bidsCount:5, currentBid:3600000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+2*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:ADMIN_DEALER },
+  { _id:'car-rr1', title:'Land Rover Range Rover Sport 2020', brand:'Land Rover', price:15000000, year:2020, fuel:'Diesel', transmission:'Automatic', mileage:35000, bodyType:'SUV', color:'Black', location:{city:'Nairobi'}, description:'Range Rover Sport HSE Dynamic. Supercharged V6, air suspension, Meridian sound.', features:['Air Suspension','Meridian Sound','Supercharged','Terrain Response','Leather','Rear Entertainment'], images:IMG.rr, views:3210, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:true, isVerifiedDealer:true, dealRating:'overpriced', dealer:ADMIN_DEALER },
+  { _id:'car-aud1', title:'Audi A4 2.0 TFSI 2021', brand:'Audi', price:3800000, year:2021, fuel:'Petrol', transmission:'Automatic', mileage:25000, bodyType:'Sedan', color:'White', location:{city:'Nairobi'}, description:'Audi A4 Quattro. Virtual cockpit, Bang & Olufsen sound, S-Line package. Executive sedan.', features:['Quattro AWD','Virtual Cockpit','Bang & Olufsen','S-Line','Sunroof','Adaptive Cruise'], images:IMG.audi, views:876, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:true, dealRating:'good', dealer:ADMIN_DEALER },
+  { _id:'car-lex1', title:'Lexus ES 350 2022', brand:'Lexus', price:5200000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:15000, bodyType:'Sedan', color:'Silver', location:{city:'Mombasa'}, description:'Lexus ES 350 Luxury Package. Mark Levinson sound, semi-aniline leather. Premium sedan.', features:['Mark Levinson','Semi-Aniline Leather','Radar Cruise','Heated/Ventilated Seats','Moonroof','360 Camera'], images:IMG.lex, views:654, bidsCount:2, currentBid:6200000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+4*DAY).toISOString(), isPromoted:false, isVerifiedDealer:true, dealRating:'fair', dealer:ADMIN_DEALER },
+  { _id:'car-vw1', title:'Volkswagen Passat 2021', brand:'Volkswagen', price:2600000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:32000, bodyType:'Sedan', color:'Blue', location:{city:'Eldoret'}, description:'VW Passat 2.0 TDI. Comfortline trim, spacious interior, great fuel economy.', features:['Diesel','Spacious Interior','Bluetooth','Rear Camera','Parking Sensors','Cruise Control'], images:IMG.vw, views:521, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'ended', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'great', dealer:ADMIN_DEALER },
+  { _id:'car-hon1', title:'Honda Accord 2022', brand:'Honda', price:3100000, year:2022, fuel:'Petrol', transmission:'Automatic', mileage:20000, bodyType:'Sedan', color:'Grey', location:{city:'Nairobi'}, description:'Honda Accord 2022, top of the line. Honda Sensing safety suite, leather, moonroof.', features:['Honda Sensing','Leather','Moonroof','Apple CarPlay','Wireless Charging','Lane Keep Assist'], images:IMG.hon, views:445, bidsCount:0, currentBid:0, allowBid:false, allowBuy:true, auctionStatus:'draft', auctionEnd:null, isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:ADMIN_DEALER },
+  { _id:'car-pick1', title:'Toyota Hilux Double Cabin 2021', brand:'Toyota', price:4200000, year:2021, fuel:'Diesel', transmission:'Automatic', mileage:40000, bodyType:'Pickup', color:'White', location:{city:'Nairobi'}, description:'Toyota Hilux Double Cabin 4x4. Workhorse of Africa. Well maintained.', features:['4x4','Double Cabin','Canopy','Bluetooth','AC','Power Windows'], images:IMG.pick, views:1678, bidsCount:10, currentBid:3100000, allowBid:true, allowBuy:true, auctionStatus:'live', auctionEnd:new Date(now+1*DAY).toISOString(), isPromoted:true, isVerifiedDealer:true, dealRating:'great', dealer:ADMIN_DEALER },
 ];
 
 export const DEMO_BIDS = (() => {
@@ -135,10 +150,10 @@ export const DEMO_PAYMENTS = [
 ];
 
 export const DEMO_ESCROWS = [
-  { _id:'esc-1', buyer:DEMO_USERS.buyer, seller:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd'}, car:{title:'Toyota Land Cruiser V8 2021'}, amount:3200000, status:'funded', createdAt:new Date(now-0.3*DAY).toISOString() },
-  { _id:'esc-2', buyer:{_id:'other-buyer-1',name:'Mary Wanjiku'}, seller:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd'}, car:{title:'Mazda CX-5 2023'}, amount:3600000, status:'released', releasedAt:new Date(now-10*DAY).toISOString(), createdAt:new Date(now-20*DAY).toISOString() },
-  { _id:'esc-3', buyer:{_id:'other-buyer-2',name:'John Ochieng'}, seller:{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd'}, car:{title:'Mercedes-Benz GLE 350d 2022'}, amount:12000000, status:'released', releasedAt:new Date(now-5*DAY).toISOString(), createdAt:new Date(now-15*DAY).toISOString() },
-  { _id:'esc-4', buyer:DEMO_USERS.buyer, seller:{_id:'dealer-coast1',name:'Coast Auto Traders'}, car:{title:'BMW X5 M Sport 2020'}, amount:4100000, status:'pending', createdAt:new Date(now-0.1*DAY).toISOString() },
+  { _id:'esc-1', buyer:DEMO_USERS.buyer, seller:ADMIN_DEALER, car:{title:'Toyota Land Cruiser V8 2021'}, amount:3200000, status:'funded', createdAt:new Date(now-0.3*DAY).toISOString() },
+  { _id:'esc-2', buyer:{_id:'other-buyer-1',name:'Mary Wanjiku'}, seller:ADMIN_DEALER, car:{title:'Mazda CX-5 2023'}, amount:3600000, status:'released', releasedAt:new Date(now-10*DAY).toISOString(), createdAt:new Date(now-20*DAY).toISOString() },
+  { _id:'esc-3', buyer:{_id:'other-buyer-2',name:'John Ochieng'}, seller:ADMIN_DEALER, car:{title:'Mercedes-Benz GLE 350d 2022'}, amount:12000000, status:'released', releasedAt:new Date(now-5*DAY).toISOString(), createdAt:new Date(now-15*DAY).toISOString() },
+  { _id:'esc-4', buyer:DEMO_USERS.buyer, seller:ADMIN_DEALER, car:{title:'BMW X5 M Sport 2020'}, amount:4100000, status:'pending', createdAt:new Date(now-0.1*DAY).toISOString() },
 ];
 
 export const DEMO_NOTIFICATIONS = [
@@ -155,36 +170,36 @@ export const DEMO_NOTIFICATIONS = [
 ];
 
 export const DEMO_REVIEWS = [
-  { _id:'rev-1', user:{_id:DEMO_USERS.buyer._id,name:'James Kariuki'}, dealer:'demo-dealer-1', car:'car-maz1', rating:5, comment:'Excellent service! The Mazda CX-5 was exactly as described. Nairobi Auto Hub made the process smooth.', createdAt:new Date(now-15*DAY).toISOString() },
-  { _id:'rev-2', user:{_id:'other-buyer-1',name:'Mary Wanjiku'}, dealer:'demo-dealer-1', rating:4, comment:'Professional dealer, fair pricing. Would buy from them again.', createdAt:new Date(now-30*DAY).toISOString() },
-  { _id:'rev-3', user:{_id:'other-buyer-2',name:'John Ochieng'}, dealer:'demo-dealer-1', rating:5, comment:'Top-notch dealership. The Mercedes GLE was immaculate. Highly recommended!', createdAt:new Date(now-20*DAY).toISOString() },
+  { _id:'rev-1', user:{_id:DEMO_USERS.buyer._id,name:'James Kariuki'}, dealer:'demo-admin-1', car:'car-maz1', rating:5, comment:'Excellent service! The Mazda CX-5 was exactly as described. Nairobi Auto Hub made the process smooth.', createdAt:new Date(now-15*DAY).toISOString() },
+  { _id:'rev-2', user:{_id:'other-buyer-1',name:'Mary Wanjiku'}, dealer:'demo-admin-1', rating:4, comment:'Professional dealer, fair pricing. Would buy from them again.', createdAt:new Date(now-30*DAY).toISOString() },
+  { _id:'rev-3', user:{_id:'other-buyer-2',name:'John Ochieng'}, dealer:'demo-admin-1', rating:5, comment:'Top-notch dealership. The Mercedes GLE was immaculate. Highly recommended!', createdAt:new Date(now-20*DAY).toISOString() },
 ];
 
 export const DEMO_CHATS = [
-  { _id:'chat-1', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd'}], car:{_id:'car-maz1',title:'Mazda CX-5 2023'}, lastMessage:{message:'Yes, it is still available. Would you like to schedule a test drive?',createdAt:new Date(now-0.5*DAY).toISOString()}, unreadCount:1, createdAt:new Date(now-5*DAY).toISOString() },
-  { _id:'chat-2', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-dealer-1',name:'Nairobi Auto Hub Ltd'}], car:{_id:'car-lc1',title:'Toyota Land Cruiser V8 2021'}, lastMessage:{message:'The vehicle is in our showroom, come for a viewing.',createdAt:new Date(now-1*DAY).toISOString()}, unreadCount:0, createdAt:new Date(now-3*DAY).toISOString() },
+  { _id:'chat-1', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-admin-1',name:'Admin User'}], car:{_id:'car-maz1',title:'Mazda CX-5 2023'}, lastMessage:{message:'Yes, it is still available. Would you like to schedule a test drive?',createdAt:new Date(now-0.5*DAY).toISOString()}, unreadCount:1, createdAt:new Date(now-5*DAY).toISOString() },
+  { _id:'chat-2', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-admin-1',name:'Admin User'}], car:{_id:'car-lc1',title:'Toyota Land Cruiser V8 2021'}, lastMessage:{message:'The vehicle is in our showroom, come for a viewing.',createdAt:new Date(now-1*DAY).toISOString()}, unreadCount:0, createdAt:new Date(now-3*DAY).toISOString() },
 ];
 
 export const DEMO_MESSAGES = {
   'chat-1': [
     { _id:'msg-1', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'Hi, is the Mazda CX-5 still available?', createdAt:new Date(now-5*DAY).toISOString() },
-    { _id:'msg-2', chatId:'chat-1', sender:'demo-dealer-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString() },
+    { _id:'msg-2', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString() },
     { _id:'msg-3', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'This weekend would work. Do you have Saturday slots?', createdAt:new Date(now-4*DAY).toISOString() },
-    { _id:'msg-4', chatId:'chat-1', sender:'demo-dealer-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString() },
-    { _id:'msg-5', chatId:'chat-1', sender:'demo-dealer-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString() },
+    { _id:'msg-4', chatId:'chat-1', sender:'demo-admin-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString() },
+    { _id:'msg-5', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString() },
   ],
   'chat-2': [
     { _id:'msg-6', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'I am interested in the Land Cruiser. Can you share more photos?', createdAt:new Date(now-3*DAY).toISOString() },
-    { _id:'msg-7', chatId:'chat-2', sender:'demo-dealer-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString() },
+    { _id:'msg-7', chatId:'chat-2', sender:'demo-admin-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString() },
     { _id:'msg-8', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'Great, please send them over. Also, is the price negotiable?', createdAt:new Date(now-2*DAY).toISOString() },
-    { _id:'msg-9', chatId:'chat-2', sender:'demo-dealer-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString() },
+    { _id:'msg-9', chatId:'chat-2', sender:'demo-admin-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString() },
   ],
 };
 
 export const DEMO_DEALER_STATS = {
-  summary: { totalCars: 8, activeCars: 5, totalViews: 12668, totalBids: 52, liveAuctions: 4 },
+  summary: { totalCars: 12, activeCars: 12, totalViews: 12668, totalBids: 52, liveAuctions: 4 },
   earnings: { total: 18500000, thisMonth: 3600000, inEscrow: 3200000, released: 15300000, pending: 3200000 },
-  analytics: { totalCars:8, totalViews:12668, totalBids:52, viewsOverTime:[120,340,560,780,450,890,1200,980,760,1100,1340,1568] },
+  analytics: { totalCars:12, totalViews:12668, totalBids:52, viewsOverTime:[120,340,560,780,450,890,1200,980,760,1100,1340,1568] },
 };
 
 export const DEMO_ADMIN_STATS = {

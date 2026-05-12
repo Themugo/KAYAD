@@ -5,12 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function ForcePasswordChange() {
-  const { user, setUser, login } = useAuth();
+  const { user, loading: authLoading, setUser, login } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
+  if (authLoading) return <div className="loading-center"><div className="spinner" /></div>;
   if (!user?.mustChangePassword) {
     navigate('/admin/settings', { replace: true });
     return null;

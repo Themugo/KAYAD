@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { isDemoMode } from '../../api/api';
 
 export default function EditCarPage() {
   const { id }     = useParams();
@@ -17,6 +18,8 @@ export default function EditCarPage() {
   const [auctionAction, setAuctionAction] = useState(null);
   const [extendHours, setExtendHours]     = useState(2);
   const [ownershipError, setOwnershipError] = useState(false);
+  const [newImages, setNewImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
 
   useEffect(() => {
     carsAPI.get(id).then(d => {
@@ -42,10 +45,25 @@ export default function EditCarPage() {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
+  const handleImages = (e) => {
+    const files = Array.from(e.target.files).slice(0, 8);
+    setNewImages(files);
+    setPreviews(files.map(f => URL.createObjectURL(f)));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await carsAPI.update(id, form);
+      if (newImages.length > 0 && !isDemoMode()) {
+        const fd = new FormData();
+        Object.entries(form).forEach(([k, v]) => {
+          if (v !== '' && v !== null) fd.append(k, v);
+        });
+        newImages.forEach(img => fd.append('images', img));
+        await carsAPI.update(id, fd);
+      } else {
+        await carsAPI.update(id, form);
+      }
       toast('Listing updated!', 'success');
       navigate('/dealer');
     } catch { toast('Failed to update', 'error'); }
@@ -215,6 +233,47 @@ export default function EditCarPage() {
               </div>
             </div>
           )}
+
+          {/* ─── Images ─── */}
+          <div className="card" style={{ padding: 28 }}>
+            <h3 style={{ marginBottom: 16 }}>Photos ({car.images?.length || 0})</h3>
+            {car.images?.length > 0 && (
+              <div className="grid-4" style={{ gap: 8, marginBottom: 16 }}>
+                {car.images.map((img, i) => (
+                  <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative', background: 'var(--surface)' }}>
+                    <img src={img.url || img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {i === 0 && (
+                      <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MAIN</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div
+              style={{ border: '2px dashed var(--border-soft)', borderRadius: 'var(--radius-lg)', padding: 24, textAlign: 'center', cursor: 'pointer' }}
+              onClick={() => document.getElementById('edit-car-images').click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => {
+                e.preventDefault();
+                const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')).slice(0, 8);
+                setNewImages(files); setPreviews(files.map(f => URL.createObjectURL(f)));
+              }}
+            >
+              <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>
+              <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 13 }}>{newImages.length > 0 ? `${newImages.length} new image(s) selected` : 'Tap to replace / add photos'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Up to 8 images · JPG, PNG, WEBP</div>
+              <input id="edit-car-images" type="file" multiple accept="image/*" onChange={handleImages} style={{ display: 'none' }} />
+            </div>
+            {previews.length > 0 && (
+              <div className="grid-4" style={{ gap: 8, marginTop: 12 }}>
+                {previews.map((src, i) => (
+                  <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)' }}>
+                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Live stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>

@@ -99,6 +99,16 @@ const userSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 💼 SELLER FINANCIAL SETTINGS
+    // =============================
+    commission: { type: Number, default: 5, min: 0, max: 50 },
+    waiver: { type: Number, default: 0, min: 0 },
+    discount: { type: Number, default: 0, min: 0, max: 100 },
+
+    totalSales: { type: Number, default: 0 },
+    listingCount: { type: Number, default: 0 },
+
+    // =============================
     // 👁 DEALER VISIBILITY
     // =============================
     visibility: {
