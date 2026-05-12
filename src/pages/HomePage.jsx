@@ -100,12 +100,6 @@ export default function HomePage() {
   const totalPages = Math.ceil(total / LIMIT);
   const hasAuctions = filters.auctionStatus === 'live';
 
-  const handleHeroSearch = (e) => {
-    e.preventDefault();
-    const val = e.target.querySelector('input')?.value || '';
-    setFilter('search', val);
-  };
-
   const pillSearch = (tag) => {
     const map = {
       'Live Auction': { auctionStatus: 'live' },
@@ -134,59 +128,22 @@ export default function HomePage() {
   return (
     <div className="page">
 
-      {/* ─── PREMIUM HERO ─── */}
+      {/* ─── HERO ─── */}
       <section style={{
-        padding: '52px 0 40px',
+        padding: '32px 0',
         background: 'linear-gradient(180deg, var(--card) 0%, rgba(10,22,40,0.98) 100%)',
         borderBottom: '1px solid var(--border)',
       }}>
         <div className="container" style={{ textAlign: 'center' }}>
           <div style={{
             fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.18em',
-            textTransform: 'uppercase', marginBottom: 12,
+            textTransform: 'uppercase', marginBottom: 8,
           }}>
             Kenya's Premium Car Marketplace
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, marginBottom: 12, lineHeight: 1.15 }}>
-            Find Your Next Car<br />
-            <span style={{ color: 'var(--gold-light)' }}>With Confidence</span>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, lineHeight: 1.2 }}>
+            Find Your Next Car <span style={{ color: 'var(--gold-light)' }}>With Confidence</span>
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 480, margin: '0 auto 24px' }}>
-            Browse thousands of verified listings from trusted sellers across Kenya.
-            Live auctions, M-Pesa payments, and escrow protection included.
-          </p>
-
-          <form onSubmit={handleHeroSearch} style={{ display: 'flex', gap: 0, maxWidth: 520, margin: '0 auto 20px' }}>
-            <input
-              className="input"
-              placeholder="Search brand, model, or city..."
-              value={filters.search}
-              onChange={e => setFilter('search', e.target.value)}
-              style={{ borderRadius: 'var(--radius) 0 0 var(--radius)', flex: 1, borderRight: 'none', height: 48, fontSize: 14 }}
-            />
-            <button type="submit" className="btn btn-gold" style={{ borderRadius: '0 var(--radius) var(--radius) 0', flexShrink: 0, padding: '0 28px', height: 48, fontSize: 14 }}>
-              Search Cars
-            </button>
-          </form>
-
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {['Under KSh 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
-              <button
-                key={tag}
-                onClick={() => pillSearch(tag)}
-                style={{
-                  background: 'var(--surface)', border: '1px solid var(--border)',
-                  borderRadius: 100, padding: '6px 16px', fontSize: 12,
-                  color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { e.target.style.borderColor = 'var(--gold)'; e.target.style.color = 'var(--gold)'; }}
-                onMouseLeave={e => { e.target.style.borderColor = 'var(--border)'; e.target.style.color = 'var(--text-muted)'; }}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -304,6 +261,15 @@ export default function HomePage() {
             {showFilters && (
               <div>
                 <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {['Under KSh 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
+                      <button key={tag} onClick={() => pillSearch(tag)} style={{
+                        background: 'var(--surface)', border: '1px solid var(--border)',
+                        borderRadius: 100, padding: '4px 12px', fontSize: 11,
+                        color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500,
+                      }}>{tag}</button>
+                    ))}
+                  </div>
                   <div className="input-group">
                     <label className="input-label">Search</label>
                     <input className="input" placeholder="Brand, model..." value={filters.search} onChange={e => setFilter('search', e.target.value)} />
