@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { formatKES } from '../api/api';
 
 export default function CarCard({ car, isComparing, onToggleCompare, compareCount }) {
-  const img = car.images?.[0]?.url || car.images?.[0];
+  const coverIdx = car.coverImage ?? 0;
+  const img = car.images?.[coverIdx]?.url || car.images?.[coverIdx];
   const isLive = car.auctionStatus === 'live';
   const linkTo = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
 

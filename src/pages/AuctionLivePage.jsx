@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, bidsAPI, formatKES } from '../api/api';
+import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
@@ -34,14 +35,23 @@ export default function AuctionLivePage() {
       bidsAPI.getForCar(id).catch(() => ({ bids: [] })),
     ]).then(([carData, bidData]) => {
       const c = carData.car || carData.data || carData;
+      if (!c || !c._id) return Promise.reject();
       setCar(c);
       setCurrentBid(c.currentBid || c.price || 0);
       setBidCount(c.bidsCount || 0);
       const bs = bidData.bids || bidData.data || [];
       setBids(bs.slice(0, 30));
-      // Pre-fill min bid
       const minNext = (c.currentBid || c.price || 0) + 5000;
       setBidAmount(String(minNext));
+    }).catch(() => {
+      const mock = getMockCar(id);
+      if (mock) {
+        setCar(mock);
+        setCurrentBid(mock.currentBid || mock.price || 0);
+        setBidCount(mock.bidsCount || 0);
+        const minNext = (mock.currentBid || mock.price || 0) + 5000;
+        setBidAmount(String(minNext));
+      }
     }).finally(() => setLoading(false));
   }, [id]);
 
@@ -137,8 +147,8 @@ export default function AuctionLivePage() {
             {/* Car image */}
             <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20, position: 'relative' }}>
               <div style={{ aspectRatio: '16/9', background: 'var(--surface)' }}>
-                {car.images?.[0] ? (
-                  <img src={car.images[0]?.url || car.images[0]} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {car.images?.length > 0 ? (
+                  <img src={(car.images[car.coverImage ?? 0]?.url || car.images[car.coverImage ?? 0])} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80, color: 'var(--text-dim)' }}>🚗</div>
                 )}

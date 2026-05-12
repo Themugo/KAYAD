@@ -24,6 +24,7 @@ export default function EditCarPage() {
   const [ownershipError, setOwnershipError] = useState(false);
   const [newImages, setNewImages] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [coverImage, setCoverImage] = useState(0);
 
   useEffect(() => {
     carsAPI.get(id).then(d => {
@@ -35,6 +36,7 @@ export default function EditCarPage() {
         return;
       }
       setCar(c);
+      setCoverImage(c.coverImage ?? 0);
       setForm({
         title: c.title || '', brand: c.brand || '', model: c.model || '',
         year: String(c.year || ''), price: String(c.price || ''),
@@ -43,6 +45,7 @@ export default function EditCarPage() {
         dealerPhone: c.dealerPhone || '',
         allowBuy: c.allowBuy ?? true, allowBid: c.allowBid ?? false,
         auctionEnd: c.auctionEnd ? new Date(c.auctionEnd).toISOString().slice(0, 16) : '',
+        coverImage: c.coverImage ?? 0,
       });
     }).finally(() => setLoading(false));
   }, [id]);
@@ -58,15 +61,16 @@ export default function EditCarPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      const payload = { ...form, coverImage };
       if (newImages.length > 0 && !isDemoMode()) {
         const fd = new FormData();
-        Object.entries(form).forEach(([k, v]) => {
+        Object.entries(payload).forEach(([k, v]) => {
           if (v !== '' && v !== null) fd.append(k, v);
         });
         newImages.forEach(img => fd.append('images', img));
         await carsAPI.update(id, fd);
       } else {
-        await carsAPI.update(id, form);
+        await carsAPI.update(id, payload);
       }
       toast('Listing updated!', 'success');
       navigate('/dealer');
@@ -240,9 +244,9 @@ export default function EditCarPage() {
             {car.images?.length > 0 && (
               <div className="grid-4" style={{ gap: 8, marginBottom: 16 }}>
                 {car.images.map((img, i) => (
-                  <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative', background: 'var(--surface)' }}>
+                  <div key={i} onClick={() => setCoverImage(i)} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative', background: 'var(--surface)', cursor: 'pointer', border: `2px solid ${i === coverImage ? 'var(--gold)' : 'transparent'}`, transition: 'all 0.15s' }}>
                     <img src={img.url || img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    {i === 0 && (
+                    {i === coverImage && (
                       <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MAIN</div>
                     )}
                   </div>
@@ -267,8 +271,11 @@ export default function EditCarPage() {
             {previews.length > 0 && (
               <div className="grid-4" style={{ gap: 8, marginTop: 12 }}>
                 {previews.map((src, i) => (
-                  <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)' }}>
+                  <div key={i} onClick={() => setCoverImage(car.images.length + i)} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', background: 'var(--surface)', cursor: 'pointer', border: `2px solid ${car.images.length + i === coverImage ? 'var(--gold)' : 'transparent'}`, transition: 'all 0.15s' }}>
                     <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {car.images.length + i === coverImage && (
+                      <div style={{ position: 'absolute', top: 4, left: 4, background: 'var(--gold)', color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>MAIN</div>
+                    )}
                   </div>
                 ))}
               </div>

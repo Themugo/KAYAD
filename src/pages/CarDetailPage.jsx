@@ -29,12 +29,12 @@ export default function CarDetailPage() {
         let c = data?.car || data?.data || data;
         if (!c || !c._id) c = getMockCar(id);
         setCar(c);
-        if (c) carsAPI.trackClick(id).catch(() => {});
+        if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick(id).catch(() => {}); }
         if (c?.dealer?._id) {
           reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
         }
       })
-      .catch(() => { setCar(getMockCar(id)); })
+      .catch(() => { const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
       .finally(() => setLoading(false));
   }, [id]);
 

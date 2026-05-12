@@ -20,6 +20,7 @@ export default function AddCarPage() {
   const [loading, setLoading] = useState(false);
   const [images, setImages]   = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [coverImage, setCoverImage] = useState(0);
   const [step, setStep]       = useState(1);
 
   const [form, setForm] = useState({
@@ -36,6 +37,7 @@ export default function AddCarPage() {
     const files = Array.from(e.target.files).slice(0, 8);
     setImages(files);
     setPreviews(files.map(f => URL.createObjectURL(f)));
+    setCoverImage(0);
   };
 
   const handleSubmit = async () => {
@@ -48,6 +50,7 @@ export default function AddCarPage() {
       Object.entries(form).forEach(([k, v]) => {
         if (v !== '' && v !== null) fd.append(k, v);
       });
+      fd.append('coverImage', String(coverImage));
       images.forEach(img => fd.append('images', img));
 
       const data = await carsAPI.create(fd);
@@ -245,9 +248,9 @@ export default function AddCarPage() {
               {previews.length > 0 && (
                 <div className="grid-4" style={{ gap: 8 }}>
                   {previews.map((src, i) => (
-                    <div key={i} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative' }}>
+                    <div key={i} onClick={() => setCoverImage(i)} style={{ aspectRatio: '4/3', borderRadius: 8, overflow: 'hidden', position: 'relative', cursor: 'pointer', border: `2px solid ${i === coverImage ? 'var(--gold)' : 'transparent'}`, transition: 'all 0.15s' }}>
                       <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      {i === 0 && (
+                      {i === coverImage && (
                         <div style={{
                           position: 'absolute', top: 4, left: 4, background: 'var(--gold)',
                           color: '#0A1628', fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 4,

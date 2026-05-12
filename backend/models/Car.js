@@ -44,6 +44,7 @@ const carSchema = new mongoose.Schema(
         public_id: String,
       },
     ],
+    coverImage: { type: Number, default: 0 },
 
     // =============================
     // 👤 DEALER

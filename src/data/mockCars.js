@@ -444,9 +444,15 @@ export function filterMockCars(filters = {}) {
   if (filters.minYear) results = results.filter(c => c.year >= Number(filters.minYear));
   if (filters.maxYear) results = results.filter(c => c.year <= Number(filters.maxYear));
   if (filters.auctionStatus === 'live') results = results.filter(c => c.auctionStatus === 'live');
-  return results;
+  return results.map(addDefaults);
+}
+
+function addDefaults(c) {
+  if (!c) return c;
+  return { ...c, coverImage: c.coverImage ?? 0 };
 }
 
 export function getMockCar(id) {
-  return MOCK_CARS.find(c => c._id === id) || null;
+  const car = MOCK_CARS.find(c => c._id === id) || MOCK_CARS.find(c => id?.endsWith(c._id.replace('mock-', ''))) || null;
+  return addDefaults(car);
 }
