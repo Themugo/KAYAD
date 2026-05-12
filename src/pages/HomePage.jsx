@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { carsAPI, formatKES } from '../api/api';
+import { carsAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import CarCard from '../components/CarCard';
 import { SkeletonGrid } from '../components/Skeleton';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { isAuth, isDealer, isAdmin } = useAuth();
+  const { isDealer, isAdmin } = useAuth();
   const [search, setSearch] = useState('');
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section style={{
-        padding: '60px 0 48px',
+        padding: '60px 0 40px',
         background: 'linear-gradient(180deg, var(--card) 0%, rgba(10,22,40,0.98) 100%)',
         borderBottom: '1px solid var(--border)',
       }}>
@@ -91,8 +91,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured cars */}
-      <section style={{ padding: '48px 0' }}>
+      {/* Sell CTA card — between hero and listings */}
+      <section style={{ padding: '28px 0 0' }}>
+        <div className="container">
+          <div className="card" style={{
+            border: '1px solid rgba(212,168,67,0.15)',
+            background: 'linear-gradient(135deg, var(--card) 0%, #1A2F52 100%)',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', top: '-50%', right: '-10%',
+              width: '50%', height: '200%',
+              background: 'radial-gradient(ellipse, rgba(212,168,67,0.06) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              padding: '28px 32px',
+              display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap', justifyContent: 'space-between',
+              position: 'relative',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span style={{ fontSize: 36 }}>{isDealer ? '🏪' : isAdmin ? '⚙' : '🚗'}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 600, marginBottom: 2 }}>
+                    {isDealer ? 'Dealer Dashboard' : isAdmin ? 'Admin Panel' : 'Ready to Sell Your Car?'}
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+                    {isDealer ? 'Manage listings, track earnings, view bids' :
+                     isAdmin ? 'Manage users, cars, and platform settings' :
+                     'List inventory, run auctions, get paid via M-Pesa escrow'}
+                  </p>
+                </div>
+              </div>
+              <Link
+                to={isDealer ? '/dealer' : isAdmin ? '/admin' : '/register?role=dealer'}
+                className="btn btn-gold"
+                style={{ flexShrink: 0 }}
+              >
+                {isDealer ? 'Go to Dealer Hub →' : isAdmin ? 'Go to Admin Panel →' : 'Get Started Free →'}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest listings */}
+      <section style={{ padding: '32px 0 48px' }}>
         <div className="container">
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -123,27 +167,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: '48px 0', background: 'var(--card)', borderTop: '1px solid var(--border)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🚗</div>
-          <h2 style={{ marginBottom: 8 }}>Ready to Sell Your Car?</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 440, margin: '0 auto 20px' }}>
-            List your inventory, run live auctions, and get paid securely via M-Pesa escrow.
-          </p>
-          <Link to="/register" className="btn btn-gold btn-lg">
-            {isDealer ? 'Go to Dealer Hub' : 'Get Started Free'}
-          </Link>
-        </div>
-      </section>
-
+      {/* Footer */}
       <footer style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '32px 0', textAlign: 'center' }}>
         <div className="container">
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 12, fontWeight: 600 }}>Gari Motors</div>
           <div style={{ display: 'flex', gap: 20, justifyContent: 'center', fontSize: 12, color: 'var(--text-dim)', flexWrap: 'wrap' }}>
             <Link to="/cars" style={{ color: 'var(--text-muted)' }}>Browse Cars</Link>
             <Link to="/cars?auctionStatus=live" style={{ color: 'var(--text-muted)' }}>Live Auctions</Link>
-            <Link to="/register" style={{ color: 'var(--text-muted)' }}>List Your Car</Link>
+            <Link to="/register?role=dealer" style={{ color: 'var(--text-muted)' }}>List Your Car</Link>
           </div>
           <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: 11 }}>
             © {new Date().getFullYear()} Gari Motors Ltd. All rights reserved.
