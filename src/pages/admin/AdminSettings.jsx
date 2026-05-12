@@ -15,20 +15,6 @@ const DEFAULTS = {
   requireDealerApproval: true,
 };
 
-const DEPARTMENTS = [
-  { id: 'finance', label: 'Finance', icon: '💰', desc: 'Payments, escrows, transactions, revenue' },
-  { id: 'hr', label: 'HR', icon: '👥', desc: 'User management, dealer approvals, profiles' },
-  { id: 'marketing', label: 'Marketing', icon: '📢', desc: 'Car listings, promotions, analytics, views' },
-  { id: 'tech-support', label: 'Technical Support', icon: '🛠', desc: 'User support, reports, system health' },
-];
-
-const PERMISSION_MAP = {
-  finance: ['view_payments', 'view_escrows', 'view_transactions', 'view_revenue', 'reconcile'],
-  hr: ['view_users', 'approve_dealers', 'manage_profiles'],
-  marketing: ['view_cars', 'manage_promotions', 'view_analytics', 'feature_cars'],
-  'tech-support': ['view_users', 'view_cars', 'view_bids', 'view_auctions', 'view_reports'],
-};
-
 export default function AdminSettings() {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
@@ -46,11 +32,6 @@ export default function AdminSettings() {
   const [testPhone, setTestPhone] = useState('254708374149');
   const [testAmount, setTestAmount] = useState(1);
   const [testingMpesa, setTestingMpesa] = useState(false);
-
-  // Subadmins
-  const [subadmins, setSubadmins] = useState([]);
-  const [showAddSubadmin, setShowAddSubadmin] = useState(false);
-  const [newSub, setNewSub] = useState({ name: '', email: '', password: '', department: 'finance' });
 
   // Audit log
   const [auditLog, setAuditLog] = useState([]);
@@ -76,11 +57,6 @@ export default function AdminSettings() {
         if (c.reconciliation) setReconcile(c.reconciliation);
       }
     } catch { /* demo fallback — keep defaults */ }
-
-    try {
-      const { subadmins: subs } = await adminAPI.listSubadmins();
-      setSubadmins(subs || []);
-    } catch { /* ignore */ }
 
     try {
       const { entries } = await adminAPI.getAuditLog({ limit: 100 });
@@ -142,54 +118,7 @@ export default function AdminSettings() {
     }
   };
 
-  const addSubadmin = async () => {
-    if (!newSub.name || !newSub.email || !newSub.password) {
-      toast('Name, email, and password required', 'error');
-      return;
-    }
-    try {
-      await adminAPI.createSubadmin(newSub);
-      toast(`Subadmin ${newSub.name} created`, 'success');
-      setShowAddSubadmin(false);
-      setNewSub({ name: '', email: '', password: '', department: 'finance' });
-      const { subadmins: subs } = await adminAPI.listSubadmins();
-      setSubadmins(subs || []);
-    } catch {
-      toast('Failed to create subadmin', 'error');
-    }
-  };
 
-  const toggleSubadmin = async (id) => {
-    try {
-      await adminAPI.toggleSubadmin(id);
-      setSubadmins(prev => prev.map(s => s._id === id ? { ...s, isBanned: !s.isBanned } : s));
-      toast('Subadmin toggled', 'success');
-    } catch {
-      toast('Failed to toggle', 'error');
-    }
-  };
-
-  const deleteSubadmin = async (id) => {
-    if (!confirm('Remove this subadmin?')) return;
-    try {
-      await adminAPI.deleteSubadmin(id);
-      setSubadmins(prev => prev.filter(s => s._id !== id));
-      toast('Subadmin removed', 'success');
-    } catch {
-      toast('Failed to remove', 'error');
-    }
-  };
-
-  const resetDemo = async () => {
-    if (!confirm('Reset all demo data to factory defaults? This cannot be undone.')) return;
-    try {
-      await adminAPI.resetDemo();
-      toast('Demo data reset complete', 'success');
-      await loadConfig();
-    } catch {
-      toast('Reset failed', 'error');
-    }
-  };
 
   const Field = ({ label, hint, children }) => (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
@@ -205,11 +134,10 @@ export default function AdminSettings() {
     { id: 'general', label: '⚙ General' },
     { id: 'payments', label: '💳 Payments' },
     { id: 'reconciliation', label: '🔄 Reconciliation' },
-    { id: 'subadmins', label: '👥 Sub-Admins' },
     { id: 'audit', label: '📋 Audit Log' },
   ];
 
-  if (!isSuperAdmin) tabs.splice(4, 1);
+  if (!isSuperAdmin) tabs.splice(3, 1);
 
   if (loading) {
     return (
@@ -296,13 +224,6 @@ export default function AdminSettings() {
               </div>
             </div>
 
-            <div className="card" style={{ padding: 24, border: '1px solid rgba(212,168,67,0.2)' }}>
-              <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>🔄 Demo Management</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
-                Reset all demo data to factory defaults.
-              </p>
-              <button className="btn btn-gold" onClick={resetDemo}>🔄 Reset Demo Data</button>
-            </div>
           </div>
         )}
 
@@ -462,107 +383,6 @@ export default function AdminSettings() {
               <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving}>
                 {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Reconciliation Settings'}
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* ═══ SUB-ADMINS ═══ */}
-        {tab === 'subadmins' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ fontSize: 18 }}>👥 Sub-Admin Management</h3>
-              <button className="btn btn-gold btn-sm" onClick={() => setShowAddSubadmin(true)}>
-                + Add Sub-Admin
-              </button>
-            </div>
-
-            {showAddSubadmin && (
-              <div className="card" style={{ padding: 24, marginBottom: 20, border: '1px solid var(--gold-muted)' }}>
-                <h4 style={{ fontSize: 14, marginBottom: 16 }}>New Sub-Admin</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  <div className="input-group">
-                    <label className="input-label">Full Name</label>
-                    <input className="input" value={newSub.name}
-                      onChange={e => setNewSub(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Mary Wanjiku" />
-                  </div>
-                  <div className="input-group">
-                    <label className="input-label">Email</label>
-                    <input className="input" type="email" value={newSub.email}
-                      onChange={e => setNewSub(p => ({ ...p, email: e.target.value }))} placeholder="mary@giclanmotors.co.ke" />
-                  </div>
-                  <div className="input-group">
-                    <label className="input-label">Password</label>
-                    <input className="input" type="password" value={newSub.password}
-                      onChange={e => setNewSub(p => ({ ...p, password: e.target.value }))} placeholder="Min 6 characters" />
-                  </div>
-                  <div className="input-group">
-                    <label className="input-label">Department</label>
-                    <select className="input" value={newSub.department}
-                      onChange={e => setNewSub(p => ({ ...p, department: e.target.value }))}
-                      style={{ height: 38 }}>
-                      {DEPARTMENTS.map(d => (
-                        <option key={d.id} value={d.id}>{d.icon} {d.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div style={{ marginTop: 16, display: 'flex', gap: 10 }}>
-                  <button className="btn btn-gold" onClick={addSubadmin}>Create Sub-Admin</button>
-                  <button className="btn btn-outline" onClick={() => setShowAddSubadmin(false)}>Cancel</button>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gap: 16 }}>
-              {DEPARTMENTS.map(dept => {
-                const members = subadmins.filter(s => s.department === dept.id);
-                const perms = PERMISSION_MAP[dept.id] || [];
-                return (
-                  <div key={dept.id} className="card" style={{ padding: 20 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                      <div>
-                        <h4 style={{ fontSize: 15, marginBottom: 2 }}>{dept.icon} {dept.label}</h4>
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{dept.desc}</p>
-                      </div>
-                      <span className="badge badge-muted">{members.length} member{members.length !== 1 ? 's' : ''}</span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-                      {perms.map(p => (
-                        <span key={p} style={{ fontSize: 11, padding: '2px 8px', background: 'var(--gold-glow)', borderRadius: 4, color: 'var(--gold-light)' }}>
-                          {p.replace(/_/g, ' ')}
-                        </span>
-                      ))}
-                    </div>
-
-                    {members.length === 0 ? (
-                      <p style={{ fontSize: 13, color: 'var(--text-dim)', fontStyle: 'italic' }}>No sub-admins assigned</p>
-                    ) : members.map(m => (
-                      <div key={m._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderTop: '1px solid var(--border)' }}>
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: 14 }}>{m.name}</div>
-                          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{m.email}</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                          <span className={`badge ${!m.isBanned ? 'badge-green' : 'badge-muted'}`}>
-                            {!m.isBanned ? 'Active' : 'Inactive'}
-                          </span>
-                          <button className="btn btn-sm btn-outline"
-                            onClick={() => toggleSubadmin(m._id)}
-                            style={{ fontSize: 11, padding: '4px 10px' }}>
-                            {!m.isBanned ? 'Deactivate' : 'Activate'}
-                          </button>
-                          <button className="btn btn-sm btn-outline"
-                            onClick={() => deleteSubadmin(m._id)}
-                            style={{ fontSize: 11, padding: '4px 10px', color: 'var(--red)', borderColor: 'var(--red)' }}>
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}

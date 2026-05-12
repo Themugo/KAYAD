@@ -103,11 +103,11 @@ export const register = async (req, res) => {
         message: "User already exists",
       });
     }
-
     const { role: requestedRole } = req.body;
-    const role = requestedRole === "dealer" ? "dealer" : "user";
-    const extra = role === "dealer" ? { approved: false, businessName: req.body.businessName || "", location: req.body.location || "" } : {};
-
+    const role = ["dealer", "broker"].includes(requestedRole) ? requestedRole : "user";
+    const extra = role === "dealer" || role === "broker"
+      ? { approved: false, businessName: req.body.businessName || "", location: req.body.location || "" }
+      : {};
     const user = await User.create({
       name,
       email,

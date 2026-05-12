@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
@@ -10,7 +10,7 @@ import Navbar from './components/Navbar';
 
 // Public pages
 import HomePage        from './pages/HomePage';
-import CarsPage        from './pages/CarsPage';
+
 import CarDetailPage   from './pages/CarDetailPage';
 import AuctionLivePage from './pages/AuctionLivePage';
 import LoginPage       from './pages/LoginPage';
@@ -48,7 +48,6 @@ export default function App() {
                 <Routes>
                   {/* ── Public ── */}
                   <Route path="/"           element={<HomePage />} />
-                  <Route path="/cars"       element={<CarsPage />} />
                   <Route path="/cars/:id"   element={<CarDetailPage />} />
                   <Route path="/auction/:id" element={<AuctionLivePage />} />
                   <Route path="/login"      element={<LoginPage />} />

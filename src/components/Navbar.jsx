@@ -75,7 +75,10 @@ export default function Navbar() {
     navigate('/');
   };
 
-  const isActive = (path) => loc.pathname === path || loc.pathname.startsWith(path + '/');
+  const isActive = (path) => {
+    if (path === '/') return loc.pathname === '/' || loc.pathname.startsWith('/cars/') || loc.pathname.startsWith('/auction/');
+    return loc.pathname === path || loc.pathname.startsWith(path + '/');
+  };
 
   const NavLink = ({ to, children, mobile }) => {
     const active = isActive(to);
@@ -121,8 +124,8 @@ export default function Navbar() {
 
           {/* Desktop nav links */}
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 22, flex: 1 }}>
-            <NavLink to="/cars">Browse Cars</NavLink>
-            <NavLink to="/cars?auctionStatus=live">
+            <NavLink to="/">Browse Cars</NavLink>
+            <NavLink to="/?auctionStatus=live">
               <span className="live-dot" style={{ width: 6, height: 6 }} />
               Live Auctions
             </NavLink>
@@ -237,8 +240,8 @@ export default function Navbar() {
                         <div style={{ fontWeight: 700, fontSize: 14 }}>{user?.name}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{user?.email}</div>
                         <div style={{ marginTop: 6 }}>
-                          <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : 'badge-blue'}`}>
-                            {user?.role}
+                          <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : user?.role === 'broker' ? 'badge-orange' : 'badge-blue'}`}>
+                            {user?.role === 'broker' ? 'broker' : user?.role}
                           </span>
                         </div>
                       </div>
@@ -310,8 +313,8 @@ export default function Navbar() {
                   <div>
                     <div style={{ fontWeight: 700 }}>{user?.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{user?.email}</div>
-                    <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : 'badge-blue'}`} style={{ marginTop: 4 }}>
-                      {user?.role}
+                    <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : user?.role === 'broker' ? 'badge-orange' : 'badge-blue'}`} style={{ marginTop: 4 }}>
+                      {user?.role === 'broker' ? 'broker' : user?.role}
                     </span>
                   </div>
                 </div>
@@ -325,8 +328,8 @@ export default function Navbar() {
 
             {/* Nav links */}
             <NavLink to="/"    mobile>🏠 Home</NavLink>
-            <NavLink to="/cars" mobile>🚗 Browse Cars</NavLink>
-            <NavLink to="/cars?auctionStatus=live" mobile>
+            <NavLink to="/" mobile>🚗 Browse Cars</NavLink>
+            <NavLink to="/?auctionStatus=live" mobile>
               <span className="live-dot" style={{ width: 7, height: 7 }} /> Live Auctions
             </NavLink>
 

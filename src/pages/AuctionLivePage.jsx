@@ -114,7 +114,7 @@ export default function AuctionLivePage() {
 
         {/* ─── Header ─── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-          <Link to="/cars" style={{ color: 'var(--text-muted)', fontSize: 13 }}>← Cars</Link>
+          <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 13 }}>← All Cars</Link>
           <span style={{ color: 'var(--border)' }}>·</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {auctionLive ? (

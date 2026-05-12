@@ -223,13 +223,6 @@ const _adminAPI = {
   // Platform Config
   getConfig:      ()          => api.get('/admin/config').then(unwrap),
   updateConfig:   (body)      => api.put('/admin/config', body).then(unwrap),
-  resetDemo:      ()          => api.post('/admin/config/reset-demo').then(unwrap),
-
-  // Subadmins
-  listSubadmins:  ()          => api.get('/admin/subadmins').then(unwrap),
-  createSubadmin: (body)      => api.post('/admin/subadmins', body).then(unwrap),
-  toggleSubadmin: (id)        => api.put(`/admin/subadmins/${id}/toggle`).then(unwrap),
-  deleteSubadmin: (id)        => api.delete(`/admin/subadmins/${id}`).then(unwrap),
 
   // Audit Log
   getAuditLog:    (params)    => api.get('/admin/audit-log', { params }).then(unwrap),

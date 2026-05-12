@@ -97,7 +97,7 @@ export default function CarDetailPage() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-          <Link to="/">Home</Link> · <Link to="/cars">Cars</Link> · {car.title}
+          <Link to="/">Home</Link> · <Link to="/">Cars</Link> · {car.title}
         </div>
 
         <div className="grid-sidebar-right" style={{ gap: 32 }}>

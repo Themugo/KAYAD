@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, adminOnly, subadminAccess } from "../middleware/auth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
@@ -12,7 +12,7 @@ import AuditLog from "../models/AuditLog.js";
 import Payment from "../models/Payment.js";
 import { stkPush } from "../services/mpesaService.js";
 
-// Routes that only admin/superadmin (not subadmin) can access
+// Routes that only admin/superadmin can access
 const adminOrSuper = authorize("admin", "superadmin");
 
 const router = express.Router();
@@ -286,142 +286,7 @@ router.put(
   })
 );
 
-// RESET DEMO DATA
-router.post(
-  "/config/reset-demo",
-  adminOrSuper,
-  asyncHandler(async (req, res) => {
-    await Promise.all([
-      Car.deleteMany({}),
-      Payment.deleteMany({}),
-      PlatformConfig.deleteMany({}),
-      AuditLog.deleteMany({}),
-    ]);
 
-    await PlatformConfig.create({});
-
-    await AuditLog.create({
-      action: "Demo data reset to factory defaults",
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({ success: true, message: "Factory reset complete" });
-  })
-);
-
-// =============================
-// 👥 SUBADMIN MANAGEMENT
-// =============================
-
-// LIST SUBADMINS
-router.get(
-  "/subadmins",
-  asyncHandler(async (req, res) => {
-    const subadmins = await User.find({ role: "subadmin" })
-      .select("-password")
-      .sort({ createdAt: -1 })
-      .lean();
-
-    res.json({ success: true, subadmins });
-  })
-);
-
-// CREATE SUBADMIN
-router.post(
-  "/subadmins",
-  adminOrSuper,
-  asyncHandler(async (req, res) => {
-    const { name, email, password, department } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: "Name, email, and password required" });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({ success: false, message: "Password min 6 characters" });
-    }
-
-    const exists = await User.findOne({ email: email.toLowerCase().trim() });
-    if (exists) {
-      return res.status(400).json({ success: false, message: "Email already in use" });
-    }
-
-    const subadmin = await User.create({
-      name,
-      email: email.toLowerCase().trim(),
-      password,
-      role: "subadmin",
-      department: department || "",
-      approved: true,
-    });
-
-    await AuditLog.create({
-      action: `Subadmin created: "${name}" (${department || "no department"})`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({
-      success: true,
-      subadmin: { id: subadmin._id, name: subadmin.name, email: subadmin.email, department: subadmin.department, active: !subadmin.isBanned, createdAt: subadmin.createdAt },
-    });
-  })
-);
-
-// TOGGLE SUBADMIN ACTIVE STATUS
-router.put(
-  "/subadmins/:id/toggle",
-  adminOrSuper,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const sub = await User.findById(req.params.id);
-
-    if (!sub || sub.role !== "subadmin") {
-      return res.status(404).json({ success: false, message: "Subadmin not found" });
-    }
-
-    sub.isBanned = !sub.isBanned;
-    await sub.save();
-
-    await AuditLog.create({
-      action: `Subadmin "${sub.name}" ${sub.isBanned ? "deactivated" : "activated"}`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({
-      success: true,
-      message: sub.isBanned ? "Subadmin deactivated" : "Subadmin activated",
-      isBanned: sub.isBanned,
-    });
-  })
-);
-
-// DELETE SUBADMIN
-router.delete(
-  "/subadmins/:id",
-  adminOrSuper,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const sub = await User.findById(req.params.id);
-
-    if (!sub || sub.role !== "subadmin") {
-      return res.status(404).json({ success: false, message: "Subadmin not found" });
-    }
-
-    const name = sub.name;
-    await sub.deleteOne();
-
-    await AuditLog.create({
-      action: `Subadmin removed: "${name}"`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({ success: true, message: "Subadmin removed" });
-  })
-);
 
 // =============================
 // 📋 AUDIT LOG

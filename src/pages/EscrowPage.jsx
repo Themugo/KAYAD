@@ -118,7 +118,7 @@ export default function EscrowPage() {
             <div className="empty-icon">🔒</div>
             <h3>No escrow records</h3>
             <p>When you buy a car via M-Pesa, your payment is protected here until you receive it.</p>
-            <Link to="/cars" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars →</Link>
+            <Link to="/" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars →</Link>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

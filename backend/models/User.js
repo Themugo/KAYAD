@@ -32,18 +32,10 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "dealer", "admin", "superadmin", "subadmin"],
+      enum: ["user", "dealer", "broker", "admin", "superadmin"],
       default: "user",
       index: true,
     },
-
-    department: {
-      type: String,
-      enum: ["", "finance", "hr", "marketing", "tech-support"],
-      default: "",
-    },
-
-    permissions: [String],
 
     isBanned: {
       type: Boolean,

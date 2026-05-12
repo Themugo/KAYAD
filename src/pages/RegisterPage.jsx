@@ -11,10 +11,10 @@ export default function RegisterPage() {
   const redirectTo = searchParams.get('redirect') || '/';
   const roleParam = searchParams.get('role');
   const isFromCar = redirectTo.startsWith('/cars/');
-  const isDealerFlow = roleParam === 'dealer';
+  const isDealerFlow = roleParam === 'dealer' || roleParam === 'broker';
 
   const [step, setStep] = useState(isFromCar || isDealerFlow ? 2 : 1);
-  const [role, setRole] = useState(isDealerFlow ? 'dealer' : 'user');
+  const [role, setRole] = useState(roleParam === 'broker' ? 'broker' : isDealerFlow ? 'dealer' : 'user');
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [form, setForm] = useState({
@@ -28,10 +28,10 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       const body = { ...form, role };
-      if (role !== 'dealer') { delete body.businessName; delete body.location; }
+      if (role !== 'dealer' && role !== 'broker') { delete body.businessName; delete body.location; }
       const data = await register(body);
       toast('Account created! Welcome to Gari Motors', 'success');
-      const dest = role === 'dealer' ? '/dealer' : redirectTo;
+      const dest = role === 'dealer' || role === 'broker' ? '/dealer' : redirectTo;
       navigate(dest, { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Registration failed', 'error');
@@ -57,8 +57,9 @@ export default function RegisterPage() {
             <h3 style={{ marginBottom: 20, textAlign: 'center' }}>I am a...</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
               {[
-                { val: 'user',   icon: '👤', title: 'Car Buyer',   desc: 'Browse listings, bid on auctions, and buy cars.' },
-                { val: 'dealer', icon: '🏪', title: 'Car Dealer',  desc: 'List inventory, run live auctions, and grow your business.' },
+                { val: 'user',   icon: '👤', title: 'Car Buyer',     desc: 'Browse listings, bid on auctions, and buy cars.' },
+                { val: 'dealer', icon: '🏪', title: 'Car Dealer',    desc: 'List inventory, run live auctions, and grow your business.' },
+                { val: 'broker', icon: '🤝', title: 'Seller / Broker', desc: 'List your personal car for sale. No business account needed.' },
               ].map(r => (
                 <div
                   key={r.val}
@@ -99,8 +100,8 @@ export default function RegisterPage() {
                   ← Back
                 </button>
               )}
-              <span className={`badge ${role === 'dealer' ? 'badge-gold' : 'badge-blue'}`}>
-                {role === 'dealer' ? '🏪 Dealer' : '👤 Buyer'}
+              <span className={`badge ${role === 'dealer' ? 'badge-gold' : role === 'broker' ? 'badge-orange' : 'badge-blue'}`}>
+                {role === 'dealer' ? '🏪 Dealer' : role === 'broker' ? '🤝 Broker' : '👤 Buyer'}
               </span>
             </div>
 
@@ -148,18 +149,18 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {role === 'dealer' && (
+              {(role === 'dealer' || role === 'broker') && (
                 <>
                   <div className="input-group">
-                    <label className="input-label">Business Name</label>
-                    <input className="input" placeholder="ABC Motors Ltd" value={form.businessName} onChange={e => set('businessName', e.target.value)} />
+                    <label className="input-label">Business Name {role === 'broker' && '(optional)'}</label>
+                    <input className="input" placeholder={role === 'dealer' ? "ABC Motors Ltd" : "Your name or trading name"} value={form.businessName} onChange={e => set('businessName', e.target.value)} />
                   </div>
                   <div className="input-group">
                     <label className="input-label">Location / City</label>
                     <input className="input" placeholder="Nairobi, Westlands" value={form.location} onChange={e => set('location', e.target.value)} />
                   </div>
                   <div style={{ background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-                    Dealer accounts require admin approval before you can list cars. You'll receive an email once approved.
+                    {role === 'dealer' ? 'Dealer accounts require admin approval before you can list cars. You\'ll receive an email once approved.' : 'Broker accounts require admin approval before you can list cars. You\'ll be notified once approved.'}
                   </div>
                 </>
               )}

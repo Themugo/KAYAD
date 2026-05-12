@@ -42,7 +42,7 @@ export default function NotFoundPage() {
 
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
         <Link to="/" className="btn btn-gold">← Go Home</Link>
-        <Link to="/cars" className="btn btn-outline">Browse Cars</Link>
+        <Link to="/" className="btn btn-outline">Browse Cars</Link>
         <button className="btn btn-ghost" onClick={() => navigate(-1)}>Go Back</button>
       </div>
     </div>

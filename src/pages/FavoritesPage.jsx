@@ -122,7 +122,7 @@ export default function FavoritesPage() {
             <div className="empty-icon">❤️</div>
             <h3>No saved cars yet</h3>
             <p>Tap the heart on any listing to save it here for later.</p>
-            <Link to="/cars" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars</Link>
+            <Link to="/" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars</Link>
           </div>
         ) : (
           <div className="car-grid">
