@@ -71,7 +71,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
           clearInterval(interval);
           setStage('failed');
         }
-      } catch {}
+      } catch { /* poll will retry */ }
     }, 5000);
 
     setPoll(interval);

@@ -27,7 +27,7 @@ services:
     networks:
       - gari-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -46,7 +46,7 @@ services:
       - backend
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./ssl:/etc/ssl/certs:ro          # SSL certificates
+      # - ./ssl:/etc/ssl/certs:ro          # SSL certificates (create ssl/ dir if needed)
     networks:
       - gari-net
 

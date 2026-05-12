@@ -101,6 +101,18 @@ const escrowSchema = new mongoose.Schema(
     // =============================
     notes: String,
     disputeReason: String,
+
+    // =============================
+    // 📜 AUDIT HISTORY
+    // =============================
+    history: [{ action: String, at: { type: Date, default: Date.now } }],
+    lastActionKey: String,
+
+    // =============================
+    // 🤖 AUTO-RELEASE
+    // =============================
+    autoReleased: { type: Boolean, default: false },
+    warningSent: { type: Boolean, default: false },
   },
   {
     timestamps: true,

@@ -29,7 +29,7 @@ const runAutoRelease = async () => {
   const cutoff = new Date(Date.now() - RELEASE_DAYS * 86_400_000);
 
   const stale = await Escrow.find({
-    status:    "funded",
+    status:    "held",
     createdAt: { $lte: cutoff },
   }).populate("buyer seller car");
 
@@ -87,7 +87,7 @@ const runDisputeWarnings = async () => {
   const warningDate = new Date(Date.now() - (RELEASE_DAYS - 2) * 86_400_000);
 
   const approaching = await Escrow.find({
-    status:    "funded",
+    status:    "held",
     createdAt: { $lte: warningDate },
     warningSent: { $ne: true },
   }).populate("buyer seller car");

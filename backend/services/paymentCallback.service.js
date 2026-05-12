@@ -96,9 +96,9 @@ export const handleMpesaCallback = async (callbackData) => {
     // 🔥 ESCROW FLOW (purchase)
     if (payment.type === "purchase") {
       await createEscrow({
-        carId: payment.car,
-        buyerId: payment.user,
-        sellerId: payment.seller,
+        car: payment.car,
+        buyer: payment.user,
+        seller: payment.seller,
         amount: payment.amount,
         paymentId: payment._id,
       });

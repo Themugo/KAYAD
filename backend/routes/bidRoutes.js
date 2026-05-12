@@ -33,7 +33,7 @@ router.post(
   protect,
   validateObjectId,
   validateBid,
-  placeBid
+  asyncHandler(placeBid)
 );
 
 // =============================

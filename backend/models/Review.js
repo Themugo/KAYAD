@@ -80,7 +80,7 @@ reviewSchema.index(
 // =============================
 reviewSchema.index({ dealer: 1, createdAt: -1 });
 reviewSchema.index({ rating: 1 });
-reviewSchema.index({ isVerified: 1 });
+// isVerified already indexed via schema field index:true
 
 // =============================
 // ⚡ STATIC: GET DEALER REVIEWS

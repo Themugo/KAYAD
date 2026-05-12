@@ -1,7 +1,7 @@
 // realtime/handlers/auctionHandler.js
 
 import { placeBid } from "../auctionEngine.js";
-import { socketRateLimit } from "../rateLimitSocket.js";
+import { socketRateLimit } from "../../middleware/rateLimiter.js";
 import { countRoomUsers } from "../presence.js";
 
 // =============================

@@ -1,6 +1,6 @@
 // realtime/handlers/adminHandler.js
 
-import { socketRateLimit } from "../rateLimitSocket.js";
+import { socketRateLimit } from "../../middleware/rateLimiter.js";
 
 // =============================
 // 🧠 HELPER: ADMIN CHECK

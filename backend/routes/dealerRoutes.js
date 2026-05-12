@@ -66,7 +66,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
-    const filter = { dealer: req.user.id };
+    const filter = { dealer: req.user.id }; 
+    const dealerId = req.user.id;
 
     if (req.query.sold === "true") filter.sold = true;
     if (req.query.active === "true") filter.sold = false;
@@ -107,7 +108,7 @@ router.get(
     const payments = await Payment.aggregate([
       {
         $match: {
-          user: req.user._id,
+          user: req.user.id,
           status: "success",
           createdAt: { $gte: from },
         },

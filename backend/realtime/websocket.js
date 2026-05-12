@@ -15,7 +15,7 @@ import {
   countRoomUsers,
 } from "./presence.js";
 
-import { socketRateLimit } from "./rateLimitSocket.js";
+import { socketRateLimit } from "../middleware/rateLimiter.js";
 
 // =============================
 // 🚀 SOCKET SETUP

@@ -57,7 +57,7 @@ router.get(
   protect,
   dealerOnly,
   asyncHandler(async (req, res) => {
-    const dealerId = req.user._id;
+    const dealerId = req.user.id;
 
     const [stats] = await Car.aggregate([
       { $match: { dealer: dealerId } },

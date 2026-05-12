@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { config } from "../config/index.js";
 
 // =============================
 // 🔐 GENERATE ACCESS TOKEN
@@ -10,7 +9,7 @@ export const generateAccessToken = (user) => {
     role: user.role || "user",
   };
 
-  return jwt.sign(payload, config.JWT_SECRET, {
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "15m", // 🔥 short-lived
   });
 };
@@ -21,7 +20,7 @@ export const generateAccessToken = (user) => {
 export const generateRefreshToken = (user) => {
   return jwt.sign(
     { id: user._id || user.id },
-    config.JWT_SECRET,
+    process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
 };
@@ -30,7 +29,7 @@ export const generateRefreshToken = (user) => {
 // 🍪 SET AUTH COOKIES
 // =============================
 export const setAuthCookies = (res, accessToken, refreshToken) => {
-  const isProd = config.NODE_ENV === "production";
+  const isProd = (process.env.NODE_ENV || "development") === "production";
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,

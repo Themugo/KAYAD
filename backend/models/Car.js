@@ -9,13 +9,13 @@ const carSchema = new mongoose.Schema(
     brand: { type: String, index: true },
     model: { type: String },
     year: { type: Number, index: true },
-    price: { type: Number, index: true },
+    price: { type: Number },
 
     // =============================
     // 📍 LOCATION
     // =============================
     location: {
-      city: { type: String, index: true },
+      city: { type: String },
       address: String,
       coordinates: {
         type: { type: String, default: "Point" },

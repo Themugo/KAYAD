@@ -15,8 +15,8 @@ export const startAuctionTimer = (io) => {
       const endingCars = await Car.find({
         allowBid: true,
         auctionStatus: "live",
-        auctionEndTime: { $lte: new Date(now.getTime() + 5000) }, // next 5s
-      }).select("_id auctionEndTime");
+        auctionEnd: { $lte: new Date(now.getTime() + 5000) }, // next 5s
+      }).select("_id auctionEnd");
 
       for (const car of endingCars) {
         // =============================

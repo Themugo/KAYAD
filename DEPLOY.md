@@ -56,10 +56,8 @@ cd backend
 npm install
 cd ..
 
-# Install frontend dependencies
-cd frontend
+# Install frontend dependencies (at project root)
 npm install
-cd ..
 ```
 
 ---
@@ -139,7 +137,7 @@ npm run build
 
 ```bash
 # Copy nginx config
-sudo cp /var/www/gari-motors/frontend/nginx.conf /etc/nginx/sites-available/gari-motors
+sudo cp /var/www/gari-motors/nginx.conf /etc/nginx/sites-available/gari-motors
 
 # Edit domain name
 sudo sed -i 's/garimotors.co.ke/YOUR-ACTUAL-DOMAIN.co.ke/g' \

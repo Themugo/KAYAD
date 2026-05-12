@@ -149,8 +149,8 @@ export const checkPaymentStatus = async (req, res) => {
     // 🔒 SECURITY CHECK
     if (
       req.user &&
-      payment.userId &&
-      payment.userId.toString() !== req.user.id &&
+      payment.user &&
+      payment.user.toString() !== req.user.id &&
       req.user.role !== "admin"
     ) {
       return res.status(403).json({
@@ -181,7 +181,7 @@ export const checkPaymentStatus = async (req, res) => {
 export const getUserPayments = async (req, res) => {
   try {
     const payments = await Payment.find({
-      userId: req.user.id,
+      user: req.user.id,
     })
       .sort({ createdAt: -1 })
       .lean();

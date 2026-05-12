@@ -1,3 +1,5 @@
+import Payment from "../models/Payment.js";
+
 export const calculateRevenue = async ({
   startDate,
   endDate,

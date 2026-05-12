@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(async () => {
-    try { await authAPI.logout(); } catch {}
+    try { await authAPI.logout(); } catch { /* ignore */ }
     localStorage.removeItem('gari_token');
     setToken(null);
     setUser(null);

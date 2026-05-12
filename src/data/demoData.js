@@ -143,10 +143,10 @@ export const DEMO_BIDS = (() => {
 })();
 
 export const DEMO_PAYMENTS = [
-  { _id:'pay-1', user:DEMO_USERS.buyer._id, car:'car-lc1', type:'bid', amount:160000, phone:'254712345678', status:'success', mpesaReceiptNumber:'PGE71H4K9V', checkoutRequestID:'mock-checkout-1', car:{title:'Toyota Land Cruiser V8 2021'}, createdAt:new Date(now-1*DAY).toISOString() },
-  { _id:'pay-2', user:DEMO_USERS.buyer._id, car:'car-maz1', type:'bid', amount:180000, phone:'254712345678', status:'success', mpesaReceiptNumber:'RFA82J5M2W', checkoutRequestID:'mock-checkout-2', car:{title:'Mazda CX-5 2023'}, createdAt:new Date(now-0.5*DAY).toISOString() },
-  { _id:'pay-3', user:DEMO_USERS.buyer._id, car:'car-sub1', type:'bid', amount:142500, phone:'254712345678', status:'pending', checkoutRequestID:'mock-checkout-3', car:{title:'Subaru Forester XT 2021'}, createdAt:new Date(now-2*DAY).toISOString() },
-  { _id:'pay-4', user:DEMO_USERS.buyer._id, car:'car-lc1', type:'escrow', amount:3200000, phone:'254712345678', status:'funded', mpesaReceiptNumber:'XCV73K8N1B', checkoutRequestID:'mock-checkout-4', car:{title:'Toyota Land Cruiser V8 2021'}, createdAt:new Date(now-0.3*DAY).toISOString() },
+  { _id:'pay-1', user:DEMO_USERS.buyer._id, car:{_id:'car-lc1', title:'Toyota Land Cruiser V8 2021'}, type:'bid', amount:160000, phone:'254712345678', status:'success', mpesaReceiptNumber:'PGE71H4K9V', checkoutRequestID:'mock-checkout-1', createdAt:new Date(now-1*DAY).toISOString() },
+  { _id:'pay-2', user:DEMO_USERS.buyer._id, car:{_id:'car-maz1', title:'Mazda CX-5 2023'}, type:'bid', amount:180000, phone:'254712345678', status:'success', mpesaReceiptNumber:'RFA82J5M2W', checkoutRequestID:'mock-checkout-2', createdAt:new Date(now-0.5*DAY).toISOString() },
+  { _id:'pay-3', user:DEMO_USERS.buyer._id, car:{_id:'car-sub1', title:'Subaru Forester XT 2021'}, type:'bid', amount:142500, phone:'254712345678', status:'pending', checkoutRequestID:'mock-checkout-3', createdAt:new Date(now-2*DAY).toISOString() },
+  { _id:'pay-4', user:DEMO_USERS.buyer._id, car:{_id:'car-lc1', title:'Toyota Land Cruiser V8 2021'}, type:'escrow', amount:3200000, phone:'254712345678', status:'funded', mpesaReceiptNumber:'XCV73K8N1B', checkoutRequestID:'mock-checkout-4', createdAt:new Date(now-0.3*DAY).toISOString() },
 ];
 
 export const DEMO_ESCROWS = [

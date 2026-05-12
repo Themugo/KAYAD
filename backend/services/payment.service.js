@@ -1,6 +1,6 @@
 import Payment from "../models/Payment.js";
 import MpesaTransaction from "../models/MpesaTransaction.js";
-import { stkPush } from "./mpesa.js";
+import { stkPush } from "./mpesaService.js";
 import { createEscrow } from "./escrow.service.js";
 
 // =============================
@@ -135,9 +135,8 @@ export const confirmPayment = async ({
 
     // 🔥 CREATE ESCROW
     await createEscrow({
-      carId: payment.car,
-      buyerId: payment.user,
-      sellerId: payment.seller, // ensure exists
+      car: payment.car,
+      buyer: payment.user,
       amount: payment.amount,
       paymentId: payment._id,
     });
