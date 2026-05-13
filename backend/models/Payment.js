@@ -92,6 +92,12 @@ const paymentSchema = new mongoose.Schema(
 
     merchantRequestId: String,
 
+    mode: {
+      type: String,
+      enum: ["mpesa", "mock", "card", "bank"],
+      default: "mpesa",
+    },
+
     // =============================
     // 🔁 PROCESS CONTROL
     // =============================

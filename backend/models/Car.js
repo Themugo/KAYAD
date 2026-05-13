@@ -118,6 +118,17 @@ const carSchema = new mongoose.Schema(
     trustScore: { type: Number, default: 100 },
 
     // =============================
+    // 🏆 AUCTION / SALE STATE
+    // =============================
+    highestBidder: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    winner: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      amount: Number,
+    },
+    paymentStatus: { type: String, enum: ["pending", "paid", "released", "refunded"] },
+    isPaid: { type: Boolean, default: false },
+
+    // =============================
     // 💵 PRICE INTELLIGENCE
     // =============================
     avgMarketPrice: Number,

@@ -107,10 +107,11 @@ export const handleMpesaCallback = async (callbackData) => {
 
     // 🔥 ESCROW FLOW (purchase)
     if (payment.type === "purchase") {
+      const escrowCar = await Car.findById(payment.car).session(session).lean();
       await createEscrow({
         car: payment.car,
         buyer: payment.user,
-        seller: payment.seller,
+        seller: escrowCar?.dealer || payment.user,
         amount: payment.amount,
         paymentId: payment._id,
       });

@@ -42,10 +42,11 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
 
   const payment = await Payment.create({
     user: userId, car: carId, type, amount,
+    referenceId: carId,
+    referenceModel: "Car",
     phone: formattedPhone,
     status: mode === "mpesa" ? "pending" : "initiated",
-    checkoutRequestID: checkoutID,   // consistent casing
-    checkoutRequestId: checkoutID,   // legacy compat
+    checkoutRequestId: checkoutID,
     mode,
     ...metadata,
   });
