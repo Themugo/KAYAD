@@ -6,7 +6,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Layout
-import Navbar from './components/Navbar';
+import AppLayout from './components/AppLayout';
 import AppInstallPrompt from './components/AppInstallPrompt';
 
 // Public pages
@@ -54,9 +54,9 @@ export default function App() {
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
-              <Navbar />
-              <ErrorBoundary>
-                <Routes>
+              <AppLayout>
+                <ErrorBoundary>
+                  <Routes>
                   {/* ── Public ── */}
                   <Route path="/"           element={<HomePage />} />
                   <Route path="/showroom"  element={<Showroom />} />
@@ -100,6 +100,7 @@ export default function App() {
                 </Routes>
                 <AppInstallPrompt />
               </ErrorBoundary>
+              </AppLayout>
             </ToastProvider>
           </SocketProvider>
         </AuthProvider>
