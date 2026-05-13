@@ -286,6 +286,26 @@ router.delete(
 );
 
 // =============================
+// ✅ TOGGLE NTSA VERIFICATION
+// =============================
+router.post(
+  "/cars/:id/verify",
+  adminOrSuper,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { ntsaVerified, dutyStatus, logbookVerified } = req.body;
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    if (ntsaVerified !== undefined) car.ntsaVerified = ntsaVerified;
+    if (dutyStatus !== undefined) car.dutyStatus = dutyStatus;
+    if (logbookVerified !== undefined) car.logbookVerified = logbookVerified;
+    if (req.body.ntsaVerified || req.body.logbookVerified) car.verifiedBy = req.user.id;
+    await car.save();
+    res.json({ success: true, car });
+  })
+);
+
+// =============================
 // ⚙️ PLATFORM CONFIG
 // =============================
 

@@ -94,6 +94,18 @@ const carSchema = new mongoose.Schema(
     favoritesCount: { type: Number, default: 0 },
 
     // =============================
+    // 🇰🇪 KENYA TRUST LAYER
+    // =============================
+    ntsaVerified: { type: Boolean, default: false },
+    dutyStatus: {
+      type: String,
+      enum: ["duty_paid", "duty_unpaid", "awaiting_clearance", "unknown"],
+      default: "unknown",
+    },
+    logbookVerified: { type: Boolean, default: false },
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+    // =============================
     // 💰 PROMOTION
     // =============================
     isPromoted: { type: Boolean, default: false },

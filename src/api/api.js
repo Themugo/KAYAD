@@ -240,6 +240,9 @@ const _adminAPI = {
 
   // Dealer Verification
   verifyDealer:    (userId, body) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
+
+  // NTSA / Car Verification
+  verifyCar:       (carId, body) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
 };
 export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
 

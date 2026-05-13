@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
+import Escrow from "../models/Escrow.js";
 import { initiatePayment } from "../services/paymentService.js";
 
 // =============================
@@ -122,6 +123,25 @@ export const placeBid = async (req, res) => {
         success: false,
         message: "You cannot bid on your own car",
       });
+    }
+
+    // =============================
+    // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
+    // =============================
+    if (amount > 5000000) {
+      const escrowDeposit = await Escrow.findOne({
+        buyer: userId,
+        amount: { $gte: 50000 },
+        status: "held",
+      });
+      if (!escrowDeposit) {
+        return res.status(403).json({
+          success: false,
+          message: "Bids over KES 5,000,000 require a KES 50,000 pre-authorized deposit held in escrow. Please deposit via your profile.",
+          code: "WALLET_LOCK_REQUIRED",
+          minDeposit: 50000,
+        });
+      }
     }
 
     if (car.auctionStatus !== "live") {
