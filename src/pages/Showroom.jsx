@@ -92,9 +92,7 @@ export default function Showroom() {
 
   return (
     <div className="flex min-h-[calc(100vh-72px)] bg-[#050505]">
-      <div className="hidden lg:block w-80 sticky top-0 h-[calc(100vh-72px)] overflow-y-auto border-r border-white/5 flex-shrink-0">
-        <BrowseSidebar onFilterChange={handleFilterUpdate} />
-      </div>
+      <BrowseSidebar onFilterChange={handleFilterUpdate} />
       <main className="flex-1 overflow-y-auto">
         {/* ─── Hero ─── */}
         <section style={{

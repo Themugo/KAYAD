@@ -23,6 +23,7 @@ export default function CarDetailPage() {
   const [startingChat, setStartingChat] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setLoading(true);
     carsAPI.get(id)
       .then(data => {
@@ -84,15 +85,17 @@ export default function CarDetailPage() {
   const nextImg = () => setImgIdx(i => (i < (car?.images?.length || 1) - 1 ? i + 1 : 0));
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-gold" />
+    <div className="h-screen bg-black flex items-center justify-center">
+      <div className="w-16 h-16 border-4 border-gold border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(212,175,55,0.3)]" />
     </div>
   );
   if (!car) return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
-      <h2 className="text-4xl font-black italic uppercase text-gold">Unit Not Found</h2>
-      <p className="text-zinc-500 mt-4 uppercase text-xs tracking-widest">The car may have been sold or removed.</p>
-      <a href="/showroom" className="mt-8 bg-white text-black px-8 py-3 rounded-full font-black text-xs uppercase">Return to Showroom</a>
+    <div className="h-screen bg-[#050505] flex flex-col items-center justify-center p-10 text-center">
+      <h1 className="text-gold text-6xl font-black italic uppercase tracking-tighter">Unit Offline</h1>
+      <p className="text-zinc-500 mt-4 font-bold uppercase text-[10px] tracking-[0.4em]">This asset has been finalized or removed from the vault.</p>
+      <Link to="/showroom" className="mt-10 bg-white text-black px-10 py-4 rounded-full font-black uppercase text-xs hover:bg-gold hover:text-black transition-colors">
+        Return to Gallery
+      </Link>
     </div>
   );
 
