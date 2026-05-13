@@ -10,6 +10,7 @@ import Navbar from './components/Navbar';
 
 // Public pages
 import HomePage        from './pages/HomePage';
+import Showroom        from './pages/Showroom';
 
 import CarDetailPage   from './pages/CarDetailPage';
 import AuctionLivePage from './pages/AuctionLivePage';
@@ -54,6 +55,7 @@ export default function App() {
                 <Routes>
                   {/* ── Public ── */}
                   <Route path="/"           element={<HomePage />} />
+                  <Route path="/showroom"  element={<Showroom />} />
                   <Route path="/cars/:id"   element={<CarDetailPage />} />
                   <Route path="/auction/:id" element={<AuctionLivePage />} />
                   <Route path="/login"      element={<LoginPage />} />

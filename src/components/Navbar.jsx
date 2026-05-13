@@ -125,6 +125,7 @@ export default function Navbar() {
           {/* Desktop nav links */}
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 22, flex: 1 }}>
             <NavLink to="/">Browse Cars</NavLink>
+            <NavLink to="/showroom">Elite Showroom</NavLink>
             <NavLink to="/?auctionStatus=live">
               <span className="live-dot" style={{ width: 6, height: 6 }} />
               Live Auctions
@@ -329,6 +330,7 @@ export default function Navbar() {
             {/* Nav links */}
             <NavLink to="/"    mobile>🏠 Home</NavLink>
             <NavLink to="/" mobile>🚗 Browse Cars</NavLink>
+            <NavLink to="/showroom" mobile>✨ Elite Showroom</NavLink>
             <NavLink to="/?auctionStatus=live" mobile>
               <span className="live-dot" style={{ width: 7, height: 7 }} /> Live Auctions
             </NavLink>
