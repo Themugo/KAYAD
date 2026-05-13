@@ -13,13 +13,12 @@ export default defineConfig(({ mode }) => {
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg', 'icon.svg'],
         manifest: {
-          name: 'Kayad – Kenya\'s Premium Car Marketplace',
-          short_name: 'Kayad',
-          description: 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.',
-          theme_color: '#0A1628',
-          background_color: '#0A1628',
+          name: "KAYAD: Kenya's Live Car Auction",
+          short_name: 'KAYAD',
+          description: 'Premium vehicle auctions and verified marketplace.',
+          theme_color: '#D4AF37',
+          background_color: '#050505',
           display: 'standalone',
-          orientation: 'portrait',
           start_url: '/',
           icons: [
             { src: 'icon.svg', sizes: '192x192', type: 'image/svg+xml' },
