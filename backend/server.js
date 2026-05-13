@@ -54,7 +54,7 @@ import notFound     from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 // ─── Services & Utils ─────────────────────────────────────────
-import { startAuctionEngine }  from "./services/auctionEngine.js";
+import { startAuctionEngine }  from "./realtime/auctionEngine.js";
 import { startAuctionTimer }   from "./utils/auctionTimer.js";
 import { startEscrowCron }     from "./services/escrowCron.js";
 import { initSentry, sentryErrorHandler } from "./utils/sentry.js";

@@ -17,6 +17,8 @@ import Auction from "../models/Auction.js";
 // 🔧 CONFIG
 // =============================
 const LOCK_TTL = 2000;
+const SYNC_LOCK_PREFIX = "auction:sync:";
+const ACTIVE_AUCTIONS_SET = "auctions:active";
 const MIN_BID_INTERVAL = 1000;
 const SNIPING_WINDOW = 10000;
 const EXTENSION_TIME = 10000;
@@ -243,6 +245,71 @@ export const startAuction = async ({
     console.error("❌ START ERROR:", err);
     return { success: false };
   }
+};
+
+// =============================
+// 🧠 BOOTSTRAP (FALLBACK LOCKS + TRACKING)
+// =============================
+const localBootLocks = new Set();
+const localActiveAuctions = new Set();
+
+const isRedisAvailable = () => redis && redis.status === "ready";
+
+const acquireBootLock = async (key) => {
+  if (isRedisAvailable()) return await redis.set(key, "1", "NX", "PX", 60000);
+  if (localBootLocks.has(key)) return false;
+  localBootLocks.add(key);
+  return true;
+};
+
+const releaseBootLock = async (key) => {
+  if (isRedisAvailable()) { await redis.del(key); }
+  else { localBootLocks.delete(key); }
+};
+
+const trackAuction = async (roomId) => {
+  if (isRedisAvailable()) { await redis.sadd(ACTIVE_AUCTIONS_SET, roomId); }
+  else { localActiveAuctions.add(roomId); }
+};
+
+const isAuctionActive = async (roomId) => {
+  if (isRedisAvailable()) { return await redis.sismember(ACTIVE_AUCTIONS_SET, roomId); }
+  return localActiveAuctions.has(roomId);
+};
+
+// =============================
+// 🚀 START AUCTION ENGINE (BOOTSTRAP)
+// =============================
+export const startAuctionEngine = async () => {
+  try {
+    console.log("⚡ Bootstrapping auctions...");
+    const now = Date.now();
+    const liveCars = await Car.find({ auctionStatus: "live", allowBid: true }).select("_id currentBid auctionEndTime");
+    if (!liveCars.length) { console.log("⚠️ No live auctions found"); return; }
+    for (const car of liveCars) {
+      const roomId = car._id.toString();
+      const endTime = new Date(car.auctionEndTime).getTime();
+      if (!endTime || isNaN(endTime)) { console.warn(`⚠️ Invalid end time: ${roomId}`); continue; }
+      const duration = endTime - now;
+      if (duration <= 0) {
+        console.log(`🏁 Ending expired auction: ${roomId}`);
+        await endAuction(roomId);
+        await Car.findByIdAndUpdate(roomId, { auctionStatus: "ended", allowBid: false });
+        continue;
+      }
+      if (await isAuctionActive(roomId)) { console.log(`⏭️ Already running: ${roomId}`); continue; }
+      const lockKey = `${SYNC_LOCK_PREFIX}${roomId}`;
+      const lock = await acquireBootLock(lockKey);
+      if (!lock) continue;
+      try {
+        await startAuction({ roomId, carId: car._id, startingBid: car.currentBid || 0, durationMs: duration });
+        await trackAuction(roomId);
+        console.log(`🚗 Auction synced: ${roomId}`);
+      } catch (err) { console.error(`❌ Failed auction start: ${roomId}`, err); }
+      finally { await releaseBootLock(lockKey); }
+    }
+    console.log("✅ Auction engine ready");
+  } catch (err) { console.error("❌ AUCTION ENGINE ERROR:", err); }
 };
 
 // =============================

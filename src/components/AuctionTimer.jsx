@@ -14,7 +14,17 @@ function getTimeLeft(end) {
 
 function pad(n) { return String(n).padStart(2, '0'); }
 
-export default function AuctionTimer({ auctionId, initialEndTime, onEnd }) {
+function getStatus(total) {
+  if (total <= 0) return { text: 'SOLD!', urgent: true };
+  const secs = Math.floor(total / 1000);
+  if (secs < 5) return { text: 'GOING THRICE...', urgent: true };
+  if (secs < 10) return { text: 'GOING TWICE...', urgent: true };
+  if (secs < 20) return { text: 'GOING ONCE...', urgent: true };
+  if (secs < 60) return { text: 'ENDING SOON', urgent: true };
+  return { text: 'LIVE', urgent: false };
+}
+
+export default function AuctionTimer({ auctionId, initialEndTime, onEnd, showStatus, size }) {
   const { joinAuction, on } = useSocket();
   const [endTime, setEndTime] = useState(() => new Date(initialEndTime));
   const [time, setTime] = useState(() => getTimeLeft(initialEndTime));
@@ -46,13 +56,32 @@ export default function AuctionTimer({ auctionId, initialEndTime, onEnd }) {
     return () => clearInterval(tick);
   }, [endTime, onEnd]);
 
-  if (time.total <= 0) {
-    return <span style={{ color: 'var(--red)', fontWeight: 700 }}>Auction Ended</span>;
+  const isUrgent = time.total < 300000;
+  const isEnded = time.total <= 0;
+  const status = getStatus(time.total);
+
+  const fontSize = size === 'lg' ? '2.8rem' : size === 'sm' ? '0.9rem' : '1.1rem';
+
+  if (isEnded) {
+    return <span style={{ color: 'var(--red)', fontWeight: 700, fontSize }}>Auction Ended</span>;
   }
 
   return (
-    <span style={{ color: time.total < 300000 ? 'var(--red)' : 'var(--gold)', fontWeight: 700, letterSpacing: '0.04em' }}>
-      {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
+    <span style={{ display: 'inline-flex', flexDirection: showStatus ? 'column' : 'row', alignItems: 'center', gap: showStatus ? 2 : 8 }}>
+      {showStatus && (
+        <span style={{
+          fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em',
+          color: status.urgent ? 'var(--red)' : 'var(--gold)',
+          animation: status.urgent ? 'pulse 1s infinite' : 'none',
+        }}>{status.text}</span>
+      )}
+      <span style={{
+        fontFamily: 'var(--font-display)', fontWeight: 700, fontSize,
+        color: isUrgent ? 'var(--red)' : 'var(--gold-light)',
+        letterSpacing: '0.06em',
+      }}>
+        {pad(time.h)}:{pad(time.m)}:{pad(time.s)}
+      </span>
     </span>
   );
 }

