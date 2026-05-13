@@ -1,376 +1,204 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { carsAPI, formatKES, isDemoMode } from '../api/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import CartyGrid from '../components/CartyGrid';
+import { useState, useEffect } from 'react';
+import { carsAPI, isDemoMode } from '../api/api';
 import { filterMockCars } from '../data/mockCars';
-import CarCard from '../components/CarCard';
-import { SkeletonGrid } from '../components/Skeleton';
-
-const BRANDS = ['All', 'BMW', 'Mercedes', 'Mitsubishi', 'Nissan', 'Subaru', 'Toyota', 'Volkswagen', 'Mazda', 'Audi', 'Honda', 'Isuzu'];
-const FUELS = ['All', 'Petrol', 'Diesel', 'Electric', 'Hybrid'];
-const TRANSMISSIONS = ['All', 'Automatic', 'Manual', 'Tiptronic'];
-const BODY_TYPES = ['All', 'SUV', 'Sedan', 'Hatchback', 'Wagon', 'Pickup', 'Coupe', 'Van'];
-const CITIES = ['All', 'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret', 'Thika', 'Nyeri', 'Machakos'];
-
-const SPEC_ROWS = [
-  { label: 'Price', key: 'price', fmt: v => formatKES(v) },
-  { label: 'Year', key: 'year' },
-  { label: 'Fuel', key: 'fuel' },
-  { label: 'Transmission', key: 'transmission' },
-  { label: 'Mileage', key: 'mileage', fmt: v => `${v.toLocaleString()} km` },
-  { label: 'Body Type', key: 'bodyType' },
-  { label: 'Location', key: 'location', get: c => c.location?.city || '—' },
-];
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [cars, setCars] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(1);
+  const { isAuth, user } = useAuth();
+  const [featured, setFeatured] = useState([]);
+  const [recent, setRecent] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(true);
-  const [compare, setCompare] = useState([]);
-  const [showCompare, setShowCompare] = useState(false);
 
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    brand: searchParams.get('brand') || '',
-    fuel: searchParams.get('fuel') || '',
-    transmission: searchParams.get('transmission') || '',
-    bodyType: searchParams.get('bodyType') || '',
-    city: searchParams.get('city') || '',
-    minPrice: searchParams.get('minPrice') || '',
-    maxPrice: searchParams.get('maxPrice') || '',
-    minYear: searchParams.get('minYear') || '',
-    maxYear: searchParams.get('maxYear') || '',
-    auctionStatus: searchParams.get('auctionStatus') || '',
-  });
-
-  const LIMIT = 12;
-
-  const fetchCars = useCallback(async (pg = 1) => {
-    setLoading(true);
-    const loadMock = () => {
-      const filtered = filterMockCars(filters);
-      const start = (pg - 1) * LIMIT;
-      setCars(filtered.slice(start, start + LIMIT));
-      setTotal(filtered.length);
-      setPage(pg);
+  useEffect(() => {
+    const load = () => {
+      let all;
+      if (isDemoMode()) {
+        all = filterMockCars({});
+      } else {
+        carsAPI.list({ limit: 20 })
+          .then(data => { all = data.cars || data.data || []; })
+          .catch(() => { all = filterMockCars({}); })
+          .finally(() => {
+            process(all || []);
+          });
+        return;
+      }
+      process(all);
     };
-    try {
-      if (isDemoMode()) { loadMock(); return; }
-      const params = { page: pg, limit: LIMIT };
-      Object.entries(filters).forEach(([k, v]) => { if (v) params[k] = v; });
-      const data = await carsAPI.list(params);
-      const apiCars = data.cars || data.data || [];
-      if (apiCars.length === 0) { loadMock(); return; }
-      setCars(apiCars);
-      setTotal(data.pagination?.total || data.total || 0);
-      setPage(pg);
-    } catch {
-      loadMock();
-    } finally {
+    const process = (cars) => {
+      const elite = cars.filter(c => c.auctionStatus === 'live' || c.allowBid).slice(0, 3);
+      const rest = cars.filter(c => !(c.auctionStatus === 'live' || c.allowBid)).slice(0, 6);
+      setFeatured(elite);
+      setRecent(rest);
       setLoading(false);
-    }
-  }, [filters]);
-
-  useEffect(() => { setPage(1); fetchCars(1); }, [filters]);
-
-  const setFilter = (key, val) => {
-    setFilters(prev => ({ ...prev, [key]: val }));
-    setCompare([]);
-  };
-
-  const clearAll = () => {
-    setFilters({ search: '', brand: '', fuel: '', transmission: '', bodyType: '', city: '', minPrice: '', maxPrice: '', minYear: '', maxYear: '', auctionStatus: '' });
-    setSearchParams({});
-    setCompare([]);
-  };
-
-  const toggleCompare = (carId) => {
-    setCompare(prev => {
-      if (prev.includes(carId)) return prev.filter(id => id !== carId);
-      if (prev.length >= 4) return prev;
-      return [...prev, carId];
-    });
-  };
-
-  const compareCars = compare.map(id => cars.find(c => c._id === id)).filter(Boolean);
-
-  const totalPages = Math.ceil(total / LIMIT);
-  const hasAuctions = filters.auctionStatus === 'live';
-
-  const pillSearch = (tag) => {
-    const map = {
-      'Live Auction': { auctionStatus: 'live' },
-      'Under KSh 1M': { maxPrice: '1000000' },
-      'Nairobi': { city: 'Nairobi' },
-      'SUVs': { bodyType: 'SUV' },
-      'Sedans': { bodyType: 'Sedan' },
     };
-    const vals = map[tag];
-    if (vals) {
-      Object.entries(vals).forEach(([k, v]) => setFilter(k, v));
-    } else {
-      setFilter('search', tag);
-    }
-  };
-
-  const SelectFilter = ({ label, options, value, onChange }) => (
-    <div className="input-group">
-      <label className="input-label">{label}</label>
-      <select className="input" value={value} onChange={e => onChange(e.target.value)}>
-        {options.map(o => <option key={o} value={o === 'All' ? '' : o}>{o}</option>)}
-      </select>
-    </div>
-  );
+    load();
+  }, []);
 
   return (
-    <div className="page">
+    <div className="page" style={{ background: '#050505' }}>
 
-      {/* ─── HERO ─── */}
+      {/* ─── Hero ─── */}
       <section style={{
-        padding: '32px 0',
-        background: 'linear-gradient(180deg, var(--card) 0%, rgba(10,22,40,0.98) 100%)',
-        borderBottom: '1px solid var(--border)',
+        minHeight: '90vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '120px 20px 60px',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.08) 0%, transparent 60%)',
       }}>
-        <div className="container" style={{ textAlign: 'center' }}>
+        <div>
           <div style={{
-            fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.18em',
-            textTransform: 'uppercase', marginBottom: 8,
+            fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.2em',
+            textTransform: 'uppercase', marginBottom: 20,
           }}>
             Kenya's Premium Car Marketplace
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', fontWeight: 700, lineHeight: 1.2 }}>
-            Find Your Next Car <span style={{ color: 'var(--gold-light)' }}>With Confidence</span>
+          <h1 style={{
+            fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
+            fontSize: 'clamp(3rem, 10vw, 7rem)', lineHeight: 0.85,
+            textTransform: 'uppercase', color: '#fff', marginBottom: 24,
+          }}>
+            Drive in <span style={{ color: 'var(--gold)' }}>Gold</span>
           </h1>
+          <p style={{
+            color: 'rgba(255,255,255,0.4)', fontSize: 15, maxWidth: 480,
+            margin: '0 auto 40px', lineHeight: 1.7,
+          }}>
+            East Africa's most sophisticated automotive marketplace — live auctions,
+            verified dealers, and secure escrow payments.
+          </p>
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/showroom" style={{
+              padding: '18px 44px', background: 'var(--gold)', color: '#000',
+              borderRadius: 9999, fontWeight: 900, fontSize: 12,
+              textTransform: 'uppercase', letterSpacing: '0.08em',
+              boxShadow: '0 8px 40px rgba(212,168,67,0.25)',
+              transition: 'all 0.3s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 50px rgba(212,168,67,0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 40px rgba(212,168,67,0.25)'; }}
+            >
+              Enter The Gallery
+            </Link>
+            <Link to="/showroom?filter=auction" style={{
+              padding: '18px 44px', background: 'transparent', color: '#fff',
+              borderRadius: 9999, fontWeight: 700, fontSize: 12,
+              textTransform: 'uppercase', letterSpacing: '0.08em',
+              border: '1px solid rgba(255,255,255,0.15)',
+              transition: 'all 0.3s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.color = 'var(--gold)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = '#fff'; }}
+            >
+              Live Auctions
+            </Link>
+          </div>
+          {isAuth && (
+            <div style={{ marginTop: 24, fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>
+              Signed in as <strong style={{ color: 'var(--gold)' }}>{user?.email}</strong>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ─── BROWSE SECTION ─── */}
-      <section style={{ padding: '28px 0 48px' }}>
-        <div className="container">
-
-          {/* Header bar */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <div>
-              <div className="section-eyebrow">
-                {hasAuctions ? '🔴 Live Now' : 'Marketplace'}
-              </div>
-              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>{hasAuctions ? 'Live Auctions' : 'Browse Cars'}</h2>
-              {!loading && <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
-                {total.toLocaleString()} cars found
-              </div>}
+      {/* ─── Stats Bar ─── */}
+      <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'rgba(255,255,255,0.04)' }}>
+          {[
+            { label: 'Vehicles Listed', value: '340+' },
+            { label: 'Verified Dealers', value: '48' },
+            { label: 'Successful Trades', value: 'KES 12B+' },
+          ].map((s, i) => (
+            <div key={i} style={{ textAlign: 'center', padding: '32px 16px', background: '#050505' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: 'var(--gold)' }}>{s.value}</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginTop: 4 }}>{s.label}</div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {compare.length >= 2 && (
-                <button className="btn btn-gold btn-sm" onClick={() => setShowCompare(!showCompare)}>
-                  📊 Compare ({compare.length})
-                </button>
-              )}
-              <button className="btn btn-outline btn-sm" onClick={() => setShowFilters(!showFilters)}>
-                {showFilters ? '✕ Hide Filters' : '⚙ Filters'}
-              </button>
-            </div>
-          </div>
+          ))}
+        </div>
+      </section>
 
-          {/* Compare bar */}
-          {compare.length > 0 && !showCompare && (
-            <div style={{
-              background: 'var(--card)', border: '1px solid var(--gold-muted)',
-              borderRadius: 'var(--radius)', padding: '10px 16px', marginBottom: 20,
-              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gold)' }}>
-                Comparing ({compare.length}/4):
-              </span>
-              {compareCars.map(c => (
-                <span key={c._id} style={{
-                  background: 'var(--surface)', borderRadius: 6, padding: '3px 8px',
-                  fontSize: 12, display: 'flex', alignItems: 'center', gap: 4,
-                }}>
-                  {c.title}
-                  <button onClick={() => toggleCompare(c._id)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: 0 }}>×</button>
-                </span>
-              ))}
-              <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto', fontSize: 11 }} onClick={() => setCompare([])}>Clear</button>
-            </div>
-          )}
-
-          {/* Compare table */}
-          {showCompare && compareCars.length >= 2 && (
-            <div style={{ marginBottom: 24 }}>
-              <div className="card" style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th style={{ padding: '16px 20px', textAlign: 'left', fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', width: 140 }}>Spec</th>
-                      {compareCars.map(c => (
-                        <th key={c._id} style={{ padding: '16px 20px', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
-                          <div style={{ width: 120, height: 80, borderRadius: 8, overflow: 'hidden', background: 'var(--surface)', margin: '0 auto 8px' }}>
-                            {c.images?.[0]?.url
-                              ? <img src={c.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>🚗</div>
-                            }
-                          </div>
-                          <div style={{ fontWeight: 600, fontSize: 13, lineHeight: 1.3 }}>{c.title}</div>
-                          <Link to={`/cars/${c._id}`} style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4, display: 'block' }}>View →</Link>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {SPEC_ROWS.map((row, ri) => {
-                      const vals = compareCars.map(c => {
-                        const raw = row.get ? row.get(c) : c[row.key];
-                        return row.fmt ? row.fmt(raw) : (raw || '—');
-                      });
-                      const allSame = vals.every(v => v === vals[0]);
-                      return (
-                        <tr key={row.label} style={{ background: ri % 2 === 0 ? 'var(--surface)' : 'transparent' }}>
-                          <td style={{ padding: '12px 20px', fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{row.label}</td>
-                          {vals.map((val, i) => (
-                            <td key={i} style={{
-                              padding: '12px 20px', textAlign: 'center', borderLeft: '1px solid var(--border)',
-                              fontWeight: row.key === 'price' ? 700 : 400,
-                              color: row.key === 'price' ? 'var(--gold-light)' : (!allSame ? 'var(--text)' : 'var(--text-muted)'),
-                              fontSize: row.key === 'price' ? '1rem' : 14,
-                            }}>{val}</td>
-                          ))}
-                        </tr>
-                      );
-                    })}
-                    <tr>
-                      <td style={{ padding: '12px 20px', fontSize: 12, color: 'var(--text-muted)' }}>Actions</td>
-                      {compareCars.map(c => (
-                        <td key={c._id} style={{ padding: '12px 20px', textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
-                          <Link to={c.auctionStatus === 'live' ? `/auction/${c._id}` : `/cars/${c._id}`} className="btn btn-gold btn-sm">View Car</Link>
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <button className="btn btn-ghost btn-sm" style={{ marginTop: 12 }} onClick={() => setShowCompare(false)}>✕ Close Comparison</button>
-            </div>
-          )}
-
-          <div className="sidebar-layout" style={{ gridTemplateColumns: showFilters ? '260px 1fr' : '1fr', gap: 28, minHeight: 'auto' }}>
-
-            {/* ─── Filters Sidebar ─── */}
-            {showFilters && (
+      {/* ─── Featured Elite ─── */}
+      {featured.length > 0 && (
+        <section style={{ padding: '80px 0' }}>
+          <div className="container">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
               <div>
-                <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {['Under KSh 1M', 'SUVs', 'Sedans', 'Nairobi', 'Live Auction'].map(tag => (
-                      <button key={tag} onClick={() => pillSearch(tag)} style={{
-                        background: 'var(--surface)', border: '1px solid var(--border)',
-                        borderRadius: 100, padding: '4px 12px', fontSize: 11,
-                        color: 'var(--text-muted)', cursor: 'pointer', fontWeight: 500,
-                      }}>{tag}</button>
-                    ))}
-                  </div>
-                  <div className="input-group">
-                    <label className="input-label">Search</label>
-                    <input className="input" placeholder="Brand, model..." value={filters.search} onChange={e => setFilter('search', e.target.value)} />
-                  </div>
-
-                  <SelectFilter label="Brand" options={BRANDS} value={filters.brand} onChange={v => setFilter('brand', v)} />
-                  <SelectFilter label="Fuel Type" options={FUELS} value={filters.fuel} onChange={v => setFilter('fuel', v)} />
-                  <SelectFilter label="Transmission" options={TRANSMISSIONS} value={filters.transmission} onChange={v => setFilter('transmission', v)} />
-                  <SelectFilter label="Body Type" options={BODY_TYPES} value={filters.bodyType} onChange={v => setFilter('bodyType', v)} />
-                  <SelectFilter label="City" options={CITIES} value={filters.city} onChange={v => setFilter('city', v)} />
-
-                  <div>
-                    <label className="input-label">Price (KES)</label>
-                    <div className="grid-2" style={{ marginTop: 6 }}>
-                      <input className="input" placeholder="Min" type="number" value={filters.minPrice} onChange={e => setFilter('minPrice', e.target.value)} />
-                      <input className="input" placeholder="Max" type="number" value={filters.maxPrice} onChange={e => setFilter('maxPrice', e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="input-label">Year</label>
-                    <div className="grid-2" style={{ marginTop: 6 }}>
-                      <input className="input" placeholder="From" type="number" value={filters.minYear} onChange={e => setFilter('minYear', e.target.value)} />
-                      <input className="input" placeholder="To" type="number" value={filters.maxYear} onChange={e => setFilter('maxYear', e.target.value)} />
-                    </div>
-                  </div>
-
-                  <button className={`btn btn-sm ${filters.auctionStatus === 'live' ? 'btn-gold' : 'btn-outline'}`} onClick={() => setFilter('auctionStatus', filters.auctionStatus === 'live' ? '' : 'live')} style={{ justifyContent: 'center' }}>
-                    <span className="live-dot" style={{ width: 6, height: 6 }} />
-                    Live Auctions Only
-                  </button>
-
-                  <button className="btn btn-ghost btn-sm" onClick={clearAll} style={{ color: 'var(--text-muted)' }}>
-                    ✕ Clear All Filters
-                  </button>
-                </div>
+                <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Featured</div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff' }}>
+                  Elite <span style={{ color: 'var(--gold)' }}>Auctions</span>
+                </h2>
               </div>
-            )}
-
-            {/* ─── Car Grid ─── */}
-            <div>
-              {loading ? (
-                <SkeletonGrid count={6} />
-              ) : cars.length === 0 ? (
-                <div className="empty-state">
-                  <div className="empty-icon">🚗</div>
-                  <h3>No cars found</h3>
-                  <p>Try adjusting your filters or search term</p>
-                  <button className="btn btn-outline" style={{ marginTop: 16 }} onClick={clearAll}>Clear Filters</button>
-                </div>
-              ) : (
-                <>
-                  <div className="car-grid">
-                    {cars.map(car => (
-                      <CarCard
-                        key={car._id}
-                        car={car}
-                        isComparing={compare.includes(car._id)}
-                        onToggleCompare={() => toggleCompare(car._id)}
-                        compareCount={compare.length}
-                      />
-                    ))}
-                  </div>
-
-                  {totalPages > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 40 }}>
-                      <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => fetchCars(page - 1)}>← Prev</button>
-                      {[...Array(Math.min(totalPages, 7))].map((_, i) => {
-                        const p = i + 1;
-                        return (
-                          <button key={p} className="btn btn-sm" onClick={() => fetchCars(p)}
-                            style={{ background: page === p ? 'var(--gold)' : 'var(--surface)', color: page === p ? '#0A1628' : 'var(--text-muted)', border: '1px solid var(--border)' }}>
-                            {p}
-                          </button>
-                        );
-                      })}
-                      <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => fetchCars(page + 1)}>Next →</button>
-                    </div>
-                  )}
-                </>
-              )}
+              <Link to="/showroom?filter=auction" style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, borderBottom: '1px solid var(--gold)', paddingBottom: 2 }}>
+                View All →
+              </Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 28 }}>
+              {featured.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           </div>
+        </section>
+      )}
+
+      {/* ─── Recent Listings ─── */}
+      {recent.length > 0 && (
+        <section style={{ padding: '0 0 80px' }}>
+          <div className="container">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32 }}>
+              <div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Marketplace</div>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff' }}>
+                  Recent <span style={{ color: 'rgba(255,255,255,0.5)' }}>Arrivals</span>
+                </h2>
+              </div>
+              <Link to="/showroom" style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 700, borderBottom: '1px solid rgba(255,255,255,0.2)', paddingBottom: 2 }}>
+                Browse All →
+              </Link>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 28 }}>
+              {recent.map(car => <CartyGrid key={car._id} car={car} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ─── CTA ─── */}
+      <section style={{ padding: '80px 0', background: 'linear-gradient(180deg, transparent, rgba(212,168,67,0.04))', textAlign: 'center' }}>
+        <div className="container">
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 900, fontStyle: 'italic', color: '#fff', marginBottom: 12 }}>
+            Ready to <span style={{ color: 'var(--gold)' }}>Sell</span> Your Car?
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14, maxWidth: 400, margin: '0 auto 32px' }}>
+            Join Kenya's most trusted dealer network. List your vehicle and reach thousands of serious buyers.
+          </p>
+          <Link to={isAuth ? '/dealer/add-car' : '/register?role=dealer'} style={{
+            padding: '16px 40px', background: '#fff', color: '#000',
+            borderRadius: 9999, fontWeight: 900, fontSize: 11,
+            textTransform: 'uppercase', letterSpacing: '0.08em',
+            transition: 'all 0.3s', display: 'inline-block',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--gold)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#fff'; }}
+          >
+            List Your Vehicle
+          </Link>
         </div>
       </section>
 
       {/* ─── Footer ─── */}
-      <footer style={{ background: 'var(--surface)', borderTop: '1px solid var(--border)', padding: '32px 0', textAlign: 'center' }}>
-        <div className="container">
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: 12, fontWeight: 600 }}>Kayad</div>
-          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', fontSize: 12, color: 'var(--text-dim)', flexWrap: 'wrap' }}>
-            <Link to="/" style={{ color: 'var(--text-muted)' }}>Browse Cars</Link>
-            <Link to="/?auctionStatus=live" style={{ color: 'var(--text-muted)' }}>Live Auctions</Link>
-            <Link to="/register?role=dealer" style={{ color: 'var(--text-muted)' }}>List Your Car</Link>
+      <footer style={{ padding: '40px 0', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: '#fff', fontWeight: 700, fontStyle: 'italic', marginBottom: 16 }}>Kayad</div>
+          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)', flexWrap: 'wrap' }}>
+            <Link to="/showroom">The Gallery</Link>
+            <Link to="/showroom?filter=auction">Live Auctions</Link>
+            <Link to="/register?role=dealer">List Your Car</Link>
           </div>
-          <div style={{ marginTop: 16, color: 'var(--text-dim)', fontSize: 11 }}>
+          <div style={{ marginTop: 24, fontSize: 11, color: 'rgba(255,255,255,0.15)' }}>
             © {new Date().getFullYear()} Kayad Ltd. All rights reserved.
           </div>
         </div>
       </footer>
-
     </div>
   );
 }

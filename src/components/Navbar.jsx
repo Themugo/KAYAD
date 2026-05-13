@@ -124,12 +124,12 @@ export default function Navbar() {
 
           {/* Desktop nav links */}
           <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 22, flex: 1 }}>
-            <NavLink to="/">Browse Cars</NavLink>
-            <NavLink to="/showroom">Elite Showroom</NavLink>
-            <NavLink to="/?auctionStatus=live">
+            <NavLink to="/showroom">The Gallery</NavLink>
+            <NavLink to="/showroom?filter=auction">
               <span className="live-dot" style={{ width: 6, height: 6 }} />
               Live Auctions
             </NavLink>
+            <NavLink to="/showroom?filter=fixed">Direct Buy</NavLink>
             {isDealer && <NavLink to="/dealer">Dealer Hub</NavLink>}
             {isAdmin  && <NavLink to="/admin">Admin</NavLink>}
           </div>
@@ -331,11 +331,11 @@ export default function Navbar() {
 
             {/* Nav links */}
             <NavLink to="/"    mobile>🏠 Home</NavLink>
-            <NavLink to="/" mobile>🚗 Browse Cars</NavLink>
-            <NavLink to="/showroom" mobile>✨ Elite Showroom</NavLink>
-            <NavLink to="/?auctionStatus=live" mobile>
+            <NavLink to="/showroom" mobile>🎨 The Gallery</NavLink>
+            <NavLink to="/showroom?filter=auction" mobile>
               <span className="live-dot" style={{ width: 7, height: 7 }} /> Live Auctions
             </NavLink>
+            <NavLink to="/showroom?filter=fixed" mobile>💳 Direct Buy</NavLink>
 
             {isAuth && (
               <>

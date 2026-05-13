@@ -77,3 +77,6 @@ tmp/
 *.gz
 *.dump
 .vercel
+
+# Generated
+KAYAD_CODE_DUMP.txt
