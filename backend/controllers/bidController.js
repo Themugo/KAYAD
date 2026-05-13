@@ -267,6 +267,18 @@ export const confirmBidPayment = async (req, res) => {
 
     await bid.markAsPaid(receipt);
 
+    // ── PDF RECEIPT (fire-and-forget) ───────────────────────
+    try {
+      const { generateReceipt } = await import("../services/pdfService.js");
+      generateReceipt({
+        title: "Bid Payment Confirmed",
+        amount: bid.amount,
+        transactionId: receipt || bid._id.toString(),
+        carDetails: bid.carId?.toString() || "—",
+        date: new Date(),
+      }).catch(() => {});
+    } catch (_) { /* PDF generation non-critical */ }
+
     const car = await Car.findById(bid.carId).session(session);
 
     if (car) {

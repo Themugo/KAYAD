@@ -3,6 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './styles/glow.css';
 import { initSentry, setSentryUser } from './utils/sentry';
 
 // Initialise Sentry before anything else renders

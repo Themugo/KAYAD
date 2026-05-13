@@ -72,6 +72,18 @@ export const handleMpesaCallback = async (callbackData) => {
 
     await payment.save({ session });
 
+    // ── PDF RECEIPT (fire-and-forget) ─────────────────────────
+    try {
+      const { generateReceipt } = await import("./pdfService.js");
+      generateReceipt({
+        title: payment.type === "purchase" ? "Purchase Payment Confirmed" : "Payment Confirmed",
+        amount: payment.amount,
+        transactionId: receipt || payment._id.toString(),
+        carDetails: payment.car?.toString() || "—",
+        date: new Date(),
+      }).catch(() => {});
+    } catch (_) { /* PDF generation non-critical */ }
+
     // =============================
     // 🎯 BUSINESS LOGIC
     // =============================

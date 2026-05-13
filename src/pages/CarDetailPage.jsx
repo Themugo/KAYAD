@@ -83,8 +83,18 @@ export default function CarDetailPage() {
   const prevImg = () => setImgIdx(i => (i > 0 ? i - 1 : (car?.images?.length || 1) - 1));
   const nextImg = () => setImgIdx(i => (i < (car?.images?.length || 1) - 1 ? i + 1 : 0));
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
-  if (!car) return <div className="page loading-center"><h3>Car not found</h3></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-gold" />
+    </div>
+  );
+  if (!car) return (
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white">
+      <h2 className="text-4xl font-black italic uppercase text-gold">Unit Not Found</h2>
+      <p className="text-zinc-500 mt-4 uppercase text-xs tracking-widest">The car may have been sold or removed.</p>
+      <a href="/showroom" className="mt-8 bg-white text-black px-8 py-3 rounded-full font-black text-xs uppercase">Return to Showroom</a>
+    </div>
+  );
 
   const images = car.images || [];
   const isOwner = user?.id === car.dealer?._id?.toString() || user?.id === car.dealer?.toString();

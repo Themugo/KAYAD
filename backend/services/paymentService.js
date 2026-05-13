@@ -88,6 +88,20 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     { status: "success", mpesaReceipt: receipt }
   ).catch(() => {});
 
+  // ── PDF RECEIPT (fire-and-forget) ─────────────────────────
+  try {
+    const { generateReceipt } = await import("./pdfService.js");
+    const pdfBuffer = await generateReceipt({
+      title: payment.type === "escrow" ? "Escrow Payment Confirmed" : "Payment Confirmed",
+      buyerName: payment.user?.toString() || "—",
+      amount: payment.amount,
+      transactionId: receipt || payment._id.toString(),
+      carDetails: payment.car?.toString() || "—",
+      date: new Date(),
+    });
+    // Could store to file/cloud in future
+  } catch (_) { /* PDF generation non-critical */ }
+
   // If escrow payment, mark escrow as held
   if (payment.type === "escrow") {
     const Escrow = (await import("../models/Escrow.js")).default;

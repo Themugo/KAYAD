@@ -130,6 +130,8 @@ const userSchema = new mongoose.Schema(
 
     totalSales: { type: Number, default: 0 },
     listingCount: { type: Number, default: 0 },
+    commissionBalance: { type: Number, default: 0 },
+    listingsLocked: { type: Boolean, default: false },
 
     // =============================
     // 👁 DEALER VISIBILITY

@@ -12,6 +12,9 @@ import {
 } from "../services/auctionSync.service.js";
 
 import Auction from "../models/Auction.js";
+import Car from "../models/Car.js";
+import User from "../models/User.js";
+import Transaction from "../models/Transaction.js";
 
 // =============================
 // 🔧 CONFIG
@@ -336,6 +339,34 @@ export const endAuction = async (roomId) => {
 
     const winner = bids[bids.length - 1];
     const deadline = new Date(Date.now() + 10 * 60 * 1000);
+    const hammerPrice = winner.bid;
+
+    // =============================
+    // 💰 COMMISSION CALCULATION (SOVEREIGN V3)
+    // =============================
+    const commissionRate = auction.commissionRate || 2;
+    const commissionOwed = (hammerPrice * commissionRate) / 100;
+
+    // Post commission to dealer's outstanding balance
+    if (auction.paymentRecipient === "DEALER_DIRECT" && commissionOwed > 0) {
+      const carDoc = await Car.findById(auction.carId).select("dealer");
+      if (carDoc?.dealer) {
+        await User.findByIdAndUpdate(carDoc.dealer, { $inc: { commissionBalance: commissionOwed } });
+      }
+    }
+
+    // Log commission transaction
+    if (commissionOwed > 0) {
+      await Transaction.create({
+        user: winner.userId,
+        car: auction.carId,
+        amount: commissionOwed,
+        type: "commission",
+        status: "pending",
+        description: `Commission ${commissionRate}% on hammer KES ${hammerPrice.toLocaleString()}`,
+        reference: `COM-${roomId}-${Date.now()}`,
+      });
+    }
 
     await Auction.updateOne(
       { roomId },
@@ -345,8 +376,26 @@ export const endAuction = async (roomId) => {
         winner,
         paymentDeadline: deadline,
         bidHistory: bids,
+        commissionOwed,
       }
     );
+
+    // =============================
+    // 🔁 LOSER REFUND LOGGING (KAYAD_ESCROW only)
+    // =============================
+    if (auction.paymentRecipient === "KAYAD_ESCROW") {
+      for (const bidder of bids.slice(0, -1)) {
+        await Transaction.create({
+          user: bidder.userId,
+          car: auction.carId,
+          amount: auction.bidSecurityAmount || 0,
+          type: "refund",
+          status: "pending",
+          description: `Auction ended — security refund for ${roomId}`,
+          reference: `REF-${roomId}-${bidder.userId}-${Date.now()}`,
+        });
+      }
+    }
 
     await syncAuctionEnd({
       roomId,
@@ -361,7 +410,7 @@ export const endAuction = async (roomId) => {
       paymentDeadline: deadline,
     });
 
-    return { success: true, winner };
+    return { success: true, winner, commissionOwed };
 
   } catch (err) {
     console.error("❌ END ERROR:", err);

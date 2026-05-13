@@ -147,6 +147,19 @@ const auctionSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 🔐 BID SECURITY (SOVEREIGN V3)
+    // =============================
+    bidSecurityAmount: { type: Number, default: 0 },
+    paymentRecipient: {
+      type: String,
+      enum: ["KAYAD_ESCROW", "DEALER_DIRECT"],
+      default: "KAYAD_ESCROW",
+    },
+    dealerMpesaShortcode: { type: String, default: "" },
+    commissionRate: { type: Number, default: 2 },
+    commissionOwed: { type: Number, default: 0 },
+
+    // =============================
     // 🚫 MODERATION
     // =============================
     cancelledReason: String,

@@ -1,0 +1,35 @@
+/* Premium KAYAD Glow-Up Pack */
+@layer components {
+  .glow-gold {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+  }
+  
+  .sidebar-icon-glow:hover {
+    color: #D4AF37;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
+    transition: all 0.3s ease;
+  }
+
+  .glass-card {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .btn-premium {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  }
+}
+
+/* Fix for smooth scrolling transitions */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #050505;
+}

@@ -24,6 +24,7 @@ import {
 } from "../controllers/carController.js";
 
 import Car from "../models/Car.js";
+import User from "../models/User.js";
 
 const router = express.Router();
 
@@ -271,6 +272,23 @@ router.post(
       return res.status(404).json({
         success: false,
         message: "Car not found",
+      });
+    }
+
+    // 🚫 Listing lock check — block if dealer has outstanding commission
+    const dealer = await User.findById(car.dealer).select(
+      "commissionBalance listingsLocked"
+    );
+
+    if (
+      dealer &&
+      dealer.listingsLocked &&
+      dealer.commissionBalance > 0
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
       });
     }
 
