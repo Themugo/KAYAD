@@ -17,6 +17,7 @@ export default function Navbar() {
   const [notifDrop,  setNotifDrop]  = useState(false);
   const [notifs,     setNotifs]     = useState([]);
   const [unread,     setUnread]     = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
   const dropRef = useRef(null);
 
   // Close everything on route change
@@ -24,6 +25,7 @@ export default function Navbar() {
     setMobileOpen(false);
     setUserDrop(false);
     setNotifDrop(false);
+    setSearchTerm('');
   }, [loc.pathname]);
 
   // Close dropdowns on outside click
@@ -94,6 +96,18 @@ export default function Navbar() {
     );
   };
 
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    if (!q) {
+      navigate('/showroom');
+    } else {
+      navigate(`/showroom?q=${encodeURIComponent(q)}`);
+    }
+    // close mobile menu after searching
+    setMobileOpen(false);
+  };
+
   return (
     <>
       {/* ── Main nav bar ───────────────────────────────── */}
@@ -103,7 +117,7 @@ export default function Navbar() {
         background: 'rgba(10,22,40,0.95)', backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border)',
       }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 28, width: '100%' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', gap: 20, width: '100%' }}>
 
           {/* Logo */}
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -113,7 +127,7 @@ export default function Navbar() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
             }}>🚗</div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem', lineHeight: 1 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.05rem', lineHeight: 1 }}>
                 Kayad
               </div>
               <div style={{ fontSize: 9, color: 'var(--gold)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -123,7 +137,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop nav links */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 22, flex: 1 }}>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 18, flex: 1 }}>
             <NavLink to="/showroom">The Gallery</NavLink>
             <NavLink to="/showroom?filter=auction">
               <span className="live-dot" style={{ width: 6, height: 6 }} />
@@ -132,6 +146,23 @@ export default function Navbar() {
             <NavLink to="/showroom?filter=fixed">Direct Buy</NavLink>
             {isDealer && <NavLink to="/dealer">Dealer Hub</NavLink>}
             {isAdmin  && <NavLink to="/admin">Admin</NavLink>}
+
+            {/* Search (desktop) */}
+            <form onSubmit={onSearchSubmit} style={{ marginLeft: 12, flex: 1, display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '60%', maxWidth: 560 }}>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search cars, brand, model or location..."
+                  aria-label="Search cars"
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)',
+                    background: 'var(--surface)', color: 'var(--text)', outline: 'none', fontSize: 14,
+                  }}
+                />
+              </div>
+            </form>
           </div>
 
           {/* Right side */}
@@ -303,6 +334,24 @@ export default function Navbar() {
         <div className="mobile-menu" onClick={() => setMobileOpen(false)}>
           <div className="mobile-menu-panel" onClick={e => e.stopPropagation()}>
 
+            {/* Mobile search */}
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
+              <form onSubmit={onSearchSubmit} style={{ display: 'flex', gap: 8 }}>
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search cars, brand, model or location..."
+                  aria-label="Search cars"
+                  style={{
+                    flex: 1, padding: '10px 12px', borderRadius: 10, border: '1px solid var(--border)',
+                    background: 'var(--surface)', color: 'var(--text)', outline: 'none', fontSize: 14,
+                  }}
+                />
+                <button type="submit" style={{ padding: '8px 12px', borderRadius: 10, background: 'var(--gold)', color: '#071026', border: 'none', cursor: 'pointer' }}>Search</button>
+              </form>
+            </div>
+
             {/* User header */}
             {isAuth ? (
               <div style={{ padding: '0 20px 20px', borderBottom: '1px solid var(--border)', marginBottom: 8 }}>
@@ -316,7 +365,7 @@ export default function Navbar() {
                   <div>
                     <div style={{ fontWeight: 700 }}>{user?.name}</div>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{user?.email}</div>
-                    <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : user?.role === 'broker' ? 'badge-orange' : 'badge-blue'}`} style={{ marginTop: 4 }}>
+                    <span className={`badge ${user?.role === 'admin' ? 'badge-red' : user?.role === 'dealer' ? 'badge-gold' : user?.role === 'broker' ? 'badge-orange' : 'badge-blue'}`}>
                       {user?.role === 'broker' ? 'broker' : user?.role}
                     </span>
                   </div>
