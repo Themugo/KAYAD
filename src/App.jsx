@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Layout
 import Navbar from './components/Navbar';
+import AppInstallPrompt from './components/AppInstallPrompt';
 
 // Public pages
 import HomePage        from './pages/HomePage';
@@ -91,6 +92,7 @@ export default function App() {
                   <Route path="/404" element={<NotFoundPage />} />
                   <Route path="*"    element={<NotFoundPage />} />
                 </Routes>
+                <AppInstallPrompt />
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>
