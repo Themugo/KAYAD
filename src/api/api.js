@@ -124,7 +124,7 @@ const _authAPI = {
   logout:   ()     => isDemoToken() ? demoAPI.auth.logout() : api.post('/auth/logout').then(unwrap),
   profile:  ()     => isDemoToken() ? demoAPI.auth.profile() : api.get('/auth/profile').then(unwrap),
   me:       ()     => isDemoToken() ? demoAPI.auth.me() : api.get('/auth/me').then(unwrap),
-  changePassword: (body) => isDemoToken() ? demoAPI.auth.changePassword(body) : api.post('/auth/change-password', body).then(unwrap),
+  changePassword: (body) => isDemoToken() ? demoAPI.auth.changePassword(body) : api.put('/auth/change-password', body).then(unwrap),
   updateProfile:  (body) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
 };
 export const authAPI = withDemo(_authAPI, demoAPI.auth);
@@ -233,6 +233,13 @@ const _adminAPI = {
 
   // M-Pesa Test
   testMpesa:      (body)      => api.post('/admin/daraja/test', body).then(unwrap),
+
+  // System Kill-Switch
+  systemKillSwitch: (body) => api.post('/admin/system/kill-switch', body).then(unwrap),
+  systemRecover:    (body) => api.post('/admin/system/recover', body).then(unwrap),
+
+  // Dealer Verification
+  verifyDealer:    (userId, body) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
 };
 export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
 

@@ -11,19 +11,21 @@ export default defineConfig(({ mode }) => {
       react(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'icon.svg'],
+        includeAssets: ['favicon.svg', 'icon.svg', 'icon-192.png', 'icon-512.png'],
         manifest: {
-          name: "KAYAD: Kenya's Live Car Auction",
-          short_name: 'KAYAD',
-          description: 'Premium vehicle auctions and verified marketplace.',
+          name: "Kayad – Kenya's Premium Car Marketplace",
+          short_name: 'Kayad',
+          description: 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.',
           theme_color: '#D4AF37',
           background_color: '#050505',
           display: 'standalone',
           start_url: '/',
+          lang: 'en-KE',
+          orientation: 'portrait-primary',
+          categories: ['automotive', 'marketplace', 'business'],
           icons: [
-            { src: 'icon.svg', sizes: '192x192', type: 'image/svg+xml' },
-            { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml' },
-            { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+            { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
           ],
         },
         workbox: {

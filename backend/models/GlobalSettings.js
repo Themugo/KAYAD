@@ -2,9 +2,6 @@ import mongoose from "mongoose";
 
 const globalSettingsSchema = new mongoose.Schema(
   {
-    // =============================
-    // 🏪 PLATFORM INFO
-    // =============================
     platformName: { type: String, default: "Kayad" },
     tagline:      { type: String, default: "Kenya's Premium Car Marketplace" },
     supportEmail: { type: String, default: "" },
@@ -18,6 +15,11 @@ const globalSettingsSchema = new mongoose.Schema(
     bidCommitmentPct:    { type: Number, default: 5 },
     escrowReleaseDays:   { type: Number, default: 3 },
     maxListingImages:    { type: Number, default: 8 },
+    listingFee:          { type: Number, default: 1000 },
+    auctionRegistrationFee: { type: Number, default: 2000 },
+    commissionPercentage: { type: Number, default: 2 },
+    ghostCheckFee:       { type: Number, default: 2500 },
+    platformVat:         { type: Number, default: 16 },
 
     // =============================
     // 🔄 FEATURES
@@ -26,6 +28,28 @@ const globalSettingsSchema = new mongoose.Schema(
     requireDealerApproval: { type: Boolean, default: true },
     allowEscrow:           { type: Boolean, default: true },
     allowAuction:          { type: Boolean, default: true },
+    isAuctionEnabled:      { type: Boolean, default: true },
+
+    // =============================
+    // 🚨 SYSTEM STATUS (KILL SWITCHES)
+    // =============================
+    systemStatus: {
+      isAuctionActive:    { type: Boolean, default: true },
+      isPaymentsActive:   { type: Boolean, default: true },
+      isGhostCheckActive: { type: Boolean, default: true },
+      isMaintenanceMode:  { type: Boolean, default: false },
+      emergencyMessage:   { type: String, default: "System under scheduled maintenance." },
+    },
+
+    // =============================
+    // 🏷 ACTIVE PROMOS
+    // =============================
+    activePromos: [{
+      code: String,
+      discountPercent: Number,
+      expiryDate: Date,
+      targetRole: { type: String, enum: ["dealer", "individual", "all"], default: "all" },
+    }],
 
     // =============================
     // 🏦 M-PESA / DARAJA

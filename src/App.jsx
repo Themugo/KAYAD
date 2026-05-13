@@ -15,6 +15,7 @@ import Showroom        from './pages/Showroom';
 
 import CarDetailPage   from './pages/CarDetailPage';
 import AuctionLivePage from './pages/AuctionLivePage';
+import AuctionCalendar from './pages/AuctionCalendar';
 import LoginPage       from './pages/LoginPage';
 import RegisterPage    from './pages/RegisterPage';
 import NotFoundPage    from './pages/NotFoundPage';
@@ -43,6 +44,8 @@ import AdminEscrows   from './pages/admin/AdminEscrows';
 import AdminAuctions  from './pages/admin/AdminAuctions';
 import AdminSellers   from './pages/admin/AdminSellers';
 import AdminSettings  from './pages/admin/AdminSettings';
+import PanicRoom     from './pages/admin/PanicRoom';
+import AdManager     from './pages/admin/AdManager';
 
 export default function App() {
   return (
@@ -59,6 +62,7 @@ export default function App() {
                   <Route path="/showroom"  element={<Showroom />} />
                   <Route path="/cars/:id"   element={<CarDetailPage />} />
                   <Route path="/auction/:id" element={<AuctionLivePage />} />
+                  <Route path="/auctions/calendar" element={<AuctionCalendar />} />
                   <Route path="/login"      element={<LoginPage />} />
                   <Route path="/register"   element={<RegisterPage />} />
 
@@ -87,6 +91,8 @@ export default function App() {
                   <Route path="/admin/auctions"    element={<RequireAdmin><AdminAuctions /></RequireAdmin>} />
                   <Route path="/admin/sellers"     element={<RequireAdmin><AdminSellers /></RequireAdmin>} />
                   <Route path="/admin/settings"    element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+                  <Route path="/admin/panic-room" element={<RequireAdmin><PanicRoom /></RequireAdmin>} />
+                  <Route path="/admin/ads"       element={<RequireAdmin><AdManager /></RequireAdmin>} />
 
                   {/* ── Fallback ── */}
                   <Route path="/404" element={<NotFoundPage />} />

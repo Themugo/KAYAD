@@ -255,6 +255,8 @@ export default function Navbar() {
                         ...(isDealer ? [{ to: '/dealer', icon: '🏪', label: 'Dealer Hub' }] : []),
                         ...(isAdmin  ? [{ to: '/admin',  icon: '🔑', label: 'Admin Panel' }] : []),
                         ...(isAdmin  ? [{ to: '/admin/settings', icon: '⚙', label: 'Settings' }] : []),
+                        ...(isAdmin  ? [{ to: '/admin/panic-room', icon: '🚨', label: 'Panic Room' }] : []),
+                        ...(isAdmin  ? [{ to: '/admin/ads', icon: '📢', label: 'Ad Manager' }] : []),
                       ].map(item => (
                         <Link key={item.to} to={item.to} style={{
                           display: 'flex', alignItems: 'center', gap: 10,
@@ -359,6 +361,9 @@ export default function Navbar() {
               <>
                 <div style={{ padding: '8px 20px 4px', fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 8 }}>Admin</div>
                 <NavLink to="/admin" mobile>📊 Reports Dashboard</NavLink>
+                <NavLink to="/admin/panic-room" mobile>🚨 Panic Room</NavLink>
+                <NavLink to="/admin/sellers" mobile>🏪 Dealer Approvals</NavLink>
+                <NavLink to="/admin/escrows" mobile>🔒 Escrow Ledger</NavLink>
               </>
             )}
 

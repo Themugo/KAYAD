@@ -32,6 +32,7 @@ import {
   mpesaIpWhitelist,
   validateMpesaCallback,
 } from "./middleware/mpesaSecurity.js";
+import { checkSystemStatus } from "./middleware/systemCheck.js";
 
 // ─── Routes ───────────────────────────────────────────────────
 import authRoutes         from "./routes/authRoutes.js";
@@ -158,10 +159,45 @@ io.on("connection", (socket) => {
     if (carId) { socket.join(String(carId)); socket.join(`car_${carId}`); }
   });
 
+  socket.on("placeBid", async ({ auctionId, userId, bidAmount, maskedName }) => {
+    if (!auctionId || !bidAmount) return;
+    try {
+      const Auction = (await import("./models/Auction.js")).default;
+      const auction = await Auction.findById(auctionId);
+      if (!auction || auction.status !== "active") return;
+
+      if (bidAmount <= auction.highestBid) return;
+      auction.highestBid = bidAmount;
+      auction.bidHistory.push({ userId: userId || socket.user?.id, bid: bidAmount });
+      const now = new Date();
+      const timeRemaining = auction.endTime - now;
+      if (timeRemaining < 30000 && timeRemaining > 0) {
+        auction.endTime = new Date(auction.endTime.getTime() + 30000);
+        auction.extendedCount = (auction.extendedCount || 0) + 1;
+      }
+      await auction.save();
+
+      io.to(String(auctionId)).emit("newBid", {
+        amount: bidAmount,
+        bidder: maskedName || `Bidder #${100 + (auction.bidHistory?.length || 0)}`,
+        time: new Date(),
+        endTime: auction.endTime,
+      });
+      if (auction.endTime > now) {
+        io.to(String(auctionId)).emit("timeExtended", { newEndTime: auction.endTime });
+      }
+    } catch (err) {
+      console.error("placeBid socket error:", err.message);
+    }
+  });
+
   socket.on("joinChat",  (chatId) => { if (chatId) socket.join(`chat_${chatId}`); });
   socket.on("joinAdmin", ()       => { if (socket.user?.role === "admin") socket.join("admins"); });
   socket.on("disconnect", ()      => {});
 });
+
+// ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
+app.use("/api", checkSystemStatus);
 
 // ─── API ROUTES ───────────────────────────────────────────────
 app.use("/api/auth",          authLimiter, authRoutes);

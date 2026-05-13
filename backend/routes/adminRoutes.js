@@ -313,6 +313,8 @@ router.put(
       "platformName", "supportEmail", "supportPhone",
       "dealerCommission", "bidCommitmentPct", "escrowReleaseDays", "maxListingImages",
       "allowGuestBrowsing", "requireDealerApproval",
+      "listingFee", "auctionRegistrationFee", "ghostCheckFee", "commissionPercentage",
+      "platformVat", "buyerPremiumPct", "activePromos",
       "daraja", "bank", "reconciliation",
     ];
 
@@ -384,6 +386,141 @@ router.post(
     });
 
     res.json({ success: true, entry });
+  })
+);
+
+// =============================
+// 🚨 SYSTEM KILL-SWITCH (superadmin only)
+// =============================
+router.post(
+  "/system/kill-switch",
+  authorize("superadmin"),
+  asyncHandler(async (req, res) => {
+    const { type } = req.body;
+    const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
+    let settings = await GlobalSettings.findOne();
+    if (!settings) settings = await GlobalSettings.create({});
+
+    if (type === "auctions") {
+      settings.systemStatus.isAuctionActive = false;
+    } else if (type === "payments") {
+      settings.systemStatus.isPaymentsActive = false;
+    } else if (type === "ghost_check") {
+      settings.systemStatus.isGhostCheckActive = false;
+    } else if (type === "full_maintenance") {
+      settings.systemStatus.isMaintenanceMode = true;
+      if (req.body.message) settings.systemStatus.emergencyMessage = req.body.message;
+    } else {
+      return res.status(400).json({ success: false, message: "Invalid kill-switch type" });
+    }
+
+    await settings.save();
+    await AuditLog.create({
+      action: `Kill-switch activated: ${type}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: `${type} disabled globally` });
+  })
+);
+
+// =============================
+// 🚨 SYSTEM RECOVERY (superadmin only)
+// =============================
+router.post(
+  "/system/recover",
+  authorize("superadmin"),
+  asyncHandler(async (req, res) => {
+    const { type } = req.body;
+    const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
+    let settings = await GlobalSettings.findOne();
+    if (!settings) settings = await GlobalSettings.create({});
+
+    if (type === "all") {
+      settings.systemStatus = {
+        isAuctionActive: true,
+        isPaymentsActive: true,
+        isGhostCheckActive: true,
+        isMaintenanceMode: false,
+        emergencyMessage: "System under scheduled maintenance.",
+      };
+    } else if (type === "auctions") {
+      settings.systemStatus.isAuctionActive = true;
+    } else if (type === "payments") {
+      settings.systemStatus.isPaymentsActive = true;
+    } else if (type === "maintenance") {
+      settings.systemStatus.isMaintenanceMode = false;
+    }
+
+    await settings.save();
+    await AuditLog.create({
+      action: `System recovered: ${type}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: `${type} re-enabled globally` });
+  })
+);
+
+// =============================
+// 🌐 DEALER SUBDOMAIN MANAGEMENT
+// =============================
+router.put(
+  "/dealers/:id/subdomain",
+  adminOrSuper,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { subdomain } = req.body;
+    if (!subdomain) return res.status(400).json({ success: false, message: "Subdomain required" });
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    user.subdomain = subdomain.toLowerCase().trim();
+    await user.save();
+
+    await AuditLog.create({
+      action: `Subdomain ${subdomain}.kayad.space assigned to ${user.email}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: `Subdomain ${subdomain}.kayad.space is now live!` });
+  })
+);
+
+// =============================
+// ✅ DEALER VERIFICATION (approve/reject)
+// =============================
+router.post(
+  "/users/:id/verify-dealer",
+  adminOrSuper,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { action } = req.body; // 'approve' or 'reject'
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    if (action === "approve") {
+      user.role = "dealer";
+      user.verificationStatus = "verified";
+      user.approved = true;
+    } else if (action === "reject") {
+      user.verificationStatus = "rejected";
+    } else {
+      return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
+    }
+
+    await user.save();
+    await AuditLog.create({
+      action: `Dealer verification: ${action} for ${user.email}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: `Dealer ${action}d successfully.` });
   })
 );
 

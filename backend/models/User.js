@@ -32,9 +32,19 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "dealer", "broker", "admin", "superadmin"],
+      enum: ["user", "dealer", "broker", "admin", "superadmin", "escrow_officer", "ad_manager", "moderator", "ghost_checker", "individual_seller"],
       default: "user",
       index: true,
+    },
+    verificationStatus: {
+      type: String,
+      enum: ["unverified", "pending", "verified", "rejected"],
+      default: "unverified",
+    },
+    dealerDocuments: {
+      businessLicenseUrl: { type: String, default: "" },
+      showroomPhotoUrl: { type: String, default: "" },
+      kraPinUrl: { type: String, default: "" },
     },
 
     isBanned: {
@@ -99,6 +109,19 @@ const userSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 💼 PAYMENT DETAILS (DEALER ONBOARDING)
+    // =============================
+    paymentDetails: {
+      bankName: { type: String, default: "" },
+      accountName: { type: String, default: "" },
+      accountNumber: { type: String, default: "" },
+      paybillNumber: { type: String, default: "" },
+      mpesaPhone: { type: String, default: "" },
+    },
+    onboardingComplete: { type: Boolean, default: false },
+    subscriptionStatus: { type: String, enum: ["active", "past_due", "none"], default: "none" },
+
+    // =============================
     // 💼 SELLER FINANCIAL SETTINGS
     // =============================
     commission: { type: Number, default: 5, min: 0, max: 50 },
@@ -130,6 +153,15 @@ const userSchema = new mongoose.Schema(
       },
       bodyType: [String],
     },
+
+    // =============================
+    // 🔍 GHOST CHECKER PROFILE
+    // =============================
+    isInspector: { type: Boolean, default: false },
+    inspectionSpecialty: [String],
+    locationCity: String,
+    averageRating: { type: Number, default: 5 },
+    completedChecks: { type: Number, default: 0 },
 
     // =============================
     // 🔐 SECURITY

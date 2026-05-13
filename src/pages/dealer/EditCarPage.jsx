@@ -1,7 +1,7 @@
 // src/pages/dealer/EditCarPage.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { carsAPI } from '../../api/api';
+import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 const Field = ({ label, children }) => (
