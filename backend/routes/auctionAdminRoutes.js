@@ -1,0 +1,207 @@
+import express from "express";
+import { protect, adminOnly } from "../middleware/auth.js";
+import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
+
+import Car from "../models/Car.js";
+import User from "../models/User.js";
+import Bid from "../models/Bid.js";
+
+import {
+  startAuction,
+  endAuction,
+  getBidHistory,
+} from "../realtime/auctionEngine.js";
+
+import { syncAuctionResult } from "../realtime/syncService.js";
+
+const router = express.Router();
+
+// =============================
+// 🔒 ADMIN ONLY
+// =============================
+router.use(protect, adminOnly);
+
+// =============================
+// 🚀 START AUCTION
+// =============================
+router.post(
+  "/:carId/start",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { startingBid = 0, durationMs } = req.body;
+
+    const car = await Car.findById(req.params.carId);
+
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
+    }
+
+    // 🚫 Listing lock check — block if dealer has outstanding commission
+    const dealer = await User.findById(car.dealer).select(
+      "commissionBalance listingsLocked"
+    );
+
+    if (
+      dealer &&
+      dealer.listingsLocked &&
+      dealer.commissionBalance > 0
+    ) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
+      });
+    }
+
+    if (!durationMs) {
+      return res.status(400).json({ message: "Duration required" });
+    }
+
+    const result = await startAuction({
+      roomId: car._id.toString(),
+      startingBid,
+      durationMs,
+    });
+
+    car.auctionStatus = "live";
+    car.startingBid = startingBid;
+    car.currentBid = startingBid;
+    car.auctionStartTime = new Date();
+    car.auctionEndTime = new Date(Date.now() + durationMs);
+
+    await car.save();
+
+    res.json({
+      success: true,
+      message: "Auction started",
+      endTime: result.endTime,
+    });
+  })
+);
+
+// =============================
+// 🏁 FORCE END AUCTION
+// =============================
+router.post(
+  "/:carId/end",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const carId = req.params.carId;
+
+    const result = await endAuction(carId);
+
+    // 🔥 SYNC DB
+    await syncAuctionResult({
+      roomId: carId,
+      winner: result.winner,
+    });
+
+    res.json({
+      success: true,
+      result,
+    });
+  })
+);
+
+// =============================
+// ⏱ EXTEND AUCTION (ANTI-SNIPE)
+// =============================
+router.post(
+  "/:carId/extend",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { extraMs } = req.body;
+
+    if (!extraMs) {
+      return res.status(400).json({
+        message: "extraMs required",
+      });
+    }
+
+    const car = await Car.findById(req.params.carId);
+
+    if (!car) {
+      return res.status(404).json({
+        message: "Car not found",
+      });
+    }
+
+    car.auctionEndTime = new Date(
+      new Date(car.auctionEndTime).getTime() + extraMs
+    );
+
+    await car.save();
+
+    res.json({
+      success: true,
+      newEndTime: car.auctionEndTime,
+    });
+  })
+);
+
+// =============================
+// 📜 GET BID HISTORY (AUDIT)
+// =============================
+router.get(
+  "/:carId/bids",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const [dbBids, redisBids] = await Promise.all([
+      Bid.find({ carId: req.params.carId })
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .lean(),
+
+      getBidHistory(req.params.carId),
+    ]);
+
+    res.json({
+      success: true,
+      dbBids,
+      redisBids,
+    });
+  })
+);
+
+// =============================
+// 🧠 FORCE SET WINNER (RARE)
+// =============================
+router.post(
+  "/:carId/set-winner",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { bidId } = req.body;
+
+    if (!bidId) {
+      return res.status(400).json({
+        message: "bidId required",
+      });
+    }
+
+    const bid = await Bid.findById(bidId);
+
+    if (!bid) {
+      return res.status(404).json({
+        message: "Bid not found",
+      });
+    }
+
+    await Bid.markWinner(bidId);
+
+    await Car.findByIdAndUpdate(req.params.carId, {
+      winner: {
+        user: bid.user,
+        amount: bid.amount,
+      },
+      sold: true,
+    });
+
+    res.json({
+      success: true,
+      message: "Winner manually set",
+    });
+  })
+);
+
+export default router;

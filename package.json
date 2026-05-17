@@ -1,0 +1,29 @@
+{
+  "name": "kayad-frontend",
+  "version": "2.0.0",
+  "description": "Kayad — Kenya's Premium Car Marketplace — Live Bidding, Escrow, M-Pesa",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx"
+  },
+  "dependencies": {
+    "@sentry/react": "^8.0.0",
+    "axios": "^1.6.0",
+    "lucide-react": "^1.14.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "vite": "^5.4.0",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}

@@ -1,0 +1,225 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap } from 'lucide-react';
+
+function firstImage(car) {
+  if (car.image) return car.image;
+  const imgs = car.images || [];
+  for (const img of imgs) {
+    if (typeof img === 'string' && img) return img;
+    if (img?.url) return img.url;
+  }
+  return null;
+}
+
+const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
+
+export default function CartyGrid({ car, listView }) {
+  const [imgErr, setImgErr] = useState(false);
+  if (!car) return null;
+
+  const isLive    = car.auctionStatus === 'live';
+  const isElite   = isLive || car.allowBid || car.isAuction;
+  const linkTo    = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const img       = (!imgErr && firstImage(car)) || FALLBACK;
+  const city      = car.location?.city || car.location || 'Nairobi';
+  const d         = car.dealer || {};
+  const price     = Number(car.currentBid || car.price || 0);
+  const priceStr  = price >= 1_000_000
+    ? `${(price / 1_000_000).toFixed(1)}M`
+    : price >= 1000
+      ? `${(price / 1000).toFixed(0)}K`
+      : price.toLocaleString();
+
+  /* ── LIST VIEW ──────────────────────────────────────────── */
+  if (listView) {
+    return (
+      <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
+        <div style={{
+          display: 'flex', alignItems: 'stretch',
+          background: '#0A0A0A', borderBottom: '1px solid rgba(255,255,255,0.05)',
+          transition: 'background 0.2s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = '#111'}
+          onMouseLeave={e => e.currentTarget.style.background = '#0A0A0A'}
+        >
+          <div style={{ width: 160, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+            <img src={img} onError={() => setImgErr(true)} alt=""
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {isLive && (
+              <div style={{
+                position: 'absolute', top: 6, left: 6,
+                background: '#ef4444', borderRadius: 4, padding: '2px 6px',
+                fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.06em',
+              }}>LIVE</div>
+            )}
+          </div>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', minWidth: 0 }}>
+            <div style={{ minWidth: 0, marginRight: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {car.title}
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {car.mileage && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{car.mileage.toLocaleString()} KM</span>}
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{city}</span>
+                {car.year && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{car.year}</span>}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>
+                {isElite ? 'Bid' : 'Price'}
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                KES {priceStr}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  /* ── GRID CARD ──────────────────────────────────────────── */
+  return (
+    <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
+      <div style={{
+        background: '#0C0C0C',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 14,
+        overflow: 'hidden',
+        transition: 'transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease',
+        cursor: 'pointer',
+      }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-3px)';
+          e.currentTarget.style.borderColor = 'rgba(212,168,67,0.28)';
+          e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,168,67,0.06)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'none';
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
+        {/* ── IMAGE ── */}
+        <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden', background: '#111' }}>
+          <img
+            src={img}
+            onError={() => setImgErr(true)}
+            alt={car.title || 'Vehicle'}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              transition: 'transform 0.5s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+          />
+
+          {/* gradient overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.55) 100%)',
+          }} />
+
+          {/* Top badges */}
+          <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {isLive && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                background: 'rgba(239,68,68,0.92)', backdropFilter: 'blur(8px)',
+                borderRadius: 6, padding: '3px 8px',
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.2s infinite' }} />
+                <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.08em' }}>LIVE</span>
+              </div>
+            )}
+            {!isLive && isElite && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(212,168,67,0.25)',
+                borderRadius: 6, padding: '3px 7px',
+              }}>
+                <Zap size={7} style={{ color: 'var(--gold)' }} />
+                <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Auction</span>
+              </div>
+            )}
+            {d.verified && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                background: 'rgba(59,130,246,0.85)', backdropFilter: 'blur(8px)',
+                borderRadius: 6, padding: '3px 7px',
+              }}>
+                <ShieldCheck size={7} style={{ color: '#fff' }} />
+                <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>Verified</span>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom-right: year pill */}
+          {car.year && (
+            <div style={{
+              position: 'absolute', bottom: 8, right: 8,
+              background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
+              borderRadius: 6, padding: '3px 8px',
+              fontSize: 9, color: 'rgba(255,255,255,0.7)', fontWeight: 700,
+            }}>{car.year}</div>
+          )}
+        </div>
+
+        {/* ── CARD BODY ── */}
+        <div style={{ padding: '12px 14px 14px' }}>
+          {/* Title */}
+          <h3 style={{
+            fontSize: 13, fontWeight: 700, color: '#fff',
+            margin: '0 0 8px', lineHeight: 1.3,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {car.title}
+          </h3>
+
+          {/* Meta row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            {car.mileage && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                <Gauge size={9} style={{ color: 'rgba(212,168,67,0.5)', flexShrink: 0 }} />
+                {(car.mileage / 1000).toFixed(0)}k km
+              </span>
+            )}
+            {car.mileage && city && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'block', flexShrink: 0 }} />}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+              <MapPin size={9} style={{ color: 'rgba(212,168,67,0.5)', flexShrink: 0 }} />
+              {city}
+            </span>
+          </div>
+
+          {/* Price row */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)',
+          }}>
+            <div>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 3 }}>
+                {isElite ? 'Current Bid' : 'Price'}
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
+                fontSize: '1rem', color: 'var(--gold)', lineHeight: 1,
+              }}>
+                KES {priceStr}
+              </div>
+            </div>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8,
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.2s',
+            }}>
+              <ChevronRight size={13} style={{ color: 'rgba(255,255,255,0.4)' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}

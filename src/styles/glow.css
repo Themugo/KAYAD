@@ -1,0 +1,72 @@
+/* Premium KAYAD Glow-Up Pack */
+@layer components {
+  .glow-gold {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+  }
+  
+  .sidebar-icon-glow:hover {
+    color: #D4AF37;
+    filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
+    transition: all 0.3s ease;
+  }
+
+  .glass-card {
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .btn-premium {
+    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  }
+
+  .tracking-sovereign {
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  .glass-surface {
+    background: rgba(5, 5, 5, 0.7);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+  }
+
+  .img-placeholder {
+    background: radial-gradient(circle at center, #111 0%, #050505 100%);
+  }
+
+  .elite-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem;
+  }
+}
+
+@keyframes pulse-gold {
+  0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+}
+
+.glow-active {
+  animation: pulse-gold 2s infinite;
+}
+
+/* Fix for smooth scrolling transitions */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D4AF37 #050505;
+}
+
+.car-card-image {
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  background: linear-gradient(45deg, #0a0a0a, #1a1a1a);
+}

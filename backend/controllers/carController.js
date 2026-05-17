@@ -1,0 +1,441 @@
+import Car from "../models/Car.js";
+import { cacheGet, cacheSet } from "../utils/cache.js";
+
+// =============================
+// 🧠 SAFE NUMBER PARSER
+// =============================
+const toNumber = (val, def) => {
+  const n = Number(val);
+  return isNaN(n) ? def : n;
+};
+
+// =============================
+// 📦 GET ALL CARS (FIXED + STABLE)
+// =============================
+export const getCars = async (req, res) => {
+  try {
+    const {
+      keyword,
+      minPrice,
+      maxPrice,
+      brand,
+      city,
+      sort,
+      page = 1,
+      limit = 12,
+    } = req.query;
+
+    const pageNum = toNumber(page, 1);
+    const limitNum = toNumber(limit, 12);
+
+    // 🔑 better cache key
+    const key = `cars:list:${JSON.stringify({
+      keyword,
+      minPrice,
+      maxPrice,
+      brand,
+      city,
+      sort,
+      page: pageNum,
+      limit: limitNum,
+    })}`;
+
+    const cached = await cacheGet(key);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    const query = {};
+
+    // =============================
+    // 🔍 SAFE SEARCH (NO TEXT INDEX BREAK)
+    // =============================
+    if (keyword) {
+      query.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { brand: { $regex: keyword, $options: "i" } },
+      ];
+    }
+
+    // =============================
+    // 💰 PRICE FILTER
+    // =============================
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = toNumber(minPrice, 0);
+      if (maxPrice) query.price.$lte = toNumber(maxPrice, 999999999);
+    }
+
+    // =============================
+    // 🚗 BRAND FILTER
+    // =============================
+    if (brand) {
+      query.brand = { $in: brand.split(",") };
+    }
+
+    // =============================
+    // 📍 LOCATION
+    // =============================
+    if (city) {
+      query["location.city"] = city;
+    }
+
+    // =============================
+    // 🔃 SORTING
+    // =============================
+    let sortOption = { createdAt: -1 };
+
+    if (sort === "price_asc") sortOption = { price: 1 };
+    else if (sort === "price_desc") sortOption = { price: -1 };
+    else if (sort === "newest") sortOption = { createdAt: -1 };
+
+    const skip = (pageNum - 1) * limitNum;
+
+    // =============================
+    // ⚡ FETCH DATA
+    // =============================
+    const [cars, total] = await Promise.all([
+      Car.find(query)
+        .select(
+          "title price images brand year location allowBid bidsCount views trustScore dealRating createdAt"
+        )
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+
+      Car.countDocuments(query),
+    ]);
+
+    const response = {
+      success: true,
+      data: cars || [],
+      pagination: {
+        page: pageNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+    };
+
+    // =============================
+    // 🧠 CACHE (30s)
+    // =============================
+    await cacheSet(key, response, 30);
+
+    res.json(response);
+
+  } catch (err) {
+    console.error("❌ FETCH ERROR:", err.message);
+    res.status(500).json({
+      success: false,
+      data: [],
+    });
+  }
+};
+
+// =============================
+// 📦 GET SINGLE CAR
+// =============================
+export const getCar = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id)
+      .populate("dealer", "name email phone location businessName bio visibility dealerRating approved")
+      .lean();
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
+      });
+    }
+
+    // Apply dealer visibility filters
+    if (car.dealer?.visibility) {
+      const vis = car.dealer.visibility;
+      if (!vis.showPhone)   { car.dealerPhone = undefined; if (car.dealer) car.dealer.phone = undefined; }
+      if (!vis.showEmail)   { if (car.dealer) car.dealer.email = undefined; }
+      if (!vis.showLocation) { if (car.dealer) car.dealer.location = undefined; }
+      if (!vis.chatEnabled) { car.chatDisabled = true; }
+      delete car.dealer?.visibility;
+    }
+
+    // 🔥 non-blocking analytics
+    Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
+
+    res.json({
+      success: true,
+      data: car,
+    });
+
+  } catch (err) {
+    console.error("❌ GET ONE ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
+
+// =============================
+// ➕ CREATE CAR
+// =============================
+export const createCar = async (req, res) => {
+  try {
+    const seller = await User.findById(req.user.id).select(
+      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved"
+    );
+
+    if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
+    if (!seller.approved) return res.status(403).json({ success: false, message: "Account not yet approved" });
+
+    // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
+    const config = await (await import("../models/PlatformConfig.js")).default.findOne().lean();
+    const pkgs   = config?.packages || [];
+    const pkg    = pkgs.find(p => p.id === seller.dealerPackage) || null;
+
+    const isDealer = seller.role === "dealer";
+    const isSeller = seller.role === "broker" || seller.role === "individual_seller";
+
+    if (isDealer && pkg) {
+      const now = new Date();
+
+      // Trial window: pkg.trialDays > 0 and isFree
+      if (pkg.isFree && pkg.trialDays > 0) {
+        const trialStart = seller.trialStartedAt || now;
+        const trialEnd   = new Date(trialStart.getTime() + pkg.trialDays * 86400000);
+
+        if (now > trialEnd) {
+          return res.status(402).json({
+            success: false,
+            message: `Your free trial ended on ${trialEnd.toLocaleDateString("en-KE")}. Please upgrade to a paid plan to continue listing.`,
+            code: "TRIAL_EXPIRED",
+          });
+        }
+
+        const trialMax = pkg.trialListingMax || pkg.listingMax || 3;
+        if ((seller.trialListingsUsed || 0) >= trialMax) {
+          return res.status(402).json({
+            success: false,
+            message: `Trial limit reached (${trialMax} listings). Upgrade to a paid plan to list more.`,
+            code: "TRIAL_LIMIT_REACHED",
+          });
+        }
+
+        // Set trial start date on first listing
+        if (!seller.trialStartedAt) {
+          await User.findByIdAndUpdate(req.user.id, { trialStartedAt: now });
+        }
+        await User.findByIdAndUpdate(req.user.id, { $inc: { trialListingsUsed: 1, listingCount: 1 } });
+
+      } else if (!pkg.isFree) {
+        // Paid package — check expiry and listing cap
+        if (seller.packageExpiresAt && now > new Date(seller.packageExpiresAt)) {
+          return res.status(402).json({
+            success: false,
+            message: "Your listing package has expired. Please renew to continue listing.",
+            code: "PACKAGE_EXPIRED",
+          });
+        }
+        if (pkg.listingMax > 0 && (seller.listingCount || 0) >= pkg.listingMax) {
+          return res.status(402).json({
+            success: false,
+            message: `You've reached your plan limit of ${pkg.listingMax} listings. Upgrade to list more.`,
+            code: "LISTING_LIMIT_REACHED",
+          });
+        }
+        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+      }
+    }
+
+    if (isSeller) {
+      const sellerPkg = pkgs.find(p => p.id === seller.dealerPackage) || null;
+
+      // First-vehicle free for sellers
+      if (!seller.firstVehicleUsed) {
+        // Mark first vehicle as used
+        await User.findByIdAndUpdate(req.user.id, { firstVehicleUsed: true, $inc: { listingCount: 1 } });
+      } else if (sellerPkg && !sellerPkg.isFree) {
+        // Paid seller plan — enforce limit
+        if (sellerPkg.listingMax > 0 && (seller.listingCount || 0) >= sellerPkg.listingMax) {
+          return res.status(402).json({
+            success: false,
+            message: `You've reached your plan limit of ${sellerPkg.listingMax} listings.`,
+            code: "LISTING_LIMIT_REACHED",
+          });
+        }
+        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+      } else if (!sellerPkg) {
+        // No paid plan after free vehicle used
+        return res.status(402).json({
+          success: false,
+          message: "Your free listing has been used. Subscribe to a seller plan to list more vehicles.",
+          code: "FREE_VEHICLE_USED",
+        });
+      } else {
+        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+      }
+    }
+
+    const body = { ...req.body, dealer: req.user.id, views: 0, bidsCount: 0, trustScore: 0 };
+
+    // ── AUTO-SELECT COVER IMAGE ──────────────────────────────
+    const totalImages = (body.images || []).length;
+    const requestedCover = Number(body.coverImage);
+    body.coverImage = (!isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages)
+      ? requestedCover
+      : 0;
+
+    const car = await Car.create(body);
+    await cacheSet("cars:list:*", null, 1);
+
+    res.status(201).json({ success: true, data: car });
+  } catch (err) {
+    console.error("❌ CREATE ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
+
+// =============================
+// ✏️ UPDATE CAR
+// =============================
+export const updateCar = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false });
+
+    // Preserve existing coverImage if caller didn't explicitly send one
+    const incomingCover = req.body.coverImage;
+    const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== '';
+
+    Object.assign(car, req.body);
+
+    // ── SMART COVER IMAGE AUTO-SELECTION ────────────────────
+    // Helper: find first index with a real URL
+    const findFirstValidIdx = (images) => {
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i];
+        const url = typeof img === 'string' ? img : img?.url;
+        if (url && url.startsWith('http')) return i;
+      }
+      return 0; // fallback to index 0
+    };
+
+    const totalImages = (car.images || []).length;
+    if (totalImages === 0) {
+      car.coverImage = 0;
+    } else if (!hadExplicitCover) {
+      // No explicit cover sent — keep existing if still valid, else auto-pick
+      if (isNaN(car.coverImage) || car.coverImage < 0 || car.coverImage >= totalImages) {
+        car.coverImage = findFirstValidIdx(car.images);
+      }
+      // else: keep the existing coverImage value untouched
+    } else {
+      // Explicit cover sent — validate it's in range
+      const idx = Number(incomingCover);
+      car.coverImage = (!isNaN(idx) && idx >= 0 && idx < totalImages) ? idx : findFirstValidIdx(car.images);
+    }
+
+    await car.save();
+    await cacheSet("cars:list:*", null, 1);
+
+    res.json({ success: true, data: car });
+  } catch (err) {
+    console.error("❌ UPDATE ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
+
+// =============================
+// ❌ DELETE CAR
+// =============================
+export const deleteCar = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+
+    if (!car) return res.status(404).json({ success: false });
+
+    await car.deleteOne();
+
+    await cacheSet("cars:list:*", null, 1);
+
+    res.json({
+      success: true,
+      message: "Deleted",
+    });
+
+  } catch (err) {
+    console.error("❌ DELETE ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
+
+// =============================
+// 💰 BUY CAR
+// =============================
+export const buyCar = async (req, res) => {
+  try {
+    const { phone, email } = req.body;
+
+    const car = await Car.findById(req.params.id);
+
+    if (!car || car.sold) {
+      return res.status(400).json({
+        success: false,
+        message: "Unavailable",
+      });
+    }
+
+    car.buyer = {
+      phone,
+      email,
+      createdAt: new Date(),
+    };
+
+    await car.save();
+
+    res.json({
+      success: true,
+      message: "Dealer will contact you",
+    });
+
+  } catch (err) {
+    console.error("❌ BUY ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
+
+// =============================
+// ⚡ PLACE BID
+// =============================
+export const placeBid = async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const car = await Car.findById(req.params.id);
+
+    if (!car || !car.allowBid) {
+      return res.status(400).json({ success: false });
+    }
+
+    if (Number(amount) <= (car.currentBid || 0)) {
+      return res.status(400).json({
+        success: false,
+        message: "Bid too low",
+      });
+    }
+
+    car.currentBid = Number(amount);
+    car.bidsCount += 1;
+
+    await car.save();
+
+    res.json({
+      success: true,
+      data: {
+        currentBid: car.currentBid,
+        bidsCount: car.bidsCount,
+      },
+    });
+
+  } catch (err) {
+    console.error("❌ BID ERROR:", err.message);
+    res.status(500).json({ success: false });
+  }
+};
