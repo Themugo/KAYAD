@@ -9,6 +9,7 @@ import PaymentModal from '../components/PaymentModal';
 import InspectionButton from '../components/InspectionButton';
 import TcoCalculator from '../components/TcoCalculator';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
+import PriceHistoryChart from '../components/PriceHistoryChart';
 import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
@@ -687,6 +688,9 @@ export default function CarDetailPage() {
             carModel={car.model}
             carYear={car.year}
           />
+
+          {/* Price History */}
+          <PriceHistoryChart carId={car._id} currentPrice={car.price} />
 
           {/* DEALER MINI CARD */}
           {dealer && (

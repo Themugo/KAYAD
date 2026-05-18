@@ -182,6 +182,31 @@ router.post(
 );
 
 // =============================
+// 📈 PRICE HISTORY
+// =============================
+router.get(
+  "/:id/price-history",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await Car.findById(req.params.id)
+      .select("price priceHistory")
+      .lean();
+
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const history = (car.priceHistory || []).map(h => ({
+      price: h.price,
+      date: h.date,
+    }));
+
+    // Include current price as the latest point
+    history.push({ price: car.price, date: new Date() });
+
+    res.json({ success: true, history });
+  })
+);
+
+// =============================
 // 🧠 PRICE INSIGHTS (NEW 🔥)
 // =============================
 router.get(

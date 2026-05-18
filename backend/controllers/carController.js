@@ -278,6 +278,12 @@ export const updateCar = async (req, res) => {
     const incomingCover = req.body.coverImage;
     const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== '';
 
+    // Track price change
+    const newPrice = Number(req.body.price);
+    if (!isNaN(newPrice) && newPrice !== car.price) {
+      car.priceHistory.push({ price: car.price || 0, date: new Date() });
+    }
+
     Object.assign(car, req.body);
 
     // ── SMART COVER IMAGE AUTO-SELECTION ────────────────────

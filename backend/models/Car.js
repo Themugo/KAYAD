@@ -129,6 +129,14 @@ const carSchema = new mongoose.Schema(
     isPaid: { type: Boolean, default: false },
 
     // =============================
+    // 📈 PRICE HISTORY
+    // =============================
+    priceHistory: [{
+      price: { type: Number, required: true },
+      date: { type: Date, default: Date.now },
+    }],
+
+    // =============================
     // 💵 PRICE INTELLIGENCE
     // =============================
     avgMarketPrice: Number,

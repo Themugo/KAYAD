@@ -162,6 +162,7 @@ const _carsAPI = {
   list: (params) => api.get('/cars', { params }).then(unwrap),
   get:  (id)     => api.get(`/cars/${id}`).then(unwrap),
   insights: (id) => api.get(`/cars/${id}/insights`).then(unwrap),
+  priceHistory: (id) => api.get(`/cars/${id}/price-history`).then(unwrap),
   trackClick: (id) => api.post(`/cars/${id}/click`).then(unwrap),
 
   // Dealer
