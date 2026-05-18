@@ -1,10 +1,11 @@
-// src/pages/ChatPage.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { chatAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
+
+const userIdOf = (u) => u?.id || u?._id;
 
 export default function ChatPage() {
   const { chatId } = useParams();
@@ -13,13 +14,20 @@ export default function ChatPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [chats, setChats]     = useState([]);
-  const [active, setActive]   = useState(chatId || null);
+  const [chats, setChats]       = useState([]);
+  const [active, setActive]     = useState(chatId || null);
   const [messages, setMessages] = useState([]);
-  const [text, setText]       = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
+  const [text, setText]         = useState('');
+  const [loading, setLoading]   = useState(true);
+  const [sending, setSending]   = useState(false);
+  const [typingUsers, setTypingUsers] = useState({});
+  const [search, setSearch]     = useState('');
+  const [attachments, setAttachments] = useState([]);
+  const [onlineUsers, setOnlineUsers] = useState({});
   const bottomRef = useRef(null);
+  const typingTimer = useRef(null);
+  const typingEmitTimer = useRef(null);
+  const uid = userIdOf(user);
 
   // Load inbox
   useEffect(() => {
@@ -32,12 +40,14 @@ export default function ChatPage() {
   useEffect(() => {
     if (!active) return;
     chatAPI.messages(active).then(d => {
-      setMessages(d.messages || d.data || []);
+      const msgs = d.messages || d.data || [];
+      setMessages(msgs);
       chatAPI.seen(active).catch(() => {});
     }).catch(() => {});
+    setTypingUsers(prev => { const n = { ...prev }; delete n[active]; return n; });
   }, [active]);
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -48,34 +58,116 @@ export default function ChatPage() {
       if (data.chatId === active) {
         setMessages(prev => [...prev, data]);
         chatAPI.seen(active).catch(() => {});
+        setChats(prev => {
+          const c = prev.find(x => x._id === active);
+          if (c) return prev.map(x => x._id === active ? { ...x, lastMessage: { message: data.message || data.text, createdAt: data.createdAt }, unreadCount: 0 } : x);
+          return prev;
+        });
       } else {
         toast('New message!', 'info');
         setChats(prev => prev.map(c =>
-          c._id === data.chatId ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
+          c._id === data.chatId ? { ...c, unreadCount: (c.unreadCount || 0) + 1, lastMessage: { message: data.message || data.text, createdAt: data.createdAt } } : c
         ));
       }
     });
     return off;
-  }, [active, on]);
+  }, [active, on, toast]);
 
-  // Join chat rooms
+  // Real-time seen receipts
+  useEffect(() => {
+    const off = on('messagesSeen', ({ chatId: seenChatId, userId: seenUserId }) => {
+      if (seenChatId === active && seenUserId !== uid) {
+        setMessages(prev => prev.map(msg =>
+          userIdOf(msg.sender) === uid
+            ? { ...msg, seen: true, seenBy: [...new Set([...(msg.seenBy || []), seenUserId])] }
+            : msg
+        ));
+        setChats(prev => prev.map(c =>
+          c._id === seenChatId ? { ...c, unreadCount: 0 } : c
+        ));
+      }
+    });
+    return off;
+  }, [active, uid, on]);
+
+  // Real-time typing indicator
+  useEffect(() => {
+    const off = on('typing', ({ chatId: tcId, userId: tuId, name }) => {
+      if (tcId === active && tuId !== uid) {
+        setTypingUsers(prev => ({ ...prev, [tcId]: name || 'Someone' }));
+        clearTimeout(typingTimer.current);
+        typingTimer.current = setTimeout(() => {
+          setTypingUsers(prev => { const n = { ...prev }; delete n[tcId]; return n; });
+        }, 3500);
+      }
+    });
+    return off;
+  }, [active, uid, on]);
+
+  useEffect(() => () => clearTimeout(typingTimer.current), []);
+  useEffect(() => () => clearInterval(typingEmitTimer.current), []);
+
+  // Join/leave socket room for active chat
   useEffect(() => {
     if (active && socket.current) {
       socket.current.emit?.('joinChat', active);
     }
-  }, [active]);
+    return () => {
+      if (active && socket.current) {
+        socket.current.emit?.('leaveChat', active);
+      }
+    };
+  }, [active, socket]);
+
+  // Emit typing every 2s while user is typing
+  const emitTyping = useCallback(() => {
+    if (!active || !socket.current) return;
+    socket.current.emit('typing', { chatId: active, userId: uid, name: user?.name });
+  }, [active, uid, user?.name, socket]);
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+    emitTyping();
+  };
+
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(prev => [...prev, ...files]);
+    e.target.value = '';
+  };
+
+  const removeAttachment = (i) => setAttachments(prev => prev.filter((_, idx) => idx !== i));
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!text.trim() || !active || sending) return;
+    if ((!text.trim() && attachments.length === 0) || !active || sending) return;
     setSending(true);
-    const msg = text.trim();
+    const msgText = text.trim();
+    const pendingFiles = [...attachments];
     setText('');
+    setAttachments([]);
     try {
-      const data = await chatAPI.send(active, { message: msg });
-      setMessages(prev => [...prev, data.message || data]);
-    } catch { toast('Failed to send message', 'error'); setText(msg); }
-    finally { setSending(false); }
+      const payload = { message: msgText };
+      if (pendingFiles.length > 0) {
+        payload.attachments = pendingFiles.map(f => ({
+          url: URL.createObjectURL(f),
+          type: f.type.startsWith('image/') ? 'image' : 'file',
+          name: f.name,
+          size: f.size,
+        }));
+      }
+      const data = await chatAPI.send(active, payload);
+      const newMsg = data.message || data;
+      setMessages(prev => [...prev, newMsg]);
+      setChats(prev => prev.map(c =>
+        c._id === active ? { ...c, lastMessage: { message: newMsg.message || newMsg.text, createdAt: newMsg.createdAt } } : c
+      ));
+    } catch {
+      toast('Failed to send message', 'error');
+      setText(msgText);
+    } finally {
+      setSending(false);
+    }
   };
 
   const formatTime = (iso) => {
@@ -88,13 +180,34 @@ export default function ChatPage() {
     const d = new Date(iso);
     const today = new Date();
     if (d.toDateString() === today.toDateString()) return 'Today';
-    return d.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
+    const y = new Date(today); y.setDate(y.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: d.getFullYear() !== today.getFullYear() ? 'numeric' : undefined });
   };
 
-  const activeChat = chats.find(c => c._id === active);
   const otherParticipant = (p) => {
-    const participants = p.participants || [];
-    return participants.find(u => u._id !== user?.id) || participants[0];
+    const parts = p.participants || [];
+    return parts.find(u => userIdOf(u) !== uid) || parts[0];
+  };
+
+  const filteredChats = useMemo(() => {
+    if (!search.trim()) return chats;
+    const q = search.toLowerCase();
+    return chats.filter(c => {
+      const o = otherParticipant(c);
+      return [o?.name, c.lastMessage?.message, c.car?.title].some(s => s?.toLowerCase().includes(q));
+    });
+  }, [chats, search]);
+
+  const activeChat = chats.find(c => c._id === active);
+  const otherInActive = activeChat ? otherParticipant(activeChat) : null;
+  const isTyping = typingUsers[active];
+
+  const MessageStatus = ({ msg, isMine }) => {
+    if (!isMine) return null;
+    if (msg.seen || (msg.seenBy && msg.seenBy.length > 0))
+      return <span className="msg-status seen" title="Seen">✓✓</span>;
+    return <span className="msg-status sent" title="Sent">✓</span>;
   };
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
@@ -104,74 +217,46 @@ export default function ChatPage() {
       <div className="chat-layout grid-sidebar-chat" style={{ flex: 1, overflow: 'hidden' }}>
 
         {/* ─── Chat List ─── */}
-        <div style={{
-          borderRight: '1px solid var(--border)',
-          background: 'var(--surface)',
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-        }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
-            <h3 style={{ fontSize: '1rem' }}>💬 Messages</h3>
+        <div className="chat-sidebar">
+          <div className="chat-sidebar-header">
+            <h3 style={{ margin: 0, fontSize: '1rem' }}>💬 Messages</h3>
+            <input
+              className="input"
+              placeholder="Search conversations..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              style={{ marginTop: 10, fontSize: 13 }}
+            />
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto' }}>
-            {chats.length === 0 ? (
-              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                No conversations yet
-              </div>
-            ) : chats.map(chat => {
+          <div className="chat-list">
+            {filteredChats.length === 0 ? (
+              <div className="chat-empty">{search ? 'No conversations match your search' : 'No conversations yet'}</div>
+            ) : filteredChats.map(chat => {
               const other = otherParticipant(chat);
               const isActive = chat._id === active;
               return (
                 <div
                   key={chat._id}
                   onClick={() => { setActive(chat._id); navigate(`/chat/${chat._id}`, { replace: true }); }}
-                  style={{
-                    padding: '14px 20px',
-                    cursor: 'pointer',
-                    background: isActive ? 'var(--gold-glow)' : 'transparent',
-                    borderLeft: `2px solid ${isActive ? 'var(--gold)' : 'transparent'}`,
-                    borderBottom: '1px solid var(--border)',
-                    transition: 'all 0.15s',
-                  }}
+                  className={`chat-list-item ${isActive ? 'active' : ''}`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-                        background: 'var(--gold)', display: 'flex', alignItems: 'center',
-                        justifyContent: 'center', fontSize: 14, color: '#0A1628', fontWeight: 700,
-                      }}>
-                        {(other?.name || '?')[0].toUpperCase()}
-                      </div>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{other?.name || 'User'}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {chat.lastMessage?.message || chat.car?.title || 'Start a conversation'}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                      {chat.lastMessage?.createdAt && (
-                        <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>
-                          {formatTime(chat.lastMessage.createdAt)}
-                        </span>
-                      )}
-                      {chat.unreadCount > 0 && (
-                        <span style={{
-                          background: 'var(--gold)', color: '#0A1628',
-                          borderRadius: '50%', width: 18, height: 18,
-                          fontSize: 10, fontWeight: 700,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>{chat.unreadCount}</span>
-                      )}
-                    </div>
+                  <div className="chat-avatar-wrap">
+                    <div className="chat-avatar">{(other?.name || '?')[0].toUpperCase()}</div>
                   </div>
-                  {chat.car && (
-                    <div style={{ fontSize: 11, color: 'var(--gold)', marginTop: 4, marginLeft: 48 }}>
-                      🚗 {chat.car.title}
+                  <div className="chat-list-content">
+                    <div className="chat-list-name-row">
+                      <span className="chat-list-name">{other?.name || 'User'}</span>
+                      {chat.lastMessage?.createdAt && (
+                        <span className="chat-list-time">{formatTime(chat.lastMessage.createdAt)}</span>
+                      )}
                     </div>
-                  )}
+                    <div className="chat-list-preview-row">
+                      <span className="chat-list-preview">{chat.lastMessage?.message || chat.car?.title || 'Start a conversation'}</span>
+                      {chat.unreadCount > 0 && <span className="chat-unread-badge">{chat.unreadCount}</span>}
+                    </div>
+                    {chat.car && <div className="chat-list-car">🚗 {chat.car.title}</div>}
+                  </div>
                 </div>
               );
             })}
@@ -180,48 +265,51 @@ export default function ChatPage() {
 
         {/* ─── Chat Window ─── */}
         {active ? (
-          <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Header */}
-            <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', alignItems: 'center', gap: 12 }}>
-              {activeChat && (() => {
-                const other = otherParticipant(activeChat);
-                return (
-                  <>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#0A1628', fontWeight: 700 }}>
-                      {(other?.name || '?')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{other?.name}</div>
-                      {activeChat.car && (
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Re: {activeChat.car.title}</div>
-                      )}
-                    </div>
-                  </>
-                );
-              })()}
+          <div className="chat-window">
+            <div className="chat-window-header">
+              <div className="chat-window-header-left">
+                <div className="chat-avatar">{(otherInActive?.name || '?')[0].toUpperCase()}</div>
+                <div>
+                  <div className="chat-window-header-name">
+                    {otherInActive?.name}
+                  </div>
+                  {isTyping ? (
+                    <div className="chat-typing-indicator">{isTyping} is typing<span className="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>
+                  ) : activeChat?.car ? (
+                    <div className="chat-window-header-car">Re: {activeChat.car.title}</div>
+                  ) : null}
+                </div>
+              </div>
             </div>
 
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="chat-messages">
               {messages.map((msg, i) => {
-                const isMine = msg.sender === user?.id || msg.sender?._id === user?.id;
+                const isMine = userIdOf(msg.sender) === uid;
                 const showDate = i === 0 || formatDate(messages[i - 1]?.createdAt) !== formatDate(msg.createdAt);
+                const hasAttachments = msg.attachments && msg.attachments.length > 0;
                 return (
                   <div key={msg._id || i}>
-                    {showDate && (
-                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', margin: '8px 0' }}>
-                        {formatDate(msg.createdAt)}
+                    {showDate && <div className="chat-date-sep"><span>{formatDate(msg.createdAt)}</span></div>}
+                    <div className={`chat-row ${isMine ? 'mine' : 'theirs'}`}>
+                      <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+                        {(msg.message || msg.content || msg.text) && (
+                          <div className="chat-bubble-text">{msg.message || msg.content || msg.text}</div>
+                        )}
+                        {hasAttachments && (
+                          <div className="chat-bubble-attachments">
+                            {msg.attachments.map((att, ai) =>
+                              att.type === 'image' ? (
+                                <img key={ai} src={att.url} alt={att.name || ''} className="chat-attachment-img" />
+                              ) : (
+                                <div key={ai} className="chat-attachment-file">📎 {att.name || 'File'}</div>
+                              )
+                            )}
+                          </div>
+                        )}
                       </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
-                      <div>
-                        <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                          {msg.message || msg.content || msg.text}
-                        </div>
-                        <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 3, textAlign: isMine ? 'right' : 'left' }}>
-                          {formatTime(msg.createdAt)}
-                          {isMine && msg.seen && ' · Seen'}
-                        </div>
+                      <div className={`chat-meta ${isMine ? 'mine' : 'theirs'}`}>
+                        <span className="chat-meta-time">{formatTime(msg.createdAt)}</span>
+                        <MessageStatus msg={msg} isMine={isMine} />
                       </div>
                     </div>
                   </div>
@@ -230,23 +318,40 @@ export default function ChatPage() {
               <div ref={bottomRef} />
             </div>
 
-            {/* Input */}
-            <form onSubmit={handleSend} style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', gap: 10 }}>
+            {attachments.length > 0 && (
+              <div className="chat-attachment-bar">
+                {attachments.map((f, i) => (
+                  <div key={i} className="chat-attachment-chip">
+                    {f.type?.startsWith('image/') ? (
+                      <img src={URL.createObjectURL(f)} alt="" className="chat-attachment-thumb" />
+                    ) : (
+                      <span>📎 {f.name}</span>
+                    )}
+                    <button type="button" className="chat-attachment-remove" onClick={() => removeAttachment(i)}>×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <form className="chat-input-form" onSubmit={handleSend}>
+              <label className="chat-attach-btn" title="Attach image">
+                <input type="file" accept="image/*" multiple onChange={handleFileSelect} style={{ display: 'none' }} />
+                📷
+              </label>
               <input
                 className="input"
                 placeholder="Type a message..."
                 value={text}
-                onChange={e => setText(e.target.value)}
-                style={{ flex: 1 }}
+                onChange={handleTextChange}
                 autoComplete="off"
               />
-              <button className="btn btn-gold" type="submit" disabled={!text.trim() || sending}>
-                {sending ? '...' : 'Send'}
+              <button className="btn btn-gold" type="submit" disabled={(!text.trim() && attachments.length === 0) || sending}>
+                {sending ? <span className="spinner-sm" /> : 'Send'}
               </button>
             </form>
           </div>
         ) : (
-          <div className="empty-state">
+          <div className="empty-state" style={{ flex: 1 }}>
             <div className="empty-icon">💬</div>
             <h3>Select a conversation</h3>
             <p>Choose from your existing chats or start a new one from a car listing.</p>

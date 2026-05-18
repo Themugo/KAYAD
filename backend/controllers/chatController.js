@@ -59,10 +59,11 @@ export const getUserChats = async (req, res) => {
 // =============================
 export const sendMessage = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, message, attachments } = req.body;
+    const msgText = text || message;
     const { chatId } = req.params;
 
-    if (!chatId || !text) {
+    if (!chatId || !msgText) {
       return res.status(400).json({ success: false, message: "chatId and text required" });
     }
 
@@ -79,18 +80,28 @@ export const sendMessage = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    const messageData = { sender: req.user.id, text };
+    const messageData = { sender: req.user.id, text: msgText };
+    if (attachments && Array.isArray(attachments)) {
+      messageData.attachments = attachments.map(a => ({
+        url: a.url,
+        type: a.type || 'image',
+      }));
+    }
     await chat.addMessage(messageData);
 
-    const message = chat.messages[chat.messages.length - 1];
+    const savedMsg = chat.messages[chat.messages.length - 1];
 
     if (global.io) {
-      global.io.to(chatId).emit("newMessage", {
-        _id: message._id,
+      global.io.to(`chat_${chatId}`).emit("newMessage", {
+        _id: savedMsg._id,
         chatId,
         sender: req.user.id,
-        text: message.text,
-        createdAt: message.createdAt,
+        text: savedMsg.text,
+        message: savedMsg.text,
+        createdAt: savedMsg.createdAt,
+        seen: false,
+        seenBy: [],
+        attachments: savedMsg.attachments || [],
       });
     }
 
@@ -116,7 +127,12 @@ export const sendMessage = async (req, res) => {
       console.warn("⚠️ Failed to send notification for new message:", notifErr.message);
     }
 
-    res.status(201).json(message);
+    res.status(201).json({
+      ...savedMsg.toObject(),
+      message: savedMsg.text,
+      seen: false,
+      seenBy: [],
+    });
   } catch (error) {
     console.error("❌ SEND MESSAGE ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to send message" });
@@ -147,7 +163,13 @@ export const getMessages = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    res.json({ success: true, messages: chat.messages });
+    const enriched = chat.messages.map(m => ({
+      ...m.toObject(),
+      message: m.text,
+      seen: m.seenBy && m.seenBy.length > 0,
+      seenBy: m.seenBy || [],
+    }));
+    res.json({ success: true, messages: enriched });
   } catch (error) {
     console.error("❌ GET MESSAGES ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to fetch messages" });
@@ -173,7 +195,7 @@ export const markAsSeen = async (req, res) => {
     await chat.markAsSeen(req.user.id);
 
     if (global.io) {
-      global.io.to(chatId).emit("messagesSeen", { chatId, userId: req.user.id });
+      global.io.to(`chat_${chatId}`).emit("messagesSeen", { chatId, userId: req.user.id });
     }
 
     res.json({ success: true });

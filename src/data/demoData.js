@@ -282,17 +282,17 @@ export const DEMO_CHATS = [
 
 export const DEMO_MESSAGES = {
   'chat-1': [
-    { _id:'msg-1', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'Hi, is the Mazda CX-5 still available?', createdAt:new Date(now-5*DAY).toISOString() },
-    { _id:'msg-2', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString() },
-    { _id:'msg-3', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'This weekend would work. Do you have Saturday slots?', createdAt:new Date(now-4*DAY).toISOString() },
-    { _id:'msg-4', chatId:'chat-1', sender:'demo-admin-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString() },
-    { _id:'msg-5', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString() },
+    { _id:'msg-1', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'Hi, is the Mazda CX-5 still available?', createdAt:new Date(now-5*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
+    { _id:'msg-2', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-3', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'This weekend would work. Do you have Saturday slots?', createdAt:new Date(now-4*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
+    { _id:'msg-4', chatId:'chat-1', sender:'demo-admin-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-5', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString(), seen:false, seenBy:[], attachments:[{url:'https://placehold.co/600x400/D4C4A8/1a1a2e?text=Mazda+CX-5',type:'image',name:'Mazda CX-5 Interior'}], },
   ],
   'chat-2': [
-    { _id:'msg-6', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'I am interested in the Land Cruiser. Can you share more photos?', createdAt:new Date(now-3*DAY).toISOString() },
-    { _id:'msg-7', chatId:'chat-2', sender:'demo-admin-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString() },
-    { _id:'msg-8', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'Great, please send them over. Also, is the price negotiable?', createdAt:new Date(now-2*DAY).toISOString() },
-    { _id:'msg-9', chatId:'chat-2', sender:'demo-admin-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString() },
+    { _id:'msg-6', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'I am interested in the Land Cruiser. Can you share more photos?', createdAt:new Date(now-3*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
+    { _id:'msg-7', chatId:'chat-2', sender:'demo-admin-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-8', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'Great, please send them over. Also, is the price negotiable?', createdAt:new Date(now-2*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
+    { _id:'msg-9', chatId:'chat-2', sender:'demo-admin-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString(), seen:false, seenBy:[] },
   ],
 };
 

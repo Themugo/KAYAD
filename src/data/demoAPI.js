@@ -619,7 +619,12 @@ const demoChat = {
 
   messages: async (chatId) => {
     await delay();
-    const msgs = DEMO_MESSAGES[chatId] || [];
+    const msgs = (DEMO_MESSAGES[chatId] || []).map(m => ({
+      ...m,
+      seen: m.seen !== undefined ? m.seen : false,
+      seenBy: m.seenBy || [],
+      attachments: m.attachments || [],
+    }));
     return wrapSuccess({ messages: msgs, data: msgs });
   },
 
@@ -630,14 +635,32 @@ const demoChat = {
       _id: 'demo-msg-' + Date.now(),
       chatId,
       sender: user?._id || 'unknown',
-      message: body.message,
+      message: body.message || '',
       createdAt: new Date().toISOString(),
+      seen: false,
+      seenBy: [],
+      attachments: body.attachments || [],
     };
+    // Also add to DEMO_MESSAGES for persistence in this session
+    if (!DEMO_MESSAGES[chatId]) DEMO_MESSAGES[chatId] = [];
+    DEMO_MESSAGES[chatId].push(newMsg);
     return wrapSuccess({ message: newMsg });
   },
 
-  seen: async () => {
+  seen: async (chatId) => {
     await delay(50, 150);
+    if (chatId && DEMO_MESSAGES[chatId]) {
+      const user = getDemoUser();
+      const uid = user?._id;
+      DEMO_MESSAGES[chatId] = DEMO_MESSAGES[chatId].map(m => {
+        if (m.sender !== uid) {
+          const seenBy = m.seenBy || [];
+          if (!seenBy.includes(uid)) seenBy.push(uid);
+          return { ...m, seen: true, seenBy };
+        }
+        return m;
+      });
+    }
     return wrapSuccess({});
   },
 

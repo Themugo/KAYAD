@@ -243,6 +243,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinChat",     (chatId) => { if (chatId) socket.join(`chat_${chatId}`); });
+  socket.on("leaveChat",    (chatId) => { if (chatId) socket.leave(`chat_${chatId}`); });
+  socket.on("typing",       ({ chatId, userId, name }) => {
+    if (chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
+  });
   socket.on("joinAdmin",    ()       => { if (socket.user?.role === "admin") socket.join("admins"); });
   socket.on("joinShowroom", ()       => { socket.join("showroom"); });
   socket.on("leaveShowroom",()       => { socket.leave("showroom"); });
