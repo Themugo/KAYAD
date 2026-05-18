@@ -43,7 +43,7 @@ export const allowRoles = (...roles) => {
         user: req.user?.id || "guest",
       });
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: "Server error",
       });

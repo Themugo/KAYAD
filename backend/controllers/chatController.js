@@ -109,10 +109,12 @@ export const sendMessage = async (req, res) => {
         }
         if (otherUser?.phone && otherUser?.notifications?.sms !== false) {
           const fromUser = await User.findById(req.user.id).select("name");
-          sendSMS(otherUser.phone, `New message from ${fromUser?.name || "a user"} on Kayad${chat.car?.title ? ` about ${chat.car.title}` : ""}.`).catch(() => {});
+          sendSMS(otherUser.phone, `New message from ${fromUser?.name || "a user"} on Kayad${chat.car?.title ? ` about ${chat.car.title}` : ""}.`).catch(e => console.warn("⚠️ SMS notification failed:", e.message));
         }
       }
-    } catch (_) {}
+    } catch (notifErr) {
+      console.warn("⚠️ Failed to send notification for new message:", notifErr.message);
+    }
 
     res.status(201).json(message);
   } catch (error) {

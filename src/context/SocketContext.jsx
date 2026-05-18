@@ -70,7 +70,7 @@ export function SocketProvider({ children }) {
   };
 
   return (
-    <SocketCtx.Provider value={{ connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit, socket: socketRef }}>
+    <SocketCtx.Provider value={{ connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit }}>
       {children}
     </SocketCtx.Provider>
   );

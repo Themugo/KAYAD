@@ -74,11 +74,18 @@ export async function reseed() {
 
   const created = { webhost: [], admin: [], demos: [], cleaned: 0, cars: 0 };
 
+  const isProd = process.env.NODE_ENV === "production";
+  const devFallback = (pw) => {
+    if (isProd) throw new Error(`Seed password required via env var in production`);
+    console.warn(`⚠️  Using dev-only fallback password — set SEED_* env vars for production`);
+    return pw;
+  };
+
   // ══════════════════════════════════════════════════════════
   // 1. WEBHOST (IMMUTABLE SUPERADMIN) — owns the platform
   // ══════════════════════════════════════════════════════════
-  const webhostEmail    = process.env.WEBHOIST_EMAIL || process.env.SEED_ADMIN_EMAIL;
-  const webhostPassword = process.env.SEED_ADMIN_PASSWORD || "Jimmy@Kayad2026!";
+  const webhostEmail    = process.env.SEED_ADMIN_EMAIL;
+  const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("Jimmy@Kayad2026!");
   const webhostName     = process.env.SEED_ADMIN_NAME || "Jimmy Mugo (Webhost)";
 
   if (webhostEmail) {
@@ -96,7 +103,7 @@ export async function reseed() {
 
   // Secondary system owner
   const ownerEmail = "themugo@kayad.space";
-  const ownerPassword = process.env.SEED_ADMIN_PASSWORD || "Jimmy@Kayad2026!";
+  const ownerPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("Jimmy@Kayad2026!");
   let owner = await User.findOne({ email: ownerEmail });
   if (!owner) {
     owner = await User.create({ name: "James Mugo (Owner)", email: ownerEmail, password: ownerPassword, role: "superadmin" });
@@ -112,11 +119,12 @@ export async function reseed() {
   // 2. PLATFORM ADMIN
   // ══════════════════════════════════════════════════════════
   const adminAcc = await User.findOne({ email: "admin@kayad.space" });
+  const adminPw = process.env.SEED_ADMIN_PW || devFallback("Admin@Kayad2026!");
   if (!adminAcc) {
-    await User.create({ name: "Platform Admin", email: "admin@kayad.space", password: process.env.SEED_ADMIN_PW || "Admin@Kayad2026!", role: "admin", approved: true });
+    await User.create({ name: "Platform Admin", email: "admin@kayad.space", password: adminPw, role: "admin", approved: true });
     created.admin.push("admin@kayad.space");
   } else {
-    adminAcc.password = process.env.SEED_ADMIN_PW || "Admin@Kayad2026!";
+    adminAcc.password = adminPw;
     adminAcc.role = "admin";
     await adminAcc.save();
     created.admin.push("admin@kayad.space (updated)");
@@ -126,9 +134,9 @@ export async function reseed() {
   // 3. DEMO ACCOUNTS (3 only — Dealer, Seller, Buyer)
   // ══════════════════════════════════════════════════════════
   const demos = [
-    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || "Dealer@Kayad2026!", role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7 },
-    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || "Seller@Kayad2026!", role: "broker", approved: true, businessName: "Private Seller" },
-    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || "Buyer@Kayad2026!",  role: "user",   approved: true },
+    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || devFallback("Dealer@Kayad2026!"), role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7 },
+    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || devFallback("Seller@Kayad2026!"), role: "broker", approved: true, businessName: "Private Seller" },
+    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || devFallback("Buyer@Kayad2026!"),  role: "user",   approved: true },
   ];
 
   for (const acc of demos) {
