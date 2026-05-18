@@ -732,9 +732,26 @@ nav {
 }
 
 .hero-badge-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #22C55E;
+  flex-shrink: 0;
   animation: pulse 2s infinite;
+}
+
+/* ─── Confetti ─── */
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.price-flash {
+  animation: priceFlash 0.6s ease;
+}
+
+@keyframes priceFlash {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 .hero-title {

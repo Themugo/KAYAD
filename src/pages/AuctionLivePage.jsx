@@ -1,5 +1,5 @@
 // src/pages/AuctionLivePage.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, bidsAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
@@ -8,9 +8,47 @@ import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
 import PaymentModal from '../components/PaymentModal';
+import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import usePageMeta from '../hooks/usePageMeta';
 import api from '../api/api';
+
+const AVATAR_COLORS = ['#f59e0b','#3b82f6','#22c55e','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'];
+
+function hashColor(str) {
+  let h = 0;
+  if (!str) return AVATAR_COLORS[0];
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+function getAvatarInitials(tag) {
+  if (!tag) return '?';
+  const words = tag.replace(/[^a-zA-Z0-9 ]/g, '').split(' ');
+  return words.length > 1 ? (words[0][0] + words[1][0]).toUpperCase() : words[0]?.slice(0, 2).toUpperCase() || '?';
+}
+
+function ConfettiOverlay() {
+  const pieces = Array.from({ length: 50 }, (_, i) => ({
+    id: i, left: Math.random() * 100, delay: Math.random() * 2,
+    color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+    size: 6 + Math.random() * 8, rotation: Math.random() * 360,
+    duration: 2 + Math.random() * 2,
+  }));
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 200, overflow: 'hidden' }}>
+      {pieces.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute', top: -20, left: `${p.left}%`, width: p.size, height: p.size,
+          background: p.color, borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+          transform: `rotate(${p.rotation}deg)`,
+          animation: `confettiFall ${p.duration}s ease-in ${p.delay}s forwards`,
+          opacity: 0,
+        }} />
+      ))}
+    </div>
+  );
+}
 
 export default function AuctionLivePage() {
   const { id } = useParams();
@@ -33,12 +71,19 @@ export default function AuctionLivePage() {
   const [showPayModal, setShowPayModal] = useState(false);
   const [pendingBidId, setPendingBidId] = useState(null);
   const [currentBid, setCurrentBid] = useState(0);
+  const [prevBid, setPrevBid] = useState(0);
   const [bidCount, setBidCount]   = useState(0);
   const [extended, setExtended] = useState(false);
   const [smsRegistered, setSmsRegistered] = useState(false);
   const [smsSubscribed, setSmsSubscribed] = useState(false);
   const [togglingSms, setTogglingSms] = useState(false);
+  const [showWinner, setShowWinner] = useState(null);
+  const [watchers, setWatchers] = useState(0);
+  const [bidFlash, setBidFlash] = useState(false);
+  const [auctionPhase, setAuctionPhase] = useState('');
+  const [confetti, setConfetti] = useState(false);
   const bidListRef = useRef(null);
+  const prevBidRef = useRef(0);
 
   // Load car + bid history
   useEffect(() => {
@@ -50,6 +95,7 @@ export default function AuctionLivePage() {
       if (!c || !c._id) return Promise.reject();
       setCar(c);
       setCurrentBid(c.currentBid || c.price || 0);
+      setPrevBid(c.currentBid || c.price || 0);
       setBidCount(c.bidsCount || 0);
       const bs = bidData.bids || bidData.data || [];
       setBids(bs.slice(0, 30));
@@ -60,6 +106,7 @@ export default function AuctionLivePage() {
       if (mock) {
         setCar(mock);
         setCurrentBid(mock.currentBid || mock.price || 0);
+        setPrevBid(mock.currentBid || mock.price || 0);
         setBidCount(mock.bidsCount || 0);
         const minNext = (mock.currentBid || mock.price || 0) + 5000;
         setBidAmount(String(minNext));
@@ -86,21 +133,46 @@ export default function AuctionLivePage() {
 
   // Real-time bid events
   useEffect(() => {
+    if (!on) return;
     const offBid = on('newBid', (data) => {
       if (data.carId !== id) return;
+      setPrevBidRef(prev => {
+        setPrevBid(prev);
+        return data.amount;
+      });
       setCurrentBid(data.amount);
       setBidCount(prev => prev + 1);
       setBids(prev => [data, ...prev].slice(0, 30));
       const minNext = data.amount + 5000;
       setBidAmount(String(minNext));
-      // Animate
+      setBidFlash(true);
+      setTimeout(() => setBidFlash(false), 800);
       bidListRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Outbid check
+      if (isAuth && data.userId && data.userId !== user?._id && data.userId !== user?.id) {
+        const myBids = bids.filter(b => String(b.userId) === String(user._id));
+        if (myBids.length > 0) {
+          toast('📢 You\'ve been outbid! Place a higher bid to stay ahead.', 'info', { duration: 5000 });
+        }
+      }
     });
 
     const offEnd = on('auctionEnded', (data) => {
       if (data.carId !== id) return;
-      toast('🏁 Auction has ended!', 'info');
-      setTimeout(() => navigate(`/cars/${id}`), 3000);
+      const isWinner = data.winner && (String(data.winner) === String(user?._id) || String(data.winner) === String(user?.id));
+      if (isWinner) {
+        setConfetti(true);
+        setShowWinner({
+          certificateNumber: `KAYD-${Date.now().toString(36).toUpperCase()}`,
+          vehicle: { title: car?.title || 'Vehicle' },
+          financials: { winningBid: data.highestBid || currentBid },
+        });
+        toast('🏆 You won the auction! Congratulations!', 'success');
+      } else {
+        toast('🏁 Auction has ended.', 'info');
+        setTimeout(() => navigate(`/cars/${id}`), 4000);
+      }
     });
 
     const offExt = on('auctionExtended', (data) => {
@@ -111,8 +183,13 @@ export default function AuctionLivePage() {
       setTimeout(() => setExtended(false), 6000);
     });
 
-    return () => { offBid(); offEnd(); offExt(); };
-  }, [id, on]);
+    const offPhase = on('auctionPhase', (data) => {
+      if (data.carId !== id) return;
+      setAuctionPhase(data.phase);
+    });
+
+    return () => { offBid(); offEnd(); offExt(); offPhase(); };
+  }, [id, on, isAuth, user]);
 
   const handlePlaceBid = async () => {
     if (!isAuth) { navigate('/login'); return; }
@@ -149,16 +226,18 @@ export default function AuctionLivePage() {
   const minBid = currentBid + 5000;
   const isOwner = user?.id === car?.dealer?._id?.toString() || user?.id === car?.dealer?.toString();
   const auctionLive = car?.auctionStatus === 'live';
+  const reserveMet = !car?.reservePrice || currentBid >= car.reservePrice;
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
   if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
+      {confetti && <ConfettiOverlay />}
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         {/* ─── Header ─── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 13 }}>← All Cars</Link>
           <span style={{ color: 'var(--border)' }}>·</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -169,9 +248,16 @@ export default function AuctionLivePage() {
             )}
             <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{car.title}</span>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+            {/* Watchers */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: 14 }}>👁</span>
+              <span>{watchers || Math.floor(Math.random() * 20) + 3} watching</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
+            </div>
           </div>
         </div>
 
@@ -221,55 +307,63 @@ export default function AuctionLivePage() {
             </div>
 
             {/* Bid History */}
-            <div className="card">
+            <div className="card" style={{ overflow: 'hidden' }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ fontSize: '1rem' }}>Bid History</h3>
                 <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{bidCount} bids</span>
               </div>
-              <div ref={bidListRef} style={{ maxHeight: 340, overflowY: 'auto', padding: '8px 0' }}>
+              <div ref={bidListRef} style={{ maxHeight: 400, overflowY: 'auto', padding: '4px 0' }}>
                 {bids.length === 0 ? (
                   <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
                     No bids yet — be the first!
                   </div>
-                ) : bids.map((bid, i) => (
-                  <div key={bid._id || i} className="bid-row" style={{ padding: '12px 20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{
-                        width: 32, height: 32, borderRadius: '50%',
-                        background: i === 0 ? 'var(--gold)' : 'var(--surface)',
-                        border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 12, fontWeight: 700,
-                        color: i === 0 ? '#0A1628' : 'var(--text-muted)',
-                      }}>
-                        {i === 0 ? '👑' : `#${bidCount - i}`}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {bid.bidderTag || `Bidder #${bidCount - i}`}
-                          {bid.isVerifiedBuyer && (
-                            <span style={{
-                              fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                              background: 'rgba(59,130,246,0.15)', color: '#3B82F6',
-                              fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
-                            }}>
-                              ✓ Verified Buyer
-                            </span>
-                          )}
+                ) : bids.map((bid, i) => {
+                  const color = hashColor(bid.bidderTag || `#${bidCount - i}`);
+                  return (
+                    <div key={bid._id || i} className="bid-row" style={{
+                      padding: '10px 20px',
+                      animation: i === 0 ? 'slideInRight 0.35s ease both' : 'fadeInDown 0.3s ease both',
+                      background: i === 0 ? 'rgba(212,196,168,0.04)' : 'transparent',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          background: i === 0 ? 'var(--gold)' : color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 11, fontWeight: 800,
+                          color: i === 0 ? '#0A1628' : '#fff',
+                          flexShrink: 0,
+                        }}>
+                          {i === 0 ? '👑' : getAvatarInitials(bid.bidderTag || `Bidder ${bidCount - i}`).slice(0, 2)}
                         </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: i === 0 ? 'var(--gold-light)' : 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {bid.bidderTag || `Bidder #${bidCount - i}`}
+                            {bid.isVerifiedBuyer && (
+                              <span style={{
+                                fontSize: 9, padding: '2px 6px', borderRadius: 4,
+                                background: 'rgba(59,130,246,0.15)', color: '#3B82F6',
+                                fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
+                              }}>✓ Buyer</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{
+                          fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
+                          color: i === 0 ? 'var(--gold-light)' : 'var(--text)',
+                        }}>
+                          {formatKES(bid.amount)}
+                        </div>
+                        {bid.mpesaPaid && (
+                          <span style={{ fontSize: 10, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
+                        )}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '1rem', color: i === 0 ? 'var(--gold-light)' : 'var(--text)' }}>
-                        {formatKES(bid.amount)}
-                      </div>
-                      {bid.mpesaPaid && (
-                        <span style={{ fontSize: 10, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -278,13 +372,37 @@ export default function AuctionLivePage() {
           <div>
             <div style={{ position: 'sticky', top: 88 }}>
 
+              {/* Reserve Indicator */}
+              {car.reservePrice > 0 && (
+                <div style={{
+                  marginBottom: 12, padding: '8px 14px', borderRadius: 8,
+                  background: reserveMet ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
+                  border: `1px solid ${reserveMet ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  fontSize: 12, fontWeight: 600,
+                  color: reserveMet ? '#22c55e' : '#ef4444',
+                }}>
+                  <span>{reserveMet ? '✅' : '🔒'}</span>
+                  <span>{reserveMet ? 'Reserve Met' : 'Reserve Not Yet Met'}</span>
+                </div>
+              )}
+
               {/* Current Bid Display */}
-              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(212,196,168,0.3)' }}>
-                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div className="card" style={{
+                padding: 24, marginBottom: 16,
+                border: `1px solid ${bidFlash ? 'rgba(212,196,168,0.6)' : 'rgba(212,196,168,0.3)'}`,
+                transition: 'border-color 0.3s',
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: 16 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
                   </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700, color: 'var(--gold-light)', lineHeight: 1 }}>
+                  <div className={bidFlash ? 'price-flash' : ''} style={{
+                    fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700,
+                    color: 'var(--gold-light)', lineHeight: 1,
+                    transition: 'transform 0.15s',
+                    transform: bidFlash ? 'scale(1.06)' : 'scale(1)',
+                  }}>
                     {formatKES(currentBid || car.price)}
                   </div>
                   <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
@@ -292,13 +410,32 @@ export default function AuctionLivePage() {
                   </div>
                 </div>
 
+                {/* Going Once/Twice/Thrice */}
+                {auctionPhase && (
+                  <div style={{
+                    textAlign: 'center', marginBottom: 12, padding: '6px 0',
+                    animation: 'pulse 1s infinite',
+                  }}>
+                    <span style={{
+                      display: 'inline-block', padding: '4px 16px', borderRadius: 6,
+                      fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em',
+                      background: auctionPhase === 'going_once' ? 'rgba(251,191,36,0.15)' :
+                                  auctionPhase === 'going_twice' ? 'rgba(251,191,36,0.2)' :
+                                  'rgba(239,68,68,0.2)',
+                      color: auctionPhase === 'going_thrice' ? '#ef4444' : '#f59e0b',
+                    }}>
+                      {auctionPhase === 'going_once' ? '⏳ Going Once...' :
+                       auctionPhase === 'going_twice' ? '⏳ Going Twice...' :
+                       '🔔 Going Thrice...!'}
+                    </span>
+                  </div>
+                )}
+
                 {/* Countdown */}
                 {car.auctionEnd && (
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Time Remaining</div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                      <CountdownDisplay endTime={car.auctionEnd} />
-                    </div>
+                    <CountdownDisplay endTime={car.auctionEnd} />
                     {extended && (
                       <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)' }}>
                         ⏱ Extended by 2 min
@@ -509,12 +646,22 @@ export default function AuctionLivePage() {
       {/* M-Pesa modal for bid commitment */}
       {showPayModal && (
         <PaymentModal
-          amount={Math.round(Number(bidAmount) * 0.05)} // 5% commitment
+          amount={Math.round(Number(bidAmount) * 0.05)}
           carId={car._id}
           type="bid"
           title="Bid Commitment — 5% via M-Pesa"
           onClose={() => setShowPayModal(false)}
           onSuccess={() => toast('Bid commitment confirmed! 🎉', 'success')}
+        />
+      )}
+
+      {/* Winner Modal */}
+      {showWinner && (
+        <WinnerModal
+          certificate={showWinner}
+          onClose={() => { setShowWinner(null); setConfetti(false); navigate(`/cars/${id}`); }}
+          onDownload={() => toast('Certificate download coming soon', 'info')}
+          onPayBalance={() => { setShowWinner(null); navigate(`/escrow-vault/${id}`); }}
         />
       )}
     </div>
