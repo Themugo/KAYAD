@@ -1,7 +1,7 @@
 export default function P2PEscrowLedger({ escrows = [] }) {
-  const held = escrows.filter(e => e.status === 'funded');
+  const held = escrows.filter(e => e.status === 'held');
   const heldTotal = held.reduce((acc, e) => acc + (e.amount || 0), 0);
-  const awaitingRelease = escrows.filter(e => e.status === 'funded' && e.buyer?.confirmedDelivery);
+  const awaitingRelease = escrows.filter(e => e.status === 'held' && e.buyer?.confirmedDelivery);
 
   return (
     <div>
@@ -31,9 +31,9 @@ export default function P2PEscrowLedger({ escrows = [] }) {
             </tr>
           </thead>
           <tbody style={{ borderTop: '1px solid #222' }}>
-            {escrows.filter(e => e.status === 'funded').length === 0 ? (
-              <tr><td colSpan={4} style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No funded escrows awaiting action</td></tr>
-            ) : escrows.filter(e => e.status === 'funded').map(e => (
+            {escrows.filter(e => e.status === 'held').length === 0 ? (
+              <tr><td colSpan={4} style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No held escrows awaiting action</td></tr>
+            ) : escrows.filter(e => e.status === 'held').map(e => (
               <tr key={e._id} style={{ borderBottom: '1px solid #222' }}>
                 <td style={{ padding: 16 }}>
                   <p style={{ fontWeight: 700, color: 'white' }}>{e.car?.title || 'Vehicle'}</p>

@@ -78,6 +78,74 @@ router.post(
 );
 
 // =============================
+// ⚠️ DISPUTE ESCROW (BUYER/SELLER INITIATED)
+// =============================
+router.post(
+  "/:id/dispute",
+  protect,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { reason } = req.body;
+    if (!reason?.trim()) return res.status(400).json({ success: false, message: "Dispute reason required" });
+
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    const userId = req.user.id;
+    const isParty = String(escrow.buyer) === userId || String(escrow.seller) === userId;
+    const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
+    if (!isParty && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
+
+    if (!["held", "pending"].includes(escrow.status)) {
+      return res.status(400).json({ success: false, message: "Escrow cannot be disputed in current state" });
+    }
+
+    escrow.status = "disputed";
+    escrow.disputeReason = reason;
+    escrow.history.push({ action: `disputed: ${reason}` });
+    await escrow.save();
+
+    if (global.io) {
+      global.io.to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });
+      global.io.to(`user_${escrow.seller}`).emit("escrowDisputed", { escrowId: escrow._id });
+    }
+
+    res.json({ success: true, message: "Dispute raised", escrow });
+  })
+);
+
+// =============================
+// 📦 REQUEST RELEASE (BUYER CONFIRMS DELIVERY)
+// =============================
+router.post(
+  "/:id/request-release",
+  protect,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    if (String(escrow.buyer) !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Only the buyer can request release" });
+    }
+
+    if (escrow.status !== "held") {
+      return res.status(400).json({ success: false, message: "Escrow must be funded to request release" });
+    }
+
+    escrow.history.push({ action: "buyer_requested_release" });
+    await escrow.save();
+
+    // Notify admin
+    if (global.io) {
+      global.io.to("admin").emit("escrowReleaseRequested", { escrowId: escrow._id });
+    }
+
+    res.json({ success: true, message: "Release requested. Admin will process shortly." });
+  })
+);
+
+// =============================
 // 🚨 FALLBACK
 // =============================
 router.use((req, res) => {

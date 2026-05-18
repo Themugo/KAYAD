@@ -4,49 +4,137 @@ import { Link } from 'react-router-dom';
 import { escrowAPI, formatKES } from '../api/api';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 import { timeAgo, formatDate } from '../utils/helpers';
+import { ShieldCheck, X } from 'lucide-react';
 
 const STATUS_META = {
   pending:  { label: 'Pending',  badge: 'badge-orange', icon: '⏳', desc: 'Awaiting payment confirmation.' },
-  funded:   { label: 'Funded',   badge: 'badge-blue',   icon: '💰', desc: 'Funds held safely. Admin will release after car handover.' },
+  held:     { label: 'Held',     badge: 'badge-blue',   icon: '💰', desc: 'Funds held safely. Confirm delivery to request release.' },
   released: { label: 'Released', badge: 'badge-green',  icon: '✅', desc: 'Funds released to seller. Deal complete!' },
   refunded: { label: 'Refunded', badge: 'badge-red',    icon: '↩️', desc: 'Funds returned to you.' },
   disputed: { label: 'Disputed', badge: 'badge-red',    icon: '⚠️', desc: 'Under review by admin.' },
 };
 
+const ESCROW_STEPS = [
+  { key: 'created',              label: 'Escrow Created', icon: '📄' },
+  { key: 'funded',               label: 'Payment Funded', icon: '💰' },
+  { key: 'buyer_requested_release', label: 'Delivery Confirmed', icon: '🚗' },
+  { key: 'released',             label: 'Funds Released',  icon: '✅' },
+];
+
+function Stepper({ escrow }) {
+  const history = escrow.history || [];
+  const doneKeys = new Set(history.map(h => h.action));
+  const currentIdx = ESCROW_STEPS.findLastIndex(s => doneKeys.has(s.key));
+
+  return (
+    <div style={{ display: 'flex', gap: 0, margin: '16px 0 20px', position: 'relative' }}>
+      {ESCROW_STEPS.map((s, i) => {
+        const isDone = doneKeys.has(s.key);
+        const isCurrent = i === currentIdx;
+        return (
+          <div key={s.key} style={{ flex: 1, textAlign: 'center', position: 'relative' }}>
+            {i < ESCROW_STEPS.length - 1 && (
+              <div style={{
+                position: 'absolute', top: 14, left: '50%', width: '100%',
+                height: 2, background: isDone ? '#22c55e' : 'rgba(255,255,255,0.08)',
+                zIndex: 0,
+              }} />
+            )}
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%', margin: '0 auto 6px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: isDone ? '#22c55e' : isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.06)',
+              color: isDone || isCurrent ? '#000' : 'rgba(255,255,255,0.25)',
+              fontSize: 12, fontWeight: 700, position: 'relative', zIndex: 1,
+              border: isCurrent && !isDone ? '2px solid var(--gold)' : 'none',
+            }}>
+              {isDone ? '✓' : i + 1}
+            </div>
+            <div style={{ fontSize: 9, color: isDone ? '#22c55e' : 'rgba(255,255,255,0.3)', fontWeight: isCurrent ? 700 : 400 }}>
+              {s.label}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function EscrowPage() {
   const { on } = useSocket();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [tab, setTab]         = useState('all');
+  const [disputeOpen, setDisputeOpen] = useState(false);
+  const [disputeReason, setDisputeReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     escrowAPI.mine()
       .then(d => setEscrows(d.escrows || d.data || []))
       .catch(() => toast('Failed to load escrows', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   // Real-time escrow updates
   useEffect(() => {
     const offRelease = on('escrowReleased', data => {
-      setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'released' } : e));
+      setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'released', releasedAt: new Date().toISOString() } : e));
       toast('✅ Escrow released! Seller has been paid.', 'success');
     });
     const offRefund = on('escrowRefunded', data => {
       setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'refunded' } : e));
       toast('↩️ Escrow refunded to your account.', 'info');
     });
-    return () => { offRelease(); offRefund(); };
+    const offDisputed = on('escrowDisputed', data => {
+      setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'disputed' } : e));
+      toast('⚠️ Escrow disputed. Admin has been notified.', 'info');
+    });
+    return () => { offRelease(); offRefund(); offDisputed(); };
   }, [on]);
 
   const filtered = tab === 'all' ? escrows : escrows.filter(e => e.status === tab);
 
-  // Totals
-  const totalLocked = escrows.filter(e => e.status === 'funded').reduce((s, e) => s + (e.amount || 0), 0);
+  const totalLocked = escrows.filter(e => e.status === 'held').reduce((s, e) => s + (e.amount || 0), 0);
   const totalReleased = escrows.filter(e => e.status === 'released').reduce((s, e) => s + (e.amount || 0), 0);
+
+  const handleRequestRelease = async () => {
+    if (!selected) return;
+    setSubmitting(true);
+    try {
+      await escrowAPI.requestRelease(selected._id);
+      toast('🚗 Delivery confirmed! Admin has been notified to release funds.', 'success');
+      setSelected(null);
+      load();
+    } catch (e) {
+      toast(e.response?.data?.message || 'Request failed', 'error');
+    } finally { setSubmitting(false); }
+  };
+
+  const handleDispute = async () => {
+    if (!selected || !disputeReason.trim()) return;
+    setSubmitting(true);
+    try {
+      await escrowAPI.dispute(selected._id, disputeReason.trim());
+      toast('⚠️ Dispute raised. Our team will review.', 'info');
+      setDisputeOpen(false);
+      setDisputeReason('');
+      setSelected(null);
+      load();
+    } catch (e) {
+      toast(e.response?.data?.message || 'Failed to raise dispute', 'error');
+    } finally { setSubmitting(false); }
+  };
+
+  const isBuyer = (e) => String(e.buyer?._id || e.buyer) === String(user?._id || user?.id);
 
   return (
     <div className="page">
@@ -99,7 +187,7 @@ export default function EscrowPage() {
 
         {/* ─── Tabs ─── */}
         <div className="tabs">
-          {['all', 'funded', 'released', 'refunded', 'disputed'].map(t => {
+          {['all', 'held', 'released', 'refunded', 'disputed'].map(t => {
             const count = t === 'all' ? escrows.length : escrows.filter(e => e.status === t).length;
             return (
               <button key={t} className={`tab-btn ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
@@ -127,7 +215,7 @@ export default function EscrowPage() {
               return (
                 <div key={e._id} className="card" style={{
                   padding: 20, cursor: 'pointer',
-                  border: e.status === 'funded' ? '1px solid rgba(59,130,246,0.25)' : '1px solid var(--border)',
+                  border: e.status === 'held' ? '1px solid rgba(59,130,246,0.25)' : '1px solid var(--border)',
                 }}
                   onClick={() => setSelected(e)}
                 >
@@ -152,7 +240,7 @@ export default function EscrowPage() {
                     <div style={{ textAlign: 'right' }}>
                       <div className="price-tag" style={{ fontSize: '1.3rem' }}>{formatKES(e.amount)}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                        {e.status === 'funded' ? '🕐 Awaiting release' : ''}
+                        {e.status === 'held' ? '🕐 Awaiting release' : ''}
                         {e.status === 'released' ? `Released ${e.releasedAt ? formatDate(e.releasedAt) : ''}` : ''}
                       </div>
                     </div>
@@ -170,7 +258,7 @@ export default function EscrowPage() {
       {selected && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 500 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Escrow Record</div>
                 <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Car Purchase'}</h3>
@@ -178,8 +266,11 @@ export default function EscrowPage() {
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
+            {/* Timeline Stepper */}
+            <Stepper escrow={selected} />
+
             {/* Amount & status */}
-            <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 20, textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 20, textAlign: 'center', marginBottom: 16 }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>{STATUS_META[selected.status]?.icon}</div>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Escrow Amount</div>
               <div className="price-tag" style={{ fontSize: '2rem' }}>{formatKES(selected.amount)}</div>
@@ -205,9 +296,83 @@ export default function EscrowPage() {
               ))}
             </div>
 
-            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Need help? Contact support or raise a dispute from your admin dashboard.
+            {/* History */}
+            {(selected.history?.length || 0) > 0 && (
+              <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius)' }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Activity</div>
+                {selected.history.map((h, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>
+                    <span>•</span>
+                    <span>{h.action.replace(/_/g, ' ')}</span>
+                    {h.at && <span style={{ marginLeft: 'auto', color: 'rgba(255,255,255,0.25)' }}>{formatDate(h.at)}</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {/* Confirm Delivery (Buyer only, when held) */}
+              {selected.status === 'held' && isBuyer(selected) && !disputeOpen && (
+                <button onClick={handleRequestRelease} disabled={submitting}
+                  className="btn btn-gold btn-full">
+                  {submitting ? 'Confirming…' : '🚗 Confirm Delivery & Request Release'}
+                </button>
+              )}
+
+              {/* Raise Dispute */}
+              {['held', 'pending'].includes(selected.status) && !disputeOpen && (
+                <button onClick={() => setDisputeOpen(true)}
+                  style={{
+                    background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+                    borderRadius: 'var(--radius)', padding: '10px 16px',
+                    color: '#ef4444', fontWeight: 600, fontSize: 12, cursor: 'pointer',
+                  }}>
+                  ⚠️ Raise a Dispute
+                </button>
+              )}
+
+              {/* Dispute Form */}
+              {disputeOpen && (
+                <div style={{
+                  background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
+                  borderRadius: 'var(--radius)', padding: 14,
+                }}>
+                  <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 6 }}>
+                    Describe your issue
+                  </label>
+                  <textarea value={disputeReason} onChange={e => setDisputeReason(e.target.value)}
+                    placeholder="Explain what went wrong…"
+                    style={{
+                      width: '100%', minHeight: 70, resize: 'vertical',
+                      background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 8, padding: '8px 10px', color: '#fff', fontSize: 12,
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button onClick={() => { setDisputeOpen(false); setDisputeReason(''); }}
+                      style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '7px 14px', color: '#fff', fontSize: 11, cursor: 'pointer' }}>
+                      Cancel
+                    </button>
+                    <button onClick={handleDispute} disabled={submitting || !disputeReason.trim()}
+                      style={{
+                        background: '#ef4444', border: 'none', borderRadius: 8, padding: '7px 14px',
+                        color: '#fff', fontWeight: 700, fontSize: 11, cursor: submitting ? 'wait' : 'pointer',
+                        opacity: (submitting || !disputeReason.trim()) ? 0.5 : 1,
+                      }}>
+                      {submitting ? 'Submitting…' : 'Submit Dispute'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {selected.status === 'disputed' && selected.disputeReason && (
+              <div style={{ marginTop: 16, padding: '14px 16px', background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                <div style={{ fontWeight: 600, color: '#ef4444', marginBottom: 4 }}>Dispute Reason</div>
+                {selected.disputeReason}
+              </div>
+            )}
           </div>
         </div>
       )}

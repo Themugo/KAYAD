@@ -222,6 +222,8 @@ const _escrowAPI = {
   get:     (id)            => api.get(`/escrow/${id}`).then(unwrap),
   release: (id)            => api.post(`/escrow/${id}/release`).then(unwrap),
   refund:  (id)            => api.post(`/escrow/${id}/refund`).then(unwrap),
+  dispute: (id, reason)    => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
+  requestRelease: (id)     => api.post(`/escrow/${id}/request-release`).then(unwrap),
 };
 export const escrowAPI = withDemo(_escrowAPI, demoAPI.escrow);
 

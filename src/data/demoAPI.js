@@ -401,6 +401,16 @@ const demoEscrow = {
     await delay();
     return wrapSuccess({ message: 'Escrow refunded' });
   },
+
+  dispute: async () => {
+    await delay(300, 600);
+    return wrapSuccess({ message: 'Dispute raised' });
+  },
+
+  requestRelease: async () => {
+    await delay(200, 500);
+    return wrapSuccess({ message: 'Release requested' });
+  },
 };
 
 // ─── Demo Dealer API ──────────────────────────────────────────────
