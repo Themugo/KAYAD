@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../context/CompareContext';
-import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, BarChart3 } from 'lucide-react';
+import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3 } from 'lucide-react';
 
 function firstImage(car) {
   if (car.image) return car.image;
@@ -17,6 +17,13 @@ const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q
 
 export default function CartyGrid({ car, listView }) {
   const [imgErr, setImgErr] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const imgRef = useRef(null);
+
+  useEffect(() => {
+    if (imgRef.current?.complete) setImgLoaded(true);
+  }, []);
+
   if (!car) return null;
 
   const isLive    = car.auctionStatus === 'live';
@@ -32,7 +39,6 @@ export default function CartyGrid({ car, listView }) {
       ? `${(price / 1000).toFixed(0)}K`
       : price.toLocaleString();
 
-  /* ── LIST VIEW ──────────────────────────────────────────── */
   if (listView) {
     return (
       <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
@@ -80,53 +86,54 @@ export default function CartyGrid({ car, listView }) {
     );
   }
 
-  /* ── GRID CARD ──────────────────────────────────────────── */
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
   const isCompared = ctxIsComparing(car._id);
+  const [hovered, setHovered] = useState(false);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}>
     <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
-      <div style={{
+      <div className="car-card-premium" style={{
         background: '#0C0C0C',
-        border: '1px solid rgba(255,255,255,0.07)',
+        border: `1px solid ${hovered ? 'rgba(212,168,67,0.25)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: 14,
         overflow: 'hidden',
-        transition: 'transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease',
+        transition: 'transform 0.35s cubic-bezier(0.2,0,0,1), border-color 0.35s ease, box-shadow 0.35s ease',
         cursor: 'pointer',
-      }}
-        onMouseEnter={e => {
-          e.currentTarget.style.transform = 'translateY(-3px)';
-          e.currentTarget.style.borderColor = 'rgba(212,168,67,0.28)';
-          e.currentTarget.style.boxShadow = '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,168,67,0.06)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-        {/* ── IMAGE ── */}
+        transform: hovered ? 'translateY(-4px)' : 'none',
+        boxShadow: hovered ? '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,168,67,0.08)' : '0 4px 12px rgba(0,0,0,0.2)',
+      }}>
         <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden', background: '#111' }}>
-          <img
+          {!imgLoaded && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s infinite',
+            }} />
+          )}
+          <img ref={imgRef}
             src={img}
             onError={() => setImgErr(true)}
+            onLoad={() => setImgLoaded(true)}
             alt={car.title || 'Vehicle'}
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
-              transition: 'transform 0.5s ease',
+              transition: 'transform 0.6s cubic-bezier(0.2,0,0,1), opacity 0.4s ease',
+              transform: hovered ? 'scale(1.06)' : 'none',
+              opacity: imgLoaded ? 1 : 0.3,
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'none'}
           />
 
-          {/* gradient overlay */}
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.55) 100%)',
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.6) 100%)',
+            transition: 'opacity 0.3s ease',
+            opacity: hovered ? 0.7 : 1,
           }} />
 
-          {/* Top badges */}
           <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {isLive && (
               <div style={{
@@ -161,7 +168,6 @@ export default function CartyGrid({ car, listView }) {
             )}
           </div>
 
-          {/* Bottom-right: year pill */}
           {car.year && (
             <div style={{
               position: 'absolute', bottom: 8, right: 8,
@@ -170,11 +176,27 @@ export default function CartyGrid({ car, listView }) {
               fontSize: 9, color: 'rgba(255,255,255,0.7)', fontWeight: 700,
             }}>{car.year}</div>
           )}
+
+          {hovered && (
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              opacity: 0, animation: 'fadeIn 0.25s ease forwards',
+            }}>
+              <span style={{
+                padding: '6px 12px', borderRadius: 8,
+                background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+                color: '#fff', fontSize: 11, fontWeight: 600,
+                display: 'flex', alignItems: 'center', gap: 4,
+                border: '1px solid rgba(255,255,255,0.1)',
+              }}>
+                <Eye size={12} /> Quick View
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* ── CARD BODY ── */}
         <div style={{ padding: '12px 14px 14px' }}>
-          {/* Title */}
           <h3 style={{
             fontSize: 13, fontWeight: 700, color: '#fff',
             margin: '0 0 8px', lineHeight: 1.3,
@@ -183,7 +205,6 @@ export default function CartyGrid({ car, listView }) {
             {car.title}
           </h3>
 
-          {/* Meta row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             {car.mileage && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
@@ -198,7 +219,6 @@ export default function CartyGrid({ car, listView }) {
             </span>
           </div>
 
-          {/* Price row */}
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.05)',
@@ -215,30 +235,31 @@ export default function CartyGrid({ car, listView }) {
               </div>
             </div>
             <div style={{
-              width: 28, height: 28, borderRadius: 8,
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+              width: 30, height: 30, borderRadius: 9,
+              background: hovered ? 'rgba(212,168,67,0.12)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${hovered ? 'rgba(212,168,67,0.2)' : 'rgba(255,255,255,0.08)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
+              transition: 'all 0.3s ease',
             }}>
-              <ChevronRight size={13} style={{ color: 'rgba(255,255,255,0.4)' }} />
+              <ChevronRight size={13} style={{ color: hovered ? 'var(--gold)' : 'rgba(255,255,255,0.4)', transition: 'color 0.3s ease' }} />
             </div>
           </div>
         </div>
       </div>
     </Link>
-    {/* Compare button overlay */}
     <button
       onClick={e => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
       title={isCompared ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
       style={{
         position: 'absolute', top: 8, right: 8,
-        background: isCompared ? 'var(--gold)' : 'rgba(0,0,0,0.6)',
-        border: `1px solid ${isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.15)'}`,
+        background: isCompared ? 'var(--gold)' : 'rgba(0,0,0,0.55)',
+        border: `1px solid ${isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`,
         borderRadius: 6, padding: '3px 7px', fontSize: 10,
-        color: isCompared ? '#000' : 'rgba(255,255,255,0.7)',
+        color: isCompared ? '#000' : 'rgba(255,255,255,0.65)',
         cursor: compareCount >= maxCompare && !isCompared ? 'not-allowed' : 'pointer',
-        fontWeight: 700, opacity: compareCount >= maxCompare && !isCompared ? 0.4 : 1,
+        fontWeight: 700, opacity: compareCount >= maxCompare && !isCompared ? 0.4 : hovered ? 1 : 0.6,
         backdropFilter: 'blur(6px)', zIndex: 10,
+        transition: 'all 0.25s ease',
       }}
     >
       {isCompared ? '✓' : <BarChart3 size={10} />}

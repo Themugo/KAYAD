@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
+import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
 import DemoModeBanner from './DemoModeBanner';
 
@@ -17,16 +18,13 @@ export default function AppLayout({ children }) {
     if (!config) return;
     const root = document.documentElement;
 
-    // Fonts
     if (config.fontDisplay) root.style.setProperty('--font-display', `'${config.fontDisplay}', Georgia, serif`);
     if (config.fontBody) root.style.setProperty('--font-body', `'${config.fontBody}', -apple-system, sans-serif`);
 
-    // Sizing
     if (config.fontSizePct) root.style.setProperty('--font-size-pct', String(config.fontSizePct));
     if (config.baseFontSize) root.style.setProperty('--base-font-size', `${config.baseFontSize}px`);
     if (config.lineHeight) root.style.setProperty('--body-line-height', String(config.lineHeight));
 
-    // Branding colors
     const b = config.branding;
     if (b) {
       if (b.primaryColor) root.style.setProperty('--gold', b.primaryColor);
@@ -39,12 +37,13 @@ export default function AppLayout({ children }) {
   }, [config]);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <DemoModeBanner />
       <Navbar branding={config?.branding} />
-      <main style={{ paddingTop: 100 }}>
+      <main style={{ paddingTop: 100, flex: 1 }}>
         {children}
       </main>
+      <Footer />
       <CompareDrawer />
     </div>
   );

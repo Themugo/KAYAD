@@ -14,7 +14,8 @@ import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
   Heart, MessageCircle, ChevronLeft, ChevronRight,
-  Star, Eye, Bookmark, Zap, Award, Lock, ArrowLeft, Pin, TrendingUp
+  Star, Eye, Bookmark, Zap, Award, Lock, ArrowLeft, Pin, TrendingUp,
+  CheckCircle, AlertTriangle, Clock, BarChart3
 } from 'lucide-react';
 
 function firstImage(car, idx = 0) {
@@ -26,95 +27,63 @@ function firstImage(car, idx = 0) {
 
 function GalleryImage({ car, idx, onPrev, onNext, total }) {
   const [err, setErr] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const touchX = useRef(null);
   const src = (!err && firstImage(car, idx)) ||
     'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1600&fit=crop';
 
-  const handleTouchStart = useCallback((e) => {
-    touchX.current = e.touches[0].clientX;
-  }, []);
-
+  const handleTouchStart = useCallback((e) => { touchX.current = e.touches[0].clientX; }, []);
   const handleTouchEnd = useCallback((e) => {
     if (touchX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
-    const threshold = 50;
-    if (dx > threshold) onPrev();
-    else if (dx < -threshold) onNext();
+    if (dx > 50) onPrev();
+    else if (dx < -50) onNext();
     touchX.current = null;
   }, [onPrev, onNext]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#0a0a0a', borderRadius: 16, overflow: 'hidden', touchAction: 'pan-y' }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      <img src={src} onError={() => setErr(true)} alt={car?.title || 'Vehicle'}
-        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <div className="car-detail-gallery"
+      onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+      {!loaded && <div className="gallery-shimmer" />}
+      <img src={src} onError={() => setErr(true)} onLoad={() => setLoaded(true)} alt={car?.title || 'Vehicle'}
+        style={{ opacity: loaded ? 1 : 0.3, transition: 'opacity 0.5s ease' }} />
 
-      {/* gradient bottom overlay */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.7) 100%)', pointerEvents: 'none' }} />
+      <div className="gallery-overlay" />
 
-      {/* nav arrows */}
       {total > 1 && (
         <>
-          <button onClick={onPrev} style={{
-            position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-            width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.55)',
-            border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(8px)', transition: 'background 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.55)'}
-          ><ChevronLeft size={18} /></button>
-          <button onClick={onNext} style={{
-            position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
-            width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.55)',
-            border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(8px)', transition: 'background 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.8)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.55)'}
-          ><ChevronRight size={18} /></button>
+          <button onClick={onPrev} className="gallery-nav-btn gallery-nav-left"><ChevronLeft size={18} /></button>
+          <button onClick={onNext} className="gallery-nav-btn gallery-nav-right"><ChevronRight size={18} /></button>
+          <div className="gallery-counter">{idx + 1} / {total}</div>
         </>
       )}
 
-      {/* counter */}
-      {total > 1 && (
-        <div style={{ position: 'absolute', bottom: 14, right: 14, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '4px 12px', fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
-          {idx + 1} / {total}
-        </div>
-      )}
-
-      {/* live badge */}
       {car?.auctionStatus === 'live' && (
-        <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.92)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '5px 12px' }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.2s infinite' }} />
-          <span style={{ fontSize: 10, color: '#fff', fontWeight: 800, letterSpacing: '0.08em' }}>LIVE AUCTION</span>
+        <div className="gallery-badge-live">
+          <span className="live-dot-pulse" />
+          <span>LIVE AUCTION</span>
         </div>
       )}
 
-      {/* promoted badge */}
       {car?.isPromoted && (
-        <div style={{ position: 'absolute', top: 14, right: total > 1 ? 60 : 14, background: 'rgba(212,168,67,0.9)', backdropFilter: 'blur(8px)', borderRadius: 8, padding: '4px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Star size={10} style={{ color: '#000' }} />
-          <span style={{ fontSize: 9, fontWeight: 800, color: '#000', letterSpacing: '0.1em' }}>FEATURED</span>
+        <div className="gallery-badge-featured">
+          <Star size={10} />
+          <span>FEATURED</span>
         </div>
       )}
     </div>
   );
 }
 
-function SpecItem({ icon: Icon, label, value }) {
+function SpecItem({ icon: Icon, label, value, delay = 0 }) {
   if (!value) return null;
   return (
-    <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: '14px 16px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-        <Icon size={13} style={{ color: 'rgba(212,168,67,0.6)', flexShrink: 0 }} />
-        <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)' }}>{label}</span>
+    <div className="spec-item" style={{ animationDelay: `${delay}ms` }}>
+      <div className="spec-item-header">
+        <Icon size={12} className="spec-item-icon" />
+        <span className="spec-item-label">{label}</span>
       </div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{value}</div>
+      <div className="spec-item-value">{value}</div>
     </div>
   );
 }
@@ -125,20 +94,21 @@ export default function CarDetailPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [car,             setCar]             = useState(null);
+  const [car, setCar] = useState(null);
   usePageMeta(
     car ? `${car.title} - ${car.brand} ${car.model} ${car.year}` : 'Car Details',
     car ? `${car.title} - ${car.brand} ${car.model} ${car.year} in ${car.location}. Price: KES ${Number(car.price).toLocaleString()}. View details on Kayad.` : 'View premium car details on Kayad Marketplace.'
   );
-  const [reviews,         setReviews]         = useState([]);
-  const [loading,         setLoading]         = useState(true);
-  const [imgIdx,          setImgIdx]          = useState(0);
-  const [showPayModal,    setShowPayModal]     = useState(false);
-  const [isFav,           setIsFav]           = useState(false);
-  const [reviewForm,      setReviewForm]      = useState({ rating: 5, comment: '' });
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [imgIdx, setImgIdx] = useState(0);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payType, setPayType] = useState('escrow');
+  const [isFav, setIsFav] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [startingChat,    setStartingChat]    = useState(false);
-  const [promoting,       setPromoting]       = useState(false);
+  const [startingChat, setStartingChat] = useState(false);
+  const [promoting, setPromoting] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -156,25 +126,31 @@ export default function CarDetailPage() {
   }, [id]);
 
   const images = car?.images || [];
-  const total  = images.length;
+  const total = images.length;
   const prevImg = useCallback(() => setImgIdx(i => i > 0 ? i - 1 : total - 1), [total]);
   const nextImg = useCallback(() => setImgIdx(i => i < total - 1 ? i + 1 : 0), [total]);
 
-  // Keyboard nav
   useEffect(() => {
     const h = (e) => { if (e.key === 'ArrowLeft') prevImg(); if (e.key === 'ArrowRight') nextImg(); };
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, [prevImg, nextImg]);
 
-  // Robust ownership check: user may have _id or id, dealer may be object or string
-  const _userId   = String(user?._id || user?.id || '');
+  const _userId = String(user?._id || user?.id || '');
   const _dealerId = String(car?.dealer?._id || car?.dealer || '');
-  const isOwner   = !!(_userId && _dealerId && _userId === _dealerId);
+  const isOwner = !!(_userId && _dealerId && _userId === _dealerId);
   const canManage = isOwner || isAdmin;
-  const isLive  = car?.auctionStatus === 'live';
-  const dealer  = car?.dealer;
-  const dv      = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
+  const isLive = car?.auctionStatus === 'live';
+  const dealer = car?.dealer;
+  const dv = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
+
+  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'broker' || dealer.role === 'user' || !dealer.role;
+  const isDealerSeller = dealer?.role === 'dealer';
+
+  const handleBuy = (type) => {
+    setPayType(type);
+    setShowPayModal(true);
+  };
 
   const handleFav = async () => {
     if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
@@ -215,22 +191,22 @@ export default function CarDetailPage() {
       const next = !car.isPromoted;
       await carsAPI.promote(id, { isPromoted: next });
       setCar(p => ({ ...p, isPromoted: next }));
-      toast(next ? '⭐ Car featured on homepage' : 'Removed from featured', 'success');
+      toast(next ? 'Featured on homepage' : 'Removed from featured', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setPromoting(false); }
   };
 
   if (loading) return (
-    <div style={{ height: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(212,168,67,0.2)', borderTopColor: 'var(--gold)', animation: 'spin 0.8s linear infinite' }} />
+    <div className="page-loader">
+      <div className="page-loader-spinner" />
     </div>
   );
 
   if (!car) return (
-    <div style={{ height: '100vh', background: '#050505', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: 32 }}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '4rem', fontStyle: 'italic', fontWeight: 900, color: 'var(--gold)' }}>Not Found</div>
-      <p style={{ color: 'rgba(255,255,255,0.3)', marginTop: 12, marginBottom: 28, fontSize: 14 }}>This vehicle has been removed or sold.</p>
-      <Link to="/showroom" style={{ padding: '12px 28px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontWeight: 900, fontSize: 11, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Back to Gallery</Link>
+    <div className="page-notfound">
+      <div className="notfound-icon">Not Found</div>
+      <p>This vehicle has been removed or sold.</p>
+      <Link to="/showroom" className="notfound-back">Back to Gallery</Link>
     </div>
   );
 
@@ -238,54 +214,39 @@ export default function CarDetailPage() {
   const priceStr = price >= 1e6 ? `${(price/1e6).toFixed(2)}M` : `${(price/1000).toFixed(0)}K`;
 
   return (
-    <div style={{ background: '#050505', minHeight: '100vh', paddingBottom: 80 }}>
+    <div className="car-detail-page">
 
-      {/* ── BREADCRUMB ── */}
-      <div className="detail-breadcrumb" style={{ maxWidth: 1320, margin: '0 auto', padding: '20px 28px 0' }}>
-        <button onClick={() => navigate(-1)} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.35)', fontSize: 13, fontWeight: 500, padding: 0 }}
-          onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-          onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.35)'}
-        >
+      {/* Breadcrumb */}
+      <div className="detail-breadcrumb">
+        <button onClick={() => navigate(-1)} className="back-btn">
           <ArrowLeft size={14} /> Back to Gallery
         </button>
       </div>
 
-      <div className="detail-grid" style={{ maxWidth: 1320, margin: '0 auto', padding: '20px 28px', display: 'grid', gridTemplateColumns: '1fr 380px', gap: 28, alignItems: 'start' }}>
+      <div className="detail-grid">
 
-        {/* ═══════════════ LEFT COLUMN ═══════════════ */}
-        <div>
-          {/* MAIN IMAGE */}
+        {/* ═══════ LEFT COLUMN ═══════ */}
+        <div className="detail-left">
+
+          {/* Gallery */}
           <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} />
 
-          {/* THUMBNAILS */}
+          {/* Thumbnails */}
           {total > 1 && (
-            <div style={{ display: 'flex', gap: 8, marginTop: 10, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
+            <div className="detail-thumbnails">
               {images.map((img, i) => {
                 const src = typeof img === 'string' ? img : img?.url;
                 const isActive = i === imgIdx;
-                const isCover  = i === (car.coverImage ?? 0);
+                const isCover = i === (car.coverImage ?? 0);
                 return (
-                  <div key={i} style={{ position: 'relative', flexShrink: 0 }}>
-                    <div onClick={() => setImgIdx(i)} style={{
-                      width: 88, height: 60, borderRadius: 8, overflow: 'hidden', cursor: 'pointer',
-                      border: `2px solid ${isActive ? 'var(--gold)' : 'transparent'}`,
-                      opacity: isActive ? 1 : 0.55, transition: 'all 0.15s', background: '#111',
-                    }}
-                      onMouseEnter={e => { if (!isActive) e.currentTarget.style.opacity = '0.85'; }}
-                      onMouseLeave={e => { if (!isActive) e.currentTarget.style.opacity = '0.55'; }}
-                    >
-                      {src && <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  <div key={i} className="thumb-wrap">
+                    <div className={`thumb ${isActive ? 'thumb-active' : ''}`} onClick={() => setImgIdx(i)}>
+                      {src && <img src={src} alt="" />}
                     </div>
-                    {/* Cover pin button for owner/admin */}
                     {canManage && (
-                      <button onClick={() => handleSetCover(i)} title="Set as cover image"
-                        style={{
-                          position: 'absolute', top: 3, right: 3,
-                          width: 18, height: 18, borderRadius: 4,
-                          background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.65)',
-                          border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                        <Pin size={9} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.7)' }} />
+                      <button onClick={() => handleSetCover(i)} title="Set as cover"
+                        className={`thumb-pin ${isCover ? 'thumb-pin-active' : ''}`}>
+                        <Pin size={8} />
                       </button>
                     )}
                   </div>
@@ -294,194 +255,143 @@ export default function CarDetailPage() {
             </div>
           )}
 
-          {/* OWNER CONTROLS — feature on front page */}
+          {/* Owner controls */}
           {canManage && (
-            <div style={{ display: 'flex', gap: 10, marginTop: 14, padding: '14px 16px', background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 2 }}>Homepage Feature</div>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                  {car.isPromoted ? '⭐ This car is currently featured on the homepage' : 'Pin this car to the homepage gallery for maximum visibility'}
+            <div className="owner-controls">
+              <div className="owner-controls-info">
+                <div className="owner-controls-title">Homepage Feature</div>
+                <div className="owner-controls-desc">
+                  {car.isPromoted ? 'This car is currently featured on the homepage' : 'Pin this car to the homepage gallery'}
                 </div>
               </div>
-              <button onClick={handleTogglePromote} disabled={promoting} style={{
-                padding: '9px 18px', borderRadius: 9, cursor: promoting ? 'wait' : 'pointer',
-                background: car.isPromoted ? 'rgba(239,68,68,0.1)' : 'rgba(212,168,67,0.12)',
-                border: `1px solid ${car.isPromoted ? 'rgba(239,68,68,0.2)' : 'rgba(212,168,67,0.25)'}`,
-                color: car.isPromoted ? '#ef4444' : 'var(--gold)',
-                fontSize: 12, fontWeight: 700, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-              }}>
+              <button onClick={handleTogglePromote} disabled={promoting}
+                className={`owner-btn-feature ${car.isPromoted ? 'owner-btn-unfeature' : ''}`}>
                 {car.isPromoted ? <><TrendingUp size={13} /> Unfeature</> : <><Star size={13} /> Feature</>}
               </button>
-              <Link to={`/dealer/edit/${car._id}`} style={{
-                padding: '9px 18px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)',
-                fontSize: 12, fontWeight: 700, textDecoration: 'none', flexShrink: 0,
-              }}>✏ Edit</Link>
+              <Link to={`/dealer/edit/${car._id}`} className="owner-btn-edit">Edit</Link>
             </div>
           )}
 
-          {/* ── TITLE (mobile-style, large) ── */}
-          <div style={{ marginTop: 28, marginBottom: 24 }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.6rem,3vw,2.2rem)', color: '#fff', margin: '0 0 10px', lineHeight: 1.05 }}>
-              {car.title}
-            </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          {/* Title Bar */}
+          <div className="detail-titlebar">
+            <h1 className="detail-title">{car.title}</h1>
+            <div className="detail-meta">
               {car.location?.city && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-                  <MapPin size={12} style={{ color: 'rgba(212,168,67,0.6)' }} />{car.location.city}
+                <span className="detail-meta-item">
+                  <MapPin size={12} className="detail-meta-icon" />{car.location.city}
                 </span>
               )}
               {car.year && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-                  <Calendar size={12} style={{ color: 'rgba(212,168,67,0.6)' }} />{car.year}
+                <span className="detail-meta-item">
+                  <Calendar size={12} className="detail-meta-icon" />{car.year}
                 </span>
               )}
               {car.mileage && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>
-                  <Gauge size={12} style={{ color: 'rgba(212,168,67,0.6)' }} />{(car.mileage/1000).toFixed(0)}k km
+                <span className="detail-meta-item">
+                  <Gauge size={12} className="detail-meta-icon" />{(car.mileage/1000).toFixed(0)}k km
+                </span>
+              )}
+              {car.fuel && (
+                <span className="detail-meta-item">
+                  <Fuel size={12} className="detail-meta-icon" />{car.fuel}
+                </span>
+              )}
+              {car.transmission && (
+                <span className="detail-meta-item">
+                  <Settings2 size={12} className="detail-meta-icon" />{car.transmission}
                 </span>
               )}
             </div>
           </div>
 
-          {/* ── SPECS GRID ── */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.3)', marginBottom: 14 }}>
-              Full Specifications
-            </div>
-            <div className="spec-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-              <SpecItem icon={Settings2} label="Brand"         value={car.brand} />
-              <SpecItem icon={Settings2} label="Model"         value={car.model} />
-              <SpecItem icon={Calendar}  label="Year"          value={car.year} />
-              <SpecItem icon={Fuel}      label="Fuel"          value={car.fuel} />
-              <SpecItem icon={Settings2} label="Transmission"  value={car.transmission} />
-              <SpecItem icon={Settings2} label="Body"          value={car.bodyType} />
-              <SpecItem icon={Gauge}     label="Mileage"       value={car.mileage ? `${Number(car.mileage).toLocaleString()} km` : null} />
-              <SpecItem icon={Settings2} label="Colour"        value={car.color} />
-              <SpecItem icon={Settings2} label="Condition"     value={car.condition} />
-              <SpecItem icon={Settings2} label="Engine"        value={car.engine} />
-              <SpecItem icon={Settings2} label="Drivetrain"    value={car.drivetrain} />
-              <SpecItem icon={MapPin}    label="Location"      value={car.location?.city} />
+          {/* Specs Grid */}
+          <div className="detail-section">
+            <div className="detail-section-label">Full Specifications</div>
+            <div className="spec-grid">
+              <SpecItem icon={Settings2} label="Brand" value={car.brand} delay={0} />
+              <SpecItem icon={Settings2} label="Model" value={car.model} delay={40} />
+              <SpecItem icon={Calendar} label="Year" value={car.year} delay={80} />
+              <SpecItem icon={Fuel} label="Fuel" value={car.fuel} delay={120} />
+              <SpecItem icon={Settings2} label="Transmission" value={car.transmission} delay={160} />
+              <SpecItem icon={Settings2} label="Body" value={car.bodyType} delay={200} />
+              <SpecItem icon={Gauge} label="Mileage" value={car.mileage ? `${Number(car.mileage).toLocaleString()} km` : null} delay={240} />
+              <SpecItem icon={Settings2} label="Colour" value={car.color} delay={280} />
+              <SpecItem icon={Settings2} label="Condition" value={car.condition} delay={320} />
+              <SpecItem icon={Settings2} label="Engine" value={car.engine} delay={360} />
+              <SpecItem icon={Settings2} label="Drivetrain" value={car.drivetrain} delay={400} />
+              <SpecItem icon={MapPin} label="Location" value={car.location?.city} delay={440} />
             </div>
           </div>
 
-          {/* ── DESCRIPTION ── */}
+          {/* Description */}
           {car.description && (
-            <div style={{
-              marginBottom: 28,
-              background: 'linear-gradient(135deg, #0C0C0C 0%, #0A0A0A 100%)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              borderRadius: 14, padding: '28px 28px',
-              position: 'relative', overflow: 'hidden',
-            }}>
-              {/* Gold left accent bar */}
-              <div style={{
-                position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
-                background: 'linear-gradient(180deg, var(--gold) 0%, rgba(212,168,67,0.2) 100%)',
-                borderRadius: '14px 0 0 14px',
-              }} />
-              <div style={{
-                position: 'absolute', top: 0, right: 0, width: 200, height: 200,
-                background: 'radial-gradient(circle at 100% 0%, rgba(212,168,67,0.04) 0%, transparent 70%)',
-                pointerEvents: 'none',
-              }} />
-              <div style={{
-                fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em',
-                color: 'var(--gold)', marginBottom: 14, position: 'relative', zIndex: 1,
-              }}>
-                About This Vehicle
-              </div>
-              <p style={{
-                color: 'rgba(255,255,255,0.75)', fontSize: 17, lineHeight: 1.9,
-                whiteSpace: 'pre-wrap', margin: 0, position: 'relative', zIndex: 1,
-              }}>
-                {car.description}
-              </p>
+            <div className="detail-description">
+              <div className="desc-accent" />
+              <div className="desc-glow" />
+              <div className="desc-label">About This Vehicle</div>
+              <p className="desc-text">{car.description}</p>
             </div>
           )}
 
-          {/* ── FEATURES ── */}
+          {/* Features */}
           {car.features?.length > 0 && (
-            <div style={{ marginBottom: 28, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '22px 24px' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(212,168,67,0.6)', marginBottom: 14 }}>
-                Features & Equipment
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className="detail-features">
+              <div className="detail-section-label">Features & Equipment</div>
+              <div className="features-grid">
                 {car.features.map((f, i) => (
-                  <span key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.14)',
-                    borderRadius: 8, padding: '6px 13px', fontSize: 12, color: 'rgba(255,255,255,0.75)',
-                    fontWeight: 500,
-                  }}>
-                    <span style={{ color: 'var(--gold)', fontSize: 10 }}>✓</span> {f}
+                  <span key={i} className="feature-chip">
+                    <CheckCircle size={10} className="feature-chip-icon" /> {f}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* ── DEALER PROFILE ── */}
+          {/* Dealer Profile */}
           {dealer && (
-            <div style={{ marginBottom: 28, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '22px 24px' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.3)', marginBottom: 16 }}>
-                About The Seller
-              </div>
-              <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                <div style={{ width: 52, height: 52, borderRadius: 12, background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 900, color: '#000', fontFamily: 'var(--font-display)', flexShrink: 0 }}>
+            <div className="detail-card">
+              <div className="detail-section-label">About The Seller</div>
+              <div className="dealer-profile">
+                <div className="dealer-avatar">
                   {(dealer.name || 'D')[0].toUpperCase()}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{dealer.name || 'Seller'}</div>
-                  {dealer.businessName && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>{dealer.businessName}</div>}
-                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                <div className="dealer-info">
+                  <div className="dealer-name">{dealer.name || 'Seller'}</div>
+                  {dealer.businessName && <div className="dealer-business">{dealer.businessName}</div>}
+                  <div className="dealer-stats">
                     {dealer.dealerRating && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--gold)', fontWeight: 700 }}>
-                        <Star size={12} fill="currentColor" /> {dealer.dealerRating}/5
+                      <span className="dealer-rating">
+                        <Star size={11} fill="currentColor" /> {dealer.dealerRating}/5
                       </span>
                     )}
                     {dealer.trustScore && (
-                      <span style={{ fontSize: 12, color: dealer.trustScore >= 80 ? '#22c55e' : '#eab308', fontWeight: 700 }}>
+                      <span className={`dealer-trust ${dealer.trustScore >= 80 ? 'trust-high' : 'trust-mid'}`}>
                         {dealer.trustScore}% Trust
                       </span>
                     )}
                     {dealer.totalTransactions > 0 && (
-                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>
-                        {dealer.totalTransactions} sales
-                      </span>
+                      <span className="dealer-sales">{dealer.totalTransactions} sales</span>
                     )}
                   </div>
-
                   {dealer.trustScore && (
-                    <div style={{ marginBottom: 12 }}>
-                      <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                        <div style={{ width: `${dealer.trustScore}%`, height: '100%', borderRadius: 2, background: dealer.trustScore >= 80 ? '#22c55e' : '#eab308', transition: 'width 0.6s ease' }} />
-                      </div>
+                    <div className="dealer-trust-bar">
+                      <div className="dealer-trust-fill" style={{ width: `${dealer.trustScore}%` }} />
                     </div>
                   )}
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="dealer-contact">
                     {dealer.location && dv.showLocation && (
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <MapPin size={12} style={{ color: 'rgba(212,168,67,0.5)', flexShrink: 0 }} />{dealer.location}
-                      </span>
+                      <span className="dealer-contact-item"><MapPin size={11} className="contact-icon" />{dealer.location}</span>
                     )}
                     {dealer.phone && dv.showPhone && (
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 12 }}>📞</span>{dealer.phone}
-                      </span>
+                      <span className="dealer-contact-item"><span className="contact-emoji">📞</span>{dealer.phone}</span>
                     )}
                     {dealer.email && dv.showEmail && (
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 12 }}>✉️</span>{dealer.email}
-                      </span>
+                      <span className="dealer-contact-item"><span className="contact-emoji">✉️</span>{dealer.email}</span>
                     )}
                   </div>
-
                   {dealer.escrowMandatory && (
-                    <div style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, padding: '5px 12px' }}>
-                      <Lock size={11} style={{ color: '#22c55e' }} />
-                      <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 700 }}>Escrow Protected Seller</span>
+                    <div className="dealer-escrow-badge">
+                      <Lock size={10} /> Escrow Protected Seller
                     </div>
                   )}
                 </div>
@@ -489,43 +399,40 @@ export default function CarDetailPage() {
             </div>
           )}
 
-          {/* ── REVIEWS ── */}
-          <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '22px 24px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.3)', marginBottom: 16 }}>
+          {/* Reviews */}
+          <div className="detail-card">
+            <div className="detail-section-label">
               Dealer Reviews {reviews.length > 0 && `(${reviews.length})`}
             </div>
             {reviews.length === 0 ? (
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginBottom: 20 }}>No reviews yet. Be the first to review this dealer.</div>
+              <div className="reviews-empty">No reviews yet. Be the first to review this dealer.</div>
             ) : reviews.slice(0, 4).map(r => (
-              <div key={r._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: 14, marginBottom: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.reviewer?.name || 'Anonymous'}</span>
-                  <span style={{ color: 'var(--gold)', fontSize: 13, letterSpacing: 2 }}>{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+              <div key={r._id} className="review-item">
+                <div className="review-header">
+                  <span className="review-author">{r.reviewer?.name || 'Anonymous'}</span>
+                  <span className="review-stars">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
                 </div>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, lineHeight: 1.6, margin: 0 }}>{r.comment}</p>
+                <p className="review-comment">{r.comment}</p>
               </div>
             ))}
 
             {isAuth && !isOwner && (
-              <form onSubmit={handleReview} style={{ paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 8 }}>Rating</label>
+              <form onSubmit={handleReview} className="review-form">
+                <div className="review-field">
+                  <label className="review-label">Rating</label>
                   <select value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: Number(e.target.value) }))}
-                    style={{ width: '100%', padding: '10px 13px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none' }}>
-                    {[5,4,3,2,1].map(n => <option key={n} value={n} style={{ background: '#111' }}>{'★'.repeat(n)} — {n} star{n !== 1 ? 's' : ''}</option>)}
+                    className="review-select">
+                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{'★'.repeat(n)} — {n} star{n !== 1 ? 's' : ''}</option>)}
                   </select>
                 </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 8 }}>Comment</label>
+                <div className="review-field">
+                  <label className="review-label">Comment</label>
                   <textarea rows={3} placeholder="Share your experience with this dealer…" value={reviewForm.comment}
                     onChange={e => setReviewForm(p => ({ ...p, comment: e.target.value }))}
-                    style={{ width: '100%', padding: '10px 13px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                    className="review-textarea" />
                 </div>
-                <button type="submit" disabled={submittingReview || !reviewForm.comment} style={{
-                  padding: '10px 24px', background: reviewForm.comment ? 'var(--gold)' : 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 9,
-                  color: reviewForm.comment ? '#000' : 'rgba(255,255,255,0.2)', fontSize: 12, fontWeight: 900, cursor: reviewForm.comment ? 'pointer' : 'default',
-                  textTransform: 'uppercase', letterSpacing: '0.06em',
-                }}>
+                <button type="submit" disabled={submittingReview || !reviewForm.comment}
+                  className={`review-submit ${reviewForm.comment ? 'review-submit-active' : ''}`}>
                   {submittingReview ? 'Submitting…' : 'Submit Review'}
                 </button>
               </form>
@@ -533,141 +440,116 @@ export default function CarDetailPage() {
           </div>
         </div>
 
-        {/* ═══════════════ RIGHT COLUMN (sticky sidebar) ═══════════════ */}
-        <div className="detail-sidebar" style={{ position: 'sticky', top: 108 }}>
+        {/* ═══════ RIGHT COLUMN (Sticky Sidebar) ═══════ */}
+        <div className="detail-sidebar">
 
-          {/* PRICE CARD */}
-          <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 18, overflow: 'hidden', marginBottom: 12 }}>
+          {/* Price Card */}
+          <div className="price-card">
+            <div className="price-card-accent" />
 
-            {/* top gold accent line */}
-            <div style={{ height: 3, background: 'linear-gradient(90deg, var(--gold-muted), var(--gold), var(--gold-muted))' }} />
-
-            <div style={{ padding: '22px 24px' }}>
-              {/* badges */}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+            <div className="price-card-body">
+              {/* Badges */}
+              <div className="price-badges">
                 {car.isVerifiedDealer && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 6, padding: '3px 9px', fontSize: 10, color: '#3b82f6', fontWeight: 700 }}>
-                    <ShieldCheck size={10} /> Verified
-                  </span>
+                  <span className="badge badge-blue"><ShieldCheck size={10} /> Verified</span>
                 )}
                 {car.isPromoted && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(212,168,67,0.1)', border: '1px solid rgba(212,168,67,0.2)', borderRadius: 6, padding: '3px 9px', fontSize: 10, color: 'var(--gold)', fontWeight: 700 }}>
-                    <Star size={10} /> Featured
-                  </span>
+                  <span className="badge badge-gold"><Star size={10} /> Featured</span>
                 )}
                 {isLive && (
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '3px 9px', fontSize: 10, color: '#ef4444', fontWeight: 700 }}>
-                    <Zap size={10} /> Live Auction
-                  </span>
+                  <span className="badge badge-red"><Zap size={10} /> Live Auction</span>
+                )}
+                {isP2P && (
+                  <span className="badge badge-green"><Lock size={10} /> P2P Escrow</span>
                 )}
               </div>
 
-              {/* title */}
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: '#fff', margin: '0 0 6px', lineHeight: 1.3 }}>{car.title}</h2>
+              <h2 className="price-card-title">{car.title}</h2>
               {car.location?.city && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 18 }}>
-                  <MapPin size={11} style={{ color: 'rgba(212,168,67,0.5)' }} />{car.location.city}
+                <div className="price-card-location">
+                  <MapPin size={11} className="price-card-location-icon" />{car.location.city}
                 </div>
               )}
 
-              {/* PRICE */}
-              <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 12, padding: '16px 18px', marginBottom: 18 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.16em', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>
-                  {isLive && car.currentBid > 0 ? 'Current Bid' : 'Asking Price'}
+              {/* Pricing */}
+              <div className="price-box">
+                <div className="price-box-label">
+                  {isLive && car.currentBid > 0 ? 'Current Bid' : isP2P ? 'Escrow Price' : 'Buy Now Price'}
                 </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '2.1rem', color: 'var(--gold)', lineHeight: 1, marginBottom: 4 }}>
-                  KES {priceStr}
-                </div>
+                <div className="price-box-amount">KES {priceStr}</div>
                 {isLive && car.currentBid > 0 && (
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>Starting: KES {(car.price / 1000).toFixed(0)}K</div>
+                  <div className="price-box-starting">Starting: KES {(car.price / 1000).toFixed(0)}K</div>
                 )}
                 {car.bidsCount > 0 && (
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>{car.bidsCount} bid{car.bidsCount !== 1 ? 's' : ''} placed</div>
+                  <div className="price-box-bids">{car.bidsCount} bid{car.bidsCount !== 1 ? 's' : ''} placed</div>
                 )}
               </div>
 
-              {/* stats row */}
-              <div className="detail-stats-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 20 }}>
+              {/* Stats row */}
+              <div className="price-stats">
                 {[
                   { icon: '👁', val: car.views || 0, label: 'Views' },
                   { icon: '❤️', val: car.favoritesCount || 0, label: 'Saved' },
                   { icon: '⚡', val: car.bidsCount || 0, label: 'Bids' },
                 ].map(s => (
-                  <div key={s.label} style={{ background: '#111', borderRadius: 9, padding: '10px 8px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: 15, marginBottom: 3 }}>{s.icon}</div>
-                    <div style={{ fontWeight: 800, fontSize: 15, color: '#fff', lineHeight: 1 }}>{s.val}</div>
-                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</div>
+                  <div key={s.label} className="price-stat-item">
+                    <div className="price-stat-icon">{s.icon}</div>
+                    <div className="price-stat-val">{s.val}</div>
+                    <div className="price-stat-label">{s.label}</div>
                   </div>
                 ))}
               </div>
 
               {/* CTAs */}
               {isOwner ? (
-                <Link to={`/dealer/edit/${car._id}`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '13px', borderRadius: 11, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
-                  ✏ Edit Your Listing
+                <Link to={`/dealer/edit/${car._id}`} className="cta-edit-listing">
+                  Edit Your Listing
                 </Link>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="cta-group">
                   {isLive ? (
-                    <Link to={`/auction/${car._id}`} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7, padding: '14px', borderRadius: 11, background: 'var(--gold)', color: '#000', fontSize: 13, fontWeight: 900, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.07em', boxShadow: '0 6px 24px rgba(212,168,67,0.25)' }}>
+                    <Link to={`/auction/${car._id}`} className="cta-primary cta-auction">
                       <Zap size={15} /> Join Live Auction
                     </Link>
-                  ) : (
-                    <>
-                      {car.allowBuy && (
-                        <button onClick={() => setShowPayModal(true)} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7, padding: '14px', borderRadius: 11, background: 'var(--gold)', border: 'none', color: '#000', fontSize: 13, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.07em', boxShadow: '0 6px 24px rgba(212,168,67,0.22)', transition: 'all 0.2s' }}
-                          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 10px 32px rgba(212,168,67,0.35)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(212,168,67,0.22)'; }}
-                        >
-                          <Lock size={14} /> Buy via Escrow
-                        </button>
-                      )}
-                      {car.allowBid && (
-                        <button onClick={() => navigate(`/auction/${car._id}`)} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7, padding: '13px', borderRadius: 11, background: 'transparent', border: '1px solid rgba(212,168,67,0.3)', color: 'var(--gold)', fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,168,67,0.08)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                        >
-                          <Zap size={14} /> Place a Bid
-                        </button>
-                      )}
-                    </>
-                  )}
+                  ) : isP2P ? (
+                    <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
+                      <Lock size={15} /> Buy via Escrow
+                    </button>
+                  ) : isDealerSeller && car.allowBuy ? (
+                    <button onClick={() => handleBuy('direct')} className="cta-primary cta-buynow">
+                      <ShieldCheck size={15} /> Buy Now
+                    </button>
+                  ) : null}
 
                   {dv.chatEnabled && !car.chatDisabled && (
-                    <button onClick={handleChat} disabled={startingChat} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 7, padding: '13px', borderRadius: 11, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: 600, cursor: startingChat ? 'wait' : 'pointer', transition: 'all 0.2s' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = '#fff'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
-                    >
-                      <MessageCircle size={14} /> {startingChat ? 'Opening…' : 'Message Dealer'}
+                    <button onClick={handleChat} disabled={startingChat} className="cta-secondary">
+                      <MessageCircle size={14} /> {startingChat ? 'Opening…' : 'Message Seller'}
                     </button>
                   )}
 
-                  <button onClick={handleFav} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, padding: '10px', borderRadius: 11, background: isFav ? 'rgba(239,68,68,0.08)' : 'transparent', border: `1px solid ${isFav ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, color: isFav ? '#ef4444' : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}>
-                    <Heart size={13} fill={isFav ? 'currentColor' : 'none'} /> {isFav ? 'Saved to Wishlist' : 'Save Car'}
+                  <button onClick={handleFav} className={`cta-fav ${isFav ? 'cta-fav-active' : ''}`}>
+                    <Heart size={13} fill={isFav ? 'currentColor' : 'none'} />
+                    {isFav ? 'Saved to Wishlist' : 'Save Car'}
                   </button>
                 </div>
               )}
 
-              {/* Trust note — escrow only for non-dealers */}
-              {dealer?.role === 'dealer' ? (
-                <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.12)', borderRadius: 10 }}>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <ShieldCheck size={12} style={{ color: '#3b82f6', flexShrink: 0, marginTop: 1 }} />
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65 }}>
-                      <strong style={{ color: '#3b82f6' }}>Verified Dealer.</strong> This vehicle is listed by a KRA-vetted, Kayad-approved dealer. Direct purchase — no escrow required.
-                    </div>
+              {/* Trust Note */}
+              {isP2P ? (
+                <div className="trust-note trust-note-escrow">
+                  <Lock size={12} className="trust-note-icon" />
+                  <div className="trust-note-text">
+                    <strong>Escrow Protected.</strong> Payment held securely until you confirm receipt. Protects you when buying from independent sellers.
                   </div>
                 </div>
-              ) : (
-                <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.1)', borderRadius: 10 }}>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                    <Lock size={12} style={{ color: '#22c55e', flexShrink: 0, marginTop: 1 }} />
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65 }}>
-                      <strong style={{ color: '#22c55e' }}>Escrow Protected.</strong> Payment held securely until you confirm receipt. Protects you when buying from independent sellers.
-                    </div>
+              ) : isDealerSeller ? (
+                <div className="trust-note trust-note-dealer">
+                  <ShieldCheck size={12} className="trust-note-icon" />
+                  <div className="trust-note-text">
+                    <strong>Verified Dealer.</strong> This vehicle is listed by a KRA-vetted, Kayad-approved dealer. Direct purchase — no escrow required.
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 
@@ -677,7 +559,7 @@ export default function CarDetailPage() {
           {/* Inspection */}
           <InspectionButton carId={car._id} location={car.location?.city || dealer?.location} />
 
-          {/* TCO Calculator */}
+          {/* TCO */}
           <TcoCalculator vehicle={car} />
 
           {/* Market Valuation */}
@@ -692,19 +574,19 @@ export default function CarDetailPage() {
           {/* Price History */}
           <PriceHistoryChart carId={car._id} currentPrice={car.price} />
 
-          {/* DEALER MINI CARD */}
+          {/* Dealer Mini Card */}
           {dealer && (
-            <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 20px' }}>
-              <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.25)', marginBottom: 12 }}>Listed By</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: '#000', flexShrink: 0 }}>
+            <div className="sidebar-dealer-card">
+              <div className="sidebar-dealer-label">Listed By</div>
+              <div className="sidebar-dealer-row">
+                <div className="sidebar-dealer-avatar">
                   {(dealer.name || 'D')[0]}
                 </div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{dealer.name || 'Dealer'}</div>
+                  <div className="sidebar-dealer-name">{dealer.name || 'Dealer'}</div>
                   {dealer.dealerRating && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--gold)', marginTop: 2 }}>
-                      <Star size={11} fill="currentColor" /> {dealer.dealerRating}/5
+                    <div className="sidebar-dealer-rating">
+                      <Star size={10} fill="currentColor" /> {dealer.dealerRating}/5
                     </div>
                   )}
                 </div>
@@ -718,10 +600,13 @@ export default function CarDetailPage() {
         <PaymentModal
           amount={car.price}
           carId={car._id}
-          type="escrow"
-          title={`Buy: ${car.title}`}
+          type={payType}
+          title={`${payType === 'escrow' ? 'Buy via Escrow' : 'Buy Now'}: ${car.title}`}
           onClose={() => setShowPayModal(false)}
-          onSuccess={() => toast('Escrow funded! Seller has been notified.', 'success')}
+          onSuccess={() => toast(
+            payType === 'escrow' ? 'Escrow funded! Seller has been notified.' : 'Purchase confirmed!',
+            'success'
+          )}
         />
       )}
     </div>
@@ -738,16 +623,9 @@ function CompareToggle({ car }) {
   return (
     <button onClick={() => isComp ? removeCar(car._id) : addCar(car._id)}
       disabled={!isComp && full}
-      style={{
-        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-        padding: '10px', marginBottom: 12,
-        borderRadius: 10, background: isComp ? 'rgba(212,168,67,0.08)' : 'transparent',
-        border: `1px solid ${isComp ? 'rgba(212,168,67,0.25)' : 'rgba(255,255,255,0.07)'}`,
-        color: isComp ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
-        fontSize: 11, fontWeight: 700, cursor: !isComp && full ? 'not-allowed' : 'pointer',
-        opacity: !isComp && full ? 0.4 : 1, transition: 'all 0.2s',
-      }}>
-      {isComp ? '✓ Added to Compare' : full ? 'Compare full (max 4)' : '+ Add to Compare'}
+      className={`compare-toggle ${isComp ? 'compare-active' : ''}`}>
+      <BarChart3 size={13} />
+      {isComp ? 'Added to Compare' : full ? 'Compare full (max 4)' : 'Add to Compare'}
     </button>
   );
 }

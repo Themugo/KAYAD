@@ -71,35 +71,45 @@ export default function Navbar({ branding }) {
     return loc.pathname === path || loc.pathname.startsWith(path + '/');
   };
 
-  // Nav link style factory
-  const navLink = (active) => ({
-    padding: '10px 18px', borderRadius: 10,
+  const navLinkStyle = (active) => ({
+    position: 'relative',
+    padding: '8px 4px',
     fontSize: 14, fontWeight: active ? 700 : 500,
-    color: active ? '#fff' : 'rgba(255,255,255,0.55)',
-    background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
-    border: `1px solid ${active ? 'rgba(255,255,255,0.12)' : 'transparent'}`,
-    textDecoration: 'none', transition: 'all 0.2s', whiteSpace: 'nowrap',
+    color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+    textDecoration: 'none', transition: 'color 0.25s',
     letterSpacing: '-0.01em',
+    background: 'none',
+  });
+
+  const navLinkAfter = (active) => ({
+    content: '""',
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    height: 2,
+    borderRadius: 1,
+    background: 'linear-gradient(90deg, rgba(212,168,67,0.2), var(--gold), rgba(212,168,67,0.2))',
+    transform: active ? 'scaleX(1)' : 'scaleX(0)',
+    transformOrigin: active ? 'left' : 'right',
+    transition: 'transform 0.35s cubic-bezier(0.2,0,0,1), opacity 0.35s ease',
+    opacity: active ? 1 : 0,
   });
 
   return (
     <>
-      {/* ══════════════════════════════════════════════════════════
-          NAVBAR — 100px tall, scroll-aware glass
-          ══════════════════════════════════════════════════════════ */}
       <nav aria-label="Main navigation" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         height: 100,
         display: 'flex', alignItems: 'center',
-        background: scrolled ? 'rgba(3,3,3,0.97)' : 'linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.3) 100%)',
-        backdropFilter: 'blur(32px)',
-        borderBottom: scrolled ? '1px solid rgba(212,168,67,0.1)' : '1px solid transparent',
-        transition: 'background 0.4s ease, border-color 0.4s ease',
+        background: scrolled
+          ? 'rgba(3,3,3,0.92)'
+          : 'linear-gradient(180deg, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.10) 100%)',
+        backdropFilter: scrolled ? 'blur(48px) saturate(1.3)' : 'blur(24px)',
+        WebkitBackdropFilter: scrolled ? 'blur(48px) saturate(1.3)' : 'blur(24px)',
+        borderBottom: scrolled ? '1px solid rgba(212,168,67,0.10)' : '1px solid transparent',
+        boxShadow: scrolled ? '0 1px 40px rgba(0,0,0,0.3)' : 'none',
+        transition: 'background 0.5s ease, border-color 0.5s ease, backdrop-filter 0.5s ease, box-shadow 0.5s ease',
       }}>
         <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 20 }}>
-
-          {/* ── LOGO: K with car icon + KAYAD text ── */}
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, textDecoration: 'none', marginRight: 'auto' }} aria-label="Kayad home">
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, textDecoration: 'none', marginRight: 'auto', transition: 'opacity 0.3s' }} aria-label="Kayad home">
             {branding?.logoType === 'image' && branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={branding.logoText || 'Logo'}
                 style={{ height: 44, width: 'auto', objectFit: 'contain', borderRadius: 8 }} />
@@ -110,7 +120,11 @@ export default function Navbar({ branding }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 8px 32px rgba(212,168,67,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
                 flexShrink: 0, position: 'relative', overflow: 'hidden',
-              }}>
+                transition: 'transform 0.3s ease',
+              }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
+              >
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)', borderRadius: '14px 14px 0 0' }} />
                 <span style={{ fontSize: 24, lineHeight: 1, zIndex: 1 }}>🚗</span>
               </div>
@@ -120,57 +134,53 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          {/* ── CENTER TAGLINE ── */}
           <div style={{ flex: 1, textAlign: 'center', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
             <span style={{
-              fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'rgba(255,255,255,0.55)',
+              fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'rgba(255,255,255,0.45)',
               letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>
               {branding?.brandTagline || "Kenya's Premium Automotive Gallery"}
             </span>
           </div>
 
-          {/* ── RIGHT SIDE ── */}
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-
-            {/* Gallery */}
-            <Link to="/showroom" style={navLink(isActive('/showroom'))}
-              onMouseEnter={e => { if (!isActive('/showroom')) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}}
-              onMouseLeave={e => { if (!isActive('/showroom')) { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}}
-            >Gallery</Link>
-
-            {/* Live Auctions */}
-            <Link to="/showroom?filter=auction" style={navLink(false)}
-              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite', flexShrink: 0 }} />
-                Live Auctions
-              </span>
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0 }}>
+            <Link to="/showroom" style={navLinkStyle(isActive('/showroom'))}
+              onMouseEnter={e => { if (!isActive('/showroom')) e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { if (!isActive('/showroom')) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+              Gallery
+              <span style={navLinkAfter(isActive('/showroom'))} className="nav-underline" />
             </Link>
 
-            {/* Dealer Hub (authenticated dealers only) */}
+            <Link to="/showroom?filter=auction" style={navLinkStyle(false)}
+              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite', flexShrink: 0 }} />
+                Live Auctions
+              </span>
+              <span style={navLinkAfter(false)} className="nav-underline" />
+            </Link>
+
             {(isDealer || user?.role === 'broker' || user?.role === 'individual_seller') && (
-              <Link to="/dealer" style={navLink(isActive('/dealer'))}
-                onMouseEnter={e => { if (!isActive('/dealer')) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}}
-                onMouseLeave={e => { if (!isActive('/dealer')) { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}}
-              >Dealer Hub</Link>
+              <Link to="/dealer" style={navLinkStyle(isActive('/dealer'))}
+                onMouseEnter={e => { if (!isActive('/dealer')) e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { if (!isActive('/dealer')) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+                Dealer Hub
+                <span style={navLinkAfter(isActive('/dealer'))} className="nav-underline" />
+              </Link>
             )}
 
-            {/* Admin */}
             {isAdmin && (
-              <Link to="/admin" style={navLink(isActive('/admin'))}
-                onMouseEnter={e => { if (!isActive('/admin')) { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}}
-                onMouseLeave={e => { if (!isActive('/admin')) { e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.background = 'transparent'; }}}
-              >Admin</Link>
+              <Link to="/admin" style={navLinkStyle(isActive('/admin'))}
+                onMouseEnter={e => { if (!isActive('/admin')) e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { if (!isActive('/admin')) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+                Admin
+                <span style={navLinkAfter(isActive('/admin'))} className="nav-underline" />
+              </Link>
             )}
           </div>
 
-          {/* ── AUTH / USER ── */}
           <div ref={dropRef} style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-
-            {/* Live indicator */}
             {connected && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 9999, border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.06)' }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', display: 'block', animation: 'pulse 2s infinite' }} />
@@ -180,7 +190,6 @@ export default function Navbar({ branding }) {
 
             {isAuth ? (
               <>
-                {/* Notifications */}
                 <div style={{ position: 'relative' }}>
                   <button onClick={() => { setNotifDrop(p => !p); setUserDrop(false); }} aria-label="Notifications"
                     style={{ width: 44, height: 44, borderRadius: 11, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}
@@ -212,7 +221,6 @@ export default function Navbar({ branding }) {
                   )}
                 </div>
 
-                {/* User menu */}
                 <div style={{ position: 'relative' }}>
                   <button onClick={() => { setUserDrop(p => !p); setNotifDrop(false); }} aria-label="User menu"
                     style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.11)', borderRadius: 12, padding: '8px 14px 8px 8px', cursor: 'pointer', transition: 'all 0.2s' }}
@@ -266,14 +274,13 @@ export default function Navbar({ branding }) {
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
                   onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.background = 'transparent'; }}
                 >Sign In</Link>
-                <Link to="/register" style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800, color: '#000', background: 'var(--gold)', textDecoration: 'none', transition: 'all 0.2s', letterSpacing: '-0.01em', boxShadow: '0 4px 20px rgba(212,168,67,0.28)' }}
+                <Link to="/register" style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800, color: '#000', background: 'var(--gold)', textDecoration: 'none', transition: 'all 0.25s', letterSpacing: '-0.01em', boxShadow: '0 4px 20px rgba(212,168,67,0.28)' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(212,168,67,0.42)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,168,67,0.28)'; }}
                 >Join Free</Link>
               </div>
             )}
 
-            {/* Hamburger */}
             <button className={`hamburger ${mobileOpen ? 'open' : ''}`} onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu" style={{ marginLeft: 4 }}>
               <span /><span /><span />
             </button>
@@ -281,12 +288,11 @@ export default function Navbar({ branding }) {
         </div>
       </nav>
 
-      {/* ══════════════════════════════════════════════════════════
-          MOBILE MENU
-          ══════════════════════════════════════════════════════════ */}
       {mobileOpen && (
-        <div className="mobile-menu" onClick={() => setMobileOpen(false)}>
-          <div className="mobile-menu-panel" onClick={e => e.stopPropagation()}>
+        <div className="mobile-menu" onClick={() => setMobileOpen(false)}
+          style={{ animation: 'fadeIn 0.2s ease' }}>
+          <div className="mobile-menu-panel" onClick={e => e.stopPropagation()}
+            style={{ animation: 'slideIn 0.3s ease' }}>
             <div style={{ padding: '28px 24px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               {branding?.logoType === 'image' && branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.logoText || 'Logo'}
@@ -308,7 +314,7 @@ export default function Navbar({ branding }) {
               {[
                 { to: '/',                        label: 'Home' },
                 { to: '/showroom',                label: 'The Gallery' },
-                { to: '/showroom?filter=auction', label: '🔴  Live Auctions' },
+                { to: '/showroom?filter=auction', label: 'Live Auctions' },
 
                 ...(isAuth ? [
                   { to: '/dashboard', label: 'Dashboard' },
@@ -318,10 +324,11 @@ export default function Navbar({ branding }) {
                   { to: '/login',    label: 'Sign In' },
                   { to: '/register', label: 'Join Free' },
                 ]),
-                ...(isDealer ? [{ to: '/dealer', label: '🏪  Dealer Hub' }] : []),
-                ...(isAdmin  ? [{ to: '/admin',  label: '⚙️  Admin Panel' }] : []),
-              ].map(({ to, label }) => (
-                <Link key={to} to={to} className={`mobile-nav-link${isActive(to.split('?')[0]) ? ' active' : ''}`} onClick={() => setMobileOpen(false)} style={{ fontSize: 15 }}>{label}</Link>
+                ...(isDealer ? [{ to: '/dealer', label: 'Dealer Hub' }] : []),
+                ...(isAdmin  ? [{ to: '/admin',  label: 'Admin Panel' }] : []),
+              ].map(({ to, label }, i) => (
+                <Link key={to} to={to} className={`mobile-nav-link${isActive(to.split('?')[0]) ? ' active' : ''}`} onClick={() => setMobileOpen(false)}
+                  style={{ fontSize: 15, animation: `fadeIn 0.3s ease ${i * 0.04}s both` }}>{label}</Link>
               ))}
               {isAuth && (
                 <button onClick={handleLogout} style={{ width: '100%', textAlign: 'left', padding: '15px 18px', margin: '6px 0', background: 'none', border: 'none', cursor: 'pointer', fontSize: 15, color: 'rgba(239,68,68,0.75)', borderRadius: 10 }}>
