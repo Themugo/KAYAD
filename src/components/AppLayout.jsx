@@ -1,0 +1,49 @@
+import { useState, useEffect } from 'react';
+import { adminAPI } from '../api/api';
+import Navbar from './Navbar';
+import CompareDrawer from './CompareDrawer';
+
+export default function AppLayout({ children }) {
+  const [config, setConfig] = useState(null);
+
+  useEffect(() => {
+    adminAPI.getConfig().then(cfg => {
+      setConfig(cfg.config || cfg);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!config) return;
+    const root = document.documentElement;
+
+    // Fonts
+    if (config.fontDisplay) root.style.setProperty('--font-display', `'${config.fontDisplay}', Georgia, serif`);
+    if (config.fontBody) root.style.setProperty('--font-body', `'${config.fontBody}', -apple-system, sans-serif`);
+
+    // Sizing
+    if (config.fontSizePct) root.style.setProperty('--font-size-pct', String(config.fontSizePct));
+    if (config.baseFontSize) root.style.setProperty('--base-font-size', `${config.baseFontSize}px`);
+    if (config.lineHeight) root.style.setProperty('--body-line-height', String(config.lineHeight));
+
+    // Branding colors
+    const b = config.branding;
+    if (b) {
+      if (b.primaryColor) root.style.setProperty('--gold', b.primaryColor);
+      if (b.accentColor) root.style.setProperty('--gold-light', b.accentColor);
+      if (b.bgColor) root.style.setProperty('--bg', b.bgColor);
+      if (b.surfaceColor) root.style.setProperty('--surface', b.surfaceColor);
+      if (b.cardColor) root.style.setProperty('--card', b.cardColor);
+      if (b.textColor) root.style.setProperty('--text', b.textColor);
+    }
+  }, [config]);
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden' }}>
+      <Navbar branding={config?.branding} />
+      <main style={{ paddingTop: 100 }}>
+        {children}
+      </main>
+      <CompareDrawer />
+    </div>
+  );
+}
