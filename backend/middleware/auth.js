@@ -64,13 +64,21 @@ export const protect = async (req, res, next) => {
     // 🔍 FETCH USER (LEAN 🔥)
     // =============================
     const user = await User.findById(decoded.id)
-      .select("-password")
+      .select("-password +tokenVersion")
       .lean();
 
     if (!user) {
       return res.status(401).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    // 🔥 CHECK TOKEN VERSION — invalidate old tokens after logout
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (user.tokenVersion ?? 0)) {
+      return res.status(401).json({
+        success: false,
+        message: "Session invalidated, please login again",
       });
     }
 

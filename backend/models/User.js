@@ -245,6 +245,14 @@ const userSchema = new mongoose.Schema(
       default: 0,
       select: false,
     },
+
+    // =============================
+    // 🔒 FORCE PASSWORD CHANGE (demo / seeded accounts)
+    // =============================
+    mustChangePassword: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

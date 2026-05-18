@@ -69,7 +69,7 @@ api.interceptors.response.use(
       orig._retry = true;
       _refreshing = true;
       try {
-        const { data } = await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true });
+        const { data } = await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true, headers: { 'X-Requested-By': 'kayad-app' } });
         localStorage.setItem('kayad_token', data.token);
         _queue.forEach(p => p.res(data.token));
         _queue = [];

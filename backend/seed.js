@@ -134,9 +134,9 @@ export async function reseed() {
   // 3. DEMO ACCOUNTS (3 only — Dealer, Seller, Buyer)
   // ══════════════════════════════════════════════════════════
   const demos = [
-    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || devFallback("Dealer@Kayad2026!"), role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7 },
-    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || devFallback("Seller@Kayad2026!"), role: "broker", approved: true, businessName: "Private Seller" },
-    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || devFallback("Buyer@Kayad2026!"),  role: "user",   approved: true },
+    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || devFallback("Dealer@Kayad2026!"), role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7, mustChangePassword: true },
+    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || devFallback("Seller@Kayad2026!"), role: "broker", approved: true, businessName: "Private Seller", mustChangePassword: true },
+    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || devFallback("Buyer@Kayad2026!"),  role: "user",   approved: true, mustChangePassword: true },
   ];
 
   for (const acc of demos) {

@@ -12,8 +12,8 @@ let ACCESS_SECRET, REFRESH_SECRET;
 const getAccess  = () => ACCESS_SECRET  || (ACCESS_SECRET  = process.env.JWT_SECRET);
 const getRefresh = () => REFRESH_SECRET || (REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
 
-const ACCESS_EXPIRES = "15m";
-const REFRESH_EXPIRES = "7d";
+const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRE || "1h";
+const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
 
 // =============================
 // 🪙 TOKEN GENERATORS
@@ -71,6 +71,7 @@ const sendAuthResponse = (res, user) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      mustChangePassword: user.mustChangePassword,
     },
   });
 };
@@ -354,9 +355,11 @@ export const changePassword = async (req, res) => {
     if (!match) return R.error(res, "Current password is incorrect", 400);
 
     user.password = await bcrypt.hash(newPassword, 12);
+    user.mustChangePassword = false;
     await user.save();
 
-    res.json({ success: true, message: "Password updated successfully" });
+    // Rotate tokens so session stays valid
+    return sendAuthResponse(res, user);
   } catch (err) {
     R.error(res, err.message, 500);
   }

@@ -1,15 +1,22 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { authAPI } from '../api/api';
 import { setSentryUser, clearSentryUser } from '../utils/sentry';
 
 const AuthCtx = createContext(null);
 export const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
 
+// Decode JWT payload (no validate — just read the claims)
+const decodeToken = (t) => {
+  try { return JSON.parse(atob(t.split('.')[1])); }
+  catch { return null; }
+};
+
 export function AuthProvider({ children }) {
   const [user, setUserState]  = useState(null);
   const [token, setToken]     = useState(() => localStorage.getItem('kayad_token'));
   const [loading, setLoading] = useState(true);
+  const refreshTimer = useRef(null);
 
   const setUser = (u) => {
     setUserState(u);
@@ -17,7 +24,28 @@ export function AuthProvider({ children }) {
     else   clearSentryUser();
   };
 
+  // Proactive token refresh — decode exp and refresh before it expires
+  const scheduleRefresh = useCallback((t) => {
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    const payload = decodeToken(t);
+    if (!payload?.exp) return;
+    const expiresInMs = payload.exp * 1000 - Date.now();
+    const refreshAt = Math.max(expiresInMs - 5 * 60 * 1000, 10000); // 5 min before expiry, min 10s
+    refreshTimer.current = setTimeout(async () => {
+      try {
+        const data = await authAPI.refresh();
+        if (data?.token) {
+          localStorage.setItem('kayad_token', data.token);
+          setToken(data.token);
+        }
+      } catch { /* refresh will be retried via Axios interceptor on next 401 */ }
+    }, refreshAt);
+  }, []);
+
+  // On mount: validate token and fetch user profile
+  const initialLoadDone = useRef(false);
   useEffect(() => {
+    if (initialLoadDone.current) return;
     const handleAuthExpired = () => {
       setToken(null);
       setUser(null);
@@ -32,9 +60,18 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false);
     }
+    initialLoadDone.current = true;
 
-    return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
-  }, []);
+    return () => {
+      window.removeEventListener('kayad:auth-expired', handleAuthExpired);
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Watch token changes to schedule proactive refresh
+  useEffect(() => {
+    if (token) scheduleRefresh(token);
+  }, [token, scheduleRefresh]);
 
   // Normalize user object to always have both _id and id fields
   const normalizeUser = (u) => {
