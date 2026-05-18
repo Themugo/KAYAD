@@ -343,3 +343,30 @@ export const sendVerificationReminderEmail = (email, name, token) => {
     `, "Email Verification"),
   });
 };
+
+// 15. Saved search alert
+export const sendSavedSearchAlertEmail = (user, search, matchedCars, totalCount) => {
+  const carList = matchedCars.slice(0, 5).map(c => {
+    const title = c.title || `${c.brand || ""} ${c.year || ""}`.trim() || "Vehicle";
+    const price = c.price ? `KES ${Number(c.price).toLocaleString("en-KE")}` : "";
+    return `<a href="${APP_URL}/cars/${c._id}" style="display:block;padding:10px 14px;margin:6px 0;background:#0a0d12;border:1px solid #252E3D;border-radius:10px;color:#E2DDD5;text-decoration:none;">
+      <strong>${title}</strong>${price ? `<span style="float:right;color:#E8B84B;font-weight:600;">${price}</span>` : ""}
+    </a>`;
+  }).join("");
+  const rest = totalCount > 5 ? `<p style="color:#4A5568;font-size:13px;margin:8px 0 0;">+ ${totalCount - 5} more vehicle${totalCount - 5 > 1 ? "s" : ""}</p>` : "";
+
+  return sendEmail({
+    to: user.email,
+    subject: `📢 ${totalCount} new vehicle${totalCount > 1 ? "s" : ""} matching "${search.name}" — ${APP_NAME}`,
+    html: layout(`
+      ${heading(`New Vehicles: "${search.name}"`)}
+      ${para(`Hi <strong style="color:#E2DDD5">${user.name || "there"}</strong>,`)}
+      ${para(`${totalCount} new vehicle${totalCount > 1 ? "s" : ""} matching your saved search <strong style="color:#E8B84B">"${search.name}"</strong> ${totalCount > 1 ? "have" : "has"} been listed on ${APP_NAME}.`)}
+      ${carList}
+      ${rest}
+      ${btn("View All Results →", `${APP_URL}/saved-searches`)}
+      ${divider()}
+      ${para(`<em style="color:#4A5568;font-size:13px;">You're receiving this because saved search alerts are enabled. <a href="${APP_URL}/settings" style="color:#E8B84B;">Manage preferences</a></em>`)}
+    `, "Saved Search Alert"),
+  });
+};

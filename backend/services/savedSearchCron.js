@@ -1,6 +1,9 @@
 import Car from "../models/Car.js";
+import User from "../models/User.js";
 import SavedSearch from "../models/SavedSearch.js";
 import { createNotification } from "../controllers/notificationController.js";
+import { sendSavedSearchAlertEmail } from "./email.service.js";
+import { sendSMS } from "../utils/sms.js";
 
 const CHECK_INTERVAL = 10 * 60 * 1000;
 
@@ -26,6 +29,10 @@ const matches = (car, filters) => {
   if (f.filter === "fixed" && (car.allowBid || car.auctionStatus === "live")) return false;
 
   return true;
+};
+
+const shouldNotify = (prefs, channel) => {
+  return prefs?.[channel] !== false;
 };
 
 export const startSavedSearchCron = () => {
@@ -54,16 +61,33 @@ export const startSavedSearchCron = () => {
 
         await SavedSearch.findByIdAndUpdate(search._id, { lastNotifiedAt: new Date() });
 
+        const user = await User.findById(search.user).select("email name phone notifications").lean();
+        if (!user) continue;
+        const prefs = user.notifications || {};
+
         const titles = fresh.slice(0, 3).map(c => c.title || `${c.brand || ""} ${c.year || ""}`).join(", ");
         const rest = fresh.length > 3 ? ` and ${fresh.length - 3} more` : "";
 
-        await createNotification({
-          user: search.user,
-          title: `New matching vehicles: ${search.name}`,
-          message: `${fresh.length} vehicle${fresh.length > 1 ? "s" : ""} added: ${titles}${rest}`,
-          type: "info",
-          data: { savedSearchId: search._id, count: fresh.length },
-        });
+        if (shouldNotify(prefs, "inApp")) {
+          await createNotification({
+            user: search.user,
+            title: `New matching vehicles: ${search.name}`,
+            message: `${fresh.length} vehicle${fresh.length > 1 ? "s" : ""} added: ${titles}${rest}`,
+            type: "info",
+            data: { savedSearchId: search._id, count: fresh.length },
+          });
+        }
+
+        if (shouldNotify(prefs, "email") && user.email) {
+          sendSavedSearchAlertEmail(user, search, fresh, fresh.length).catch(e =>
+            console.warn("⚠️ Saved search email failed:", e.message)
+          );
+        }
+
+        if (shouldNotify(prefs, "sms") && user.phone) {
+          const msg = `Kayad: ${fresh.length} new vehicle${fresh.length > 1 ? "s" : ""} matching "${search.name}". ${titles}${rest}. View: https://kayad.space/saved-searches`;
+          sendSMS(user.phone, msg).catch(() => {});
+        }
       }
     } catch (err) {
       console.error("❌ SavedSearchCron error:", err.message);

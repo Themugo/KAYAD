@@ -51,7 +51,9 @@ router.put(
     const allowed = ["notifications", "privacy", "language", "currency", "timezone"];
     const updates = {};
     for (const key of allowed) {
-      if (req.body[key] !== undefined) updates[`preferences.${key}`] = req.body[key];
+      if (req.body[key] !== undefined) {
+        updates[key === "notifications" ? `notifications` : `preferences.${key}`] = req.body[key];
+      }
     }
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ success: false, message: "No valid settings provided" });

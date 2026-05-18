@@ -188,7 +188,9 @@ const userSchema = new mongoose.Schema(
     // 🔔 NOTIFICATION PREFERENCES
     // =============================
     notifications: {
+      email: { type: Boolean, default: true },
       sms: { type: Boolean, default: true },
+      inApp: { type: Boolean, default: true },
     },
 
     // =============================
