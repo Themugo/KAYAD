@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
-import { CheckCircle, XCircle, Clock, Search, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Search, Eye, Loader } from 'lucide-react';
 
 const STATUS_BADGE = {
   pending:  'badge-muted',
@@ -11,31 +11,65 @@ const STATUS_BADGE = {
   sold:     'badge-gold',
 };
 
+const PAGE_SIZE = 20;
+
 export default function AdminCarModeration() {
   const { toast } = useToast();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('pending');
-  const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null);
+  const sentinelRef = useRef(null);
+  const pageRef = useRef(1);
+  const searchRef = useRef('');
+  const filterRef = useRef('pending');
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const loadPage = useCallback(async (pageNum, append) => {
+    if (!append) setLoading(true);
+    else setLoadingMore(true);
     try {
-      const params = { page, limit: 20 };
-      if (search) params.search = search;
-      if (statusFilter !== 'all') params.status = statusFilter;
+      const params = { page: pageNum, limit: PAGE_SIZE };
+      if (searchRef.current) params.search = searchRef.current;
+      if (filterRef.current !== 'all') params.status = filterRef.current;
       const data = await adminAPI.cars(params);
-      setCars(data.cars || data.data || []);
-      setTotal(data.pagination?.total || data.total || 0);
+      const items = data.cars || data.data || [];
+      const total = data.pagination?.total || data.total || 0;
+      if (append) {
+        setCars(prev => [...prev, ...items]);
+      } else {
+        setCars(items);
+      }
+      setHasMore(pageNum * PAGE_SIZE < total);
     } catch { toast('Failed to load listings', 'error'); }
-    finally { setLoading(false); }
-  }, [page, search, statusFilter, toast]);
+    finally { setLoading(false); setLoadingMore(false); }
+  }, [toast]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    searchRef.current = search;
+    filterRef.current = statusFilter;
+    pageRef.current = 1;
+    setHasMore(true);
+    loadPage(1, false);
+  }, [search, statusFilter, loadPage]);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loading && !loadingMore) {
+          pageRef.current += 1;
+          loadPage(pageRef.current, true);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loading, loadingMore, loadPage]);
 
   const handleModerate = async (carId, action) => {
     const adminNote = action === 'reject' ? prompt('Reason for rejection:') : '';
@@ -44,12 +78,10 @@ export default function AdminCarModeration() {
     try {
       await adminAPI.moderateCar(carId, { action, adminNote });
       toast(`Listing ${action}d successfully`, 'success');
-      load();
+      setCars(prev => prev.filter(c => c._id !== carId));
     } catch { toast(`Failed to ${action} listing`, 'error'); }
     finally { setActionId(null); }
   };
-
-  const pages = Math.ceil(total / 20);
 
   return (
     <div className="page">
@@ -66,11 +98,11 @@ export default function AdminCarModeration() {
                 className="input"
                 placeholder="Search listings..."
                 value={search}
-                onChange={e => { setSearch(e.target.value); setPage(1); }}
+                onChange={e => setSearch(e.target.value)}
                 style={{ paddingLeft: 36, minWidth: 220 }}
               />
             </div>
-            <select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+            <select className="input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               style={{ minWidth: 140 }}>
               <option value="all">All Statuses</option>
               <option value="pending">Pending Review</option>
@@ -89,85 +121,79 @@ export default function AdminCarModeration() {
             <p>No listings found.</p>
           </div>
         ) : (
-          <>
-            <div className="table-wrap">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Listing</th>
-                    <th>Dealer</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                    <th>Actions</th>
+          <div className="table-wrap">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Listing</th>
+                  <th>Dealer</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cars.map(car => (
+                  <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer' }}>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{car.title || `${car.brand} ${car.model || ''}`}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                        {car.year || ''} &middot; {car.mileage ? `${(car.mileage / 1000).toFixed(0)}k km` : ''}
+                      </div>
+                    </td>
+                    <td>{car.dealer?.name || car.dealer?.email || 'Unknown'}</td>
+                    <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+                      KES {formatKES(car.price || 0)}
+                    </td>
+                    <td>
+                      <span className={`badge ${STATUS_BADGE[car.status] || 'badge-muted'}`}>
+                        {car.status || 'unknown'}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {timeAgo(car.createdAt)}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+                        onClick={e => e.stopPropagation()}>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                          disabled={actionId === car._id}
+                          onClick={() => handleModerate(car._id, 'approve')}>
+                          <CheckCircle size={12} style={{ marginRight: 4 }} />
+                          Approve
+                        </button>
+                        <button
+                          className="btn btn-sm"
+                          style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                          disabled={actionId === car._id}
+                          onClick={() => handleModerate(car._id, 'reject')}>
+                          <XCircle size={12} style={{ marginRight: 4 }} />
+                          Reject
+                        </button>
+                        <button className="btn btn-sm btn-outline"
+                          onClick={() => setSelected(car)}>
+                          <Eye size={12} style={{ marginRight: 4 }} />
+                          View
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {cars.map(car => (
-                    <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer' }}>
-                      <td>
-                        <div style={{ fontWeight: 600 }}>{car.title || `${car.brand} ${car.model || ''}`}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                          {car.year || ''} &middot; {car.mileage ? `${(car.mileage / 1000).toFixed(0)}k km` : ''}
-                        </div>
-                      </td>
-                      <td>{car.dealer?.name || car.dealer?.email || 'Unknown'}</td>
-                      <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
-                        KES {formatKES(car.price || 0)}
-                      </td>
-                      <td>
-                        <span className={`badge ${STATUS_BADGE[car.status] || 'badge-muted'}`}>
-                          {car.status || 'unknown'}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {timeAgo(car.createdAt)}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-                          onClick={e => e.stopPropagation()}>
-                          <button
-                            className="btn btn-sm"
-                            style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
-                            disabled={actionId === car._id}
-                            onClick={() => handleModerate(car._id, 'approve')}>
-                            <CheckCircle size={12} style={{ marginRight: 4 }} />
-                            Approve
-                          </button>
-                          <button
-                            className="btn btn-sm"
-                            style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
-                            disabled={actionId === car._id}
-                            onClick={() => handleModerate(car._id, 'reject')}>
-                            <XCircle size={12} style={{ marginRight: 4 }} />
-                            Reject
-                          </button>
-                          <button className="btn btn-sm btn-outline"
-                            onClick={() => setSelected(car)}>
-                            <Eye size={12} style={{ marginRight: 4 }} />
-                            View
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {pages > 1 && (
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24 }}>
-                {Array.from({ length: pages }, (_, i) => (
-                  <button key={i}
-                    className={`btn btn-sm ${page === i + 1 ? 'btn-gold' : ''}`}
-                    onClick={() => setPage(i + 1)}>
-                    {i + 1}
-                  </button>
                 ))}
-              </div>
-            )}
-          </>
+              </tbody>
+            </table>
+          </div>
         )}
+
+        {loadingMore && (
+          <div className="loading-center" style={{ padding: '24px 0' }}>
+            <Loader size={20} className="spinner" />
+          </div>
+        )}
+
+        {hasMore && cars.length > 0 && <div ref={sentinelRef} style={{ height: 1 }} />}
       </div>
 
       {selected && (
