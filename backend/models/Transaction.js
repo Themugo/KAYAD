@@ -19,7 +19,7 @@ const transactionSchema = new mongoose.Schema(
     // =============================
     type: {
       type: String,
-      enum: ["bid_commitment", "escrow_deposit", "escrow_release", "buy_now", "refund", "commission", "withdrawal", "deposit"],
+      enum: ["bid_commitment", "escrow_deposit", "escrow_release", "buy_now", "refund", "commission", "withdrawal", "deposit", "referral_bonus"],
       required: true,
       index: true,
     },

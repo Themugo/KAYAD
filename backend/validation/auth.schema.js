@@ -8,6 +8,7 @@ export const registerSchema = z.object({
   role: z.enum(["dealer", "broker", "user"]).optional(),
   businessName: z.string().optional(),
   location: z.string().optional(),
+  referralCode: z.string().optional(),
 });
 
 export const loginSchema = z.object({

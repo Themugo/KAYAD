@@ -197,7 +197,8 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
     if (form.password.length < 8) { toast('Password must be at least 8 characters', 'error'); return; }
     setLoading(true);
     try {
-      const body = { ...form, role, ...(selPkg ? { dealerPackage: selPkg } : {}) };
+      const refCode = params.get('ref') || '';
+      const body = { ...form, role, ...(refCode ? { referralCode: refCode } : {}), ...(selPkg ? { dealerPackage: selPkg } : {}) };
       if (!isDealer && !isSeller) { delete body.businessName; delete body.location; }
       const data = await register(body);
       toast('Account created! Welcome to Kayad 🎉', 'success');

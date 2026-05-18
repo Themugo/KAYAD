@@ -6,8 +6,9 @@ import { useToast } from '../context/ToastContext';
 import { authAPI, paymentsAPI, reviewsAPI, carsAPI, formatKES } from '../api/api';
 import { timeAgo, formatDate, initials, validatePassword } from '../utils/helpers';
 import { SkeletonRow, SkeletonText } from '../components/Skeleton';
+import ReferralStats from '../components/ReferralStats';
 
-const TABS = ['Profile', 'Security', 'Activity', 'Reviews'];
+const TABS = ['Profile', 'Security', 'Activity', 'Reviews', 'Referrals'];
 
 export default function ProfilePage() {
   const { user, setUser, isDealer, isSeller } = useAuth();
@@ -366,6 +367,11 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* ─── Referrals ─── */}
+        {tab === 'Referrals' && (
+          <ReferralStats />
         )}
       </div>
     </div>

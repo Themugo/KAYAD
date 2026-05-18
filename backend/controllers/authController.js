@@ -104,6 +104,17 @@ export const register = async (req, res) => {
     const extra = role === "dealer" || role === "broker"
       ? { approved: false, businessName: req.body.businessName || "", location: req.body.location || "" }
       : {};
+
+    // Referral: look up referrer by code
+    let referredBy = null;
+    const referralCode = req.body.referralCode || req.query.ref;
+    if (referralCode) {
+      const referrer = await User.findOne({ referralCode });
+      if (referrer && referrer._id.toString() !== req.user?.id) {
+        referredBy = referrer._id;
+      }
+    }
+
     const user = await User.create({
       name,
       email,
@@ -112,8 +123,35 @@ export const register = async (req, res) => {
       tokenVersion: 0,
       phone: req.body.phone || "",
       emailVerified: false,
+      referredBy,
       ...extra,
     });
+
+    // Credit referrer if valid
+    if (referredBy) {
+      const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
+      try {
+        await User.findByIdAndUpdate(referredBy, {
+          $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
+        });
+        await (await import("../models/Referral.js")).default.create({
+          referrer: referredBy,
+          referee: user._id,
+          status: "credited",
+          bonusAmount: REFERRAL_BONUS,
+          creditedAt: new Date(),
+        });
+        const { sendNotification } = await import("../services/notification.service.js");
+        sendNotification({
+          userId: referredBy,
+          title: "🎉 Referral Bonus!",
+          message: `You earned KES ${REFERRAL_BONUS.toLocaleString()} for referring ${name}. Thanks for spreading the word!`,
+          type: "referral",
+        }).catch(() => {});
+      } catch (refErr) {
+        console.warn("⚠️ Referral credit failed:", refErr.message);
+      }
+    }
 
     // 📧 Generate email verification token
     try {

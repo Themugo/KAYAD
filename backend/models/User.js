@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const userSchema = new mongoose.Schema(
   {
@@ -185,6 +186,15 @@ const userSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 🔗 REFERRAL SYSTEM
+    // =============================
+    referralCode: { type: String, unique: true, sparse: true, index: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
+    credits: { type: Number, default: 0 },
+    referralEarnings: { type: Number, default: 0 },
+    referralCount: { type: Number, default: 0 },
+
+    // =============================
     // 🔔 NOTIFICATION PREFERENCES
     // =============================
     notifications: {
@@ -246,6 +256,13 @@ userSchema.pre("save", async function (next) {
   try {
     if (this.email) {
       this.email = this.email.toLowerCase().trim();
+    }
+
+    // Auto-generate referral code for new users
+    if (!this.referralCode) {
+      const prefix = (this.name || "user").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase();
+      const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
+      this.referralCode = `${prefix}${suffix}`;
     }
 
     // 🔥 ONLY hash if changed

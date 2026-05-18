@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema(
     message: { type: String, required: true },
     type: {
       type: String,
-      enum: ["bid", "auction", "payment", "escrow", "chat", "system", "info"],
+      enum: ["bid", "auction", "payment", "escrow", "chat", "system", "info", "referral"],
       default: "info",
     },
     read: { type: Boolean, default: false, index: true },

@@ -269,6 +269,12 @@ export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 // ============================================================
 //  ADMIN — routes/adminRoutes.js
 // ============================================================
+const _referralAPI = {
+  stats: () => api.get('/referral/stats').then(unwrap),
+  code:  () => api.get('/referral/code').then(unwrap),
+};
+export const referralAPI = withDemo(_referralAPI, {});
+
 const _adminAPI = {
   stats:         ()          => api.get('/admin/stats').then(unwrap),
   users:         (params)    => api.get('/admin/users', { params }).then(unwrap),
