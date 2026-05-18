@@ -92,7 +92,7 @@ export default function App() {
                   <Route path="/force-password-change" element={<RequireAuth><ForcePasswordChange /></RequireAuth>} />
                   <Route path="/profile"   element={<RequireAuth><ProfilePage /></RequireAuth>} />
                   <Route path="/favorites" element={<RequireAuth><FavoritesPage /></RequireAuth>} />
-                  <Route path="/compare" element={<RequireAuth><ComparePage /></RequireAuth>} />
+                  <Route path="/compare" element={<ComparePage />} />
                   <Route path="/escrow"    element={<RequireAuth><EscrowPage /></RequireAuth>} />
                   <Route path="/escrow-vault" element={<RequireAuth><EscrowVaultPortal /></RequireAuth>} />
                   <Route path="/escrow-vault/:id" element={<RequireAuth><EscrowVaultPortal /></RequireAuth>} />

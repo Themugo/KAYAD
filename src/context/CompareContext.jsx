@@ -1,11 +1,29 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const CompareCtx = createContext(null);
 
 const MAX_COMPARE = 4;
+const STORAGE_KEY = 'kayad_compare_ids';
+
+function loadPersisted() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(id => typeof id === 'string');
+    }
+  } catch {}
+  return [];
+}
 
 export function CompareProvider({ children }) {
-  const [compareIds, setCompareIds] = useState([]);
+  const [compareIds, setCompareIds] = useState(loadPersisted);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(compareIds));
+    } catch {}
+  }, [compareIds]);
 
   const addCar = useCallback((carId) => {
     setCompareIds(prev => {

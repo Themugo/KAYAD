@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
-import { X, ArrowLeft, TrendingUp, Zap, Clock, Gauge, MapPin, Star } from 'lucide-react';
+import { X, ArrowLeft, TrendingUp, Zap, Clock, Gauge, MapPin, Star, Check, Minus } from 'lucide-react';
 
 const COMPARE_ROWS = [
   { key: 'brand', label: 'Brand' },
@@ -20,7 +20,12 @@ const COMPARE_ROWS = [
   { key: 'location.city', label: 'Location' },
   { key: 'condition', label: 'Condition' },
   { key: 'dutyStatus', label: 'Duty Status' },
+  { key: 'auctionStatus', label: 'Auction', format: v => v === 'live' ? '🔴 Live' : v === 'ended' ? '🏁 Ended' : '—' },
+  { key: 'dealRating', label: 'Deal Rating', format: v => v ? v.charAt(0).toUpperCase() + v.slice(1) : '—' },
+  { key: 'avgMarketPrice', label: 'Market Avg', format: v => v ? `KES ${Number(v).toLocaleString('en-KE')}` : '—' },
   { key: 'ntsaVerified', label: 'NTSA Verified', format: v => v ? '✅' : '—' },
+  { key: 'logbookVerified', label: 'Logbook Verified', format: v => v ? '✅' : '—' },
+  { key: 'trustScore', label: 'Trust Score', format: v => v != null ? `${v}/100` : '—' },
   { key: 'bidsCount', label: 'Bids Placed', format: v => v || 0 },
   { key: 'currentBid', label: 'Current Bid', format: v => v > 0 ? `KES ${Number(v).toLocaleString('en-KE')}` : '—' },
   { key: 'views', label: 'Views', format: v => v || 0 },
@@ -37,6 +42,20 @@ function getNested(obj, path) {
     val = val[p];
   }
   return val ?? null;
+}
+
+function FeatureTags({ features }) {
+  if (!features || features.length === 0) return <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>—</span>;
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
+      {features.slice(0, 8).map((f, i) => (
+        <span key={i} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.12)', color: 'rgba(255,255,255,0.6)' }}>
+          {f}
+        </span>
+      ))}
+      {features.length > 8 && <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>+{features.length - 8}</span>}
+    </div>
+  );
 }
 
 export default function ComparePage() {
@@ -161,11 +180,23 @@ export default function ComparePage() {
             </thead>
 
             <tbody>
+              {/* Features row (special rendering with tags) */}
+              <tr style={{ background: 'rgba(212,168,67,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                <td style={{ padding: '10px 16px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' }}>
+                  Features
+                </td>
+                {cars.map(c => (
+                  <td key={c._id} style={{ padding: '10px 12px', textAlign: 'center', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
+                    <FeatureTags features={c.features} />
+                  </td>
+                ))}
+              </tr>
+
+              {/* Spec rows */}
               {COMPARE_ROWS.map((row, ri) => {
                 const values = cars.map(c => getNested(c, row.key));
                 const hasAny = values.some(v => v != null && v !== '');
 
-                // Determine best price / best mileage highlight
                 let isBest = false;
                 const rawVals = cars.map(c => {
                   if (row.key === 'price') return c.price;
@@ -190,7 +221,6 @@ export default function ComparePage() {
                         ? (row.format ? row.format(val) : val)
                         : '—';
 
-                      // Highlight best price/mileage
                       let highlight = false;
                       if (row.key === 'price' && c.price === bestPrice && cars.length > 1) highlight = true;
                       if (row.key === 'mileage' && c.mileage === bestMileage && cars.length > 1) highlight = true;
