@@ -12,6 +12,20 @@ import User from "./models/User.js";
 
 dotenv.config();
 
+// Helper: upsert a user (create or update)
+const upsertUser = async (match, data, createdList, listKey) => {
+  let u = await User.findOne(match);
+  if (!u) {
+    u = await User.create(data);
+    createdList.push(`${data.email}`);
+  } else {
+    for (const key of Object.keys(data)) u[key] = data[key];
+    await u.save();
+    createdList.push(`${data.email} (updated)`);
+  }
+  return u;
+};
+
 const IMG = (u) => ({ url: u, thumb: u, public_id: "" });
 
 const SHARED = [
@@ -72,7 +86,7 @@ const connectDB = async () => {
 export async function reseed() {
   await connectDB();
 
-  const created = { webhost: [], admin: [], demos: [], cleaned: 0, cars: 0 };
+  const created = { webhost: [], admin: [], demos: [], staff: [], dealers: [], cars: 0 };
 
   const isProd = process.env.NODE_ENV === "production";
   const devFallback = (pw) => {
@@ -120,15 +134,11 @@ export async function reseed() {
   // ══════════════════════════════════════════════════════════
   const adminAcc = await User.findOne({ email: "admin@kayad.space" });
   const adminPw = process.env.SEED_ADMIN_PW || devFallback("Admin@Kayad2026!");
-  if (!adminAcc) {
-    await User.create({ name: "Platform Admin", email: "admin@kayad.space", password: adminPw, role: "admin", approved: true });
-    created.admin.push("admin@kayad.space");
-  } else {
-    adminAcc.password = adminPw;
-    adminAcc.role = "admin";
-    await adminAcc.save();
-    created.admin.push("admin@kayad.space (updated)");
-  }
+  await upsertUser(
+    { email: "admin@kayad.space" },
+    { name: "Platform Admin", email: "admin@kayad.space", password: adminPw, role: "admin", approved: true, mustChangePassword: true },
+    created.admin
+  );
 
   // ══════════════════════════════════════════════════════════
   // 3. DEMO ACCOUNTS (3 only — Dealer, Seller, Buyer)
@@ -140,16 +150,36 @@ export async function reseed() {
   ];
 
   for (const acc of demos) {
-    let u = await User.findOne({ email: acc.email });
-    if (!u) {
-      u = await User.create(acc);
-      created.demos.push(acc.email);
-    } else {
-      // Update password in case env changed
-      for (const key of Object.keys(acc)) u[key] = acc[key];
-      await u.save();
-      created.demos.push(`${acc.email} (updated)`);
-    }
+    await upsertUser({ email: acc.email }, acc, created.demos);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // 3b. ADDITIONAL DEALER ACCOUNTS (Elite + Pending)
+  // ══════════════════════════════════════════════════════════
+  const extraDealers = [
+    { name: "Elite Dealer", email: "elite@kayad.space", password: process.env.SEED_ELITE_PW || devFallback("Elite@Kayad2026!"), role: "dealer", approved: true, businessName: "Elite Motors Kenya", location: "Nairobi", dealerPackage: "elite", dealerRating: 4.9, mustChangePassword: true },
+    { name: "Pending Dealer", email: "pending@kayad.space", password: process.env.SEED_PENDING_PW || devFallback("Pending@Kayad2026!"), role: "dealer", approved: false, businessName: "New Ventures Ltd", location: "Nairobi", mustChangePassword: true },
+  ];
+
+  for (const acc of extraDealers) {
+    await upsertUser({ email: acc.email }, acc, created.dealers);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // 3c. STAFF ACCOUNTS (departmental roles)
+  // ══════════════════════════════════════════════════════════
+  const staffAccounts = [
+    { name: "HR Manager",       email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("Hr@Kayad2026!"),     role: "hr",              approved: true, mustChangePassword: true },
+    { name: "Accounts Officer", email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW || devFallback("Acc@Kayad2026!"),    role: "accounts",        approved: true, mustChangePassword: true },
+    { name: "Escrow Officer",   email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW   || devFallback("Escrow@Kayad2026!"), role: "escrow_officer",   approved: true, mustChangePassword: true },
+    { name: "Marketing Lead",   email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("Market@Kayad2026!"),  role: "marketing",       approved: true, mustChangePassword: true },
+    { name: "Ad Manager",       email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("Ads@Kayad2026!"),    role: "ad_manager",      approved: true, mustChangePassword: true },
+    { name: "Tech Support",     email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("Support@Kayad2026!"), role: "technical_support", approved: true, mustChangePassword: true },
+    { name: "Moderator",        email: "mod@kayad.space",       password: process.env.SEED_MOD_PW     || devFallback("Mod@Kayad2026!"),    role: "moderator",       approved: true, mustChangePassword: true },
+  ];
+
+  for (const acc of staffAccounts) {
+    await upsertUser({ email: acc.email }, acc, created.staff);
   }
 
   // ══════════════════════════════════════════════════════════
@@ -163,18 +193,6 @@ export async function reseed() {
     created.cars = inserted.length;
   }
 
-  // ══════════════════════════════════════════════════════════
-  // 5. CLEANUP old staff accounts
-  // ══════════════════════════════════════════════════════════
-  const result = await User.deleteMany({
-    email: { $in: [
-      "hr@kayad.space", "accounts@kayad.space", "escrow@kayad.space",
-      "marketing@kayad.space", "ads@kayad.space", "support@kayad.space",
-      "mod@kayad.space", "elite@kayad.space", "pending@kayad.space",
-    ]},
-  });
-  created.cleaned = result.deletedCount;
-
   return created;
 }
 
@@ -186,8 +204,9 @@ const seed = async () => {
     console.log(`\nWebhost: ${result.webhost.join(", ")}`);
     console.log(`Admin: ${result.admin.join(", ")}`);
     console.log(`Demos: ${result.demos.join(", ")}`);
+    console.log(`Staff: ${result.staff.join(", ")}`);
+    console.log(`Dealers: ${result.dealers.join(", ")}`);
     console.log(`Cars: ${result.cars}`);
-    if (result.cleaned > 0) console.log(`Cleaned: ${result.cleaned} old accounts`);
     console.log(`\n✅ KAYAD — SEED COMPLETE`);
     process.exit();
   } catch (err) {
