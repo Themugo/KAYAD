@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import NtsaVerificationRequest from "../models/NtsaVerificationRequest.js";
 import Car from "../models/Car.js";
@@ -21,13 +21,38 @@ router.get("/", adminOnly, asyncHandler(async (req, res) => {
   res.json({ success: true, requests });
 }));
 
-// Enqueue a car for verification (admin)
-router.post("/", adminOnly, asyncHandler(async (req, res) => {
+// Get verification status for a specific car (any authenticated user)
+router.get("/car/:carId/status", asyncHandler(async (req, res) => {
+  const request = await NtsaVerificationRequest.findOne({ car: req.params.carId })
+    .sort({ createdAt: -1 })
+    .populate("reviewedBy", "name")
+    .lean();
+
+  const car = await Car.findById(req.params.carId).select("ntsaVerified dutyStatus logbookVerified").lean();
+
+  res.json({
+    success: true,
+    status: request?.status || "none",
+    verified: car?.ntsaVerified || false,
+    dutyStatus: car?.dutyStatus || "unknown",
+    request,
+  });
+}));
+
+// Request verification for own car (dealer/owner) or admin-enqueue
+router.post("/", asyncHandler(async (req, res) => {
   const { carId } = req.body;
   if (!carId) return res.status(400).json({ success: false, message: "carId required" });
 
   const car = await Car.findById(carId);
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  // Only allow owner or admin to request
+  const isOwner = String(car.dealer || car.user) === String(req.user.id);
+  const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
+  if (!isOwner && !isStaff) {
+    return res.status(403).json({ success: false, message: "Only the car owner or admin can request verification" });
+  }
 
   const existing = await NtsaVerificationRequest.findOne({ car: carId, status: { $in: ["pending", "in_review"] } });
   if (existing) return res.status(409).json({ success: false, message: "Car already queued for verification" });
@@ -61,7 +86,6 @@ router.post("/:id/process", adminOnly, asyncHandler(async (req, res) => {
   if (importVerified !== undefined) request.importVerified = importVerified;
   await request.save();
 
-  // Update the Car model flags
   if (status === "passed") {
     await Car.findByIdAndUpdate(request.car, {
       ntsaVerified: true,
@@ -74,13 +98,19 @@ router.post("/:id/process", adminOnly, asyncHandler(async (req, res) => {
   res.json({ success: true, request });
 }));
 
-// Upload supporting documents for a request (admin)
-router.post("/:id/documents", adminOnly, asyncHandler(async (req, res) => {
+// Upload supporting documents for a request (admin or requestor)
+router.post("/:id/documents", asyncHandler(async (req, res) => {
   const { url, label } = req.body;
   if (!url) return res.status(400).json({ success: false, message: "url required" });
 
   const request = await NtsaVerificationRequest.findById(req.params.id);
   if (!request) return res.status(404).json({ success: false, message: "Request not found" });
+
+  const isRequestor = String(request.requestedBy) === String(req.user.id);
+  const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
+  if (!isRequestor && !isStaff) {
+    return res.status(403).json({ success: false, message: "Not authorized" });
+  }
 
   request.documents.push({ url, label: label || "Supporting document" });
   await request.save();

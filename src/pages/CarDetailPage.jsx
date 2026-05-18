@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, reviewsAPI, chatAPI, formatKES } from '../api/api';
+import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
@@ -109,6 +109,8 @@ export default function CarDetailPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
   const [promoting, setPromoting] = useState(false);
+  const [ntsaStatus, setNtsaStatus] = useState(null);
+  const [ntsaLoading, setNtsaLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -124,6 +126,28 @@ export default function CarDetailPage() {
       .catch(() => { const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
       .finally(() => setLoading(false));
   }, [id]);
+
+  // Load NTSA verification status
+  useEffect(() => {
+    if (!car?._id) return;
+    setNtsaLoading(true);
+    ntsaAPI.status(car._id).then(d => {
+      setNtsaStatus(d);
+    }).catch(() => {}).finally(() => setNtsaLoading(false));
+  }, [car?._id]);
+
+  const handleRequestNtsa = async () => {
+    if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
+    setNtsaLoading(true);
+    try {
+      await ntsaAPI.queue(car._id);
+      toast('NTSA verification requested!', 'success');
+      const d = await ntsaAPI.status(car._id);
+      setNtsaStatus(d);
+    } catch (e) {
+      toast(e.response?.data?.message || 'Failed to request verification', 'error');
+    } finally { setNtsaLoading(false); }
+  };
 
   const images = car?.images || [];
   const total = images.length;
@@ -551,6 +575,53 @@ export default function CarDetailPage() {
                 </div>
               ) : null}
             </div>
+          </div>
+
+          {/* NTSA Verification Status */}
+          <div className="ntsa-status-card">
+            <div className="ntsa-status-header">
+              <ShieldCheck size={13} className="ntsa-status-icon" />
+              <span className="ntsa-status-label">NTSA Verification</span>
+            </div>
+            {ntsaLoading ? (
+              <div style={{ padding: '12px 0', textAlign: 'center' }}>
+                <div className="spinner" style={{ width: 20, height: 20, margin: '0 auto' }} />
+              </div>
+            ) : car.ntsaVerified ? (
+              <div className="ntsa-status-passed">
+                <span className="ntsa-badge-passed">Verified</span>
+                <span className="ntsa-status-sub">Logbook & chassis verified by Kayad</span>
+              </div>
+            ) : ntsaStatus?.status === 'pending' ? (
+              <div className="ntsa-status-pending">
+                <span className="ntsa-badge-pending">Pending Review</span>
+                <span className="ntsa-status-sub">Queued for NTSA verification</span>
+              </div>
+            ) : ntsaStatus?.status === 'in_review' ? (
+              <div className="ntsa-status-review">
+                <span className="ntsa-badge-review">In Review</span>
+                <span className="ntsa-status-sub">Under review by Kayad team</span>
+              </div>
+            ) : ntsaStatus?.status === 'failed' ? (
+              <div className="ntsa-status-failed">
+                <span className="ntsa-badge-failed">Not Verified</span>
+                {ntsaStatus?.request?.adminNotes && (
+                  <span className="ntsa-status-sub">{ntsaStatus.request.adminNotes}</span>
+                )}
+                <button onClick={handleRequestNtsa} className="ntsa-retry-btn">Request Re-verification</button>
+              </div>
+            ) : canManage ? (
+              <div className="ntsa-status-none">
+                <span className="ntsa-status-sub">Not yet verified</span>
+                <button onClick={handleRequestNtsa} disabled={ntsaLoading} className="ntsa-request-btn">
+                  {ntsaLoading ? 'Requesting…' : 'Request NTSA Check'}
+                </button>
+              </div>
+            ) : (
+              <div className="ntsa-status-none">
+                <span className="ntsa-status-sub">Verification not yet completed</span>
+              </div>
+            )}
           </div>
 
           {/* Compare */}

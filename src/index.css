@@ -2158,6 +2158,157 @@ nav {
   color: var(--gold);
 }
 
+/* ── NTSA Verification Sidebar Card ── */
+.ntsa-status-card {
+  background: #0C0C0C;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+
+.ntsa-status-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ntsa-status-icon { color: var(--gold); flex-shrink: 0; }
+
+.ntsa-status-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+}
+
+.ntsa-status-passed,
+.ntsa-status-pending,
+.ntsa-status-review,
+.ntsa-status-failed,
+.ntsa-status-none {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ntsa-badge-passed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #22c55e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ntsa-badge-passed::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.ntsa-badge-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #f59e0b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ntsa-badge-pending::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f59e0b;
+  flex-shrink: 0;
+}
+
+.ntsa-badge-review {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #3b82f6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ntsa-badge-review::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3b82f6;
+  flex-shrink: 0;
+  animation: pulse 1.5s infinite;
+}
+
+.ntsa-badge-failed {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ef4444;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ntsa-badge-failed::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  flex-shrink: 0;
+}
+
+.ntsa-status-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.5;
+}
+
+.ntsa-request-btn,
+.ntsa-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(212,196,168,0.2);
+  background: rgba(212,196,168,0.08);
+  color: var(--gold);
+  transition: all 0.2s;
+}
+
+.ntsa-request-btn:hover,
+.ntsa-retry-btn:hover {
+  background: rgba(212,196,168,0.14);
+}
+
+.ntsa-request-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 /* ── Sidebar Dealer Card ── */
 .sidebar-dealer-card {
   background: #0C0C0C;

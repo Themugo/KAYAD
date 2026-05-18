@@ -390,6 +390,7 @@ const _ntsaAPI = {
   queue:   (carId)     => api.post('/ntsa-verification', { carId }).then(unwrap),
   process: (id, body)  => api.post(`/ntsa-verification/${id}/process`, body).then(unwrap),
   addDoc:  (id, body)  => api.post(`/ntsa-verification/${id}/documents`, body).then(unwrap),
+  status:  (carId)     => api.get(`/ntsa-verification/car/${carId}/status`).then(unwrap),
 };
 export const ntsaAPI = withDemo(_ntsaAPI, demoAPI.ntsa);
 

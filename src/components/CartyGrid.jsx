@@ -166,6 +166,16 @@ export default function CartyGrid({ car, listView }) {
                 <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>Verified</span>
               </div>
             )}
+            {car.ntsaVerified && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                background: 'rgba(34,197,94,0.92)', backdropFilter: 'blur(8px)',
+                borderRadius: 6, padding: '3px 7px',
+              }}>
+                <ShieldCheck size={7} style={{ color: '#fff' }} />
+                <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>NTSA OK</span>
+              </div>
+            )}
           </div>
 
           {car.year && (

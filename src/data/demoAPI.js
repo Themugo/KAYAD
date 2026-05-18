@@ -730,7 +730,55 @@ export const demoAPI = {
   chat: demoChat,
   notif: demoNotif,
   savedSearch: { list: async () => ({ searches: [] }), create: async () => ({}), update: async () => ({}), remove: async () => ({}) },
-  ntsa: { list: async () => ({ requests: [] }), queue: async () => ({}), process: async () => ({}), addDoc: async () => ({}) },
+  ntsa: {
+    list: async () => {
+      await delay();
+      const cars = await demoCars.list({ page: 1, limit: 50 }, false);
+      const items = (cars.cars || []).slice(0, 8);
+      return {
+        requests: items.map((c, i) => ({
+          _id: `ntsa_demo_${i}`,
+          car: c,
+          status: ['pending', 'in_review', 'passed', 'failed'][i % 4],
+          chassisVerified: i % 4 === 2,
+          logbookVerified: i % 4 === 2,
+          importVerified: i % 4 === 2,
+          dutyStatus: i % 4 === 2 ? 'duty_paid' : 'unknown',
+          adminNotes: i % 4 === 3 ? 'Logbook serial mismatch – contact seller' : null,
+          documents: i % 2 === 0 ? [{ url: '#', label: 'Logbook Scan' }] : [],
+          createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+        })),
+        total: 8,
+      };
+    },
+    queue: async () => { await delay(300, 600); return { message: 'Queued for verification' }; },
+    process: async () => { await delay(300, 600); return { message: 'Updated' }; },
+    addDoc: async () => { await delay(200, 400); return { message: 'Document added' }; },
+    status: async (carId) => {
+      await delay(100, 300);
+      const cars = await demoCars.list({ page: 1, limit: 50 }, false);
+      const car = (cars.cars || []).find(c => c._id === carId || c.slug === carId);
+      if (!car) {
+        return { status: null, request: null };
+      }
+      const idx = Math.abs(car._id.split('').reduce((a, ch) => a + ch.charCodeAt(0), 0)) % 4;
+      const statuses = ['pending', 'in_review', 'passed', 'failed'];
+      return {
+        status: statuses[idx],
+        request: {
+          _id: `ntsa_status_${carId}`,
+          status: statuses[idx],
+          carId: car._id,
+          chassisVerified: idx === 2,
+          logbookVerified: idx === 2,
+          importVerified: idx === 2,
+          dutyStatus: idx === 2 ? 'duty_paid' : 'unknown',
+          adminNotes: idx === 3 ? 'Document mismatch – contact support' : null,
+          createdAt: new Date().toISOString(),
+        },
+      };
+    },
+  },
   inspection: {
     order: async () => ({}), confirmPayment: async () => ({}), myOrders: async () => ({ orders: [] }),
     myTasks: async () => ({ orders: [] }), list: async () => ({ orders: [] }),

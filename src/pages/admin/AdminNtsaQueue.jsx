@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ntsaAPI, formatKES } from '../../api/api';
-import { ShieldCheck, Search, CheckCircle, XCircle, Clock, Eye, FileText } from 'lucide-react';
+import { ShieldCheck, Search, CheckCircle, XCircle, Clock, Eye, FileText, X } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -9,11 +9,40 @@ const STATUS_COLORS = {
   failed: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444' },
 };
 
+function Modal({ title, children, onClose }) {
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: '#111', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 16, padding: 28, width: 420, maxWidth: '90vw',
+        position: 'relative',
+      }}>
+        <button onClick={onClose} style={{
+          position: 'absolute', top: 12, right: 12,
+          background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
+          cursor: 'pointer', fontSize: 18,
+        }}><X size={18} /></button>
+        <h3 style={{ marginTop: 0, marginBottom: 18 }}>{title}</h3>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminNtsaQueue() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [selected, setSelected] = useState(null);
+  const [processModal, setProcessModal] = useState(null);
+  const [queueModal, setQueueModal] = useState(false);
+  const [notes, setNotes] = useState('');
+  const [carIdInput, setCarIdInput] = useState('');
+  const [processing, setProcessing] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -27,30 +56,40 @@ export default function AdminNtsaQueue() {
 
   useEffect(() => { load(); }, [statusFilter]);
 
-  const handleProcess = async (id, status) => {
-    const notes = prompt(`Enter admin notes for ${status} decision:`);
-    if (notes === null) return;
+  const openProcessModal = (id, status) => {
+    setProcessModal({ id, status });
+    setNotes('');
+  };
+
+  const handleProcess = async () => {
+    if (!processModal) return;
+    setProcessing(true);
     try {
-      await ntsaAPI.process(id, {
-        status,
+      await ntsaAPI.process(processModal.id, {
+        status: processModal.status,
         adminNotes: notes,
         chassisVerified: true,
-        logbookVerified: status === 'passed',
-        importVerified: status === 'passed',
-        dutyStatus: status === 'passed' ? 'duty_paid' : 'unknown',
+        logbookVerified: processModal.status === 'passed',
+        importVerified: processModal.status === 'passed',
+        dutyStatus: processModal.status === 'passed' ? 'duty_paid' : 'unknown',
       });
+      setProcessModal(null);
       setSelected(null);
       load();
     } catch {}
+    finally { setProcessing(false); }
   };
 
   const handleQueueCar = async () => {
-    const carId = prompt('Enter Car ID to queue for verification:');
-    if (!carId) return;
+    if (!carIdInput.trim()) return;
+    setProcessing(true);
     try {
-      await ntsaAPI.queue(carId.trim());
+      await ntsaAPI.queue(carIdInput.trim());
+      setQueueModal(false);
+      setCarIdInput('');
       load();
     } catch {}
+    finally { setProcessing(false); }
   };
 
   return (
@@ -70,7 +109,7 @@ export default function AdminNtsaQueue() {
               <option value="passed">Passed</option>
               <option value="failed">Failed</option>
             </select>
-            <button onClick={handleQueueCar} className="btn btn-gold btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <button onClick={() => setQueueModal(true)} className="btn btn-gold btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <Search size={13} /> Queue Car
             </button>
           </div>
@@ -130,11 +169,11 @@ export default function AdminNtsaQueue() {
                       )}
                       {r.status === 'pending' && (
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <button onClick={(e) => { e.stopPropagation(); handleProcess(r._id, 'passed'); }}
+                          <button onClick={(e) => { e.stopPropagation(); openProcessModal(r._id, 'passed'); }}
                             className="btn btn-sm" style={{ background: '#22c55e', color: '#000', fontWeight: 800, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}>
                             <CheckCircle size={12} style={{ marginRight: 4 }} /> Approve
                           </button>
-                          <button onClick={(e) => { e.stopPropagation(); handleProcess(r._id, 'failed'); }}
+                          <button onClick={(e) => { e.stopPropagation(); openProcessModal(r._id, 'failed'); }}
                             className="btn btn-sm" style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}>
                             <XCircle size={12} style={{ marginRight: 4 }} /> Reject
                           </button>
@@ -159,6 +198,74 @@ export default function AdminNtsaQueue() {
           </div>
         )}
       </div>
+
+      {/* Process Modal */}
+      {processModal && (
+        <Modal title={processModal.status === 'passed' ? 'Approve Verification' : 'Reject Verification'} onClose={() => setProcessModal(null)}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 6 }}>
+              Admin Notes {processModal.status === 'failed' ? <span style={{ color: '#ef4444' }}>(required)</span> : ''}
+            </label>
+            <textarea value={notes} onChange={e => setNotes(e.target.value)}
+              placeholder="Enter notes about this decision…"
+              style={{
+                width: '100%', minHeight: 80, resize: 'vertical',
+                background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12,
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button onClick={() => setProcessModal(null)}
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 18px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>
+              Cancel
+            </button>
+            <button onClick={handleProcess} disabled={processing || (processModal.status === 'failed' && !notes.trim())}
+              style={{
+                background: processModal.status === 'passed' ? '#22c55e' : '#ef4444',
+                border: 'none', borderRadius: 8, padding: '8px 18px',
+                color: processModal.status === 'passed' ? '#000' : '#fff',
+                fontWeight: 800, fontSize: 12, cursor: processing ? 'wait' : 'pointer',
+                opacity: (processing || (processModal.status === 'failed' && !notes.trim())) ? 0.5 : 1,
+              }}>
+              {processing ? 'Processing…' : processModal.status === 'passed' ? 'Approve' : 'Reject'}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {/* Queue Car Modal */}
+      {queueModal && (
+        <Modal title="Queue Car for NTSA Verification" onClose={() => setQueueModal(false)}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 6 }}>
+              Car ID
+            </label>
+            <input value={carIdInput} onChange={e => setCarIdInput(e.target.value)}
+              placeholder="Enter car _id to queue…"
+              style={{
+                width: '100%',
+                background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 8, padding: '10px 12px', color: '#fff', fontSize: 12,
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button onClick={() => setQueueModal(false)}
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px 18px', color: '#fff', fontSize: 12, cursor: 'pointer' }}>
+              Cancel
+            </button>
+            <button onClick={handleQueueCar} disabled={processing || !carIdInput.trim()}
+              style={{
+                background: 'var(--gold)', border: 'none', borderRadius: 8, padding: '8px 18px',
+                color: '#000', fontWeight: 800, fontSize: 12, cursor: processing ? 'wait' : 'pointer',
+                opacity: (processing || !carIdInput.trim()) ? 0.5 : 1,
+              }}>
+              {processing ? 'Queueing…' : 'Queue'}
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
