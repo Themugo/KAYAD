@@ -4,9 +4,10 @@ import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import { initiatePayment } from "../services/paymentService.js";
-import { emitListingUpdate, emitAuctionExtended } from "../socket/socket.js";
+import { emitListingUpdate } from "../socket/socket.js";
 import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { applySnipingProtection } from "../utils/snipeGuard.js";
 
 // =============================
 // 🆔 PSEUDONYM GENERATOR
@@ -15,28 +16,6 @@ const generatePseudonym = (userId, carId) => {
   const hash = crypto.createHash("sha256").update(`${userId}-${carId}-kayad`).digest("hex");
   const shortId = parseInt(hash.substring(0, 4), 16).toString(36).toUpperCase();
   return `Bidder #${shortId}`;
-};
-
-// =============================
-// ⏱ SNIPING PROTECTION HELPER
-// =============================
-const applySnipingProtection = async (car) => {
-  if (!car.auctionEnd) return false;
-  const now = Date.now();
-  const end = new Date(car.auctionEnd).getTime();
-  const remaining = end - now;
-  if (remaining > 0 && remaining < 120000) { // 2 minutes
-    const extension = 120000; // 2 minutes
-    car.auctionEnd = new Date(end + extension);
-    await car.save();
-    const carId = car._id.toString();
-    emitAuctionExtended(carId, car.auctionEnd);
-    if (global.io) {
-      global.io.to(`car_${carId}`).emit("timeExtended", { newEndTime: car.auctionEnd });
-    }
-    return true;
-  }
-  return false;
 };
 
 // =============================

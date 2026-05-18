@@ -1,10 +1,7 @@
 import redis from "../config/redis.js";
 import { detectFraud } from "../services/fraud.service.js";
-import {
-  emitBidUpdate,
-  emitAuctionEnd,
-  emitAuctionExtended,
-} from "../socket/socket.js";
+import { emitBidUpdate, emitAuctionEnd } from "../socket/socket.js";
+import { SNIPE_WINDOW_MS, EXTENSION_MS, applyRedisSnipingProtection } from "../utils/snipeGuard.js";
 
 import {
   syncBidToMongo,
@@ -23,8 +20,6 @@ const LOCK_TTL = 2000;
 const SYNC_LOCK_PREFIX = "auction:sync:";
 const ACTIVE_AUCTIONS_SET = "auctions:active";
 const MIN_BID_INTERVAL = 1000;
-const SNIPING_WINDOW = 10000;
-const EXTENSION_TIME = 10000;
 
 // 🧠 fallback memory
 const localLocks = new Set();
@@ -129,17 +124,7 @@ export const placeBid = async ({ roomId, bid, userId }) => {
       // ⏱ ANTI-SNIPING
       // =============================
       const endTime = Number(await redis.get(`auction:${roomId}:end`));
-
-      if (endTime && endTime - now < SNIPING_WINDOW) {
-        const newEnd = now + EXTENSION_TIME;
-
-        await redis.set(`auction:${roomId}:end`, newEnd);
-
-        emitAuctionExtended(roomId, {
-          newEndTime: newEnd,
-          extendedBy: EXTENSION_TIME,
-        });
-      }
+      await applyRedisSnipingProtection(redis, roomId, endTime, now);
     }
 
     // =============================

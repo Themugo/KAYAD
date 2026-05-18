@@ -206,11 +206,9 @@ io.on("connection", (socket) => {
 
   socket.on("placeBid", async ({ auctionId, bidAmount, maskedName }) => {
     if (!auctionId || !bidAmount) return;
-    // 🔒 SECURITY: Always use the authenticated socket user, never trust client-sent userId
     const authenticatedUserId = socket.user?.id || socket.user?._id;
-    if (!authenticatedUserId) return; // reject unauthenticated bids
+    if (!authenticatedUserId) return;
 
-    // 🚦 Rate limit: max 3 bids per second per user
     if (!socketRateLimit(authenticatedUserId)) {
       socket.emit("error", { message: "Too many bids — slow down" });
       return;
@@ -223,12 +221,10 @@ io.on("connection", (socket) => {
       if (bidAmount <= auction.highestBid) return;
       auction.highestBid = bidAmount;
       auction.bidHistory.push({ userId: authenticatedUserId, bid: bidAmount });
-      const now = new Date();
-      const timeRemaining = auction.endTime - now;
-      if (timeRemaining < 30000 && timeRemaining > 0) {
-        auction.endTime = new Date(auction.endTime.getTime() + 30000);
-        auction.extendedCount = (auction.extendedCount || 0) + 1;
-      }
+
+      const { applyAuctionSnipingProtection } = await import("./utils/snipeGuard.js");
+      const extended = await applyAuctionSnipingProtection(auction);
+
       await auction.save();
 
       io.to(String(auctionId)).emit("newBid", {
@@ -237,7 +233,7 @@ io.on("connection", (socket) => {
         time: new Date(),
         endTime: auction.endTime,
       });
-      if (auction.endTime > now) {
+      if (extended) {
         io.to(String(auctionId)).emit("timeExtended", { newEndTime: auction.endTime });
       }
     } catch (err) {
