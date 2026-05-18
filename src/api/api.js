@@ -307,6 +307,9 @@ const _adminAPI = {
   // NTSA / Car Verification
   verifyCar:       (carId, body) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
 
+  // Moderation Queue
+  moderateCar:     (carId, body) => api.post(`/admin/cars/${carId}/moderate`, body).then(unwrap),
+
   // Staff Management (superadmin only)
   getStaff:        ()            => api.get('/admin/staff').then(unwrap),
   createStaff:     (body)        => api.post('/admin/staff', body).then(unwrap),

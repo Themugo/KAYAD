@@ -14,6 +14,7 @@ import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import Ad from "../models/Ad.js";
 import { stkPush } from "../services/mpesaService.js";
+import { sendNotification } from "../services/notification.service.js";
 
 // Routes that only admin/superadmin can access
 const adminOrSuper = authorize("admin", "superadmin");
@@ -302,6 +303,7 @@ router.get(
     if (req.query.sold === "true") filter.sold = true;
     if (req.query.featured === "true") filter.featured = true;
     if (req.query.brand) filter.brand = req.query.brand;
+    if (req.query.status) filter.status = req.query.status;
 
     // 🔎 SEARCH (title)
     if (req.query.search) {
@@ -375,6 +377,62 @@ router.post(
     if (req.body.ntsaVerified || req.body.logbookVerified) car.verifiedBy = req.user.id;
     await car.save();
     res.json({ success: true, car });
+  })
+);
+
+// =============================
+// ✅ APPROVE / REJECT CAR LISTING (MODERATION QUEUE)
+// =============================
+router.post(
+  "/cars/:id/moderate",
+  adminOrSuper,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const { action, adminNote } = req.body;
+    if (!["approve", "reject"].includes(action)) {
+      return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
+    }
+
+    const car = await Car.findById(req.params.id).populate("dealer", "email phone name");
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    if (action === "approve") {
+      car.status = "active";
+    } else {
+      car.status = "rejected";
+    }
+
+    await car.save();
+
+    const dealer = car.dealer;
+    const listingTitle = car.title || car.brand + " " + (car.model || "");
+
+    if (action === "approve") {
+      await sendNotification({
+        userId: dealer._id,
+        title: "Listing Approved",
+        message: `Your listing "${listingTitle}" has been approved and is now live on the marketplace.`,
+        type: "info",
+        email: dealer.email,
+      });
+    } else {
+      await sendNotification({
+        userId: dealer._id,
+        title: "Listing Rejected",
+        message: `Your listing "${listingTitle}" was not approved.${adminNote ? ` Reason: ${adminNote}` : ""}`,
+        type: "system",
+        email: dealer.email,
+      });
+    }
+
+    await AuditLog.create({
+      action: `Car listing ${action}d: ${listingTitle}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+      details: { carId: car._id, action, adminNote },
+    });
+
+    res.json({ success: true, message: `Listing ${action}d successfully.`, car });
   })
 );
 

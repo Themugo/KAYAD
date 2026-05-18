@@ -19,6 +19,7 @@ const ROLE_CONFIG = {
 const ROLE_LINKS = {
   superadmin: [
     { to:'/admin/users',        icon: Users,        label:'Users',          desc:'Manage all accounts' },
+    { to:'/admin/moderation',   icon: ClipboardCheck,label:'Moderation Queue',desc:'Approve/reject listings' },
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'All vehicle listings' },
     { to:'/admin/sellers',      icon: UserCheck,    label:'Dealer Approvals',desc:'Pending verifications' },
     { to:'/admin/transactions', icon: DollarSign,   label:'Transactions',   desc:'Payment records' },
@@ -64,6 +65,7 @@ const ROLE_LINKS = {
     { to:'/admin/ads',          icon: Megaphone,    label:'Ad Campaigns',   desc:'Manage ads' },
   ],
   moderator: [
+    { to:'/admin/moderation',   icon: ClipboardCheck,label:'Moderation Queue',desc:'Approve/reject listings' },
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'Content review' },
     { to:'/admin/users',        icon: Users,        label:'Users',          desc:'Accounts' },
   ],
@@ -199,7 +201,7 @@ export default function AdminDashboard() {
                 </div>
                 {[
                   { label: 'Pending Dealer Approvals', value: s.pendingDealers || 0, to: '/admin/sellers', urgent: (s.pendingDealers||0) > 0 },
-                  { label: 'Cars Pending Review',      value: s.pendingCars    || 0, to: '/admin/cars' },
+                  { label: 'Cars Pending Review',      value: s.pendingCars    || 0, to: '/admin/moderation' },
                   { label: 'Open Escrows',             value: s.openEscrows    || 0, to: '/admin/escrows' },
                   { label: 'Unread Alerts',            value: s.alerts         || 0, to: '/admin/users', urgent: (s.alerts||0) > 0 },
                 ].map(item => (

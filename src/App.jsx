@@ -64,6 +64,7 @@ import AdminSecurityLog from './pages/admin/AdminSecurityLog';
 import InspectorDashboard from './pages/InspectorDashboard';
 import InspectorApply from './pages/InspectorApply';
 import AdminInspectorApplications from './pages/admin/AdminInspectorApplications';
+import AdminCarModeration from './pages/admin/AdminCarModeration';
 
 export default function App() {
   return (
@@ -117,6 +118,7 @@ export default function App() {
                   <Route path="/admin"             element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
                   <Route path="/admin/users"       element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
                   <Route path="/admin/cars"        element={<RequireAdmin><AdminCars /></RequireAdmin>} />
+                  <Route path="/admin/moderation"   element={<RequireAdmin><AdminCarModeration /></RequireAdmin>} />
                   <Route path="/admin/bids"        element={<RequireAdmin><AdminBids /></RequireAdmin>} />
                   <Route path="/admin/escrows"     element={<RequireAdmin><AdminEscrows /></RequireAdmin>} />
                   <Route path="/admin/auctions"    element={<RequireAdmin><AdminAuctions /></RequireAdmin>} />

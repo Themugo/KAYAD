@@ -48,7 +48,7 @@ export const getCars = async (req, res) => {
       return res.json(cached);
     }
 
-    const query = {};
+    const query = { status: "active" };
 
     // =============================
     // 🔍 SAFE SEARCH (NO TEXT INDEX BREAK)
@@ -234,7 +234,7 @@ export const createCar = async (req, res) => {
       }
     }
 
-    const body = { ...req.body, dealer: req.user.id, views: 0, bidsCount: 0, trustScore: 0 };
+    const body = { ...req.body, dealer: req.user.id, views: 0, bidsCount: 0, trustScore: 0, status: "pending" };
 
     // ── PROCESS UPLOADED IMAGES ──────────────────────────────
     if (req.files && req.files.length > 0) {
@@ -374,6 +374,12 @@ export const getCar = async (req, res) => {
       .lean();
 
     if (!car) {
+      return res.status(404).json({ success: false, message: "Car not found" });
+    }
+
+    const isOwner = req.user && String(car.dealer?._id) === String(req.user.id);
+    const isAdmin = req.user && ["admin", "superadmin", "moderator"].includes(req.user.role);
+    if (car.status !== "active" && car.status !== "sold" && !isOwner && !isAdmin) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 

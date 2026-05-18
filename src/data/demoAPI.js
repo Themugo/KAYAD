@@ -523,6 +523,12 @@ const demoAdmin = {
     await delay(1000, 2000);
     return wrapSuccess({ message: 'STK push sent', checkoutRequestID: 'demo-checkout-' + Date.now() });
   },
+
+  moderateCar: async (carId, body) => {
+    await delay();
+    const action = body.action;
+    return wrapSuccess({ message: `Listing ${action}d successfully.`, car: { _id: carId, status: action === 'approve' ? 'active' : 'rejected' } });
+  },
 };
 
 // ─── Demo Auction Admin API ───────────────────────────────────────
