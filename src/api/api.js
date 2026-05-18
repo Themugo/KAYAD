@@ -7,7 +7,7 @@
 import axios from 'axios';
 import { demoAPI } from '../data/demoAPI';
 
-const BASE = '/api';
+const BASE = import.meta.env.VITE_API_BASE || '/api';
 
 // ─── Demo mode auto-detection ────────────────────────────────
 let __DEMO_MODE__ = false;
@@ -20,7 +20,7 @@ export const isDemoMode = () => __DEMO_MODE__;
   axios.get(`${BASE}/cars?limit=1`, { signal: controller.signal })
     .catch(() => {
       __DEMO_MODE__ = true;
-      console.info('[Demo] Backend unreachable, using demo data');
+      if (import.meta.env.DEV) console.info('[Demo] Backend unreachable, using demo data');
     });
 })();
 

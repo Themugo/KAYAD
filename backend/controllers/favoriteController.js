@@ -17,7 +17,8 @@ export const getFavorites = async (req, res) => {
     const cars = favorites.map(f => f.car).filter(Boolean);
     res.json({ success: true, favorites: cars, total: cars.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ getFavorites error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch favourites" });
   }
 };
 
@@ -41,7 +42,8 @@ export const addFavorite = async (req, res) => {
     res.json({ success: true, favorited: true, message: "Added to favourites" });
   } catch (err) {
     if (err.code === 11000) return res.json({ success: true, favorited: true, message: "Already in favourites" });
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ addFavorite error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to add favourite" });
   }
 };
 
@@ -53,7 +55,8 @@ export const removeFavorite = async (req, res) => {
     if (deleted) await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
     res.json({ success: true, favorited: false, message: "Removed from favourites" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ removeFavorite error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to remove favourite" });
   }
 };
 
@@ -79,6 +82,7 @@ export const toggleFavorite = async (req, res) => {
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
     return res.json({ success: true, favorited: true, message: "Added to favourites" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ toggleFavorite error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to toggle favourite" });
   }
 };

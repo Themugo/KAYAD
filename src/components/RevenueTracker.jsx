@@ -1,6 +1,5 @@
 import { TrendingUp, Wallet, ArrowDownLeft, FileText, CheckCircle } from 'lucide-react';
-
-const formatKES = (val) => 'KES ' + Number(val || 0).toLocaleString('en-KE');
+import { formatKES } from '../api/api';
 
 export default function RevenueTracker({ stats }) {
   const s = stats || { totalVolume: 0, commitments: 0, sales: 0, pending: 0, recent: [], feesPaid: 0 };

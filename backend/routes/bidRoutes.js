@@ -3,6 +3,10 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateBid } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
+import {
+  mpesaIpWhitelist,
+  validateMpesaCallback,
+} from "../middleware/mpesaSecurity.js";
 
 import {
   placeBid,
@@ -50,9 +54,10 @@ router.get(
 // =============================
 // 📲 MPESA CALLBACK (SAFE ENTRY)
 // =============================
-// ⚠️ Should validate source (IP / signature later)
 router.post(
   "/mpesa/callback",
+  mpesaIpWhitelist,
+  validateMpesaCallback,
   asyncHandler(confirmBidPayment)
 );
 

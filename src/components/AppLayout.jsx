@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
 import CompareDrawer from './CompareDrawer';
+import DemoModeBanner from './DemoModeBanner';
 
 export default function AppLayout({ children }) {
   const [config, setConfig] = useState(null);
@@ -39,6 +40,7 @@ export default function AppLayout({ children }) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden' }}>
+      <DemoModeBanner />
       <Navbar branding={config?.branding} />
       <main style={{ paddingTop: 100 }}>
         {children}

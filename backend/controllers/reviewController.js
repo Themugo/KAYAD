@@ -33,7 +33,8 @@ export const createReview = async (req, res) => {
 
     res.status(201).json({ success: true, review });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ createReview error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to create review" });
   }
 };
 
@@ -50,7 +51,8 @@ export const getDealerReviews = async (req, res) => {
 
     res.json({ success: true, reviews, averageRating: Math.round(avg * 10) / 10, total: reviews.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ getDealerReviews error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch reviews" });
   }
 };
 
@@ -62,7 +64,8 @@ export const getMyReviews = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, reviews });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ getMyReviews error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch reviews" });
   }
 };
 
@@ -93,6 +96,7 @@ export const deleteReview = async (req, res) => {
 
     res.json({ success: true, message: "Review deleted" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ deleteReview error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to delete review" });
   }
 };

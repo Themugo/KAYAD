@@ -33,8 +33,8 @@ router.post(
 
     const car = await Car.findById(req.params.carId);
 
-    if (!car) {
-      return res.status(404).json({ message: "Car not found" });
+      if (!car) {
+        return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     // 🚫 Listing lock check — block if dealer has outstanding commission
@@ -55,7 +55,7 @@ router.post(
     }
 
     if (!durationMs) {
-      return res.status(400).json({ message: "Duration required" });
+      return res.status(400).json({ success: false, message: "Duration required" });
     }
 
     const result = await startAuction({
@@ -115,7 +115,7 @@ router.post(
 
     if (!extraMs) {
       return res.status(400).json({
-        message: "extraMs required",
+        success: false, message: "extraMs required",
       });
     }
 
@@ -123,7 +123,7 @@ router.post(
 
     if (!car) {
       return res.status(404).json({
-        message: "Car not found",
+        success: false, message: "Car not found",
       });
     }
 
@@ -175,7 +175,7 @@ router.post(
 
     if (!bidId) {
       return res.status(400).json({
-        message: "bidId required",
+        success: false, message: "bidId required",
       });
     }
 
@@ -183,7 +183,7 @@ router.post(
 
     if (!bid) {
       return res.status(404).json({
-        message: "Bid not found",
+        success: false, message: "Bid not found",
       });
     }
 

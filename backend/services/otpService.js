@@ -1,9 +1,12 @@
+import crypto from "crypto";
 import axios from "axios";
 import User from "../models/User.js";
 
 const AT_API_KEY = process.env.AT_API_KEY;
 const AT_USERNAME = process.env.AT_USERNAME || "kayad";
 const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@kayad.space";
+
+const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
 const sendSMS = async (to, message) => {
   if (AT_API_KEY) {
@@ -31,7 +34,7 @@ const sendEmail = async (to, subject, text) => {
 
 export const sendOTP = async (user, channel = "sms") => {
   const otp = Math.floor(1000 + Math.random() * 9000);
-  user.otpSecret = otp;
+  user.otpHash = hashOtp(otp);
   user.otpExpiry = Date.now() + 600000;
   await user.save();
 
@@ -45,10 +48,10 @@ export const sendOTP = async (user, channel = "sms") => {
 };
 
 export const verifyOTP = async (user, otp) => {
-  if (!user.otpSecret || !user.otpExpiry) return false;
+  if (!user.otpHash || !user.otpExpiry) return false;
   if (Date.now() > user.otpExpiry) return false;
-  if (String(user.otpSecret) !== String(otp)) return false;
-  user.otpSecret = undefined;
+  if (user.otpHash !== hashOtp(otp)) return false;
+  user.otpHash = undefined;
   user.otpExpiry = undefined;
   await user.save();
   return true;

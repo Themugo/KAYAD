@@ -33,6 +33,9 @@ import {
   validateMpesaCallback,
 } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
+import { csrfProtection } from "./middleware/csrf.js";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./config/swagger.js";
 
 // ─── Routes ───────────────────────────────────────────────────
 import authRoutes         from "./routes/authRoutes.js";
@@ -162,6 +165,12 @@ app.use(paginationCap());    // Cap ?limit and ?page params
 // ─── HEALTH CHECKS (before other routes, no auth) ────────────
 registerHealthRoutes(app);
 
+// ─── API DOCS ─────────────────────────────────────────────────
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: ".swagger-ui .topbar { display: none }",
+  customSiteTitle: "KAYAD API Docs",
+}));
+
 // ─── SOCKET.IO ────────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
@@ -247,6 +256,7 @@ io.on("connection", (socket) => {
 app.use("/api", checkSystemStatus);
 
 // ─── API ROUTES ───────────────────────────────────────────────
+app.use("/api/auth/refresh",  csrfProtection);  // CSRF for cookie-based refresh
 app.use("/api/auth",          authLimiter, authRoutes);
 app.use("/api/cars",          carRoutes);
 app.use("/api/bids",          bidRoutes);

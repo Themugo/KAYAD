@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatKES } from '../api/api';
+import api from '../api/api';
 
 export default function MarketValuationMatrix({ carId, carPrice, carBrand, carModel, carYear }) {
   const [valuation, setValuation] = useState(null);
@@ -8,8 +9,8 @@ export default function MarketValuationMatrix({ carId, carPrice, carBrand, carMo
   useEffect(() => {
     if (!carId) return;
     setLoading(true);
-    fetch(`/api/cars/${carId}/valuation`)
-      .then(r => r.json())
+    api.get(`/cars/${carId}/valuation`)
+      .then(r => r.data)
       .then(d => { if (d.success) setValuation(d.valuation); })
       .catch(() => {})
       .finally(() => setLoading(false));

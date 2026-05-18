@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 import {
   submitApplication,
   approveApplication,
@@ -10,20 +11,17 @@ import {
 
 const router = Router();
 
-// Public — anyone can apply
-router.post("/apply", submitApplication);
+router.post("/apply", asyncHandler(submitApplication));
 
-// Protected — get own application status (if user is logged in)
-router.get("/my", protect, async (req, res) => {
+router.get("/my", protect, asyncHandler(async (req, res) => {
   const InspectorApplication = (await import("../models/InspectorApplication.js")).default;
   const apps = await InspectorApplication.find({ user: req.user.id }).sort({ createdAt: -1 }).lean();
   res.json({ success: true, applications: apps });
-});
+}));
 
-// Admin
-router.get("/", protect, adminOnly, listApplications);
-router.get("/:id", protect, adminOnly, getApplication);
-router.post("/:id/approve", protect, adminOnly, approveApplication);
-router.post("/:id/reject", protect, adminOnly, rejectApplication);
+router.get("/", protect, adminOnly, asyncHandler(listApplications));
+router.get("/:id", protect, adminOnly, asyncHandler(getApplication));
+router.post("/:id/approve", protect, adminOnly, asyncHandler(approveApplication));
+router.post("/:id/reject", protect, adminOnly, asyncHandler(rejectApplication));
 
 export default router;

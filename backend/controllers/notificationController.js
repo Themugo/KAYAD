@@ -25,7 +25,8 @@ export const getNotifications = async (req, res) => {
       pagination: { total, page, limit, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ getNotifications error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch notifications" });
   }
 };
 
@@ -38,7 +39,8 @@ export const markAsRead = async (req, res) => {
     );
     res.json({ success: true, message: "Marked as read" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ markAsRead error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to mark as read" });
   }
 };
 
@@ -51,7 +53,8 @@ export const markAllAsRead = async (req, res) => {
     );
     res.json({ success: true, message: "All notifications marked as read" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ markAllAsRead error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to mark all as read" });
   }
 };
 
@@ -61,7 +64,8 @@ export const deleteNotification = async (req, res) => {
     await Notification.findOneAndDelete({ _id: req.params.id, user: req.user.id });
     res.json({ success: true, message: "Notification deleted" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("❌ deleteNotification error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to delete notification" });
   }
 };
 

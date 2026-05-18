@@ -135,46 +135,6 @@ export const getCars = async (req, res) => {
 };
 
 // =============================
-// 📦 GET SINGLE CAR
-// =============================
-export const getCar = async (req, res) => {
-  try {
-    const car = await Car.findById(req.params.id)
-      .populate("dealer", "_id name email phone location businessName bio visibility dealerRating approved role")
-      .lean();
-
-    if (!car) {
-      return res.status(404).json({
-        success: false,
-        message: "Car not found",
-      });
-    }
-
-    // Apply dealer visibility filters
-    if (car.dealer?.visibility) {
-      const vis = car.dealer.visibility;
-      if (!vis.showPhone)   { car.dealerPhone = undefined; if (car.dealer) car.dealer.phone = undefined; }
-      if (!vis.showEmail)   { if (car.dealer) car.dealer.email = undefined; }
-      if (!vis.showLocation) { if (car.dealer) car.dealer.location = undefined; }
-      if (!vis.chatEnabled) { car.chatDisabled = true; }
-      delete car.dealer?.visibility;
-    }
-
-    // 🔥 non-blocking analytics
-    Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
-
-    res.json({
-      success: true,
-      data: car,
-    });
-
-  } catch (err) {
-    console.error("❌ GET ONE ERROR:", err.message);
-    res.status(500).json({ success: false, message: "Failed to fetch car" });
-  }
-};
-
-// =============================
 // ➕ CREATE CAR
 // =============================
 export const createCar = async (req, res) => {

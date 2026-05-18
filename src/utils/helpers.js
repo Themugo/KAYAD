@@ -1,9 +1,6 @@
 // src/utils/helpers.js
 
 // ─── Currency ───────────────────────────────────────────
-export const formatKES = (n) =>
-  'KES ' + Number(n || 0).toLocaleString('en-KE');
-
 export const parseKES = (str) =>
   Number(String(str).replace(/[^0-9.]/g, '')) || 0;
 

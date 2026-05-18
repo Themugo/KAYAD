@@ -127,6 +127,7 @@ export const adminOnly = (req, res, next) => {
 export const dealerOnly = (req, res, next) => {
   if (!req.user || !["dealer", "broker", "individual_seller", ...STAFF_ROLES].includes(req.user.role)) {
     return res.status(403).json({
+      success: false,
       message: "Dealer, broker, or seller access only",
     });
   }

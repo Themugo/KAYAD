@@ -213,7 +213,7 @@ export const requestReleaseOtp = async (req, res) => {
     }
 
     await sendOTP(vault.buyer, "sms");
-    vault.releaseOtp = vault.buyer.otpSecret;
+    vault.releaseOtp = vault.buyer.otpHash;
     vault.otpExpiry = vault.buyer.otpExpiry;
     vault.status = "otp_sent";
     addHistory(vault, "Release OTP sent to buyer", userId);
@@ -254,7 +254,8 @@ export const releaseWithOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "OTP expired. Request a new one." });
     }
 
-    if (String(vault.releaseOtp) !== String(otp)) {
+    const otpHash = crypto.createHash("sha256").update(String(otp)).digest("hex");
+    if (vault.releaseOtp !== otpHash) {
       vault.otpAttempts += 1;
       await vault.save();
       return res.status(400).json({ success: false, message: "Invalid OTP" });

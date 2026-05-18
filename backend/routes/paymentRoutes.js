@@ -4,6 +4,10 @@ import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { paymentLimiter } from "../middleware/rateLimiter.js";
+import {
+  mpesaIpWhitelist,
+  validateMpesaCallback,
+} from "../middleware/mpesaSecurity.js";
 
 import {
   initiatePayment,
@@ -41,11 +45,12 @@ router.get(
 );
 
 // =============================
-// 📥 MPESA CALLBACK (PUBLIC)
+// 📥 MPESA CALLBACK (PUBLIC — protected by IP whitelist + payload validation)
 // =============================
-// ⚠️ DO NOT protect this route
 router.post(
   "/callback",
+  mpesaIpWhitelist,
+  validateMpesaCallback,
   asyncHandler(mpesaCallback)
 );
 
