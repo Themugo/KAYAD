@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { notifAPI } from '../api/api';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationCenter from './NotificationCenter';
 import { initials, timeAgo } from '../utils/helpers';
 
 export default function Navbar({ branding }) {
   const { user, isAuth, isAdmin, isDealer, isSuperAdmin, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const socketCtx  = useSocket();
   const connected  = socketCtx?.connected;
   const on         = socketCtx?.on;
@@ -16,8 +18,6 @@ export default function Navbar({ branding }) {
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [userDrop,    setUserDrop]    = useState(false);
   const [notifDrop,   setNotifDrop]   = useState(false);
-  const [notifs,      setNotifs]      = useState([]);
-  const [unread,      setUnread]      = useState(0);
   const [scrolled,    setScrolled]    = useState(false);
 
   const dropRef  = useRef(null);
@@ -42,27 +42,6 @@ export default function Navbar({ branding }) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    if (!isAuth) return;
-    notifAPI.list({ limit: 8 }).then(d => {
-      const list = d.notifications || [];
-      setNotifs(list);
-      setUnread(list.filter(n => !n.read).length);
-    }).catch(() => {});
-  }, [isAuth]);
-
-  useEffect(() => {
-    if (!isAuth || !on) return;
-    const off = on('notification', (n) => { setNotifs(p => [n, ...p.slice(0, 7)]); setUnread(c => c + 1); });
-    return off;
-  }, [isAuth, on]);
-
-  const markAllRead = async () => {
-    await notifAPI.markAllRead().catch(() => {});
-    setNotifs(p => p.map(n => ({ ...n, read: true })));
-    setUnread(0);
-  };
 
   const handleLogout = async () => { await logout(); navigate('/'); };
 
@@ -197,29 +176,12 @@ export default function Navbar({ branding }) {
                     onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.65)'; }}
                   >🔔
-                    {unread > 0 && (
-                      <span style={{ position: 'absolute', top: 4, right: 4, width: 17, height: 17, borderRadius: '50%', background: 'var(--gold)', color: '#000', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #050505' }}>{unread > 9 ? '9+' : unread}</span>
+                    {unreadCount > 0 && (
+                      <span style={{ position: 'absolute', top: 4, right: 4, width: 17, height: 17, borderRadius: '50%', background: 'var(--gold)', color: '#000', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #050505' }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
                     )}
                   </button>
 
-                  {notifDrop && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: 340, background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, boxShadow: '0 28px 70px rgba(0,0,0,0.85)', overflow: 'hidden', zIndex: 200 }}>
-                      <div style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                        <span style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>Notifications</span>
-                        {unread > 0 && <button onClick={markAllRead} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>Mark all read</button>}
-                      </div>
-                      {notifs.length === 0 ? (
-                        <div style={{ padding: '32px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>No notifications yet</div>
-                      ) : notifs.map((n, i) => (
-                        <div key={i} style={{ padding: '13px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.read ? 'transparent' : 'rgba(212,196,168,0.03)' }}>
-                          <div style={{ fontWeight: n.read ? 400 : 600, fontSize: 13, color: n.read ? 'rgba(255,255,255,0.55)' : '#fff' }}>{n.title || n.message}</div>
-                          {n.message && n.title && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>{n.message}</div>}
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 5 }}>{timeAgo(n.createdAt)}</div>
-                        </div>
-                      ))}
-                      <Link to="/profile" style={{ display: 'block', padding: '13px 20px', textAlign: 'center', fontSize: 13, color: 'var(--gold)', borderTop: '1px solid rgba(255,255,255,0.06)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
-                    </div>
-                  )}
+                  {notifDrop && <NotificationCenter onClose={() => setNotifDrop(false)} />}
                 </div>
 
                 <div style={{ position: 'relative' }}>
@@ -247,6 +209,7 @@ export default function Navbar({ branding }) {
                       </div>
                       {[
                         { to: '/profile',   label: '👤  Profile' },
+                        { to: '/notifications', label: '🔔  Notifications' },
                         { to: '/profile?tab=Security', label: '🔑  Change Password' },
                         { to: '/dashboard', label: '📊  Dashboard' },
                         { to: '/favorites', label: '❤️  Saved Cars' },
@@ -319,6 +282,7 @@ export default function Navbar({ branding }) {
 
                 ...(isAuth ? [
                   { to: '/dashboard', label: 'Dashboard' },
+                  { to: '/notifications', label: 'Notifications' },
                   { to: '/profile',   label: 'Profile' },
                   { to: '/favorites', label: 'Saved Cars' },
                 ] : [

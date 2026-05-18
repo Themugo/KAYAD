@@ -653,8 +653,20 @@ const demoNotif = {
     await delay();
     const user = getDemoUser();
     let notifs = DEMO_NOTIFICATIONS.filter(n => n.user === user?._id);
-    if (params.limit) notifs = notifs.slice(0, Number(params.limit));
-    return wrapSuccess({ notifications: notifs, data: notifs });
+
+    if (params.type) notifs = notifs.filter(n => n.type === params.type);
+
+    const total = notifs.length;
+    const page = Number(params.page) || 1;
+    const limit = Number(params.limit) || 30;
+    const start = (page - 1) * limit;
+    notifs = notifs.slice(start, start + limit);
+
+    return wrapSuccess({
+      notifications: notifs,
+      data: notifs,
+      pagination: { total, page, limit, pages: Math.ceil(total / limit) },
+    });
   },
 
   markRead: async () => {

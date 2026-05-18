@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireSeller, RequireAdmin } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { CompareProvider } from './context/CompareContext';
@@ -29,6 +30,7 @@ import ProfilePage   from './pages/ProfilePage';
 import FavoritesPage from './pages/FavoritesPage';
 import ComparePage   from './pages/ComparePage';
 import EscrowPage    from './pages/EscrowPage';
+import NotificationsPage from './pages/NotificationsPage';
 import EscrowVaultPortal from './pages/EscrowVaultPortal';
 import ChatPage      from './pages/ChatPage';
 import PaymentsPage  from './pages/PaymentsPage';
@@ -73,6 +75,7 @@ export default function App() {
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
+              <NotificationProvider>
               <CompareProvider>
               <AppLayout>
                 <ErrorBoundary>
@@ -99,6 +102,7 @@ export default function App() {
                   <Route path="/escrow-vault/:id" element={<RequireAuth><EscrowVaultPortal /></RequireAuth>} />
                   <Route path="/chat"      element={<RequireAuth><ChatPage /></RequireAuth>} />
                   <Route path="/chat/:chatId" element={<RequireAuth><ChatPage /></RequireAuth>} />
+                  <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
                   <Route path="/payments"  element={<RequireAuth><PaymentsPage /></RequireAuth>} />
                   <Route path="/checkout/:id" element={<RequireAuth><Checkout /></RequireAuth>} />
 
@@ -145,6 +149,7 @@ export default function App() {
               </ErrorBoundary>
               </AppLayout>
               </CompareProvider>
+              </NotificationProvider>
             </ToastProvider>
           </SocketProvider>
         </AuthProvider>

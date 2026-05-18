@@ -248,16 +248,25 @@ export const DEMO_ESCROWS = [
 ];
 
 export const DEMO_NOTIFICATIONS = [
+  // Buyer notifications
   { _id:'notif-1', user:DEMO_USERS.buyer._id, title:'Bid Placed', message:'Your bid of KES 3,200,000 on Toyota Land Cruiser V8 is leading!', type:'bid', read:false, createdAt:new Date(now-0.5*DAY).toISOString() },
   { _id:'notif-2', user:DEMO_USERS.buyer._id, title:'Payment Confirmed', message:'M-Pesa payment of KES 160,000 confirmed. Receipt: PGE71H4K9V', type:'payment', read:false, createdAt:new Date(now-1*DAY).toISOString() },
   { _id:'notif-3', user:DEMO_USERS.buyer._id, title:'Escrow Funded', message:'KES 3,200,000 is now held securely in escrow for Land Cruiser V8.', type:'escrow', read:true, createdAt:new Date(now-0.3*DAY).toISOString() },
   { _id:'notif-4', user:DEMO_USERS.buyer._id, title:'New Message', message:'Nairobi Auto Hub Ltd replied to your inquiry about Mazda CX-5.', type:'chat', read:false, createdAt:new Date(now-0.1*DAY).toISOString() },
   { _id:'notif-5', user:DEMO_USERS.buyer._id, title:'Auction Ending Soon', message:'Subaru Forester XT auction ends in 12 hours!', type:'auction', read:true, createdAt:new Date(now-0.2*DAY).toISOString() },
+  { _id:'notif-11', user:DEMO_USERS.buyer._id, title:'NTSA Verified', message:'Logbook verification passed for Mazda CX-5.', type:'ntsa', read:false, createdAt:new Date(now-0.05*DAY).toISOString() },
+  { _id:'notif-12', user:DEMO_USERS.buyer._id, title:'Inspection Scheduled', message:'Your inspection for BMW X5 is confirmed for tomorrow.', type:'inspection', read:false, createdAt:new Date(now-0.15*DAY).toISOString() },
+
+  // Dealer notifications
   { _id:'notif-6', user:DEMO_USERS.dealer._id, title:'New Bid Received', message:'New bid of KES 3,200,000 on your Toyota Land Cruiser V8.', type:'bid', read:false, createdAt:new Date(now-0.5*DAY).toISOString() },
   { _id:'notif-7', user:DEMO_USERS.dealer._id, title:'Escrow Released', message:'KES 3,600,000 from Mazda CX-5 sale released to your account.', type:'escrow', read:false, createdAt:new Date(now-10*DAY).toISOString() },
+  { _id:'notif-13', user:DEMO_USERS.dealer._id, title:'Listing Approved', message:'Your Mercedes-Benz GLE listing has been approved.', type:'system', read:true, createdAt:new Date(now-2*DAY).toISOString() },
+
+  // Admin notifications
   { _id:'notif-8', user:DEMO_USERS.admin._id, title:'New User Registered', message:'A new dealer account requires approval.', type:'system', read:false, createdAt:new Date(now-1*DAY).toISOString() },
   { _id:'notif-9', user:DEMO_USERS.admin._id, title:'Suspicious Activity', message:'Multiple rapid bids detected on car-lc1.', type:'system', read:true, createdAt:new Date(now-2*DAY).toISOString() },
   { _id:'notif-10', user:DEMO_USERS.admin._id, title:'Large Escrow Release', message:'KES 12,000,000 escrow pending release for Mercedes GLE.', type:'escrow', read:false, createdAt:new Date(now-1*DAY).toISOString() },
+  { _id:'notif-14', user:DEMO_USERS.admin._id, title:'Dispute Raised', message:'Buyer opened a dispute on escrow esc-5.', type:'escrow', read:false, createdAt:new Date(now-0.5*DAY).toISOString() },
 ];
 
 export const DEMO_REVIEWS = [
