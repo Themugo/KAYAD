@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { dealerAPI, carsAPI, adminAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart } from 'lucide-react';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -372,13 +372,15 @@ export default function DealerDashboard() {
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
                   <StatCard icon={Car}         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" />
                   <StatCard icon={Eye}         label="Total Views"   value={s.totalViews}                     color="#3b82f6" />
                   <StatCard icon={Gavel}       label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" />
                   <StatCard icon={DollarSign}  label="Revenue"
                     value={totalRevenue >= 1e6 ? `${(totalRevenue/1e6).toFixed(1)}M` : totalRevenue ? `${Math.round(totalRevenue/1000)}K` : '—'}
                     sub="KES" color="#22c55e" />
+                  <StatCard icon={MessageSquare} label="Inquiries"   value={s.totalInquiries || 0}            color="#8b5cf6" />
+                  <StatCard icon={Heart}       label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" />
                 </div>
 
                 {/* Recent listings preview */}

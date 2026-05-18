@@ -80,11 +80,13 @@ export default function DealerAnalytics() {
         </div>
 
         {/* ─── Top KPIs ─── */}
-        <div className="grid-4" style={{ marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
           {[
             { label: 'Total Listings',    val: summary?.totalCars || 0,                    icon: '🚗', color: 'var(--text)' },
             { label: 'Total Views',       val: compactNumber(analytics?.totalViews || 0),  icon: '👁', color: 'var(--blue)' },
             { label: 'Total Bids',        val: analytics?.totalBids || 0,                  icon: '⚡', color: 'var(--gold-light)' },
+            { label: 'Inquiries',         val: analytics?.totalInquiries || 0,             icon: '💬', color: 'var(--purple)' },
+            { label: 'Favorites',         val: analytics?.totalFavorites || 0,             icon: '❤️', color: '#ef4444' },
             { label: `Revenue (${period}d)`, val: formatKES(earnings?.total || 0),         icon: '💰', color: 'var(--green)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
@@ -203,7 +205,7 @@ export default function DealerAnalytics() {
                     {car.title}
                   </Link>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                    👁 {car.views || 0} · ⚡ {car.bidsCount || 0} bids · ❤️ {car.favoritesCount || 0}
+                    👁 {car.views || 0} · 💬 {car.chatsCount || 0} inq · ❤️ {car.favoritesCount || 0}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -216,8 +218,34 @@ export default function DealerAnalytics() {
             ))}
           </div>
 
-          {/* ─── Quick Tips ─── */}
+          {/* ─── Conversion Rates ─── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {analytics?.conversionRates && (
+              <div className="card" style={{ padding: 20 }}>
+                <h3 style={{ fontSize: '0.95rem', marginBottom: 16 }}>📈 Conversion Rates</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {[
+                    { label: 'Views → Bids',      value: analytics.conversionRates.viewsToBids,      color: 'var(--gold)' },
+                    { label: 'Views → Inquiries', value: analytics.conversionRates.viewsToInquiries, color: 'var(--blue)' },
+                    { label: 'Views → Favorites', value: analytics.conversionRates.viewsToFavorites, color: '#ef4444' },
+                  ].map(c => {
+                    const pct = Math.min(c.value, 100);
+                    return (
+                      <div key={c.label}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                          <span style={{ color: 'var(--text-muted)' }}>{c.label}</span>
+                          <span style={{ color: c.color, fontWeight: 700 }}>{c.value}%</span>
+                        </div>
+                        <div style={{ height: 5, background: 'var(--surface)', borderRadius: 3, overflow: 'hidden' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: c.color, borderRadius: 3 }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="card" style={{ padding: 20 }}>
               <h3 style={{ fontSize: '0.95rem', marginBottom: 16 }}>💡 Boost Your Listings</h3>
               {[

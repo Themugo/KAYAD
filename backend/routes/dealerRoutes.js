@@ -6,6 +6,9 @@ import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
+import Chat from "../models/Chat.js";
+import Favorite from "../models/Favorite.js";
+import Message from "../models/Message.js";
 
 const router = express.Router();
 
@@ -117,7 +120,7 @@ router.get(
 );
 
 // =============================
-// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS)
+// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS, CONVERSION)
 // =============================
 router.get(
   "/analytics",
@@ -130,12 +133,14 @@ router.get(
 
     const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
 
-    const [viewsAgg, totalBids, topCars] = await Promise.all([
+    const [viewsAgg, totalBids, totalInquiries, totalFavorites, topCars] = await Promise.all([
       Car.aggregate([
         { $match: { dealer: dealerId } },
         { $group: { _id: null, totalViews: { $sum: "$views" } } },
       ]),
       Bid.countDocuments({ carId: { $in: dealerCarIds }, createdAt: { $gte: from } }),
+      Chat.countDocuments({ car: { $in: dealerCarIds }, createdAt: { $gte: from } }),
+      Favorite.countDocuments({ car: { $in: dealerCarIds }, createdAt: { $gte: from } }),
       Car.find({ dealer: dealerId })
         .sort({ views: -1, bidsCount: -1 })
         .limit(10)
@@ -143,11 +148,22 @@ router.get(
         .lean(),
     ]);
 
+    const totalViews = viewsAgg[0]?.totalViews || 0;
+    const totalCars = await Car.countDocuments({ dealer: dealerId });
+
     res.json({
       success: true,
       analytics: {
-        totalViews: viewsAgg[0]?.totalViews || 0,
+        totalViews,
         totalBids,
+        totalInquiries,
+        totalFavorites,
+        totalCars,
+        conversionRates: {
+          viewsToBids: totalViews > 0 ? Number(((totalBids / totalViews) * 100).toFixed(1)) : 0,
+          viewsToInquiries: totalViews > 0 ? Number(((totalInquiries / totalViews) * 100).toFixed(1)) : 0,
+          viewsToFavorites: totalViews > 0 ? Number(((totalFavorites / totalViews) * 100).toFixed(1)) : 0,
+        },
         topCars,
       },
     });
@@ -164,7 +180,7 @@ router.get(
 
     const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
 
-    const [totalCars, soldCars, totalRevenueAgg, carViewsAgg, liveAuctions, pendingEscrows, pendingBids, draftCars] = await Promise.all([
+    const [totalCars, soldCars, totalRevenueAgg, carViewsAgg, liveAuctions, pendingEscrows, pendingBids, draftCars, totalInquiries, totalFavorites, unreadMessages] = await Promise.all([
       Car.countDocuments({ dealer: dealerId }),
       Car.countDocuments({ dealer: dealerId, sold: true }),
 
@@ -185,6 +201,12 @@ router.get(
       Bid.countDocuments({ carId: { $in: dealerCarIds }, status: "pending" }),
 
       Car.countDocuments({ dealer: dealerId, auctionStatus: "draft" }),
+
+      Chat.countDocuments({ car: { $in: dealerCarIds } }),
+
+      Favorite.countDocuments({ car: { $in: dealerCarIds } }),
+
+      Message.countDocuments({ receiver: dealerId, status: { $ne: "seen" } }),
     ]);
 
     const totalBids = await Bid.countDocuments({
@@ -204,6 +226,9 @@ router.get(
         pendingEscrows,
         pendingBids,
         draftCars,
+        totalInquiries,
+        totalFavorites,
+        unreadMessages,
       },
     });
   })
