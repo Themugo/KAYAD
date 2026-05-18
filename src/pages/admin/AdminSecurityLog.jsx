@@ -3,7 +3,7 @@ import { adminAPI } from '../../api/api';
 
 const SEVERITY_COLORS = {
   critical: { bg: 'rgba(239,68,68,0.1)', color: 'var(--red)' },
-  warning: { bg: 'rgba(212,168,67,0.1)', color: 'var(--gold)' },
+  warning: { bg: 'rgba(212,196,168,0.1)', color: 'var(--gold)' },
   info: { bg: 'rgba(59,130,246,0.08)', color: '#3B82F6' },
 };
 

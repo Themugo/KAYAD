@@ -227,7 +227,7 @@ export default function AdminBids() {
               <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
-            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bid Amount</div>
               <div className="price-tag" style={{ fontSize: '2rem' }}>{formatKES(selected.amount)}</div>
               {selected.commitmentAmount && (

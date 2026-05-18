@@ -140,12 +140,12 @@ export default function AdminDashboard() {
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* HEADER */}
       <div style={{
-        background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)',
+        background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
         borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '40px 0 36px',
       }}>
         <div style={{ maxWidth: 1300, margin: '0 auto', padding: '0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
               <span style={{ fontSize: 14 }}>{rc.icon}</span>
               <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{rc.label}</span>
             </div>

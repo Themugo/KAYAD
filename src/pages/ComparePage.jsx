@@ -49,7 +49,7 @@ function FeatureTags({ features }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
       {features.slice(0, 8).map((f, i) => (
-        <span key={i} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.12)', color: 'rgba(255,255,255,0.6)' }}>
+        <span key={i} style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.12)', color: 'rgba(255,255,255,0.6)' }}>
           {f}
         </span>
       ))}
@@ -124,7 +124,7 @@ export default function ComparePage() {
                     <span style={{ fontSize: 13, fontWeight: 900, color: 'var(--gold)' }}>{c.bidsCount || 0}</span>
                     <div style={{
                       width: '100%', height: `${Math.max(8, pct)}px`,
-                      background: pct >= 80 ? 'var(--gold)' : pct >= 40 ? 'rgba(212,168,67,0.6)' : 'rgba(212,168,67,0.2)',
+                      background: pct >= 80 ? 'var(--gold)' : pct >= 40 ? 'rgba(212,196,168,0.6)' : 'rgba(212,196,168,0.2)',
                       borderRadius: '3px 3px 0 0',
                       transition: 'height 0.4s ease',
                     }} />
@@ -181,7 +181,7 @@ export default function ComparePage() {
 
             <tbody>
               {/* Features row (special rendering with tags) */}
-              <tr style={{ background: 'rgba(212,168,67,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <tr style={{ background: 'rgba(212,196,168,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                 <td style={{ padding: '10px 16px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' }}>
                   Features
                 </td>

@@ -97,13 +97,13 @@ export default function CartyGrid({ car, listView }) {
     <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
       <div className="car-card-premium" style={{
         background: '#0C0C0C',
-        border: `1px solid ${hovered ? 'rgba(212,168,67,0.25)' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${hovered ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: 14,
         overflow: 'hidden',
         transition: 'transform 0.35s cubic-bezier(0.2,0,0,1), border-color 0.35s ease, box-shadow 0.35s ease',
         cursor: 'pointer',
         transform: hovered ? 'translateY(-4px)' : 'none',
-        boxShadow: hovered ? '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,168,67,0.08)' : '0 4px 12px rgba(0,0,0,0.2)',
+        boxShadow: hovered ? '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,196,168,0.08)' : '0 4px 12px rgba(0,0,0,0.2)',
       }}>
         <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden', background: '#111' }}>
           {!imgLoaded && (
@@ -149,7 +149,7 @@ export default function CartyGrid({ car, listView }) {
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 3,
                 background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-                border: '1px solid rgba(212,168,67,0.25)',
+                border: '1px solid rgba(212,196,168,0.25)',
                 borderRadius: 6, padding: '3px 7px',
               }}>
                 <Zap size={7} style={{ color: 'var(--gold)' }} />
@@ -208,13 +208,13 @@ export default function CartyGrid({ car, listView }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
             {car.mileage && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
-                <Gauge size={9} style={{ color: 'rgba(212,168,67,0.5)', flexShrink: 0 }} />
+                <Gauge size={9} style={{ color: 'rgba(212,196,168,0.5)', flexShrink: 0 }} />
                 {(car.mileage / 1000).toFixed(0)}k km
               </span>
             )}
             {car.mileage && city && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'block', flexShrink: 0 }} />}
             <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
-              <MapPin size={9} style={{ color: 'rgba(212,168,67,0.5)', flexShrink: 0 }} />
+              <MapPin size={9} style={{ color: 'rgba(212,196,168,0.5)', flexShrink: 0 }} />
               {city}
             </span>
           </div>
@@ -236,8 +236,8 @@ export default function CartyGrid({ car, listView }) {
             </div>
             <div style={{
               width: 30, height: 30, borderRadius: 9,
-              background: hovered ? 'rgba(212,168,67,0.12)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${hovered ? 'rgba(212,168,67,0.2)' : 'rgba(255,255,255,0.08)'}`,
+              background: hovered ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.06)',
+              border: `1px solid ${hovered ? 'rgba(212,196,168,0.2)' : 'rgba(255,255,255,0.08)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.3s ease',
             }}>

@@ -119,8 +119,8 @@ export default function InspectorDashboard() {
             {['excellent', 'good', 'fair', 'poor'].map(c => (
               <button key={c} onClick={() => setCondition(c)} style={{
                 padding: '6px 16px', borderRadius: 8, border: '1px solid',
-                background: condition === c ? 'rgba(212,168,67,0.15)' : 'transparent',
-                borderColor: condition === c ? 'rgba(212,168,67,0.3)' : 'rgba(255,255,255,0.1)',
+                background: condition === c ? 'rgba(212,196,168,0.15)' : 'transparent',
+                borderColor: condition === c ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.1)',
                 color: condition === c ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
                 fontSize: 11, fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize',
               }}>

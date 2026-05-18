@@ -279,7 +279,7 @@ export default function AuctionLivePage() {
             <div style={{ position: 'sticky', top: 88 }}>
 
               {/* Current Bid Display */}
-              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(212,168,67,0.3)' }}>
+              <div className="card" style={{ padding: 24, marginBottom: 16, border: '1px solid rgba(212,196,168,0.3)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
@@ -300,7 +300,7 @@ export default function AuctionLivePage() {
                       <CountdownDisplay endTime={car.auctionEnd} />
                     </div>
                     {extended && (
-                      <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,168,67,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)' }}>
+                      <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)' }}>
                         ⏱ Extended by 2 min
                       </div>
                     )}

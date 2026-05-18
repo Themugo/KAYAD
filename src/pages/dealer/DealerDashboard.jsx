@@ -101,7 +101,7 @@ function TeamTab({ user, toast }) {
             You are the <strong style={{ color: 'var(--gold)' }}>Business Owner</strong>. Invite staff and assign role-based access.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
           <Shield size={12} /> Business Owner
         </div>
       </div>
@@ -183,7 +183,7 @@ function TeamTab({ user, toast }) {
                   </span>
                   {/* Expand perms */}
                   <button onClick={() => setExpanded(isExp ? null : m._id)}
-                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(212,168,67,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(212,168,67,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                     Permissions
                   </button>
                   {/* Remove */}
@@ -325,7 +325,7 @@ export default function DealerDashboard() {
   return (
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* HEADER */}
-      <div style={{ background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
+      <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
             <div>
@@ -454,7 +454,7 @@ export default function DealerDashboard() {
                         <StatusBadge status={car.status || (car.auctionStatus === 'live' ? 'active' : 'draft')} />
                         <div style={{ display: 'flex', gap: 8 }}>
                           <Link to={`/cars/${car._id}`} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
-                          <Link to={`/dealer/edit/${car._id}`} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(212,168,67,0.1)', border: '1px solid rgba(212,168,67,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
+                          <Link to={`/dealer/edit/${car._id}`} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
                           <button onClick={() => handleDelete(car._id)} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
                         </div>
                       </div>
@@ -515,7 +515,7 @@ export default function DealerDashboard() {
                 </div>
 
                 {/* Current package status */}
-                <div style={{ background: '#0C0C0C', border: '1px solid rgba(212,168,67,0.18)', borderRadius: 16, padding: '24px', marginBottom: 28 }}>
+                <div style={{ background: '#0C0C0C', border: '1px solid rgba(212,196,168,0.18)', borderRadius: 16, padding: '24px', marginBottom: 28 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                     <div>
                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>Current Plan</div>

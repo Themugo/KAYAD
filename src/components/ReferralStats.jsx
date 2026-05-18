@@ -55,7 +55,7 @@ export default function ReferralStats() {
             <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '9px 12px', fontSize: 12, color: 'var(--gold)', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {referralLink}
             </div>
-            <button onClick={copyLink} style={{ padding: '8px 14px', borderRadius: 8, background: copied ? 'rgba(34,197,94,0.1)' : 'rgba(212,168,67,0.1)', border: `1px solid ${copied ? 'rgba(34,197,94,0.25)' : 'rgba(212,168,67,0.2)'}`, color: copied ? '#22c55e' : 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700 }}>
+            <button onClick={copyLink} style={{ padding: '8px 14px', borderRadius: 8, background: copied ? 'rgba(34,197,94,0.1)' : 'rgba(212,196,168,0.1)', border: `1px solid ${copied ? 'rgba(34,197,94,0.25)' : 'rgba(212,196,168,0.2)'}`, color: copied ? '#22c55e' : 'var(--gold)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700 }}>
               {copied ? <Check size={13} /> : <Copy size={13} />}
               {copied ? 'Copied!' : 'Copy'}
             </button>

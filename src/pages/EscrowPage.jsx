@@ -205,7 +205,7 @@ export default function EscrowPage() {
               ))}
             </div>
 
-            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
               Need help? Contact support or raise a dispute from your admin dashboard.
             </div>
           </div>

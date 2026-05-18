@@ -115,7 +115,7 @@ export default function DealerTeam() {
   return (
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* HEADER */}
-      <div style={{ background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 32px' }}>
+      <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 32px' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 6 }}>Dealer Hub</div>
@@ -152,7 +152,7 @@ export default function DealerTeam() {
                 <label style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 8 }}>Email Address</label>
                 <input placeholder="colleague@example.com" value={invite.email} onChange={e => setInvite(p => ({ ...p, email: e.target.value }))}
                   style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(212,168,67,0.4)'}
+                  onFocus={e => e.target.style.borderColor = 'rgba(212,196,168,0.4)'}
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'} />
               </div>
 
@@ -182,7 +182,7 @@ export default function DealerTeam() {
                     const on = customPerms[p.key] ?? ROLE_DEFAULTS[invite.role]?.[p.key] ?? false;
                     return (
                       <div key={p.key} onClick={() => setCustomPerms(prev => ({ ...prev, [p.key]: !on }))}
-                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,168,67,0.25)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,168,67,0.06)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,196,168,0.06)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.15s' }}>
                         <div style={{ width: 16, height: 16, borderRadius: 4, background: on ? 'var(--gold)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           {on && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>✓</span>}
                         </div>
@@ -228,7 +228,7 @@ export default function DealerTeam() {
                   {/* Member row */}
                   <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
                     {/* Avatar */}
-                    <div style={{ width: 44, height: 44, borderRadius: 11, background: 'linear-gradient(135deg, rgba(212,168,67,0.3), rgba(212,168,67,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: 'var(--gold)', flexShrink: 0, fontFamily: 'var(--font-display)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 11, background: 'linear-gradient(135deg, rgba(212,196,168,0.3), rgba(212,196,168,0.1))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, fontWeight: 900, color: 'var(--gold)', flexShrink: 0, fontFamily: 'var(--font-display)' }}>
                       {name[0]?.toUpperCase()}
                     </div>
 
@@ -255,7 +255,7 @@ export default function DealerTeam() {
                     {/* Actions */}
                     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                       <button onClick={() => setEditingId(isEditing ? null : m._id)}
-                        style={{ padding: '7px 14px', borderRadius: 8, background: isEditing ? 'rgba(212,168,67,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${isEditing ? 'rgba(212,168,67,0.3)' : 'rgba(255,255,255,0.09)'}`, color: isEditing ? 'var(--gold)' : 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
+                        style={{ padding: '7px 14px', borderRadius: 8, background: isEditing ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.05)', border: `1px solid ${isEditing ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.09)'}`, color: isEditing ? 'var(--gold)' : 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
                         {isEditing ? 'Done' : 'Permissions'}
                       </button>
                       <button onClick={() => handleSuspend(m._id, m.status)}
@@ -278,7 +278,7 @@ export default function DealerTeam() {
                           const on = m.permissions?.[p.key] ?? false;
                           return (
                             <div key={p.key} onClick={() => handlePermToggle(m._id, p.key, on)}
-                              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,168,67,0.22)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,168,67,0.06)' : 'transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
+                              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,196,168,0.22)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,196,168,0.06)' : 'transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
                               <div style={{ width: 15, height: 15, borderRadius: 4, background: on ? 'var(--gold)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 {on && <span style={{ color: '#000', fontSize: 9, fontWeight: 900 }}>✓</span>}
                               </div>

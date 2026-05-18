@@ -254,7 +254,7 @@ export default function Showroom() {
                   {/* Save Search */}
                   {filtersActive && (
                     <button onClick={() => setShowSavePrompt(true)} style={{
-                      background: 'rgba(212,168,67,0.1)', border: '1px solid rgba(212,168,67,0.2)',
+                      background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
                       borderRadius: 8, padding: '6px 12px', color: 'var(--gold)',
                       fontSize: 11, fontWeight: 700, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', gap: 5,
@@ -266,8 +266,8 @@ export default function Showroom() {
                   {/* Saved Searches Panel Toggle */}
                   {savedSearches.length > 0 && (
                     <button onClick={() => setShowSavedPanel(p => !p)} style={{
-                      background: showSavedPanel ? 'rgba(212,168,67,0.15)' : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${showSavedPanel ? 'rgba(212,168,67,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                      background: showSavedPanel ? 'rgba(212,196,168,0.15)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${showSavedPanel ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)'}`,
                       borderRadius: 8, padding: '6px 12px',
                       color: showSavedPanel ? 'var(--gold)' : 'rgba(255,255,255,0.5)',
                       fontSize: 11, fontWeight: 700, cursor: 'pointer',
@@ -305,7 +305,7 @@ export default function Showroom() {
                   <div style={{ display: 'flex', gap: 3, background: 'rgba(255,255,255,0.04)', padding: 3, borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
                     <button onClick={() => setViewMode('grid')} style={{
                       padding: '5px 9px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                      background: viewMode === 'grid' ? 'rgba(212,168,67,0.15)' : 'transparent',
+                      background: viewMode === 'grid' ? 'rgba(212,196,168,0.15)' : 'transparent',
                       color: viewMode === 'grid' ? 'var(--gold)' : 'rgba(255,255,255,0.3)',
                       transition: 'all 0.2s', display: 'flex', alignItems: 'center',
                     }}>
@@ -313,7 +313,7 @@ export default function Showroom() {
                     </button>
                     <button onClick={() => setViewMode('list')} style={{
                       padding: '5px 9px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                      background: viewMode === 'list' ? 'rgba(212,168,67,0.15)' : 'transparent',
+                      background: viewMode === 'list' ? 'rgba(212,196,168,0.15)' : 'transparent',
                       color: viewMode === 'list' ? 'var(--gold)' : 'rgba(255,255,255,0.3)',
                       transition: 'all 0.2s', display: 'flex', alignItems: 'center',
                     }}>
@@ -326,7 +326,7 @@ export default function Showroom() {
               {/* ── Save Search Prompt ── */}
               {showSavePrompt && (
                 <div style={{
-                  background: '#0C0C0C', border: '1px solid rgba(212,168,67,0.2)',
+                  background: '#0C0C0C', border: '1px solid rgba(212,196,168,0.2)',
                   borderRadius: 12, padding: '14px 18px', marginBottom: 16,
                   display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
                 }}>

@@ -8,7 +8,7 @@ const FUELS = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','CNG'];
 const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
 const COLOR_MAP = {
   Black:'#111',White:'#f5f5f5',Silver:'#C0C0C0',Gray:'#808080',Blue:'#3B82F6',
-  Red:'#EF4444',Green:'#22C55E',Brown:'#8B4513',Beige:'#D2B48C',Gold:'#D4A843',
+  Red:'#EF4444',Green:'#22C55E',Brown:'#8B4513',Beige:'#D2B48C',Gold:'#D4C4A8',
   Burgundy:'#800020',Orange:'#F97316',Purple:'#A855F7',Yellow:'#EAB308',
   Maroon:'#7B0000',Pearl:'#F0EAD6',Navy:'#1E3A5F',Teal:'#14B8A6',
 };
@@ -29,7 +29,7 @@ function Section({ title, children, defaultOpen = true, count }) {
         }}>{title}</span>
         {count > 0 && (
           <span style={{
-            background: 'rgba(212,168,67,0.15)', color: 'var(--gold)',
+            background: 'rgba(212,196,168,0.15)', color: 'var(--gold)',
             fontSize: 9, fontWeight: 800, borderRadius: 9999, padding: '1px 7px',
           }}>{count}</span>
         )}
@@ -50,7 +50,7 @@ function Chip({ active, onClick, children, count }) {
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       width: '100%', padding: '9px 16px',
-      background: active ? 'rgba(212,168,67,0.1)' : 'transparent',
+      background: active ? 'rgba(212,196,168,0.1)' : 'transparent',
       border: 'none', borderLeft: active ? '2px solid var(--gold)' : '2px solid transparent',
       color: active ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
       fontSize: 13, fontWeight: active ? 600 : 400,
@@ -75,7 +75,7 @@ function RangeInput({ placeholder, value, onChange }) {
         color: '#fff', fontSize: 12, outline: 'none',
         transition: 'border-color 0.2s',
       }}
-      onFocus={e => e.target.style.borderColor = 'rgba(212,168,67,0.4)'}
+      onFocus={e => e.target.style.borderColor = 'rgba(212,196,168,0.4)'}
       onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
     />
   );
@@ -125,7 +125,7 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
       background: '#070707',
       borderRight: '1px solid rgba(255,255,255,0.06)',
       height: 'calc(100vh - 100px)', overflowY: 'auto', position: 'sticky', top: 88,
-      scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,168,67,0.15) transparent',
+      scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,196,168,0.15) transparent',
     }}>
 
       {/* ── HEADER ── */}
@@ -194,7 +194,7 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
                 background: 'rgba(255,255,255,0.04)', color: '#fff',
                 fontSize: 12, outline: 'none', boxSizing: 'border-box',
               }}
-              onFocus={e => e.target.style.borderColor = 'rgba(212,168,67,0.4)'}
+              onFocus={e => e.target.style.borderColor = 'rgba(212,196,168,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}
             />
           </div>
@@ -297,7 +297,7 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
                   background: hex,
                   border: active ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.1)',
                   cursor: 'pointer', position: 'relative',
-                  boxShadow: active ? '0 0 0 3px rgba(212,168,67,0.2)' : 'none',
+                  boxShadow: active ? '0 0 0 3px rgba(212,196,168,0.2)' : 'none',
                   transition: 'all 0.15s',
                 }}>
                 {active && (

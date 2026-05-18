@@ -149,7 +149,7 @@ export default function TcoCalculator({ vehicle }) {
 
           {/* Results */}
           <div style={{
-            background: 'rgba(212,168,67,0.04)', border: '1px solid rgba(212,168,67,0.1)', borderRadius: 10,
+            background: 'rgba(212,196,168,0.04)', border: '1px solid rgba(212,196,168,0.1)', borderRadius: 10,
             padding: '12px 14px',
           }}>
             {!isUsed && (
@@ -168,7 +168,7 @@ export default function TcoCalculator({ vehicle }) {
                     <span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.7)' }}>KES {r.v.toLocaleString('en-KE')}</span>
                   </div>
                 ))}
-                <div style={{ borderTop: '1px solid rgba(212,168,67,0.1)', margin: '4px 0 6px' }} />
+                <div style={{ borderTop: '1px solid rgba(212,196,168,0.1)', margin: '4px 0 6px' }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
                   <span>Total Import Duty</span>
                   <span>KES {Math.round(tco.importDuty).toLocaleString('en-KE')}</span>
@@ -206,7 +206,7 @@ export default function TcoCalculator({ vehicle }) {
 
             {/* Grand Total */}
             <div style={{
-              borderTop: '1px solid rgba(212,168,67,0.15)', margin: '8px 0 4px', paddingTop: 8,
+              borderTop: '1px solid rgba(212,196,168,0.15)', margin: '8px 0 4px', paddingTop: 8,
               display: 'flex', justifyContent: 'space-between',
             }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: '#fff' }}>

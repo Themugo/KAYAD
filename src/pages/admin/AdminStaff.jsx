@@ -11,7 +11,7 @@ const ORG = [
     title: 'Super Admin',
     icon: '👑',
     color: 'var(--gold)',
-    bg: 'rgba(212,168,67,0.1)',
+    bg: 'rgba(212,196,168,0.1)',
     desc: 'Full platform control. Manages all staff, config, and financials.',
     level: 0,
     canCreate: false, // created via env/seed only
@@ -135,7 +135,7 @@ function SI({ value, onChange, placeholder, type='text' }) {
   return (
     <div style={{ position:'relative' }}>
       <input type={type==='password' && v ? 'text' : type} value={value} onChange={onChange} placeholder={placeholder}
-        style={{ width:'100%', padding: type==='password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius:9, border:`1px solid ${f?'rgba(212,168,67,0.4)':'rgba(255,255,255,0.09)'}`, background:'rgba(255,255,255,0.04)', color:'#fff', fontSize:13, outline:'none', boxSizing:'border-box', transition:'all 0.2s' }}
+        style={{ width:'100%', padding: type==='password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius:9, border:`1px solid ${f?'rgba(212,196,168,0.4)':'rgba(255,255,255,0.09)'}`, background:'rgba(255,255,255,0.04)', color:'#fff', fontSize:13, outline:'none', boxSizing:'border-box', transition:'all 0.2s' }}
         onFocus={()=>setF(true)} onBlur={()=>setF(false)} />
       {type==='password' && (
         <button type="button" onClick={()=>setV(x=>!x)} style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', color:'rgba(255,255,255,0.3)', display:'flex' }}>
@@ -205,7 +205,7 @@ export default function AdminStaff() {
   return (
     <div style={{ background:'#050505', minHeight:'100vh' }}>
       {/* Header */}
-      <div style={{ background:'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)', borderBottom:'1px solid rgba(255,255,255,0.05)', padding:'36px 0 0' }}>
+      <div style={{ background:'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom:'1px solid rgba(255,255,255,0.05)', padding:'36px 0 0' }}>
         <div style={{ maxWidth:1300, margin:'0 auto', padding:'0 32px' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24, flexWrap:'wrap', gap:16 }}>
             <div>

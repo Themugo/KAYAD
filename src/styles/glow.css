@@ -5,7 +5,7 @@
   }
   
   .sidebar-icon-glow:hover {
-    color: #D4AF37;
+    color: #C4B498;
     filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.6));
     transition: all 0.3s ease;
   }
@@ -17,7 +17,7 @@
   }
 
   .btn-premium {
-    background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+    background: linear-gradient(135deg, var(--gold) 0%, #A89878 100%);
     box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
@@ -62,7 +62,7 @@
 /* Fix for smooth scrolling transitions */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #D4AF37 #050505;
+  scrollbar-color: var(--gold) #050505;
 }
 
 .car-card-image {

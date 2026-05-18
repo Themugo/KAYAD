@@ -41,8 +41,8 @@ function Input({ label, hint, type='text', value, onChange, placeholder, require
           required={required} autoComplete={autoComplete}
           style={{
             width:'100%', padding: isPwd ? '12px 44px 12px 14px' : '12px 14px',
-            borderRadius:10, border:`1px solid ${focused ? 'rgba(212,168,67,0.45)' : 'rgba(255,255,255,0.1)'}`,
-            background: focused ? 'rgba(212,168,67,0.03)' : 'rgba(255,255,255,0.04)',
+            borderRadius:10, border:`1px solid ${focused ? 'rgba(212,196,168,0.45)' : 'rgba(255,255,255,0.1)'}`,
+            background: focused ? 'rgba(212,196,168,0.03)' : 'rgba(255,255,255,0.04)',
             color:'#fff', fontSize:14, outline:'none', boxSizing:'border-box', transition:'all 0.2s',
           }}
           onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
@@ -105,7 +105,7 @@ function WaitingRoom({ user, onLogout }) {
         </div>
 
         {/* What happens next */}
-        <div style={{ background:'rgba(212,168,67,0.05)', border:'1px solid rgba(212,168,67,0.12)', borderRadius:12, padding:'18px 22px', marginBottom:24, textAlign:'left' }}>
+        <div style={{ background:'rgba(212,196,168,0.05)', border:'1px solid rgba(212,196,168,0.12)', borderRadius:12, padding:'18px 22px', marginBottom:24, textAlign:'left' }}>
           <div style={{ fontSize:11, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.12em', color:'var(--gold)', marginBottom:10 }}>What happens next?</div>
           {[
             'Our HR team will verify your business details',
@@ -234,14 +234,14 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
             <button key={r.val}
               onClick={() => { setRole(r.val); setStep(r.val === 'user' ? 3 : 2); }}
               style={{ display:'flex', alignItems:'center', gap:18, padding:'22px 24px', borderRadius:16, background:'#0C0C0C', border:'1px solid rgba(255,255,255,0.08)', cursor:'pointer', textAlign:'left', transition:'all 0.2s', width:'100%' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(212,168,67,0.35)'; e.currentTarget.style.background='rgba(212,168,67,0.04)'; e.currentTarget.style.transform='translateY(-2px)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(212,196,168,0.35)'; e.currentTarget.style.background='rgba(212,196,168,0.04)'; e.currentTarget.style.transform='translateY(-2px)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(255,255,255,0.08)'; e.currentTarget.style.background='#0C0C0C'; e.currentTarget.style.transform='none'; }}
             >
-              <div style={{ width:54, height:54, borderRadius:14, background:'rgba(212,168,67,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, flexShrink:0 }}>{r.icon}</div>
+              <div style={{ width:54, height:54, borderRadius:14, background:'rgba(212,196,168,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, flexShrink:0 }}>{r.icon}</div>
               <div style={{ flex:1 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}>
                   <span style={{ fontWeight:700, fontSize:15, color:'#fff' }}>{r.title}</span>
-                  {r.badge && <span style={{ background:'rgba(212,168,67,0.12)', border:'1px solid rgba(212,168,67,0.2)', color:'var(--gold)', fontSize:9, fontWeight:800, borderRadius:4, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase' }}>{r.badge}</span>}
+                  {r.badge && <span style={{ background:'rgba(212,196,168,0.12)', border:'1px solid rgba(212,196,168,0.2)', color:'var(--gold)', fontSize:9, fontWeight:800, borderRadius:4, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase' }}>{r.badge}</span>}
                 </div>
                 <div style={{ fontSize:13, color:'rgba(255,255,255,0.4)', lineHeight:1.5 }}>{r.desc}</div>
               </div>
@@ -336,7 +336,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
         <div style={{ textAlign:'center', marginBottom:28 }}>
           <Link to="/" style={{ fontFamily:'var(--font-display)', fontWeight:900, fontSize:'1.5rem', fontStyle:'italic', color:'rgba(255,255,255,0.6)', textDecoration:'none' }}>KAYAD</Link>
           <h2 style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontWeight:900, fontSize:'1.5rem', color:'#fff', margin:'10px 0 10px' }}>Create Your Account</h2>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(212,168,67,0.08)', border:'1px solid rgba(212,168,67,0.15)', borderRadius:9999, padding:'4px 14px', fontSize:11, color:'var(--gold)', fontWeight:700 }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(212,196,168,0.08)', border:'1px solid rgba(212,196,168,0.15)', borderRadius:9999, padding:'4px 14px', fontSize:11, color:'var(--gold)', fontWeight:700 }}>
             {role === 'dealer' ? '🏪 Dealer' : role === 'broker' ? '🤝 Private Seller' : '👤 Buyer'}
             {selPkg && pkgList.length > 0 && ` · ${pkgList.find(p=>p.id===selPkg)?.name || ''} Plan`}
           </div>
@@ -364,7 +364,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
               </>
             )}
 
-            <button type="submit" disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? 'rgba(212,168,67,0.5)' : 'var(--gold)', border:'none', borderRadius:11, color:'#000', fontSize:14, fontWeight:900, cursor: loading ? 'wait' : 'pointer', textTransform:'uppercase', letterSpacing:'0.07em', boxShadow:'0 4px 20px rgba(212,168,67,0.2)', transition:'all 0.2s', marginTop:4 }}>
+            <button type="submit" disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? 'rgba(212,196,168,0.5)' : 'var(--gold)', border:'none', borderRadius:11, color:'#000', fontSize:14, fontWeight:900, cursor: loading ? 'wait' : 'pointer', textTransform:'uppercase', letterSpacing:'0.07em', boxShadow:'0 4px 20px rgba(212,196,168,0.2)', transition:'all 0.2s', marginTop:4 }}>
               {loading ? 'Creating Account…' : 'Create Account'}
             </button>
           </form>

@@ -47,7 +47,7 @@ export default function HomePage() {
         <div style={{
           position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
           width: 700, height: 400,
-          background: 'radial-gradient(ellipse, rgba(212,168,67,0.09) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse, rgba(212,196,168,0.09) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -62,14 +62,15 @@ export default function HomePage() {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20, zIndex: 1,
         }}>
-          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, transparent, rgba(212,168,67,0.4))' }} />
+          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
           <span style={{
-            fontSize: 9, color: 'rgba(212,168,67,0.7)', fontWeight: 700,
-            letterSpacing: '0.24em', textTransform: 'uppercase',
+            fontSize: 11, color: 'var(--gold)', fontWeight: 800,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            textShadow: '0 0 20px rgba(212,196,168,0.12)',
           }}>
             Kenya's Premium Car Marketplace
           </span>
-          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, rgba(212,168,67,0.4), transparent)' }} />
+          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
         </div>
 
         {/* HEADLINE — smaller clamp so first row of cars always peeks */}
@@ -82,15 +83,16 @@ export default function HomePage() {
           Drive in{' '}
           <span style={{
             color: 'var(--gold)',
-            textShadow: '0 0 48px rgba(212,168,67,0.28)',
+            textShadow: '0 0 48px rgba(212,196,168,0.28)',
           }}>
             Gold
           </span>
         </h1>
 
         <p style={{
-          color: 'rgba(255,255,255,0.34)', fontSize: 14, maxWidth: 420,
-          margin: '0 auto 28px', lineHeight: 1.8, zIndex: 1,
+          color: 'rgba(255,255,255,0.65)', fontSize: 16, maxWidth: 520,
+          margin: '0 auto 28px', lineHeight: 1.7, zIndex: 1,
+          fontWeight: 400,
         }}>
           East Africa's most sophisticated marketplace — live auctions,
           verified dealers &amp; secure escrow.
@@ -101,11 +103,11 @@ export default function HomePage() {
             padding: '13px 32px', background: 'var(--gold)', color: '#000',
             borderRadius: 9999, fontWeight: 900, fontSize: 11,
             textTransform: 'uppercase', letterSpacing: '0.1em',
-            boxShadow: '0 6px 28px rgba(212,168,67,0.28)',
+            boxShadow: '0 6px 28px rgba(212,196,168,0.28)',
             transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 42px rgba(212,168,67,0.42)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,168,67,0.28)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 42px rgba(212,196,168,0.42)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,196,168,0.28)'; }}
           >Enter The Gallery</Link>
 
           <Link to="/showroom?filter=auction" style={{
@@ -115,14 +117,14 @@ export default function HomePage() {
             border: '1px solid rgba(255,255,255,0.14)',
             transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
           }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.5)'; e.currentTarget.style.color = 'var(--gold)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.5)'; e.currentTarget.style.color = 'var(--gold)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
           >Live Auctions</Link>
         </div>
 
         {isAuth && (
           <div style={{ marginTop: 18, fontSize: 11, color: 'rgba(255,255,255,0.18)', zIndex: 1 }}>
-            Welcome back, <strong style={{ color: 'rgba(212,168,67,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
+            Welcome back, <strong style={{ color: 'rgba(212,196,168,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
           </div>
         )}
 
@@ -194,13 +196,13 @@ export default function HomePage() {
               </h2>
             </div>
             <Link to="/showroom" style={{
-              fontSize: 11, color: 'rgba(212,168,67,0.7)', fontWeight: 700,
+              fontSize: 11, color: 'rgba(212,196,168,0.7)', fontWeight: 700,
               textDecoration: 'none', letterSpacing: '0.06em',
               display: 'flex', alignItems: 'center', gap: 4,
               transition: 'color 0.2s',
             }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(212,168,67,0.7)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(212,196,168,0.7)'}
             >Full Gallery →</Link>
           </div>
 
@@ -272,7 +274,7 @@ export default function HomePage() {
                 desc: 'Real-time bidding with automatic time extensions. Your bid, your timing.',
                 cta: 'Bid Now',
                 href: '/showroom?filter=auction',
-                accent: 'rgba(212,168,67,0.06)',
+                accent: 'rgba(212,196,168,0.06)',
               },
               {
                 icon: '🔒',
@@ -317,9 +319,9 @@ export default function HomePage() {
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
           {/* fine gold rule */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, justifyContent: 'center', marginBottom: 24 }}>
-            <div style={{ height: 1, width: 64, background: 'linear-gradient(90deg, transparent, rgba(212,168,67,0.3))' }} />
+            <div style={{ height: 1, width: 64, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.3))' }} />
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--gold)', display: 'block', opacity: 0.5 }} />
-            <div style={{ height: 1, width: 64, background: 'linear-gradient(90deg, rgba(212,168,67,0.3), transparent)' }} />
+            <div style={{ height: 1, width: 64, background: 'linear-gradient(90deg, rgba(212,196,168,0.3), transparent)' }} />
           </div>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
@@ -349,9 +351,9 @@ export default function HomePage() {
         <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div style={{
             width: 42, height: 42, borderRadius: 12,
-            background: 'linear-gradient(135deg, #B8860B 0%, #F0CC6A 40%, #C8960C 70%, #A37800 100%)',
+            background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(212,168,67,0.25)',
+            boxShadow: '0 4px 16px rgba(212,196,168,0.25)',
           }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 22, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
           </div>

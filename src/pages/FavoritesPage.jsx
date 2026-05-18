@@ -66,7 +66,7 @@ export default function FavoritesPage() {
           </div>
         )}
         {compareCount >= 2 && (
-          <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gold)' }}>Comparing {compareCount} car{compareCount > 1 ? 's' : ''}</span>
             <Link to="/compare" className="btn btn-gold btn-sm" style={{ marginLeft: 'auto' }}>
               View Comparison →

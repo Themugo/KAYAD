@@ -20,7 +20,7 @@ export default function CompareDrawer() {
   return (
     <div style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
-      background: '#0C0C0C', borderTop: '1px solid rgba(212,168,67,0.2)',
+      background: '#0C0C0C', borderTop: '1px solid rgba(212,196,168,0.2)',
       boxShadow: '0 -8px 40px rgba(0,0,0,0.6)',
       padding: '10px 24px',
       display: 'flex', alignItems: 'center', gap: 16,
@@ -28,7 +28,7 @@ export default function CompareDrawer() {
     }}>
       {/* Count badge */}
       <div style={{
-        background: 'rgba(212,168,67,0.1)', border: '1px solid rgba(212,168,67,0.2)',
+        background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
         borderRadius: 8, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0,
       }}>
         <BarChart3 size={14} style={{ color: 'var(--gold)' }} />
@@ -44,7 +44,7 @@ export default function CompareDrawer() {
           return (
             <div key={i} style={{
               width: 56, height: 42, borderRadius: 6, overflow: 'hidden',
-              border: car ? '1px solid rgba(212,168,67,0.2)' : '1px dashed rgba(255,255,255,0.1)',
+              border: car ? '1px solid rgba(212,196,168,0.2)' : '1px dashed rgba(255,255,255,0.1)',
               background: car ? '#111' : 'rgba(255,255,255,0.02)',
               position: 'relative', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

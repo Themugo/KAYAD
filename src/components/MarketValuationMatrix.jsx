@@ -41,7 +41,7 @@ export default function MarketValuationMatrix({ carId, carPrice, carBrand, carMo
     : 50;
 
   return (
-    <div className="card" style={{ padding: 16, border: '1px solid rgba(212,168,67,0.2)' }}>
+    <div className="card" style={{ padding: 16, border: '1px solid rgba(212,196,168,0.2)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <span style={{ fontSize: 14 }}>📊</span>
         <span style={{ fontSize: 13, fontWeight: 600 }}>Live Market Valuation</span>

@@ -26,8 +26,8 @@ function Input({ value, onChange, placeholder, type = 'text', rows }) {
   const [focused, setFocused] = useState(false);
   const style = {
     width: '100%', padding: '11px 14px', borderRadius: 10, boxSizing: 'border-box',
-    border: `1px solid ${focused ? 'rgba(212,168,67,0.4)' : 'rgba(255,255,255,0.08)'}`,
-    background: focused ? 'rgba(212,168,67,0.03)' : 'rgba(255,255,255,0.04)',
+    border: `1px solid ${focused ? 'rgba(212,196,168,0.4)' : 'rgba(255,255,255,0.08)'}`,
+    background: focused ? 'rgba(212,196,168,0.03)' : 'rgba(255,255,255,0.04)',
     color: '#fff', fontSize: 13, outline: 'none', transition: 'all 0.2s',
     resize: rows ? 'vertical' : undefined,
   };
@@ -105,7 +105,7 @@ export default function DealerSettings() {
   return (
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* HEADER */}
-      <div style={{ background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
+      <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 32px' }}>
           <div style={{ marginBottom: 24 }}>
             <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 6 }}>Dealer Hub</div>
@@ -148,7 +148,7 @@ export default function DealerSettings() {
                 <div>
                   <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{profile.name || user?.email}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{user?.email}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, background: 'rgba(212,168,67,0.1)', border: '1px solid rgba(212,168,67,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     {user?.role} · {user?.approved ? '✓ Approved' : '⏳ Pending'}
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export default function DealerSettings() {
               padding: '13px 28px', background: 'var(--gold)', border: 'none', borderRadius: 10,
               color: '#000', fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer',
               textTransform: 'uppercase', letterSpacing: '0.06em',
-              boxShadow: '0 4px 20px rgba(212,168,67,0.2)',
+              boxShadow: '0 4px 20px rgba(212,196,168,0.2)',
             }}>
               <Save size={14} /> {saving ? 'Saving…' : 'Save Changes'}
             </button>

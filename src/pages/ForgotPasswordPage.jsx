@@ -63,12 +63,12 @@ export default function ForgotPasswordPage() {
                   type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com" required autoComplete="email"
                   style={{ width:'100%', padding:'12px 14px', borderRadius:10, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'#fff', fontSize:14, outline:'none', boxSizing:'border-box' }}
-                  onFocus={e => e.target.style.borderColor='rgba(212,168,67,0.45)'}
+                  onFocus={e => e.target.style.borderColor='rgba(212,196,168,0.45)'}
                   onBlur={e => e.target.style.borderColor='rgba(255,255,255,0.1)'}
                 />
               </div>
 
-              <button type="submit" disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? 'rgba(212,168,67,0.5)' : 'var(--gold)', border:'none', borderRadius:11, color:'#000', fontSize:14, fontWeight:900, cursor: loading ? 'wait' : 'pointer', textTransform:'uppercase', letterSpacing:'0.07em', marginTop:4 }}>
+              <button type="submit" disabled={loading} style={{ width:'100%', padding:'14px', background: loading ? 'rgba(212,196,168,0.5)' : 'var(--gold)', border:'none', borderRadius:11, color:'#000', fontSize:14, fontWeight:900, cursor: loading ? 'wait' : 'pointer', textTransform:'uppercase', letterSpacing:'0.07em', marginTop:4 }}>
                 {loading ? 'Sending…' : 'Send Reset Link'}
               </button>
             </form>

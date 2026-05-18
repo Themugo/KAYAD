@@ -21,9 +21,9 @@ export default function Footer() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12,
-                background: 'linear-gradient(135deg, #B8860B 0%, #F0CC6A 40%, #C8960C 70%, #A37800 100%)',
+                background: 'linear-gradient(135deg, #A89878 0%, var(--gold) 40%, #C4B498 70%, #8A7A5E 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 20px rgba(212,168,67,0.25)',
+                boxShadow: '0 4px 20px rgba(212,196,168,0.25)',
               }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
               </div>
@@ -46,7 +46,7 @@ export default function Footer() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 14, textDecoration: 'none', transition: 'all 0.2s',
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,168,67,0.12)'; e.currentTarget.style.borderColor = 'rgba(212,168,67,0.2)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,196,168,0.12)'; e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
                 >{s.icon}</a>
               ))}

@@ -12,7 +12,7 @@ function StatCard({ icon: Icon, label, value, sub, accent = 'var(--gold)', to })
       transition: 'border-color 0.2s, transform 0.2s',
       cursor: to ? 'pointer' : 'default', position: 'relative', overflow: 'hidden',
     }}
-      onMouseEnter={e => { if (to) { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
+      onMouseEnter={e => { if (to) { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
       onMouseLeave={e => { if (to) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'none'; }}}
     >
       <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, borderRadius: '0 0 0 80px', background: `${accent}08` }} />
@@ -30,7 +30,7 @@ function StatCard({ icon: Icon, label, value, sub, accent = 'var(--gold)', to })
   return to ? <Link to={to} style={{ textDecoration: 'none' }}>{inner}</Link> : inner;
 }
 
-function QuickLink({ to, icon: Icon, label, desc, accent = 'rgba(212,168,67,0.12)' }) {
+function QuickLink({ to, icon: Icon, label, desc, accent = 'rgba(212,196,168,0.12)' }) {
   return (
     <Link to={to} style={{ textDecoration: 'none' }}>
       <div style={{
@@ -39,7 +39,7 @@ function QuickLink({ to, icon: Icon, label, desc, accent = 'rgba(212,168,67,0.12
         display: 'flex', alignItems: 'center', gap: 14,
         transition: 'all 0.2s',
       }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,168,67,0.25)'; e.currentTarget.style.background = '#111'; }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.25)'; e.currentTarget.style.background = '#111'; }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = '#0C0C0C'; }}
       >
         <div style={{ width: 42, height: 42, borderRadius: 11, background: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -88,7 +88,7 @@ export default function BuyerDashboard() {
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* ── HEADER ── */}
       <div style={{
-        background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)',
+        background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
         borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '40px 0 36px',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
@@ -152,7 +152,7 @@ export default function BuyerDashboard() {
                         </div>
                         <span style={{
                           padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700,
-                          background: e.status === 'completed' ? 'rgba(34,197,94,0.12)' : e.status === 'released' ? 'rgba(59,130,246,0.12)' : 'rgba(212,168,67,0.12)',
+                          background: e.status === 'completed' ? 'rgba(34,197,94,0.12)' : e.status === 'released' ? 'rgba(59,130,246,0.12)' : 'rgba(212,196,168,0.12)',
                           color: e.status === 'completed' ? '#22c55e' : e.status === 'released' ? '#3b82f6' : 'var(--gold)',
                         }}>{e.status?.toUpperCase()}</span>
                       </div>

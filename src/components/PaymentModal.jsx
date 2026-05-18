@@ -121,7 +121,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
         </div>
 
         <div style={{
-          background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.2)',
+          background: 'var(--gold-glow)', border: '1px solid rgba(212,196,168,0.2)',
           borderRadius: 'var(--radius)', padding: '16px', marginBottom: 24, textAlign: 'center',
         }}>
           <div style={{ fontSize: 11, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>

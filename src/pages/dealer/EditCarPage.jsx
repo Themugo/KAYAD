@@ -27,7 +27,7 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
   return (
     <input
       type={type} value={value} onChange={onChange} placeholder={placeholder}
-      style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: `1px solid ${f ? 'rgba(212,168,67,0.4)' : 'rgba(255,255,255,0.09)'}`, background: f ? 'rgba(212,168,67,0.03)' : 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
+      style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: `1px solid ${f ? 'rgba(212,196,168,0.4)' : 'rgba(255,255,255,0.09)'}`, background: f ? 'rgba(212,196,168,0.03)' : 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
       onFocus={() => setF(true)} onBlur={() => setF(false)}
     />
   );
@@ -194,7 +194,7 @@ export default function EditCarPage() {
   // ── Loading ──
   if (loading) return (
     <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(212,168,67,0.2)', borderTopColor: 'var(--gold)', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ width: 48, height: 48, borderRadius: '50%', border: '3px solid rgba(212,196,168,0.2)', borderTopColor: 'var(--gold)', animation: 'spin 0.8s linear infinite' }} />
     </div>
   );
 
@@ -245,7 +245,7 @@ export default function EditCarPage() {
   return (
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       {/* Header */}
-      <div style={{ background: 'linear-gradient(180deg, rgba(212,168,67,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '28px 0 0' }}>
+      <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '28px 0 0' }}>
         <div style={{ maxWidth: 980, margin: '0 auto', padding: '0 28px' }}>
           <button onClick={() => navigate('/dealer')} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }}>
             <ChevronLeft size={14} /> Back to My Listings
@@ -328,7 +328,7 @@ export default function EditCarPage() {
                       { key: 'allowBuy', label: '🏷 Allow Direct Buy' },
                       { key: 'allowBid', label: '⚡ Allow Bidding' },
                     ].map(opt => (
-                      <button key={opt.key} onClick={() => set(opt.key, !form[opt.key])} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 8, borderRadius: 9, border: `1px solid ${form[opt.key] ? 'rgba(212,168,67,0.3)' : 'rgba(255,255,255,0.07)'}`, background: form[opt.key] ? 'rgba(212,168,67,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                      <button key={opt.key} onClick={() => set(opt.key, !form[opt.key])} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 8, borderRadius: 9, border: `1px solid ${form[opt.key] ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, background: form[opt.key] ? 'rgba(212,196,168,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
                         <div style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid ${form[opt.key] ? 'var(--gold)' : 'rgba(255,255,255,0.2)'}`, background: form[opt.key] ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           {form[opt.key] && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>✓</span>}
                         </div>
@@ -362,7 +362,7 @@ export default function EditCarPage() {
                     <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: `2px solid ${isCover ? 'var(--gold)' : 'rgba(255,255,255,0.07)'}`, aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s' }}
                       onClick={() => handleSetCover(i)}>
                       {src && <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                      <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,168,67,0.1)' : 'transparent', transition: 'background 0.2s' }} />
+                      <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : 'transparent', transition: 'background 0.2s' }} />
                       <div style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Pin size={13} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.6)' }} />
                       </div>
@@ -416,7 +416,7 @@ export default function EditCarPage() {
             </div>
 
             {car.bidsCount > 0 && (
-              <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(212,168,67,0.05)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 10 }}>
+              <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(212,196,168,0.05)', border: '1px solid rgba(212,196,168,0.12)', borderRadius: 10 }}>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
                   <strong style={{ color: 'var(--gold)' }}>{car.bidsCount}</strong> bid{car.bidsCount !== 1 ? 's' : ''} placed ·
                   Current: <strong style={{ color: '#fff' }}>KES {Number(car.currentBid || 0).toLocaleString()}</strong>
@@ -440,7 +440,7 @@ export default function EditCarPage() {
                     ? 'This vehicle is pinned to the homepage gallery, giving it maximum visibility to all visitors.'
                     : 'Pin this vehicle to the homepage to increase visibility. Featured cars appear in the "Elite Selection" section on the front page.'}
                 </div>
-                <button onClick={handlePromote} style={{ padding: '11px 24px', background: car.isPromoted ? 'rgba(239,68,68,0.1)' : 'rgba(212,168,67,0.12)', border: `1px solid ${car.isPromoted ? 'rgba(239,68,68,0.2)' : 'rgba(212,168,67,0.25)'}`, borderRadius: 10, color: car.isPromoted ? '#ef4444' : 'var(--gold)', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
+                <button onClick={handlePromote} style={{ padding: '11px 24px', background: car.isPromoted ? 'rgba(239,68,68,0.1)' : 'rgba(212,196,168,0.12)', border: `1px solid ${car.isPromoted ? 'rgba(239,68,68,0.2)' : 'rgba(212,196,168,0.25)'}`, borderRadius: 10, color: car.isPromoted ? '#ef4444' : 'var(--gold)', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
                   <Star size={14} fill={car.isPromoted ? '#ef4444' : 'none'} />
                   {car.isPromoted ? 'Remove from Homepage' : 'Feature on Homepage'}
                 </button>

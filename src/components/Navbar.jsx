@@ -86,7 +86,7 @@ export default function Navbar({ branding }) {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     height: 2,
     borderRadius: 1,
-    background: 'linear-gradient(90deg, rgba(212,168,67,0.2), var(--gold), rgba(212,168,67,0.2))',
+    background: 'linear-gradient(90deg, rgba(212,196,168,0.2), var(--gold), rgba(212,196,168,0.2))',
     transform: active ? 'scaleX(1)' : 'scaleX(0)',
     transformOrigin: active ? 'left' : 'right',
     transition: 'transform 0.35s cubic-bezier(0.2,0,0,1), opacity 0.35s ease',
@@ -104,7 +104,7 @@ export default function Navbar({ branding }) {
           : 'linear-gradient(180deg, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.10) 100%)',
         backdropFilter: scrolled ? 'blur(48px) saturate(1.3)' : 'blur(24px)',
         WebkitBackdropFilter: scrolled ? 'blur(48px) saturate(1.3)' : 'blur(24px)',
-        borderBottom: scrolled ? '1px solid rgba(212,168,67,0.10)' : '1px solid transparent',
+        borderBottom: scrolled ? '1px solid rgba(212,196,168,0.10)' : '1px solid transparent',
         boxShadow: scrolled ? '0 1px 40px rgba(0,0,0,0.3)' : 'none',
         transition: 'background 0.5s ease, border-color 0.5s ease, backdrop-filter 0.5s ease, box-shadow 0.5s ease',
       }}>
@@ -116,9 +116,9 @@ export default function Navbar({ branding }) {
             ) : (
               <div style={{
                 width: 52, height: 52, borderRadius: 14,
-                background: 'linear-gradient(135deg, #B8860B 0%, var(--gold) 40%, #C8960C 70%, #A37800 100%)',
+                background: 'linear-gradient(135deg, #A89878 0%, var(--gold) 40%, #C4B498 70%, #8A7A5E 100%)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 8px 32px rgba(212,168,67,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
+                boxShadow: '0 8px 32px rgba(212,196,168,0.4), inset 0 1px 0 rgba(255,255,255,0.25)',
                 flexShrink: 0, position: 'relative', overflow: 'hidden',
                 transition: 'transform 0.3s ease',
               }}
@@ -136,8 +136,9 @@ export default function Navbar({ branding }) {
 
           <div style={{ flex: 1, textAlign: 'center', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
             <span style={{
-              fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'rgba(255,255,255,0.45)',
+              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, color: 'var(--gold)',
               letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              textShadow: '0 0 20px rgba(212,196,168,0.15)',
             }}>
               {branding?.brandTagline || "Kenya's Premium Automotive Gallery"}
             </span>
@@ -210,7 +211,7 @@ export default function Navbar({ branding }) {
                       {notifs.length === 0 ? (
                         <div style={{ padding: '32px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>No notifications yet</div>
                       ) : notifs.map((n, i) => (
-                        <div key={i} style={{ padding: '13px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.read ? 'transparent' : 'rgba(212,168,67,0.03)' }}>
+                        <div key={i} style={{ padding: '13px 20px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: n.read ? 'transparent' : 'rgba(212,196,168,0.03)' }}>
                           <div style={{ fontWeight: n.read ? 400 : 600, fontSize: 13, color: n.read ? 'rgba(255,255,255,0.55)' : '#fff' }}>{n.title || n.message}</div>
                           {n.message && n.title && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>{n.message}</div>}
                           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 5 }}>{timeAgo(n.createdAt)}</div>
@@ -274,9 +275,9 @@ export default function Navbar({ branding }) {
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
                   onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.background = 'transparent'; }}
                 >Sign In</Link>
-                <Link to="/register" style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800, color: '#000', background: 'var(--gold)', textDecoration: 'none', transition: 'all 0.25s', letterSpacing: '-0.01em', boxShadow: '0 4px 20px rgba(212,168,67,0.28)' }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(212,168,67,0.42)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,168,67,0.28)'; }}
+                <Link to="/register" style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14, fontWeight: 800, color: '#000', background: 'var(--gold)', textDecoration: 'none', transition: 'all 0.25s', letterSpacing: '-0.01em', boxShadow: '0 4px 20px rgba(212,196,168,0.28)' }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(212,196,168,0.42)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,196,168,0.28)'; }}
                 >Join Free</Link>
               </div>
             )}
@@ -300,9 +301,9 @@ export default function Navbar({ branding }) {
               ) : (
                 <div style={{
                   width: 48, height: 48, borderRadius: 14,
-                  background: 'linear-gradient(135deg, #B8860B 0%, var(--gold) 40%, #C8960C 70%, #A37800 100%)',
+                background: 'linear-gradient(135deg, #A89878 0%, var(--gold) 40%, #C4B498 70%, #8A7A5E 100%)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 8px 32px rgba(212,168,67,0.3)',
+                  boxShadow: '0 8px 32px rgba(212,196,168,0.3)',
                 }}>
                   <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: branding?.logoText?.length > 1 ? 18 : 26, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>
                     {branding?.logoText || 'K'}

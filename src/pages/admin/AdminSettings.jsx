@@ -40,8 +40,8 @@ const BRANDING_DEFAULTS = {
   logoType: 'icon',
   logoUrl: '',
   brandTagline: 'Premium Marketplace',
-  primaryColor: '#D4A843',
-  accentColor: '#F0CC6A',
+  primaryColor: '#D4C4A8',
+  accentColor: '#E8DAC4',
   bgColor: '#050505',
   surfaceColor: '#0A0A0A',
   cardColor: '#111111',
@@ -632,7 +632,7 @@ export default function AdminSettings() {
                       <div>
                         <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 5 }}>Active</div>
                         <button onClick={() => setPackages(p => p.map((x, j) => j === i ? { ...x, isActive: !x.isActive } : x))}
-                          style={{ width: '100%', padding: '7px 10px', borderRadius: 8, border: `1px solid ${pkg.isActive ? 'rgba(212,168,67,0.3)' : 'rgba(255,255,255,0.08)'}`, background: pkg.isActive ? 'rgba(212,168,67,0.08)' : 'rgba(255,255,255,0.03)', color: pkg.isActive ? 'var(--gold)' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                          style={{ width: '100%', padding: '7px 10px', borderRadius: 8, border: `1px solid ${pkg.isActive ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)'}`, background: pkg.isActive ? 'rgba(212,196,168,0.08)' : 'rgba(255,255,255,0.03)', color: pkg.isActive ? 'var(--gold)' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                           {pkg.isActive ? 'On' : 'Off'}
                         </button>
                       </div>

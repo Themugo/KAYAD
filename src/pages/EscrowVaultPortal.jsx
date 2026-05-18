@@ -122,7 +122,7 @@ export default function EscrowVaultPortal() {
             </div>
             <div style={{
               padding: '8px 16px', borderRadius: 8,
-              background: STATUS_LABELS[vault.status]?.color === 'var(--green)' ? 'rgba(34,197,94,0.1)' : 'rgba(212,168,67,0.1)',
+              background: STATUS_LABELS[vault.status]?.color === 'var(--green)' ? 'rgba(34,197,94,0.1)' : 'rgba(212,196,168,0.1)',
               color: STATUS_LABELS[vault.status]?.color,
               fontWeight: 600, fontSize: 13,
             }}>
@@ -168,7 +168,7 @@ export default function EscrowVaultPortal() {
 
         {/* Bank Transfer Info — only when awaiting_payment */}
         {vault.status === 'awaiting_payment' && (
-          <div className="card" style={{ padding: 24, marginBottom: 20, border: '1px solid rgba(212,168,67,0.3)' }}>
+          <div className="card" style={{ padding: 24, marginBottom: 20, border: '1px solid rgba(212,196,168,0.3)' }}>
             <h4 style={{ marginBottom: 16 }}>🏦 Make Your Bank Transfer</h4>
             <div style={{ display: 'grid', gap: 12 }}>
               <div className="input-group">
@@ -198,7 +198,7 @@ export default function EscrowVaultPortal() {
                 </div>
               </div>
             </div>
-            <div style={{ marginTop: 16, padding: 12, background: 'rgba(212,168,67,0.08)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
+            <div style={{ marginTop: 16, padding: 12, background: 'rgba(212,196,168,0.08)', borderRadius: 8, fontSize: 13, lineHeight: 1.6 }}>
               <strong>Accepted payment methods:</strong> RTGS, EFT, Pesalink, or direct bank deposit.
               Transfers are usually confirmed within 1-2 business hours.
             </div>

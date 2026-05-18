@@ -231,7 +231,7 @@ export default function AdminSellers() {
                       } catch { toast('Failed to set package', 'error'); }
                     }} style={{
                       padding: '7px 16px', borderRadius: 8, border: `1px solid ${isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
-                      background: isCurrent ? 'rgba(212,168,67,0.12)' : 'rgba(255,255,255,0.04)',
+                      background: isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.04)',
                       color: isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.6)',
                       fontSize: 12, fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize',
                       transition: 'all 0.15s',
