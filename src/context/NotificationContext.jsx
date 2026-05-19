@@ -21,7 +21,9 @@ export function NotificationProvider({ children }) {
       const list = d.notifications || [];
       setNotifications(list);
       setUnreadCount(list.filter(n => !n.read).length);
-    } catch {} finally { setLoading(false); }
+    } catch (error) {
+      console.warn('Unable to fetch notifications', error);
+    } finally { setLoading(false); }
   }, [isAuth]);
 
   const prependNotification = useCallback((n) => {
@@ -89,7 +91,9 @@ export function NotificationProvider({ children }) {
       await notifAPI.markRead(id);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
       setUnreadCount(c => Math.max(0, c - 1));
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to mark notification as read', error);
+    }
   };
 
   const markAllRead = async () => {
@@ -97,7 +101,9 @@ export function NotificationProvider({ children }) {
       await notifAPI.markAllRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to mark all notifications as read', error);
+    }
   };
 
   const deleteNotif = async (id) => {
@@ -108,7 +114,9 @@ export function NotificationProvider({ children }) {
         if (removed && !removed.read) setUnreadCount(c => Math.max(0, c - 1));
         return prev.filter(n => n._id !== id);
       });
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to delete notification', error);
+    }
   };
 
   return (

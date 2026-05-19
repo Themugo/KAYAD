@@ -41,7 +41,9 @@ export default function AdminInspections() {
       await inspectionAPI.assign(orderId, inspectorId.trim());
       setAssigning(null);
       load();
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to assign inspector', error);
+    }
   };
 
   const handleAssignSelector = async (orderId, inspectorId) => {
@@ -49,7 +51,9 @@ export default function AdminInspections() {
       await inspectionAPI.assign(orderId, inspectorId);
       setAssigning(null);
       load();
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to assign inspector', error);
+    }
   };
 
   return (

@@ -5,7 +5,7 @@ export const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters").max(128),
   phone: z.string().optional(),
-  role: z.enum(["dealer", "broker", "user"]).optional(),
+  role: z.enum(["dealer", "broker", "individual_seller", "user", "admin"]).optional(),
   businessName: z.string().optional(),
   location: z.string().optional(),
   referralCode: z.string().optional(),

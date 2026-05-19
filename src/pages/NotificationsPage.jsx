@@ -47,7 +47,9 @@ export default function NotificationsPage() {
       const list = d.notifications || d.data || [];
       setNotifs(list);
       setTotal(d.pagination?.total || list.length);
-    } catch {} finally { setLoading(false); }
+    } catch (error) {
+      console.warn('Unable to load notifications', error);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, [page, typeFilter]);

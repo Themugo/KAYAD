@@ -174,7 +174,9 @@ export default function Showroom() {
     try {
       await savedSearchAPI.update(id, { notify: !current });
       setSavedSearches(prev => prev.map(s => s._id === id ? { ...s, notify: !current } : s));
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to update saved search notifications', error);
+    }
   };
 
   const handleDeleteSearch = async (id) => {
@@ -182,7 +184,9 @@ export default function Showroom() {
       await savedSearchAPI.remove(id);
       setSavedSearches(prev => prev.filter(s => s._id !== id));
       toast('Search removed', 'info');
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to delete saved search', error);
+    }
   };
 
   const handleApplySearch = (saved) => {

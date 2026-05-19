@@ -12,7 +12,9 @@ function loadPersisted() {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed.filter(id => typeof id === 'string');
     }
-  } catch {}
+  } catch (error) {
+    console.warn('Unable to load compare list', error);
+  }
   return [];
 }
 
@@ -22,7 +24,9 @@ export function CompareProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(compareIds));
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to persist compare list', error);
+    }
   }, [compareIds]);
 
   const addCar = useCallback((carId) => {

@@ -41,7 +41,9 @@ export default function InspectorDashboard() {
       await inspectionAPI.start(id);
       toast('Inspection started', 'success');
       loadTasks();
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to start inspection', error);
+    }
   };
 
   const handleBeginChecklist = (task) => {

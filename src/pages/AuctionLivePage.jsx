@@ -134,10 +134,8 @@ export default function AuctionLivePage() {
     if (!on) return;
     const offBid = on('newBid', (data) => {
       if (data.carId !== id) return;
-      setPrevBidRef(prev => {
-        setPrevBid(prev);
-        return data.amount;
-      });
+      setPrevBid(prevBidRef.current);
+      prevBidRef.current = data.amount;
       setCurrentBid(data.amount);
       setBidCount(prev => prev + 1);
       setBids(prev => [data, ...prev].slice(0, 30));

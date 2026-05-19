@@ -19,7 +19,6 @@ const Field = ({ label, children }) => (
 export default function AddCarPage() {
   const { user }  = useAuth();
   const { toast } = useToast();
-  const navigate  = useNavigate();
   const [loading, setLoading] = useState(false);
   const [done, setDone]      = useState(null);
   const [images, setImages]   = useState([]);

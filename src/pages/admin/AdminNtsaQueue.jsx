@@ -76,7 +76,9 @@ export default function AdminNtsaQueue() {
       setProcessModal(null);
       setSelected(null);
       load();
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to process NTSA verification', error);
+    }
     finally { setProcessing(false); }
   };
 
@@ -88,7 +90,9 @@ export default function AdminNtsaQueue() {
       setQueueModal(false);
       setCarIdInput('');
       load();
-    } catch {}
+    } catch (error) {
+      console.warn('Unable to queue car for NTSA verification', error);
+    }
     finally { setProcessing(false); }
   };
 
