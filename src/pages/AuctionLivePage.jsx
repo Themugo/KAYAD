@@ -271,6 +271,15 @@ export default function AuctionLivePage() {
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80, color: 'var(--text-dim)' }}>🚗</div>
                 )}
               </div>
+              {car.isDemo && (
+                <div style={{
+                  position: 'absolute', top: 10, right: 10,
+                  background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
+                  borderRadius: 6, padding: '3px 8px', zIndex: 5,
+                }}>
+                  <span style={{ fontSize: 9, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                </div>
+              )}
             </div>
 
             {/* Car specs strip */}

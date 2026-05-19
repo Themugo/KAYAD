@@ -124,6 +124,17 @@ export default function CartyGrid({ car, listView, isMobile }) {
                 </div>
               )}
             </div>
+            {car.isDemo && (
+              <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
+                  borderRadius: 6, padding: '3px 7px',
+                }}>
+                  <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                </div>
+              </div>
+            )}
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 20px', minWidth: 0, justifyContent: 'space-between' }}>
             <div>
@@ -328,6 +339,17 @@ export default function CartyGrid({ car, listView, isMobile }) {
               </div>
             )}
           </div>
+          {car.isDemo && (
+            <div style={{ position: 'absolute', top: 8, right: 8 }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
+                borderRadius: 6, padding: '3px 7px',
+              }}>
+                <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+              </div>
+            </div>
+          )}
 
           {car.year && (
             <div style={{

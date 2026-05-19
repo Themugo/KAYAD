@@ -73,6 +73,19 @@ function GalleryImage({ car, idx, onPrev, onNext, total }) {
           <span>FEATURED</span>
         </div>
       )}
+
+      {car?.isDemo && (
+        <div style={{
+          position: 'absolute', top: 12, right: 12,
+          background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
+          borderRadius: 8, padding: '5px 12px',
+          display: 'flex', alignItems: 'center', gap: 5,
+          zIndex: 5,
+        }}>
+          <span style={{ fontSize: 10 }}>🧪</span>
+          <span style={{ fontSize: 11, color: '#0A1628', fontWeight: 800, letterSpacing: '0.06em' }}>DEMO</span>
+        </div>
+      )}
     </div>
   );
 }

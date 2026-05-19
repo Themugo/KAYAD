@@ -29,6 +29,13 @@ export default function CarCard({ car, isComparing, onToggleCompare, compareCoun
               </span>
             </div>
           )}
+          {car.isDemo && (
+            <div style={{ position: 'absolute', top: 10, right: 10 }}>
+              <span className="badge" style={{ fontSize: 9, background: 'rgba(251,191,36,0.92)', color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>
+                🧪 DEMO
+              </span>
+            </div>
+          )}
         </div>
 
         <div style={{ padding: '14px 16px' }}>
