@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../context/CompareContext';
 import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3, Fuel, Calendar, Settings, Flame } from 'lucide-react';
-import useMediaQuery from '../hooks/useMediaQuery';
 
 function firstImage(car) {
   if (car.image) return car.image;
@@ -31,12 +30,11 @@ function daysAgo(date) {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
-export default function CartyGrid({ car, listView }) {
+export default function CartyGrid({ car, listView, isMobile }) {
   const [imgErr, setImgErr] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const imgRef = useRef(null);
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
   const isCompared = ctxIsComparing(car._id);

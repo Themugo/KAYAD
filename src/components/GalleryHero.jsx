@@ -1,16 +1,14 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
-import useMediaQuery from '../hooks/useMediaQuery';
 
 const DEFAULTS = {
   galleryTitle: 'The Gallery',
   gallerySubtitle: "Kenya's Premium Automotive Gallery",
 };
 
-export default function GalleryHero() {
+export default function GalleryHero({ isMobile }) {
   const [title, setTitle] = useState(DEFAULTS.galleryTitle);
   const [subtitle, setSubtitle] = useState(DEFAULTS.gallerySubtitle);
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     adminAPI.getConfig()

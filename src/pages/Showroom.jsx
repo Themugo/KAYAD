@@ -286,7 +286,7 @@ export default function Showroom() {
         )}
 
         <main style={{ flex: 1, minWidth: 0, background: '#050505', paddingTop: isMobile ? 0 : 0 }}>
-          <GalleryHero />
+          <GalleryHero isMobile={isMobile} />
 
           <section style={{ padding: '0 0 48px' }}>
             <div className="container">
@@ -487,11 +487,11 @@ export default function Showroom() {
                 <>
                   {viewMode === 'grid' ? (
                     <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: isMobile ? 10 : 16 }}>
-                      {visible.map(car => <CartyGrid key={car._id} car={car} />)}
+                      {visible.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, overflow: 'hidden' }}>
-                      {visible.map(car => <CartyGrid key={car._id} car={car} listView />)}
+                      {visible.map(car => <CartyGrid key={car._id} car={car} listView isMobile={isMobile} />)}
                     </div>
                   )}
 
