@@ -346,6 +346,7 @@ const _favoritesAPI = {
   add:    (carId) => api.post(`/favorites/${carId}`).then(unwrap),
   remove: (carId) => api.delete(`/favorites/${carId}`).then(unwrap),
   toggle: (carId) => api.post(`/favorites/${carId}/toggle`).then(unwrap),
+  setPriceAlert: (carId, notify) => api.put(`/favorites/${carId}/price-alert`, { notifyOnPriceDrop: notify }).then(unwrap),
 };
 export const favoritesAPI = withDemo(_favoritesAPI, demoAPI.favorites);
 

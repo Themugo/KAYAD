@@ -14,7 +14,7 @@ import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
-  Heart, MessageCircle, ChevronLeft, ChevronRight,
+  Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
   Star, Eye, Bookmark, Zap, Award, Lock, ArrowLeft, Pin, TrendingUp,
   CheckCircle, AlertTriangle, Clock, BarChart3
 } from 'lucide-react';
@@ -106,6 +106,7 @@ export default function CarDetailPage() {
   const [showPayModal, setShowPayModal] = useState(false);
   const [payType, setPayType] = useState('escrow');
   const [isFav, setIsFav] = useState(false);
+  const [priceAlertOn, setPriceAlertOn] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
@@ -130,7 +131,9 @@ export default function CarDetailPage() {
     if (isAuth) {
       favoritesAPI.list().then(d => {
         const favs = d.favorites || d.cars || d.data || [];
-        setIsFav(favs.some(f => f._id === id || f?.car?._id === id));
+        const match = favs.find(f => (f._id === id || f?.car?._id === id));
+        setIsFav(!!match);
+        setPriceAlertOn(match?.notifyOnPriceDrop === true);
       }).catch(() => {});
     }
   }, [id]);
@@ -190,8 +193,19 @@ export default function CarDetailPage() {
       const res = await favoritesAPI.toggle(id);
       const nowFav = res.favorited === true || res.favorited === 'true';
       setIsFav(nowFav);
+      if (!nowFav) setPriceAlertOn(false);
       toast(nowFav ? 'Saved to wishlist' : 'Removed from wishlist', 'success');
     } catch { toast('Failed', 'error'); }
+  };
+
+  const handlePriceAlert = async () => {
+    if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
+    const next = !priceAlertOn;
+    try {
+      await favoritesAPI.setPriceAlert(id, next);
+      setPriceAlertOn(next);
+      toast(next ? 'Price alerts enabled' : 'Price alerts disabled', 'success');
+    } catch { toast('Failed to update price alert', 'error'); }
   };
 
   const handleChat = async () => {
@@ -569,6 +583,13 @@ export default function CarDetailPage() {
                     <Heart size={13} fill={isFav ? 'currentColor' : 'none'} />
                     {isFav ? 'Saved to Wishlist' : 'Save Car'}
                   </button>
+
+                  {isFav && (
+                    <button onClick={handlePriceAlert} className={`cta-fav ${priceAlertOn ? 'cta-fav-active' : ''}`} style={{ borderColor: priceAlertOn ? 'rgba(212,196,168,0.2)' : undefined }}>
+                      <Bell size={13} fill={priceAlertOn ? 'currentColor' : 'none'} />
+                      {priceAlertOn ? 'Price Alerts On' : 'Notify on Price Drop'}
+                    </button>
+                  )}
                 </div>
               )}
 

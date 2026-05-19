@@ -4,6 +4,7 @@ import { favoritesAPI } from '../api/api';
 import CarCard from '../components/CarCard';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
+import { Bell, BellOff } from 'lucide-react';
 
 export default function FavoritesPage() {
   const { toast } = useToast();
@@ -14,16 +15,31 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     favoritesAPI.list()
-      .then(d => setCars(d.favorites || d.cars || d.data || []))
+      .then(d => {
+        const items = d.favorites || d.cars || d.data || [];
+        setCars(items);
+        setAlertStates(Object.fromEntries(items.map(c => [c._id, c.notifyOnPriceDrop === true])));
+      })
       .catch(() => toast('Failed to load favourites', 'error'))
       .finally(() => setLoading(false));
   }, []);
+
+  const [alertStates, setAlertStates] = useState({});
 
   const handleRemove = async (carId) => {
     try {
       await favoritesAPI.remove(carId);
       setCars(prev => prev.filter(c => c._id !== carId));
       toast('Removed from favourites', 'info');
+    } catch { toast('Failed', 'error'); }
+  };
+
+  const handlePriceAlert = async (carId, current) => {
+    const next = !current;
+    try {
+      await favoritesAPI.setPriceAlert(carId, next);
+      setAlertStates(p => ({ ...p, [carId]: next }));
+      toast(next ? 'Price alerts enabled' : 'Price alerts disabled', 'success');
     } catch { toast('Failed', 'error'); }
   };
 
@@ -107,6 +123,19 @@ export default function FavoritesPage() {
                     }}
                   >
                     {isComparing(car._id) ? '✓ Compare' : '⇄ Compare'}
+                  </button>
+                   <button
+                    onClick={() => handlePriceAlert(car._id, alertStates[car._id])}
+                    title={alertStates[car._id] ? 'Price alerts on' : 'Enable price alerts'}
+                    style={{
+                      background: alertStates[car._id] ? 'rgba(212,196,168,0.12)' : 'rgba(10,22,40,0.85)',
+                      border: `1px solid ${alertStates[car._id] ? 'rgba(212,196,168,0.2)' : 'var(--border)'}`,
+                      borderRadius: 6, padding: '4px 8px', fontSize: 11,
+                      color: alertStates[car._id] ? 'var(--gold)' : 'var(--text)',
+                      cursor: 'pointer', fontWeight: 600, backdropFilter: 'blur(4px)',
+                    }}
+                  >
+                    {alertStates[car._id] ? <Bell size={11} /> : <BellOff size={11} />}
                   </button>
                   <button
                     onClick={() => handleRemove(car._id)}

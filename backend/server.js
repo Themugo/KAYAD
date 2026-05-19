@@ -73,6 +73,7 @@ import { startAuctionTimer }   from "./utils/auctionTimer.js";
 import { startEscrowCron }     from "./services/escrowCron.js";
 import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
 import { startSavedSearchCron } from "./services/savedSearchCron.js";
+import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { initSentry, sentryErrorHandler } from "./utils/sentry.js";
 import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
@@ -363,10 +364,12 @@ const bootstrap = async () => {
     startEscrowCron();
     startAuctionReminderCron();
     startSavedSearchCron();
+    startPriceAlertCron();
 
     console.log(`  ⏰ EscrowCron: auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`);
     console.log(`  ⏰ AuctionReminderCron: reminders active`);
     console.log(`  ⏰ SavedSearchCron: 10-min cycle`);
+    console.log(`  ⏰ PriceAlertCron: 15-min cycle`);
     console.log(`  ⚡ AuctionEngine: running`);
     console.log("");
   } catch (err) {

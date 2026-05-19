@@ -14,8 +14,12 @@ export const getFavorites = async (req, res) => {
       })
       .lean();
 
-    const cars = favorites.map(f => f.car).filter(Boolean);
-    res.json({ success: true, favorites: cars, total: cars.length });
+    const items = favorites.map(f => ({
+      ...(f.car || {}),
+      _favoriteId: f._id,
+      notifyOnPriceDrop: f.notifyOnPriceDrop,
+    })).filter(Boolean);
+    res.json({ success: true, favorites: items, total: items.length });
   } catch (err) {
     console.error("❌ getFavorites error:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch favourites" });
@@ -39,11 +43,30 @@ export const addFavorite = async (req, res) => {
     );
 
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
-    res.json({ success: true, favorited: true, message: "Added to favourites" });
+    return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
     if (err.code === 11000) return res.json({ success: true, favorited: true, message: "Already in favourites" });
     console.error("❌ addFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to add favourite" });
+  }
+};
+
+// PUT /api/favorites/:carId/price-alert — toggle notifyOnPriceDrop
+export const updateFavoritePriceAlert = async (req, res) => {
+  try {
+    const { carId } = req.params;
+    const { notifyOnPriceDrop } = req.body;
+
+    const existing = await Favorite.findOne({ user: req.user.id, car: carId });
+    if (!existing) return res.status(404).json({ success: false, message: "Favorite not found" });
+
+    existing.notifyOnPriceDrop = notifyOnPriceDrop === true;
+    await existing.save();
+
+    res.json({ success: true, notifyOnPriceDrop: existing.notifyOnPriceDrop });
+  } catch (err) {
+    console.error("❌ updateFavoritePriceAlert error:", err.message);
+    res.status(500).json({ success: false, message: "Failed to update price alert" });
   }
 };
 
@@ -80,7 +103,7 @@ export const toggleFavorite = async (req, res) => {
       carSnapshot: { title: car.title, price: car.price, brand: car.brand, image: car.images?.[0]?.url || car.images?.[0] || null },
     });
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
-    return res.json({ success: true, favorited: true, message: "Added to favourites" });
+    return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
     console.error("❌ toggleFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to toggle favourite" });

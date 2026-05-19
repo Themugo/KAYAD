@@ -584,6 +584,10 @@ const demoFavorites = {
     await delay(100, 300);
     return wrapSuccess({ message: 'Toggled' });
   },
+  setPriceAlert: async () => {
+    await delay(100, 300);
+    return wrapSuccess({ notifyOnPriceDrop: true });
+  },
 };
 
 // ─── Demo Chat API ────────────────────────────────────────────────
