@@ -126,7 +126,7 @@ app.use(globalLimiter);
 
 // ─── CORS ─────────────────────────────────────────────────────
 const allowedOrigins = [
-  FRONTEND,
+  FRONTEND, "https://kayad.space", "https://www.kayad.space",
   ...(process.env.EXTRA_CORS_ORIGINS || "").split(",").filter(Boolean),
 ];
 
@@ -134,6 +134,8 @@ app.use(cors({
   origin: (origin, cb) => {
     if (!origin || NODE_ENV === "development") return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
+    if (/\.vercel\.app$/.test(origin) || /^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+    console.warn("⚠️ CORS blocked:", origin, "— set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render");
     cb(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,

@@ -208,7 +208,7 @@ export const placeBid = async (req, res) => {
       phone,
       bidderTag: generatePseudonym(userId, carId),
       status: payment.mode === "mpesa" ? "pending" : "paid",
-      checkoutRequestID: payment.checkoutRequestId,
+      checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
     });
 
     // =============================
@@ -274,7 +274,7 @@ export const placeBid = async (req, res) => {
         payment.mode === "mpesa"
           ? "STK push sent"
           : "Bid placed",
-      checkoutRequestID: payment.checkoutRequestId,
+      checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
       bid,
     });
 

@@ -15,12 +15,13 @@ export const isDemoMode = () => __DEMO_MODE__;
 
 // Try backend on startup — if unreachable, switch to demo
 (function initDemoCheck() {
-  const controller = new AbortController();
-  setTimeout(() => controller.abort(), 3000);
-  axios.get(`${BASE}/cars?limit=1`, { signal: controller.signal })
-    .catch(() => {
-      __DEMO_MODE__ = true;
-      if (import.meta.env.DEV) console.info('[Demo] Backend unreachable, using demo data');
+  axios.get(`${BASE}/cars?limit=1`, { timeout: 35000 })
+    .then(() => { if (import.meta.env.DEV) console.info('[Backend] Reachable'); })
+    .catch((err) => {
+      if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+        __DEMO_MODE__ = true;
+        if (import.meta.env.DEV) console.info('[Demo] Backend unreachable, using demo data');
+      }
     });
 })();
 
