@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, formatKES } from '../api/api';
+import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
@@ -127,6 +127,12 @@ export default function CarDetailPage() {
       })
       .catch(() => { const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
       .finally(() => setLoading(false));
+    if (isAuth) {
+      favoritesAPI.list().then(d => {
+        const favs = d.favorites || d.cars || d.data || [];
+        setIsFav(favs.some(f => f._id === id || f?.car?._id === id));
+      }).catch(() => {});
+    }
   }, [id]);
 
   // Load NTSA verification status
@@ -180,8 +186,12 @@ export default function CarDetailPage() {
 
   const handleFav = async () => {
     if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
-    try { await carsAPI.toggleFav(id); setIsFav(p => !p); toast(isFav ? 'Removed from saved' : 'Saved!', 'success'); }
-    catch { toast('Failed', 'error'); }
+    try {
+      const res = await favoritesAPI.toggle(id);
+      const nowFav = res.favorited === true || res.favorited === 'true';
+      setIsFav(nowFav);
+      toast(nowFav ? 'Saved to wishlist' : 'Removed from wishlist', 'success');
+    } catch { toast('Failed', 'error'); }
   };
 
   const handleChat = async () => {

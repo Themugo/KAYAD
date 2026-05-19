@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
+import { useToast } from '../context/ToastContext';
+import { favoritesAPI } from '../api/api';
 import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3, Fuel, Calendar, Settings, Flame } from 'lucide-react';
 import LazyImage from './LazyImage';
 
@@ -33,11 +36,27 @@ function daysAgo(date) {
 
 export default function CartyGrid({ car, listView, isMobile }) {
   const [hovered, setHovered] = useState(false);
+  const [isFav, setIsFav] = useState(false);
 
+  const navigate = useNavigate();
+  const { isAuth } = useAuth();
+  const { toast } = useToast();
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
   const isCompared = ctxIsComparing(car._id);
 
   if (!car) return null;
+
+  const handleFav = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isAuth) { navigate(`/register?redirect=/showroom`); return; }
+    try {
+      const res = await favoritesAPI.toggle(car._id);
+      const now = res.favorited === true || res.favorited === 'true';
+      setIsFav(now);
+      toast(now ? 'Saved to wishlist' : 'Removed from wishlist', 'success');
+    } catch { toast('Failed to save', 'error'); }
+  };
 
   const isLive    = car.auctionStatus === 'live';
   const isElite   = isLive || car.allowBid || car.isAuction;
@@ -193,6 +212,17 @@ export default function CartyGrid({ car, listView, isMobile }) {
                 )}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button onClick={handleFav} title={isFav ? 'Remove from wishlist' : 'Save to wishlist'} style={{
+                  padding: '6px 10px', borderRadius: 6,
+                  background: isFav ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isFav ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                  color: isFav ? '#ef4444' : 'rgba(255,255,255,0.3)',
+                  cursor: 'pointer', fontSize: 10, fontWeight: 600, transition: 'all 0.2s',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  opacity: hovered ? 1 : 0.6,
+                }}>
+                  <Heart size={11} fill={isFav ? 'currentColor' : 'none'} />
+                </button>
                 <button
                   onClick={e => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
                   title={isCompared ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
@@ -378,11 +408,22 @@ export default function CartyGrid({ car, listView, isMobile }) {
         </div>
       </div>
     </Link>
+    <button onClick={handleFav} title={isFav ? 'Remove from wishlist' : 'Save to wishlist'} style={{
+      position: 'absolute', top: 8, right: 8, zIndex: 10,
+      background: isFav ? 'rgba(239,68,68,0.85)' : 'rgba(0,0,0,0.55)',
+      border: `1px solid ${isFav ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.12)'}`,
+      borderRadius: 6, padding: '3px 7px',
+      color: isFav ? '#fff' : 'rgba(255,255,255,0.65)',
+      cursor: 'pointer', display: 'flex',
+      backdropFilter: 'blur(6px)', transition: 'all 0.25s ease',
+    }}>
+      <Heart size={10} fill={isFav ? 'currentColor' : 'none'} />
+    </button>
     <button
       onClick={e => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
       title={isComparedGrid ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
       style={{
-        position: 'absolute', top: 8, right: 8,
+        position: 'absolute', top: 36, right: 8,
         background: isComparedGrid ? 'var(--gold)' : 'rgba(0,0,0,0.55)',
         border: `1px solid ${isComparedGrid ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`,
         borderRadius: 6, padding: '3px 7px', fontSize: 10,
