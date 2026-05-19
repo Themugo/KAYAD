@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { isDemoMode } from '../api/api';
+import { checkBackendAvailability, isDemoMode } from '../api/api';
 
 export default function DemoModeBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const check = () => setVisible(isDemoMode());
+    const check = async () => {
+      if (isDemoMode()) await checkBackendAvailability();
+      setVisible(isDemoMode());
+    };
     check();
     const interval = setInterval(check, 10000);
     return () => clearInterval(interval);

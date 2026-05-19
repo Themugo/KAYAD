@@ -190,6 +190,10 @@ export async function reseed() {
   const dealer = await User.findOne({ email: "dealer@kayad.space" });
   if (dealer) {
     await Car.deleteMany({ dealer: dealer._id });
+    dealer.listingCount = 0;
+    dealer.trialListingsUsed = 0;
+    dealer.firstVehicleUsed = false;
+    await dealer.save();
     const cars = seedCars.map((c) => ({ ...c, dealer: dealer._id, status: "active", coverImage: 0, isDemo: true }));
     const inserted = await Car.insertMany(cars);
     created.cars = inserted.length;

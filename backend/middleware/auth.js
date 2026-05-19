@@ -89,6 +89,12 @@ export const protect = async (req, res, next) => {
         message: "Account suspended",
       });
     }
+    if (user.deactivatedAt && !isOwnerEmail(user.email)) {
+      return res.status(403).json({
+        success: false,
+        message: "Account deactivated",
+      });
+    }
 
     // =============================
     // ✅ ATTACH USER (WITH OWNER BYPASS)

@@ -30,6 +30,7 @@ export default function AdminUsers() {
       if (roleFilter !== 'all') params.role = roleFilter;
       if (statusFilter === 'banned') params.banned = true;
       if (statusFilter === 'pending') params.pendingApproval = true;
+      if (statusFilter === 'demo') params.isDemo = true;
       const data = await adminAPI.users(params);
       setUsers(data.users || data.data || []);
       setTotal(data.pagination?.total || data.total || 0);
@@ -64,8 +65,10 @@ export default function AdminUsers() {
   };
 
   const handleDelete = async (u) => {
-    if (!window.confirm(`Permanently delete ${u.name} (${u.email})? This removes all their cars, bids, payments.`)) return;
-    if (!window.confirm(`⚠️ ARE YOU SURE? This action CANNOT be undone. Type OK to confirm.`) === 'OK') return;
+    const scope = u.isDemo ? 'demo account' : 'real user account';
+    if (!window.confirm(`Permanently delete ${scope} ${u.name} (${u.email})? This removes associated cars, bids, payments, and escrows.`)) return;
+    const confirmation = window.prompt('Type DELETE to confirm permanent deletion.');
+    if (confirmation !== 'DELETE') return;
     setActionId(u._id + '-del');
     try {
       await adminAPI.deleteUser(u._id);
@@ -82,8 +85,9 @@ export default function AdminUsers() {
     setActionId(u._id + '-deact');
     try {
       const result = await adminAPI.deactivateUser(u._id);
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, deactivatedAt: result.deactivatedAt || true } : x));
-      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, deactivatedAt: result.deactivatedAt || true } : prev);
+      const deactivatedAt = result.deactivatedAt || null;
+      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, deactivatedAt } : x));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, deactivatedAt } : prev);
       toast(u.deactivatedAt ? '✅ User reactivated' : '⛔ User deactivated', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
@@ -123,11 +127,11 @@ export default function AdminUsers() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            {['all', 'banned', 'pending'].map(s => (
+            {['all', 'banned', 'pending', 'demo'].map(s => (
               <button key={s} className={`btn btn-sm ${statusFilter === s ? 'btn-outline' : 'btn-ghost'}`}
                 style={{ color: statusFilter === s ? 'var(--gold)' : undefined }}
                 onClick={() => { setStatusFilter(s); setPage(1); }}>
-                {s === 'banned' ? '🚫' : s === 'pending' ? '⏳' : '✓'} {s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'banned' ? '🚫' : s === 'pending' ? '⏳' : s === 'demo' ? '🧪' : '✓'} {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
@@ -171,6 +175,7 @@ export default function AdminUsers() {
                       <td>
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {u.isBanned && <span className="badge badge-red">🚫 Banned</span>}
+                          {u.isDemo && <span className="badge badge-blue">🧪 Demo</span>}
                           {u.deactivatedAt && <span className="badge badge-orange">⛔ Deactivated</span>}
                           {u.role === 'dealer' && !u.approved && <span className="badge badge-orange">⏳ Pending</span>}
                           {u.role === 'dealer' &&  u.approved && <span className="badge badge-green">✓ Approved</span>}
@@ -202,7 +207,7 @@ export default function AdminUsers() {
                               </button>
                             )}
                           </div>
-                          {isSuper && u.role !== 'superadmin' && u.role !== 'admin' && (
+                          {isSuper && u.isDemo && u.role !== 'superadmin' && (
                             <button className="btn btn-sm btn-danger" style={{ fontSize: 10, opacity: 0.7 }}
                               disabled={actionId === u._id + '-del'}
                               onClick={() => handleDelete(u)}>
@@ -283,7 +288,7 @@ export default function AdminUsers() {
                   {actionId === selected._id + '-deact' ? '...' : selected.deactivatedAt ? '✓ Reactivate' : '⛔ Deactivate Account'}
                 </button>
               )}
-              {isSuper && selected.role !== 'superadmin' && selected.role !== 'admin' && (
+              {isSuper && selected.isDemo && selected.role !== 'superadmin' && (
                 <button className="btn btn-danger" style={{ flex: 1 }}
                   onClick={() => handleDelete(selected)} disabled={actionId === selected._id + '-del'}>
                   {actionId === selected._id + '-del' ? '...' : '🗑 Permanently Delete'}

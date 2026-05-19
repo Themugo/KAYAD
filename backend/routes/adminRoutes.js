@@ -133,6 +133,8 @@ router.get(
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
     if (req.query.pendingApproval === "true") filter.approved = false;
+    if (req.query.isDemo === "true") filter.isDemo = true;
+    if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 
     // 🔎 SEARCH (name/email)
     if (req.query.search) {
@@ -360,6 +362,22 @@ router.delete(
     }
 
     await car.deleteOne();
+    if (car.dealer && !car.isDemo) {
+      await User.findByIdAndUpdate(car.dealer, {
+        $inc: { listingCount: -1, trialListingsUsed: -1 },
+      });
+      await User.updateOne(
+        { _id: car.dealer },
+        [
+          {
+            $set: {
+              listingCount: { $max: ["$listingCount", 0] },
+              trialListingsUsed: { $max: ["$trialListingsUsed", 0] },
+            },
+          },
+        ]
+      ).catch(() => {});
+    }
 
     res.json({
       success: true,
@@ -784,6 +802,7 @@ router.put(
 
     user.deactivatedAt = user.deactivatedAt ? null : new Date();
     await user.save();
+    const deactivatedAt = user.deactivatedAt;
 
     await AuditLog.create({
       action: user.deactivatedAt ? `User deactivated: ${user.email}` : `User reactivated: ${user.email}`,
@@ -791,7 +810,16 @@ router.put(
       adminId: req.user.id,
     });
 
-    res.json({ success: true, message: user.deactivatedAt ? "User deactivated" : "User reactivated" });
+    res.json({
+      success: true,
+      message: deactivatedAt ? "User deactivated" : "User reactivated",
+      deactivatedAt,
+      user: {
+        _id: user._id,
+        email: user.email,
+        deactivatedAt,
+      },
+    });
   })
 );
 
@@ -835,16 +863,25 @@ router.delete(
   asyncHandler(async (req, res) => {
     const demoUserIds = await User.find({ isDemo: true }).distinct("_id");
 
-    const [carsDeleted, bidsDeleted, paymentsDeleted, escrowsDeleted, usersDeleted] = await Promise.all([
+    const [carsDeleted, bidsDeleted, paymentsDeleted, escrowsDeleted, usersReset] = await Promise.all([
       Car.deleteMany({ dealer: { $in: demoUserIds } }),
       Bid.deleteMany({ user: { $in: demoUserIds } }),
       Payment.deleteMany({ user: { $in: demoUserIds } }),
       Escrow.deleteMany({ $or: [{ buyer: { $in: demoUserIds } }, { seller: { $in: demoUserIds } }] }),
-      User.deleteMany({ isDemo: true }),
+      User.updateMany(
+        { isDemo: true },
+        {
+          $set: {
+            listingCount: 0,
+            trialListingsUsed: 0,
+            firstVehicleUsed: false,
+          },
+        }
+      ),
     ]);
 
     await AuditLog.create({
-      action: `Demo cleanup: ${usersDeleted.deletedCount} users, ${carsDeleted.deletedCount} cars, ${bidsDeleted.deletedCount} bids, ${paymentsDeleted.deletedCount} payments, ${escrowsDeleted.deletedCount} escrows deleted`,
+      action: `Demo cleanup: ${usersReset.modifiedCount} demo users reset, ${carsDeleted.deletedCount} cars, ${bidsDeleted.deletedCount} bids, ${paymentsDeleted.deletedCount} payments, ${escrowsDeleted.deletedCount} escrows deleted`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
@@ -853,7 +890,8 @@ router.delete(
       success: true,
       message: "Demo data cleaned up",
       deleted: {
-        users: usersDeleted.deletedCount,
+        users: 0,
+        usersReset: usersReset.modifiedCount,
         cars: carsDeleted.deletedCount,
         bids: bidsDeleted.deletedCount,
         payments: paymentsDeleted.deletedCount,

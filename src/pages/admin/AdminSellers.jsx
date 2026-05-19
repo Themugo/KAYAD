@@ -31,6 +31,8 @@ export default function AdminSellers() {
         listingCount: u.listingCount || 0,
         rating: u.dealerRating || 0,
         createdAt: u.createdAt,
+        dealerPackage: u.dealerPackage || 'none',
+        isDemo: !!u.isDemo,
       }));
       const filtered = filter === 'pending' ? mapped.filter(s => s.status === 'pending')
         : filter === 'suspended' ? mapped.filter(s => s.status === 'suspended')

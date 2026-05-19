@@ -215,6 +215,9 @@ export const login = async (req, res) => {
     if (user.isBanned) {
       return R.error(res, "Account suspended", 403);
     }
+    if (user.deactivatedAt) {
+      return R.error(res, "Account deactivated", 403);
+    }
 
     user.lastLogin = new Date();
     await user.save();

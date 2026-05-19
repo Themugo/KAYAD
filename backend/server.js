@@ -16,6 +16,8 @@ import morgan       from "morgan";
 import cookieParser from "cookie-parser";
 import { Server }   from "socket.io";
 import jwt          from "jsonwebtoken";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
 
 // ─── Rate Limiters (from middleware) ───────────────────────────
 import { globalLimiter, authLimiter, socketRateLimit } from "./middleware/rateLimiter.js";
@@ -79,7 +81,9 @@ import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv }              from "./utils/env.js";
 
-dotenv.config();
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, "../.env") });
+dotenv.config({ path: resolve(__dirname, ".env") });
 
 // ─── CONFIG ───────────────────────────────────────────────────
 const app      = express();

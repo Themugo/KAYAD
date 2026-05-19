@@ -18,7 +18,7 @@ const carSchema = new mongoose.Schema(
       city: { type: String },
       address: String,
       coordinates: {
-        type: { type: String, default: "Point" },
+        type: { type: String },
         coordinates: [Number], // [lng, lat]
       },
     },
@@ -59,6 +59,8 @@ const carSchema = new mongoose.Schema(
       default: false,
       index: true,
     },
+    demoEditedAt: Date,
+    demoEditedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     dealerPhone: String,
     isVerifiedDealer: { type: Boolean, default: false },
 

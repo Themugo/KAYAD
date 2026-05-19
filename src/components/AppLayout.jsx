@@ -40,7 +40,7 @@ export default function AppLayout({ children }) {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <DemoModeBanner />
       <Navbar branding={config?.branding} />
-      <main style={{ paddingTop: 100, flex: 1 }}>
+      <main className="app-main">
         {children}
       </main>
       <Footer />

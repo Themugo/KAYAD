@@ -1,15 +1,23 @@
 // src/context/AuthContext.jsx
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setSentryUser, clearSentryUser } from '../utils/sentry';
+import { STAFF_ROLES, isSellerRole } from '../utils/authRoutes';
 
 const AuthCtx = createContext(null);
-export const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
 
 // Decode JWT payload (no validate — just read the claims)
 const decodeToken = (t) => {
   try { return JSON.parse(atob(t.split('.')[1])); }
   catch { return null; }
+};
+
+// Normalize user object to always have both _id and id fields
+const normalizeUser = (u) => {
+  if (!u) return null;
+  const id = u._id || u.id;
+  return { ...u, _id: id, id: id };
 };
 
 export function AuthProvider({ children }) {
@@ -23,6 +31,14 @@ export function AuthProvider({ children }) {
     if (u) setSentryUser(u);   // track user in Sentry
     else   clearSentryUser();
   };
+
+  const clearAuthState = useCallback(() => {
+    localStorage.removeItem('kayad_token');
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    setToken(null);
+    setUser(null);
+    setLoading(false);
+  }, []);
 
   // Proactive token refresh — decode exp and refresh before it expires
   const scheduleRefresh = useCallback((t) => {
@@ -46,16 +62,13 @@ export function AuthProvider({ children }) {
   const initialLoadDone = useRef(false);
   useEffect(() => {
     if (initialLoadDone.current) return;
-    const handleAuthExpired = () => {
-      setToken(null);
-      setUser(null);
-    };
+    const handleAuthExpired = () => clearAuthState();
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
 
     if (token) {
       authAPI.me()
         .then(data => setUser(normalizeUser(data.user)))
-        .catch(() => { localStorage.removeItem('kayad_token'); setToken(null); })
+        .catch(() => clearAuthState())
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -66,19 +79,12 @@ export function AuthProvider({ children }) {
       window.removeEventListener('kayad:auth-expired', handleAuthExpired);
       if (refreshTimer.current) clearTimeout(refreshTimer.current);
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clearAuthState]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Watch token changes to schedule proactive refresh
   useEffect(() => {
     if (token) scheduleRefresh(token);
   }, [token, scheduleRefresh]);
-
-  // Normalize user object to always have both _id and id fields
-  const normalizeUser = (u) => {
-    if (!u) return null;
-    const id = u._id || u.id;
-    return { ...u, _id: id, id: id };
-  };
 
   const login = useCallback(async ({ email, password }) => {
     const data = await authAPI.login({ email, password });
@@ -98,15 +104,13 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try { await authAPI.logout(); } catch { /* ignore */ }
-    localStorage.removeItem('kayad_token');
-    setToken(null);
-    setUser(null);
-  }, []);
+    clearAuthState();
+  }, [clearAuthState]);
 
   const isAdmin       = STAFF_ROLES.includes(user?.role);
   const isDealer      = user?.role === 'dealer';
   const isBroker      = user?.role === 'broker';
-  const isSeller      = user?.role === 'dealer' || user?.role === 'broker';
+  const isSeller      = isSellerRole(user?.role);
   const isSuperAdmin  = user?.role === 'superadmin';
   const isMarketing   = user?.role === 'marketing';
   const isTechSupport = user?.role === 'technical_support';
@@ -125,8 +129,6 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => useContext(AuthCtx);
 
-import { Navigate, useLocation } from 'react-router-dom';
-
 export function RequireAuth({ children }) {
   const { isAuth, loading } = useAuth();
   const loc = useLocation();
@@ -136,9 +138,9 @@ export function RequireAuth({ children }) {
 }
 
 export function RequireDealer({ children }) {
-  const { isDealer, loading } = useAuth();
+  const { isDealer, isAdmin, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isDealer) return <Navigate to="/" replace />;
+  if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
   return children;
 }
 

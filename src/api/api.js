@@ -13,10 +13,24 @@ const BASE = import.meta.env.VITE_API_BASE || '/api';
 let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__;
 
+export const checkBackendAvailability = async () => {
+  try {
+    await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000 });
+    __DEMO_MODE__ = false;
+    return true;
+  } catch (err) {
+    if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error') || !err.response) {
+      __DEMO_MODE__ = true;
+      return false;
+    }
+    return true;
+  }
+};
+
 // Try backend on startup — if unreachable, switch to demo
 (function initDemoCheck() {
-  axios.get(`${BASE}/cars?limit=1`, { timeout: 35000 })
-    .then(() => { if (import.meta.env.DEV) console.info('[Backend] Reachable'); })
+  checkBackendAvailability()
+    .then((online) => { if (online && import.meta.env.DEV) console.info('[Backend] Reachable'); })
     .catch((err) => {
       if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
         __DEMO_MODE__ = true;

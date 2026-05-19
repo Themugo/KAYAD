@@ -5,6 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { adminAPI } from '../api/api';
 import { Eye, EyeOff, ChevronRight, Check, Clock, ShieldCheck, Mail } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
+import { getPostAuthPath, isSellerRole, safeRedirectPath } from '../utils/authRoutes';
 
 // ── Constants ─────────────────────────────────────────────────
 const ROLES = [
@@ -140,22 +141,20 @@ function WaitingRoom({ user, onLogout }) {
 // ── Main RegisterPage ──────────────────────────────────────────
 export default function RegisterPage() {
   usePageMeta('Join Free', 'Create a Kayad account to buy, sell, and bid on premium cars in Kenya. Join Kenya\'s premier car marketplace.');
-  const { register, logout, user, isAuth } = useAuth();
-  const { toast }  = useToast();
+  const { logout, user, isAuth } = useAuth();
   const navigate   = useNavigate();
   const [params]   = useSearchParams();
-  const redirectTo  = params.get('redirect') || '/';
+  const redirectTo  = safeRedirectPath(params.get('redirect'), '/dashboard');
   const roleParam   = params.get('role');
   const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker';
 
   // If already logged in and unapproved dealer → show waiting room
-  if (isAuth && user?.role === 'dealer' && !user?.approved) {
+  if (isAuth && isSellerRole(user?.role) && !user?.approved) {
     return <WaitingRoom user={user} onLogout={() => { logout(); navigate('/'); }} />;
   }
   // Already logged in and approved → redirect away
-  if (isAuth && user?.approved) {
-    const dest = (user?.role === 'dealer' || user?.role === 'broker' || user?.role === 'individual_seller') ? '/dealer' : '/dashboard';
-    return <Navigate to={dest} replace />;
+  if (isAuth) {
+    return <Navigate to={getPostAuthPath(user, redirectTo)} replace />;
   }
 
   return <RegisterFlow roleParam={roleParam} isDealerUrl={isDealerUrl} redirectTo={redirectTo} />;
@@ -210,7 +209,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
         navigate('/dealer', { replace: true });
       } else {
         // Buyer → redirect straight in
-        navigate(redirectTo.startsWith('/') ? redirectTo : '/dashboard', { replace: true });
+        navigate(redirectTo, { replace: true });
       }
     } catch (err) {
       toast(err.response?.data?.message || 'Registration failed', 'error');

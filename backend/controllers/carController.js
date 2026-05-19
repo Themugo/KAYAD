@@ -4,8 +4,8 @@ import { cacheGet, cacheSet } from "../utils/cache.js";
 import { uploadMultiple } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 
-// Demo dealer can manage all demo cars — identified by seeded email
-const isDemoDealer = (user) => user?.email?.toLowerCase() === "dealer@kayad.space";
+const STAFF_ROLES = ["admin", "superadmin", "moderator", "technical_support"];
+const DEALER_ROLES = ["dealer", "broker", "individual_seller"];
 
 // =============================
 // 🧠 SAFE NUMBER PARSER
@@ -92,7 +92,7 @@ export const getCars = async (req, res) => {
     const [cars, total] = await Promise.all([
       Car.find(query)
         .select(
-          "title price images brand year model location fuel transmission mileage bodyType color description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted"
+          "title price images brand year model location fuel transmission mileage bodyType color description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy"
         )
         .sort(sortOption)
         .skip(skip)
@@ -125,11 +125,12 @@ export const getCars = async (req, res) => {
 export const createCar = async (req, res) => {
   try {
     const seller = await User.findById(req.user.id).select(
-      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved"
+      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved isDemo"
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
     if (!seller.approved) return res.status(403).json({ success: false, message: "Account not yet approved" });
+    const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
     const config = await (await import("../models/PlatformConfig.js")).default.findOne().lean();
@@ -138,8 +139,11 @@ export const createCar = async (req, res) => {
 
     const isDealer = seller.role === "dealer";
     const isSeller = seller.role === "broker" || seller.role === "individual_seller";
+    const currentListingCount = isDemoSeller
+      ? 0
+      : await Car.countDocuments({ dealer: req.user.id });
 
-    if (isDealer && pkg) {
+    if (!isDemoSeller && isDealer && pkg) {
       const now = new Date();
 
       // Trial window: pkg.trialDays > 0 and isFree
@@ -156,7 +160,7 @@ export const createCar = async (req, res) => {
         }
 
         const trialMax = pkg.trialListingMax || pkg.listingMax || 3;
-        if ((seller.trialListingsUsed || 0) >= trialMax) {
+        if (currentListingCount >= trialMax) {
           return res.status(402).json({
             success: false,
             message: `Trial limit reached (${trialMax} listings). Upgrade to a paid plan to list more.`,
@@ -179,7 +183,7 @@ export const createCar = async (req, res) => {
             code: "PACKAGE_EXPIRED",
           });
         }
-        if (pkg.listingMax > 0 && (seller.listingCount || 0) >= pkg.listingMax) {
+        if (pkg.listingMax > 0 && currentListingCount >= pkg.listingMax) {
           return res.status(402).json({
             success: false,
             message: `You've reached your plan limit of ${pkg.listingMax} listings. Upgrade to list more.`,
@@ -190,16 +194,16 @@ export const createCar = async (req, res) => {
       }
     }
 
-    if (isSeller) {
+    if (!isDemoSeller && isSeller) {
       const sellerPkg = pkgs.find(p => p.id === seller.dealerPackage) || null;
 
       // First-vehicle free for sellers
-      if (!seller.firstVehicleUsed) {
+      if (!seller.firstVehicleUsed || currentListingCount === 0) {
         // Mark first vehicle as used
         await User.findByIdAndUpdate(req.user.id, { firstVehicleUsed: true, $inc: { listingCount: 1 } });
       } else if (sellerPkg && !sellerPkg.isFree) {
         // Paid seller plan — enforce limit
-        if (sellerPkg.listingMax > 0 && (seller.listingCount || 0) >= sellerPkg.listingMax) {
+        if (sellerPkg.listingMax > 0 && currentListingCount >= sellerPkg.listingMax) {
           return res.status(402).json({
             success: false,
             message: `You've reached your plan limit of ${sellerPkg.listingMax} listings.`,
@@ -219,7 +223,27 @@ export const createCar = async (req, res) => {
       }
     }
 
-    const body = { ...req.body, dealer: req.user.id, views: 0, bidsCount: 0, trustScore: 0, status: "pending" };
+    const body = {
+      ...req.body,
+      dealer: req.user.id,
+      views: 0,
+      bidsCount: 0,
+      trustScore: 0,
+      status: isDemoSeller ? "active" : "pending",
+      isDemo: isDemoSeller,
+    };
+    if (isDemoSeller) {
+      body.demoEditedAt = new Date();
+      body.demoEditedBy = req.user.id;
+    }
+    if (!body.location && (body.city || body.address)) {
+      body.location = {
+        city: body.city || seller.location || "",
+        address: body.address || "",
+      };
+    }
+    delete body.city;
+    delete body.address;
 
     // ── PROCESS UPLOADED IMAGES ──────────────────────────────
     if (req.files && req.files.length > 0) {
@@ -253,9 +277,10 @@ export const updateCar = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = ["admin","superadmin","moderator","technical_support"].includes(req.user.role);
+    const isStaff = STAFF_ROLES.includes(req.user.role);
+    const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && isDemoDealer(req.user);
+    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
     if (!isOwner && !isStaff && !isDemoMgmt) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
@@ -271,6 +296,11 @@ export const updateCar = async (req, res) => {
     }
 
     Object.assign(car, req.body);
+    if (car.isDemo && isDealer) {
+      car.isDemo = true;
+      car.demoEditedAt = new Date();
+      car.demoEditedBy = req.user.id;
+    }
 
     // ── SMART COVER IMAGE AUTO-SELECTION ────────────────────
     // Helper: find first index with a real URL
@@ -317,8 +347,9 @@ export const deleteCar = async (req, res) => {
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     const isStaff = ["admin","superadmin","moderator"].includes(req.user.role);
+    const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && isDemoDealer(req.user);
+    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
     if (!isOwner && !isStaff && !isDemoMgmt) {
       return res.status(403).json({ success: false, message: "Not authorized to delete this listing" });
     }
@@ -433,8 +464,8 @@ export const placeBid = async (req, res) => {
 // =============================
 export const getDemoCars = async (req, res) => {
   try {
-    if (!isDemoDealer(req.user)) {
-      return res.status(403).json({ success: false, message: "Only the demo dealer can view all demo cars" });
+    if (!DEALER_ROLES.includes(req.user.role) && !STAFF_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Only dealer or admin accounts can view demo cars" });
     }
 
     const cars = await Car.find({ isDemo: true })

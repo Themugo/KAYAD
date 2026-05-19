@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import './styles/glow.css';
-import { initSentry, setSentryUser } from './utils/sentry';
+import { initSentry } from './utils/sentry';
 
 // Initialise Sentry before anything else renders
 // Only activates if VITE_SENTRY_DSN is set in .env

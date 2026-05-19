@@ -271,6 +271,14 @@ function StatusBadge({ status }) {
   );
 }
 
+function DemoBadge({ edited }) {
+  return (
+    <span style={{ padding: '3px 8px', borderRadius: 9999, fontSize: 9, fontWeight: 900, background: 'rgba(59,130,246,0.14)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.25)', letterSpacing: '0.06em' }}>
+      {edited ? 'DEMO EDITED' : 'DEMO'}
+    </span>
+  );
+}
+
 export default function DealerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -283,11 +291,19 @@ export default function DealerDashboard() {
   const [tab, setTab]           = useState('overview');
   const [config, setConfig]     = useState({});
 
-  const isDemoDealer = user?.email === 'dealer@kayad.space';
+  const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
 
   useEffect(() => {
-    const carsPromise = isDemoDealer
-      ? carsAPI.demoAll().then(d => ({ cars: d.data || d.cars || [] })).catch(() => ({ cars: [] }))
+    const carsPromise = canManageDemoCars
+      ? Promise.all([
+          dealerAPI.cars().catch(() => ({ cars: [] })),
+          carsAPI.demoAll().catch(() => ({ data: [] })),
+        ]).then(([ownedRes, demoRes]) => {
+          const owned = ownedRes.cars || ownedRes.data || [];
+          const demo = demoRes.data || demoRes.cars || [];
+          const ownedIds = new Set(owned.map(car => car._id));
+          return { cars: [...owned, ...demo.filter(car => !ownedIds.has(car._id))] };
+        })
       : dealerAPI.cars().catch(() => ({ cars: [] }));
     Promise.all([
       dealerAPI.summary().catch(() => ({})),
@@ -298,7 +314,7 @@ export default function DealerDashboard() {
       setCars(c.cars || c.data || []);
       setConfig(cfg.config || cfg);
     }).finally(() => setLoading(false));
-  }, [isDemoDealer]);
+  }, [canManageDemoCars]);
 
   useEffect(() => {
     if (tab === 'bids') dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {});
@@ -422,7 +438,10 @@ export default function DealerDashboard() {
                         {img ? <img src={img} alt="" style={{ width: 54, height: 40, objectFit: 'cover', borderRadius: 7, flexShrink: 0 }} />
                           : <div style={{ width: 54, height: 40, borderRadius: 7, background: 'rgba(255,255,255,0.04)', flexShrink: 0 }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</span>
+                            {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
+                          </div>
                           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{car.views || 0} views · {car.year}</div>
                         </div>
                         <div style={{ textAlign: 'right', flexShrink: 0, marginRight: 12 }}>
@@ -468,7 +487,10 @@ export default function DealerDashboard() {
                         {img ? <img src={img} alt="" style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
                           : <div style={{ width: 80, height: 56, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{car.title}</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{car.title}</span>
+                            {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
+                          </div>
                           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{car.year} · {car.mileage?.toLocaleString() || '—'} km</span>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>👁 {car.views || 0} views</span>

@@ -4,14 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationCenter from './NotificationCenter';
-import { initials, timeAgo } from '../utils/helpers';
+import { initials } from '../utils/helpers';
+import { isSellerRole } from '../utils/authRoutes';
 
 export default function Navbar({ branding }) {
-  const { user, isAuth, isAdmin, isDealer, isSuperAdmin, logout } = useAuth();
+  const { user, isAuth, isAdmin, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const socketCtx  = useSocket();
   const connected  = socketCtx?.connected;
-  const on         = socketCtx?.on;
   const loc      = useLocation();
   const navigate = useNavigate();
 
@@ -141,7 +141,7 @@ export default function Navbar({ branding }) {
               <span style={navLinkAfter(false)} className="nav-underline" />
             </Link>
 
-            {(isDealer || user?.role === 'broker' || user?.role === 'individual_seller') && (
+            {isSellerRole(user?.role) && (
               <>
               <Link to="/dealer" style={navLinkStyle(isActive('/dealer'))}
                 onMouseEnter={e => { if (!isActive('/dealer')) e.currentTarget.style.color = '#fff'; }}
@@ -225,7 +225,7 @@ export default function Navbar({ branding }) {
                         { to: '/profile?tab=Security', label: '🔑  Change Password' },
                         { to: '/dashboard', label: '📊  Dashboard' },
                         { to: '/favorites', label: '❤️  Saved Cars' },
-                        ...(isDealer ? [{ to: '/dealer', label: '🏪  Dealer Hub' }] : []),
+                        ...(isSellerRole(user?.role) ? [{ to: '/dealer', label: '🏪  Dealer Hub' }] : []),
                         ...(isAdmin  ? [{ to: '/admin',  label: '⚙️  Admin Panel' }] : []),
                         ...(user?.role === 'superadmin' ? [{ to: '/admin/staff', label: '👑  Staff Hierarchy' }] : []),
                       ].map(({ to, label }) => (
@@ -301,7 +301,7 @@ export default function Navbar({ branding }) {
                   { to: '/login',    label: 'Sign In' },
                   { to: '/register', label: 'Join Free' },
                 ]),
-                ...(isDealer ? [{ to: '/dealer', label: 'Dealer Hub' }] : []),
+                ...(isSellerRole(user?.role) ? [{ to: '/dealer', label: 'Dealer Hub' }] : []),
                 ...(isAdmin  ? [{ to: '/admin',  label: 'Admin Panel' }] : []),
               ].map(({ to, label }, i) => (
                 <Link key={to} to={to} className={`mobile-nav-link${isActive(to.split('?')[0]) ? ' active' : ''}`} onClick={() => setMobileOpen(false)}

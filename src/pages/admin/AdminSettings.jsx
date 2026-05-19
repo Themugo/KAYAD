@@ -94,6 +94,15 @@ export default function AdminSettings() {
           fontDisplay: c.fontDisplay || DEFAULTS.fontDisplay,
           fontBody: c.fontBody || DEFAULTS.fontBody,
           fontSizePct: c.fontSizePct ?? DEFAULTS.fontSizePct,
+          baseFontSize: c.baseFontSize ?? DEFAULTS.baseFontSize,
+          lineHeight: c.lineHeight ?? DEFAULTS.lineHeight,
+          listingFee: c.listingFee ?? 1000,
+          auctionRegistrationFee: c.auctionRegistrationFee ?? 2000,
+          ghostCheckFee: c.ghostCheckFee ?? 2500,
+          commissionPercentage: c.commissionPercentage ?? 2,
+          platformVat: c.platformVat ?? 16,
+          buyerPremiumPct: c.buyerPremiumPct ?? 0,
+          activePromos: c.activePromos || [],
         });
         if (c.daraja) setDaraja(c.daraja);
       if (c.packages) setPackages(c.packages);
@@ -146,6 +155,17 @@ export default function AdminSettings() {
       if (!section || section === 'payments') {
         body.daraja = daraja;
         body.bank = bank;
+      }
+      if (!section || section === 'fees') {
+        Object.assign(body, {
+          listingFee: Number(config.listingFee || 0),
+          auctionRegistrationFee: Number(config.auctionRegistrationFee || 0),
+          ghostCheckFee: Number(config.ghostCheckFee || 0),
+          commissionPercentage: Number(config.commissionPercentage || 0),
+          platformVat: Number(config.platformVat || 0),
+          buyerPremiumPct: Number(config.buyerPremiumPct || 0),
+          activePromos: config.activePromos || [],
+        });
       }
       if (!section || section === 'reconciliation') {
         body.reconciliation = reconcile;

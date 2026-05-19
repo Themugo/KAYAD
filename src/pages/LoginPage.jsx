@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
+import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
 import axios from 'axios';
 
 export function LoginPage() {
@@ -12,7 +13,7 @@ export function LoginPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const from = safeRedirectPath(location.state?.from?.pathname, '/');
 
   // Wake Render backend on mount (cold start takes ~30s)
   useEffect(() => {
@@ -22,15 +23,7 @@ export function LoginPage() {
   // Safety net: redirect once auth state flushes
   useEffect(() => {
     if (!isAuth || !user) return;
-    if (user?.mustChangePassword) { navigate('/force-password-change', { replace: true }); return; }
-    const role = user.role;
-    const dest = role === 'dealer' || role === 'broker' ? '/dealer'
-      : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
-      || role === 'hr' || role === 'accounts' || role === 'escrow_officer' || role === 'ad_manager'
-      || role === 'moderator' ? '/admin'
-      : role === 'user' ? '/dashboard'
-      : from;
-    navigate(dest, { replace: true });
+    navigate(getPostAuthPath(user, from), { replace: true });
   }, [isAuth, user, navigate, from]);
 
   const [form, setForm]       = useState({ email: '', password: '' });
@@ -42,16 +35,8 @@ export function LoginPage() {
     setLoading(true);
     try {
       const data = await login(form);
-      toast('Welcome back! 🚗', 'success');
-      if (data.user?.mustChangePassword) { navigate('/force-password-change', { replace: true }); return; }
-      const role = data.user?.role;
-      const dest = role === 'dealer' || role === 'broker' ? '/dealer'
-        : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
-        || role === 'hr' || role === 'accounts' || role === 'escrow_officer' || role === 'ad_manager'
-        || role === 'moderator' ? '/admin'
-        : role === 'user' ? '/dashboard'
-        : from;
-      setTimeout(() => navigate(dest, { replace: true }), 50);
+      toast('Welcome back!', 'success');
+      navigate(getPostAuthPath(data.user, from), { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid credentials', 'error');
     } finally {

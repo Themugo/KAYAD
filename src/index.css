@@ -106,7 +106,13 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); }
 
 .page {
   min-height: 100vh;
-  padding-top: 100px;
+  padding-top: 0;
+}
+
+.app-main {
+  flex: 1;
+  padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  min-width: 0;
 }
 
 /* ─────── BUTTONS ─────── */
@@ -527,9 +533,10 @@ select.input { cursor: pointer; }
   .grid-sidebar-right { grid-template-columns: 1fr; }
   .grid-sidebar-chat { grid-template-columns: 1fr; }
   /* Navbar smaller on mobile */
-  nav { height: 72px !important; padding-top: 0 !important; }
+  nav { height: calc(72px + env(safe-area-inset-top, 0px)) !important; padding-top: env(safe-area-inset-top, 0px) !important; }
   nav > div { padding: 0 16px !important; }
-  .page { padding-top: 72px; }
+  .app-main { padding-top: calc(72px + env(safe-area-inset-top, 0px)); }
+  .page { padding-top: 0; }
   /* Car detail: stack left + right columns */
   .detail-grid { grid-template-columns: 1fr !important; padding: 14px 16px !important; gap: 20px !important; }
   .detail-grid .detail-sidebar { position: static !important; }
@@ -829,7 +836,7 @@ select.input { cursor: pointer; }
 
 /* ─────── PWA SAFE AREA ─────── */
 .page {
-  padding-top: calc(100px + env(safe-area-inset-top, 0px));
+  padding-top: 0;
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 nav {
@@ -839,6 +846,32 @@ nav {
 .mobile-menu-panel {
   padding-top: calc(100px + env(safe-area-inset-top, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu {
+    z-index: 120;
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .mobile-menu-panel {
+    width: min(360px, 92vw);
+    padding-top: calc(72px + env(safe-area-inset-top, 0px));
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-menu-panel {
+    width: 100vw;
+    border-left: 0;
+  }
+
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+  }
 }
 
 /* ─────── RESPONSIVE GRID ─────── */

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI, dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { User, Building2, CreditCard, Bell, Shield, Eye, EyeOff, ChevronRight, Save, Camera } from 'lucide-react';
+import { User, Building2, CreditCard, Shield, Eye, EyeOff, Save, Camera } from 'lucide-react';
 
 const TABS = [
   { id: 'profile',   label: 'Profile',    icon: User },
@@ -81,7 +81,7 @@ export default function DealerSettings() {
     setSaving(true);
     try {
       const payload = { ...profile, ...business, visibility: privacy };
-      const { user: updated } = await authAPI.update(payload);
+      const { user: updated } = await authAPI.updateProfile(payload);
       if (setUser && updated) setUser(updated);
       toast('Settings saved ✓', 'success');
     } catch (e) {

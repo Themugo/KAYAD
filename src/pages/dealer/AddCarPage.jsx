@@ -87,7 +87,7 @@ export default function AddCarPage() {
 
   // Post-submission success screen
   if (done) {
-    const needsReview = user?.role === 'dealer';
+    const needsReview = user?.role === 'dealer' && !user?.isDemo;
     return (
       <div className="page">
         <div className="container" style={{ paddingTop: 80, paddingBottom: 32, maxWidth: 560 }}>
