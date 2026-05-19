@@ -72,7 +72,7 @@ export const approveApplication = async (req, res) => {
         name: application.fullName,
         email: application.email,
         phone: application.phone,
-        password: "Inspector@Kayad2026!", // temp password, should be reset
+        password: process.env.SEED_INSPECTOR_PW || "Inspector@Kayad2026!",
         role: "ghost_checker",
       });
     } else {

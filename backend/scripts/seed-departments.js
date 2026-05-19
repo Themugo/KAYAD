@@ -7,13 +7,20 @@ import mongoose from "mongoose";
 import { config } from "dotenv";
 config();
 
+const isProd = process.env.NODE_ENV === "production";
+const devFallback = (pw) => {
+  if (isProd) throw new Error("Seed password required via env var in production");
+  console.warn("⚠️  Using dev-only fallback password — set SEED_* env vars for production");
+  return pw;
+};
+
 const departments = [
-  { name: "Marketing",    email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || "Market@Kayad2026!", role: "marketing" },
-  { name: "Tech Support", email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || "Support@Kayad2026!", role: "technical_support" },
-  { name: "HR",           email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || "Hr@Kayad2026!", role: "hr" },
-  { name: "Accounts",     email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW|| "Acc@Kayad2026!", role: "accounts" },
-  { name: "Escrow",       email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW  || "Escrow@Kayad2026!", role: "escrow_officer" },
-  { name: "Ad Manager",   email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || "Ads@Kayad2026!", role: "ad_manager" },
+  { name: "Marketing",    email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("Market@Kayad2026!"), role: "marketing" },
+  { name: "Tech Support", email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("Support@Kayad2026!"), role: "technical_support" },
+  { name: "HR",           email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("Hr@Kayad2026!"), role: "hr" },
+  { name: "Accounts",     email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW|| devFallback("Acc@Kayad2026!"), role: "accounts" },
+  { name: "Escrow",       email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW  || devFallback("Escrow@Kayad2026!"), role: "escrow_officer" },
+  { name: "Ad Manager",   email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("Ads@Kayad2026!"), role: "ad_manager" },
 ];
 
 async function run() {
