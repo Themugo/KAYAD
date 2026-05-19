@@ -424,6 +424,7 @@ export const endAuction = async (req, res) => {
     }
 
     car.sold = true;
+    car.status = "sold";
     car.auctionStatus = "ended";
     car.paymentStatus = "pending"; // 🔥 important
 

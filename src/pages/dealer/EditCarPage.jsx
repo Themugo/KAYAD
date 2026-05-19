@@ -11,6 +11,13 @@ const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hyb
 const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
 const BODIES = ['SUV','Sedan','Hatchback','Station Wagon','Pickup','Minivan','Coupe','Convertible','Crossover'];
 const COLORS = ['Black','White','Silver','Gray','Blue','Red','Green','Brown','Beige','Gold','Burgundy','Orange','Purple','Yellow','Maroon','Pearl','Navy'];
+const STATUS_STYLE = {
+  active:  { label: 'Active',  color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)' },
+  sold:    { label: 'Sold',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)' },
+  pending: { label: 'Pending', color: '#f97316', bg: 'rgba(249,115,22,0.1)', border: 'rgba(249,115,22,0.2)' },
+  rejected:{ label: 'Rejected',color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)' },
+};
+
 const CONDITIONS = ['Foreign Used','Local Used','Brand New'];
 
 function FieldGroup({ label, children }) {
@@ -256,12 +263,17 @@ export default function EditCarPage() {
               <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(1.3rem,2.5vw,1.8rem)', color: '#fff', margin: 0 }}>
                 {car.title || 'Untitled Vehicle'}
               </h1>
-              {isLive && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: '#ef4444', fontWeight: 700 }}>
-                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.2s infinite' }} /> LIVE AUCTION
-                </span>
-              )}
-            </div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                {car.status && car.status !== 'active' && (() => {
+                  const s = STATUS_STYLE[car.status] || STATUS_STYLE.active;
+                  return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: s.bg, border: `1px solid ${s.border}`, borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: s.color, fontWeight: 700 }}>{s.label}</span>;
+                })()}
+                {isLive && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: '#ef4444', fontWeight: 700 }}>
+                    <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.2s infinite' }} /> LIVE AUCTION
+                  </span>
+                )}
+              </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={handleDelete} style={{ padding: '10px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Trash2 size={13} /> Delete

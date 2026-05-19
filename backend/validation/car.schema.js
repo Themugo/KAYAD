@@ -11,10 +11,18 @@ export const createCarSchema = z.object({
   mileage: z.number().nonnegative().optional(),
   bodyType: z.string().optional(),
   color: z.string().optional(),
+  condition: z.string().optional(),
+  engine: z.string().optional(),
+  drivetrain: z.string().optional(),
+  dealerPhone: z.string().optional(),
   description: z.string().optional(),
   features: z.array(z.string()).optional(),
   city: z.string().optional(),
   address: z.string().optional(),
+  allowBuy: z.boolean().optional(),
+  allowBid: z.boolean().optional(),
+  auctionStatus: z.string().optional(),
+  auctionEnd: z.string().optional(),
 });
 
 export const updateCarSchema = createCarSchema.partial();

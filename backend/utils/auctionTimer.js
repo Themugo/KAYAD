@@ -53,6 +53,7 @@ export const startAuctionTimer = (io) => {
 
           updated.currentBid = topBid.amount;
           updated.sold = true;
+          updated.status = "sold";
           updated.winner = winner;
 
           await updated.save();

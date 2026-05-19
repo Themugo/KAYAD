@@ -200,7 +200,8 @@ export const releaseEscrow = async (req, res) => {
 
     if (car) {
       car.sold = true;
-      car.isPaid = true; // 🔥 NEW FLAG (important)
+      car.status = "sold";
+      car.isPaid = true;
       await car.save({ session });
     }
 

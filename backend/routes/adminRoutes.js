@@ -231,6 +231,13 @@ router.post(
       );
     }
 
+    sendNotification({
+      userId: user._id,
+      title: "✅ Dealer Account Approved",
+      message: "Your dealer account has been approved! You can now list vehicles and access all dealer features.",
+      type: "info",
+    }).catch(() => {});
+
     res.json({
       success: true,
       message: "User approved as dealer",
