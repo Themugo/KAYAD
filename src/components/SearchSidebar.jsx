@@ -81,7 +81,7 @@ function RangeInput({ placeholder, value, onChange }) {
   );
 }
 
-export default function SearchSidebar({ cars, filters, onFilterChange, onBrandChange, activeBrand }) {
+export default function SearchSidebar({ cars, filters, onFilterChange, onBrandChange, activeBrand, isMobile, onClose }) {
   const [brandSearch, setBrandSearch] = useState('');
   const [showAllBrands, setShowAllBrands] = useState(false);
 
@@ -121,10 +121,13 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
 
   return (
     <aside style={{
-      width: 272, flexShrink: 0,
+      width: isMobile ? '100%' : 272, flexShrink: 0,
       background: '#070707',
-      borderRight: '1px solid rgba(255,255,255,0.06)',
-      height: 'calc(100vh - 100px)', overflowY: 'auto', position: 'sticky', top: 88,
+      borderRight: isMobile ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      height: isMobile ? '100%' : 'calc(100vh - 100px)',
+      overflowY: 'auto',
+      position: isMobile ? 'relative' : 'sticky',
+      top: isMobile ? 0 : 88,
       scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,196,168,0.15) transparent',
     }}>
 
@@ -132,11 +135,19 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         background: '#070707',
-        padding: '18px 16px 14px',
+        padding: isMobile ? '14px 16px' : '18px 16px 14px',
         borderBottom: '1px solid rgba(255,255,255,0.05)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {isMobile && onClose && (
+              <button onClick={onClose} style={{
+                background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
+                cursor: 'pointer', display: 'flex', padding: 2, marginRight: 4,
+              }}>
+                <X size={16} />
+              </button>
+            )}
             <SlidersHorizontal size={15} style={{ color: 'var(--gold)' }} />
             <span style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff' }}>
               Refine

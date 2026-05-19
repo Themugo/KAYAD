@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../context/CompareContext';
 import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3, Fuel, Calendar, Settings, Flame } from 'lucide-react';
+import useMediaQuery from '../hooks/useMediaQuery';
 
 function firstImage(car) {
   if (car.image) return car.image;
@@ -35,6 +36,7 @@ export default function CartyGrid({ car, listView }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [hovered, setHovered] = useState(false);
   const imgRef = useRef(null);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
   const isCompared = ctxIsComparing(car._id);
@@ -58,16 +60,20 @@ export default function CartyGrid({ car, listView }) {
     return (
       <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
         <div style={{
-          display: 'flex',
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row',
           background: '#0A0A0A',
           borderBottom: '1px solid rgba(255,255,255,0.05)',
           transition: 'background 0.2s',
-          minHeight: 200,
+          minHeight: isMobile ? 'auto' : 200,
         }}
           onMouseEnter={e => { e.currentTarget.style.background = '#111'; setHovered(true); }}
           onMouseLeave={e => { e.currentTarget.style.background = '#0A0A0A'; setHovered(false); }}
         >
-          <div style={{ width: 220, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+          <div style={{
+            width: isMobile ? '100%' : 220,
+            height: isMobile ? 180 : 'auto',
+            flexShrink: 0, overflow: 'hidden', position: 'relative',
+          }}>
             <img src={img} onError={() => setImgErr(true)} alt=""
               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', transform: hovered ? 'scale(1.05)' : 'none' }} />
             <div style={{

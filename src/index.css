@@ -352,6 +352,7 @@ select.input { cursor: pointer; }
   max-width: 360px;
 }
 @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
 .toast-success { border-color: rgba(34,197,94,0.3); }
 .toast-error   { border-color: rgba(239,68,68,0.3); }
 .toast-icon    { font-size: 18px; }

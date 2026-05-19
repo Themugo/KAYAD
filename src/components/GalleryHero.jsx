@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
+import useMediaQuery from '../hooks/useMediaQuery';
 
 const DEFAULTS = {
   galleryTitle: 'The Gallery',
@@ -9,6 +10,7 @@ const DEFAULTS = {
 export default function GalleryHero() {
   const [title, setTitle] = useState(DEFAULTS.galleryTitle);
   const [subtitle, setSubtitle] = useState(DEFAULTS.gallerySubtitle);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     adminAPI.getConfig()
@@ -22,7 +24,7 @@ export default function GalleryHero() {
   }, []);
 
   return (
-    <section style={{ padding: '28px 0 16px', background: '#050505' }}>
+    <section style={{ padding: isMobile ? '16px 0 8px' : '28px 0 16px', background: '#050505' }}>
       <div className="container">
         <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 4 }}>
           {subtitle}

@@ -4,8 +4,9 @@ import { carsAPI, savedSearchAPI } from '../api/api';
 import CartyGrid from '../components/CartyGrid';
 import SearchSidebar from '../components/SearchSidebar';
 import GalleryHero from '../components/GalleryHero';
-import { LayoutGrid, List, Bookmark, BookmarkCheck, Bell, BellOff, Trash2, Search, X, ArrowUpDown, Loader } from 'lucide-react';
+import { LayoutGrid, List, Bookmark, BookmarkCheck, Bell, BellOff, Trash2, Search, X, ArrowUpDown, Loader, SlidersHorizontal } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
+import useMediaQuery from '../hooks/useMediaQuery';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 
@@ -19,6 +20,12 @@ export default function Showroom() {
   const [displayCount, setDisplayCount] = useState(12);
   const PER_BATCH = 12;
   const sentinelRef = useRef(null);
+
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery('(max-width: 1024px)');
+
+  const gridCols = isMobile ? 'repeat(1, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)';
 
   const [savedSearches, setSavedSearches] = useState([]);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
@@ -241,46 +248,95 @@ export default function Showroom() {
 
   return (
     <div style={{ minHeight: 'calc(100vh - 100px)', background: '#050505' }}>
-      <div style={{ display: 'flex' }}>
-        <SearchSidebar
-          cars={cars}
-          filters={filters}
-          onFilterChange={onFilterChange}
-          onBrandChange={onBrandChange}
-          activeBrand={filters.brand}
-        />
-        <main style={{ flex: 1, minWidth: 0, background: '#050505' }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
+        {/* Desktop sidebar */}
+        {!isMobile && (
+          <SearchSidebar
+            cars={cars}
+            filters={filters}
+            onFilterChange={onFilterChange}
+            onBrandChange={onBrandChange}
+            activeBrand={filters.brand}
+          />
+        )}
+
+        {/* Mobile filter drawer */}
+        {isMobile && mobileFilterOpen && (
+          <>
+            <div onClick={() => setMobileFilterOpen(false)} style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 99,
+            }} />
+            <div style={{
+              position: 'fixed', top: 0, left: 0, bottom: 0, width: '85%', maxWidth: 320,
+              background: '#070707', zIndex: 100, overflowY: 'auto',
+              boxShadow: '4px 0 40px rgba(0,0,0,0.6)',
+              animation: 'slideInLeft 0.25s ease',
+            }}>
+              <SearchSidebar
+                cars={cars}
+                filters={filters}
+                onFilterChange={onFilterChange}
+                onBrandChange={onBrandChange}
+                activeBrand={filters.brand}
+                isMobile
+                onClose={() => setMobileFilterOpen(false)}
+              />
+            </div>
+          </>
+        )}
+
+        <main style={{ flex: 1, minWidth: 0, background: '#050505', paddingTop: isMobile ? 0 : 0 }}>
           <GalleryHero />
 
           <section style={{ padding: '0 0 48px' }}>
             <div className="container">
               {/* ── Toolbar ── */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, paddingTop: 8 }}>
-                <div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
-                    {activeFilter === 'auction' ? 'Live Auctions' : activeFilter === 'fixed' ? 'Direct Buy' : 'Full Catalog'}
-                  </div>
-                  {!loading && (
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', color: '#fff', lineHeight: 1.1 }}>
-                      {sorted.length} {sorted.length === 1 ? 'Vehicle' : 'Vehicles'}
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'center',
+                marginBottom: 16, paddingTop: 8,
+                flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 10 : 0,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.28)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                      {activeFilter === 'auction' ? 'Live Auctions' : activeFilter === 'fixed' ? 'Direct Buy' : 'Full Catalog'}
                     </div>
+                    {!loading && (
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 700, fontStyle: 'italic', color: '#fff', lineHeight: 1.1 }}>
+                        {sorted.length} {sorted.length === 1 ? 'Vehicle' : 'Vehicles'}
+                      </div>
+                    )}
+                  </div>
+                  {/* Mobile filter toggle */}
+                  {isMobile && (
+                    <button onClick={() => setMobileFilterOpen(true)} style={{
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      padding: '8px 14px', borderRadius: 8,
+                      background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
+                      color: 'var(--gold)', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+                    }}>
+                      <SlidersHorizontal size={14} /> Filters
+                    </button>
                   )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  flexWrap: 'wrap', justifyContent: isMobile ? 'flex-start' : 'flex-end',
+                }}>
                   {/* Save Search */}
-                  {filtersActive && (
+                  {filtersActive && !isMobile && (
                     <button onClick={() => setShowSavePrompt(true)} style={{
                       background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
                       borderRadius: 8, padding: '6px 12px', color: 'var(--gold)',
                       fontSize: 11, fontWeight: 700, cursor: 'pointer',
                       display: 'flex', alignItems: 'center', gap: 5,
                     }}>
-                      <Bookmark size={13} /> Save Search
+                      <Bookmark size={13} /> Save
                     </button>
                   )}
 
                   {/* Saved Searches Panel Toggle */}
-                  {savedSearches.length > 0 && (
+                  {savedSearches.length > 0 && !isMobile && (
                     <button onClick={() => setShowSavedPanel(p => !p)} style={{
                       background: showSavedPanel ? 'rgba(212,196,168,0.15)' : 'rgba(255,255,255,0.04)',
                       border: `1px solid ${showSavedPanel ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)'}`,
@@ -296,8 +352,8 @@ export default function Showroom() {
                   {filters.brand && (
                     <button onClick={() => onBrandChange('All')} style={{
                       background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 9999, padding: '5px 12px', color: 'rgba(255,255,255,0.45)',
-                      fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                      borderRadius: 9999, padding: '5px 10px', color: 'rgba(255,255,255,0.45)',
+                      fontSize: 10, fontWeight: 600, cursor: 'pointer',
                     }}>
                       ✕ {filters.brand}
                     </button>
@@ -305,9 +361,10 @@ export default function Showroom() {
 
                   {/* Sort dropdown */}
                   <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
-                    padding: '4px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '5px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)',
                     background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)',
-                    fontSize: 11, fontWeight: 600, cursor: 'pointer', outline: 'none',
+                    fontSize: 10, fontWeight: 600, cursor: 'pointer', outline: 'none',
+                    maxWidth: isMobile ? 120 : 'auto',
                   }}>
                     <option value="default" style={{ background: '#111' }}>Sort: Default</option>
                     <option value="price_asc" style={{ background: '#111' }}>Price: Low → High</option>
@@ -429,7 +486,7 @@ export default function Showroom() {
               ) : (
                 <>
                   {viewMode === 'grid' ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: gridCols, gap: isMobile ? 10 : 16 }}>
                       {visible.map(car => <CartyGrid key={car._id} car={car} />)}
                     </div>
                   ) : (
