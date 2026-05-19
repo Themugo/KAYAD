@@ -19,7 +19,6 @@ import {
   createCar,
   updateCar,
   deleteCar,
-  buyCar,
   placeBid,
 } from "../controllers/carController.js";
 
@@ -38,7 +37,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const cars = await Car.find({ dealer: req.user.id })
       .select(
-        "title price images views clicks bidsCount createdAt"
+        "title price images views clicks bidsCount createdAt status auctionStatus"
       )
       .sort({ createdAt: -1 })
       .lean();
@@ -159,16 +158,6 @@ router.delete(
   dealerOnly,
   validateObjectId,
   asyncHandler(deleteCar)
-);
-
-// =============================
-// 💰 BUY FLOW
-// =============================
-router.post(
-  "/:id/buy",
-  protect,
-  validateObjectId,
-  asyncHandler(buyCar)
 );
 
 // =============================

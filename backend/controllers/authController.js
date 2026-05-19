@@ -67,10 +67,16 @@ const sendAuthResponse = (res, user) => {
     success: true,
     token: accessToken,
     user: {
+      _id: user._id,
       id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      approved: user.approved,
+      businessName: user.businessName,
+      location: user.location,
+      phone: user.phone,
+      onboardingComplete: user.onboardingComplete,
       mustChangePassword: user.mustChangePassword,
     },
   });

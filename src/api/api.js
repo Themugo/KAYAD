@@ -175,7 +175,6 @@ const _carsAPI = {
   analytics: ()      => api.get('/cars/dealer/analytics').then(unwrap),
 
   // Actions
-  buy: (id)              => api.post(`/cars/${id}/buy`).then(unwrap),
   bid: (id, body)        => api.post(`/cars/${id}/bid`, body).then(unwrap),
   toggleFav: (id)        => api.post(`/cars/${id}/favorite`).then(unwrap),
 

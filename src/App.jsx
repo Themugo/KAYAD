@@ -34,7 +34,6 @@ import NotificationsPage from './pages/NotificationsPage';
 import EscrowVaultPortal from './pages/EscrowVaultPortal';
 import ChatPage      from './pages/ChatPage';
 import PaymentsPage  from './pages/PaymentsPage';
-import Checkout      from './pages/Checkout';
 import BuyerDashboard from './pages/BuyerDashboard';
 
 // Dealer pages
@@ -105,8 +104,6 @@ export default function App() {
                   <Route path="/chat/:chatId" element={<RequireAuth><ChatPage /></RequireAuth>} />
                   <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
                   <Route path="/payments"  element={<RequireAuth><PaymentsPage /></RequireAuth>} />
-                  <Route path="/checkout/:id" element={<RequireAuth><Checkout /></RequireAuth>} />
-
                   {/* ── Seller (dealers + brokers) ── */}
                   <Route path="/dealer"             element={<RequireSeller><DealerDashboard /></RequireSeller>} />
                   <Route path="/dealer/team"        element={<RequireSeller><DealerTeam /></RequireSeller>} />

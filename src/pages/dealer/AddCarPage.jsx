@@ -1,8 +1,10 @@
 // src/pages/dealer/AddCarPage.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { carsAPI } from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { CheckCircle, Clock } from 'lucide-react';
 
 const BRANDS  = ['Toyota','Mercedes-Benz','BMW','Land Rover','Subaru','Mazda','Nissan','Honda','Volkswagen','Lexus','Audi','Mitsubishi','Hyundai','Kia','Ford','Jeep','Peugeot','Isuzu'];
 const FUELS   = ['Petrol','Diesel','Hybrid','Electric','LPG'];
@@ -15,9 +17,11 @@ const Field = ({ label, children }) => (
 );
 
 export default function AddCarPage() {
-  const { toast }  = useToast();
-  const navigate   = useNavigate();
+  const { user }  = useAuth();
+  const { toast } = useToast();
+  const navigate  = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [done, setDone]      = useState(null);
   const [images, setImages]   = useState([]);
   const [previews, setPreviews] = useState([]);
   const [coverImage, setCoverImage] = useState(0);
@@ -73,15 +77,47 @@ export default function AddCarPage() {
       fd.append('coverImage', String(coverImage));
       images.forEach(img => fd.append('images', img));
 
-      const data = await carsAPI.create(fd);
-      toast('🚗 Car listed successfully!', 'success');
-      navigate('/dealer');
+      await carsAPI.create(fd);
+      setDone(form);
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to create listing', 'error');
     } finally {
       setLoading(false);
     }
   };
+
+  // Post-submission success screen
+  if (done) {
+    const needsReview = user?.role === 'dealer';
+    return (
+      <div className="page">
+        <div className="container" style={{ paddingTop: 80, paddingBottom: 32, maxWidth: 560 }}>
+          <div className="card" style={{ padding: 48, textAlign: 'center' }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: needsReview ? 'rgba(249,115,22,0.1)' : 'rgba(34,197,94,0.1)', border: `2px solid ${needsReview ? 'rgba(249,115,22,0.2)' : 'rgba(34,197,94,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              {needsReview ? <Clock size={36} style={{ color: '#f97316' }} /> : <CheckCircle size={36} style={{ color: '#22c55e' }} />}
+            </div>
+            <h2 style={{ marginBottom: 8 }}>{needsReview ? 'Listing Submitted for Review' : 'Listing Published!'}</h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+              {needsReview
+                ? 'Your listing has been submitted. Our team will review it shortly — usually within 24 hours. You\'ll be notified once it\'s live.'
+                : 'Your listing is now live and visible to buyers across the marketplace.'}
+            </p>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{done.title}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>KES {Number(done.price || 0).toLocaleString()}</span>
+              </div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>{done.brand} · {done.year || '—'} · {done.mileage ? `${Number(done.mileage).toLocaleString()} km` : '—'}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <Link to="/dealer/add-car" className="btn btn-outline" onClick={() => setDone(null)}>List Another Car</Link>
+              <Link to="/dealer" className="btn btn-gold">Back to Dashboard</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const SelectField = ({ label, field, options }) => (
     <Field label={label}>

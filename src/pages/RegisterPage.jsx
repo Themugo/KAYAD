@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { adminAPI } from '../api/api';
@@ -150,13 +150,12 @@ export default function RegisterPage() {
 
   // If already logged in and unapproved dealer → show waiting room
   if (isAuth && user?.role === 'dealer' && !user?.approved) {
-    return <WaitingRoom user={user} onLogout={logout} />;
+    return <WaitingRoom user={user} onLogout={() => { logout(); navigate('/'); }} />;
   }
   // Already logged in and approved → redirect away
   if (isAuth && user?.approved) {
     const dest = (user?.role === 'dealer' || user?.role === 'broker' || user?.role === 'individual_seller') ? '/dealer' : '/dashboard';
-    navigate(dest, { replace: true });
-    return null;
+    return <Navigate to={dest} replace />;
   }
 
   return <RegisterFlow roleParam={roleParam} isDealerUrl={isDealerUrl} redirectTo={redirectTo} />;
@@ -167,6 +166,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
   const { register, logout } = useAuth();
   const { toast } = useToast();
   const navigate  = useNavigate();
+  const [params]  = useSearchParams();
 
   const [step,    setStep]   = useState(isDealerUrl ? 2 : 1);
   const [role,    setRole]   = useState(roleParam === 'broker' ? 'broker' : isDealerUrl ? 'dealer' : 'user');
@@ -363,7 +363,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
             {needsPkg && (
               <>
                 <Input label={`${isDealer ? 'Business' : 'Trading'} Name${isSeller ? ' (optional)' : ''}`} value={form.businessName} onChange={e=>set('businessName',e.target.value)} placeholder={isDealer ? 'ABC Motors Ltd' : 'Your name or trading name'} />
-                <Input label="Location / City" value={form.location} onChange={e=>set('location',e.target.value)} placeholder="Nairobi, Westlands" />
+                <Input label="Location / City" value={form.location} onChange={e=>set('location',e.target.value)} placeholder="Nairobi, Westlands" required={isDealer} />
               </>
             )}
 

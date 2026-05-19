@@ -37,24 +37,19 @@ export const initiatePayment = async (req, res) => {
       });
     }
 
-    // 🚫 Direct "buy" via M-Pesa is not allowed — use escrow instead
-    if (type === "buy") {
-      return res.status(400).json({
-        success: false,
-        message: "Direct purchase via M-Pesa is not supported. Use escrow for secure payment.",
-      });
-    }
+    // All purchases go through escrow — normalize any buy-type to "escrow"
+    const normalizedType = type === "buy" || type === "direct" ? "escrow" : type;
 
     const result = await initiate({
       userId: req.user.id,
       carId,
-      type,
+      type: normalizedType,
       amount: parsedAmount,
       phone,
     });
 
-    // If escrow type, also create the Escrow record
-    if (type === "escrow" && result.payment?._id) {
+    // Create Escrow record for escrow-type payments
+    if (normalizedType === "escrow" && result.payment?._id) {
       const Car = (await import("../models/Car.js")).default;
       const Escrow = (await import("../models/Escrow.js")).default;
       const car = await Car.findById(carId);

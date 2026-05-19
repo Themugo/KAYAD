@@ -184,6 +184,7 @@ export default function CarDetailPage() {
   const isDealerSeller = dealer?.role === 'dealer';
 
   const handleBuy = (type) => {
+    if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
     setPayType(type);
     setShowPayModal(true);
   };
@@ -570,13 +571,9 @@ export default function CarDetailPage() {
                     <Link to={`/auction/${car._id}`} className="cta-primary cta-auction">
                       <Zap size={15} /> Join Live Auction
                     </Link>
-                  ) : isP2P ? (
+                  ) : car.allowBuy && (isP2P || isDealerSeller) ? (
                     <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
                       <Lock size={15} /> Buy via Escrow
-                    </button>
-                  ) : isDealerSeller && car.allowBuy ? (
-                    <button onClick={() => handleBuy('direct')} className="cta-primary cta-buynow">
-                      <ShieldCheck size={15} /> Buy Now
                     </button>
                   ) : null}
 
@@ -609,10 +606,10 @@ export default function CarDetailPage() {
                   </div>
                 </div>
               ) : isDealerSeller ? (
-                <div className="trust-note trust-note-dealer">
-                  <ShieldCheck size={12} className="trust-note-icon" />
+                <div className="trust-note trust-note-escrow">
+                  <Lock size={12} className="trust-note-icon" />
                   <div className="trust-note-text">
-                    <strong>Verified Dealer.</strong> This vehicle is listed by a KRA-vetted, Kayad-approved dealer. Direct purchase — no escrow required.
+                    <strong>Escrow Protected.</strong> Payment held securely until you confirm receipt. All purchases on Kayad are escrow-protected.
                   </div>
                 </div>
               ) : null}
