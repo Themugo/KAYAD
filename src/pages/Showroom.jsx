@@ -4,7 +4,7 @@ import { carsAPI, savedSearchAPI } from '../api/api';
 import CartyGrid from '../components/CartyGrid';
 import SearchSidebar from '../components/SearchSidebar';
 import GalleryHero from '../components/GalleryHero';
-import { LayoutGrid, List, Bookmark, BookmarkCheck, Bell, BellOff, Trash2, Search, X, ArrowUpDown } from 'lucide-react';
+import { LayoutGrid, List, Bookmark, BookmarkCheck, Bell, BellOff, Trash2, Search, X, ArrowUpDown, Loader } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
@@ -16,8 +16,9 @@ export default function Showroom() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('default');
-  const [page, setPage] = useState(1);
-  const perPage = 12;
+  const [displayCount, setDisplayCount] = useState(12);
+  const PER_BATCH = 12;
+  const sentinelRef = useRef(null);
 
   const [savedSearches, setSavedSearches] = useState([]);
   const [showSavedPanel, setShowSavedPanel] = useState(false);
@@ -88,7 +89,6 @@ export default function Showroom() {
       else next.set(type, value);
     }
     setSearchParams(next);
-    setPage(1);
   }, [searchParams, setSearchParams]);
 
   const onBrandChange = useCallback((brand) => {
@@ -96,7 +96,6 @@ export default function Showroom() {
     if (!brand || brand === 'All') next.delete('brand');
     else next.set('brand', brand);
     setSearchParams(next);
-    setPage(1);
   }, [searchParams, setSearchParams]);
 
   const activeFilter = filters.filter;
@@ -183,8 +182,26 @@ export default function Showroom() {
     return list;
   }, [filtered, sortBy]);
 
-  const totalPages = Math.ceil(sorted.length / perPage);
-  const paged = sorted.slice((page - 1) * perPage, page * perPage);
+  const visible = sorted.slice(0, displayCount);
+  const hasMore = displayCount < sorted.length;
+
+  // Reset display count when filters or sort change
+  useEffect(() => {
+    setDisplayCount(PER_BATCH);
+  }, [filters, sortBy]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        setDisplayCount(prev => Math.min(prev + PER_BATCH, sorted.length));
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, sorted.length]);
 
   const handleSaveSearch = async () => {
     if (!saveName.trim()) return;
@@ -220,7 +237,6 @@ export default function Showroom() {
     Object.entries(saved.filters || {}).forEach(([k, v]) => { if (v) next.set(k, v); });
     setSearchParams(next);
     setShowSavedPanel(false);
-    setPage(1);
   };
 
   return (
@@ -391,11 +407,19 @@ export default function Showroom() {
 
               {/* ── Grid / List ── */}
               {loading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                    <div key={i} style={{ aspectRatio: '3/4', background: 'rgba(255,255,255,0.03)', borderRadius: '1rem', animation: 'pulse 1.5s infinite' }} />
-                  ))}
-                </div>
+                viewMode === 'grid' ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                      <div key={i} style={{ aspectRatio: '3/4', background: 'rgba(255,255,255,0.03)', borderRadius: '1rem', animation: 'pulse 1.5s infinite' }} />
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} style={{ height: 200, background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem', animation: 'pulse 1.5s infinite' }} />
+                    ))}
+                  </div>
+                )
               ) : sorted.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(255,255,255,0.28)' }}>
                   <div style={{ fontSize: 56, marginBottom: 16 }}>🚗</div>
@@ -406,26 +430,25 @@ export default function Showroom() {
                 <>
                   {viewMode === 'grid' ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-                      {paged.map(car => <CartyGrid key={car._id} car={car} />)}
+                      {visible.map(car => <CartyGrid key={car._id} car={car} />)}
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, overflow: 'hidden' }}>
-                      {paged.map(car => <CartyGrid key={car._id} car={car} listView />)}
+                      {visible.map(car => <CartyGrid key={car._id} car={car} listView />)}
                     </div>
                   )}
 
-                  {totalPages > 1 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 36 }}>
-                      {Array.from({ length: totalPages }, (_, i) => (
-                        <button key={i} onClick={() => setPage(i + 1)} style={{
-                          width: 34, height: 34, borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)',
-                          background: page === i + 1 ? 'var(--gold)' : 'transparent',
-                          color: page === i + 1 ? '#000' : 'rgba(255,255,255,0.4)',
-                          fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s',
-                        }}>
-                          {i + 1}
-                        </button>
-                      ))}
+                  {/* Infinite scroll sentinel */}
+                  <div ref={sentinelRef} style={{ height: 1 }} />
+                  {hasMore && (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, padding: '32px 0', color: 'rgba(255,255,255,0.2)' }}>
+                      <Loader size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                      <span style={{ fontSize: 12, fontWeight: 600 }}>Loading more vehicles…</span>
+                    </div>
+                  )}
+                  {!hasMore && sorted.length > PER_BATCH && (
+                    <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 11, color: 'rgba(255,255,255,0.15)', fontWeight: 600 }}>
+                      Showing all {sorted.length} vehicles
                     </div>
                   )}
                 </>

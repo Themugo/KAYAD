@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../context/CompareContext';
-import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3 } from 'lucide-react';
+import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3, Fuel, Calendar, Settings, Flame } from 'lucide-react';
 
 function firstImage(car) {
   if (car.image) return car.image;
@@ -15,10 +15,29 @@ function firstImage(car) {
 
 const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
 
+function formatPrice(price) {
+  if (!price) return '—';
+  return price.toLocaleString('en-KE');
+}
+
+function daysAgo(date) {
+  if (!date) return '';
+  const days = Math.floor((Date.now() - new Date(date).getTime()) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return '1 day ago';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 export default function CartyGrid({ car, listView }) {
   const [imgErr, setImgErr] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const imgRef = useRef(null);
+
+  const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
+  const isCompared = ctxIsComparing(car._id);
 
   useEffect(() => {
     if (imgRef.current?.complete) setImgLoaded(true);
@@ -33,51 +52,174 @@ export default function CartyGrid({ car, listView }) {
   const city      = car.location?.city || car.location || 'Nairobi';
   const d         = car.dealer || {};
   const price     = Number(car.currentBid || car.price || 0);
-  const priceStr  = price >= 1_000_000
-    ? `${(price / 1_000_000).toFixed(1)}M`
-    : price >= 1000
-      ? `${(price / 1000).toFixed(0)}K`
-      : price.toLocaleString();
+  const fuelIcon  = car.fuel?.toLowerCase() === 'diesel' ? '🛢️' : car.fuel?.toLowerCase() === 'electric' ? '⚡' : '⛽';
 
   if (listView) {
     return (
       <Link to={linkTo} style={{ display: 'block', textDecoration: 'none' }}>
         <div style={{
-          display: 'flex', alignItems: 'stretch',
-          background: '#0A0A0A', borderBottom: '1px solid rgba(255,255,255,0.05)',
+          display: 'flex',
+          background: '#0A0A0A',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
           transition: 'background 0.2s',
+          minHeight: 200,
         }}
-          onMouseEnter={e => e.currentTarget.style.background = '#111'}
-          onMouseLeave={e => e.currentTarget.style.background = '#0A0A0A'}
+          onMouseEnter={e => { e.currentTarget.style.background = '#111'; setHovered(true); }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#0A0A0A'; setHovered(false); }}
         >
-          <div style={{ width: 160, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
+          <div style={{ width: 220, flexShrink: 0, overflow: 'hidden', position: 'relative' }}>
             <img src={img} onError={() => setImgErr(true)} alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            {isLive && (
-              <div style={{
-                position: 'absolute', top: 6, left: 6,
-                background: '#ef4444', borderRadius: 4, padding: '2px 6px',
-                fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.06em',
-              }}>LIVE</div>
-            )}
-          </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', minWidth: 0 }}>
-            <div style={{ minWidth: 0, marginRight: 12 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {car.title}
-              </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {car.mileage && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{car.mileage.toLocaleString()} KM</span>}
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{city}</span>
-                {car.year && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{car.year}</span>}
-              </div>
+              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', transform: hovered ? 'scale(1.05)' : 'none' }} />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)',
+            }} />
+            <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {isLive && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  background: 'rgba(239,68,68,0.92)', backdropFilter: 'blur(8px)',
+                  borderRadius: 6, padding: '3px 8px',
+                }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.2s infinite' }} />
+                  <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.08em' }}>LIVE</span>
+                </div>
+              )}
+              {!isLive && isElite && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(212,196,168,0.25)',
+                  borderRadius: 6, padding: '3px 7px',
+                }}>
+                  <Zap size={7} style={{ color: 'var(--gold)' }} />
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>Auction</span>
+                </div>
+              )}
+              {car.ntsaVerified && (
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
+                  background: 'rgba(34,197,94,0.92)', backdropFilter: 'blur(8px)',
+                  borderRadius: 6, padding: '3px 7px',
+                }}>
+                  <ShieldCheck size={7} style={{ color: '#fff' }} />
+                  <span style={{ fontSize: 8, color: '#fff', fontWeight: 700 }}>NTSA OK</span>
+                </div>
+              )}
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>
-                {isElite ? 'Bid' : 'Price'}
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '16px 20px', minWidth: 0, justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 8 }}>
+                <h3 style={{
+                  fontSize: 15, fontWeight: 700, color: '#fff',
+                  margin: 0, lineHeight: 1.3,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  flex: 1,
+                }}>
+                  {car.year && <span style={{ color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{car.year} </span>}
+                  {car.title}
+                </h3>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 2 }}>
+                    {isElite ? 'Current Bid' : 'Price'}
+                  </div>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+                    KES {formatPrice(price)}
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                KES {priceStr}
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
+                {car.mileage != null && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+                    <Gauge size={11} style={{ color: 'rgba(212,196,168,0.4)' }} />
+                    {car.mileage.toLocaleString()} km
+                  </span>
+                )}
+                {car.fuel && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+                    <span style={{ fontSize: 11 }}>{fuelIcon}</span>
+                    {car.fuel}
+                  </span>
+                )}
+                {car.transmission && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+                    <Settings size={11} style={{ color: 'rgba(212,196,168,0.4)' }} />
+                    {car.transmission}
+                  </span>
+                )}
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
+                  <MapPin size={11} style={{ color: 'rgba(212,196,168,0.4)' }} />
+                  {city}
+                </span>
+                {car.bodyType && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+                    <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.15)' }} />
+                    {car.bodyType}
+                  </span>
+                )}
+              </div>
+
+              {car.description && (
+                <p style={{
+                  fontSize: 12, color: 'rgba(255,255,255,0.35)',
+                  margin: '0 0 8px', lineHeight: 1.5,
+                  overflow: 'hidden', textOverflow: 'ellipsis',
+                  display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                }}>
+                  {car.description}
+                </p>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+                  {daysAgo(car.createdAt)}
+                </span>
+                {car.views > 0 && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+                    <Eye size={10} /> {car.views}
+                  </span>
+                )}
+                {car.bidsCount > 0 && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>
+                    <Flame size={10} /> {car.bidsCount} bids
+                  </span>
+                )}
+                {car.isVerifiedDealer && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 10, color: '#3b82f6' }}>
+                    <ShieldCheck size={10} /> Verified dealer
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button
+                  onClick={e => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
+                  title={isCompared ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
+                  style={{
+                    padding: '6px 10px', borderRadius: 6,
+                    background: isCompared ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${isCompared ? 'rgba(212,196,168,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                    color: isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.3)',
+                    cursor: compareCount >= maxCompare && !isCompared ? 'not-allowed' : 'pointer',
+                    fontSize: 10, fontWeight: 600, transition: 'all 0.2s',
+                    display: 'flex', alignItems: 'center', gap: 4,
+                    opacity: compareCount >= maxCompare && !isCompared ? 0.4 : hovered ? 1 : 0.6,
+                  }}
+                >
+                  <BarChart3 size={11} /> {isCompared ? 'Added' : 'Compare'}
+                </button>
+                <span style={{
+                  padding: '6px 14px', borderRadius: 6,
+                  background: 'rgba(212,196,168,0.1)',
+                  color: 'var(--gold)', fontSize: 11, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  transition: 'all 0.2s',
+                }}>
+                  View Details <ChevronRight size={11} />
+                </span>
               </div>
             </div>
           </div>
@@ -86,9 +228,7 @@ export default function CartyGrid({ car, listView }) {
     );
   }
 
-  const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
-  const isCompared = ctxIsComparing(car._id);
-  const [hovered, setHovered] = useState(false);
+  const isComparedGrid = ctxIsComparing(car._id);
 
   return (
     <div style={{ position: 'relative' }}
@@ -216,13 +356,13 @@ export default function CartyGrid({ car, listView }) {
           </h3>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            {car.mileage && (
+            {car.mileage != null && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
                 <Gauge size={9} style={{ color: 'rgba(212,196,168,0.5)', flexShrink: 0 }} />
                 {(car.mileage / 1000).toFixed(0)}k km
               </span>
             )}
-            {car.mileage && city && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'block', flexShrink: 0 }} />}
+            {car.mileage != null && city && <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', display: 'block', flexShrink: 0 }} />}
             <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
               <MapPin size={9} style={{ color: 'rgba(212,196,168,0.5)', flexShrink: 0 }} />
               {city}
@@ -241,7 +381,7 @@ export default function CartyGrid({ car, listView }) {
                 fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
                 fontSize: '1rem', color: 'var(--gold)', lineHeight: 1,
               }}>
-                KES {priceStr}
+                KES {formatPrice(price)}
               </div>
             </div>
             <div style={{
@@ -259,20 +399,20 @@ export default function CartyGrid({ car, listView }) {
     </Link>
     <button
       onClick={e => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-      title={isCompared ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
+      title={isComparedGrid ? 'Remove from compare' : compareCount >= maxCompare ? 'Max for comparison' : 'Add to compare'}
       style={{
         position: 'absolute', top: 8, right: 8,
-        background: isCompared ? 'var(--gold)' : 'rgba(0,0,0,0.55)',
-        border: `1px solid ${isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`,
+        background: isComparedGrid ? 'var(--gold)' : 'rgba(0,0,0,0.55)',
+        border: `1px solid ${isComparedGrid ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`,
         borderRadius: 6, padding: '3px 7px', fontSize: 10,
-        color: isCompared ? '#000' : 'rgba(255,255,255,0.65)',
-        cursor: compareCount >= maxCompare && !isCompared ? 'not-allowed' : 'pointer',
-        fontWeight: 700, opacity: compareCount >= maxCompare && !isCompared ? 0.4 : hovered ? 1 : 0.6,
+        color: isComparedGrid ? '#000' : 'rgba(255,255,255,0.65)',
+        cursor: compareCount >= maxCompare && !isComparedGrid ? 'not-allowed' : 'pointer',
+        fontWeight: 700, opacity: compareCount >= maxCompare && !isComparedGrid ? 0.4 : hovered ? 1 : 0.6,
         backdropFilter: 'blur(6px)', zIndex: 10,
         transition: 'all 0.25s ease',
       }}
     >
-      {isCompared ? '✓' : <BarChart3 size={10} />}
+      {isComparedGrid ? '✓' : <BarChart3 size={10} />}
     </button>
     </div>
   );

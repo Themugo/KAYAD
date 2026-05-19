@@ -86,7 +86,7 @@ router.get(
       User.countDocuments({ role: "dealer", approved: true }),
       Bid.countDocuments({ createdAt: { $gte: today } }),
       Payment.countDocuments({ status: "success" }),
-      User.countDocuments({ role: "user", approved: { $ne: true } }),
+      User.countDocuments({ role: "dealer", approved: false }),
       Car.countDocuments({ status: "pending" }),
       Escrow.countDocuments({ status: "held" }),
       Escrow.countDocuments({ status: "disputed" }),
@@ -132,6 +132,7 @@ router.get(
     // 🔍 FILTERS
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
+    if (req.query.pendingApproval === "true") filter.approved = false;
 
     // 🔎 SEARCH (name/email)
     if (req.query.search) {

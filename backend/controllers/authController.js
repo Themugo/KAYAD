@@ -99,11 +99,12 @@ export const register = async (req, res) => {
     }
     const { role: requestedRole } = req.body;
     const allowedSelfRoles = process.env.NODE_ENV === "test"
-      ? ["dealer", "broker", "admin"]
-      : ["dealer", "broker"];
+      ? ["dealer", "broker", "individual_seller", "admin"]
+      : ["dealer", "broker", "individual_seller"];
     const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
-    const extra = role === "dealer" || role === "broker"
-      ? { approved: false, businessName: req.body.businessName || "", location: req.body.location || "" }
+    const needsApproval = role === "dealer"; // only dealers need admin approval
+    const extra = role === "dealer" || role === "broker" || role === "individual_seller"
+      ? { approved: !needsApproval, businessName: req.body.businessName || "", location: req.body.location || "" }
       : {};
 
     // Referral: look up referrer by code

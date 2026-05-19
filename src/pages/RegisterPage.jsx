@@ -148,13 +148,13 @@ export default function RegisterPage() {
   const roleParam   = params.get('role');
   const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker';
 
-  // If already logged in and unapproved dealer/broker → show waiting room
-  if (isAuth && (user?.role === 'dealer' || user?.role === 'broker') && !user?.approved) {
+  // If already logged in and unapproved dealer → show waiting room
+  if (isAuth && user?.role === 'dealer' && !user?.approved) {
     return <WaitingRoom user={user} onLogout={logout} />;
   }
   // Already logged in and approved → redirect away
   if (isAuth && user?.approved) {
-    const dest = (user?.role === 'dealer' || user?.role === 'broker') ? '/dealer' : '/dashboard';
+    const dest = (user?.role === 'dealer' || user?.role === 'broker' || user?.role === 'individual_seller') ? '/dealer' : '/dashboard';
     navigate(dest, { replace: true });
     return null;
   }
@@ -202,9 +202,12 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
       if (!isDealer && !isSeller) { delete body.businessName; delete body.location; }
       const data = await register(body);
       toast('Account created! Welcome to Kayad 🎉', 'success');
-      if (needsPkg) {
-        // Dealer/broker → show waiting room (they need admin approval)
+      if (role === 'dealer') {
+        // Dealer → show waiting room (needs admin approval)
         setDone(data.user || data);
+      } else if (needsPkg) {
+        // Auto-approved seller → go straight to dealer hub
+        navigate('/dealer', { replace: true });
       } else {
         // Buyer → redirect straight in
         navigate(redirectTo.startsWith('/') ? redirectTo : '/dashboard', { replace: true });
@@ -342,11 +345,11 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
           </div>
         </div>
 
-        {needsPkg && (
+        {role === 'dealer' && (
           <div style={{ background:'rgba(249,115,22,0.06)', border:'1px solid rgba(249,115,22,0.15)', borderRadius:12, padding:'12px 16px', marginBottom:20, fontSize:12, color:'rgba(255,255,255,0.5)', lineHeight:1.65 }}>
             <strong style={{ color:'#f97316' }}>⏳ Approval required.</strong>{' '}
-            {isDealer ? 'Dealer accounts are reviewed by our HR team before activation.' : 'Private seller accounts require admin approval before listing.'}
-            {' '}You\'ll receive an email within 24 hours.
+            Dealer accounts are reviewed by our HR team before activation.
+            {' '}You'll receive an email within 24 hours.
           </div>
         )}
 
