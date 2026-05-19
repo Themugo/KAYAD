@@ -21,6 +21,7 @@ export const createCarSchema = z.object({
   address: z.string().optional(),
   allowBuy: z.boolean().optional(),
   allowBid: z.boolean().optional(),
+  escrowEnabled: z.boolean().optional(),
   auctionStatus: z.string().optional(),
   auctionEnd: z.string().optional(),
 });

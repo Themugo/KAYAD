@@ -37,7 +37,7 @@ export const initiatePayment = async (req, res) => {
       });
     }
 
-    // All purchases go through escrow — normalize any buy-type to "escrow"
+    // All purchases go through escrow by default — normalize buy-type
     const normalizedType = type === "buy" || type === "direct" ? "escrow" : type;
 
     const result = await initiate({
@@ -48,12 +48,12 @@ export const initiatePayment = async (req, res) => {
       phone,
     });
 
-    // Create Escrow record for escrow-type payments
+    // Create Escrow record only when car has escrow enabled
     if (normalizedType === "escrow" && result.payment?._id) {
       const Car = (await import("../models/Car.js")).default;
-      const Escrow = (await import("../models/Escrow.js")).default;
-      const car = await Car.findById(carId);
-      if (car) {
+      const car = await Car.findById(carId).select("escrowEnabled dealer");
+      if (car && car.escrowEnabled !== false) {
+        const Escrow = (await import("../models/Escrow.js")).default;
         const escrow = await Escrow.create({
           car: carId,
           buyer: req.user.id,

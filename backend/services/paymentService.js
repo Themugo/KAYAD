@@ -131,6 +131,19 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     }
   }
 
+  // If no escrow record exists (escrow disabled on car), mark car sold directly
+  if (payment.car) {
+    const Car = (await import("../models/Car.js")).default;
+    const car = await Car.findById(payment.car);
+    if (car && !car.escrowEnabled) {
+      car.sold = true;
+      car.status = "sold";
+      car.isPaid = true;
+      car.paymentStatus = "paid";
+      await car.save();
+    }
+  }
+
   // ── EMIT: user gets real-time confirmation ──────────────────
   const io = global.io;
   if (io) {

@@ -63,6 +63,7 @@ const carSchema = new mongoose.Schema(
     status: { type: String, enum: ["active", "sold", "pending", "rejected"], default: "active", index: true },
     allowBuy: { type: Boolean, default: true },
     allowBid: { type: Boolean, default: false },
+    escrowEnabled: { type: Boolean, default: true },
 
     // =============================
     // 🔥 AUCTION

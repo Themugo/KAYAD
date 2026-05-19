@@ -534,7 +534,7 @@ export default function CarDetailPage() {
               {/* Pricing */}
               <div className="price-box">
                 <div className="price-box-label">
-                  {isLive && car.currentBid > 0 ? 'Current Bid' : isP2P ? 'Escrow Price' : 'Buy Now Price'}
+                  {isLive && car.currentBid > 0 ? 'Current Bid' : isP2P || car.escrowEnabled !== false ? 'Escrow Price' : 'Buy Now Price'}
                 </div>
                 <div className="price-box-amount">KES {priceStr}</div>
                 {isLive && car.currentBid > 0 && (
@@ -572,9 +572,15 @@ export default function CarDetailPage() {
                       <Zap size={15} /> Join Live Auction
                     </Link>
                   ) : car.allowBuy && (isP2P || isDealerSeller) ? (
-                    <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
-                      <Lock size={15} /> Buy via Escrow
-                    </button>
+                    car.escrowEnabled !== false ? (
+                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
+                        <Lock size={15} /> Buy via Escrow
+                      </button>
+                    ) : (
+                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-buynow">
+                        <ShieldCheck size={15} /> Buy Now
+                      </button>
+                    )
                   ) : null}
 
                   {dv.chatEnabled && !car.chatDisabled && (
@@ -598,21 +604,21 @@ export default function CarDetailPage() {
               )}
 
               {/* Trust Note */}
-              {isP2P ? (
+              {isP2P || car.escrowEnabled !== false ? (
                 <div className="trust-note trust-note-escrow">
                   <Lock size={12} className="trust-note-icon" />
                   <div className="trust-note-text">
-                    <strong>Escrow Protected.</strong> Payment held securely until you confirm receipt. Protects you when buying from independent sellers.
+                    <strong>Escrow Protected.</strong> Payment held securely until you confirm receipt. Funds released to the seller only after your approval.
                   </div>
                 </div>
-              ) : isDealerSeller ? (
-                <div className="trust-note trust-note-escrow">
-                  <Lock size={12} className="trust-note-icon" />
+              ) : (
+                <div className="trust-note trust-note-dealer">
+                  <ShieldCheck size={12} className="trust-note-icon" />
                   <div className="trust-note-text">
-                    <strong>Escrow Protected.</strong> Payment held securely until you confirm receipt. All purchases on Kayad are escrow-protected.
+                    <strong>Direct Purchase.</strong> Pay the seller directly — no escrow holding. This vehicle is listed by a Kayad-approved dealer.
                   </div>
                 </div>
-              ) : null}
+              )}
             </div>
           </div>
 

@@ -69,7 +69,7 @@ export default function EditCarPage() {
     title:'', brand:'', model:'', year:'', price:'',
     fuel:'', transmission:'', bodyType:'', mileage:'',
     color:'', condition:'', city:'', description:'',
-    allowBuy: true, allowBid: false, auctionEnd:'',
+    allowBuy: true, allowBid: false, escrowEnabled: true, auctionEnd:'',
     engine:'', drivetrain:'',
   });
 
@@ -120,6 +120,7 @@ export default function EditCarPage() {
           description:  c.description || '',
           allowBuy:     c.allowBuy  ?? true,
           allowBid:     c.allowBid  ?? false,
+          escrowEnabled: c.escrowEnabled ?? true,
           auctionEnd:   c.auctionEnd ? new Date(c.auctionEnd).toISOString().slice(0, 16) : '',
           engine:       c.engine      || '',
           drivetrain:   c.drivetrain  || '',
@@ -347,6 +348,14 @@ export default function EditCarPage() {
                         <span style={{ fontSize: 13, color: form[opt.key] ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: form[opt.key] ? 600 : 400 }}>{opt.label}</span>
                       </button>
                     ))}
+                    {form.allowBuy && (
+                      <button onClick={() => set('escrowEnabled', !form.escrowEnabled)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', borderRadius: 9, border: `1px solid ${form.escrowEnabled ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, background: form.escrowEnabled ? 'rgba(212,196,168,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
+                        <div style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid ${form.escrowEnabled ? 'var(--gold)' : 'rgba(255,255,255,0.2)'}`, background: form.escrowEnabled ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {form.escrowEnabled && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>✓</span>}
+                        </div>
+                        <span style={{ fontSize: 13, color: form.escrowEnabled ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: form.escrowEnabled ? 600 : 400 }}>🛡️ Escrow Protection</span>
+                      </button>
+                    )}
                   </FieldGroup>
                 </div>
               </div>
