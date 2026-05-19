@@ -68,7 +68,7 @@ router.post(
     car.startingBid = startingBid;
     car.currentBid = startingBid;
     car.auctionStartTime = new Date();
-    car.auctionEndTime = new Date(Date.now() + durationMs);
+    car.auctionEnd = new Date(Date.now() + durationMs);
 
     await car.save();
 
@@ -127,15 +127,15 @@ router.post(
       });
     }
 
-    car.auctionEndTime = new Date(
-      new Date(car.auctionEndTime).getTime() + extraMs
+    car.auctionEnd = new Date(
+      new Date(car.auctionEnd).getTime() + extraMs
     );
 
     await car.save();
 
     res.json({
       success: true,
-      newEndTime: car.auctionEndTime,
+      newEndTime: car.auctionEnd,
     });
   })
 );

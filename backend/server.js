@@ -206,43 +206,6 @@ io.on("connection", (socket) => {
     if (carId) { socket.join(String(carId)); socket.join(`car_${carId}`); }
   });
 
-  socket.on("placeBid", async ({ auctionId, bidAmount, maskedName }) => {
-    if (!auctionId || !bidAmount) return;
-    const authenticatedUserId = socket.user?.id || socket.user?._id;
-    if (!authenticatedUserId) return;
-
-    if (!socketRateLimit(authenticatedUserId)) {
-      socket.emit("error", { message: "Too many bids — slow down" });
-      return;
-    }
-    try {
-      const Auction = (await import("./models/Auction.js")).default;
-      const auction = await Auction.findById(auctionId);
-      if (!auction || auction.status !== "active") return;
-
-      if (bidAmount <= auction.highestBid) return;
-      auction.highestBid = bidAmount;
-      auction.bidHistory.push({ userId: authenticatedUserId, bid: bidAmount });
-
-      const { applyAuctionSnipingProtection } = await import("./utils/snipeGuard.js");
-      const extended = await applyAuctionSnipingProtection(auction);
-
-      await auction.save();
-
-      io.to(String(auctionId)).emit("newBid", {
-        amount: bidAmount,
-        bidder: maskedName || `Bidder #${100 + (auction.bidHistory?.length || 0)}`,
-        time: new Date(),
-        endTime: auction.endTime,
-      });
-      if (extended) {
-        io.to(String(auctionId)).emit("timeExtended", { newEndTime: auction.endTime });
-      }
-    } catch (err) {
-      console.error("placeBid socket error:", err.message);
-    }
-  });
-
   socket.on("joinChat",     (chatId) => { if (chatId) socket.join(`chat_${chatId}`); });
   socket.on("leaveChat",    (chatId) => { if (chatId) socket.leave(`chat_${chatId}`); });
   socket.on("typing",       ({ chatId, userId, name }) => {

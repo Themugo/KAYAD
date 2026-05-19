@@ -40,7 +40,7 @@ export const startAuctionTimer = (io) => {
         // =============================
         const topBid = await Bid.findOne({
           carId: car._id,
-          status: "active",
+          status: "paid",
         }).sort({ amount: -1 });
 
         let winner = null;

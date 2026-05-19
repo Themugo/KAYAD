@@ -360,8 +360,9 @@ export const confirmBidPayment = async (req, res) => {
     await runAutoBidding(bid.carId);
 
     if (global.io) {
-      global.io.to(`car_${carId}`).emit("auctionUpdate", {
-        carId: bid.carId.toString(),
+      const carIdStr = bid.carId.toString();
+      global.io.to(`car_${carIdStr}`).emit("auctionUpdate", {
+        carId: carIdStr,
         currentBid: bid.amount,
       });
     }

@@ -7,7 +7,6 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
-import PaymentModal from '../components/PaymentModal';
 import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import usePageMeta from '../hooks/usePageMeta';
@@ -68,7 +67,6 @@ export default function AuctionLivePage() {
   const [maxBid, setMaxBid] = useState('');
   const [phone, setPhone] = useState('');
   const [placing, setPlacing] = useState(false);
-  const [showPayModal, setShowPayModal] = useState(false);
   const [pendingBidId, setPendingBidId] = useState(null);
   const [currentBid, setCurrentBid] = useState(0);
   const [prevBid, setPrevBid] = useState(0);
@@ -208,8 +206,7 @@ export default function AuctionLivePage() {
         maxBid: maxBid ? Number(maxBid) : null,
       });
       setPendingBidId(data.bid?._id || data._id);
-      setShowPayModal(true);
-      toast('Bid placed! Complete M-Pesa payment to confirm.', 'info');
+      toast('STK push sent — check your M-Pesa to confirm bid', 'info');
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to place bid', 'error');
     } finally {
@@ -642,18 +639,6 @@ export default function AuctionLivePage() {
           </div>
         </div>
       </div>
-
-      {/* M-Pesa modal for bid commitment */}
-      {showPayModal && (
-        <PaymentModal
-          amount={Math.round(Number(bidAmount) * 0.05)}
-          carId={car._id}
-          type="bid"
-          title="Bid Commitment — 5% via M-Pesa"
-          onClose={() => setShowPayModal(false)}
-          onSuccess={() => toast('Bid commitment confirmed! 🎉', 'success')}
-        />
-      )}
 
       {/* Winner Modal */}
       {showWinner && (

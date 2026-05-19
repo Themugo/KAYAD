@@ -90,17 +90,39 @@ export const handleMpesaCallback = async (callbackData) => {
 
     // 🔥 BID PAYMENT FLOW
     if (payment.type === "bid") {
-      const bid = await Bid.findById(payment.bidId).session(session);
+      let bid = null;
 
-      if (bid && bid.status !== "active") {
-        bid.status = "active";
+      if (payment.bidId) {
+        bid = await Bid.findById(payment.bidId).session(session);
+      }
+
+      if (!bid && payment.car) {
+        bid = await Bid.findOne({
+          carId: payment.car,
+          status: "pending",
+          checkoutRequestID,
+        }).session(session);
+      }
+
+      if (bid && bid.status !== "paid") {
+        bid.status = "paid";
+        bid.mpesaReceipt = receipt;
+        bid.paidAt = new Date();
         await bid.save({ session });
 
         const car = await Car.findById(bid.carId).session(session);
 
         if (car) {
           car.currentBid = bid.amount;
+          car.highestBidder = bid.user;
           await car.save({ session });
+
+          if (global.io) {
+            global.io.to(`car_${car._id}`).emit("auctionUpdate", {
+              carId: car._id,
+              currentBid: bid.amount,
+            });
+          }
         }
       }
     }

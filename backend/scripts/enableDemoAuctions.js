@@ -36,7 +36,7 @@ async function enableAuctions() {
         allowBuy: false,
         auctionStatus: "live",
         auctionStartTime: new Date(),
-        auctionEndTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        auctionEnd: new Date(Date.now() + 2 * 60 * 60 * 1000),
         currentBid: 100000,
         startingBid: 100000,
         bidIncrement: 50000,

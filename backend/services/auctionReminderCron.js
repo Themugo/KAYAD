@@ -38,9 +38,9 @@ const runReminders = async () => {
     const endingAuctions = await Car.find({
       auctionStatus: "live",
       allowBid: true,
-      auctionEndTime: { $gte: windowStart, $lte: windowEnd },
+      auctionEnd: { $gte: windowStart, $lte: windowEnd },
       [`reminderSent_${threshold.label}min`]: { $ne: true },
-    }).select("_id title currentBid price auctionEndTime");
+    }).select("_id title currentBid price auctionEnd");
 
     if (endingAuctions.length === 0) continue;
 

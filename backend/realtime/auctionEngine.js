@@ -272,11 +272,11 @@ export const startAuctionEngine = async () => {
   try {
     console.log("⚡ Bootstrapping auctions...");
     const now = Date.now();
-    const liveCars = await Car.find({ auctionStatus: "live", allowBid: true }).select("_id currentBid auctionEndTime");
+    const liveCars = await Car.find({ auctionStatus: "live", allowBid: true }).select("_id currentBid auctionEnd");
     if (!liveCars.length) { console.log("⚠️ No live auctions found"); return; }
     for (const car of liveCars) {
       const roomId = car._id.toString();
-      const endTime = new Date(car.auctionEndTime).getTime();
+      const endTime = new Date(car.auctionEnd).getTime();
       if (!endTime || isNaN(endTime)) { console.warn(`⚠️ Invalid end time: ${roomId}`); continue; }
       const duration = endTime - now;
       if (duration <= 0) {
@@ -364,6 +364,18 @@ export const endAuction = async (roomId) => {
         commissionOwed,
       }
     );
+
+    // =============================
+    // 🚗 SYNC CAR MODEL (PREVENT DOUBLE-END BY TIMER)
+    // =============================
+    await Car.findByIdAndUpdate(roomId, {
+      auctionStatus: "ended",
+      allowBid: false,
+      currentBid: winner.bid,
+      sold: true,
+      status: "sold",
+      winner: { user: winner.userId, amount: winner.bid },
+    });
 
     // =============================
     // 🔁 LOSER REFUND LOGGING (KAYAD_ESCROW only)
