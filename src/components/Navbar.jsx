@@ -142,12 +142,24 @@ export default function Navbar({ branding }) {
             </Link>
 
             {(isDealer || user?.role === 'broker' || user?.role === 'individual_seller') && (
+              <>
               <Link to="/dealer" style={navLinkStyle(isActive('/dealer'))}
                 onMouseEnter={e => { if (!isActive('/dealer')) e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { if (!isActive('/dealer')) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
                 Dealer Hub
                 <span style={navLinkAfter(isActive('/dealer'))} className="nav-underline" />
               </Link>
+              {!user?.onboardingComplete && (
+                <Link to="/dealer/onboarding" style={{
+                  ...navLinkStyle(isActive('/dealer/onboarding')),
+                  color: 'var(--gold)', fontSize: 10,
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--gold)'; }}>
+                  Setup
+                </Link>
+              )}
+              </>
             )}
 
             {isAdmin && (

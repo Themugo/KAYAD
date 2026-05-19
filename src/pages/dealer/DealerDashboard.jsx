@@ -346,6 +346,27 @@ export default function DealerDashboard() {
             </div>
           </div>
 
+          {!user?.onboardingComplete && (
+            <div style={{
+              background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)',
+              borderRadius: 10, padding: '12px 18px', marginBottom: 20,
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            }}>
+              <span style={{ fontSize: 20 }}>🚀</span>
+              <span style={{ flex: 1, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                Complete your <strong style={{ color: 'var(--gold)' }}>shop setup</strong> to start receiving payments
+              </span>
+              <Link to="/dealer/onboarding" style={{
+                padding: '8px 18px', borderRadius: 8,
+                background: 'var(--gold)', color: '#000',
+                fontSize: 12, fontWeight: 700, textDecoration: 'none',
+                display: 'flex', alignItems: 'center', gap: 5,
+              }}>
+                Complete Setup <ChevronRight size={13} />
+              </Link>
+            </div>
+          )}
+
           {/* TABS */}
           <div style={{ display: 'flex', gap: 2 }}>
             {TABS.map(({ id, label, icon: Icon }) => (

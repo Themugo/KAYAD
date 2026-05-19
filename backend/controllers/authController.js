@@ -308,7 +308,7 @@ export const getProfile = async (req, res) => {
 // ============================================================
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications } = req.body;
+    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications, paymentDetails, onboardingComplete } = req.body;
 
     const updates = {};
     if (name)              updates.name = name.trim();
@@ -323,6 +323,8 @@ export const updateProfile = async (req, res) => {
     if (bankAccount !== undefined)       updates.bankAccount = bankAccount.trim();
     if (bankBranch !== undefined)        updates.bankBranch = bankBranch.trim();
     if (notifications)                   updates.notifications = { sms: notifications.sms };
+    if (paymentDetails)                  updates.paymentDetails = paymentDetails;
+    if (onboardingComplete === true)     updates.onboardingComplete = true;
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
       .select("-password");

@@ -41,6 +41,7 @@ import BuyerDashboard from './pages/BuyerDashboard';
 import DealerDashboard  from './pages/dealer/DealerDashboard';
 import DealerTeam       from './pages/dealer/DealerTeam';
 import DealerSetup      from './pages/dealer/DealerSetup';
+import DealerOnboarding from './pages/dealer/DealerOnboarding';
 import AddCarPage       from './pages/dealer/AddCarPage';
 import EditCarPage      from './pages/dealer/EditCarPage';
 import DealerAnalytics  from './pages/dealer/DealerAnalytics';
@@ -110,6 +111,7 @@ export default function App() {
                   <Route path="/dealer"             element={<RequireSeller><DealerDashboard /></RequireSeller>} />
                   <Route path="/dealer/team"        element={<RequireSeller><DealerTeam /></RequireSeller>} />
                   <Route path="/dealer/setup"       element={<RequireSeller><DealerSetup /></RequireSeller>} />
+                  <Route path="/dealer/onboarding" element={<RequireSeller><DealerOnboarding /></RequireSeller>} />
                   <Route path="/dealer/add-car"     element={<RequireSeller><AddCarPage /></RequireSeller>} />
                   <Route path="/dealer/edit/:id"       element={<RequireSeller><EditCarPage /></RequireSeller>} />
 
