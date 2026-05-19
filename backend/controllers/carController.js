@@ -13,46 +13,26 @@ const toNumber = (val, def) => {
 };
 
 // =============================
-// 📦 GET ALL CARS (FIXED + STABLE)
+// 📦 GET ALL CARS (SERVER-SIDE FILTERING + PAGINATION)
 // =============================
 export const getCars = async (req, res) => {
   try {
     const {
-      keyword,
-      minPrice,
-      maxPrice,
-      brand,
-      city,
+      keyword, brand, city,
+      minPrice, maxPrice,
+      yearMin, yearMax,
+      body, fuel, transmission, color, condition,
+      mileageMin, mileageMax,
+      category,
       sort,
-      page = 1,
-      limit = 12,
+      page = 1, limit = 12,
     } = req.query;
 
     const pageNum = toNumber(page, 1);
     const limitNum = toNumber(limit, 12);
 
-    // 🔑 better cache key
-    const key = `cars:list:${JSON.stringify({
-      keyword,
-      minPrice,
-      maxPrice,
-      brand,
-      city,
-      sort,
-      page: pageNum,
-      limit: limitNum,
-    })}`;
-
-    const cached = await cacheGet(key);
-    if (cached) {
-      return res.json(cached);
-    }
-
     const query = { status: "active" };
 
-    // =============================
-    // 🔍 SAFE SEARCH (NO TEXT INDEX BREAK)
-    // =============================
     if (keyword) {
       const safe = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.$or = [
@@ -61,43 +41,51 @@ export const getCars = async (req, res) => {
       ];
     }
 
-    // =============================
-    // 💰 PRICE FILTER
-    // =============================
+    if (brand) query.brand = { $in: brand.split(",") };
+    if (city) query["location.city"] = city;
+
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = toNumber(minPrice, 0);
       if (maxPrice) query.price.$lte = toNumber(maxPrice, 999999999);
     }
 
-    // =============================
-    // 🚗 BRAND FILTER
-    // =============================
-    if (brand) {
-      query.brand = { $in: brand.split(",") };
+    if (yearMin || yearMax) {
+      query.year = {};
+      if (yearMin) query.year.$gte = toNumber(yearMin, 0);
+      if (yearMax) query.year.$lte = toNumber(yearMax, 9999);
     }
 
-    // =============================
-    // 📍 LOCATION
-    // =============================
-    if (city) {
-      query["location.city"] = city;
+    if (body) query.bodyType = body;
+    if (fuel) query.fuel = fuel;
+    if (transmission) query.transmission = transmission;
+    if (color) query.color = color;
+    if (condition) query.condition = condition;
+
+    if (mileageMin || mileageMax) {
+      query.mileage = {};
+      if (mileageMin) query.mileage.$gte = toNumber(mileageMin, 0);
+      if (mileageMax) query.mileage.$lte = toNumber(mileageMax, 9999999);
     }
 
-    // =============================
-    // 🔃 SORTING
-    // =============================
-    let sortOption = { createdAt: -1 };
+    if (category === "auction") {
+      query.$or = [{ auctionStatus: "live" }, { allowBid: true }];
+    } else if (category === "fixed") {
+      query.auctionStatus = { $ne: "live" };
+      query.allowBid = { $ne: true };
+    }
 
+    let sortOption = {};
     if (sort === "price_asc") sortOption = { price: 1 };
     else if (sort === "price_desc") sortOption = { price: -1 };
-    else if (sort === "newest") sortOption = { createdAt: -1 };
+    else if (sort === "year_desc") sortOption = { year: -1 };
+    else if (sort === "year_asc") sortOption = { year: 1 };
+    else if (sort === "mileage_asc") sortOption = { mileage: 1 };
+    else if (sort === "views_desc") sortOption = { views: -1 };
+    else sortOption = { auctionStatus: -1, createdAt: -1 };
 
     const skip = (pageNum - 1) * limitNum;
 
-    // =============================
-    // ⚡ FETCH DATA
-    // =============================
     const [cars, total] = await Promise.all([
       Car.find(query)
         .select(
@@ -111,22 +99,16 @@ export const getCars = async (req, res) => {
       Car.countDocuments(query),
     ]);
 
-    const response = {
+    res.json({
       success: true,
       data: cars || [],
       pagination: {
         page: pageNum,
+        limit: limitNum,
         total,
         pages: Math.ceil(total / limitNum),
       },
-    };
-
-    // =============================
-    // 🧠 CACHE (30s)
-    // =============================
-    await cacheSet(key, response, 30);
-
-    res.json(response);
+    });
 
   } catch (err) {
     console.error("❌ FETCH ERROR:", err.message);
