@@ -19,13 +19,10 @@ export function LoginPage() {
     axios.get('/api/cars?limit=1', { timeout: 5000 }).catch(() => {});
   }, []);
 
-  // Reactive redirect after auth state flushes (fixes race condition where
-  // navigate() was called before React committed the user state update)
+  // Safety net: redirect once auth state flushes
   useEffect(() => {
     if (!isAuth || !user) return;
-    if (user?.mustChangePassword) {
-      navigate('/force-password-change', { replace: true }); return;
-    }
+    if (user?.mustChangePassword) { navigate('/force-password-change', { replace: true }); return; }
     const role = user.role;
     const dest = role === 'dealer' || role === 'broker' ? '/dealer'
       : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
@@ -44,8 +41,17 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form);
+      const data = await login(form);
       toast('Welcome back! 🚗', 'success');
+      if (data.user?.mustChangePassword) { navigate('/force-password-change', { replace: true }); return; }
+      const role = data.user?.role;
+      const dest = role === 'dealer' || role === 'broker' ? '/dealer'
+        : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
+        || role === 'hr' || role === 'accounts' || role === 'escrow_officer' || role === 'ad_manager'
+        || role === 'moderator' ? '/admin'
+        : role === 'user' ? '/dashboard'
+        : from;
+      setTimeout(() => navigate(dest, { replace: true }), 50);
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid credentials', 'error');
     } finally {
