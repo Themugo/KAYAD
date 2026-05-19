@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCompare } from '../context/CompareContext';
 import { MapPin, Gauge, ChevronRight, ShieldCheck, Zap, Heart, Eye, BarChart3, Fuel, Calendar, Settings, Flame } from 'lucide-react';
+import LazyImage from './LazyImage';
 
 function firstImage(car) {
   if (car.image) return car.image;
@@ -31,24 +32,17 @@ function daysAgo(date) {
 }
 
 export default function CartyGrid({ car, listView, isMobile }) {
-  const [imgErr, setImgErr] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const imgRef = useRef(null);
 
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
   const isCompared = ctxIsComparing(car._id);
-
-  useEffect(() => {
-    if (imgRef.current?.complete) setImgLoaded(true);
-  }, []);
 
   if (!car) return null;
 
   const isLive    = car.auctionStatus === 'live';
   const isElite   = isLive || car.allowBid || car.isAuction;
   const linkTo    = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
-  const img       = (!imgErr && firstImage(car)) || FALLBACK;
+  const img       = firstImage(car);
   const city      = car.location?.city || car.location || 'Nairobi';
   const d         = car.dealer || {};
   const price     = Number(car.currentBid || car.price || 0);
@@ -72,8 +66,8 @@ export default function CartyGrid({ car, listView, isMobile }) {
             height: isMobile ? 180 : 'auto',
             flexShrink: 0, overflow: 'hidden', position: 'relative',
           }}>
-            <img src={img} onError={() => setImgErr(true)} alt=""
-              style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease', transform: hovered ? 'scale(1.05)' : 'none' }} />
+            <LazyImage src={img} fallback={FALLBACK} alt=""
+              style={{ width: '100%', height: '100%', transform: hovered ? 'scale(1.05)' : 'none', transition: 'transform 0.4s ease' }} />
             <div style={{
               position: 'absolute', inset: 0,
               background: 'linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.5) 100%)',
@@ -250,26 +244,9 @@ export default function CartyGrid({ car, listView, isMobile }) {
         boxShadow: hovered ? '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(212,196,168,0.08)' : '0 4px 12px rgba(0,0,0,0.2)',
       }}>
         <div style={{ position: 'relative', aspectRatio: '16/10', overflow: 'hidden', background: '#111' }}>
-          {!imgLoaded && (
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 100%)',
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 1.5s infinite',
-            }} />
-          )}
-          <img ref={imgRef}
-            src={img}
-            onError={() => setImgErr(true)}
-            onLoad={() => setImgLoaded(true)}
-            alt={car.title || 'Vehicle'}
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transition: 'transform 0.6s cubic-bezier(0.2,0,0,1), opacity 0.4s ease',
-              transform: hovered ? 'scale(1.06)' : 'none',
-              opacity: imgLoaded ? 1 : 0.3,
-            }}
-          />
+          <div style={{ width: '100%', height: '100%', transform: hovered ? 'scale(1.06)' : 'none', transition: 'transform 0.6s cubic-bezier(0.2,0,0,1)' }}>
+            <LazyImage src={img} fallback={FALLBACK} alt={car.title || 'Vehicle'} style={{ width: '100%', height: '100%' }} />
+          </div>
 
           <div style={{
             position: 'absolute', inset: 0,

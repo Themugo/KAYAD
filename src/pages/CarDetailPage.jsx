@@ -10,6 +10,7 @@ import InspectionButton from '../components/InspectionButton';
 import TcoCalculator from '../components/TcoCalculator';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import PriceHistoryChart from '../components/PriceHistoryChart';
+import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
@@ -111,6 +112,7 @@ export default function CarDetailPage() {
   const [promoting, setPromoting] = useState(false);
   const [ntsaStatus, setNtsaStatus] = useState(null);
   const [ntsaLoading, setNtsaLoading] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -253,7 +255,9 @@ export default function CarDetailPage() {
         <div className="detail-left">
 
           {/* Gallery */}
-          <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} />
+          <div onClick={() => setShowGallery(true)} style={{ cursor: 'zoom-in' }}>
+            <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} />
+          </div>
 
           {/* Thumbnails */}
           {total > 1 && (
@@ -666,6 +670,10 @@ export default function CarDetailPage() {
           )}
         </div>
       </div>
+
+      {showGallery && (
+        <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+      )}
 
       {showPayModal && (
         <PaymentModal
