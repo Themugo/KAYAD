@@ -7,6 +7,17 @@ const userSchema = new mongoose.Schema(
     // =============================
     // 👤 BASIC INFO
     // =============================
+    isDemo: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    deactivatedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+
     name: {
       type: String,
       required: true,

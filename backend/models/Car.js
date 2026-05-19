@@ -54,6 +54,11 @@ const carSchema = new mongoose.Schema(
       ref: "User",
       index: true,
     },
+    isDemo: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     dealerPhone: String,
     isVerifiedDealer: { type: Boolean, default: false },
 

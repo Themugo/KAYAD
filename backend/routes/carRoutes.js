@@ -20,6 +20,7 @@ import {
   updateCar,
   deleteCar,
   placeBid,
+  getDemoCars,
 } from "../controllers/carController.js";
 
 import Car from "../models/Car.js";
@@ -78,6 +79,15 @@ router.get(
       data: stats || {},
     });
   })
+);
+
+// =============================
+// 🧪 DEMO CARS (demo dealer only)
+// =============================
+router.get(
+  "/demo/all",
+  protect,
+  asyncHandler(getDemoCars)
 );
 
 // =============================

@@ -741,6 +741,129 @@ router.post(
 );
 
 // =============================
+// 🗑 DELETE USER (superadmin only — hard remove)
+// =============================
+router.delete(
+  "/users/:id",
+  authorize("superadmin"),
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
+    if (user._id.toString() === req.user.id) return res.status(400).json({ success: false, message: "Cannot delete yourself" });
+
+    // Clean up user's cars, bids, payments, escrows
+    await Car.deleteMany({ dealer: user._id });
+    await Bid.deleteMany({ user: user._id });
+    await Payment.deleteMany({ user: user._id });
+    await Escrow.deleteMany({ $or: [{ buyer: user._id }, { seller: user._id }] });
+    await user.deleteOne();
+
+    await AuditLog.create({
+      action: `User deleted: ${user.email} (${user.role})`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: "User and all associated data deleted" });
+  })
+);
+
+// =============================
+// ⛔ DEACTIVATE USER (superadmin only — soft disable)
+// =============================
+router.put(
+  "/users/:id/deactivate",
+  authorize("superadmin"),
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot deactivate superadmin" });
+
+    user.deactivatedAt = user.deactivatedAt ? null : new Date();
+    await user.save();
+
+    await AuditLog.create({
+      action: user.deactivatedAt ? `User deactivated: ${user.email}` : `User reactivated: ${user.email}`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({ success: true, message: user.deactivatedAt ? "User deactivated" : "User reactivated" });
+  })
+);
+
+// =============================
+// 📊 DEMO DATA STATUS
+// =============================
+router.get(
+  "/demo/status",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const [demoUsers, demoUsersDeleted, demoCars, demoBids, demoPayments, demoEscrows] = await Promise.all([
+      User.countDocuments({ isDemo: true, deactivatedAt: null }),
+      User.countDocuments({ isDemo: true, deactivatedAt: { $ne: null } }),
+      Car.countDocuments({ isDemo: true }),
+      Bid.countDocuments({ isDemo: true }),
+      Payment.countDocuments({ isDemo: true }),
+      Escrow.countDocuments({ isDemo: true }),
+    ]);
+
+    res.json({
+      success: true,
+      status: {
+        activeDemoUsers: demoUsers,
+        deactivatedDemoUsers: demoUsersDeleted,
+        demoUsersTotal: demoUsers + demoUsersDeleted,
+        demoCars,
+        demoBids,
+        demoPayments,
+        demoEscrows,
+      },
+    });
+  })
+);
+
+// =============================
+// 🧹 DELETE ALL DEMO DATA (webhost/superadmin only)
+// =============================
+router.delete(
+  "/demo/cleanup",
+  authorize("superadmin"),
+  asyncHandler(async (req, res) => {
+    const demoUserIds = await User.find({ isDemo: true }).distinct("_id");
+
+    const [carsDeleted, bidsDeleted, paymentsDeleted, escrowsDeleted, usersDeleted] = await Promise.all([
+      Car.deleteMany({ dealer: { $in: demoUserIds } }),
+      Bid.deleteMany({ user: { $in: demoUserIds } }),
+      Payment.deleteMany({ user: { $in: demoUserIds } }),
+      Escrow.deleteMany({ $or: [{ buyer: { $in: demoUserIds } }, { seller: { $in: demoUserIds } }] }),
+      User.deleteMany({ isDemo: true }),
+    ]);
+
+    await AuditLog.create({
+      action: `Demo cleanup: ${usersDeleted.deletedCount} users, ${carsDeleted.deletedCount} cars, ${bidsDeleted.deletedCount} bids, ${paymentsDeleted.deletedCount} payments, ${escrowsDeleted.deletedCount} escrows deleted`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
+
+    res.json({
+      success: true,
+      message: "Demo data cleaned up",
+      deleted: {
+        users: usersDeleted.deletedCount,
+        cars: carsDeleted.deletedCount,
+        bids: bidsDeleted.deletedCount,
+        payments: paymentsDeleted.deletedCount,
+        escrows: escrowsDeleted.deletedCount,
+      },
+    });
+  })
+);
+
+// =============================
 // 👥 STAFF MANAGEMENT (superadmin only)
 // =============================
 

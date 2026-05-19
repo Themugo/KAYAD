@@ -67,6 +67,7 @@ import InspectorDashboard from './pages/InspectorDashboard';
 import InspectorApply from './pages/InspectorApply';
 import AdminInspectorApplications from './pages/admin/AdminInspectorApplications';
 import AdminCarModeration from './pages/admin/AdminCarModeration';
+import ControlRoom from './pages/admin/ControlRoom';
 
 export default function App() {
   return (
@@ -135,6 +136,7 @@ export default function App() {
                   <Route path="/admin/inspections"  element={<RequireAdmin><AdminInspections /></RequireAdmin>} />
                   <Route path="/admin/security-log" element={<RequireAdmin><AdminSecurityLog /></RequireAdmin>} />
                   <Route path="/admin/inspector-applications" element={<RequireAdmin><AdminInspectorApplications /></RequireAdmin>} />
+                  <Route path="/admin/control-room" element={<RequireAdmin><ControlRoom /></RequireAdmin>} />
 
                   {/* Inspector */}
                   <Route path="/inspector" element={<RequireAuth><InspectorDashboard /></RequireAuth>} />

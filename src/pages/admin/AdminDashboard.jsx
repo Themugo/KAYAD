@@ -18,6 +18,7 @@ const ROLE_CONFIG = {
 
 const ROLE_LINKS = {
   superadmin: [
+    { to:'/admin/control-room', icon: Activity,     label:'Control Room',   desc:'System operations hub' },
     { to:'/admin/users',        icon: Users,        label:'Users',          desc:'Manage all accounts' },
     { to:'/admin/moderation',   icon: ClipboardCheck,label:'Moderation Queue',desc:'Approve/reject listings' },
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'All vehicle listings' },
@@ -33,6 +34,7 @@ const ROLE_LINKS = {
     { to:'/admin/inspections',  icon: BarChart3,    label:'Inspections',    desc:'On-demand inspection orders' },
   ],
   admin: [
+    { to:'/admin/control-room', icon: Activity,     label:'Control Room',   desc:'System operations' },
     { to:'/admin/users',        icon: Users,        label:'Users',          desc:'Manage accounts' },
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'Vehicle listings' },
     { to:'/admin/sellers',      icon: UserCheck,    label:'Dealer Approvals',desc:'Verifications' },

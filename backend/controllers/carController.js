@@ -4,6 +4,9 @@ import { cacheGet, cacheSet } from "../utils/cache.js";
 import { uploadMultiple } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 
+// Demo dealer can manage all demo cars — identified by seeded email
+const isDemoDealer = (user) => user?.email?.toLowerCase() === "dealer@kayad.space";
+
 // =============================
 // 🧠 SAFE NUMBER PARSER
 // =============================
@@ -252,7 +255,8 @@ export const updateCar = async (req, res) => {
 
     const isStaff = ["admin","superadmin","moderator","technical_support"].includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    if (!isOwner && !isStaff) {
+    const isDemoMgmt = car.isDemo && isDemoDealer(req.user);
+    if (!isOwner && !isStaff && !isDemoMgmt) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
 
@@ -314,7 +318,8 @@ export const deleteCar = async (req, res) => {
 
     const isStaff = ["admin","superadmin","moderator"].includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    if (!isOwner && !isStaff) {
+    const isDemoMgmt = car.isDemo && isDemoDealer(req.user);
+    if (!isOwner && !isStaff && !isDemoMgmt) {
       return res.status(403).json({ success: false, message: "Not authorized to delete this listing" });
     }
 
@@ -420,5 +425,26 @@ export const placeBid = async (req, res) => {
   } catch (err) {
     console.error("❌ BID ERROR:", err.message);
     res.status(500).json({ success: false, message: "Bid failed" });
+  }
+};
+
+// =============================
+// 🧪 GET ALL DEMO CARS (demo dealer only)
+// =============================
+export const getDemoCars = async (req, res) => {
+  try {
+    if (!isDemoDealer(req.user)) {
+      return res.status(403).json({ success: false, message: "Only the demo dealer can view all demo cars" });
+    }
+
+    const cars = await Car.find({ isDemo: true })
+      .populate("dealer", "name email businessName")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json({ success: true, data: cars });
+  } catch (err) {
+    console.error("❌ GET DEMO CARS ERROR:", err.message);
+    res.status(500).json({ success: false, message: "Failed to fetch demo cars" });
   }
 };

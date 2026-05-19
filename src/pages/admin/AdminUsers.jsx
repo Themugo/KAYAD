@@ -3,12 +3,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, formatDate, initials } from '../../utils/helpers';
+import { useAuth } from '../../context/AuthContext';
 
 const ROLE_BADGE  = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red' };
 const ROLE_ICON   = { user: '👤', dealer: '🏪', admin: '🔑' };
 
 export default function AdminUsers() {
   const { toast } = useToast();
+  const { user: me } = useAuth();
+  const isSuper = me?.role === 'superadmin';
   const [users, setUsers]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -56,6 +59,32 @@ export default function AdminUsers() {
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true } : x));
       if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, approved: true } : prev);
       toast('✅ Dealer approved!', 'success');
+    } catch { toast('Failed', 'error'); }
+    finally { setActionId(null); }
+  };
+
+  const handleDelete = async (u) => {
+    if (!window.confirm(`Permanently delete ${u.name} (${u.email})? This removes all their cars, bids, payments.`)) return;
+    if (!window.confirm(`⚠️ ARE YOU SURE? This action CANNOT be undone. Type OK to confirm.`) === 'OK') return;
+    setActionId(u._id + '-del');
+    try {
+      await adminAPI.deleteUser(u._id);
+      setUsers(prev => prev.filter(x => x._id !== u._id));
+      if (selected?._id === u._id) setSelected(null);
+      toast('🗑 User permanently deleted', 'success');
+    } catch { toast('Delete failed', 'error'); }
+    finally { setActionId(null); }
+  };
+
+  const handleDeactivate = async (u) => {
+    const action = u.deactivatedAt ? 'Reactivate' : 'Deactivate';
+    if (!window.confirm(`${action} ${u.name}?`)) return;
+    setActionId(u._id + '-deact');
+    try {
+      const result = await adminAPI.deactivateUser(u._id);
+      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, deactivatedAt: result.deactivatedAt || true } : x));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, deactivatedAt: result.deactivatedAt || true } : prev);
+      toast(u.deactivatedAt ? '✅ User reactivated' : '⛔ User deactivated', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
   };
@@ -142,25 +171,42 @@ export default function AdminUsers() {
                       <td>
                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {u.isBanned && <span className="badge badge-red">🚫 Banned</span>}
+                          {u.deactivatedAt && <span className="badge badge-orange">⛔ Deactivated</span>}
                           {u.role === 'dealer' && !u.approved && <span className="badge badge-orange">⏳ Pending</span>}
                           {u.role === 'dealer' &&  u.approved && <span className="badge badge-green">✓ Approved</span>}
-                          {!u.isBanned && (u.role !== 'dealer' || u.approved) && !u.isBanned && <span className="badge badge-green">Active</span>}
+                          {!u.isBanned && !u.deactivatedAt && (u.role !== 'dealer' || u.approved) && <span className="badge badge-green">Active</span>}
                         </div>
                       </td>
                       <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{u.createdAt ? timeAgo(u.createdAt) : '—'}</td>
                       <td onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 110 }}>
+                        <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 120 }}>
                           {u.role === 'dealer' && !u.approved && (
                             <button className="btn btn-gold btn-sm" disabled={actionId === u._id + '-approve'}
                               onClick={() => handleApprove(u)}>
                               {actionId === u._id + '-approve' ? '...' : '✅ Approve'}
                             </button>
                           )}
-                          {u.role !== 'admin' && (
-                            <button className={`btn btn-sm ${u.isBanned ? 'btn-outline' : 'btn-danger'}`}
-                              disabled={actionId === u._id + '-ban'}
-                              onClick={() => handleBan(u)}>
-                              {actionId === u._id + '-ban' ? '...' : u.isBanned ? '✓ Unban' : '🚫 Ban'}
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {u.role !== 'admin' && u.role !== 'superadmin' && (
+                              <button className={`btn btn-sm ${u.isBanned ? 'btn-outline' : 'btn-danger'}`} style={{ flex: 1, fontSize: 11 }}
+                                disabled={actionId === u._id + '-ban'}
+                                onClick={() => handleBan(u)}>
+                                {actionId === u._id + '-ban' ? '...' : u.isBanned ? '✓ Unban' : '🚫 Ban'}
+                              </button>
+                            )}
+                            {isSuper && u.role !== 'superadmin' && u._id !== me?._id && (
+                              <button className="btn btn-sm btn-outline" style={{ flex: 1, fontSize: 11 }}
+                                disabled={actionId === u._id + '-deact'}
+                                onClick={() => handleDeactivate(u)}>
+                                {actionId === u._id + '-deact' ? '...' : u.deactivatedAt ? '✓ Reactivate' : '⛔ Deactivate'}
+                              </button>
+                            )}
+                          </div>
+                          {isSuper && u.role !== 'superadmin' && u.role !== 'admin' && (
+                            <button className="btn btn-sm btn-danger" style={{ fontSize: 10, opacity: 0.7 }}
+                              disabled={actionId === u._id + '-del'}
+                              onClick={() => handleDelete(u)}>
+                              {actionId === u._id + '-del' ? '...' : '🗑 Delete'}
                             </button>
                           )}
                         </div>
@@ -202,13 +248,14 @@ export default function AdminUsers() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               {[
                 { label: 'Role',          val: `${ROLE_ICON[selected.role]} ${selected.role}` },
-                { label: 'Status',        val: selected.isBanned ? '🚫 Banned' : '✅ Active' },
+                { label: 'Status',        val: selected.isBanned ? '🚫 Banned' : selected.deactivatedAt ? '⛔ Deactivated' : '✅ Active' },
                 { label: 'Phone',         val: selected.phone || '—', mono: true },
                 { label: 'Location',      val: selected.location || '—' },
                 { label: 'Business',      val: selected.businessName || '—' },
                 { label: 'Joined',        val: selected.createdAt ? formatDate(selected.createdAt) : '—' },
                 { label: 'User ID',       val: `#${selected._id?.slice(-10)}`, mono: true },
                 { label: 'Dealer Status', val: selected.role === 'dealer' ? (selected.approved ? '✅ Approved' : '⏳ Pending') : 'N/A' },
+                { label: 'Account Type', val: selected.isDemo ? '🧪 Demo Account' : '👤 Real User' },
               ].map(r => (
                 <div key={r.label}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.label}</div>
@@ -217,17 +264,29 @@ export default function AdminUsers() {
               ))}
             </div>
 
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {selected.role === 'dealer' && !selected.approved && (
                 <button className="btn btn-gold" style={{ flex: 1 }}
                   onClick={() => handleApprove(selected)} disabled={actionId === selected._id + '-approve'}>
                   {actionId === selected._id + '-approve' ? '...' : '✅ Approve Dealer'}
                 </button>
               )}
-              {selected.role !== 'admin' && (
+              {selected.role !== 'admin' && selected.role !== 'superadmin' && (
                 <button className={`btn ${selected.isBanned ? 'btn-outline' : 'btn-danger'}`} style={{ flex: 1 }}
                   onClick={() => handleBan(selected)} disabled={actionId === selected._id + '-ban'}>
                   {actionId === selected._id + '-ban' ? '...' : selected.isBanned ? '✓ Unban User' : '🚫 Ban User'}
+                </button>
+              )}
+              {isSuper && selected.role !== 'superadmin' && selected._id !== me?._id && (
+                <button className={`btn btn-outline`} style={{ flex: 1 }}
+                  onClick={() => handleDeactivate(selected)} disabled={actionId === selected._id + '-deact'}>
+                  {actionId === selected._id + '-deact' ? '...' : selected.deactivatedAt ? '✓ Reactivate' : '⛔ Deactivate Account'}
+                </button>
+              )}
+              {isSuper && selected.role !== 'superadmin' && selected.role !== 'admin' && (
+                <button className="btn btn-danger" style={{ flex: 1 }}
+                  onClick={() => handleDelete(selected)} disabled={actionId === selected._id + '-del'}>
+                  {actionId === selected._id + '-del' ? '...' : '🗑 Permanently Delete'}
                 </button>
               )}
             </div>

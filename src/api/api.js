@@ -319,6 +319,14 @@ const _adminAPI = {
   seedDepartments: ()            => api.post('/admin/seed-departments').then(unwrap),
   reseed:          ()            => api.post('/admin/reseed').then(unwrap),
 
+  // User Management
+  deleteUser:      (userId)      => api.delete(`/admin/users/${userId}`).then(unwrap),
+  deactivateUser:  (userId)      => api.put(`/admin/users/${userId}/deactivate`).then(unwrap),
+
+  // Demo Data Management
+  demoStatus:      ()            => api.get('/admin/demo/status').then(unwrap),
+  demoCleanup:     ()            => api.delete('/admin/demo/cleanup').then(unwrap),
+
   // Dealer Package Assignment
   assignPackage:   (userId, body) => api.patch(`/admin/dealers/${userId}/package`, body).then(unwrap),
   updatePackages:  (packages) => api.put('/admin/config/packages', { packages }).then(unwrap),
