@@ -25,6 +25,12 @@ const {
 
 const ENV_ENV = MPESA_ENV || MPESA_ENVIRONMENT || "sandbox";
 
+const devFallback = (pw) => {
+  if (process.env.NODE_ENV === "production") throw new Error("MPESA_CALLBACK_URL must be set in production");
+  console.warn("⚠️  Using dev-only fallback for MPESA_CALLBACK_URL — set it in .env for production");
+  return pw;
+};
+
 // =============================
 // 🔧 LOAD CONFIG (env → db override)
 // =============================
@@ -36,7 +42,7 @@ const loadConfig = async (overrides = {}) => {
     consumerSecret: ENV_SECRET,
     shortCode: ENV_SHORTCODE,
     passkey: ENV_PASSKEY,
-    callbackUrl: ENV_CALLBACK || "https://kayad-backend.onrender.com/api/payments/callback",
+    callbackUrl: ENV_CALLBACK || devFallback("https://kayad-backend.onrender.com/api/payments/callback"),
   };
 
   // Override with DB config if available
