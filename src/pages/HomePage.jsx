@@ -4,6 +4,7 @@ import CartyGrid from '../components/CartyGrid';
 import { useState, useEffect } from 'react';
 import { carsAPI } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
+import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
@@ -30,6 +31,11 @@ export default function HomePage() {
   const cars = loading ? [] : (featured.length > 0 ? featured : recent);
 
   return (
+    <>
+    <WebSiteStructuredData />
+    <BreadcrumbStructuredData items={[
+      { name: 'Home', url: '/' },
+    ]} />
     <div style={{ background: '#050505', minHeight: '100vh' }}>
 
       {/* ════════════════════════════════════════════════════════
@@ -375,5 +381,6 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

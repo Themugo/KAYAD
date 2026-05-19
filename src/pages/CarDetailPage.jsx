@@ -11,6 +11,7 @@ import TcoCalculator from '../components/TcoCalculator';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import PriceHistoryChart from '../components/PriceHistoryChart';
 import GalleryModal from '../components/GalleryModal';
+import { VehicleStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
@@ -265,6 +266,12 @@ export default function CarDetailPage() {
 
   return (
     <div className="car-detail-page">
+    <VehicleStructuredData car={car} />
+    <BreadcrumbStructuredData items={[
+      { name: 'Home', url: '/' },
+      { name: 'Showroom', url: '/showroom' },
+      { name: car.title || `${car.brand || ''} ${car.model || ''}`.trim() || 'Vehicle', url: `/cars/${car._id}` },
+    ]} />
 
       {/* Breadcrumb */}
       <div className="detail-breadcrumb">

@@ -7,6 +7,7 @@ import GalleryHero from '../components/GalleryHero';
 import { LayoutGrid, List, Bookmark, Bell, BellOff, Trash2, Search, X, Loader, SlidersHorizontal } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
+import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 
@@ -192,6 +193,12 @@ export default function Showroom() {
   };
 
   return (
+    <>
+    <ItemListStructuredData items={cars} />
+    <BreadcrumbStructuredData items={[
+      { name: 'Home', url: '/' },
+      { name: 'Showroom', url: '/showroom' },
+    ]} />
     <div style={{ minHeight: 'calc(100vh - 100px)', background: '#050505' }}>
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row' }}>
         {!isMobile && (
@@ -338,5 +345,6 @@ export default function Showroom() {
         </main>
       </div>
     </div>
+    </>
   );
 }
