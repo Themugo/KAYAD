@@ -182,6 +182,9 @@ const _carsAPI = {
   // Batch
   batch: (body)         => api.post('/cars/batch', body).then(unwrap),
 
+  // Demo
+  demoAll: ()       => api.get('/cars/demo/all').then(unwrap),
+
   // Admin
   fraudCheck: (id) => api.get(`/cars/admin/${id}/fraud`).then(unwrap),
   adminStart: (id) => api.post(`/cars/admin/${id}/start`).then(unwrap),

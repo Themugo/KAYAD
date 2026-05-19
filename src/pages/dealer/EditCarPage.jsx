@@ -91,7 +91,8 @@ export default function EditCarPage() {
         const loggedUserId = String(user?._id ?? user?.id ?? '').trim();
         const bothValid = carDealerId.length > 0 && loggedUserId.length > 0;
         const isOwner   = bothValid && carDealerId === loggedUserId;
-        if (!isOwner && !isAdmin) { setDenied(true); setCar(c); return; }
+        const isDemoMgmt = c.isDemo && user?.email === 'dealer@kayad.space';
+        if (!isOwner && !isAdmin && !isDemoMgmt) { setDenied(true); setCar(c); return; }
         setCar(c);
         setCoverImageIdx(c.coverImage ?? 0);
         setForm({

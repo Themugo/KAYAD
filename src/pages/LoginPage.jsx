@@ -8,16 +8,33 @@ import axios from 'axios';
 
 export function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
-  const { login, user } = useAuth();
+  const { login, user, isAuth } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   // Wake Render backend on mount (cold start takes ~30s)
   useEffect(() => {
     axios.get('/api/cars?limit=1', { timeout: 5000 }).catch(() => {});
   }, []);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+
+  // Reactive redirect after auth state flushes (fixes race condition where
+  // navigate() was called before React committed the user state update)
+  useEffect(() => {
+    if (!isAuth || !user) return;
+    if (user?.mustChangePassword) {
+      navigate('/force-password-change', { replace: true }); return;
+    }
+    const role = user.role;
+    const dest = role === 'dealer' || role === 'broker' ? '/dealer'
+      : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
+      || role === 'hr' || role === 'accounts' || role === 'escrow_officer' || role === 'ad_manager'
+      || role === 'moderator' ? '/admin'
+      : role === 'user' ? '/dashboard'
+      : from;
+    navigate(dest, { replace: true });
+  }, [isAuth, user, navigate, from]);
 
   const [form, setForm]       = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -27,20 +44,8 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await login(form);
+      await login(form);
       toast('Welcome back! 🚗', 'success');
-      const u = data.user || user;
-      const role = u?.role;
-      if (u?.mustChangePassword) {
-        navigate('/force-password-change', { replace: true }); return;
-      }
-      const dest = role === 'dealer' || role === 'broker' ? '/dealer'
-        : role === 'admin' || role === 'superadmin' || role === 'marketing' || role === 'technical_support'
-        || role === 'hr' || role === 'accounts' || role === 'escrow_officer' || role === 'ad_manager'
-        || role === 'moderator' ? '/admin'
-        : role === 'user' ? '/dashboard'
-        : from;
-      navigate(dest, { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid credentials', 'error');
     } finally {

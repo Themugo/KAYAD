@@ -283,17 +283,22 @@ export default function DealerDashboard() {
   const [tab, setTab]           = useState('overview');
   const [config, setConfig]     = useState({});
 
+  const isDemoDealer = user?.email === 'dealer@kayad.space';
+
   useEffect(() => {
+    const carsPromise = isDemoDealer
+      ? carsAPI.demoAll().then(d => ({ cars: d.data || d.cars || [] })).catch(() => ({ cars: [] }))
+      : dealerAPI.cars().catch(() => ({ cars: [] }));
     Promise.all([
       dealerAPI.summary().catch(() => ({})),
-      dealerAPI.cars().catch(() => ({ cars: [] })),
+      carsPromise,
       adminAPI.getConfig().catch(() => ({})),
     ]).then(([s, c, cfg]) => {
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
       setConfig(cfg.config || cfg);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [isDemoDealer]);
 
   useEffect(() => {
     if (tab === 'bids') dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {});
