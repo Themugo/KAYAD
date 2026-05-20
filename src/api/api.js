@@ -512,6 +512,7 @@ export const adminPaymentsAPI = {
 };
 
 // Utility: format KES
+export { api };
 export const formatKES = (n) =>
   'KES ' + Number(n || 0).toLocaleString('en-KE');
 
