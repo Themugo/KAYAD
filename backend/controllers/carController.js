@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { cacheGet, cacheSet } from "../utils/cache.js";
 import { uploadMultiple } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
+import path from "path";
 
 const STAFF_ROLES = ["admin", "superadmin", "moderator", "technical_support"];
 const DEALER_ROLES = ["dealer", "broker", "individual_seller"];
@@ -143,10 +144,12 @@ export const createCar = async (req, res) => {
       ? 0
       : await Car.countDocuments({ dealer: req.user.id });
 
+    // Determine if user is allowed to create a listing (without incrementing yet)
+    let shouldIncrementListingCount = false;
+
     if (!isDemoSeller && isDealer && pkg) {
       const now = new Date();
 
-      // Trial window: pkg.trialDays > 0 and isFree
       if (pkg.isFree && pkg.trialDays > 0) {
         const trialStart = seller.trialStartedAt || now;
         const trialEnd   = new Date(trialStart.getTime() + pkg.trialDays * 86400000);
@@ -168,14 +171,14 @@ export const createCar = async (req, res) => {
           });
         }
 
+        shouldIncrementListingCount = true;
+
         // Set trial start date on first listing
         if (!seller.trialStartedAt) {
           await User.findByIdAndUpdate(req.user.id, { trialStartedAt: now });
         }
-        await User.findByIdAndUpdate(req.user.id, { $inc: { trialListingsUsed: 1, listingCount: 1 } });
 
       } else if (!pkg.isFree) {
-        // Paid package — check expiry and listing cap
         if (seller.packageExpiresAt && now > new Date(seller.packageExpiresAt)) {
           return res.status(402).json({
             success: false,
@@ -190,19 +193,16 @@ export const createCar = async (req, res) => {
             code: "LISTING_LIMIT_REACHED",
           });
         }
-        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+        shouldIncrementListingCount = true;
       }
     }
 
     if (!isDemoSeller && isSeller) {
       const sellerPkg = pkgs.find(p => p.id === seller.dealerPackage) || null;
 
-      // First-vehicle free for sellers
       if (!seller.firstVehicleUsed || currentListingCount === 0) {
-        // Mark first vehicle as used
-        await User.findByIdAndUpdate(req.user.id, { firstVehicleUsed: true, $inc: { listingCount: 1 } });
+        shouldIncrementListingCount = true;
       } else if (sellerPkg && !sellerPkg.isFree) {
-        // Paid seller plan — enforce limit
         if (sellerPkg.listingMax > 0 && currentListingCount >= sellerPkg.listingMax) {
           return res.status(402).json({
             success: false,
@@ -210,16 +210,15 @@ export const createCar = async (req, res) => {
             code: "LISTING_LIMIT_REACHED",
           });
         }
-        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+        shouldIncrementListingCount = true;
       } else if (!sellerPkg) {
-        // No paid plan after free vehicle used
         return res.status(402).json({
           success: false,
           message: "Your free listing has been used. Subscribe to a seller plan to list more vehicles.",
           code: "FREE_VEHICLE_USED",
         });
       } else {
-        await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
+        shouldIncrementListingCount = true;
       }
     }
 
@@ -246,26 +245,56 @@ export const createCar = async (req, res) => {
     delete body.address;
 
     // ── PROCESS UPLOADED IMAGES ──────────────────────────────
+    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
     if (req.files && req.files.length > 0) {
-      const uploaded = await uploadMultiple(req.files, "kayad/cars");
-      body.images = uploaded;
-      body.coverImage = 0;
-      cleanupFiles(req.files);
-    } else {
-      const totalImages = (body.images || []).length;
-      const requestedCover = Number(body.coverImage);
-      body.coverImage = (!isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages)
-        ? requestedCover
-        : 0;
+      if (cloudinaryConfigured) {
+        const uploaded = await uploadMultiple(req.files, "kayad/cars");
+        body.images = uploaded;
+        cleanupFiles(req.files);
+      } else {
+        // Fallback: use local file paths when Cloudinary is not configured
+        body.images = req.files.map(f => ({
+          url: `/uploads/${path.basename(f.path)}`,
+          thumb: `/uploads/${path.basename(f.path)}`,
+          public_id: null,
+        }));
+      }
     }
 
+    // Set coverImage: use user selection if valid, otherwise default to 0
+    const totalImages = (body.images || []).length;
+    const requestedCover = Number(body.coverImage);
+    body.coverImage = (!isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages)
+      ? requestedCover
+      : 0;
+
+    // ── CREATE CAR (before incrementing listing count for atomicity) ──
     const car = await Car.create(body);
+
+    // ── INCREMENT LISTING COUNT (only after successful Car.create) ──
+    if (shouldIncrementListingCount) {
+      const updateOps = { $inc: { listingCount: 1 } };
+      if (!isDemoSeller && isDealer && pkg?.isFree && pkg?.trialDays > 0) {
+        updateOps.$inc.trialListingsUsed = 1;
+      }
+      if (!isDemoSeller && isSeller && !seller.firstVehicleUsed) {
+        updateOps.firstVehicleUsed = true;
+      }
+      await User.findByIdAndUpdate(req.user.id, updateOps);
+    }
+
     await cacheSet("cars:list:*", null, 1);
 
     res.status(201).json({ success: true, data: car });
   } catch (err) {
     console.error("❌ CREATE ERROR:", err.message);
-    res.status(500).json({ success: false, message: "Failed to create car" });
+    const isDev = process.env.NODE_ENV === "development";
+    res.status(500).json({
+      success: false,
+      message: "Failed to create car",
+      ...(isDev && { error: err.message }),
+    });
   }
 };
 

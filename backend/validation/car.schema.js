@@ -47,6 +47,7 @@ export const createCarSchema = z.object({
   escrowEnabled: optionalBoolean.optional(),
   auctionStatus: z.string().optional(),
   auctionEnd: z.string().optional(),
+  coverImage: z.coerce.number().int().min(0).optional(),
 });
 
 export const updateCarSchema = createCarSchema.partial();
