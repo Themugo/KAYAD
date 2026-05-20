@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { authAPI } from '../../api/api';
 
 export default function DealerSetup() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -22,10 +23,12 @@ export default function DealerSetup() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await new Promise(r => setTimeout(r, 600));
+      await authAPI.updateProfile({ paymentDetails: bankInfo, onboardingComplete: true });
       toast('Payment details saved! You can now start listing.', 'success');
       navigate('/dealer');
-    } catch { toast('Failed to save payment details', 'error'); }
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to save payment details', 'error');
+    }
     finally { setSaving(false); }
   };
 

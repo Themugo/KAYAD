@@ -7,7 +7,7 @@
 import axios from 'axios';
 import { demoAPI } from '../data/demoAPI';
 
-const BASE = import.meta.env.VITE_API_BASE || '/api';
+const BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || '/api';
 
 // ─── Demo mode auto-detection ────────────────────────────────
 let __DEMO_MODE__ = false;
@@ -90,7 +90,14 @@ api.interceptors.response.use(
       orig._retry = true;
       _refreshing = true;
       try {
-        const { data } = await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true, headers: { 'X-Requested-By': 'kayad-app' } });
+        const storedToken = localStorage.getItem('kayad_token');
+        const { data } = await axios.post(`${BASE}/auth/refresh`, {}, {
+          withCredentials: true,
+          headers: {
+            'X-Requested-By': 'kayad-app',
+            ...(storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {}),
+          }
+        });
         localStorage.setItem('kayad_token', data.token);
         _queue.forEach(p => p.res(data.token));
         _queue = [];

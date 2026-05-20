@@ -49,7 +49,7 @@ const sendRefreshToken = (res, token) => {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    path: "/api/auth/refresh",
+    path: "/api",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
@@ -235,7 +235,15 @@ export const login = async (req, res) => {
 // =============================
 export const refreshToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    // Try cookie first, then fall back to Authorization header
+    let token = req.cookies.refreshToken;
+
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
+      }
+    }
 
     if (!token) {
       return R.unauthorized(res, "No refresh token");
@@ -280,7 +288,7 @@ export const logout = async (req, res) => {
     }
 
     res.clearCookie("refreshToken", {
-      path: "/api/auth/refresh",
+      path: "/api",
     });
 
     res.json({

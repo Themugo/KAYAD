@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { adminAPI } from '../../api/api';
+import { adminAPI, default as api } from '../../api/api';
 
 const Field = ({ label, hint, children }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
@@ -348,8 +348,8 @@ export default function AdminSettings() {
                         const form = new FormData();
                         form.append('logo', file);
                         try {
-                          const res = await fetch('/api/admin/upload-logo', { method: 'POST', body: form });
-                          const data = await res.json();
+                          const res = await api.post('/admin/upload-logo', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+                          const data = res.data;
                           if (data.url) setBranding(p => ({ ...p, logoUrl: data.url }));
                         } catch { alert('Upload failed'); }
                       }} style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }} />
