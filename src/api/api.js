@@ -112,34 +112,20 @@ api.interceptors.response.use(
 // ─── HELPERS ───────────────────────────────────────────────────
 const unwrap = res => res.data;
 
-// Wrap a real API object with demo fallback
-// Keys listed in ALWAYS_REAL are always called against real API first even in demo mode
-// (real MongoDB IDs would never exist in in-memory demo data)
-const ALWAYS_REAL_PREFIXES = ['get', 'update', 'remove', 'promote'];
-
+// Wrap a real API object with demo fallback.
+// Strategy: ALWAYS try the real API first. Only fall back to demo on
+// network errors (backend unreachable). This ensures all save/update
+// operations reach the backend when it's available.
 function withDemo(realObj, demoObj) {
   const wrapped = {};
   for (const key of Object.keys(realObj)) {
     wrapped[key] = async (...args) => {
-      // Always try real API for get/update/remove when the first arg looks like a real ObjectId
-      const firstArg = args[0];
-      const looksLikeRealId = typeof firstArg === 'string' && /^[0-9a-f]{24}$/i.test(firstArg);
-      const isAlwaysReal = ALWAYS_REAL_PREFIXES.some(p => key.startsWith(p)) && looksLikeRealId;
-
-      if (__DEMO_MODE__ && !isAlwaysReal) return demoObj[key](...args);
       try { return await realObj[key](...args); }
       catch (err) {
-        if (!err.response) {
-          // Network error → fall to demo only for non-real-ID calls
-          if (!isAlwaysReal) {
-            __DEMO_MODE__ = true;
-            return demoObj[key](...args);
-          }
-          throw err;
-        }
-        // HTTP error on a real-ID call → try demo as fallback (handles 404 on unknown ids)
-        if (isAlwaysReal) {
-          try { return await demoObj[key](...args); } catch { /* ignore demo failure */ }
+        // Network error (no response) → fall back to demo if available
+        if (!err.response && demoObj?.[key]) {
+          __DEMO_MODE__ = true;
+          return demoObj[key](...args);
         }
         throw err;
       }
