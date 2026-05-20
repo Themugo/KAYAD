@@ -266,6 +266,26 @@ const demoCars = {
       return wrapSuccess({ message: 'Car deleted' });
   },
 
+  promote: async (id, body) => {
+    await delay(200, 400);
+    const car = getDemoCar(id);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    updateDemoCar(id, body);
+    return wrapSuccess({ message: 'Updated', car: transformCar({ ...car, ...body }) });
+  },
+
+  deleteImage: async (id, idx) => {
+    await delay(200, 400);
+    const car = getDemoCar(id);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    const newImages = [...(car.images || [])];
+    if (idx < 0 || idx >= newImages.length) throw { response: { status: 400, data: { message: 'Invalid image index' } } };
+    newImages.splice(idx, 1);
+    const updated = { ...car, images: newImages, coverImage: idx < (car.coverImage || 0) ? (car.coverImage || 0) - 1 : 0 };
+    updateDemoCar(id, updated);
+    return wrapSuccess({ message: 'Image deleted', car: transformCar(updated), data: { images: newImages } });
+  },
+
   myCars: async () => {
     await delay();
     const user = getDemoUser();

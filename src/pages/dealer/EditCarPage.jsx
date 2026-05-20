@@ -154,7 +154,7 @@ export default function EditCarPage() {
     if (!confirm('Delete this image?')) return;
     setDeletingIdx(idx);
     try {
-      await api.delete(`/cars/${id}/images/${idx}`);
+      await carsAPI.deleteImage(id, idx);
       setCar(p => {
         const newImages = [...(p.images || [])];
         newImages.splice(idx, 1);
@@ -181,7 +181,7 @@ export default function EditCarPage() {
       const newImages = res?.data?.images || [];
       setCar(p => ({ ...p, images: newImages }));
       toast(`${files.length} image(s) uploaded`, 'success');
-    } catch { toast('Failed to upload images', 'error'); }
+    } catch (err) { console.error('[EditCar] Upload failed:', err); toast(err?.response?.data?.message || 'Failed to upload images', 'error'); }
     finally { setUploading(false); e.target.value = ''; }
   };
 
