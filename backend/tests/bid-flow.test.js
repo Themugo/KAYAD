@@ -2,10 +2,12 @@ import { describe, it, expect, beforeAll } from "@jest/globals";
 import request from "supertest";
 import { io as ioc } from "socket.io-client";
 
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
+
+import { startTestDB, stopTestDB } from "./setup.js";
+await startTestDB();
 
 const { default: app, server } = await import("../server.js");
 

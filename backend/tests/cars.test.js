@@ -1,13 +1,15 @@
 // backend/tests/cars.test.js
 import request from "supertest";
-import dotenv   from "dotenv";
+import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV   = "test";
 
-const { default: app } = await import("../server.js").catch(() => ({ default: null }));
+import { startTestDB, stopTestDB } from "./setup.js";
+await startTestDB();
+
+const { default: app } = await import("../server.js");
 
 describe("🚗 Car Listings", () => {
 
@@ -25,7 +27,6 @@ describe("🚗 Car Listings", () => {
       .get("/api/cars?limit=9999")
       .expect(200);
 
-    // Our paginationCap middleware should have capped this to 100
     const returnedLimit = res.body.pagination?.limit ?? res.body.limit ?? 100;
     expect(returnedLimit).toBeLessThanOrEqual(100);
   });

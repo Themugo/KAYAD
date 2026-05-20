@@ -1,13 +1,15 @@
 // backend/tests/escrow.test.js
 import request from "supertest";
-import dotenv   from "dotenv";
+import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV   = "test";
 
-const { default: app } = await import("../server.js").catch(() => ({ default: null }));
+import { startTestDB, stopTestDB } from "./setup.js";
+await startTestDB();
+
+const { default: app } = await import("../server.js");
 
 let adminToken = "";
 let userToken  = "";
@@ -15,13 +17,11 @@ let userToken  = "";
 describe("🔒 Escrow System", () => {
 
   beforeAll(async () => {
-    // Register admin
     const adminRes = await request(app)
       .post("/api/auth/register")
       .send({ name: "Test Admin", email: `admin-${Date.now()}@test.com`, password: "admin123", role: "admin" });
     adminToken = adminRes.body.token;
 
-    // Register regular user
     const userRes = await request(app)
       .post("/api/auth/register")
       .send({ name: "Test Buyer", email: `buyer-${Date.now()}@test.com`, password: "buyer123" });
@@ -45,7 +45,6 @@ describe("🔒 Escrow System", () => {
   });
 
   test("GET /api/escrow — admin only", async () => {
-    // Non-admin should be rejected
     await request(app)
       .get("/api/escrow")
       .set("Authorization", `Bearer ${userToken}`)

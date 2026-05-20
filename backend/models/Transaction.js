@@ -5,7 +5,7 @@ const transactionSchema = new mongoose.Schema(
     // =============================
     // 🔗 RELATIONS
     // =============================
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     car:  { type: mongoose.Schema.Types.ObjectId, ref: "Car", index: true },
 
     // =============================

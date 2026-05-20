@@ -366,7 +366,8 @@ if (NODE_ENV !== "test") {
 }
 
 if (NODE_ENV === "test") {
-  await connectDB();
+  // Do NOT connect in test mode — tests handle their own DB connection
+  // via mongodb-memory-server or TEST_MONGO_URI
 } else {
   bootstrap();
 }

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const smsBidderSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
-  phone: { type: String, required: true, unique: true, index: true },
+  phone: { type: String, required: true, unique: true },
   active: { type: Boolean, default: true },
   // Active auction subscriptions — the user gets SMS updates for these cars
   subscriptions: [
@@ -17,8 +17,5 @@ const smsBidderSchema = new mongoose.Schema({
   lastBidAt: Date,
   totalSmsBids: { type: Number, default: 0 },
 }, { timestamps: true });
-
-smsBidderSchema.index({ phone: 1 });
-smsBidderSchema.index({ user: 1 });
 
 export default mongoose.model("SmsBidder", smsBidderSchema);

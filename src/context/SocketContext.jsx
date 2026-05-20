@@ -13,7 +13,12 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     if (!isAuth) return;
 
-    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '/';
+    // In production, connect directly to the backend (Vercel doesn't proxy WebSockets)
+    // In development, use the Vite proxy (defaults to '/')
+    const isProduction = import.meta.env.PROD;
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
+      || (isProduction ? 'https://kayad-backend.onrender.com' : '/');
+
     const socket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
@@ -25,7 +30,6 @@ export function SocketProvider({ children }) {
 
     socket.on('connect', () => {
       setConnected(true);
-      // Re-join admin room if needed
     });
 
     socket.on('disconnect', () => setConnected(false));
@@ -37,27 +41,22 @@ export function SocketProvider({ children }) {
     };
   }, [isAuth, token]);
 
-  // Join an auction room for a specific car
   const joinAuction = (carId) => {
     socketRef.current?.emit('joinAuction', carId);
   };
 
-  // Join admin broadcast room
   const joinAdmin = () => {
     socketRef.current?.emit('joinAdmin');
   };
 
-  // Join showroom room for live listing updates
   const joinShowroom = () => {
     socketRef.current?.emit('joinShowroom');
   };
 
-  // Leave showroom room
   const leaveShowroom = () => {
     socketRef.current?.emit('leaveShowroom');
   };
 
-  // Subscribe to a socket event, auto-cleanup
   const on = (event, handler) => {
     const s = socketRef.current;
     if (!s) return () => {};

@@ -1,16 +1,16 @@
 // backend/tests/auth.test.js
-// Run: npm test
 import request from "supertest";
-import dotenv  from "dotenv";
+import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
-// Use a test database
-process.env.MONGO_URI = process.env.TEST_MONGO_URI || "mongodb://localhost:27017/kayad-test";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV   = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-const { default: app } = await import("../server.js").catch(() => ({ default: null }));
+import { startTestDB, stopTestDB } from "./setup.js";
+await startTestDB();
+
+const { default: app } = await import("../server.js");
 
 const TEST_USER = {
   name:     "Test User",
@@ -33,7 +33,7 @@ describe("🔑 Authentication", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.token).toBeTruthy();
     expect(res.body.user.email).toBe(TEST_USER.email);
-    expect(res.body.user.password).toBeUndefined(); // password not returned
+    expect(res.body.user.password).toBeUndefined();
 
     token  = res.body.token;
     userId = res.body.user._id;
