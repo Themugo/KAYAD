@@ -177,8 +177,8 @@ export default function EditCarPage() {
     try {
       const fd = new FormData();
       files.forEach(f => fd.append('images', f));
-      const res = await api.post(`/cars/${id}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      const newImages = res.data?.data?.images || [];
+      const res = await carsAPI.addImages(id, fd);
+      const newImages = res?.data?.images || [];
       setCar(p => ({ ...p, images: newImages }));
       toast(`${files.length} image(s) uploaded`, 'success');
     } catch { toast('Failed to upload images', 'error'); }

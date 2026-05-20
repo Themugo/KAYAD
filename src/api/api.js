@@ -207,6 +207,8 @@ const _carsAPI = {
   // Dealer
   create: (formData) =>
     api.post('/cars', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
+  addImages: (id, formData) =>
+    api.post(`/cars/${id}/images`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
   update:  (id, body) => api.put(`/cars/${id}`, body).then(unwrap),
   promote: (id, body) => api.patch(`/cars/${id}/promote`, body).then(unwrap),
   remove: (id)       => api.delete(`/cars/${id}`).then(unwrap),
