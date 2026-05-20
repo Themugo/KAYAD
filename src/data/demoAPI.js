@@ -185,10 +185,15 @@ const demoCars = {
       const images = [];
       try {
         const files = formData.getAll('images');
-        for (const f of files) {
-          if (f instanceof File && f.size > 0) images.push(URL.createObjectURL(f));
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          if (f instanceof File && f.size > 0) {
+            images.push({ url: `https://placehold.co/800x600/1a1a2e/ffffff?text=Car+${i + 1}`, public_id: null });
+          }
         }
       } catch { /* formData may not have images field - OK */ }
+      const rawFeatures = formData.getAll('features');
+      const features = rawFeatures.length > 0 ? rawFeatures.filter(Boolean) : (formData.get('features') || '').split(',').filter(Boolean);
       const newCar = {
         _id: 'demo-car-' + Date.now(),
         title: formData.get('title') || 'New Listing',
@@ -201,14 +206,14 @@ const demoCars = {
         bodyType: formData.get('bodyType') || 'SUV',
         color: formData.get('color') || 'Black',
         description: formData.get('description') || '',
-        features: (formData.get('features') || '').split(',').filter(Boolean),
+        features,
         images,
         views: 0,
         bidsCount: 0,
         currentBid: 0,
         allowBid: formData.get('allowBid') === 'true',
         allowBuy: formData.get('allowBuy') !== 'false',
-        auctionStatus: 'draft',
+        auctionStatus: formData.get('auctionStatus') || 'draft',
         isPromoted: false,
         isVerifiedDealer: true,
         dealer: { _id: user._id, name: user.businessName || user.name, dealerRating: 4.5 },
@@ -216,8 +221,28 @@ const demoCars = {
         createdAt: new Date().toISOString(),
         coverImage: Number(formData.get('coverImage')) || 0,
       };
+      if (newCar.auctionStatus === 'live') {
+        newCar.auctionEnd = new Date(Date.now() + 7 * 86400000).toISOString();
+      }
       addDemoCar(newCar);
       return wrapSuccess({ car: transformCar(newCar), data: transformCar(newCar) });
+  },
+
+  addImages: async (id, formData) => {
+    await delay(300, 800);
+    const car = getDemoCar(id);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    const files = formData.getAll('images');
+    const newImages = [];
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      if (f instanceof File && f.size > 0) {
+        newImages.push({ url: `https://placehold.co/800x600/1a1a2e/ffffff?text=Car+${(car.images?.length || 0) + i + 1}`, public_id: null });
+      }
+    }
+    const updated = { ...car, images: [...(car.images || []), ...newImages] };
+    updateDemoCar(id, updated);
+    return wrapSuccess({ message: `${newImages.length} image(s) uploaded`, car: transformCar(updated), data: { images: updated.images } });
   },
 
   update: async (id, body) => {
@@ -509,8 +534,9 @@ const demoAdmin = {
     return wrapSuccess({ cars: cars.map(transformCar), data: cars.map(transformCar), pagination: { total, page: 1, limit: params.limit || 50, pages: 1 }, total });
   },
 
-  deleteCar: async () => {
+  deleteCar: async (carId) => {
     await delay();
+    if (carId) removeDemoCar(carId);
     return wrapSuccess({ message: 'Car deleted' });
   },
 
