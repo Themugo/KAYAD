@@ -116,21 +116,6 @@ export async function reseed() {
     }
   }
 
-  // Secondary system owner
-  const ownerEmail = "themugo@kayad.space";
-  const ownerPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("Jimmy@Kayad2026!");
-  let owner = await User.findOne({ email: ownerEmail });
-  if (!owner) {
-    owner = await User.create({ name: "James Mugo (Owner)", email: ownerEmail, password: ownerPassword, role: "superadmin", isDemo: true });
-    created.webhost.push(ownerEmail);
-  } else {
-    owner.password = ownerPassword;
-    owner.role = "superadmin";
-    owner.isDemo = true;
-    await owner.save();
-    created.webhost.push(`${ownerEmail} (updated)`);
-  }
-
   // ══════════════════════════════════════════════════════════
   // 2. PLATFORM ADMIN
   // ══════════════════════════════════════════════════════════

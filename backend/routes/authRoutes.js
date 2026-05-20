@@ -65,7 +65,7 @@ router.get(
     const User = (await import("../models/User.js")).default;
     const user = await User.findById(req.user.id).select("-password").lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    const ownerEmails = [process.env.WEBHOIST_EMAIL, "themugo@kayad.space"].filter(Boolean).map(e => e.toLowerCase().trim());
+    const ownerEmails = [process.env.WEBHOIST_EMAIL].filter(Boolean).map(e => e.toLowerCase().trim());
     if (ownerEmails.includes(String(user.email || "").toLowerCase().trim())) user.role = "superadmin";
     res.json({
       success: true,

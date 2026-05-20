@@ -36,6 +36,7 @@ import {
 } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection } from "./middleware/csrf.js";
+import responseWrapper from "./middleware/responseWrapper.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 
@@ -80,7 +81,7 @@ import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { initSentry, sentryErrorHandler } from "./utils/sentry.js";
 import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
-import { getEnv }              from "./utils/env.js";
+import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected }    from "./utils/cache.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -109,7 +110,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://js.sentry-cdn.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
-      connectSrc: ["'self'", "https://kayad.space", "wss://kayad.space", "https://*.sentry.io"],
+      connectSrc: ["'self'", FRONTEND, `wss://${new URL(FRONTEND).hostname}`, "https://*.sentry.io"],
       fontSrc: ["'self'", "data:"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
@@ -135,7 +136,7 @@ app.use(globalLimiter);
 
 // ─── CORS ─────────────────────────────────────────────────────
 const allowedOrigins = [
-  FRONTEND, "https://kayad.space", "https://www.kayad.space",
+  FRONTEND, `https://${new URL(FRONTEND).hostname}`, `https://www.${new URL(FRONTEND).hostname}`,
   ...(process.env.EXTRA_CORS_ORIGINS || "").split(",").filter(Boolean),
 ];
 
@@ -245,6 +246,9 @@ io.on("connection", (socket) => {
   socket.on("disconnect",   ()      => {});
 });
 
+// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
+app.use(responseWrapper);
+
 // ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
 app.use("/api", checkSystemStatus);
 
@@ -301,20 +305,7 @@ const connectDB = async () => {
 };
 
 // ─── ENV VALIDATION ───────────────────────────────────────────
-const validateEnv = () => {
-  const required = [
-    "JWT_SECRET",
-    "MONGO_URI",
-  ];
-  for (const key of required) {
-    getEnv(key, { required: true, defaultValue: null });
-  }
-  if (process.env.NODE_ENV === "production") {
-    getEnv("JWT_SECRET", { required: true });
-    getEnv("MONGO_URI", { required: true });
-    getEnv("FRONTEND_URL", { required: true });
-  }
-};
+// (validateEnv is imported from ./utils/env.js)
 
 // ─── BOOTSTRAP ────────────────────────────────────────────────
 const bootstrap = async () => {

@@ -1,4 +1,4 @@
-# Gari Motors — Backend Integration Guide
+# Kayad — Backend Integration Guide
 ## Exact files to replace/add in your backend folder
 
 ---

@@ -1,4 +1,4 @@
-# 🚀 Gari Motors — Production Deployment
+# 🚀 Kayad — Production Deployment
 ## Ubuntu 22.04 LTS · Node.js 20 · MongoDB Atlas · Nginx · PM2
 
 ---

@@ -8,4 +8,13 @@ export default {
   detectOpenHandles: true,
   verbose: true,
   maxWorkers: 1,
+  collectCoverageFrom: [
+    "utils/**/*.js",
+    "middleware/**/*.js",
+    "services/**/*.js",
+    "controllers/**/*.js",
+    "!**/node_modules/**",
+  ],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov", "clover"],
 };

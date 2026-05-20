@@ -18,7 +18,7 @@ const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRE || "1h";
 const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-const OWNER_EMAILS = [WEBHOIST_EMAIL, "themugo@kayad.space"].filter(Boolean);
+const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
 const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
 const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
 

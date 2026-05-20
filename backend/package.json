@@ -10,6 +10,7 @@
     "seed": "node seed.js",
     "seed-depts": "node scripts/seed-departments.js",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --coverage",
     "backup": "bash scripts/backup.sh"
   },
   "dependencies": {

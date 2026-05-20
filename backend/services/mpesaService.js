@@ -32,7 +32,7 @@ const loadConfig = async (overrides = {}) => {
     consumerSecret: ENV_SECRET,
     shortCode: ENV_SHORTCODE,
     passkey: ENV_PASSKEY,
-    callbackUrl: ENV_CALLBACK || devFallback("https://kayad-backend.onrender.com/api/payments/callback"),
+    callbackUrl: ENV_CALLBACK || devFallback("https://api.kayad.space/api/payments/callback"),
   };
 
   try {

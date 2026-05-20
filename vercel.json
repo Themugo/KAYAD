@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://kayad-backend.onrender.com/api/$1"
+      "destination": "https://api.kayad.space/api/$1"
     },
     {
       "source": "/socket.io/(.*)",
-      "destination": "https://kayad-backend.onrender.com/socket.io/$1"
+      "destination": "https://api.kayad.space/socket.io/$1"
     },
     {
       "source": "/(.*)",

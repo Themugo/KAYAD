@@ -13,11 +13,7 @@ export function SocketProvider({ children }) {
   useEffect(() => {
     if (!isAuth) return;
 
-    // In production, connect directly to the backend (Vercel doesn't proxy WebSockets)
-    // In development, use the Vite proxy (defaults to '/')
-    const isProduction = import.meta.env.PROD;
-    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
-      || (isProduction ? 'https://kayad-backend.onrender.com' : '/');
+    const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '/';
 
     const socket = io(SOCKET_URL, {
       auth: { token },

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-const OWNER_EMAILS = [WEBHOIST_EMAIL, "themugo@kayad.space"].filter(Boolean);
+const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
 
 const isOwnerEmail = (email) => OWNER_EMAILS.includes(email);
 
