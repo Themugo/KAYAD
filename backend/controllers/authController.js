@@ -324,10 +324,7 @@ export const refreshToken = async (req, res) => {
       return R.error(res, "Refresh cookie required", 403);
     }
 
-    // Rotate refresh token: increment tokenVersion so old token is invalidated
-    user.tokenVersion = (user.tokenVersion || 0) + 1;
-    await user.save();
-
+    // Issue new tokens without bumping tokenVersion (only password change/logout does that)
     return sendAuthResponse(res, user);
 
   } catch (err) {
