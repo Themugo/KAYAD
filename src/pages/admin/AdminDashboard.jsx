@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI, formatKES } from '../../api/api';
-import { Users, Car, DollarSign, ShieldCheck, Gavel, AlertTriangle, Settings, BarChart3, ChevronRight, Activity, TrendingUp, Lock, Megaphone, UserCheck, Crown, ClipboardCheck, Star, Shield, Gift, MessageSquare } from 'lucide-react';
+import { Users, Car, DollarSign, ShieldCheck, Gavel, AlertTriangle, Settings, BarChart3, ChevronRight, Activity, TrendingUp, Lock, Megaphone, UserCheck, Crown, ClipboardCheck, Star, Shield, Gift, MessageSquare, Bell, Eye, Check } from 'lucide-react';
 
 const ROLE_CONFIG = {
   superadmin:       { label: 'Super Admin',       icon: '👑', color: 'var(--gold)' },
@@ -134,11 +134,16 @@ export default function AdminDashboard() {
   const role = user?.role || 'admin';
   const rc = ROLE_CONFIG[role] || ROLE_CONFIG.admin;
   const [stats, setStats] = useState(null);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    adminAPI.stats().catch(() => ({ stats: {} })).then(s => {
+    Promise.all([
+      adminAPI.stats().catch(() => ({ stats: {} })),
+      adminAPI.alerts({ limit: 10, read: 'false' }).catch(() => ({ alerts: [], unreadCount: 0 })),
+    ]).then(([s, a]) => {
       setStats(s.stats || {});
+      setAlerts(a.alerts || []);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -183,8 +188,8 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <>
-            {/* STATS GRID */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, marginBottom: 36 }}>
+            {/* STATS GRID - Primary */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, marginBottom: 24 }}>
               <StatBox icon={Users}       label="Total Users"     value={s.totalUsers}     color="#3b82f6"    to="/admin/users" />
               <StatBox icon={Car}         label="Listings"        value={s.totalCars}      color="var(--gold)" to="/admin/cars" />
               <StatBox icon={Gavel}       label="Active Auctions" value={s.activeAuctions} color="#f97316"    to="/admin/auctions" />
@@ -194,16 +199,19 @@ export default function AdminDashboard() {
                 sub="KES platform" color="var(--gold)" to="/admin/transactions" />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
+            {/* STATS GRID - Secondary & Alerts */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20, marginBottom: 24 }}>
               {/* Extra stats */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                <StatBox icon={UserCheck}   label="Dealers"       value={s.totalDealers}   color="#8b5cf6" to="/admin/sellers" />
-                <StatBox icon={ShieldCheck} label="Verified"      value={s.verifiedDealers} color="#22c55e" />
-                <StatBox icon={TrendingUp}  label="Bids Today"    value={s.bidsToday}      color="#f97316" to="/admin/bids" />
-                <StatBox icon={BarChart3}   label="Payments"      value={s.totalPayments}  color="#06b6d4" to="/admin/transactions" />
+                <StatBox icon={UserCheck}     label="Dealers"          value={s.totalDealers}     color="#8b5cf6" to="/admin/sellers" />
+                <StatBox icon={ShieldCheck}   label="Verified"         value={s.verifiedDealers}  color="#22c55e" />
+                <StatBox icon={TrendingUp}    label="Bids Today"       value={s.bidsToday}        color="#f97316" to="/admin/bids" />
+                <StatBox icon={BarChart3}     label="Payments"         value={s.totalPayments}    color="#06b6d4" to="/admin/transactions" />
+                <StatBox icon={Car}           label="Sold Cars"        value={s.carsSold}         color="#22c55e" />
+                <StatBox icon={AlertTriangle} label="Unread Alerts"    value={s.activeAlerts}     color={s.activeAlerts > 0 ? '#ef4444' : 'rgba(255,255,255,0.3)'} />
               </div>
 
-              {/* Recent activity placeholder */}
+              {/* Platform Health */}
               <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '22px', display: 'flex', flexDirection: 'column', gap: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Activity size={14} style={{ color: 'var(--gold)' }} /> Platform Health
@@ -212,21 +220,65 @@ export default function AdminDashboard() {
                   { label: 'Pending Dealer Approvals', value: s.pendingDealers || 0, to: '/admin/sellers', urgent: (s.pendingDealers||0) > 0 },
                   { label: 'Cars Pending Review',      value: s.pendingCars    || 0, to: '/admin/moderation' },
                   { label: 'Open Escrows',             value: s.openEscrows    || 0, to: '/admin/escrows' },
-                  { label: 'Unread Alerts',            value: s.alerts         || 0, to: '/admin/users', urgent: (s.alerts||0) > 0 },
+                  { label: 'Individual Sellers',        value: s.individualSellers || 0, to: '/admin/users' },
+                  { label: 'Brokers',                   value: s.brokers || 0,         to: '/admin/sellers' },
+                  { label: 'Total Bids Placed',         value: s.totalBids || 0,       to: '/admin/bids' },
                 ].map(item => (
                   <Link key={item.label} to={item.to} style={{ textDecoration: 'none' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                       onMouseEnter={e => e.currentTarget.style.paddingLeft = '4px'}
                       onMouseLeave={e => e.currentTarget.style.paddingLeft = '0'}
                     >
-                      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>{item.label}</span>
+                      <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>{item.label}</span>
                       <span style={{
-                        fontSize: 13, fontWeight: 700,
+                        fontSize: 12, fontWeight: 700,
                         color: item.urgent && item.value > 0 ? '#ef4444' : item.value > 0 ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
                       }}>{item.value}</span>
                     </div>
                   </Link>
                 ))}
+              </div>
+
+              {/* Alerts Feed */}
+              <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '22px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Bell size={14} style={{ color: 'var(--gold)' }} /> Alerts
+                  </span>
+                  <Link to="/admin/security-log" style={{ fontSize: 11, color: 'var(--gold)', textDecoration: 'none', fontWeight: 600 }}>View All</Link>
+                </div>
+                {alerts.length === 0 ? (
+                  <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
+                    <Check size={20} style={{ color: '#22c55e', marginBottom: 6 }} />
+                    <div>No unread alerts</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {alerts.slice(0, 5).map(a => (
+                      <div key={a._id} style={{
+                        padding: '8px 10px', borderRadius: 8,
+                        background: a.severity === 'critical' ? 'rgba(239,68,68,0.04)' : a.severity === 'warning' ? 'rgba(245,158,11,0.04)' : 'rgba(255,255,255,0.02)',
+                        border: `1px solid ${a.severity === 'critical' ? 'rgba(239,68,68,0.12)' : a.severity === 'warning' ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)'}`,
+                        fontSize: 12,
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                          <span style={{
+                            width: 6, height: 6, borderRadius: '50%',
+                            background: a.severity === 'critical' ? '#ef4444' : a.severity === 'warning' ? '#f97316' : '#22c55e',
+                            flexShrink: 0,
+                          }} />
+                          <span style={{ fontWeight: 600, color: '#fff', textTransform: 'capitalize' }}>{a.type?.replace(/_/g, ' ')}</span>
+                          <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>
+                            {new Date(a.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, marginLeft: 12 }}>
+                          {a.data?.message || a.message || a.type || 'System alert'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

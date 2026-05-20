@@ -14,6 +14,7 @@ import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import Ad from "../models/Ad.js";
+import AdminAlert from "../models/AdminAlert.js";
 import { stkPush } from "../services/mpesaService.js";
 import { sendNotification } from "../services/notification.service.js";
 
@@ -79,6 +80,15 @@ router.get(
       openEscrows,
       disputedEscrows,
       revenueAgg,
+      totalBidsAll,
+      totalInquiries,
+      totalFavorites,
+      pendingReviews,
+      activeAlerts,
+      individualSellers,
+      brokers,
+      demoUsers,
+      carsSold,
     ] = await Promise.all([
       User.countDocuments(),
       Car.countDocuments(),
@@ -96,9 +106,20 @@ router.get(
         { $match: { status: "released" } },
         { $group: { _id: null, total: { $sum: "$commission" } } },
       ]),
+      Bid.countDocuments(),
+      Car.aggregate([{ $group: { _id: null, total: { $sum: "$inquiriesCount" } } }]),
+      Car.aggregate([{ $group: { _id: null, total: { $sum: "$favoritesCount" } } }]),
+      Bid.countDocuments({ status: "pending" }),
+      AdminAlert.countDocuments({ read: false }),
+      User.countDocuments({ role: "individual_seller" }),
+      User.countDocuments({ role: "broker" }),
+      User.countDocuments({ isDemo: true }),
+      Car.countDocuments({ sold: true }),
     ]);
 
     const totalRevenue = revenueAgg[0]?.total || 0;
+    const totalInq = totalInquiries[0]?.total || 0;
+    const totalFavs = totalFavorites[0]?.total || 0;
 
     res.json({
       success: true,
@@ -115,7 +136,16 @@ router.get(
         pendingDealers,
         pendingCars,
         openEscrows,
-        alerts: disputedEscrows,
+        alerts: disputedEscrows || 0,
+        totalBids: totalBidsAll,
+        totalInquiries: totalInq,
+        totalFavorites: totalFavs,
+        pendingReviews,
+        activeAlerts,
+        individualSellers,
+        brokers,
+        demoUsers,
+        carsSold,
       },
     });
   })
@@ -1524,6 +1554,73 @@ router.post("/market-data/bulk", adminOrSuper, asyncHandler(async (req, res) => 
 
   await AuditLog.create({ admin: req.user._id, action: "Bulk Import Market Data", target: "MarketData", details: `${created} created, ${errors.length} errors` });
   res.json({ success: true, created, errors, total: entries.length });
+}));
+
+// =============================
+// 🔔 GET ADMIN ALERTS
+// =============================
+router.get("/alerts", asyncHandler(async (req, res) => {
+  const { limit = 20, severity, read } = req.query;
+  const filter = {};
+  if (severity) filter.severity = severity;
+  if (read === "false") filter.read = false;
+  if (read === "true") filter.read = true;
+
+  const [alerts, unreadCount] = await Promise.all([
+    AdminAlert.find(filter).sort({ createdAt: -1 }).limit(Number(limit)).lean(),
+    AdminAlert.countDocuments({ read: false }),
+  ]);
+
+  res.json({ success: true, alerts, unreadCount });
+}));
+
+// =============================
+// ✅ MARK ALERT READ
+// =============================
+router.post("/alerts/:id/read", validateObjectId, asyncHandler(async (req, res) => {
+  const alert = await AdminAlert.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
+  if (!alert) return res.status(404).json({ success: false, message: "Alert not found" });
+  res.json({ success: true, alert });
+}));
+
+// =============================
+// ✅ MARK ALL ALERTS READ
+// =============================
+router.post("/alerts/read-all", asyncHandler(async (req, res) => {
+  await AdminAlert.updateMany({ read: false }, { read: true });
+  res.json({ success: true, message: "All alerts marked read" });
+}));
+
+// =============================
+// 🖥 GET SYSTEM HEALTH
+// =============================
+router.get("/system/health", asyncHandler(async (req, res) => {
+  const [userCount, carCount, liveAuctions, pendingEscrows, heldEscrows, pendingModeration, recentErrors] = await Promise.all([
+    User.countDocuments(),
+    Car.countDocuments(),
+    Car.countDocuments({ auctionStatus: "live" }),
+    Escrow.countDocuments({ status: "pending" }),
+    Escrow.countDocuments({ status: "held" }),
+    Car.countDocuments({ status: "pending" }),
+    AdminAlert.countDocuments({ severity: "critical", read: false, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
+  ]);
+
+  const status = recentErrors > 0 ? "warning" : "healthy";
+
+  res.json({
+    success: true,
+    health: {
+      status,
+      users: userCount,
+      listings: carCount,
+      liveAuctions,
+      pendingEscrows,
+      heldEscrows,
+      pendingModeration,
+      criticalAlerts24h: recentErrors,
+      timestamp: new Date().toISOString(),
+    },
+  });
 }));
 
 export default router;

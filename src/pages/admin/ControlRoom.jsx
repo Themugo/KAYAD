@@ -3,12 +3,14 @@ import { adminAPI } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
+import { Activity, AlertTriangle, Wifi, WifiOff, Settings, Users, Car, Shield, DollarSign, Megaphone } from 'lucide-react';
 
 const SECTIONS = [
-  { key: 'users', label: 'Users', desc: 'Manage all accounts', path: '/admin/users' },
-  { key: 'cars', label: 'Listings', desc: 'Vehicle listings', path: '/admin/cars' },
-  { key: 'staff', label: 'Staff Team', desc: 'Department accounts', path: '/admin/staff' },
-  { key: 'panic', label: 'Panic Room', desc: 'Emergency controls', path: '/admin/panic-room', danger: true },
+  { key: 'users', label: 'Users', desc: 'Manage all accounts', icon: Users, path: '/admin/users' },
+  { key: 'cars', label: 'Listings', desc: 'Vehicle listings', icon: Car, path: '/admin/cars' },
+  { key: 'staff', label: 'Staff Team', desc: 'Department accounts', icon: Shield, path: '/admin/staff' },
+  { key: 'settings', label: 'Platform Config', desc: 'System settings', icon: Settings, path: '/admin/settings' },
+  { key: 'panic', label: 'Panic Room', desc: 'Emergency controls', icon: AlertTriangle, path: '/admin/panic-room', danger: true },
 ];
 
 function SectionCard({ title, children, accent = 'var(--gold)' }) {
@@ -35,13 +37,20 @@ export default function ControlRoom() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [demo, setDemo] = useState(null);
+  const [health, setHealth] = useState(null);
   const [loading, setLoading] = useState(true);
   const [cleaning, setCleaning] = useState(false);
 
   const isSuperadmin = user?.role === 'superadmin';
 
   useEffect(() => {
-    adminAPI.demoStatus().then(setDemo).catch(() => {}).finally(() => setLoading(false));
+    Promise.all([
+      adminAPI.demoStatus().catch(() => null),
+      adminAPI.systemHealth().catch(() => null),
+    ]).then(([d, h]) => {
+      setDemo(d);
+      setHealth(h?.health || h);
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleCleanup = async () => {
@@ -57,21 +66,56 @@ export default function ControlRoom() {
   };
 
   return (
-    <div className="page" style={{ background: 'var(--bg)' }}>
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 900 }}>
+    <div style={{ background: '#050505', minHeight: '100vh' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 32px 60px' }}>
         <div style={{ marginBottom: 28 }}>
-          <div className="section-eyebrow" style={{ color: 'var(--gold)' }}>System Control Room</div>
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span>🎛</span> Operations Center
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontWeight: 400, marginLeft: 8 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
+            <Activity size={12} style={{ color: 'var(--gold)' }} />
+            <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>System Control Room</span>
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: '0 0 8px' }}>
+            Operations <span style={{ color: 'var(--gold)' }}>Center</span>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontWeight: 400, marginLeft: 12 }}>
               {isSuperadmin ? '👑 Superadmin' : '⚙ Admin'}
             </span>
-          </h2>
+          </h1>
         </div>
+
+        {/* System Health */}
+        {health && (
+          <SectionCard title="System Health" accent={health.status === 'healthy' ? '#22c55e' : '#ef4444'}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px', borderRadius: 10, background: health.status === 'healthy' ? 'rgba(34,197,94,0.04)' : 'rgba(239,68,68,0.04)', border: `1px solid ${health.status === 'healthy' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}` }}>
+              {health.status === 'healthy' ? <Wifi size={20} style={{ color: '#22c55e' }} /> : <WifiOff size={20} style={{ color: '#ef4444' }} />}
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: health.status === 'healthy' ? '#22c55e' : '#ef4444', textTransform: 'uppercase' }}>
+                  {health.status === 'healthy' ? 'All Systems Operational' : 'System Warning'}
+                </div>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+                  Last checked: {new Date(health.timestamp).toLocaleTimeString()}
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+              {[
+                { label: 'Total Users', value: health.users, color: '#3b82f6' },
+                { label: 'Total Listings', value: health.listings, color: 'var(--gold)' },
+                { label: 'Live Auctions', value: health.liveAuctions, color: '#f97316' },
+                { label: 'Held Escrows', value: health.heldEscrows, color: '#22c55e' },
+                { label: 'Pending Moderation', value: health.pendingModeration, color: '#8b5cf6' },
+                { label: 'Critical Alerts (24h)', value: health.criticalAlerts24h, color: health.criticalAlerts24h > 0 ? '#ef4444' : 'rgba(255,255,255,0.3)' },
+              ].map(s => (
+                <div key={s.label} style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', color: s.color }}>{s.value}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </SectionCard>
+        )}
 
         {/* Quick Navigation */}
         <SectionCard title="Quick Navigation">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
             {SECTIONS.map(s => (
               <Link key={s.key} to={s.path} style={{ textDecoration: 'none' }}>
                 <div style={{
@@ -80,7 +124,8 @@ export default function ControlRoom() {
                   background: s.danger ? 'rgba(239,68,68,0.04)' : 'rgba(255,255,255,0.02)',
                   transition: 'border-color 0.2s',
                 }}>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: s.danger ? '#ef4444' : '#fff' }}>{s.label}</div>
+                  <s.icon size={16} style={{ color: s.danger ? '#ef4444' : 'var(--gold)', marginBottom: 4 }} />
+                  <div style={{ fontWeight: 700, fontSize: 13, color: s.danger ? '#ef4444' : '#fff' }}>{s.label}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{s.desc}</div>
                 </div>
               </Link>
@@ -111,16 +156,12 @@ export default function ControlRoom() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <button className="btn btn-danger" onClick={handleCleanup} disabled={cleaning}>
-                    {cleaning ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Cleaning...</> : '🧹 Delete All Demo Data'}
+                  <button onClick={handleCleanup} disabled={cleaning} style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {cleaning ? 'Cleaning...' : '🧹 Delete All Demo Data'}
                   </button>
-                  <button className="btn btn-outline" onClick={async () => {
-                    try {
-                      await adminAPI.reseed();
-                      toast('✅ Database re-seeded', 'success');
-                      adminAPI.demoStatus().then(setDemo).catch(() => {});
-                    } catch { toast('Reseed failed', 'error'); }
-                  }}>🔄 Re-seed Database</button>
+                  <button onClick={async () => { try { await adminAPI.reseed(); toast('✅ Database re-seeded', 'success'); adminAPI.demoStatus().then(setDemo).catch(() => {}); } catch { toast('Reseed failed', 'error'); } }} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                    🔄 Re-seed Database
+                  </button>
                 </div>
                 <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(251,191,36,0.06)', borderRadius: 8, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
                   ⚠️ Deleting demo data removes all pre-seeded accounts and their associated data. This is permanent. Use <strong style={{ color: '#f59e0b' }}>Re-seed</strong> to restore demo data.
@@ -167,16 +208,17 @@ export default function ControlRoom() {
         <SectionCard title="Staff Departments" accent="#8b5cf6">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
             {[
-              { role: 'marketing', label: 'Marketing', color: '#8b5cf6', path: '/admin/ads' },
-              { role: 'technical_support', label: 'Tech Support', color: '#22c55e', path: '/admin/users' },
-              { role: 'hr', label: 'HR', color: '#f97316', path: '/admin/sellers' },
-              { role: 'accounts', label: 'Accounts', color: '#06b6d4', path: '/admin/transactions' },
-              { role: 'escrow_officer', label: 'Escrow', color: '#22c55e', path: '/admin/escrows' },
-              { role: 'ad_manager', label: 'Ad Manager', color: '#f97316', path: '/admin/ads' },
-              { role: 'moderator', label: 'Moderator', color: '#3b82f6', path: '/admin/moderation' },
+              { role: 'marketing', label: 'Marketing', icon: Megaphone, color: '#8b5cf6', path: '/admin/ads' },
+              { role: 'technical_support', label: 'Tech Support', icon: Users, color: '#22c55e', path: '/admin/users' },
+              { role: 'hr', label: 'HR', icon: Users, color: '#f97316', path: '/admin/sellers' },
+              { role: 'accounts', label: 'Accounts', icon: DollarSign, color: '#06b6d4', path: '/admin/transactions' },
+              { role: 'escrow_officer', label: 'Escrow', icon: Shield, color: '#22c55e', path: '/admin/escrows' },
+              { role: 'ad_manager', label: 'Ad Manager', icon: Megaphone, color: '#f97316', path: '/admin/ads' },
+              { role: 'moderator', label: 'Moderator', icon: Shield, color: '#3b82f6', path: '/admin/moderation' },
             ].map(d => (
               <Link key={d.role} to={d.path} style={{ textDecoration: 'none' }}>
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, textAlign: 'center' }}>
+                  <d.icon size={14} style={{ color: d.color, marginBottom: 2 }} />
                   <div style={{ color: d.color, fontWeight: 600 }}>{d.label}</div>
                 </div>
               </Link>

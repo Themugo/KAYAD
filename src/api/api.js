@@ -415,7 +415,15 @@ const _adminAPI = {
   createMarketData: (body)      => api.post('/admin/market-data', body).then(unwrap),
   updateMarketData: (id, body)  => api.put(`/admin/market-data/${id}`, body).then(unwrap),
   deleteMarketData: (id)        => api.delete(`/admin/market-data/${id}`).then(unwrap),
-  bulkMarketData:   (entries)   => api.post('/admin/market-data/bulk', { entries }).then(unwrap),
+  bulkMarketData:  (entries)   => api.post('/admin/market-data/bulk', { entries }).then(unwrap),
+
+  // Alerts (NEW)
+  alerts:          (params)    => api.get('/admin/alerts', { params }).then(unwrap),
+  markAlertRead:   (id)        => api.post(`/admin/alerts/${id}/read`).then(unwrap),
+  markAllAlertsRead: ()        => api.post('/admin/alerts/read-all').then(unwrap),
+
+  // System Health (NEW)
+  systemHealth:    ()          => api.get('/admin/system/health').then(unwrap),
 };
 export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
 
