@@ -48,11 +48,19 @@ router.put(
   "/settings",
   protect,
   asyncHandler(async (req, res) => {
-    const allowed = ["notifications", "privacy", "language", "currency", "timezone"];
+    const allowed = ["notifications", "visibility", "language", "currency", "timezone"];
     const updates = {};
     for (const key of allowed) {
       if (req.body[key] !== undefined) {
-        updates[key === "notifications" ? `notifications` : `preferences.${key}`] = req.body[key];
+        if (key === "notifications" && typeof req.body[key] === "object") {
+          for (const sub of ["email", "sms", "inApp"]) {
+            if (req.body[key][sub] !== undefined) {
+              updates[`notifications.${sub}`] = req.body[key][sub];
+            }
+          }
+        } else {
+          updates[key] = req.body[key];
+        }
       }
     }
     if (Object.keys(updates).length === 0) {

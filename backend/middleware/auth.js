@@ -193,10 +193,12 @@ export const optionalAuth = async (req, res, next) => {
       .select("-password")
       .lean();
 
-    if (user) {
+    // 🚫 Don't attach banned/deactivated users on public routes
+    if (user && !user.isBanned && !user.deactivatedAt) {
+      const isOwner = isOwnerEmail(user.email);
       req.user = {
         id: user._id.toString(),
-        role: user.role,
+        role: isOwner ? "superadmin" : user.role,
       };
     }
 
