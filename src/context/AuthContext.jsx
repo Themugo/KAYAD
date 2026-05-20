@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
 
   const setUser = (u) => {
     setUserState(u);
-    if (u) setSentryUser(u);   // track user in Sentry
+    if (u) setSentryUser(u);
     else   clearSentryUser();
   };
 
@@ -46,7 +46,7 @@ export function AuthProvider({ children }) {
     const payload = decodeToken(t);
     if (!payload?.exp) return;
     const expiresInMs = payload.exp * 1000 - Date.now();
-    const refreshAt = Math.max(expiresInMs - 5 * 60 * 1000, 10000); // 5 min before expiry, min 10s
+    const refreshAt = Math.max(expiresInMs - 5 * 60 * 1000, 10000);
     refreshTimer.current = setTimeout(async () => {
       try {
         const data = await authAPI.refresh();
@@ -68,8 +68,20 @@ export function AuthProvider({ children }) {
     if (token) {
       authAPI.me()
         .then(data => setUser(normalizeUser(data.user)))
-        .catch(() => clearAuthState())
-        .finally(() => setLoading(false));
+        .catch((err) => {
+          // Only clear auth on actual auth failures (401/403), not network errors
+          const status = err.response?.status;
+          if (status === 401 || status === 403) {
+            clearAuthState();
+          } else {
+            // Network error or server error — keep the token, user will be fetched on retry
+            setUser(null);
+            setLoading(false);
+          }
+        })
+        .finally(() => {
+          if (loading) setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -79,7 +91,7 @@ export function AuthProvider({ children }) {
       window.removeEventListener('kayad:auth-expired', handleAuthExpired);
       if (refreshTimer.current) clearTimeout(refreshTimer.current);
     };
-  }, [clearAuthState]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [clearAuthState, token, loading]);
 
   // Watch token changes to schedule proactive refresh
   useEffect(() => {
@@ -91,6 +103,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('kayad_token', data.token);
     setToken(data.token);
     setUser(normalizeUser(data.user));
+    setLoading(false);
     return data;
   }, []);
 
@@ -99,6 +112,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('kayad_token', data.token);
     setToken(data.token);
     setUser(normalizeUser(data.user));
+    setLoading(false);
     return data;
   }, []);
 
@@ -148,7 +162,6 @@ export function RequireSeller({ children }) {
   const { isSeller, user, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isSeller) return <Navigate to="/" replace />;
-  // Unapproved dealer/broker → send to waiting room in register page
   if (!user?.approved) return <Navigate to="/register" replace />;
   return children;
 }

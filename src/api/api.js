@@ -45,7 +45,10 @@ const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 
 // Attach JWT from localStorage on every request
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('kayad_token');
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    cfg.headers.Authorization = `Bearer ${token}`;
+    cfg._hadToken = true; // mark that this request was made with a token
+  }
   return cfg;
 });
 
@@ -76,7 +79,10 @@ api.interceptors.response.use(
       requestUrl.includes('/auth/reset-password') ||
       requestUrl.includes('/auth/refresh');
 
-    if (err.response?.status === 401 && hasStoredToken && !skipRefresh && !orig._retry) {
+    // Only attempt refresh/clear if the original request HAD a token attached.
+    // Requests made without a token (e.g. wake-up calls, public endpoints) should
+    // NOT trigger auth-expired — a 401 is expected when no token was sent.
+    if (err.response?.status === 401 && hasStoredToken && !skipRefresh && !orig._retry && orig._hadToken) {
       if (_refreshing) {
         return new Promise((res, rej) => _queue.push({ res, rej }))
           .then(token => { orig.headers.Authorization = `Bearer ${token}`; return api(orig); });

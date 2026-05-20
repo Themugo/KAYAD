@@ -1,11 +1,10 @@
 // src/pages/LoginPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
-import axios from 'axios';
 
 export function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
@@ -14,16 +13,14 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = safeRedirectPath(location.state?.from?.pathname, '/');
+  const hasRedirected = useRef(false);
 
-  // Wake Render backend on mount (cold start takes ~30s)
+  // Redirect if already authenticated (e.g. user navigated to /login manually)
   useEffect(() => {
-    axios.get('/api/cars?limit=1', { timeout: 5000 }).catch(() => {});
-  }, []);
-
-  // Safety net: redirect once auth state flushes
-  useEffect(() => {
-    if (!isAuth || !user) return;
-    navigate(getPostAuthPath(user, from), { replace: true });
+    if (isAuth && user && !hasRedirected.current) {
+      hasRedirected.current = true;
+      navigate(getPostAuthPath(user, from), { replace: true });
+    }
   }, [isAuth, user, navigate, from]);
 
   const [form, setForm]       = useState({ email: '', password: '' });
@@ -39,7 +36,6 @@ export function LoginPage() {
       navigate(getPostAuthPath(data.user, from), { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Invalid credentials', 'error');
-    } finally {
       setLoading(false);
     }
   };
