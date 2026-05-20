@@ -27,6 +27,12 @@ export const initCache = async () => {
       socket: { reconnectStrategy: (n) => (n > 5 ? false : Math.min(n * 500, 3000)) },
     });
 
+    if (!client) {
+      console.warn("⚠️  Redis createClient returned null — using in-memory");
+      client = null;
+      return;
+    }
+
     client.on("error", (err) => {
       if (connected) console.error("❌ Redis error:", err.message);
       connected = false;
