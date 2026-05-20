@@ -1,8 +1,10 @@
 import express from "express";
+import mongoose from "mongoose";
 import {
   protect,
   dealerOnly,
   adminOnly,
+  optionalAuth,
 } from "../middleware/auth.js";
 
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -58,7 +60,7 @@ router.get(
   protect,
   dealerOnly,
   asyncHandler(async (req, res) => {
-    const dealerId = req.user.id;
+    const dealerId = new mongoose.Types.ObjectId(req.user.id);
 
     const [stats] = await Car.aggregate([
       { $match: { dealer: dealerId } },
@@ -100,6 +102,7 @@ router.get("/", asyncHandler(getCars));
 // 🔎 GET SINGLE CAR
 router.get(
   "/:id",
+  optionalAuth,
   validateObjectId,
   asyncHandler(getCar)
 );

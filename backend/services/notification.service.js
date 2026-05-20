@@ -20,12 +20,14 @@ export const sendNotification = async ({
     });
 
     if (global.io) {
-      global.io.to(userId.toString()).emit("notification", {
+      const payload = {
         id: notification._id,
         title,
         message,
         type,
-      });
+      };
+      global.io.to(userId.toString()).emit("notification", payload);
+      global.io.to(`user_${userId.toString()}`).emit("notification", payload);
     }
 
     if (email) {

@@ -153,7 +153,6 @@ const userSchema = new mongoose.Schema(
 
     dealerPackage: {
       type: String,
-      enum: ["none", "starter", "growth", "elite", "enterprise"],
       default: "none",
     },
     packageExpiresAt:  { type: Date, default: null },

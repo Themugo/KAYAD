@@ -14,8 +14,11 @@ export default function AdminSellers() {
   const fetchSellers = useCallback(async () => {
     setLoading(true);
     try {
-      const roleParam = filter !== 'all' ? 'dealer' : undefined;
-      const data = await adminAPI.users({ role: roleParam, search: search || undefined });
+      const data = await adminAPI.users({
+        seller: true,
+        ...(filter === 'pending' ? { pendingApproval: true } : {}),
+        search: search || undefined,
+      });
       const users = data.users || data.data || [];
       const mapped = users.map(u => ({
         id: u._id,

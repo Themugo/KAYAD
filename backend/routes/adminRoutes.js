@@ -132,6 +132,9 @@ router.get(
     // 🔍 FILTERS
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
+    if (req.query.seller === "true") {
+      filter.role = { $in: ["dealer", "broker", "individual_seller"] };
+    }
     if (req.query.pendingApproval === "true") {
       filter.role = { $in: ["dealer", "broker", "individual_seller"] };
       filter.approved = false;
@@ -224,8 +227,8 @@ router.post(
       });
     }
 
-    user.role = "dealer";
     user.approved = true;
+    user.verificationStatus = "verified";
 
     await user.save();
 
@@ -238,14 +241,14 @@ router.post(
 
     sendNotification({
       userId: user._id,
-      title: "✅ Dealer Account Approved",
-      message: "Your dealer account has been approved! You can now list vehicles and access all dealer features.",
+      title: "Seller Account Approved",
+      message: "Your seller account has been approved. You can now list vehicles and access seller features.",
       type: "info",
     }).catch(() => {});
 
     res.json({
       success: true,
-      message: "User approved as dealer",
+      message: "Seller approved",
     });
   })
 );

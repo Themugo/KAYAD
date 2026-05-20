@@ -49,6 +49,7 @@ const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('kayad_token');
   if (token) {
+    cfg.headers = cfg.headers || {};
     cfg.headers.Authorization = `Bearer ${token}`;
     cfg._hadToken = true; // mark that this request was made with a token
   }
@@ -88,7 +89,11 @@ api.interceptors.response.use(
     if (err.response?.status === 401 && hasStoredToken && !skipRefresh && !orig._retry && orig._hadToken) {
       if (_refreshing) {
         return new Promise((res, rej) => _queue.push({ res, rej }))
-          .then(token => { orig.headers.Authorization = `Bearer ${token}`; return api(orig); });
+          .then(token => {
+            orig.headers = orig.headers || {};
+            orig.headers.Authorization = `Bearer ${token}`;
+            return api(orig);
+          });
       }
       orig._retry = true;
       _refreshing = true;
@@ -104,6 +109,7 @@ api.interceptors.response.use(
         localStorage.setItem('kayad_token', data.token);
         _queue.forEach(p => p.res(data.token));
         _queue = [];
+        orig.headers = orig.headers || {};
         orig.headers.Authorization = `Bearer ${data.token}`;
         return api(orig);
       } catch {

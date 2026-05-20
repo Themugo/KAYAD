@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import { protect, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
@@ -91,7 +92,7 @@ router.get(
     const { page, limit, skip } = getPagination(req);
 
     const filter = { dealer: req.user.id }; 
-    const dealerId = req.user.id;
+    const dealerId = new mongoose.Types.ObjectId(req.user.id);
 
     if (req.query.sold === "true") filter.sold = true;
     if (req.query.active === "true") filter.sold = false;
@@ -176,7 +177,7 @@ router.get(
 router.get(
   "/summary",
   asyncHandler(async (req, res) => {
-    const dealerId = req.user.id;
+    const dealerId = new mongoose.Types.ObjectId(req.user.id);
 
     const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
 
@@ -185,7 +186,7 @@ router.get(
       Car.countDocuments({ dealer: dealerId, sold: true }),
 
       Payment.aggregate([
-        { $match: { user: req.user._id, status: "success" } },
+        { $match: { user: dealerId, status: "success" } },
         { $group: { _id: null, total: { $sum: "$dealerAmount" } } },
       ]),
 
@@ -356,17 +357,6 @@ router.put(
   })
 );
 
-// =============================
-// 🚨 FALLBACK
-// =============================
-router.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Dealer route not found",
-  });
-});
-
-export default router;
 // ─────────────────────────────────────────────────────────────
 // 👥 DEALER TEAM MANAGEMENT
 // ─────────────────────────────────────────────────────────────
@@ -446,3 +436,14 @@ router.delete("/team/:memberId", asyncHandler(async (req, res) => {
   res.json({ success: true, message: "Removed from team" });
 }));
 
+// =============================
+// 🚨 FALLBACK
+// =============================
+router.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Dealer route not found",
+  });
+});
+
+export default router;

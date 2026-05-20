@@ -3,6 +3,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { formatPhone } from "../utils/format.js";
 import * as R from "../utils/response.js";
+import PlatformConfig from "../models/PlatformConfig.js";
+import { sendNotification } from "../services/notification.service.js";
 
 // =============================
 // 🔐 CONFIG (read at function call time, not import time — dotenv hasn't loaded yet)
@@ -14,6 +16,31 @@ const getRefresh = () => REFRESH_SECRET || (REFRESH_SECRET = process.env.REFRESH
 
 const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRE || "1h";
 const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
+
+const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
+const OWNER_EMAILS = [WEBHOIST_EMAIL, "themugo@kayad.space"].filter(Boolean);
+const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
+const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
+
+const isOwnerEmail = (email) => OWNER_EMAILS.includes(String(email || "").toLowerCase().trim());
+
+const serializeUser = (user) => {
+  const raw = typeof user.toObject === "function" ? user.toObject() : user;
+  const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
+  delete raw.password;
+  delete raw.resetToken;
+  delete raw.resetTokenExpire;
+  delete raw.emailVerifyToken;
+  delete raw.emailVerifyExpire;
+  delete raw.tokenVersion;
+  return {
+    ...raw,
+    _id: raw._id,
+    id: raw._id,
+    role,
+    approved: raw.approved,
+  };
+};
 
 // =============================
 // 🪙 TOKEN GENERATORS
@@ -60,26 +87,33 @@ const sendRefreshToken = (res, token) => {
 const sendAuthResponse = (res, user) => {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
+  const safeUser = serializeUser(user);
 
   sendRefreshToken(res, refreshToken);
 
   return res.json({
     success: true,
     token: accessToken,
-    user: {
-      _id: user._id,
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      approved: user.approved,
-      businessName: user.businessName,
-      location: user.location,
-      phone: user.phone,
-      onboardingComplete: user.onboardingComplete,
-      mustChangePassword: user.mustChangePassword,
-    },
+    user: safeUser,
   });
+};
+
+const notifyAdminsOfPendingSeller = async (seller) => {
+  try {
+    const admins = await User.find({ role: { $in: STAFF_ROLES } })
+      .select("_id email")
+      .lean();
+
+    await Promise.all(admins.map(admin => sendNotification({
+      userId: admin._id,
+      title: "New seller approval pending",
+      message: `${seller.businessName || seller.name} (${seller.email}) registered as a ${seller.role} and is awaiting approval.`,
+      type: "system",
+      email: admin.email,
+    })));
+  } catch (err) {
+    console.warn("⚠️  Pending seller admin notification failed:", err.message);
+  }
 };
 
 // =============================
@@ -103,14 +137,32 @@ export const register = async (req, res) => {
     if (exists) {
       return R.error(res, "User already exists", 400);
     }
-    const { role: requestedRole } = req.body;
+    const { role: requestedRole, dealerPackage } = req.body;
     const allowedSelfRoles = process.env.NODE_ENV === "test"
       ? ["dealer", "broker", "individual_seller", "admin"]
       : ["dealer", "broker", "individual_seller"];
     const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
-    const needsApproval = role === "dealer"; // only dealers need admin approval
-    const extra = role === "dealer" || role === "broker" || role === "individual_seller"
-      ? { approved: !needsApproval, businessName: req.body.businessName || "", location: req.body.location || "" }
+    const isSeller = SELLER_ROLES.includes(role);
+    const config = await PlatformConfig.findOne().lean().catch(() => null);
+    const needsApproval = isSeller && config?.requireDealerApproval !== false;
+    const selectedPackage = isSeller && dealerPackage
+      ? (config?.packages || []).find(pkg => pkg.id === dealerPackage && pkg.isActive)
+      : null;
+    const extra = isSeller
+      ? {
+          approved: !needsApproval,
+          verificationStatus: needsApproval ? "pending" : "verified",
+          businessName: req.body.businessName || "",
+          location: req.body.location || "",
+          dealerPackage: selectedPackage?.id || "none",
+          packageListingMax: selectedPackage?.listingMax ?? 0,
+          packageFeatures: selectedPackage?.features || [],
+          packageExpiresAt: selectedPackage?.durationDays
+            ? new Date(Date.now() + Number(selectedPackage.durationDays) * 86400000)
+            : null,
+          subscriptionStatus: selectedPackage && (selectedPackage.isFree || selectedPackage.priceMonthly === 0) ? "active" : "none",
+          trialStartedAt: selectedPackage?.trialDays ? new Date() : null,
+        }
       : {};
 
     // Referral: look up referrer by code
@@ -185,6 +237,10 @@ export const register = async (req, res) => {
       console.warn("⚠️  Could not generate verify token:", emailErr.message);
     }
 
+    if (needsApproval) {
+      notifyAdminsOfPendingSeller(user).catch(() => {});
+    }
+
     return sendAuthResponse(res.status(201), user);
 
   } catch (err) {
@@ -250,11 +306,17 @@ export const refreshToken = async (req, res) => {
     }
 
     let decoded;
+    let usedAccessFallback = false;
 
     try {
       decoded = jwt.verify(token, getRefresh());
     } catch {
-      return R.error(res, "Invalid refresh token", 403);
+      try {
+        decoded = jwt.verify(token, getAccess(), { ignoreExpiration: true });
+        usedAccessFallback = true;
+      } catch {
+        return R.error(res, "Invalid refresh token", 403);
+      }
     }
 
     const user = await User.findById(decoded.id).select("+tokenVersion");
@@ -265,6 +327,10 @@ export const refreshToken = async (req, res) => {
 
     if (decoded.tokenVersion !== user.tokenVersion) {
       return R.error(res, "Session invalidated", 403);
+    }
+
+    if (usedAccessFallback && !req.headers.authorization) {
+      return R.error(res, "Refresh cookie required", 403);
     }
 
     return sendAuthResponse(res, user);
@@ -313,7 +379,7 @@ export const getProfile = async (req, res) => {
       return R.notFound(res, "User not found");
     }
 
-    res.json({ success: true, user });
+    res.json({ success: true, user: serializeUser(user) });
 
   } catch (err) {
     console.error("❌ PROFILE ERROR:", err);
@@ -328,27 +394,27 @@ export const updateProfile = async (req, res) => {
     const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications, paymentDetails, onboardingComplete } = req.body;
 
     const updates = {};
-    if (name)              updates.name = name.trim();
-    if (phone)             updates.phone = formatPhone(phone) || phone.trim();
-    if (location)          updates.location = location.trim();
-    if (businessName)      updates.businessName = businessName.trim();
-    if (bio !== undefined)  updates.bio = bio.trim();
-    if (visibility)        updates.visibility = visibility;
-    if (mpesaBusiness !== undefined)     updates.mpesaBusiness = mpesaBusiness.trim();
-    if (mpesaBusinessName !== undefined) updates.mpesaBusinessName = mpesaBusinessName.trim();
-    if (bankName !== undefined)          updates.bankName = bankName.trim();
-    if (bankAccount !== undefined)       updates.bankAccount = bankAccount.trim();
-    if (bankBranch !== undefined)        updates.bankBranch = bankBranch.trim();
+    if (name !== undefined)              updates.name = String(name).trim();
+    if (phone !== undefined)             updates.phone = formatPhone(phone) || String(phone).trim();
+    if (location !== undefined)          updates.location = String(location).trim();
+    if (businessName !== undefined)      updates.businessName = String(businessName).trim();
+    if (bio !== undefined)               updates.bio = String(bio).trim();
+    if (visibility && typeof visibility === "object") updates.visibility = visibility;
+    if (mpesaBusiness !== undefined)     updates.mpesaBusiness = String(mpesaBusiness).trim();
+    if (mpesaBusinessName !== undefined) updates.mpesaBusinessName = String(mpesaBusinessName).trim();
+    if (bankName !== undefined)          updates.bankName = String(bankName).trim();
+    if (bankAccount !== undefined)       updates.bankAccount = String(bankAccount).trim();
+    if (bankBranch !== undefined)        updates.bankBranch = String(bankBranch).trim();
     if (notifications)                   updates.notifications = { sms: notifications.sms };
     if (paymentDetails)                  updates.paymentDetails = paymentDetails;
-    if (onboardingComplete === true)     updates.onboardingComplete = true;
+    if (onboardingComplete !== undefined) updates.onboardingComplete = Boolean(onboardingComplete);
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
       .select("-password");
 
     if (!user) return R.notFound(res, "User not found");
 
-    res.json({ success: true, user });
+    res.json({ success: true, user: serializeUser(user) });
   } catch (err) {
     R.error(res, err.message, 500);
   }
