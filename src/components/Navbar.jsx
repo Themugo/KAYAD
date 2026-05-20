@@ -19,18 +19,22 @@ export default function Navbar({ branding }) {
   const [userDrop,    setUserDrop]    = useState(false);
   const [notifDrop,   setNotifDrop]   = useState(false);
   const [scrolled,    setScrolled]    = useState(false);
+  const [searchOpen,  setSearchOpen]  = useState(false);
+  const [searchQ,     setSearchQ]     = useState('');
 
   const dropRef  = useRef(null);
+  const searchRef = useRef(null);
 
-  useEffect(() => { setMobileOpen(false); setUserDrop(false); setNotifDrop(false); }, [loc.pathname]);
+  useEffect(() => { setMobileOpen(false); setUserDrop(false); setNotifDrop(false); setSearchOpen(false); }, [loc.pathname]);
 
   useEffect(() => {
     const h = (e) => {
       if (dropRef.current && !dropRef.current.contains(e.target)) { setUserDrop(false); setNotifDrop(false); }
+      if (searchRef.current && !searchRef.current.contains(e.target) && searchOpen) setSearchOpen(false);
     };
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
-  }, []);
+  }, [searchOpen]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
@@ -44,6 +48,15 @@ export default function Navbar({ branding }) {
   }, []);
 
   const handleLogout = async () => { await logout(); navigate('/'); };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQ.trim()) {
+      navigate(`/showroom?search=${encodeURIComponent(searchQ.trim())}`);
+      setSearchOpen(false);
+      setSearchQ('');
+    }
+  };
 
   const isActive = (path) => {
     if (path === '/') return loc.pathname === '/';
@@ -87,8 +100,9 @@ export default function Navbar({ branding }) {
         boxShadow: scrolled ? '0 1px 40px rgba(0,0,0,0.3)' : 'none',
         transition: 'background 0.5s ease, border-color 0.5s ease, backdrop-filter 0.5s ease, box-shadow 0.5s ease',
       }}>
-        <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, textDecoration: 'none', marginRight: 'auto', transition: 'opacity 0.3s' }} aria-label="Kayad home">
+        <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 16 }}>
+          {/* ── LOGO ── */}
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, textDecoration: 'none', transition: 'opacity 0.3s' }} aria-label="Kayad home">
             {branding?.logoType === 'image' && branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={branding.logoText || 'Logo'} decoding="async"
                 style={{ height: 44, width: 'auto', objectFit: 'contain', borderRadius: 8 }} />
@@ -113,17 +127,31 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          <div style={{ flex: 1, textAlign: 'center', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 0 }}>
-            <span style={{
-              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 18, color: 'var(--gold)',
-              letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              textShadow: '0 0 20px rgba(212,196,168,0.15)',
-            }}>
-              {branding?.brandTagline || "Kenya's Premium Automotive Gallery"}
-            </span>
+          {/* ── SEARCH BAR (compact inline) ── */}
+          <div ref={searchRef} style={{ flex: 1, maxWidth: 320, position: 'relative', display: 'none' }} className="desktop-search">
+            <form onSubmit={handleSearch} style={{ position: 'relative' }}>
+              <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              </svg>
+              <input
+                type="text" placeholder="Search makes, models..." value={searchQ}
+                onChange={e => setSearchQ(e.target.value)}
+                onFocus={() => setSearchOpen(true)}
+                style={{
+                  width: '100%', padding: '10px 14px 10px 38px', borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#fff', fontSize: 13, outline: 'none',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+              />
+            </form>
           </div>
 
-          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0 }}>
+          {/* ── DESKTOP NAV ── */}
+          <div className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: 18, flexShrink: 0 }}>
             <Link to="/showroom" style={navLinkStyle(isActive('/showroom'))}
               onMouseEnter={e => { if (!isActive('/showroom')) e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { if (!isActive('/showroom')) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
@@ -172,13 +200,23 @@ export default function Navbar({ branding }) {
             )}
           </div>
 
-          <div ref={dropRef} style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {/* ── RIGHT ── */}
+          <div ref={dropRef} style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
             {connected && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 9999, border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.06)' }}>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', display: 'block', animation: 'pulse 2s infinite' }} />
                 <span style={{ fontSize: 11, color: 'rgba(34,197,94,0.85)', fontWeight: 700, letterSpacing: '0.06em' }}>LIVE</span>
               </div>
             )}
+
+            {/* Quick search toggle (mobile) */}
+            <button onClick={() => setSearchOpen(true)} className="mobile-search-toggle"
+              style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.5)', display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+              </svg>
+            </button>
 
             {isAuth ? (
               <>
@@ -192,7 +230,6 @@ export default function Navbar({ branding }) {
                       <span style={{ position: 'absolute', top: 4, right: 4, width: 17, height: 17, borderRadius: '50%', background: 'var(--gold)', color: '#000', fontSize: 9, fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #050505' }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
                     )}
                   </button>
-
                   {notifDrop && <NotificationCenter onClose={() => setNotifDrop(false)} />}
                 </div>
 
@@ -213,7 +250,7 @@ export default function Navbar({ branding }) {
                   </button>
 
                   {userDrop && (
-                    <div style={{ position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: 230, background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, boxShadow: '0 28px 70px rgba(0,0,0,0.85)', overflow: 'hidden', zIndex: 200 }}>
+                    <div style={{ position: 'absolute', top: 'calc(100% + 12px)', right: 0, width: 240, background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, boxShadow: '0 28px 70px rgba(0,0,0,0.85)', overflow: 'hidden', zIndex: 200 }}>
                       <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                         <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{user?.name}</div>
                         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 3 }}>{user?.email}</div>
@@ -264,6 +301,19 @@ export default function Navbar({ branding }) {
         </div>
       </nav>
 
+      {/* ── MOBILE SEARCH OVERLAY ── */}
+      {searchOpen && (
+        <div style={{ position: 'fixed', top: 100, left: 0, right: 0, zIndex: 99, padding: '12px 20px', background: 'rgba(3,3,3,0.98)', borderBottom: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(16px)' }}>
+          <form onSubmit={handleSearch} style={{ display: 'flex', gap: 10 }}>
+            <input type="text" placeholder="Search makes, models..." value={searchQ} onChange={e => setSearchQ(e.target.value)} autoFocus
+              style={{ flex: 1, padding: '14px 18px', borderRadius: 12, border: '1px solid rgba(212,196,168,0.2)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontSize: 15, outline: 'none' }} />
+            <button type="submit" style={{ padding: '14px 24px', borderRadius: 12, background: 'var(--gold)', color: '#000', fontWeight: 900, border: 'none', cursor: 'pointer', fontSize: 13 }}>Search</button>
+            <button type="button" onClick={() => setSearchOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: 'none', cursor: 'pointer', fontSize: 13 }}>✕</button>
+          </form>
+        </div>
+      )}
+
+      {/* ── MOBILE MENU ── */}
       {mobileOpen && (
         <div className="mobile-menu" onClick={() => setMobileOpen(false)}
           style={{ animation: 'fadeIn 0.2s ease' }}>
@@ -286,12 +336,18 @@ export default function Navbar({ branding }) {
                 </div>
               )}
             </div>
-            <div style={{ padding: '14px 10px' }}>
+            {/* Mobile search */}
+            <div style={{ padding: '12px 16px' }}>
+              <form onSubmit={handleSearch}>
+                <input type="text" placeholder="Search..." value={searchQ} onChange={e => setSearchQ(e.target.value)}
+                  style={{ width: '100%', padding: '14px 18px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 15, outline: 'none' }} />
+              </form>
+            </div>
+            <div style={{ padding: '6px 10px' }}>
               {[
                 { to: '/',                        label: 'Home' },
                 { to: '/showroom',                label: 'The Gallery' },
                 { to: '/showroom?filter=auction', label: 'Live Auctions' },
-
                 ...(isAuth ? [
                   { to: '/dashboard', label: 'Dashboard' },
                   { to: '/notifications', label: 'Notifications' },

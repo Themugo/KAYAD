@@ -1,10 +1,42 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { carsAPI } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
+
+const AnimatedStat = ({ value, label }) => {
+  const [display, setDisplay] = useState('0');
+  const ref = useRef(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        const target = typeof value === 'string' ? parseInt(value.replace(/[^0-9]/g,'')) || 100 : (value || 0);
+        const suffix = typeof value === 'string' ? value.replace(/[0-9]/g,'') : '';
+        let start = 0;
+        const dur = Math.min(1200, target * 8);
+        const step = Math.max(1, Math.floor(target / 30));
+        const iv = setInterval(() => {
+          start += step;
+          if (start >= target) { start = target; clearInterval(iv); }
+          setDisplay(start.toLocaleString() + suffix);
+        }, dur / (target / step || 1));
+        obs.disconnect();
+      }
+    }, { threshold: 0.5 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [value]);
+  return (
+    <div ref={ref} style={{ textAlign: 'center', padding: '20px 12px', background: '#050505' }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.65rem', fontWeight: 900, fontStyle: 'italic', color: 'var(--gold)', lineHeight: 1 }}>{display}</div>
+      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginTop: 5 }}>{label}</div>
+    </div>
+  );
+};
 
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
@@ -13,6 +45,7 @@ export default function HomePage() {
   const [recent,    setRecent]    = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [stats,     setStats]     = useState(null);
+  const scrollRef  = useRef(null);
 
   useEffect(() => {
     carsAPI.list({ limit: 50 }).then(data => {
@@ -39,65 +72,53 @@ export default function HomePage() {
     <div style={{ background: '#050505', minHeight: '100vh' }}>
 
       {/* ════════════════════════════════════════════════════════
-          HERO — compact, text-tight so first row of cars peeks
+          HERO
           ════════════════════════════════════════════════════════ */}
       <section style={{
         position: 'relative', overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         textAlign: 'center',
-        padding: '52px 24px 36px',
-        minHeight: '56vh',
+        padding: '56px 24px 40px',
+        minHeight: '58vh',
       }}>
         {/* Radial gold glow */}
         <div style={{
-          position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
-          width: 700, height: 400,
-          background: 'radial-gradient(ellipse, rgba(212,196,168,0.09) 0%, transparent 70%)',
+          position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)',
+          width: 800, height: 500,
+          background: 'radial-gradient(ellipse, rgba(212,196,168,0.10) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
         {/* Fine grid texture */}
         <div style={{
-          position: 'absolute', inset: 0, opacity: 0.018,
+          position: 'absolute', inset: 0, opacity: 0.02,
           backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
           backgroundSize: '60px 60px', pointerEvents: 'none',
         }} />
 
-        {/* Thin horizontal rule above headline */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20, zIndex: 1,
-        }}>
+        {/* Top ornament */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22, zIndex: 1 }}>
           <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
-          <span style={{
-            fontSize: 11, color: 'var(--gold)', fontWeight: 800,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            textShadow: '0 0 20px rgba(212,196,168,0.12)',
-          }}>
+          <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', textShadow: '0 0 20px rgba(212,196,168,0.12)' }}>
             Kenya's Premium Car Marketplace
           </span>
           <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
         </div>
 
-        {/* HEADLINE — smaller clamp so first row of cars always peeks */}
         <h1 style={{
           fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
-          fontSize: 'clamp(2.6rem, 6.5vw, 4.8rem)', lineHeight: 0.9,
+          fontSize: 'clamp(2.8rem, 7vw, 5.2rem)', lineHeight: 0.9,
           textTransform: 'uppercase', color: '#fff',
-          marginBottom: 18, letterSpacing: '-0.01em', zIndex: 1,
+          marginBottom: 20, letterSpacing: '-0.01em', zIndex: 1,
         }}>
           Drive in{' '}
-          <span style={{
-            color: 'var(--gold)',
-            textShadow: '0 0 48px rgba(212,196,168,0.28)',
-          }}>
-            Gold
-          </span>
+          <span style={{ color: 'var(--gold)', textShadow: '0 0 48px rgba(212,196,168,0.28)' }}>Gold</span>
         </h1>
 
         <p style={{
           color: 'rgba(255,255,255,0.65)', fontSize: 16, maxWidth: 520,
-          margin: '0 auto 28px', lineHeight: 1.7, zIndex: 1,
+          margin: '0 auto 30px', lineHeight: 1.7, zIndex: 1,
           fontWeight: 400,
         }}>
           East Africa's most sophisticated marketplace — live auctions,
@@ -106,7 +127,7 @@ export default function HomePage() {
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', zIndex: 1 }}>
           <Link to="/showroom" style={{
-            padding: '13px 32px', background: 'var(--gold)', color: '#000',
+            padding: '14px 36px', background: 'var(--gold)', color: '#000',
             borderRadius: 9999, fontWeight: 900, fontSize: 11,
             textTransform: 'uppercase', letterSpacing: '0.1em',
             boxShadow: '0 6px 28px rgba(212,196,168,0.28)',
@@ -117,7 +138,7 @@ export default function HomePage() {
           >Enter The Gallery</Link>
 
           <Link to="/showroom?filter=auction" style={{
-            padding: '13px 32px', background: 'transparent', color: 'rgba(255,255,255,0.75)',
+            padding: '14px 36px', background: 'transparent', color: 'rgba(255,255,255,0.75)',
             borderRadius: 9999, fontWeight: 600, fontSize: 11,
             textTransform: 'uppercase', letterSpacing: '0.1em',
             border: '1px solid rgba(255,255,255,0.14)',
@@ -129,21 +150,17 @@ export default function HomePage() {
         </div>
 
         {isAuth && (
-          <div style={{ marginTop: 18, fontSize: 11, color: 'rgba(255,255,255,0.18)', zIndex: 1 }}>
+          <div style={{ marginTop: 20, fontSize: 11, color: 'rgba(255,255,255,0.18)', zIndex: 1 }}>
             Welcome back, <strong style={{ color: 'rgba(212,196,168,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
           </div>
         )}
 
-        {/* Fade bottom edge so cars below feel revealed */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: 80,
-          background: 'linear-gradient(transparent, #050505)',
-          pointerEvents: 'none',
-        }} />
+        {/* fade to content */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 80, background: 'linear-gradient(transparent, #050505)', pointerEvents: 'none' }} />
       </section>
 
       {/* ════════════════════════════════════════════════════════
-          LIVE STATS BAR
+          LIVE STATS BAR (animated counters)
           ════════════════════════════════════════════════════════ */}
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{
@@ -151,31 +168,18 @@ export default function HomePage() {
           display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
           gap: 1, background: 'rgba(255,255,255,0.03)',
         }}>
-          {[
-            { label: 'Vehicles',      value: stats ? `${stats.totalCars}+`  : '—' },
-            { label: 'Live Now',      value: stats ? `${stats.liveAuctions}` : '—' },
-            { label: 'Brands',        value: stats ? `${stats.brands}`       : '—' },
-            { label: 'Avg Price',     value: stats ? `KES ${(stats.avgPrice / 1e6).toFixed(1)}M` : '—' },
-          ].map((s, i) => (
-            <div key={i} style={{ textAlign: 'center', padding: '20px 12px', background: '#050505' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.65rem', fontWeight: 900, fontStyle: 'italic', color: 'var(--gold)', lineHeight: 1 }}>
-                {s.value}
-              </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginTop: 5 }}>
-                {s.label}
-              </div>
-            </div>
-          ))}
+          <AnimatedStat label="Vehicles"  value={stats ? `${stats.totalCars}+`  : '—'} />
+          <AnimatedStat label="Live Now"  value={stats ? `${stats.liveAuctions}` : '—'} />
+          <AnimatedStat label="Brands"    value={stats ? `${stats.brands}`       : '—'} />
+          <AnimatedStat label="Avg Price" value={stats ? `KES ${(stats.avgPrice / 1e6).toFixed(1)}M` : '—'} />
         </div>
       </section>
 
       {/* ════════════════════════════════════════════════════════
-          FEATURED CARS — from the gallery
+          FEATURED CARS
           ════════════════════════════════════════════════════════ */}
-      <section style={{ padding: '48px 0 36px' }}>
+      <section style={{ padding: '52px 0 40px' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-
-          {/* Section header */}
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -212,7 +216,6 @@ export default function HomePage() {
             >Full Gallery →</Link>
           </div>
 
-          {/* Cars grid — 4-up */}
           {loading ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
               {[1,2,3,4].map(i => (
@@ -265,44 +268,53 @@ export default function HomePage() {
       )}
 
       {/* ════════════════════════════════════════════════════════
-          THREE FEATURE PILLARS
+          FEATURE PILLARS
           ════════════════════════════════════════════════════════ */}
-      <section style={{
-        borderTop: '1px solid rgba(255,255,255,0.04)',
-        padding: '64px 0',
-      }}>
+      <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '64px 0' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 2, overflow: 'hidden' }}>
             {[
               {
-                icon: '⚡',
                 title: 'Live Auctions',
-                desc: 'Real-time bidding with automatic time extensions. Your bid, your timing.',
+                desc: 'Real-time bidding with automatic time extensions and snipe protection. Every bid, every second counts.',
                 cta: 'Bid Now',
                 href: '/showroom?filter=auction',
                 accent: 'rgba(212,196,168,0.06)',
+                icon: (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                ),
               },
               {
-                icon: '🔒',
                 title: 'Escrow Protection',
-                desc: 'M-Pesa secured transactions held safely until both parties confirm.',
+                desc: 'M-Pesa secured transactions held safely until delivery is confirmed. Your money stays protected.',
                 cta: 'Learn More',
                 href: '/escrow',
                 accent: 'rgba(34,197,94,0.05)',
+                icon: (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                ),
               },
               {
-                icon: '✓',
                 title: 'Verified Dealers',
-                desc: 'Every dealer is KRA-vetted, licensed, and rated by real buyers.',
+                desc: 'Every dealer is KRA-vetted, licensed, and rated by real buyers. Transparency you can trust.',
                 cta: 'Explore',
                 href: '/showroom',
                 accent: 'rgba(59,130,246,0.05)',
+                icon: (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 12l2 2 4-4"/><path d="M22 12c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2s10 4.48 10 10z"/>
+                  </svg>
+                ),
               },
             ].map((p, i) => (
-              <div key={i} style={{ background: `#080808`, padding: '36px 32px', position: 'relative', overflow: 'hidden' }}>
+              <div key={i} style={{ background: '#080808', padding: '40px 36px', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', inset: 0, background: p.accent, pointerEvents: 'none' }} />
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontSize: 28, marginBottom: 14 }}>{p.icon}</div>
+                  <div style={{ marginBottom: 16 }}>{p.icon}</div>
                   <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '1.15rem', color: '#fff', marginBottom: 8 }}>{p.title}</div>
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.7, marginBottom: 20, margin: '0 0 20px' }}>{p.desc}</p>
                   <Link to={p.href} style={{
@@ -319,11 +331,10 @@ export default function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════
-          CTA — Sell your car
+          CTA — Sell
           ════════════════════════════════════════════════════════ */}
-      <section style={{ padding: '72px 0', textAlign: 'center' }}>
+      <section style={{ padding: '80px 0', textAlign: 'center' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-          {/* fine gold rule */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 18, justifyContent: 'center', marginBottom: 24 }}>
             <div style={{ height: 1, width: 64, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.3))' }} />
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--gold)', display: 'block', opacity: 0.5 }} />
@@ -353,30 +364,70 @@ export default function HomePage() {
       {/* ════════════════════════════════════════════════════════
           FOOTER
           ════════════════════════════════════════════════════════ */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '32px 28px' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: 12,
-            background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 16px rgba(212,196,168,0.25)',
-          }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 22, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '48px 28px 32px' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, marginBottom: 36 }}>
+            <div>
+              <div style={{
+                width: 42, height: 42, borderRadius: 12,
+                background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(212,196,168,0.25)', marginBottom: 14,
+              }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 22, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
+              </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', lineHeight: 1.7, maxWidth: 260, margin: 0 }}>
+                Kenya's premium automotive marketplace. Buy, sell, and bid on verified vehicles with secure M-Pesa escrow.
+              </p>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Browse</div>
+              {[
+                { to: '/showroom', label: 'Gallery' },
+                { to: '/showroom?filter=auction', label: 'Live Auctions' },
+                { to: '/showroom?sort=price_asc', label: 'Best Deals' },
+              ].map(({ to, label }) => (
+                <Link key={to} to={to} style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+                >{label}</Link>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Sell</div>
+              {[
+                { to: '/register?role=dealer', label: 'List a Car' },
+                { to: '/register?role=dealer', label: 'Become a Dealer' },
+                { to: '/dealer', label: 'Dealer Hub' },
+              ].map(({ to, label }) => (
+                <Link key={to} to={to} style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+                >{label}</Link>
+              ))}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Support</div>
+              {[
+                { to: '/about', label: 'About Us' },
+                { to: '/contact', label: 'Contact' },
+                { to: '/privacy', label: 'Privacy Policy' },
+                { to: '/terms', label: 'Terms of Service' },
+              ].map(({ to, label }) => (
+                <Link key={to} to={to} style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+                >{label}</Link>
+              ))}
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 20, fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>
-            {[
-              { to: '/showroom', label: 'Gallery' },
-              { to: '/showroom?filter=auction', label: 'Auctions' },
-              { to: '/register?role=dealer', label: 'List a Car' },
-            ].map(({ to, label }) => (
-              <Link key={to} to={to} style={{ textDecoration: 'none', color: 'inherit', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
-                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
-              >{label}</Link>
-            ))}
-          </div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.12)' }}>
-            © {new Date().getFullYear()} Kayad Ltd. All rights reserved.
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.12)' }}>
+              © {new Date().getFullYear()} Kayad Ltd. All rights reserved.
+            </div>
+            <div style={{ display: 'flex', gap: 16, fontSize: 12, color: 'rgba(255,255,255,0.15)' }}>
+              <span>🇰🇪 Nairobi, Kenya</span>
+            </div>
           </div>
         </div>
       </footer>
