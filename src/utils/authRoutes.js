@@ -31,8 +31,12 @@ export function safeRedirectPath(path, fallback = '/') {
 export function getPostAuthPath(user, fallback = '/') {
   const safeFallback = safeRedirectPath(fallback, '/');
   if (user?.mustChangePassword) return '/force-password-change';
+  if (!user?.emailVerified && user?.role === 'user') return '/register';
   if (isStaffRole(user?.role)) return '/admin';
-  if (isSellerRole(user?.role)) return '/dealer';
+  if (isSellerRole(user?.role)) {
+    if (!user?.approved) return '/register';
+    return '/dealer';
+  }
   if (user?.role === 'user') return '/dashboard';
   return safeFallback;
 }

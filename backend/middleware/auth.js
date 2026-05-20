@@ -96,6 +96,14 @@ export const protect = async (req, res, next) => {
       });
     }
 
+    // 📧 REQUIRE EMAIL VERIFICATION (OWNER EXEMPT)
+    if (!user.emailVerified && !isOwnerEmail(user.email)) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before accessing this resource",
+      });
+    }
+
     // =============================
     // ✅ ATTACH USER (WITH OWNER BYPASS)
     // =============================

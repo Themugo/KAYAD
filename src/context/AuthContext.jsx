@@ -133,9 +133,10 @@ export function AuthProvider({ children }) {
   const isEscrowOfficer = user?.role === 'escrow_officer';
   const isAdManager   = user?.role === 'ad_manager';
   const isAuth        = !!user;
+  const isEmailVerified = !!user?.emailVerified;
 
   return (
-    <AuthCtx.Provider value={{ user, token, loading, isAuth, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, login, register, logout, setUser }}>
+    <AuthCtx.Provider value={{ user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, login, register, logout, setUser }}>
       {children}
     </AuthCtx.Provider>
   );
@@ -152,9 +153,10 @@ export function RequireAuth({ children }) {
 }
 
 export function RequireDealer({ children }) {
-  const { isDealer, isAdmin, loading } = useAuth();
+  const { isDealer, isAdmin, user, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
+  if (!user?.approved) return <Navigate to="/register" replace />;
   return children;
 }
 
@@ -163,6 +165,13 @@ export function RequireSeller({ children }) {
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isSeller) return <Navigate to="/" replace />;
   if (!user?.approved) return <Navigate to="/register" replace />;
+  return children;
+}
+
+export function RequireEmailVerified({ children }) {
+  const { isEmailVerified, loading } = useAuth();
+  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isEmailVerified) return <Navigate to="/login?verify=required" replace />;
   return children;
 }
 

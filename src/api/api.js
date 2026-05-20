@@ -192,8 +192,9 @@ const _authAPI = {
   changePassword:   (body) => isDemoToken() ? demoAPI.auth.changePassword(body) : api.put('/auth/change-password', body).then(unwrap),
   forgotPassword:   (body) => api.post('/auth/forgot-password', body).then(unwrap),
   resetPassword:    (body) => api.post('/auth/reset-password', body).then(unwrap),
-  verifyEmail:    (token) => api.get(`/auth/verify-email/${token}`).then(unwrap),
-  updateProfile:  (body) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
+  verifyEmail:         (token) => api.get(`/auth/verify-email/${token}`).then(unwrap),
+  resendVerification:  (body)  => api.post('/auth/resend-verification', body).then(unwrap),
+  updateProfile:       (body) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
 };
 export const authAPI = withDemo(_authAPI, demoAPI.auth);
 

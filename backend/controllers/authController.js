@@ -5,17 +5,7 @@ import { formatPhone } from "../utils/format.js";
 import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
-
-// =============================
-// 🔐 CONFIG (read at function call time, not import time — dotenv hasn't loaded yet)
-// =============================
-
-let ACCESS_SECRET, REFRESH_SECRET;
-const getAccess  = () => ACCESS_SECRET  || (ACCESS_SECRET  = process.env.JWT_SECRET);
-const getRefresh = () => REFRESH_SECRET || (REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
-
-const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRE || "1h";
-const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
+import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
 const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
@@ -33,39 +23,7 @@ const serializeUser = (user) => {
   delete raw.emailVerifyToken;
   delete raw.emailVerifyExpire;
   delete raw.tokenVersion;
-  return {
-    ...raw,
-    _id: raw._id,
-    id: raw._id,
-    role,
-    approved: raw.approved,
-  };
-};
-
-// =============================
-// 🪙 TOKEN GENERATORS
-// =============================
-const generateAccessToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-      role: user.role,
-      tokenVersion: user.tokenVersion || 0,
-    },
-    getAccess(),
-    { expiresIn: ACCESS_EXPIRES }
-  );
-};
-
-const generateRefreshToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id,
-      tokenVersion: user.tokenVersion || 0,
-    },
-    getRefresh(),
-    { expiresIn: REFRESH_EXPIRES }
-  );
+  return { ...raw, role, isOwner: isOwnerEmail(raw.email) };
 };
 
 // =============================
@@ -165,12 +123,16 @@ export const register = async (req, res) => {
         }
       : {};
 
-    // Referral: look up referrer by code
+    // Validate phone if provided (Kenyan format)
+    const rawPhone = req.body.phone || "";
+    const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
+
+    // Referral: look up referrer by code (guard: cannot self-refer)
     let referredBy = null;
     const referralCode = req.body.referralCode || req.query.ref;
     if (referralCode) {
       const referrer = await User.findOne({ referralCode });
-      if (referrer && referrer._id.toString() !== req.user?.id) {
+      if (referrer && referrer.email !== email) {
         referredBy = referrer._id;
       }
     }
@@ -181,7 +143,7 @@ export const register = async (req, res) => {
       password,
       role,
       tokenVersion: 0,
-      phone: req.body.phone || "",
+      phone: validPhone,
       emailVerified: false,
       referredBy,
       ...extra,
@@ -265,7 +227,31 @@ export const login = async (req, res) => {
     const user = await User.findOne({ email }).select("+password +tokenVersion");
 
     if (!user || !(await user.matchPassword(password))) {
+      // ─── Account lockout ────────────────────────────────
+      if (user && !user.isBanned) {
+        const attempts = (user.loginAttempts || 0) + 1;
+        if (attempts >= 5) {
+          user.loginAttempts = attempts;
+          user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+          await user.save();
+          return R.error(res, "Account locked due to too many attempts. Try again in 15 minutes.", 429);
+        }
+        user.loginAttempts = attempts;
+        await user.save();
+      }
       return R.unauthorized(res, "Invalid credentials");
+    }
+
+    // ─── Reset lockout on successful login ────────────────
+    if (user.loginAttempts || user.lockUntil) {
+      user.loginAttempts = 0;
+      user.lockUntil = null;
+    }
+
+    // ─── Check lockout ────────────────────────────────────
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const remaining = Math.ceil((user.lockUntil - new Date()) / 60000);
+      return R.error(res, `Account locked. Try again in ${remaining} minute(s).`, 429);
     }
 
     if (user.isBanned) {
@@ -273,6 +259,11 @@ export const login = async (req, res) => {
     }
     if (user.deactivatedAt) {
       return R.error(res, "Account deactivated", 403);
+    }
+
+    // ─── Require email verification ───────────────────────
+    if (!user.emailVerified) {
+      return R.error(res, "Please verify your email before logging in. Check your inbox or request a new verification link.", 403);
     }
 
     user.lastLogin = new Date();
@@ -309,10 +300,10 @@ export const refreshToken = async (req, res) => {
     let usedAccessFallback = false;
 
     try {
-      decoded = jwt.verify(token, getRefresh());
+      decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
     } catch {
       try {
-        decoded = jwt.verify(token, getAccess(), { ignoreExpiration: true });
+        decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
         usedAccessFallback = true;
       } catch {
         return R.error(res, "Invalid refresh token", 403);
@@ -332,6 +323,10 @@ export const refreshToken = async (req, res) => {
     if (usedAccessFallback && !req.headers.authorization) {
       return R.error(res, "Refresh cookie required", 403);
     }
+
+    // Rotate refresh token: increment tokenVersion so old token is invalidated
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    await user.save();
 
     return sendAuthResponse(res, user);
 

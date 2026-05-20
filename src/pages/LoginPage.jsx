@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
+import { authAPI } from '../api/api';
 
 export function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
@@ -14,6 +15,9 @@ export function LoginPage() {
   const location = useLocation();
   const from = safeRedirectPath(location.state?.from?.pathname, '/');
   const hasRedirected = useRef(false);
+
+  const params = new URLSearchParams(location.search);
+  const verifyRequired = params.get('verify') === 'required';
 
   // Redirect if already authenticated (e.g. user navigated to /login manually)
   useEffect(() => {
@@ -25,7 +29,9 @@ export function LoginPage() {
 
   const [form, setForm]       = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,8 +41,25 @@ export function LoginPage() {
       toast('Welcome back!', 'success');
       navigate(getPostAuthPath(data.user, from), { replace: true });
     } catch (err) {
-      toast(err.response?.data?.message || 'Invalid credentials', 'error');
+      const msg = err.response?.data?.message || 'Invalid credentials';
+      if (msg.toLowerCase().includes('verify your email')) {
+        setUnverifiedEmail(form.email);
+      }
+      toast(msg, 'error');
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!unverifiedEmail && !form.email) return;
+    setResending(true);
+    try {
+      await authAPI.resendVerification({ email: unverifiedEmail || form.email });
+      toast('Verification email sent! Check your inbox.', 'success');
+    } catch {
+      toast('Failed to resend. Try again later.', 'error');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -89,6 +112,28 @@ export function LoginPage() {
               {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Signing in...</> : 'Sign In'}
             </button>
           </form>
+
+          {verifyRequired && (
+            <div style={{ marginTop: 16, padding: '12px 16px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, textAlign: 'center' }}>
+              <p style={{ margin: 0, fontSize: 13, color: '#856404' }}>
+                Please verify your email before accessing that page. Check your inbox or request a new link below.
+              </p>
+              <button className="btn btn-sm" onClick={handleResend} disabled={resending} style={{ marginTop: 8 }}>
+                {resending ? 'Sending...' : 'Resend verification email'}
+              </button>
+            </div>
+          )}
+
+          {unverifiedEmail && !verifyRequired && (
+            <div style={{ marginTop: 16, padding: '12px 16px', background: '#fff3cd', border: '1px solid #ffc107', borderRadius: 8, textAlign: 'center' }}>
+              <p style={{ margin: 0, fontSize: 13, color: '#856404' }}>
+                This email is not yet verified. Check your inbox or request a new verification link.
+              </p>
+              <button className="btn btn-sm" onClick={handleResend} disabled={resending} style={{ marginTop: 8 }}>
+                {resending ? 'Sending...' : 'Resend verification email'}
+              </button>
+            </div>
+          )}
 
             <div className="gold-line" />
 

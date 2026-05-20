@@ -226,6 +226,8 @@ const userSchema = new mongoose.Schema(
     // 🔐 SECURITY
     // =============================
     lastLogin: Date,
+    loginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
 
     resetToken: String,
     resetTokenExpire: Date,

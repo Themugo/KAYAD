@@ -43,6 +43,7 @@ router.post(
 // 🔁 REFRESH TOKEN (CRITICAL 🔥)
 router.post(
   "/refresh",
+  authLimiter,
   asyncHandler(refreshToken)
 );
 
@@ -105,8 +106,8 @@ router.put(
 // =============================
 // 📧 EMAIL VERIFICATION
 // =============================
-router.get("/verify-email/:token", asyncHandler(verifyEmail));
-router.post("/resend-verification", asyncHandler(resendVerification));
+router.get("/verify-email/:token", authLimiter, asyncHandler(verifyEmail));
+router.post("/resend-verification", authLimiter, asyncHandler(resendVerification));
 
 // =============================
 // 🔑 PASSWORD RESET (public)

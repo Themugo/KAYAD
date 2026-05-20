@@ -1,17 +1,25 @@
 import jwt from "jsonwebtoken";
 
+let ACCESS_SECRET, REFRESH_SECRET;
+const getAccess  = () => ACCESS_SECRET  || (ACCESS_SECRET  = process.env.JWT_SECRET);
+const getRefresh = () => REFRESH_SECRET || (REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
+
+const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRE || "1h";
+const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRE || "7d";
+
 // =============================
 // 🔐 GENERATE ACCESS TOKEN
 // =============================
 export const generateAccessToken = (user) => {
-  const payload = {
-    id: user._id || user.id,
-    role: user.role || "user",
-  };
-
-  return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "15m", // 🔥 short-lived
-  });
+  return jwt.sign(
+    {
+      id: user._id || user.id,
+      role: user.role || "user",
+      tokenVersion: user.tokenVersion || 0,
+    },
+    getAccess(),
+    { expiresIn: ACCESS_EXPIRES }
+  );
 };
 
 // =============================
@@ -19,66 +27,22 @@ export const generateAccessToken = (user) => {
 // =============================
 export const generateRefreshToken = (user) => {
   return jwt.sign(
-    { id: user._id || user.id },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
+    {
+      id: user._id || user.id,
+      tokenVersion: user.tokenVersion || 0,
+    },
+    getRefresh(),
+    { expiresIn: REFRESH_EXPIRES }
   );
-};
-
-// =============================
-// 🍪 SET AUTH COOKIES
-// =============================
-export const setAuthCookies = (res, accessToken, refreshToken) => {
-  const isProd = (process.env.NODE_ENV || "development") === "production";
-
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? "none" : "lax",
-    maxAge: 15 * 60 * 1000, // 15 mins
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  });
 };
 
 // =============================
 // 🔍 VERIFY TOKEN
 // =============================
-export const verifyToken = (token) => {
+export const verifyToken = (token, secret) => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET);
+    return jwt.verify(token, secret || getAccess());
   } catch {
     return null;
   }
-};
-
-// =============================
-// 🔄 REFRESH ACCESS TOKEN
-// =============================
-export const refreshAccessToken = (refreshToken) => {
-  const decoded = verifyToken(refreshToken);
-
-  if (!decoded) return null;
-
-  return generateAccessToken({ id: decoded.id });
-};
-
-// =============================
-// ❌ CLEAR TOKENS (LOGOUT)
-// =============================
-export const clearAuthCookies = (res) => {
-  res.cookie("accessToken", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
-
-  res.cookie("refreshToken", "", {
-    httpOnly: true,
-    expires: new Date(0),
-  });
 };

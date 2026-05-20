@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 
 export default function VerifyEmailPage() {
   usePageMeta('Verify Email', 'Verify your Kayad email address.');
+  const { toast } = useToast();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token') || '';
 
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
+  const [resendEmail, setResendEmail] = useState('');
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -35,6 +39,19 @@ export default function VerifyEmailPage() {
     })();
     return () => { cancelled = true; };
   }, [token, navigate]);
+
+  const handleResend = async () => {
+    if (!resendEmail) { toast('Enter your email address', 'error'); return; }
+    setResending(true);
+    try {
+      await authAPI.resendVerification({ email: resendEmail });
+      toast('Verification email sent! Check your inbox.', 'success');
+    } catch {
+      toast('Failed to resend. Try again later.', 'error');
+    } finally {
+      setResending(false);
+    }
+  };
 
   return (
     <div style={{ background:'#050505', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'40px 20px' }}>
@@ -64,9 +81,27 @@ export default function VerifyEmailPage() {
             </Link>
           )}
           {status === 'error' && (
-            <Link to="/login" style={{ display:'inline-block', padding:'13px 36px', background:'#333', borderRadius:10, color:'#fff', fontSize:14, fontWeight:900, textDecoration:'none', textTransform:'uppercase', letterSpacing:'0.07em' }}>
-              Back to Login
-            </Link>
+            <>
+              <div style={{ marginTop: 16, marginBottom: 16 }}>
+                <input
+                  type="email"
+                  placeholder="Your email address"
+                  value={resendEmail}
+                  onChange={e => setResendEmail(e.target.value)}
+                  style={{ width:'100%', padding:'12px 14px', borderRadius:10, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.04)', color:'#fff', fontSize:14, outline:'none', boxSizing:'border-box' }}
+                />
+              </div>
+              <button
+                onClick={handleResend}
+                disabled={resending}
+                style={{ display:'inline-block', padding:'13px 36px', background:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)', borderRadius:10, color:'#3b82f6', fontSize:14, fontWeight:600, cursor:'pointer', width:'100%', marginBottom:12 }}
+              >
+                {resending ? 'Sending...' : 'Resend Verification Email'}
+              </button>
+              <Link to="/login" style={{ display:'inline-block', padding:'13px 36px', background:'#333', borderRadius:10, color:'#fff', fontSize:14, fontWeight:900, textDecoration:'none', textTransform:'uppercase', letterSpacing:'0.07em' }}>
+                Back to Login
+              </Link>
+            </>
           )}
         </div>
       </div>
