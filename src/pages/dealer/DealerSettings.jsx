@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI, dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { formatPhone, displayPhone } from '../../utils/helpers';
 import { User, Building2, CreditCard, Shield, Eye, EyeOff, Save, Camera } from 'lucide-react';
 
 const TABS = [
@@ -61,9 +62,11 @@ function Toggle({ checked, onChange, label, desc }) {
 export default function DealerSettings() {
   const { user, setUser } = useAuth();
   const { toast } = useToast();
+  const fileRef = useRef(null);
   const [tab, setTab] = useState('profile');
   const [saving, setSaving] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [profile, setProfile] = useState({ name: '', phone: '', location: '', bio: '', avatar: '' });
   const [business, setBusiness] = useState({ businessName: '', mpesaBusiness: '', mpesaBusinessName: '', bankName: '', bankAccount: '', bankBranch: '' });
@@ -77,10 +80,38 @@ export default function DealerSettings() {
     setPrivacy(user.visibility || { showPhone:true, showEmail:true, showLocation:true, chatEnabled:true, autoApproveReviews:false });
   }, [user]);
 
+  const validate = () => {
+    const errs = {};
+    if (!profile.name.trim()) errs.name = 'Full name is required';
+    if (profile.phone) {
+      const formatted = formatPhone(profile.phone);
+      if (formatted.length !== 12) errs.phone = 'Enter a valid Kenyan phone number (e.g. 0712 345 678)';
+    }
+    if (tab === 'business' && !business.businessName.trim()) errs.businessName = 'Business name is required';
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Please select an image file', 'error'); return; }
+    if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => setProfile(p => ({ ...p, avatar: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
+
   const save = async () => {
+    if (!validate()) return;
     setSaving(true);
     try {
-      const payload = { ...profile, ...business, visibility: privacy };
+      const payload = {
+        ...profile,
+        phone: profile.phone ? formatPhone(profile.phone) : '',
+        ...business,
+        visibility: privacy,
+      };
       const { user: updated } = await authAPI.updateProfile(payload);
       if (setUser && updated) setUser(updated);
       toast('Settings saved ✓', 'success');
@@ -138,10 +169,15 @@ export default function DealerSettings() {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32, paddingBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ position: 'relative' }}>
-                  <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 900, color: '#000', fontFamily: 'var(--font-display)' }}>
-                    {(profile.name||'D')[0].toUpperCase()}
-                  </div>
-                  <button style={{ position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%', background: '#111', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {profile.avatar ? (
+                    <img src={profile.avatar} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 900, color: '#000', fontFamily: 'var(--font-display)' }}>
+                      {(profile.name||'D')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+                  <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%', background: '#111', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Camera size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
                   </button>
                 </div>
@@ -155,8 +191,11 @@ export default function DealerSettings() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
                 <div style={{ paddingRight: 24 }}>
-                  <Field label="Full Name"><Input value={profile.name} onChange={e => setProfile(p => ({...p, name: e.target.value}))} placeholder="Your full name" /></Field>
-                  <Field label="Phone Number" hint="Used for M-Pesa and buyer contact"><Input value={profile.phone} onChange={e => setProfile(p => ({...p, phone: e.target.value}))} placeholder="+254 7XX XXX XXX" /></Field>
+                  <Field label="Full Name">{errors.name && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.name}</div>}<Input value={profile.name} onChange={e => { setErrors(p=>({...p,name:''})); setProfile(p => ({...p, name: e.target.value})); }} placeholder="Your full name" /></Field>
+                  <Field label="Phone Number" hint={`Used for M-Pesa and buyer contact${profile.phone && formatPhone(profile.phone).length === 12 ? ' — formatted: ' + displayPhone(profile.phone) : ''}`}>
+                    {errors.phone && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.phone}</div>}
+                    <Input value={profile.phone} onChange={e => { setErrors(p=>({...p,phone:''})); setProfile(p => ({...p, phone: e.target.value})); }} placeholder="+254 7XX XXX XXX" />
+                  </Field>
                 </div>
                 <div style={{ paddingLeft: 24, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
                   <Field label="Location"><Input value={profile.location} onChange={e => setProfile(p => ({...p, location: e.target.value}))} placeholder="City, Kenya" /></Field>
@@ -175,7 +214,7 @@ export default function DealerSettings() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
                 <div style={{ paddingRight: 24 }}>
-                  <Field label="Business Name"><Input value={business.businessName} onChange={e => setBusiness(p => ({...p, businessName: e.target.value}))} placeholder="Dealer Name Ltd." /></Field>
+                  <Field label="Business Name">{errors.businessName && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.businessName}</div>}<Input value={business.businessName} onChange={e => { setErrors(p=>({...p,businessName:''})); setBusiness(p => ({...p, businessName: e.target.value})); }} placeholder="Dealer Name Ltd." /></Field>
                   <Field label="M-Pesa Paybill / Till"><Input value={business.mpesaBusiness} onChange={e => setBusiness(p => ({...p, mpesaBusiness: e.target.value}))} placeholder="Paybill or Till No." /></Field>
                   <Field label="M-Pesa Business Name"><Input value={business.mpesaBusinessName} onChange={e => setBusiness(p => ({...p, mpesaBusinessName: e.target.value}))} placeholder="Name as on M-Pesa" /></Field>
                 </div>

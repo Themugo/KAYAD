@@ -9,9 +9,10 @@ import { getPostAuthPath, isSellerRole, safeRedirectPath } from '../utils/authRo
 
 // ── Constants ─────────────────────────────────────────────────
 const ROLES = [
-  { val: 'user',   icon: '👤', title: 'Car Buyer',      desc: 'Browse listings, bid on auctions, buy securely.' },
-  { val: 'dealer', icon: '🏪', title: 'Car Dealer',      desc: 'List your full inventory, run live auctions, grow your business.', badge: 'Business' },
-  { val: 'broker', icon: '🤝', title: 'Private Seller',  desc: 'List your personal car for sale without a business account.' },
+  { val: 'user',              icon: '👤', title: 'Car Buyer',          desc: 'Browse listings, bid on auctions, buy securely.' },
+  { val: 'dealer',            icon: '🏪', title: 'Car Dealer',          desc: 'List your full inventory, run live auctions, grow your business.', badge: 'Business' },
+  { val: 'broker',            icon: '🤝', title: 'Private Seller',      desc: 'List cars occasionally — earn commission on referrals.', badge: 'Popular' },
+  { val: 'individual_seller', icon: '🚗', title: 'Individual Seller',  desc: 'Sell your own car. No business account needed. Free first listing.' },
 ];
 
 const DEFAULT_PKG = {
@@ -62,7 +63,7 @@ function Input({ label, hint, type='text', value, onChange, placeholder, require
 
 // ── Waiting Room shown after dealer/broker registers ──────────
 function WaitingRoom({ user, onLogout }) {
-  const isSellerPending = user?.role === 'dealer' || user?.role === 'broker';
+  const isSellerPending = user?.role === 'dealer' || user?.role === 'broker' || user?.role === 'individual_seller';
   const statusSteps = isSellerPending
     ? [
         { icon: '✅', label: 'Account created',      done: true },
@@ -168,7 +169,7 @@ export default function RegisterPage() {
   const [params]   = useSearchParams();
   const redirectTo  = safeRedirectPath(params.get('redirect'), '/dashboard');
   const roleParam   = params.get('role');
-  const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker';
+  const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker' || roleParam === 'individual_seller';
 
   // If already logged in and unapproved dealer → show waiting room
   if (isAuth && isSellerRole(user?.role) && !user?.approved) {
@@ -206,7 +207,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
   }, []);
 
   const isDealer = role === 'dealer';
-  const isSeller = role === 'broker';
+  const isSeller = role === 'broker' || role === 'individual_seller';
   const needsPkg = isDealer || isSeller;
 
   const pkgList = livePkgs

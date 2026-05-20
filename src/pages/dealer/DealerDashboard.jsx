@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { dealerAPI, carsAPI, adminAPI, formatKES } from '../../api/api';
+import { dealerAPI, carsAPI, adminAPI, notifAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell } from 'lucide-react';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -290,6 +290,7 @@ export default function DealerDashboard() {
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState('overview');
   const [config, setConfig]     = useState({});
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
 
   const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
 
@@ -309,10 +310,12 @@ export default function DealerDashboard() {
       dealerAPI.summary().catch(() => ({})),
       carsPromise,
       adminAPI.getConfig().catch(() => ({})),
-    ]).then(([s, c, cfg]) => {
+      notifAPI.list({ limit: 1, unread: true }).catch(() => ({})),
+    ]).then(([s, c, cfg, n]) => {
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
       setConfig(cfg.config || cfg);
+      setUnreadNotifs(n.unreadCount || n.pendingCount || n.count || 0);
     }).finally(() => setLoading(false));
   }, [canManageDemoCars]);
 
@@ -359,6 +362,25 @@ export default function DealerDashboard() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
+              <Link to="/notifications" title="Notifications" style={{
+                position: 'relative', width: 36, height: 36, borderRadius: 10,
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none',
+              }}>
+                <Bell size={14} style={{ color: '#fff' }} />
+                {unreadNotifs > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -4, right: -4,
+                    background: '#ef4444', color: '#fff', fontSize: 9,
+                    fontWeight: 900, minWidth: 16, height: 16,
+                    borderRadius: 9999, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', padding: '0 4px',
+                    boxShadow: '0 2px 6px rgba(239,68,68,0.4)',
+                  }}>
+                    {unreadNotifs > 99 ? '99+' : unreadNotifs}
+                  </span>
+                )}
+              </Link>
               <Link to="/dealer/settings" style={{ padding: '10px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Settings</Link>
               <Link to="/dealer/analytics" style={{ padding: '10px 18px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none' }}>Analytics</Link>
               <Link to="/dealer/add-car" style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--gold)', color: '#000', fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
