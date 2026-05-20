@@ -386,7 +386,7 @@ export const getProfile = async (req, res) => {
 // ============================================================
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications, paymentDetails, onboardingComplete } = req.body;
+    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications, paymentDetails, onboardingComplete, avatar } = req.body;
 
     const updates = {};
     if (name !== undefined)              updates.name = String(name).trim();
@@ -403,6 +403,7 @@ export const updateProfile = async (req, res) => {
     if (notifications)                   updates.notifications = { sms: notifications.sms };
     if (paymentDetails)                  updates.paymentDetails = paymentDetails;
     if (onboardingComplete !== undefined) updates.onboardingComplete = Boolean(onboardingComplete);
+    if (avatar !== undefined)            updates.avatar = String(avatar);
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
       .select("-password");
@@ -437,9 +438,9 @@ export const changePassword = async (req, res) => {
 
     user.password = await bcrypt.hash(newPassword, 12);
     user.mustChangePassword = false;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
-    // Rotate tokens so session stays valid
     return sendAuthResponse(res, user);
   } catch (err) {
     R.error(res, err.message, 500);

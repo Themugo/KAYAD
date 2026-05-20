@@ -81,7 +81,6 @@ router.get(
       disputedEscrows,
       revenueAgg,
       totalBidsAll,
-      totalInquiries,
       totalFavorites,
       pendingReviews,
       activeAlerts,
@@ -107,7 +106,6 @@ router.get(
         { $group: { _id: null, total: { $sum: "$commission" } } },
       ]),
       Bid.countDocuments(),
-      Car.aggregate([{ $group: { _id: null, total: { $sum: "$inquiriesCount" } } }]),
       Car.aggregate([{ $group: { _id: null, total: { $sum: "$favoritesCount" } } }]),
       Bid.countDocuments({ status: "pending" }),
       AdminAlert.countDocuments({ read: false }),
@@ -118,7 +116,6 @@ router.get(
     ]);
 
     const totalRevenue = revenueAgg[0]?.total || 0;
-    const totalInq = totalInquiries[0]?.total || 0;
     const totalFavs = totalFavorites[0]?.total || 0;
 
     res.json({
@@ -138,7 +135,6 @@ router.get(
         openEscrows,
         alerts: disputedEscrows || 0,
         totalBids: totalBidsAll,
-        totalInquiries: totalInq,
         totalFavorites: totalFavs,
         pendingReviews,
         activeAlerts,
@@ -352,6 +348,7 @@ router.get(
     if (req.query.featured === "true") filter.featured = true;
     if (req.query.brand) filter.brand = req.query.brand;
     if (req.query.status) filter.status = req.query.status;
+    if (req.query.auctionStatus) filter.auctionStatus = req.query.auctionStatus;
 
     // 🔎 SEARCH (title)
     if (req.query.search) {

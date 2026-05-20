@@ -3,10 +3,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
+const WEBHOIST_EMAIL = (process.env.WEBHOIST_EMAIL || "").toLowerCase().trim();
 const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
 
-const isOwnerEmail = (email) => OWNER_EMAILS.includes(email);
+const isOwnerEmail = (email) => OWNER_EMAILS.includes(String(email).toLowerCase().trim());
 
 // =============================
 // 🔐 PROTECT ROUTES

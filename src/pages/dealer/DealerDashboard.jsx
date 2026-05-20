@@ -309,7 +309,7 @@ export default function DealerDashboard() {
   useEffect(() => {
     const carsPromise = canManageDemoCars
       ? Promise.all([
-          dealerAPI.cars().catch(() => ({ cars: [] })),
+          dealerAPI.cars({ limit: 100 }).catch(() => ({ cars: [] })),
           carsAPI.demoAll().catch(() => ({ data: [] })),
         ]).then(([ownedRes, demoRes]) => {
           const owned = ownedRes.cars || ownedRes.data || [];
@@ -317,7 +317,7 @@ export default function DealerDashboard() {
           const ownedIds = new Set(owned.map(car => car._id));
           return { cars: [...owned, ...demo.filter(car => !ownedIds.has(car._id))] };
         })
-      : dealerAPI.cars().catch(() => ({ cars: [] }));
+      : dealerAPI.cars({ limit: 100 }).catch(() => ({ cars: [] }));
     Promise.all([
       dealerAPI.summary().catch(() => ({})),
       carsPromise,
@@ -587,9 +587,9 @@ export default function DealerDashboard() {
                               const action = prompt('Actions: mark-sold, duplicate, copy-link');
                               if (!action) return;
                               if (action === 'mark-sold') {
-                                try { await dealerAPI.markSold(car._id, { buyerName: prompt('Buyer name:') || 'Unknown', salePrice: Number(prompt('Sale price:') || car.price) }); toast('Marked as sold', 'success'); const r = await dealerAPI.cars(); setCars(r.cars || r.data || []); } catch { toast('Failed', 'error'); }
+                                try { await dealerAPI.markSold(car._id, { buyerName: prompt('Buyer name:') || 'Unknown', salePrice: Number(prompt('Sale price:') || car.price) }); toast('Marked as sold', 'success'); const r = await dealerAPI.cars({ limit: 100 }); setCars(r.cars || r.data || []); } catch { toast('Failed', 'error'); }
                               } else if (action === 'duplicate') {
-                                try { const r = await dealerAPI.duplicate(car._id); toast('Duplicated', 'success'); const r2 = await dealerAPI.cars(); setCars(r2.cars || r2.data || []); } catch { toast('Failed', 'error'); }
+                                try { const r = await dealerAPI.duplicate(car._id); toast('Duplicated', 'success'); const r2 = await dealerAPI.cars({ limit: 100 }); setCars(r2.cars || r2.data || []); } catch { toast('Failed', 'error'); }
                               } else if (action === 'copy-link') {
                                 navigator.clipboard.writeText(window.location.origin + '/cars/' + car._id); toast('Link copied', 'success');
                               }
@@ -616,14 +616,22 @@ export default function DealerDashboard() {
                     <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>No bids received yet</div>
                   </div>
                 ) : bids.map(b => (
-                  <div key={b._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '16px 20px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{b.car?.title || 'Vehicle'}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{b.user?.name || 'Bidder'} · {new Date(b.createdAt).toLocaleDateString()}</div>
+                  <div key={b._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 20px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{b.carTitle || b.car?.title || 'Vehicle'}</div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{b.bidderName || b.user?.name || 'Bidder'} · {new Date(b.createdAt).toLocaleDateString()}</div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 16, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{b.isAuto ? 'Auto-bid' : 'Manual'}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.acceptBid(carId, b._id); toast(`Bid accepted — sale completed!`, 'success'); dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch (e) { toast(e?.response?.data?.message || 'Failed to accept bid', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Accept
+                      </button>
+                      <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.rejectBid(carId, b._id); toast('Bid rejected', 'info'); dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch { toast('Failed to reject', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        Decline
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -536,6 +536,35 @@ router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
 }));
 
 // =============================
+// ❌ REJECT BID
+// =============================
+router.post("/cars/:id/reject-bid", asyncHandler(async (req, res) => {
+  const { bidId } = req.body;
+  if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
+
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  const Bid = (await import("../models/Bid.js")).default;
+  const bid = await Bid.findOne({ _id: bidId, carId: car._id });
+  if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
+
+  bid.status = "failed";
+  bid.isWinningBid = false;
+  await bid.save();
+
+  // Notify bidder
+  try {
+    const { sendNotification } = await import("../services/notification.service.js").catch(() => ({}));
+    if (typeof sendNotification === "function") {
+      sendNotification(bid.user, `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`).catch(() => {});
+    }
+  } catch { /* non-critical */ }
+
+  res.json({ success: true, message: "Bid rejected" });
+}));
+
+// =============================
 // 🔨 DEALER AUCTION CONTROLS
 // =============================
 import { startAuction, endAuction } from "../realtime/auctionEngine.js";

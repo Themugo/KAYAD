@@ -309,6 +309,7 @@ const _dealerAPI = {
   duplicate:  (carId)        => api.post(`/dealer/cars/${carId}/duplicate`).then(unwrap),
   markSold:   (carId, body)  => api.patch(`/dealer/cars/${carId}/mark-sold`, body).then(unwrap),
   acceptBid:  (carId, bidId) => api.post(`/dealer/cars/${carId}/accept-bid`, { bidId }).then(unwrap),
+  rejectBid:  (carId, bidId) => api.post(`/dealer/cars/${carId}/reject-bid`, { bidId }).then(unwrap),
   bulkStatus: (body)         => api.patch('/dealer/cars/bulk-status', body).then(unwrap),
 
   // CSV export

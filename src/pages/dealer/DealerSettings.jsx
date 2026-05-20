@@ -113,7 +113,10 @@ export default function DealerSettings() {
         visibility: privacy,
       };
       const { user: updated } = await authAPI.updateProfile(payload);
-      if (setUser && updated) setUser(updated);
+      if (setUser && updated) {
+        setUser(updated);
+        setPrivacy(updated.visibility || { showPhone:true, showEmail:true, showLocation:true, chatEnabled:true, autoApproveReviews:false });
+      }
       toast('Settings saved ✓', 'success');
     } catch (e) {
       toast(e?.response?.data?.message || 'Save failed', 'error');
