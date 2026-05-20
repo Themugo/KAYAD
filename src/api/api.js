@@ -7,7 +7,10 @@
 import axios from 'axios';
 import { demoAPI } from '../data/demoAPI';
 
-const BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || '/api';
+// In dev: Vite proxy forwards /api → backend (see vite.config.js)
+// In prod: Vercel rewrite forwards /api → Render backend (see vercel.json)
+// Always use /api — never set VITE_API_BASE_URL to a full backend URL
+const BASE = '/api';
 
 // ─── Demo mode auto-detection ────────────────────────────────
 let __DEMO_MODE__ = false;
