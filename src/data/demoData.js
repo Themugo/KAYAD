@@ -318,20 +318,57 @@ export const DEMO_ADMIN_USERS = [
 
 export function filterDemoCars(filters = {}) {
   let r = [..._cars];
-  if (filters.search) { const q = filters.search.toLowerCase(); r = r.filter(c => c.title.toLowerCase().includes(q) || c.brand.toLowerCase().includes(q) || c.location.city.toLowerCase().includes(q)); }
+  if (filters.search) {
+    const q = String(filters.search).toLowerCase();
+    r = r.filter(c => {
+      const title = (c.title || '').toLowerCase();
+      const brand = (c.brand || '').toLowerCase();
+      const city = (c.location?.city || '').toLowerCase();
+      return title.includes(q) || brand.includes(q) || city.includes(q);
+    });
+  }
   if (filters.brand && filters.brand !== 'All Brands') r = r.filter(c => c.brand === filters.brand);
   if (filters.fuel) r = r.filter(c => c.fuel === filters.fuel);
   if (filters.transmission) r = r.filter(c => c.transmission === filters.transmission);
-  if (filters.bodyType) r = r.filter(c => c.bodyType === filters.bodyType);
-  if (filters.city) r = r.filter(c => c.location.city === filters.city);
+  if (filters.body || filters.bodyType) {
+    const bodyVal = filters.body || filters.bodyType;
+    r = r.filter(c => c.bodyType === bodyVal);
+  }
+  if (filters.city || filters.location) {
+    const cityVal = filters.city || filters.location;
+    r = r.filter(c => c.location?.city === cityVal);
+  }
   if (filters.minPrice) r = r.filter(c => c.price >= Number(filters.minPrice));
   if (filters.maxPrice) r = r.filter(c => c.price <= Number(filters.maxPrice));
-  if (filters.minYear) r = r.filter(c => c.year >= Number(filters.minYear));
-  if (filters.maxYear) r = r.filter(c => c.year <= Number(filters.maxYear));
+  if (filters.yearMin || filters.minYear) {
+    const y = Number(filters.yearMin || filters.minYear);
+    if (y) r = r.filter(c => c.year >= y);
+  }
+  if (filters.yearMax || filters.maxYear) {
+    const y = Number(filters.yearMax || filters.maxYear);
+    if (y) r = r.filter(c => c.year <= y);
+  }
+  if (filters.mileageMin) r = r.filter(c => c.mileage >= Number(filters.mileageMin));
+  if (filters.mileageMax) r = r.filter(c => c.mileage <= Number(filters.mileageMax));
+  if (filters.condition) r = r.filter(c => c.condition === filters.condition);
+  if (filters.category === 'auction') r = r.filter(c => c.auctionStatus === 'live' || c.allowBid);
+  if (filters.category === 'fixed') r = r.filter(c => c.auctionStatus !== 'live' && !c.allowBid);
   if (filters.auctionStatus === 'live') r = r.filter(c => c.auctionStatus === 'live');
+  if (filters.color) r = r.filter(c => c.color === filters.color);
   const total = r.length;
-  if (filters.limit) r = r.slice(0, Number(filters.limit));
-  return { cars: r, total, pagination: { total, page: 1, limit: filters.limit || 10, pages: 1 } };
+  const page = Number(filters.page) || 1;
+  const limit = Number(filters.limit) || 12;
+  const totalPages = Math.ceil(total / limit) || 1;
+  if (filters.sort === 'price_asc') r.sort((a, b) => (a.price || 0) - (b.price || 0));
+  else if (filters.sort === 'price_desc') r.sort((a, b) => (b.price || 0) - (a.price || 0));
+  else if (filters.sort === 'year_desc') r.sort((a, b) => (b.year || 0) - (a.year || 0));
+  else if (filters.sort === 'year_asc') r.sort((a, b) => (a.year || 0) - (b.year || 0));
+  else if (filters.sort === 'mileage_asc') r.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
+  else if (filters.sort === 'views_desc') r.sort((a, b) => (b.views || 0) - (a.views || 0));
+  else r.sort((a, b) => (b.auctionStatus === 'live' ? 1 : 0) - (a.auctionStatus === 'live' ? 1 : 0));
+  const start = (page - 1) * limit;
+  const paged = r.slice(start, start + limit);
+  return { cars: paged, total, pagination: { total, page, limit, pages: totalPages } };
 }
 
 export function getDemoCar(id) {

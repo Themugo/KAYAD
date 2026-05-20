@@ -407,7 +407,7 @@ export function filterMockCars(filters = {}) {
     const q = filters.search.toLowerCase();
     results = results.filter(c => c.title.toLowerCase().includes(q) || c.brand.toLowerCase().includes(q) || c.location.city.toLowerCase().includes(q));
   }
-  if (filters.brand) results = results.filter(c => c.brand === filters.brand);
+  if (filters.brand && filters.brand !== 'All Brands') results = results.filter(c => c.brand === filters.brand);
   if (filters.fuel) results = results.filter(c => c.fuel === filters.fuel);
   if (filters.transmission) results = results.filter(c => c.transmission === filters.transmission);
   if (filters.bodyType) results = results.filter(c => c.bodyType === filters.bodyType);

@@ -31,6 +31,7 @@ const carSchema = new mongoose.Schema(
     mileage: Number,
     bodyType: String,
     color: String,
+    condition: String,
     description: String,
     features: [String],
 

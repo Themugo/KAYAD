@@ -42,9 +42,10 @@ export default function CartyGrid({ car, listView, isMobile }) {
   const { isAuth } = useAuth();
   const { toast } = useToast();
   const { isComparing: ctxIsComparing, toggleCar, compareCount, maxCompare } = useCompare();
-  const isCompared = ctxIsComparing(car._id);
 
   if (!car) return null;
+
+  const isCompared = ctxIsComparing(car._id);
 
   const handleFav = async (e) => {
     e.preventDefault();

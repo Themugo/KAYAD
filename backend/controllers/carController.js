@@ -93,7 +93,7 @@ export const getCars = async (req, res) => {
     const [cars, total] = await Promise.all([
       Car.find(query)
         .select(
-          "title price images brand year model location fuel transmission mileage bodyType color description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy"
+          "title price images brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy"
         )
         .sort(sortOption)
         .skip(skip)

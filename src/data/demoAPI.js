@@ -35,18 +35,21 @@ const wrapSuccess = (data) => ({ success: true, ...data });
 const makeEmail = (name) =>
   `${name?.toLowerCase().replace(/[^a-z]/g, '')}@kayad.space`;
 
-const transformCar = (c) => ({
-  ...c,
-  model: c.model || c.title?.split(' ').slice(1).slice(0, -1).join(' ') || c.brand,
-  dealerPhone: c.dealer?.phone || c.dealerPhone || '2547XXXXXX',
-  trustScore: c.trustScore ?? Math.round(85 + Math.random() * 15),
-  images: c.images,
-  dealer: c.dealer ? {
-    ...c.dealer,
-    id: c.dealer._id,
-    email: c.dealer.email || makeEmail(c.dealer.name || c.dealer.businessName),
-  } : c.dealer,
-});
+const transformCar = (c) => {
+  if (!c) return c;
+  return {
+    ...c,
+    model: c.model || c.title?.split(' ').slice(1).slice(0, -1).join(' ') || c.brand,
+    dealerPhone: c.dealer?.phone || c.dealerPhone || '2547XXXXXX',
+    trustScore: c.trustScore ?? Math.round(85 + Math.random() * 15),
+    images: c.images,
+    dealer: c.dealer ? {
+      ...c.dealer,
+      id: c.dealer._id,
+      email: c.dealer.email || makeEmail(c.dealer.name || c.dealer.businessName),
+    } : c.dealer,
+  };
+};
 
 const transformReview = (r) => ({
   ...r,
@@ -591,7 +594,7 @@ const demoFavorites = {
   },
   toggle: async () => {
     await delay(100, 300);
-    return wrapSuccess({ message: 'Toggled' });
+    return wrapSuccess({ message: 'Toggled', favorited: true });
   },
   setPriceAlert: async () => {
     await delay(100, 300);
