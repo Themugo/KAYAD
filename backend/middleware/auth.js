@@ -116,6 +116,9 @@ export const protect = async (req, res, next) => {
       email: user.email,
     };
 
+    // ⏱ Update lastActive timestamp (fire-and-forget)
+    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch(() => {});
+
     next();
 
   } catch (err) {

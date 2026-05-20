@@ -90,8 +90,83 @@ export const getEscrowById = async (req, res) => {
   }
 };
 
+// =============================
+// ✅ CONFIRM DELIVERY (BUYER)
+// =============================
+export const confirmDelivery = async (req, res) => {
+  try {
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    if (escrow.buyer.toString() !== req.user.id && !["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Only the buyer can confirm delivery" });
+    }
+
+    if (escrow.status !== "held") {
+      return res.status(400).json({ success: false, message: "Escrow is not in active state" });
+    }
+
+    await escrow.confirmDelivery();
+
+    // Notify seller
+    try {
+      const UserModel = (await import("../models/User.js")).default;
+      const seller = await UserModel.findById(escrow.seller).select("phone notifications");
+      if (seller?.phone && seller?.notifications?.sms !== false) {
+        sendSMS(seller.phone, `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`).catch(() => {});
+      }
+    } catch (_) {}
+
+    logActionFromReq(req, "escrow.delivery_confirmed", {
+      target: escrow._id, targetModel: "Escrow", resourceId: req.params.id,
+      details: { carId: escrow.car, amount: escrow.amount },
+      severity: "info",
+    });
+
+    res.json({ success: true, message: "Delivery confirmed", escrow });
+  } catch (err) {
+    console.error("❌ CONFIRM DELIVERY ERROR:", err);
+    res.status(500).json({ success: false, message: err.message || "Confirmation failed" });
+  }
+};
+
+// =============================
+// 📋 REQUEST ESCROW RELEASE (BUYER)
+// =============================
+export const requestRelease = async (req, res) => {
+  try {
+    const escrow = await Escrow.findById(req.params.id).populate("car", "title");
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    if (escrow.buyer.toString() !== req.user.id && !["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
+
+    if (escrow.status !== "held") {
+      return res.status(400).json({ success: false, message: "Escrow not active" });
+    }
+
+    escrow.history.push({ action: `Buyer requested release` });
+    await escrow.save();
+
+    // Notify admin via socket
+    if (global.io) {
+      global.io.emit("adminAlert", {
+        type: "escrow_release_requested",
+        message: `Buyer requested release of escrow KES ${Number(escrow.amount).toLocaleString("en-KE")} for ${escrow.car?.title || "vehicle"}`,
+        escrowId: escrow._id,
+        severity: "info",
+      });
+    }
+
+    res.json({ success: true, message: "Release request submitted. An admin will process it shortly." });
+  } catch (err) {
+    console.error("❌ REQUEST RELEASE ERROR:", err);
+    res.status(500).json({ success: false, message: "Request failed" });
+  }
+};
+
 // ── EMAIL NOTIFICATIONS ON ESCROW EVENTS ─────────────────────
-// Hook: call after escrow.status = 'released' + save
 export const notifyEscrowReleased = async (escrow) => {
   try {
     const { sendEscrowReleasedEmail } = await import("../services/email.service.js");
@@ -177,6 +252,11 @@ export const releaseEscrow = async (req, res) => {
 
     if (escrow.status !== "held") {
       throw new Error("Escrow already processed");
+    }
+
+    // 🛡 Require buyer delivery confirmation or auto-release eligibility
+    if (!escrow.deliveryConfirmed && (!escrow.autoReleaseEligibleAt || escrow.autoReleaseEligibleAt > new Date())) {
+      throw new Error("Buyer has not confirmed delivery. Wait for buyer confirmation or auto-release window.");
     }
 
     // =============================
@@ -290,8 +370,12 @@ export const refundEscrow = async (req, res) => {
       throw new Error("Cannot refund processed escrow");
     }
 
-    escrow.status = "refunded";
-    escrow.refundedAt = new Date();
+    const { reason } = req.body;
+    if (!reason || reason.length < 10) {
+      throw new Error("A detailed refund reason (min 10 chars) is required");
+    }
+
+    escrow.refundBuyer(req.user.id, reason);
 
     await escrow.save({ session });
 

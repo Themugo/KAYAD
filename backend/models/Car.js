@@ -84,7 +84,12 @@ const carSchema = new mongoose.Schema(
       default: "draft",
       index: true,
     },
+    auctionStartTime: Date,
     auctionEnd: Date,
+    startingBid: { type: Number, default: 0 },
+    reservePrice: { type: Number, default: null },
+    reserveMet: { type: Boolean, default: false },
+    extensionCount: { type: Number, default: 0 },
 
     bids: [
       {

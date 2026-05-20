@@ -152,6 +152,23 @@ export const placeBid = async (req, res) => {
     // =============================
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================
+    if (car.auctionStatus !== "live") {
+      return res.status(400).json({
+        success: false,
+        message: "Auction not live",
+      });
+    }
+
+    // 📱 Require verified phone for bids
+    const bidder = await mongoose.model("User").findById(userId).select("phone emailVerified phone notifications");
+    if (!bidder?.phone || bidder.phone.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "A verified phone number is required to place bids. Update your profile.",
+      });
+    }
+
+    // 🛡 High-value bid verification
     if (amount > 5000000) {
       const escrowDeposit = await Escrow.findOne({
         buyer: userId,
@@ -168,20 +185,16 @@ export const placeBid = async (req, res) => {
       }
     }
 
-    if (car.auctionStatus !== "live") {
-      return res.status(400).json({
-        success: false,
-        message: "Auction not live",
-      });
-    }
-
     const highest = await Bid.getHighestBid(carId);
     const currentBid = highest?.amount || car.currentBid || car.price;
 
-    if (amount <= currentBid) {
+    // 📏 Enforce minimum bid increment
+    const minIncrement = currentBid < 100000 ? 1000 : currentBid < 500000 ? 5000 : currentBid < 2000000 ? 10000 : 25000;
+    if (amount < currentBid + minIncrement) {
       return res.status(400).json({
         success: false,
-        message: `Bid must be higher than ${currentBid}`,
+        message: `Minimum bid increment is KES ${minIncrement.toLocaleString("en-KE")}. Current bid: KES ${currentBid.toLocaleString("en-KE")}`,
+        minBid: currentBid + minIncrement,
       });
     }
 

@@ -572,11 +572,24 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 
 // 🚀 Start auction on dealer's own car
 router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
-  const { durationMs } = req.body;
+  const { durationMs, startingBid, reservePrice } = req.body;
   if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
+
+  // ⏱ Minimum 24h auction duration
+  const MIN_DURATION = 24 * 60 * 60 * 1000;
+  if (durationMs < MIN_DURATION) {
+    return res.status(400).json({
+      success: false,
+      message: `Minimum auction duration is 24 hours (${(durationMs / 3600000).toFixed(0)}h provided)`,
+    });
+  }
 
   const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  if (car.auctionStatus === "live") {
+    return res.status(400).json({ success: false, message: "Auction already live" });
+  }
 
   // Listing lock check
   const User = (await import("../models/User.js")).default;
@@ -588,20 +601,31 @@ router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
     });
   }
 
+  const startingBidVal = Number(startingBid) || 0;
+  if (startingBidVal < 1000) {
+    return res.status(400).json({ success: false, message: "Starting bid must be at least KES 1,000" });
+  }
+
+  const reserveVal = reservePrice ? Number(reservePrice) : null;
+  if (reserveVal !== null && reserveVal < startingBidVal) {
+    return res.status(400).json({ success: false, message: "Reserve price must be >= starting bid" });
+  }
+
   const result = await startAuction({
     roomId: car._id.toString(),
-    startingBid: Number(req.body.startingBid) || 0,
+    startingBid: startingBidVal,
     durationMs,
   });
 
   car.auctionStatus = "live";
-  car.startingBid = Number(req.body.startingBid) || 0;
-  car.currentBid = Number(req.body.startingBid) || 0;
+  car.startingBid = startingBidVal;
+  car.currentBid = startingBidVal;
+  car.reservePrice = reserveVal;
   car.auctionStartTime = new Date();
   car.auctionEnd = new Date(Date.now() + durationMs);
   await car.save();
 
-  res.json({ success: true, message: "Auction started", endTime: result.endTime });
+  res.json({ success: true, message: "Auction started", endTime: result.endTime, reservePrice: reserveVal });
 }));
 
 // 🏁 End auction on dealer's own car
@@ -609,25 +633,44 @@ router.post("/cars/:id/auction/end", asyncHandler(async (req, res) => {
   const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
+  if (car.auctionStatus !== "live") {
+    return res.status(400).json({ success: false, message: "Auction is not live" });
+  }
+
   const result = await endAuction(car._id.toString());
   await syncAuctionResult({ roomId: car._id.toString(), winner: result.winner });
 
   res.json({ success: true, result });
 }));
 
-// ⏱ Extend auction
+// ⏱ Extend auction (max 3 extensions per auction)
 router.post("/cars/:id/auction/extend", asyncHandler(async (req, res) => {
   const { hours } = req.body;
   if (!hours) return res.status(400).json({ success: false, message: "hours required" });
 
-  const car = await Car.findOneAndUpdate(
-    { _id: req.params.id, dealer: req.user.id, auctionStatus: "live" },
-    { $set: { auctionEnd: new Date(Date.now() + hours * 60 * 60 * 1000) } },
-    { new: true }
-  );
+  if (hours < 1 || hours > 72) {
+    return res.status(400).json({ success: false, message: "Extension must be between 1 and 72 hours" });
+  }
+
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id, auctionStatus: "live" });
   if (!car) return res.status(404).json({ success: false, message: "Car not found or auction not live" });
 
-  res.json({ success: true, newEndTime: car.auctionEnd });
+  const MAX_EXTENSIONS = 3;
+  const extensionCount = car.extensionCount || 0;
+  if (extensionCount >= MAX_EXTENSIONS) {
+    return res.status(400).json({ success: false, message: `Maximum ${MAX_EXTENSIONS} extensions per auction reached` });
+  }
+
+  const updated = await Car.findOneAndUpdate(
+    { _id: req.params.id, dealer: req.user.id, auctionStatus: "live" },
+    {
+      $set: { auctionEnd: new Date(Date.now() + hours * 60 * 60 * 1000) },
+      $inc: { extensionCount: 1 },
+    },
+    { new: true }
+  );
+
+  res.json({ success: true, newEndTime: updated.auctionEnd, extensionsUsed: extensionCount + 1 });
 }));
 
 // =============================

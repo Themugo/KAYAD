@@ -37,6 +37,12 @@ const escrowSchema = new mongoose.Schema(
       min: 1,
     },
 
+    reservePrice: {
+      type: Number,
+      default: null,
+      min: 0,
+    },
+
     commission: {
       type: Number,
       default: 0,
@@ -44,8 +50,24 @@ const escrowSchema = new mongoose.Schema(
 
     sellerAmount: {
       type: Number,
-      default: 0, // 🔥 FIX: don't require at creation
+      default: 0,
     },
+
+    releaseWindowDays: {
+      type: Number,
+      default: 3,
+      min: 1,
+      max: 30,
+    },
+
+    deliveryConfirmed: {
+      type: Boolean,
+      default: false,
+    },
+
+    deliveryConfirmedAt: Date,
+
+    autoReleaseEligibleAt: Date,
 
     // =============================
     // 🔗 PAYMENT LINK
@@ -136,6 +158,64 @@ escrowSchema.methods.markFunded = function () {
 
   this.status = "held";
   this.fundedAt = new Date();
+  this.autoReleaseEligibleAt = new Date(Date.now() + this.releaseWindowDays * 86400000);
+  this.history.push({ action: `Funded — KES ${this.amount.toLocaleString("en-KE")} held in escrow` });
+
+  return this.save();
+};
+
+// ✅ BUYER CONFIRMS DELIVERY
+escrowSchema.methods.confirmDelivery = function () {
+  if (this.status !== "held") throw new Error("Escrow not in delivery state");
+
+  this.deliveryConfirmed = true;
+  this.deliveryConfirmedAt = new Date();
+  this.history.push({ action: "Buyer confirmed delivery" });
+
+  return this.save();
+};
+
+// ✅ RELEASE FUNDS (ADMIN)
+escrowSchema.methods.releaseFunds = function (adminId) {
+  if (this.status !== "held") {
+    throw new Error("Escrow not in releasable state");
+  }
+
+  const commissionRate = 0.05;
+  this.commission = this.amount * commissionRate;
+  this.sellerAmount = this.amount - this.commission;
+
+  this.status = "released";
+  this.releasedAt = new Date();
+  this.releasedBy = adminId;
+  this.history.push({ action: `Released to seller — KES ${this.sellerAmount.toLocaleString("en-KE")}` });
+
+  return this.save();
+};
+
+// 🔁 REFUND BUYER
+escrowSchema.methods.refundBuyer = function (adminId, reason) {
+  if (!["held", "disputed"].includes(this.status)) {
+    throw new Error("Cannot refund this escrow");
+  }
+
+  this.status = "refunded";
+  this.refundedAt = new Date();
+  this.refundedBy = adminId;
+  this.disputeReason = reason;
+  this.history.push({ action: `Refunded to buyer — ${reason || "No reason provided"}` });
+
+  return this.save();
+};
+
+// ⚠️ OPEN DISPUTE
+escrowSchema.methods.openDispute = function (reason) {
+  if (this.status === "released" || this.status === "refunded") {
+    throw new Error("Cannot dispute a finalized escrow");
+  }
+  this.status = "disputed";
+  this.disputeReason = reason;
+  this.history.push({ action: `Dispute opened — ${reason}` });
 
   return this.save();
 };

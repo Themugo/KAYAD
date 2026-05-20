@@ -12,6 +12,8 @@ import {
   getEscrowById,
   releaseEscrow,
   refundEscrow,
+  confirmDelivery,
+  requestRelease,
 } from "../controllers/escrowController.js";
 import Escrow from "../models/Escrow.js";
 
@@ -119,6 +121,18 @@ router.post(
 );
 
 // =============================
+// ✅ CONFIRM DELIVERY (BUYER)
+// =============================
+router.post(
+  "/:id/confirm-delivery",
+  protect,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    return confirmDelivery(req, res);
+  })
+);
+
+// =============================
 // 📦 REQUEST RELEASE (BUYER CONFIRMS DELIVERY)
 // =============================
 router.post(
@@ -126,26 +140,7 @@ router.post(
   protect,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const escrow = await Escrow.findById(req.params.id);
-    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
-
-    if (String(escrow.buyer) !== req.user.id) {
-      return res.status(403).json({ success: false, message: "Only the buyer can request release" });
-    }
-
-    if (escrow.status !== "held") {
-      return res.status(400).json({ success: false, message: "Escrow must be funded to request release" });
-    }
-
-    escrow.history.push({ action: "buyer_requested_release" });
-    await escrow.save();
-
-    // Notify admin
-    if (global.io) {
-      global.io.to("admin").emit("escrowReleaseRequested", { escrowId: escrow._id });
-    }
-
-    res.json({ success: true, message: "Release requested. Admin will process shortly." });
+    return requestRelease(req, res);
   })
 );
 
