@@ -262,7 +262,7 @@ export const login = async (req, res) => {
 
     email = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password +tokenVersion");
 
     if (!user || !(await user.matchPassword(password))) {
       return R.unauthorized(res, "Invalid credentials");
@@ -434,7 +434,7 @@ export const changePassword = async (req, res) => {
       return R.error(res, "New password must be at least 8 characters", 400);
     }
 
-    const user = await User.findById(req.user.id).select("+password");
+    const user = await User.findById(req.user.id).select("+password +tokenVersion");
     if (!user) return R.notFound(res, "User not found");
 
     const match = await bcrypt.compare(currentPassword, user.password);
