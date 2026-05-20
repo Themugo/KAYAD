@@ -33,6 +33,7 @@ export default function AddCarPage() {
     description: '', features: [],
     allowBuy: true, allowBid: false, escrowEnabled: true,
     auctionStatus: 'draft', auctionEnd: '',
+    vin: '', logbookNo: '', ntsaStatus: '',
   });
   const [featureInput, setFeatureInput] = useState('');
 
@@ -210,6 +211,27 @@ export default function AddCarPage() {
                 <SelectField label="Transmission" field="transmission" options={TRANS} />
                 <Field label="Mileage (km)">
                   <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 45000" value={form.mileage} onChange={e => set('mileage', e.target.value)} />
+                </Field>
+              </div>
+
+              {/* Vehicle Identification */}
+              <div style={{ borderTop: '1px solid var(--border)', marginTop: 8, paddingTop: 16 }}>
+                <h3 style={{ marginBottom: 10 }}>Vehicle Identification</h3>
+                <div className="grid-2">
+                  <Field label="VIN / Chassis Number">
+                    <input className="input" placeholder="e.g. JTEBU29J405..." value={form.vin} onChange={e => set('vin', e.target.value)} />
+                  </Field>
+                  <Field label="Logbook Number">
+                    <input className="input" placeholder="e.g. LB123456" value={form.logbookNo} onChange={e => set('logbookNo', e.target.value)} />
+                  </Field>
+                </div>
+                <Field label="NTSA Verification Status">
+                  <select className="input" value={form.ntsaStatus} onChange={e => set('ntsaStatus', e.target.value)}>
+                    <option value="">-- Select --</option>
+                    <option value="verified">Verified</option>
+                    <option value="pending">Pending Verification</option>
+                    <option value="not_verified">Not Verified</option>
+                  </select>
                 </Field>
               </div>
 

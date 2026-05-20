@@ -305,6 +305,15 @@ const _dealerAPI = {
   quickStats: ()       => api.get('/dealer/quick-stats').then(unwrap),
   bids:       (params) => api.get('/dealer/bids', { params }).then(unwrap),
 
+  // Listing actions
+  duplicate:  (carId)        => api.post(`/dealer/cars/${carId}/duplicate`).then(unwrap),
+  markSold:   (carId, body)  => api.patch(`/dealer/cars/${carId}/mark-sold`, body).then(unwrap),
+  acceptBid:  (carId, bidId) => api.post(`/dealer/cars/${carId}/accept-bid`, { bidId }).then(unwrap),
+  bulkStatus: (body)         => api.patch('/dealer/cars/bulk-status', body).then(unwrap),
+
+  // CSV export
+  exportCSV:  (params)       => api.get('/dealer/cars', { params, responseType: 'blob' }).then(r => r.data),
+
   // Team management
   getTeam:        ()             => api.get('/dealer/team').then(unwrap),
   inviteMember:   (body)         => api.post('/dealer/team/invite', body).then(unwrap),
@@ -411,7 +420,7 @@ const _adminAPI = {
 export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
 
 // ============================================================
-//  AUCTION ADMIN — routes/auctionAdminRoutes.js
+//  AUCTION ADMIN — routes/auctionAdminRoutes.js (ADMIN ONLY)
 // ============================================================
 const _auctionAdminAPI = {
   start:     (carId, body)  => api.post(`/auction-admin/${carId}/start`, body).then(unwrap),
@@ -421,6 +430,16 @@ const _auctionAdminAPI = {
   setWinner: (carId, bidId) => api.post(`/auction-admin/${carId}/set-winner`, { bidId }).then(unwrap),
 };
 export const auctionAdminAPI = withDemo(_auctionAdminAPI, demoAPI.auctionAdmin);
+
+// ============================================================
+//  DEALER AUCTIONS — routes/dealerRoutes.js (DEALER ONLY)
+// ============================================================
+const _dealerAuctionAPI = {
+  start:     (carId, body)  => api.post(`/dealer/cars/${carId}/auction/start`, body).then(unwrap),
+  end:       (carId)        => api.post(`/dealer/cars/${carId}/auction/end`).then(unwrap),
+  extend:    (carId, hours) => api.post(`/dealer/cars/${carId}/auction/extend`, { hours }).then(unwrap),
+};
+export const dealerAuctionAPI = withDemo(_dealerAuctionAPI, demoAPI.auctionAdmin);
 
 // ============================================================
 //  FAVORITES — routes/favoriteRoutes.js

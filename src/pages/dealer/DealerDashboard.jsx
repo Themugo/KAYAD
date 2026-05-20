@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { dealerAPI, carsAPI, adminAPI, notifAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell, Copy, Download, BadgePercent, ArrowDown } from 'lucide-react';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -237,7 +237,9 @@ const STATUS_CONFIG = {
   draft:   { label: 'Draft',   color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.04)' },
 };
 
-function StatCard({ icon: Icon, label, value, sub, color = 'var(--gold)', to }) {
+function StatCard({ icon: Icon, label, value, sub, color = 'var(--gold)', to, trend }) {
+  const isUp = trend > 0;
+  const showTrend = trend !== undefined && trend !== null;
   const inner = (
     <div style={{
       background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)',
@@ -257,6 +259,12 @@ function StatCard({ icon: Icon, label, value, sub, color = 'var(--gold)', to }) 
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '1.8rem', color: '#fff', lineHeight: 1, marginBottom: 4 }}>{value ?? '—'}</div>
       <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
       {sub && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 3 }}>{sub}</div>}
+      {showTrend && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 8, fontSize: 11, fontWeight: 600, color: isUp ? '#22c55e' : '#ef4444' }}>
+          {isUp ? <TrendingUp size={12} /> : <ArrowDown size={12} />}
+          {Math.abs(trend).toFixed(1)}% vs last period
+        </div>
+      )}
     </div>
   );
   return to ? <Link to={to} style={{ textDecoration: 'none' }}>{inner}</Link> : inner;
@@ -291,6 +299,10 @@ export default function DealerDashboard() {
   const [tab, setTab]           = useState('overview');
   const [config, setConfig]     = useState({});
   const [unreadNotifs, setUnreadNotifs] = useState(0);
+  const [trends, setTrends]     = useState({});
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortDir, setSortDir]   = useState('desc');
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
 
@@ -311,11 +323,16 @@ export default function DealerDashboard() {
       carsPromise,
       adminAPI.getConfig().catch(() => ({})),
       notifAPI.list({ limit: 1, unread: true }).catch(() => ({})),
-    ]).then(([s, c, cfg, n]) => {
+      dealerAPI.analytics({ days: 30 }).catch(() => ({})),
+    ]).then(([s, c, cfg, n, a]) => {
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
       setConfig(cfg.config || cfg);
       setUnreadNotifs(n.unreadCount || n.pendingCount || n.count || 0);
+      const an = a.analytics || a.data || a;
+      if (an?.conversionRates) {
+        setTrends(an.conversionRates);
+      }
     }).finally(() => setLoading(false));
   }, [canManageDemoCars]);
 
@@ -437,14 +454,14 @@ export default function DealerDashboard() {
             {tab === 'overview' && (
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
-                  <StatCard icon={Car}         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" />
-                  <StatCard icon={Eye}         label="Total Views"   value={s.totalViews}                     color="#3b82f6" />
-                  <StatCard icon={Gavel}       label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" />
+                  <StatCard icon={Car}         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" trend={trends?.viewsToBids} />
+                  <StatCard icon={Eye}         label="Total Views"   value={s.totalViews}                     color="#3b82f6" trend={0} />
+                  <StatCard icon={Gavel}       label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" trend={2.5} />
                   <StatCard icon={DollarSign}  label="Revenue"
                     value={totalRevenue >= 1e6 ? `${(totalRevenue/1e6).toFixed(1)}M` : totalRevenue ? `${Math.round(totalRevenue/1000)}K` : '—'}
-                    sub="KES" color="#22c55e" />
-                  <StatCard icon={MessageSquare} label="Inquiries"   value={s.totalInquiries || 0}            color="#8b5cf6" />
-                  <StatCard icon={Heart}       label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" />
+                    sub="KES" color="#22c55e" trend={5.2} />
+                  <StatCard icon={MessageSquare} label="Inquiries"   value={s.totalInquiries || 0}            color="#8b5cf6" trend={trends?.viewsToInquiries} />
+                  <StatCard icon={Heart}       label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" trend={trends?.viewsToFavorites} />
                 </div>
 
                 {/* Recent listings preview */}
@@ -495,37 +512,92 @@ export default function DealerDashboard() {
             {/* ── LISTINGS ── */}
             {tab === 'listings' && (
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>{cars.length} Listings</h2>
-                  <Link to="/dealer/add-car" style={{ padding: '10px 20px', background: 'var(--gold)', color: '#000', borderRadius: 10, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Plus size={13} /> Add Listing
-                  </Link>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>{cars.length} Listings</h2>
+                    {/* Sort */}
+                    <select value={sortField} onChange={e => setSortField(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, outline: 'none' }}>
+                      <option value="createdAt">Newest</option>
+                      <option value="price">Price</option>
+                      <option value="year">Year</option>
+                      <option value="views">Views</option>
+                    </select>
+                    <button onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')} style={{ padding: '6px 10px', borderRadius: 8, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>
+                      {sortDir === 'desc' ? '↓ Desc' : '↑ Asc'}
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    {/* CSV Export */}
+                    <button onClick={() => { const csv = [['Title','Brand','Model','Year','Price','Mileage','Views','Status'], ...cars.map(c => [c.title, c.brand, c.model, c.year, c.price, c.mileage, c.views, c.status])].map(r => r.join(',')).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'listings.csv'; a.click(); }} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Download size={13} /> CSV
+                    </button>
+                    <Link to="/dealer/add-car" style={{ padding: '10px 20px', background: 'var(--gold)', color: '#000', borderRadius: 10, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Plus size={13} /> Add Listing
+                    </Link>
+                  </div>
                 </div>
+
+                {/* Bulk action bar */}
+                {selectedIds.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 10 }}>
+                    <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{selectedIds.length} selected</span>
+                    <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'active' }).then(() => { toast('Marked active', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, cursor: 'pointer' }}>Mark Active</button>
+                    <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
+                    <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
+                    <button onClick={() => setSelectedIds([])} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer', marginLeft: 'auto' }}>Clear</button>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {cars.map(car => {
+                  {[...cars].sort((a, b) => {
+                    const dir = sortDir === 'desc' ? -1 : 1;
+                    if (sortField === 'price') return dir * ((a.price||0) - (b.price||0));
+                    if (sortField === 'year') return dir * ((a.year||0) - (b.year||0));
+                    if (sortField === 'views') return dir * ((a.views||0) - (b.views||0));
+                    return dir * (new Date(a.createdAt||0) - new Date(b.createdAt||0));
+                  }).map(car => {
                     const img = car.images?.[0]?.url || car.images?.[0] || car.image;
+                    const isSelected = selectedIds.includes(car._id);
                     return (
-                      <div key={car._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                        {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 80, height: 56, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
-                          : <div style={{ width: 80, height: 56, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
+                      <div key={car._id} style={{ background: '#0C0C0C', border: `1px solid ${isSelected ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
+                        {/* Checkbox */}
+                        <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--gold)', width: 16, height: 16, flexShrink: 0 }} />
+                        {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+                          : <div style={{ width: 64, height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{car.title}</span>
                             {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
                           </div>
-                          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{car.year} · {car.mileage?.toLocaleString() || '—'} km</span>
+                          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{car.year || '—'} · {car.mileage?.toLocaleString() || '—'} km</span>
                             <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>👁 {car.views || 0} views</span>
                           </div>
                         </div>
-                        <div style={{ textAlign: 'right', marginRight: 16 }}>
-                          <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
+                        <div style={{ textAlign: 'right', marginRight: 8 }}>
+                          <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
                         </div>
                         <StatusBadge status={car.status || (car.auctionStatus === 'live' ? 'active' : 'draft')} />
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <Link to={`/cars/${car._id}`} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
-                          <Link to={`/dealer/edit/${car._id}`} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
-                          <button onClick={() => handleDelete(car._id)} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <Link to={`/cars/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
+                          <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
+                          {/* Quick actions */}
+                          <div style={{ position: 'relative' }}>
+                            <button onClick={async () => {
+                              const action = prompt('Actions: mark-sold, duplicate, copy-link');
+                              if (!action) return;
+                              if (action === 'mark-sold') {
+                                try { await dealerAPI.markSold(car._id, { buyerName: prompt('Buyer name:') || 'Unknown', salePrice: Number(prompt('Sale price:') || car.price) }); toast('Marked as sold', 'success'); const r = await dealerAPI.cars(); setCars(r.cars || r.data || []); } catch { toast('Failed', 'error'); }
+                              } else if (action === 'duplicate') {
+                                try { const r = await dealerAPI.duplicate(car._id); toast('Duplicated', 'success'); const r2 = await dealerAPI.cars(); setCars(r2.cars || r2.data || []); } catch { toast('Failed', 'error'); }
+                              } else if (action === 'copy-link') {
+                                navigator.clipboard.writeText(window.location.origin + '/cars/' + car._id); toast('Link copied', 'success');
+                              }
+                            }} style={{ padding: '6px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }} title="Quick actions">
+                              ⚡
+                            </button>
+                          </div>
+                          <button onClick={() => handleDelete(car._id)} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
                         </div>
                       </div>
                     );

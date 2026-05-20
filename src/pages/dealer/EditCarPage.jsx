@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, dealerAPI, auctionAdminAPI, formatKES, api } from '../../api/api';
+import { carsAPI, dealerAPI, dealerAuctionAPI, formatKES, api } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { Save, Trash2, ChevronLeft, Star, Zap, Image, Settings, Pin, Upload, Plus } from 'lucide-react';
+import { Save, Trash2, ChevronLeft, Star, Zap, Image, Settings, Pin, Upload, Plus, Copy } from 'lucide-react';
 
 const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai','Porsche','Land Rover','Jaguar'];
 const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hybrid','CNG'];
@@ -189,7 +189,9 @@ export default function EditCarPage() {
     if (!form.auctionEnd) { toast('Set an auction end time first', 'error'); return; }
     setAuctionAction('starting');
     try {
-      await auctionAdminAPI.start(id, { auctionEnd: form.auctionEnd });
+      const endMs = new Date(form.auctionEnd).getTime() - Date.now();
+      if (endMs < 60000) { toast('Auction must run at least 1 minute', 'error'); setAuctionAction(null); return; }
+      await dealerAuctionAPI.start(id, { durationMs: endMs, startingBid: Number(form.price) });
       toast('Auction is now LIVE', 'success');
       setCar(p => ({ ...p, auctionStatus: 'live' }));
     } catch (err) { toast(err.response?.data?.message || 'Failed to start auction', 'error'); }
@@ -200,7 +202,7 @@ export default function EditCarPage() {
     if (!confirm('End this auction now?')) return;
     setAuctionAction('ending');
     try {
-      await auctionAdminAPI.end(id);
+      await dealerAuctionAPI.end(id);
       toast('Auction ended', 'info');
       setCar(p => ({ ...p, auctionStatus: 'ended' }));
     } catch { toast('Failed to end auction', 'error'); }
@@ -245,6 +247,9 @@ export default function EditCarPage() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
+                <button onClick={async () => { try { const r = await dealerAPI.duplicate(id); toast('Listing duplicated', 'success'); navigate(`/edit-car/${r.car._id}`); } catch { toast('Failed to duplicate', 'error'); } } } style={{ padding: '10px 18px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)', borderRadius: 10, color: '#3b82f6', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Copy size={13} /> Copy
+                </button>
                 <button onClick={handleDelete} style={{ padding: '10px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Trash2 size={13} /> Delete
                 </button>
@@ -407,7 +412,7 @@ export default function EditCarPage() {
                   <button onClick={handleAuctionEnd} disabled={!!auctionAction} style={{ padding: '12px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                     {auctionAction === 'ending' ? 'Ending...' : 'End Auction'}
                   </button>
-                  <button onClick={async () => { setAuctionAction('extending'); try { await auctionAdminAPI.extend(id, { hours: extendHours }); toast('Extended by ' + extendHours + 'h', 'success'); } catch { toast('Failed', 'error'); } finally { setAuctionAction(null); } }} disabled={!!auctionAction}
+                  <button onClick={async () => { setAuctionAction('extending'); try { await dealerAuctionAPI.extend(id, extendHours); toast('Extended by ' + extendHours + 'h', 'success'); } catch { toast('Failed', 'error'); } finally { setAuctionAction(null); } }} disabled={!!auctionAction}
                     style={{ padding: '12px 24px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 10, color: '#3b82f6', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                     {auctionAction === 'extending' ? 'Extending...' : '+ Extend ' + extendHours + 'h'}
                   </button>

@@ -437,6 +437,171 @@ router.delete("/team/:memberId", asyncHandler(async (req, res) => {
 }));
 
 // =============================
+// 🔄 DUPLICATE LISTING
+// =============================
+router.post("/cars/:id/duplicate", asyncHandler(async (req, res) => {
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  const dup = await Car.create({
+    ...car.toObject(),
+    _id: undefined,
+    title: `${car.title} (Copy)`,
+    views: 0,
+    bidsCount: 0,
+    favoritesCount: 0,
+    sold: false,
+    auctionStatus: "draft",
+    auctionStartTime: undefined,
+    auctionEnd: undefined,
+    currentBid: 0,
+    winner: undefined,
+    isPromoted: false,
+    status: "active",
+    createdAt: undefined,
+    updatedAt: undefined,
+  });
+
+  res.status(201).json({ success: true, car: dup });
+}));
+
+// =============================
+// ✅ MARK LISTING AS SOLD
+// =============================
+router.patch("/cars/:id/mark-sold", asyncHandler(async (req, res) => {
+  const { buyerName, buyerEmail, salePrice, saleNotes } = req.body;
+  const car = await Car.findOneAndUpdate(
+    { _id: req.params.id, dealer: req.user.id },
+    {
+      $set: {
+        sold: true,
+        status: "sold",
+        saleDetails: { buyerName, buyerEmail, salePrice: salePrice || car?.price, saleNotes, soldAt: new Date() },
+      },
+    },
+    { new: true }
+  );
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+  res.json({ success: true, car });
+}));
+
+// =============================
+// 📋 BULK STATUS UPDATE
+// =============================
+router.patch("/cars/bulk-status", asyncHandler(async (req, res) => {
+  const { ids, status } = req.body;
+  if (!Array.isArray(ids) || !status) {
+    return res.status(400).json({ success: false, message: "ids (array) and status required" });
+  }
+  const result = await Car.updateMany(
+    { _id: { $in: ids }, dealer: req.user.id },
+    { $set: { status } }
+  );
+  res.json({ success: true, modified: result.modifiedCount });
+}));
+
+// =============================
+// 🏆 ACCEPT BID (SOLD TO BIDDER)
+// =============================
+router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
+  const { bidId } = req.body;
+  if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
+
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+  if (car.sold) return res.status(400).json({ success: false, message: "Already sold" });
+
+  const Bid = (await import("../models/Bid.js")).default;
+  const bid = await Bid.findOne({ _id: bidId, carId: car._id });
+  if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
+
+  bid.status = "accepted";
+  await bid.save();
+
+  car.sold = true;
+  car.status = "sold";
+  car.soldTo = { user: bid.user, amount: bid.amount, bidId: bid._id, soldAt: new Date() };
+  car.auctionStatus = "ended";
+  await car.save();
+
+  // Notify winner
+  try {
+    const { sendSaleNotification } = await import("../services/notification.service.js").catch(() => ({}));
+    if (typeof sendSaleNotification === "function") {
+      sendSaleNotification(bid.user, car.title).catch(e => console.warn("Sale notif failed:", e.message));
+    }
+  } catch { /* non-critical */ }
+
+  res.json({ success: true, car, bid });
+}));
+
+// =============================
+// 🔨 DEALER AUCTION CONTROLS
+// =============================
+import { startAuction, endAuction } from "../realtime/auctionEngine.js";
+import { syncAuctionResult } from "../realtime/syncService.js";
+
+// 🚀 Start auction on dealer's own car
+router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
+  const { durationMs } = req.body;
+  if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
+
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  // Listing lock check
+  const User = (await import("../models/User.js")).default;
+  const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
+  if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
+    return res.status(403).json({
+      success: false,
+      message: "Cannot start auction — outstanding commission balance and listings are locked.",
+    });
+  }
+
+  const result = await startAuction({
+    roomId: car._id.toString(),
+    startingBid: Number(req.body.startingBid) || 0,
+    durationMs,
+  });
+
+  car.auctionStatus = "live";
+  car.startingBid = Number(req.body.startingBid) || 0;
+  car.currentBid = Number(req.body.startingBid) || 0;
+  car.auctionStartTime = new Date();
+  car.auctionEnd = new Date(Date.now() + durationMs);
+  await car.save();
+
+  res.json({ success: true, message: "Auction started", endTime: result.endTime });
+}));
+
+// 🏁 End auction on dealer's own car
+router.post("/cars/:id/auction/end", asyncHandler(async (req, res) => {
+  const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+  if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  const result = await endAuction(car._id.toString());
+  await syncAuctionResult({ roomId: car._id.toString(), winner: result.winner });
+
+  res.json({ success: true, result });
+}));
+
+// ⏱ Extend auction
+router.post("/cars/:id/auction/extend", asyncHandler(async (req, res) => {
+  const { hours } = req.body;
+  if (!hours) return res.status(400).json({ success: false, message: "hours required" });
+
+  const car = await Car.findOneAndUpdate(
+    { _id: req.params.id, dealer: req.user.id, auctionStatus: "live" },
+    { $set: { auctionEnd: new Date(Date.now() + hours * 60 * 60 * 1000) } },
+    { new: true }
+  );
+  if (!car) return res.status(404).json({ success: false, message: "Car not found or auction not live" });
+
+  res.json({ success: true, newEndTime: car.auctionEnd });
+}));
+
+// =============================
 // 🚨 FALLBACK
 // =============================
 router.use((req, res) => {
