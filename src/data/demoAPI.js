@@ -176,8 +176,8 @@ const demoCars = {
   create: async (formData) => {
     await delay(500, 1200);
     const user = getDemoUser();
-    if (!user || !['dealer', 'admin', 'superadmin'].includes(user.role)) {
-      throw { response: { status: 403, data: { message: 'Only dealers can create listings' } } };
+    if (!user || !['dealer', 'broker', 'individual_seller', 'admin', 'superadmin'].includes(user.role)) {
+      throw { response: { status: 403, data: { message: 'Only dealers, brokers, and sellers can create listings' } } };
     }
       const images = [];
       try {

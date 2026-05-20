@@ -23,6 +23,8 @@ import {
   deleteCar,
   placeBid,
   getDemoCars,
+  deleteCarImage,
+  addCarImages,
 } from "../controllers/carController.js";
 
 import Car from "../models/Car.js";
@@ -171,6 +173,25 @@ router.delete(
   dealerOnly,
   validateObjectId,
   asyncHandler(deleteCar)
+);
+
+// 🖼 DELETE IMAGE FROM CAR
+router.delete(
+  "/:id/images/:imageIndex",
+  protect,
+  dealerOnly,
+  validateObjectId,
+  asyncHandler(deleteCarImage)
+);
+
+// 📤 ADD IMAGES TO CAR
+router.post(
+  "/:id/images",
+  protect,
+  dealerOnly,
+  upload.array("images", 10),
+  handleUploadError,
+  asyncHandler(addCarImages)
 );
 
 // =============================

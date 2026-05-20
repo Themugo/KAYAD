@@ -1,9 +1,9 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import { cacheGet, cacheSet } from "../utils/cache.js";
-import { uploadMultiple } from "../config/cloudinary.js";
+import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
-import path from "path";
+import * as path from "path";
 
 const STAFF_ROLES = ["admin", "superadmin", "moderator", "technical_support"];
 const DEALER_ROLES = ["dealer", "broker", "individual_seller"];
@@ -408,6 +408,108 @@ export const deleteCar = async (req, res) => {
   } catch (err) {
     console.error("❌ DELETE ERROR:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
+  }
+};
+
+// =============================
+// 🖼 DELETE IMAGE FROM CAR
+// =============================
+export const deleteCarImage = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const isStaff = STAFF_ROLES.includes(req.user.role);
+    const isDealer = DEALER_ROLES.includes(req.user.role);
+    const isOwner = car.dealer?.toString() === req.user.id;
+    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
+    if (!isOwner && !isStaff && !isDemoMgmt) {
+      return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
+    }
+
+    const imageIndex = Number(req.params.imageIndex);
+    if (isNaN(imageIndex) || imageIndex < 0 || imageIndex >= (car.images || []).length) {
+      return res.status(400).json({ success: false, message: "Invalid image index" });
+    }
+
+    const removedImage = car.images[imageIndex];
+
+    // Delete from Cloudinary if it has a public_id
+    if (removedImage?.public_id) {
+      await deleteImage(removedImage.public_id);
+    }
+
+    // Remove from array
+    car.images.splice(imageIndex, 1);
+
+    // Adjust coverImage if needed
+    if (car.images.length === 0) {
+      car.coverImage = 0;
+    } else if (imageIndex < car.coverImage) {
+      car.coverImage -= 1;
+    } else if (imageIndex === car.coverImage) {
+      car.coverImage = 0;
+    }
+
+    await car.save();
+    await cacheSet("cars:list:*", null, 1);
+
+    res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
+  } catch (err) {
+    console.error("❌ DELETE IMAGE ERROR:", err.message);
+    res.status(500).json({ success: false, message: "Failed to delete image" });
+  }
+};
+
+// =============================
+// 📤 ADD IMAGES TO CAR
+// =============================
+export const addCarImages = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const isStaff = STAFF_ROLES.includes(req.user.role);
+    const isDealer = DEALER_ROLES.includes(req.user.role);
+    const isOwner = car.dealer?.toString() === req.user.id;
+    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
+    if (!isOwner && !isStaff && !isDemoMgmt) {
+      return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
+    }
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ success: false, message: "No images provided" });
+    }
+
+    const maxImages = 20;
+    const currentCount = (car.images || []).length;
+    if (currentCount + req.files.length > maxImages) {
+      cleanupFiles(req.files);
+      return res.status(400).json({ success: false, message: `Maximum ${maxImages} images allowed. You have ${currentCount}, trying to add ${req.files.length}.` });
+    }
+
+    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+
+    let newImages;
+    if (cloudinaryConfigured) {
+      newImages = await uploadMultiple(req.files, "kayad/cars");
+      cleanupFiles(req.files);
+    } else {
+      newImages = req.files.map(f => ({
+        url: `/uploads/${path.basename(f.path)}`,
+        thumb: `/uploads/${path.basename(f.path)}`,
+        public_id: null,
+      }));
+    }
+
+    car.images = [...(car.images || []), ...newImages];
+    await car.save();
+    await cacheSet("cars:list:*", null, 1);
+
+    res.json({ success: true, data: { images: car.images } });
+  } catch (err) {
+    console.error("❌ ADD IMAGES ERROR:", err.message);
+    res.status(500).json({ success: false, message: "Failed to add images" });
   }
 };
 

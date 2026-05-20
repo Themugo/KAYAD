@@ -79,7 +79,11 @@ export default function AddCarPage() {
       await carsAPI.create(fd);
       setDone(form);
     } catch (err) {
-      toast(err.response?.data?.message || 'Failed to create listing', 'error');
+      const msg = err.response?.data?.message || err.message || 'Failed to create listing';
+      const code = err.response?.data?.code;
+      const status = err.response?.status;
+      console.error('[AddCar] Create failed:', { status, code, msg, error: err });
+      toast(`${code ? `[${code}] ` : ''}${msg}`, 'error');
     } finally {
       setLoading(false);
     }
