@@ -10,4 +10,8 @@ backend/.env
 ACCOUNTS.md
 backend/.env.test
 backend/coverage/
+backend/uploads/
+coverage/
+.idea/
+.vscode/
 *.tsbuildinfo

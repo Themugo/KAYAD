@@ -1,4 +1,4 @@
-# Gari Motors — Zero-Code Integrations Guide
+# Kayad — Zero-Code Integrations Guide
 ## Every integration below activates with ENV vars or DNS changes only.
 ## No code changes needed. Just set the variable and restart.
 
@@ -48,13 +48,13 @@ npm run build
 1. Go to https://uptimerobot.com → Create Free Account
 2. Add New Monitor:
    - Monitor Type: HTTP(s)
-   - Friendly Name: Gari Motors API
+    - Friendly Name: Kayad API
    - URL: https://kayad.space/health
    - Monitoring Interval: 5 minutes
 
 3. Add another monitor:
    - URL: https://kayad.space
-   - Name: Gari Motors Frontend
+    - Name: Kayad Frontend
 
 4. Add alert contacts: your email, phone (SMS), and Slack webhook
 ```

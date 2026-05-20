@@ -6,20 +6,34 @@ import Car      from "../models/Car.js";
 // GET /api/favorites
 export const getFavorites = async (req, res) => {
   try {
-    const favorites = await Favorite.find({ user: req.user.id })
-      .sort({ createdAt: -1 })
-      .populate({
-        path: "car",
-        select: "title price images brand model year fuel transmission mileage location auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
-      })
-      .lean();
+    const page  = Math.max(Number(req.query.page)  || 1, 1);
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+    const skip  = (page - 1) * limit;
+
+    const [favorites, total] = await Promise.all([
+      Favorite.find({ user: req.user.id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: "car",
+          select: "title price images brand model year fuel transmission mileage location auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
+        })
+        .lean(),
+      Favorite.countDocuments({ user: req.user.id }),
+    ]);
 
     const items = favorites.map(f => ({
       ...(f.car || {}),
       _favoriteId: f._id,
       notifyOnPriceDrop: f.notifyOnPriceDrop,
     })).filter(Boolean);
-    res.json({ success: true, favorites: items, total: items.length });
+    res.json({
+      success: true,
+      favorites: items,
+      total,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     console.error("❌ getFavorites error:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch favourites" });

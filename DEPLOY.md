@@ -200,7 +200,7 @@ pm2 status
 
 Expected startup logs:
 ```
-🚗 Gari Motors API
+🚗 Kayad API
 ├─ URL:      http://localhost:5000
 ├─ Env:      production
 ├─ Routes:   13 mounted

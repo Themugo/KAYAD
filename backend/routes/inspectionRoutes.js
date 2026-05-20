@@ -1,6 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { createLimiter } from "../middleware/rateLimiter.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import Car from "../models/Car.js";
 import { initiatePayment } from "../services/paymentService.js";
@@ -9,7 +10,7 @@ const router = express.Router();
 router.use(protect);
 
 // ── Order an inspection (buyer pays fee) ──────────────────────
-router.post("/order", asyncHandler(async (req, res) => {
+router.post("/order", createLimiter, asyncHandler(async (req, res) => {
   const { carId, phone, location } = req.body;
   if (!carId || !phone) {
     return res.status(400).json({ success: false, message: "carId and phone required" });

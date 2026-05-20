@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { createLimiter, webhookLimiter } from "../middleware/rateLimiter.js";
 import {
   handleInboundSms,
   registerSmsBidder,
@@ -12,12 +13,12 @@ import {
 const router = Router();
 
 // Public — inbound SMS webhook (called by Africa's Talking / Twilio)
-router.post("/webhook/inbound", asyncHandler(handleInboundSms));
+router.post("/webhook/inbound", webhookLimiter, asyncHandler(handleInboundSms));
 
 // Protected — user SMS bidding management
-router.post("/register", protect, asyncHandler(registerSmsBidder));
+router.post("/register", protect, createLimiter, asyncHandler(registerSmsBidder));
 router.get("/my", protect, asyncHandler(getMySmsProfile));
-router.post("/subscribe", protect, asyncHandler(subscribeToCar));
+router.post("/subscribe", protect, createLimiter, asyncHandler(subscribeToCar));
 router.delete("/unsubscribe/:carId", protect, asyncHandler(unsubscribeFromCar));
 
 export default router;

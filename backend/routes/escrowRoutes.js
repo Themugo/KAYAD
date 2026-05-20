@@ -4,6 +4,7 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { createLimiter } from "../middleware/rateLimiter.js";
 
 import {
   getAllEscrows,
@@ -57,6 +58,7 @@ router.post(
   "/:id/release",
   protect,
   adminOnly,
+  createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail
@@ -71,6 +73,7 @@ router.post(
   "/:id/refund",
   protect,
   adminOnly,
+  createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail

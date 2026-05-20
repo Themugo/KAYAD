@@ -153,7 +153,7 @@ cd backend && node seed.js
 node server.js
 # Expected output:
 # ✅ MongoDB: cluster.mongodb.net
-# 🚀 Gari Motors API → http://localhost:5000
+# 🚀 Kayad API → http://localhost:5000
 # 📡 Socket.io ready
 # 📦 Routes mounted: 13
 
