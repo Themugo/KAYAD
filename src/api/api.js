@@ -112,18 +112,42 @@ api.interceptors.response.use(
 // ─── HELPERS ───────────────────────────────────────────────────
 const unwrap = res => res.data;
 
+// Check if the stored token is a demo token (base64-encoded JSON with @demo.com email)
+const isDemoToken = () => {
+  const t = localStorage.getItem('kayad_token');
+  if (!t) return false;
+  try {
+    const p = JSON.parse(atob(t));
+    return p.email?.endsWith('@demo.com') || p.superAdmin === true;
+  } catch { return false; }
+};
+
 // Wrap a real API object with demo fallback.
-// Strategy: ALWAYS try the real API first. Only fall back to demo on
-// network errors (backend unreachable). This ensures all save/update
-// operations reach the backend when it's available.
+// Strategy:
+// 1. If the token is a demo token → use demo API directly (real backend will reject it)
+// 2. Otherwise → try real API first
+// 3. On network error (no response) → fall back to demo
+// 4. On 401 from real backend with a demo token → fall back to demo
 function withDemo(realObj, demoObj) {
   const wrapped = {};
   for (const key of Object.keys(realObj)) {
     wrapped[key] = async (...args) => {
+      // If using a demo token, go straight to demo API — real backend will reject it
+      if (isDemoToken() && demoObj?.[key]) {
+        __DEMO_MODE__ = true;
+        return demoObj[key](...args);
+      }
+
       try { return await realObj[key](...args); }
       catch (err) {
-        // Network error (no response) → fall back to demo if available
+        // Network error (no response) → fall back to demo
         if (!err.response && demoObj?.[key]) {
+          __DEMO_MODE__ = true;
+          return demoObj[key](...args);
+        }
+        // 401 from real backend with a demo token → fall back to demo
+        // (Real users with expired tokens should see the error to re-login)
+        if (err.response?.status === 401 && isDemoToken() && demoObj?.[key]) {
           __DEMO_MODE__ = true;
           return demoObj[key](...args);
         }
@@ -137,15 +161,6 @@ function withDemo(realObj, demoObj) {
 // ============================================================
 //  AUTH  — routes/authRoutes.js
 // ============================================================
-// Check if the stored token is a demo token (base64-encoded JSON with @demo.com email)
-const isDemoToken = () => {
-  const t = localStorage.getItem('kayad_token');
-  if (!t) return false;
-  try {
-    const p = JSON.parse(atob(t));
-    return p.email?.endsWith('@demo.com') || p.superAdmin === true;
-  } catch { return false; }
-};
 
 const _authAPI = {
   register: (body) => api.post('/auth/register', body).then(unwrap),
