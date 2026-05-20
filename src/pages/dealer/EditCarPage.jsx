@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, dealerAPI, auctionAdminAPI, formatKES } from '../../api/api';
+import { carsAPI, dealerAPI, auctionAdminAPI, formatKES, api } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { Save, Trash2, ChevronLeft, Star, Zap, Image, Settings, Pin } from 'lucide-react';
+import { Save, Trash2, ChevronLeft, Star, Zap, Image, Settings, Pin, Upload, Plus } from 'lucide-react';
 
 const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai','Porsche','Land Rover','Jaguar'];
 const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hybrid','CNG'];
@@ -69,6 +69,8 @@ export default function EditCarPage() {
   const [coverImage,   setCoverImageIdx] = useState(0);
   const [auctionAction,setAuctionAction] = useState(null);
   const [extendHours,  setExtendHours]  = useState(2);
+  const [uploading,    setUploading]     = useState(false);
+  const [deletingIdx,  setDeletingIdx]   = useState(null);
 
   const [form, setForm] = useState({
     title:'', brand:'', model:'', year:'', price:'',
@@ -146,6 +148,41 @@ export default function EditCarPage() {
       setCar(p => ({ ...p, isPromoted: next }));
       toast(next ? 'Featured on homepage' : 'Removed from featured', 'success');
     } catch { toast('Failed', 'error'); }
+  };
+
+  const handleDeleteImage = async (idx) => {
+    if (!confirm('Delete this image?')) return;
+    setDeletingIdx(idx);
+    try {
+      await api.delete(`/cars/${id}/images/${idx}`);
+      setCar(p => {
+        const newImages = [...(p.images || [])];
+        newImages.splice(idx, 1);
+        let newCover = coverImage;
+        if (newImages.length === 0) newCover = 0;
+        else if (idx < newCover) newCover -= 1;
+        else if (idx === newCover) newCover = 0;
+        setCoverImageIdx(newCover);
+        return { ...p, images: newImages, coverImage: newCover };
+      });
+      toast('Image deleted', 'success');
+    } catch { toast('Failed to delete image', 'error'); }
+    finally { setDeletingIdx(null); }
+  };
+
+  const handleUploadImages = async (e) => {
+    const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+    if (files.length === 0) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      files.forEach(f => fd.append('images', f));
+      const res = await api.post(`/cars/${id}/images`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const newImages = res.data?.data?.images || [];
+      setCar(p => ({ ...p, images: newImages }));
+      toast(`${files.length} image(s) uploaded`, 'success');
+    } catch { toast('Failed to upload images', 'error'); }
+    finally { setUploading(false); e.target.value = ''; }
   };
 
   const handleAuctionStart = async () => {
@@ -294,29 +331,47 @@ export default function EditCarPage() {
         {/* PHOTOS TAB */}
         {tab === 'photos' && (
           <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>Cover Image Selection</div>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 20 }}>Click the pin icon to set a photo as the cover (main gallery image). The gold border shows the current cover.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>Photo Management</div>
+                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Click pin to set cover. Click trash to delete. Upload new photos below.</p>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: uploading ? 'rgba(212,196,168,0.1)' : 'rgba(212,196,168,0.15)', border: '1px solid rgba(212,196,168,0.25)', borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--gold)', transition: 'all 0.2s' }}>
+                <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Photos'}
+                <input type="file" multiple accept="image/*" onChange={handleUploadImages} style={{ display: 'none' }} disabled={uploading} />
+              </label>
+            </div>
             {images.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px', border: '2px dashed rgba(255,255,255,0.08)', borderRadius: 12 }}>
+              <div style={{ textAlign: 'center', padding: '48px', border: '2px dashed rgba(255,255,255,0.08)', borderRadius: 12, marginTop: 16 }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>no image</div>
-                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>No photos yet - use the Add Car form to upload images.</div>
+                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginBottom: 16 }}>No photos yet. Click "Upload Photos" to add images.</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 16 }}>
                 {images.map((img, i) => {
                   const src = typeof img === 'string' ? img : img?.url;
                   const isCover = i === coverImage;
+                  const isDeleting = deletingIdx === i;
                   return (
-                    <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: isCover ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.07)', aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s' }}
-                      onClick={() => handleSetCover(i)}>
-                      {src && <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                      <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : 'transparent', transition: 'background 0.2s' }} />
-                      <div style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: isCover ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.07)', aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s', opacity: isDeleting ? 0.5 : 1 }}>
+                      {src && <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => handleSetCover(i)} />}
+                      <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : 'transparent', transition: 'background 0.2s' }} onClick={() => handleSetCover(i)} />
+                      {/* Cover pin button */}
+                      <div style={{ position: 'absolute', top: 6, left: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                        onClick={(e) => { e.stopPropagation(); handleSetCover(i); }}>
                         <Pin size={13} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.6)' }} />
+                      </div>
+                      {/* Delete button */}
+                      <div style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: 'rgba(239,68,68,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                        onClick={(e) => { e.stopPropagation(); handleDeleteImage(i); }}>
+                        <Trash2 size={13} style={{ color: '#fff' }} />
                       </div>
                       {isCover && (
                         <div style={{ position: 'absolute', bottom: 6, left: 6, background: 'var(--gold)', color: '#000', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.08em' }}>COVER</div>
                       )}
+                      <div style={{ position: 'absolute', bottom: 6, right: 6, background: 'rgba(0,0,0,0.6)', color: 'rgba(255,255,255,0.6)', fontSize: 8, fontWeight: 700, borderRadius: 4, padding: '2px 6px' }}>
+                        {i + 1}
+                      </div>
                     </div>
                   );
                 })}
