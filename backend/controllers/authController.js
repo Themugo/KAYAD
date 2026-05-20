@@ -261,8 +261,8 @@ export const login = async (req, res) => {
       return R.error(res, "Account deactivated", 403);
     }
 
-    // ─── Require email verification ───────────────────────
-    if (!user.emailVerified) {
+    // ─── Require email verification (skip for demo/dev accounts) ─
+    if (!user.emailVerified && !user.isDemo) {
       return R.error(res, "Please verify your email before logging in. Check your inbox or request a new verification link.", 403);
     }
 

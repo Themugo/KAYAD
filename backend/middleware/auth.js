@@ -96,8 +96,8 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 📧 REQUIRE EMAIL VERIFICATION (OWNER EXEMPT)
-    if (!user.emailVerified && !isOwnerEmail(user.email)) {
+    // 📧 REQUIRE EMAIL VERIFICATION (OWNER + DEMO EXEMPT)
+    if (!user.emailVerified && !isOwnerEmail(user.email) && !user.isDemo) {
       return res.status(403).json({
         success: false,
         message: "Please verify your email before accessing this resource",
