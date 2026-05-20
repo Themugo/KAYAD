@@ -42,6 +42,17 @@ export const checkBackendAvailability = async () => {
     });
 })();
 
+// ─── MULTI-TAB DETECTION ──────────────────────────────────────
+// localStorage is shared across all tabs. If another tab changes the token,
+// reload to pick up the new auth state.
+let _currentToken = localStorage.getItem('kayad_token');
+window.addEventListener('storage', (e) => {
+  if (e.key === 'kayad_token' && e.newValue !== _currentToken) {
+    _currentToken = e.newValue;
+    window.location.reload();
+  }
+});
+
 // ─── AXIOS INSTANCE ───────────────────────────────────────────
 const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 }); // 15s default; payment calls override to 45s
 
@@ -149,21 +160,14 @@ function withDemo(realObj, demoObj) {
   for (const key of Object.keys(realObj)) {
     wrapped[key] = async (...args) => {
       // If using a demo token, go straight to demo API — real backend will reject it
-      if (isDemoToken() && demoObj?.[key]) {
+      if (demoObj?.[key] && (isDemoToken() || __DEMO_MODE__)) {
         __DEMO_MODE__ = true;
         return demoObj[key](...args);
       }
 
       try { return await realObj[key](...args); }
       catch (err) {
-        // Network error (no response) → fall back to demo
-        if (!err.response && demoObj?.[key]) {
-          __DEMO_MODE__ = true;
-          return demoObj[key](...args);
-        }
-        // 401 from real backend with a demo token → fall back to demo
-        // (Real users with expired tokens should see the error to re-login)
-        if (err.response?.status === 401 && isDemoToken() && demoObj?.[key]) {
+        if (demoObj?.[key] && (!err.response || __DEMO_MODE__ || (err.response?.status === 401 && isDemoToken()))) {
           __DEMO_MODE__ = true;
           return demoObj[key](...args);
         }
