@@ -132,7 +132,10 @@ router.get(
     // 🔍 FILTERS
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
-    if (req.query.pendingApproval === "true") filter.approved = false;
+    if (req.query.pendingApproval === "true") {
+      filter.role = { $in: ["dealer", "broker", "individual_seller"] };
+      filter.approved = false;
+    }
     if (req.query.isDemo === "true") filter.isDemo = true;
     if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 

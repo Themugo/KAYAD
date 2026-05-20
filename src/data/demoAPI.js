@@ -476,6 +476,15 @@ const demoAdmin = {
       const q = params.search.toLowerCase();
       users = users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
     }
+    if (params.pendingApproval === true || params.pendingApproval === 'true') {
+      users = users.filter(u => u.role === 'dealer' && !u.approved);
+    }
+    if (params.banned === true || params.banned === 'true') {
+      users = users.filter(u => u.isBanned);
+    }
+    if (params.isDemo === true || params.isDemo === 'true') {
+      users = users.filter(u => u.isDemo);
+    }
     const total = users.length;
     return wrapSuccess({ users, data: users, pagination: { total, page: 1, limit: params.limit || 50, pages: 1 }, total });
   },
