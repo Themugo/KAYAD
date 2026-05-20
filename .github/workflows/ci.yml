@@ -47,52 +47,12 @@ jobs:
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install MongoDB
-        run: |
-          $ErrorActionPreference = "Stop"
-          # Download MongoDB 7.0 Windows zip
-          $mongoUrl = "https://fastdl.mongodb.org/windows/mongodb-windows-x86_64-7.0.15.zip"
-          $zipPath = "$env:TEMP\mongodb.zip"
-          $mongoDir = "$env:TEMP\mongodb"
-          $dataDir = "$env:TEMP\mongodb-data"
-
-          Write-Host "Downloading MongoDB..."
-          Invoke-WebRequest -Uri $mongoUrl -OutFile $zipPath
-
-          Write-Host "Extracting MongoDB..."
-          Expand-Archive -Path $zipPath -DestinationPath $mongoDir -Force
-
-          # Find the bin directory
-          $binDir = Get-ChildItem -Path $mongoDir -Directory | Select-Object -First 1 | ForEach-Object { Join-Path $_.FullName "bin" }
-          if (-not (Test-Path $binDir)) {
-            $binDir = Join-Path $mongoDir "bin"
-          }
-
-          Write-Host "MongoDB bin dir: $binDir"
-
-          # Create data directory
-          New-Item -ItemType Directory -Force -Path $dataDir | Out-Null
-
-          # Start mongod
-          $mongodPath = Join-Path $binDir "mongod.exe"
-          if (Test-Path $mongodPath) {
-            Write-Host "Starting mongod..."
-            Start-Process -FilePath $mongodPath -ArgumentList "--dbpath", $dataDir, "--port", "27017", "--bind_ip", "127.0.0.1" -NoNewWindow
-            Start-Sleep -Seconds 5
-            Write-Host "MongoDB started"
-          } else {
-            Write-Host "mongod.exe not found at $mongodPath"
-            Get-ChildItem -Path $mongoDir -Recurse -Filter "mongod.exe" | Select-Object FullName
-            exit 1
-          }
-
       - run: npm ci
 
       - run: npm test
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-32-chars-minimum-x
-          MONGO_URI: mongodb://127.0.0.1:27017/kayad-ci
           MPESA_SKIP_IP_CHECK: "true"
 
   security-audit:

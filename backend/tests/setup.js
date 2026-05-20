@@ -11,12 +11,17 @@ export async function startTestDB() {
 
   // If MONGO_URI is already set (e.g., CI provides it), use it directly
   if (process.env.MONGO_URI && !process.env.MONGO_URI.includes("kayad-test-mock")) {
-    await mongoose.connect(process.env.MONGO_URI, {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 15000,
-    });
-    usingMemoryServer = false;
-    return process.env.MONGO_URI;
+    try {
+      await mongoose.connect(process.env.MONGO_URI, {
+        maxPoolSize: 5,
+        serverSelectionTimeoutMS: 15000,
+      });
+      usingMemoryServer = false;
+      return process.env.MONGO_URI;
+    } catch {
+      // Connection failed — fall through to memory server
+      console.warn("⚠️  MONGO_URI connection failed, falling back to in-memory MongoDB");
+    }
   }
 
   try {
@@ -28,7 +33,7 @@ export async function startTestDB() {
 
     await mongoose.connect(uri, {
       maxPoolSize: 5,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 30000,
     });
 
     return uri;
