@@ -51,6 +51,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_API_BASE_URL || 'http://localhost:5000',
           changeOrigin: true,
+          cookieDomainRewrite: 'localhost',
         },
         '/socket.io': {
           target: env.VITE_SOCKET_URL || 'http://localhost:5000',

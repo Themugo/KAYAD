@@ -1,6 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validate, createSavedSearchSchema, updateSavedSearchSchema } from "../middleware/validate.js";
 import SavedSearch from "../models/SavedSearch.js";
 
 const router = express.Router();
@@ -13,26 +14,23 @@ router.get("/", asyncHandler(async (req, res) => {
   res.json({ success: true, searches });
 }));
 
-router.post("/", asyncHandler(async (req, res) => {
-  const { name, filters, notify } = req.body;
-  if (!name || !filters) {
-    return res.status(400).json({ success: false, message: "name and filters required" });
-  }
+router.post("/", validate(createSavedSearchSchema), asyncHandler(async (req, res) => {
+  const { name, filters, notifyOnNewMatch } = req.body;
   const search = await SavedSearch.create({
     user: req.user.id,
     name,
     filters,
-    notify: notify !== false,
+    notify: notifyOnNewMatch !== false,
   });
   res.json({ success: true, search });
 }));
 
-router.put("/:id", asyncHandler(async (req, res) => {
-  const { name, filters, notify } = req.body;
+router.put("/:id", validateObjectId, validate(updateSavedSearchSchema), asyncHandler(async (req, res) => {
+  const { name, filters, notifyOnNewMatch } = req.body;
   const update = {};
   if (name !== undefined) update.name = name;
   if (filters !== undefined) update.filters = filters;
-  if (notify !== undefined) update.notify = notify;
+  if (notifyOnNewMatch !== undefined) update.notify = notifyOnNewMatch;
 
   const search = await SavedSearch.findOneAndUpdate(
     { _id: req.params.id, user: req.user.id },

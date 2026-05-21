@@ -9,6 +9,27 @@ import {
   updateProfileSchema,
 } from "../validation/auth.schema.js";
 import { createCarSchema, updateCarSchema } from "../validation/car.schema.js";
+import { initiatePaymentSchema, paymentCallbackSchema } from "../validation/payment.schema.js";
+import { createEscrowSchema, escrowActionSchema, releaseEscrowSchema, escrowVaultWebhookSchema, releaseOtpSchema } from "../validation/escrow.schema.js";
+import { createChatSchema, sendMessageSchema } from "../validation/chat.schema.js";
+import { orderInspectionSchema, confirmPaymentSchema, assignInspectorSchema, submitInspectionSchema } from "../validation/inspection.schema.js";
+import { queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema } from "../validation/ntsa.schema.js";
+import { createSavedSearchSchema, updateSavedSearchSchema } from "../validation/savedSearch.schema.js";
+import {
+  toggleBanSchema, dealerApprovalSchema, platformConfigSchema, createStaffSchema,
+  updateStaffSchema, assignPackageSchema, moderateCarSchema, verifyCarSchema,
+  verifyDealerSchema, systemKillSwitchSchema, systemRecoverSchema, creditReferralSchema,
+  createMarketDataSchema, updateMarketDataSchema, bulkMarketDataSchema,
+  updateSellerSettingsSchema, createAdSchema, updateAdSchema, reseedSchema,
+} from "../validation/admin.schema.js";
+import {
+  teamInviteSchema, updateTeamMemberSchema, markSoldSchema, acceptBidSchema,
+  bulkStatusSchema, auctionStartSchema, auctionExtendSchema, settlementSchema,
+} from "../validation/dealer.schema.js";
+import {
+  submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema,
+} from "../validation/inspectorApplication.schema.js";
+import { createReviewSchema } from "../validation/platform.schema.js";
 
 const bidSchema = z.object({
   amount: z.number().positive("Bid must be positive").max(100_000_000),
@@ -118,4 +139,39 @@ export const validateCar = (req, res, next) => {
   if (!isUpdate) req.body = result.data;
   else Object.assign(req.body, result.data);
   next();
+};
+
+// ─── Re-export all schemas for direct use in routes ────────────
+export {
+  // Auth
+  registerSchema, loginSchema, changePasswordSchema,
+  forgotPasswordSchema, resetPasswordSchema, updateProfileSchema,
+  // Cars
+  createCarSchema, updateCarSchema,
+  // Payments
+  initiatePaymentSchema, paymentCallbackSchema,
+  // Escrow
+  createEscrowSchema, escrowActionSchema, releaseEscrowSchema,
+  escrowVaultWebhookSchema, releaseOtpSchema,
+  // Chat
+  createChatSchema, sendMessageSchema,
+  // Inspections
+  orderInspectionSchema, confirmPaymentSchema, assignInspectorSchema, submitInspectionSchema,
+  // NTSA
+  queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema,
+  // Saved Searches
+  createSavedSearchSchema, updateSavedSearchSchema,
+  // Admin
+  toggleBanSchema, dealerApprovalSchema, platformConfigSchema, createStaffSchema,
+  updateStaffSchema, assignPackageSchema, moderateCarSchema, verifyCarSchema,
+  verifyDealerSchema, systemKillSwitchSchema, systemRecoverSchema, creditReferralSchema,
+  createMarketDataSchema, updateMarketDataSchema, bulkMarketDataSchema,
+  updateSellerSettingsSchema, createAdSchema, updateAdSchema, reseedSchema,
+  // Dealer
+  teamInviteSchema, updateTeamMemberSchema, markSoldSchema, acceptBidSchema,
+  bulkStatusSchema, auctionStartSchema, auctionExtendSchema, settlementSchema,
+  // Inspector Applications
+  submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema,
+  // Reviews
+  createReviewSchema,
 };

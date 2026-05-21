@@ -1,8 +1,6 @@
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
 
-const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-
 export const PERMISSIONS = {
   MANAGE_USERS:        "manage_users",
   MANAGE_CARS:         "manage_cars",
@@ -25,7 +23,6 @@ export const PERMISSIONS = {
 };
 
 const ROLE_PERMISSIONS = {
-  webhoist: Object.values(PERMISSIONS),
   superadmin: Object.values(PERMISSIONS),
   admin: [
     PERMISSIONS.MANAGE_USERS, PERMISSIONS.MANAGE_CARS, PERMISSIONS.MANAGE_AUCTIONS,
@@ -57,12 +54,7 @@ const ROLE_PERMISSIONS = {
   guest: [],
 };
 
-export function isWebhoist(user) {
-  return WEBHOIST_EMAIL && user?.email === WEBHOIST_EMAIL;
-}
-
 export function getEffectiveRole(user) {
-  if (isWebhoist(user)) return "webhoist";
   return user?.role || "guest";
 }
 
@@ -83,8 +75,7 @@ export function requirePermission(...permissions) {
         return res.status(401).json({ success: false, message: "Unauthorized" });
       }
 
-      if (isWebhoist(req.user)) {
-        req.user.effectiveRole = "webhoist";
+      if (req.user.role === "superadmin") {
         return next();
       }
 
@@ -107,7 +98,7 @@ export function requirePermission(...permissions) {
             requiredRole: Object.entries(ROLE_PERMISSIONS)
               .filter(([, perms]) => perms.includes(perm))
               .map(([role]) => role)
-              .filter(r => r !== "webhoist"),
+              .filter(r => r !== "superadmin"),
           });
         }
       }
@@ -127,8 +118,7 @@ export function requireRole(...roles) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (isWebhoist(req.user)) {
-      req.user.effectiveRole = "webhoist";
+    if (req.user.role === "superadmin") {
       return next();
     }
 
@@ -146,14 +136,13 @@ export function requireRole(...roles) {
 }
 
 export function requireAtLeast(minRole) {
-  const hierarchy = ["user", "dealer", "broker", "ghost_checker", "moderator", "ad_manager", "escrow_officer", "admin", "superadmin", "webhoist"];
+  const hierarchy = ["user", "dealer", "broker", "ghost_checker", "moderator", "ad_manager", "escrow_officer", "admin", "superadmin"];
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (isWebhoist(req.user)) {
-      req.user.effectiveRole = "webhoist";
+    if (req.user.role === "superadmin") {
       return next();
     }
 

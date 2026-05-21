@@ -383,7 +383,7 @@ export const deleteCar = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized to delete this listing" });
     }
 
-    await car.deleteOne();
+    await Car.softDelete(req.params.id, req.user.id);
 
     // Decrement listing counts
     if (car.dealer) {

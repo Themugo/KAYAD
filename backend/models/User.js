@@ -1,6 +1,26 @@
+/**
+ * @typedef {import('mongoose').Document} Document
+ * @typedef {import('mongoose').Model} Model
+ */
+
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+
+/**
+ * @typedef {Object} UserDocument
+ * @property {boolean} isDemo
+ * @property {Date|null} deactivatedAt
+ * @property {string} name
+ * @property {string} email
+ * @property {string} password
+ * @property {string} role
+ * @property {boolean} isBanned
+ * @property {boolean} emailVerified
+ * @property {number} tokenVersion
+ * @property {boolean} mustChangePassword
+ * @property {Function} matchPassword
+ */
 
 const userSchema = new mongoose.Schema(
   {
@@ -337,6 +357,34 @@ userSchema.statics.findByCredentials = async function (email, password) {
   }
 
   return user;
+};
+
+// =============================
+// 🗑️ SOFT DELETE
+// =============================
+userSchema.add({
+  deletedAt: { type: Date, default: null, index: true },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+userSchema.statics.softDelete = async function (ids, adminId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: adminId } }
+  );
+};
+
+const _origFind = userSchema.statics.find;
+userSchema.statics.find = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) query.deletedAt = null;
+  return _origFind.call(this, query, ...rest);
+};
+
+const _origFindOne = userSchema.statics.findOne;
+userSchema.statics.findOne = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) query.deletedAt = null;
+  return _origFindOne.call(this, query, ...rest);
 };
 
 // =============================

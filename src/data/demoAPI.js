@@ -9,20 +9,11 @@ import {
 const delay = (min = 200, max = 800) =>
   new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
 
-const fakeJWT = (user) =>
-  btoa(JSON.stringify({ _id: user._id, email: user.email, role: user.role, name: user.name, superAdmin: user.superAdmin || false }));
-
-const decodeFakeJWT = (token) => {
-  try { return JSON.parse(atob(token)); } catch { return null; }
-};
-
-const getDemoUser = () => {
-  const token = localStorage.getItem('kayad_token');
-  if (!token) return null;
-  const decoded = decodeFakeJWT(token);
-  if (!decoded) return null;
-  return Object.values(DEMO_USERS).find(u => u._id === decoded._id) || null;
-};
+// Demo session state — no localStorage tokens needed
+let _demoUser = null;
+export const setDemoUser = (user) => { _demoUser = user; };
+export const getDemoUser = () => _demoUser;
+export const clearDemoUser = () => { _demoUser = null; };
 
 const withUser = (fn) => (...args) => {
   const user = getDemoUser();
@@ -75,8 +66,9 @@ const demoAuth = {
       createdAt: new Date().toISOString(),
       tokenVersion: 0,
     };
-    const token = fakeJWT(newUser);
-    return wrapSuccess({ token, user: newUser });
+    const { password, ...safe } = newUser;
+    setDemoUser(safe);
+    return wrapSuccess({ user: safe });
   },
 
   login: async (body) => {
@@ -84,21 +76,21 @@ const demoAuth = {
     const user = Object.values(DEMO_USERS).find(u => u.email === body.email && u.password === body.password);
     if (!user) throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
     if (user.isBanned) throw { response: { status: 403, data: { message: 'Your account has been suspended' } } };
-    const token = fakeJWT(user);
     const { password, ...safe } = user;
-    return wrapSuccess({ token, user: safe });
+    setDemoUser(safe);
+    return wrapSuccess({ user: safe });
   },
 
   refresh: async () => {
     await delay(100, 300);
     const user = getDemoUser();
-    if (!user) throw { response: { status: 401, data: { message: 'Token expired' } } };
-    const token = fakeJWT(user);
-    return wrapSuccess({ token });
+    if (!user) throw { response: { status: 401, data: { message: 'Session expired' } } };
+    return wrapSuccess({ user });
   },
 
   logout: async () => {
     await delay(100, 300);
+    clearDemoUser();
     return wrapSuccess({ message: 'Logged out' });
   },
 
@@ -140,8 +132,8 @@ const demoAuth = {
     user.password = newPassword;
     user.mustChangePassword = false;
     const { password, ...safe } = user;
-    const token = fakeJWT(user);
-    return wrapSuccess({ token, user: safe, message: 'Password changed successfully' });
+    setDemoUser(safe);
+    return wrapSuccess({ user: safe, message: 'Password changed successfully' });
   },
 };
 

@@ -168,6 +168,45 @@ const carSchema = new mongoose.Schema(
 );
 
 // =============================
+// 🗑️ SOFT DELETE
+// =============================
+carSchema.add({
+  deletedAt: { type: Date, default: null, index: true },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+carSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } }
+  );
+};
+
+// Override find to exclude soft-deleted by default
+const originalFind = carSchema.statics.find;
+carSchema.statics.find = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) {
+    query.deletedAt = null;
+  }
+  return originalFind.call(this, query, ...rest);
+};
+
+const originalFindOne = carSchema.statics.findOne;
+carSchema.statics.findOne = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) {
+    query.deletedAt = null;
+  }
+  return originalFindOne.call(this, query, ...rest);
+};
+
+const originalFindById = carSchema.statics.findById;
+carSchema.statics.findById = function (id, ...rest) {
+  return originalFindById.call(this, id, { deletedAt: null }, ...rest);
+};
+
+// =============================
 // 🔥 INDEXES (CRITICAL)
 // =============================
 carSchema.index({ price: 1 });
@@ -176,6 +215,7 @@ carSchema.index({ "location.city": 1 });
 carSchema.index({ createdAt: -1 });
 carSchema.index({ views: -1 });
 carSchema.index({ allowBid: 1, auctionStatus: 1 });
+carSchema.index({ deletedAt: 1 });
 
 carSchema.index({
   title: "text",

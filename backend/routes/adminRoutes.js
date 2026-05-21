@@ -396,7 +396,7 @@ router.delete(
       });
     }
 
-    await car.deleteOne();
+    await Car.softDelete(car._id, req.user.id);
     if (car.dealer && !car.isDemo) {
       await User.findByIdAndUpdate(car.dealer, {
         $inc: { listingCount: -1, trialListingsUsed: -1 },
@@ -806,11 +806,11 @@ router.delete(
     if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
     if (user._id.toString() === req.user.id) return res.status(400).json({ success: false, message: "Cannot delete yourself" });
 
-    // Clean up user's cars, bids, payments, escrows
-    await Car.deleteMany({ dealer: user._id });
-    await Bid.deleteMany({ user: user._id });
-    await Payment.deleteMany({ user: user._id });
-    await Escrow.deleteMany({ $or: [{ buyer: user._id }, { seller: user._id }] });
+    // Soft-delete user's cars
+    await Car.softDelete(
+      (await Car.find({ dealer: user._id }, { _id: 1 })).map(c => c._id),
+      req.user.id
+    );
     await user.deleteOne();
 
     await AuditLog.create({
@@ -1001,7 +1001,7 @@ router.delete(
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
-    await user.deleteOne();
+    await User.softDelete(req.params.id, req.user.id);
     res.json({ success: true, message: "Staff account deleted" });
   })
 );
