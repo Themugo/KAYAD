@@ -959,6 +959,26 @@ nav {
   100% { transform: scale(1); }
 }
 
+/* ─── Particle Burst (bid flash particles) ─── */
+@keyframes particleBurst {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, 30px), var(--dy, -30px)) scale(0); }
+}
+
+/* ─── Bell Ring (outbid alert) ─── */
+@keyframes bellRing {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(12deg); }
+  50% { transform: rotate(-12deg); }
+  75% { transform: rotate(6deg); }
+}
+
+/* ─── Bid Glow (new bid highlight) ─── */
+@keyframes bidGlow {
+  0% { background: rgba(212,196,168,0.06); }
+  100% { background: transparent; }
+}
+
 .hero-title {
   font-family: var(--font-display);
   font-weight: 300;

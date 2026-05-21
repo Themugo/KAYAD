@@ -43,6 +43,7 @@ const EditCarPage = lazy(() => import('./pages/dealer/EditCarPage'));
 const DealerAnalytics = lazy(() => import('./pages/dealer/DealerAnalytics'));
 const DealerSettings = lazy(() => import('./pages/dealer/DealerSettings'));
 const DealerSettlement = lazy(() => import('./pages/dealer/DealerSettlement'));
+const DealerAuctionSetup = lazy(() => import('./pages/dealer/DealerAuctionSetup'));
 
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
@@ -116,6 +117,7 @@ export default function App() {
                       <Route path="/dealer/analytics" element={<RequireDealer><DealerAnalytics /></RequireDealer>} />
                       <Route path="/dealer/settings" element={<RequireSeller><DealerSettings /></RequireSeller>} />
                       <Route path="/dealer/settlement" element={<RequireSeller><DealerSettlement /></RequireSeller>} />
+                      <Route path="/dealer/auctions" element={<RequireSeller><DealerAuctionSetup /></RequireSeller>} />
 
                       <Route element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
                         <Route path="/admin" element={<AdminDashboard />} />

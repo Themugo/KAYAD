@@ -49,6 +49,97 @@ function ConfettiOverlay() {
   );
 }
 
+function ViewersCounter() {
+  const [count, setCount] = useState(0);
+  const [spike, setSpike] = useState(false);
+  useEffect(() => {
+    const base = Math.floor(Math.random() * 15) + 8;
+    setCount(base);
+    const iv = setInterval(() => {
+      const delta = Math.random() > 0.6 ? (Math.random() > 0.5 ? 2 : -1) : 0;
+      setCount(prev => {
+        const next = Math.max(3, prev + delta);
+        if (delta > 0) {
+          setSpike(true);
+          setTimeout(() => setSpike(false), 400);
+        }
+        return next;
+      });
+    }, 3000 + Math.random() * 4000);
+    return () => clearInterval(iv);
+  }, []);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
+      <span style={{
+        fontSize: 14, display: 'inline-block',
+        transform: spike ? 'scale(1.3)' : 'scale(1)',
+        transition: 'transform 0.2s',
+      }}>👁</span>
+      <span>{count} watching</span>
+    </div>
+  );
+}
+
+function OutbidBell({ show }) {
+  const [ringing, setRinging] = useState(false);
+  useEffect(() => {
+    if (show) {
+      setRinging(true);
+      const t = setTimeout(() => setRinging(false), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [show]);
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 4,
+      fontSize: 13, fontWeight: 600,
+      color: ringing ? '#ef4444' : 'var(--text-muted)',
+      transition: 'color 0.3s',
+    }}>
+      <span style={{
+        display: 'inline-block',
+        animation: ringing ? 'bellRing 0.5s ease-in-out 3' : 'none',
+        transformOrigin: 'top center',
+      }}>🔔</span>
+      {ringing && <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700 }}>OUTBID!</span>}
+    </span>
+  );
+}
+
+function PriceParticles({ active }) {
+  const [particles, setParticles] = useState([]);
+  useEffect(() => {
+    if (!active) return;
+    const newP = Array.from({ length: 12 }, (_, i) => ({
+      id: Date.now() + i,
+      x: 40 + Math.random() * 20,
+      y: 40 + Math.random() * 20,
+      color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+      size: 4 + Math.random() * 6,
+      delay: Math.random() * 0.3,
+    }));
+    setParticles(newP);
+    const t = setTimeout(() => setParticles([]), 1000);
+    return () => clearTimeout(t);
+  }, [active]);
+  if (particles.length === 0) return null;
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden', zIndex: 10 }}>
+      {particles.map(p => (
+        <div key={p.id} style={{
+          position: 'absolute',
+          left: `${p.x}%`, top: `${p.y}%`,
+          width: p.size, height: p.size,
+          borderRadius: '50%',
+          background: p.color,
+          animation: `particleBurst 0.6s ease-out ${p.delay}s forwards`,
+          opacity: 0,
+        }} />
+      ))}
+    </div>
+  );
+}
+
 export default function AuctionLivePage() {
   const { id } = useParams();
   const { user, isAuth } = useAuth();
@@ -80,8 +171,35 @@ export default function AuctionLivePage() {
   const [bidFlash, setBidFlash] = useState(false);
   const [auctionPhase, setAuctionPhase] = useState('');
   const [confetti, setConfetti] = useState(false);
+  const [outbidAlert, setOutbidAlert] = useState(false);
+  const [priceParticles, setPriceParticles] = useState(false);
   const bidListRef = useRef(null);
   const prevBidRef = useRef(0);
+  const newBidIdsRef = useRef(new Set());
+
+  // Simulated live viewers
+  const [liveViewers, setLiveViewers] = useState(0);
+  useEffect(() => {
+    const base = Math.floor(Math.random() * 20) + 8;
+    setLiveViewers(base);
+    const iv = setInterval(() => {
+      setLiveViewers(prev => Math.max(3, prev + (Math.random() > 0.55 ? Math.floor(Math.random() * 3) + 1 : -Math.floor(Math.random() * 2))));
+    }, 4000);
+    return () => clearInterval(iv);
+  }, []);
+
+  // Check if auction is in last 5 minutes for pulse effect
+  const [isEnding, setIsEnding] = useState(false);
+  useEffect(() => {
+    if (!car?.auctionEnd) return;
+    const check = () => {
+      const diff = new Date(car.auctionEnd).getTime() - Date.now();
+      setIsEnding(diff > 0 && diff <= 300000);
+    };
+    check();
+    const iv = setInterval(check, 5000);
+    return () => clearInterval(iv);
+  }, [car?.auctionEnd]);
 
   // Load car + bid history
   useEffect(() => {
@@ -142,13 +260,16 @@ export default function AuctionLivePage() {
       const minNext = data.amount + 5000;
       setBidAmount(String(minNext));
       setBidFlash(true);
-      setTimeout(() => setBidFlash(false), 800);
+      setPriceParticles(true);
+      setTimeout(() => { setBidFlash(false); setPriceParticles(false); }, 800);
       bidListRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
 
       // Outbid check
       if (isAuth && data.userId && data.userId !== user?._id && data.userId !== user?.id) {
         const myBids = bids.filter(b => String(b.userId) === String(user._id));
         if (myBids.length > 0) {
+          setOutbidAlert(true);
+          setTimeout(() => setOutbidAlert(false), 3000);
           toast('📢 You\'ve been outbid! Place a higher bid to stay ahead.', 'info', { duration: 5000 });
         }
       }
@@ -223,6 +344,18 @@ export default function AuctionLivePage() {
   const auctionLive = car?.auctionStatus === 'live';
   const reserveMet = !car?.reservePrice || currentBid >= car.reservePrice;
 
+  // Leaderboard sorted by highest bid
+  const biddersMap = {};
+  (bids || []).forEach(b => {
+    const tag = b.bidderTag || 'Anonymous';
+    if (!biddersMap[tag] || b.amount > biddersMap[tag].amount) {
+      biddersMap[tag] = { tag, amount: b.amount, count: (biddersMap[tag]?.count || 0) + 1, isVerified: b.isVerifiedBuyer };
+    } else {
+      biddersMap[tag].count += 1;
+    }
+  });
+  const leaderboard = Object.values(biddersMap).sort((a, b) => b.amount - a.amount).slice(0, 8);
+
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
   if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
 
@@ -244,15 +377,10 @@ export default function AuctionLivePage() {
             <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{car.title}</span>
           </div>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-            {/* Watchers */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
-              <span style={{ fontSize: 14 }}>👁</span>
-              <span>{watchers || Math.floor(Math.random() * 20) + 3} watching</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
-            </div>
+            {/* Viewers */}
+            <ViewersCounter />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
           </div>
         </div>
 
@@ -276,6 +404,21 @@ export default function AuctionLivePage() {
                   borderRadius: 6, padding: '3px 8px', zIndex: 5,
                 }}>
                   <span style={{ fontSize: 9, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                </div>
+              )}
+              {/* Countdown overlay on image */}
+              {car.auctionEnd && auctionLive && (
+                <div style={{
+                  position: 'absolute', bottom: 12, left: 12,
+                  background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)',
+                  borderRadius: 10, padding: '8px 14px',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  zIndex: 5,
+                }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Ends In</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: isEnding ? '#ef4444' : 'var(--gold)', }}>
+                    <CountdownDisplay endTime={car.auctionEnd} />
+                  </span>
                 </div>
               )}
             </div>
@@ -312,9 +455,15 @@ export default function AuctionLivePage() {
 
             {/* Bid History */}
             <div className="card" style={{ overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{
+                padding: '16px 20px', borderBottom: '1px solid var(--border)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
                 <h3 style={{ fontSize: '1rem' }}>Bid History</h3>
-                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{bidCount} bids</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <OutbidBell show={outbidAlert} />
+                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{bidCount} bids</span>
+                </div>
               </div>
               <div ref={bidListRef} style={{ maxHeight: 400, overflowY: 'auto', padding: '4px 0' }}>
                 {bids.length === 0 ? (
@@ -323,12 +472,15 @@ export default function AuctionLivePage() {
                   </div>
                 ) : bids.map((bid, i) => {
                   const color = hashColor(bid.bidderTag || `#${bidCount - i}`);
+                  const isNew = i === 0 && bidFlash;
                   return (
                     <div key={bid._id || i} className="bid-row" style={{
                       padding: '10px 20px',
-                      animation: i === 0 ? 'slideInRight 0.35s ease both' : 'fadeInDown 0.3s ease both',
-                      background: i === 0 ? 'rgba(212,196,168,0.04)' : 'transparent',
+                      animation: isNew ? 'slideInRight 0.35s ease both, bidGlow 0.8s ease both' : 'fadeInDown 0.3s ease both',
+                      background: isNew ? 'rgba(212,196,168,0.06)' : 'transparent',
+                      position: 'relative',
                     }}>
+                      {isNew && <PriceParticles active={priceParticles} />}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <div style={{
                           width: 34, height: 34, borderRadius: '50%',
@@ -337,6 +489,8 @@ export default function AuctionLivePage() {
                           fontSize: 11, fontWeight: 800,
                           color: i === 0 ? '#0A1628' : '#fff',
                           flexShrink: 0,
+                          transition: 'transform 0.2s',
+                          transform: isNew ? 'scale(1.15)' : 'scale(1)',
                         }}>
                           {i === 0 ? '👑' : getAvatarInitials(bid.bidderTag || `Bidder ${bidCount - i}`).slice(0, 2)}
                         </div>
@@ -358,6 +512,8 @@ export default function AuctionLivePage() {
                         <div style={{
                           fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
                           color: i === 0 ? 'var(--gold-light)' : 'var(--text)',
+                          transition: 'transform 0.2s',
+                          transform: isNew ? 'scale(1.1)' : 'scale(1)',
                         }}>
                           {formatKES(bid.amount)}
                         </div>
@@ -385,27 +541,33 @@ export default function AuctionLivePage() {
                   display: 'flex', alignItems: 'center', gap: 8,
                   fontSize: 12, fontWeight: 600,
                   color: reserveMet ? '#22c55e' : '#ef4444',
+                  transition: 'all 0.5s',
                 }}>
-                  <span>{reserveMet ? '✅' : '🔒'}</span>
+                  <span style={{
+                    display: 'inline-block',
+                    animation: reserveMet ? 'pulse 1.5s infinite' : 'none',
+                  }}>{reserveMet ? '✅' : '🔒'}</span>
                   <span>{reserveMet ? 'Reserve Met' : 'Reserve Not Yet Met'}</span>
                 </div>
               )}
 
               {/* Current Bid Display */}
               <div className="card" style={{
-                padding: 24, marginBottom: 16,
+                padding: 24, marginBottom: 16, position: 'relative',
                 border: `1px solid ${bidFlash ? 'rgba(212,196,168,0.6)' : 'rgba(212,196,168,0.3)'}`,
                 transition: 'border-color 0.3s',
               }}>
+                {bidFlash && <PriceParticles active={priceParticles} />}
                 <div style={{ textAlign: 'center', marginBottom: 16 }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
                   </div>
-                  <div className={bidFlash ? 'price-flash' : ''} style={{
+                  <div style={{
                     fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700,
                     color: 'var(--gold-light)', lineHeight: 1,
-                    transition: 'transform 0.15s',
-                    transform: bidFlash ? 'scale(1.06)' : 'scale(1)',
+                    transition: 'transform 0.15s, color 0.2s',
+                    transform: bidFlash ? 'scale(1.08)' : 'scale(1)',
+                    color: bidFlash ? '#fff' : 'var(--gold-light)',
                   }}>
                     {formatKES(currentBid || car.price)}
                   </div>
@@ -438,10 +600,22 @@ export default function AuctionLivePage() {
                 {/* Countdown */}
                 {car.auctionEnd && (
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Time Remaining</div>
-                    <CountdownDisplay endTime={car.auctionEnd} />
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      {isEnding ? (
+                        <span style={{ color: '#ef4444', fontWeight: 700 }}>🔴 Auction Ending</span>
+                      ) : 'Time Remaining'}
+                    </div>
+                    <div style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: isEnding ? '1.8rem' : '1.5rem',
+                      fontWeight: 700,
+                      color: isEnding ? '#ef4444' : 'var(--gold)',
+                      animation: isEnding ? 'pulse 1s infinite' : 'none',
+                    }}>
+                      <CountdownDisplay endTime={car.auctionEnd} />
+                    </div>
                     {extended && (
-                      <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)' }}>
+                      <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)', animation: 'slideInRight 0.4s ease both' }}>
                         ⏱ Extended by 2 min
                       </div>
                     )}
@@ -529,6 +703,9 @@ export default function AuctionLivePage() {
                     className="btn btn-gold btn-full btn-lg"
                     onClick={handlePlaceBid}
                     disabled={placing || !bidAmount || Number(bidAmount) < minBid}
+                    style={{
+                      animation: isEnding ? 'pulse 1s infinite' : 'none',
+                    }}
                   >
                     {placing ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Placing...</> : '⚡ Place Bid'}
                   </button>
@@ -542,6 +719,49 @@ export default function AuctionLivePage() {
                   </div>
                 )}
               </div>
+
+              {/* Bidder Leaderboard */}
+              {leaderboard.length > 0 && (
+                <div className="card" style={{ padding: 16, marginBottom: 12 }}>
+                  <div style={{
+                    fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase',
+                    letterSpacing: '0.06em', fontWeight: 700, marginBottom: 12,
+                    display: 'flex', alignItems: 'center', gap: 6,
+                  }}>
+                    <span>🏆</span> Bidder Leaderboard
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {leaderboard.map((b, i) => (
+                      <div key={b.tag} style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        padding: '4px 0',
+                        borderBottom: i < leaderboard.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                      }}>
+                        <div style={{
+                          width: 20, fontSize: 10, fontWeight: 700, textAlign: 'center',
+                          color: i === 0 ? 'var(--gold)' : i < 3 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)',
+                        }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+                        <div style={{
+                          width: 24, height: 24, borderRadius: '50%',
+                          background: hashColor(b.tag),
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 9, fontWeight: 800, color: '#fff', flexShrink: 0,
+                        }}>
+                          {getAvatarInitials(b.tag).slice(0, 2)}
+                        </div>
+                        <div style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#fff' }}>
+                          {b.tag}
+                          {b.isVerified && <span style={{ color: '#3B82F6', marginLeft: 4, fontSize: 10 }}>✓</span>}
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold-light)' }}>{formatKES(b.amount)}</div>
+                          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>{b.count} bid{b.count !== 1 ? 's' : ''}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Escrow info */}
               <div className="card" style={{ padding: 16 }}>

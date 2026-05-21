@@ -127,10 +127,10 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          {/* ── SEARCH BAR (compact inline) ── */}
-          <div ref={searchRef} style={{ flex: 1, maxWidth: 320, position: 'relative', display: 'none' }} className="desktop-search">
+          {/* ── SEARCH BAR (desktop inline) ── */}
+          <div ref={searchRef} style={{ flex: 1, maxWidth: 380, position: 'relative' }} className="desktop-search">
             <form onSubmit={handleSearch} style={{ position: 'relative' }}>
-              <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
               </svg>
               <input
@@ -138,14 +138,17 @@ export default function Navbar({ branding }) {
                 onChange={e => setSearchQ(e.target.value)}
                 onFocus={() => setSearchOpen(true)}
                 style={{
-                  width: '100%', padding: '10px 14px 10px 38px', borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  background: 'rgba(255,255,255,0.05)',
+                  width: '100%', padding: '9px 14px 9px 38px', borderRadius: 10,
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(255,255,255,0.04)',
                   color: '#fff', fontSize: 13, outline: 'none',
-                  transition: 'all 0.2s',
+                  transition: 'all 0.25s',
+                  backdropFilter: 'blur(4px)',
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'}
-                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'}
+                onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,196,168,0.18)'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.background = 'rgba(212,196,168,0.06)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(212,196,168,0.08)'; }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.boxShadow = 'none'; }}
               />
             </form>
           </div>

@@ -1,14 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { dealerAPI, carsAPI, adminAPI, notifAPI, formatKES } from '../../api/api';
+import { dealerAPI, carsAPI, adminAPI, notifAPI, escrowAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell, Copy, Download, BadgePercent, ArrowDown } from 'lucide-react';
+import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell, Copy, Download, BadgePercent, ArrowDown, Clock, Filter, RefreshCw } from 'lucide-react';
 
-
-// ─────────────────────────────────────────────────────────────
-// TEAM TAB COMPONENT — full dealer team management with RBAC
-// ─────────────────────────────────────────────────────────────
 const DEALER_ROLES = [
   { id: 'manager',        label: 'Manager',        color: '#f97316', desc: 'Full control except team deletion' },
   { id: 'sales_agent',   label: 'Sales Agent',    color: '#3b82f6', desc: 'List, edit, chat with buyers' },
@@ -28,7 +24,6 @@ const PERM_LABELS = {
   canEditSettings:'Edit Settings',
 };
 
-// Default permissions per role
 const ROLE_DEFAULTS = {
   manager:         { canListCars:true,  canEditCars:true,  canDeleteCars:true,  canViewEarnings:true,  canManageTeam:true,  canApproveDeals:true,  canChatBuyers:true,  canEditSettings:true  },
   sales_agent:     { canListCars:true,  canEditCars:true,  canDeleteCars:false, canViewEarnings:false, canManageTeam:false, canApproveDeals:false, canChatBuyers:true,  canEditSettings:false },
@@ -43,7 +38,7 @@ function TeamTab({ user, toast }) {
   const [invEmail,   setInvEmail]   = useState('');
   const [invRole,    setInvRole]    = useState('sales_agent');
   const [inviting,   setInviting]   = useState(false);
-  const [expanded,   setExpanded]   = useState(null); // memberId for expanded perms
+  const [expanded,   setExpanded]   = useState(null);
 
   useEffect(() => {
     dealerAPI.getTeam().then(d => setTeam(d.members || d.team || [])).catch(() => {}).finally(() => setLoading(false));
@@ -106,8 +101,7 @@ function TeamTab({ user, toast }) {
         </div>
       </div>
 
-      {/* Invite form */}
-      <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '22px 24px', marginBottom: 24 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', padding: '22px 24px', marginBottom: 24 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>
           <UserPlus size={12} style={{ marginRight: 6, verticalAlign: 'middle' }} />Invite Team Member
         </div>
@@ -123,8 +117,8 @@ function TeamTab({ user, toast }) {
             />
           </div>
           <select value={invRole} onChange={e => setInvRole(e.target.value)}
-            style={{ padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#111', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 160 }}>
-            {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: '#111' }}>{r.label}</option>)}
+            style={{ padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'var(--card)', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 160 }}>
+            {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: 'var(--card)' }}>{r.label}</option>)}
           </select>
           <button onClick={invite} disabled={inviting || !invEmail.trim()} style={{ padding: '10px 22px', background: invEmail.trim() ? 'var(--gold)' : 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 9, color: invEmail.trim() ? '#000' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 900, cursor: invEmail.trim() ? 'pointer' : 'default', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
             {inviting ? 'Sending…' : 'Send Invite'}
@@ -135,21 +129,19 @@ function TeamTab({ user, toast }) {
         </div>
       </div>
 
-      {/* Role reference */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 24 }}>
         {DEALER_ROLES.map(r => (
-          <div key={r.id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 14px' }}>
+          <div key={r.id} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 14px' }}>
             <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: r.color, marginBottom: 5 }}>{r.label}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>{r.desc}</div>
           </div>
         ))}
       </div>
 
-      {/* Team list */}
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
       ) : team.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px', background: '#0C0C0C', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ textAlign: 'center', padding: '48px', background: 'var(--card)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <Users size={36} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: 14 }} />
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>No team members yet</div>
           <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>Invite your first employee above</div>
@@ -160,9 +152,8 @@ function TeamTab({ user, toast }) {
             const roleInfo = DEALER_ROLES.find(r => r.id === m.role) || DEALER_ROLES[1];
             const isExp = expanded === m._id;
             return (
-              <div key={m._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
+              <div key={m._id} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, overflow: 'hidden' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px' }}>
-                  {/* Avatar */}
                   <div style={{ width: 40, height: 40, borderRadius: 10, background: `${roleInfo.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: roleInfo.color, flexShrink: 0 }}>
                     {(m.member?.name || m.inviteEmail || '?')[0].toUpperCase()}
                   </div>
@@ -172,28 +163,23 @@ function TeamTab({ user, toast }) {
                     </div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{m.member?.email || m.inviteEmail}</div>
                   </div>
-                  {/* Role selector */}
                   <select value={m.role} onChange={e => updateRole(m._id, e.target.value)}
                     style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${roleInfo.color}30`, background: `${roleInfo.color}10`, color: roleInfo.color, fontSize: 12, fontWeight: 700, outline: 'none', cursor: 'pointer' }}>
-                    {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: '#111', color: '#fff' }}>{r.label}</option>)}
+                    {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: 'var(--card)', color: '#fff' }}>{r.label}</option>)}
                   </select>
-                  {/* Status */}
                   <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: `${statusColor[m.status] || '#666'}15`, color: statusColor[m.status] || '#666', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
                     {m.status}
                   </span>
-                  {/* Expand perms */}
                   <button onClick={() => setExpanded(isExp ? null : m._id)}
                     style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                     Permissions
                   </button>
-                  {/* Remove */}
                   <button onClick={() => remove(m._id)}
                     style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.14)', color: 'rgba(239,68,68,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <X size={13} />
                   </button>
                 </div>
 
-                {/* Expanded permissions grid */}
                 {isExp && (
                   <div style={{ padding: '0 20px 18px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Fine-grained Permissions</div>
@@ -221,12 +207,14 @@ function TeamTab({ user, toast }) {
     </div>
   );
 }
+
 const TABS = [
   { id: 'overview', label: 'Overview',  icon: BarChart3 },
   { id: 'listings', label: 'Listings',  icon: Car },
   { id: 'bids',     label: 'Bids',      icon: Gavel },
+  { id: 'escrows',  label: 'Escrows',   icon: Shield },
   { id: 'earnings', label: 'Earnings',  icon: TrendingUp },
-  { id: 'package',  label: 'My Package', icon: BarChart3 },
+  { id: 'package',  label: 'My Package', icon: BadgePercent },
   { id: 'team',     label: 'Team',       icon: Users },
 ];
 
@@ -235,24 +223,50 @@ const STATUS_CONFIG = {
   sold:    { label: 'Sold',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
   pending: { label: 'Pending', color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
   draft:   { label: 'Draft',   color: 'rgba(255,255,255,0.3)', bg: 'rgba(255,255,255,0.04)' },
+  live:    { label: 'Live Auction', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
 };
 
-function StatCard({ icon: Icon, label, value, sub, color = 'var(--gold)', to, trend }) {
+const BID_STATUS_CONFIG = {
+  pending:  { label: 'Pending',  color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
+  accepted: { label: 'Accepted', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
+  rejected: { label: 'Rejected', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' },
+};
+
+const ESCROW_STEPS = [
+  { key: 'pending',  label: 'Pending',  color: '#f97316' },
+  { key: 'held',     label: 'Held',     color: '#3b82f6' },
+  { key: 'released', label: 'Released', color: '#22c55e' },
+  { key: 'refunded', label: 'Refunded', color: '#6b7280' },
+];
+
+function timeAgo(date) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(date).toLocaleDateString();
+}
+
+function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, trend }) {
   const isUp = trend > 0;
   const showTrend = trend !== undefined && trend !== null;
   const inner = (
     <div style={{
-      background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 16, padding: '20px', position: 'relative', overflow: 'hidden',
+      background: 'var(--card)', border: '1px solid var(--border)',
+      borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden',
       transition: 'border-color 0.2s, transform 0.2s',
     }}
       onMouseEnter={e => { if (to) { e.currentTarget.style.borderColor = `${color}40`; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
-      onMouseLeave={e => { if (to) { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'none'; }}}
+      onMouseLeave={e => { if (to) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}}
     >
       <div style={{ position: 'absolute', top: -20, right: -20, width: 80, height: 80, borderRadius: '50%', background: `${color}07` }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-        <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon size={17} style={{ color }} />
+        <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+          {icon}
         </div>
         {to && <ArrowUpRight size={14} style={{ color: 'rgba(255,255,255,0.2)' }} />}
       </div>
@@ -270,7 +284,14 @@ function StatCard({ icon: Icon, label, value, sub, color = 'var(--gold)', to, tr
   return to ? <Link to={to} style={{ textDecoration: 'none' }}>{inner}</Link> : inner;
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status, custom }) {
+  if (custom) {
+    return (
+      <span style={{ padding: '3px 9px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: custom.bg, color: custom.color }}>
+        {custom.label}
+      </span>
+    );
+  }
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
   return (
     <span style={{ padding: '3px 9px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: cfg.bg, color: cfg.color }}>
@@ -287,24 +308,70 @@ function DemoBadge({ edited }) {
   );
 }
 
+function EscrowProgress({ status }) {
+  const stepIndex = ESCROW_STEPS.findIndex(s => s.key === status);
+  const currentIdx = stepIndex >= 0 ? stepIndex : 0;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 0, width: '100%' }}>
+      {ESCROW_STEPS.map((step, i) => {
+        const done = i <= currentIdx;
+        const isLast = i === ESCROW_STEPS.length - 1;
+        return (
+          <div key={step.key} style={{ display: 'flex', alignItems: 'center', flex: isLast ? 0 : 1, gap: 0 }}>
+            <div style={{
+              width: 24, height: 24, borderRadius: '50%',
+              background: done ? step.color : 'rgba(255,255,255,0.06)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 900, color: done ? '#000' : 'rgba(255,255,255,0.2)',
+              border: done ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              flexShrink: 0, transition: 'all 0.3s',
+            }}>
+              {done ? '✓' : i + 1}
+            </div>
+            {!isLast && (
+              <div style={{
+                height: 2, flex: 1, margin: '0 4px',
+                background: i < currentIdx ? step.color : 'rgba(255,255,255,0.06)',
+                transition: 'background 0.3s',
+              }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function DealerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [summary, setSummary]   = useState(null);
-  const [cars, setCars]         = useState([]);
-  const [bids, setBids]         = useState([]);
-  const [earnings, setEarnings] = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [tab, setTab]           = useState('overview');
-  const [config, setConfig]     = useState({});
+  const [summary, setSummary]     = useState(null);
+  const [cars, setCars]           = useState([]);
+  const [bids, setBids]           = useState([]);
+  const [escrows, setEscrows]     = useState([]);
+  const [earnings, setEarnings]   = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [tab, setTab]             = useState('overview');
+  const [config, setConfig]       = useState({});
   const [unreadNotifs, setUnreadNotifs] = useState(0);
-  const [trends, setTrends]     = useState({});
+  const [trends, setTrends]       = useState({});
   const [sortField, setSortField] = useState('createdAt');
-  const [sortDir, setSortDir]   = useState('desc');
+  const [sortDir, setSortDir]     = useState('desc');
   const [selectedIds, setSelectedIds] = useState([]);
+  const [bidFilter, setBidFilter] = useState('all');
+  const [escrowLoading, setEscrowLoading] = useState(false);
 
   const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  const fetchEscrows = () => {
+    setEscrowLoading(true);
+    escrowAPI.mine().then(d => {
+      setEscrows(d.escrows || d.data || d || []);
+    }).catch(() => {}).finally(() => setEscrowLoading(false));
+  };
 
   useEffect(() => {
     const carsPromise = canManageDemoCars
@@ -337,8 +404,9 @@ export default function DealerDashboard() {
   }, [canManageDemoCars]);
 
   useEffect(() => {
-    if (tab === 'bids') dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {});
+    if (tab === 'bids') dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {});
     if (tab === 'earnings') dealerAPI.earnings({ days: 365 }).then(d => setEarnings(d.earnings || d.data || d)).catch(() => {});
+    if (tab === 'escrows') fetchEscrows();
   }, [tab]);
 
   const handleDelete = async (carId) => {
@@ -349,7 +417,7 @@ export default function DealerDashboard() {
 
   if (!user?.approved && user?.role === 'dealer') {
     return (
-      <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 28 }}>⏳</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.6rem', color: '#fff', marginBottom: 10 }}>Pending Approval</h2>
@@ -362,23 +430,36 @@ export default function DealerDashboard() {
 
   const s = summary || {};
   const totalRevenue = s.totalRevenue || s.revenue || 0;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+  const filteredBids = bidFilter === 'all' ? bids : bids.filter(b => b.status === bidFilter);
 
   return (
-    <div style={{ background: '#050505', minHeight: '100vh' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
       {/* HEADER */}
       <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
             <div>
-              <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 6 }}>Dealer Hub</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>Dealer Hub</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                  Connected
+                </span>
+              </div>
               <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0 }}>
-                {user?.businessName || user?.name || 'My Dealership'}
+                {greeting}, {user?.businessName || user?.name || 'Dealer'}
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 6 }}>
-                {user?.location || 'Nairobi, Kenya'} · {cars.length} listings
+                {user?.location || 'Nairobi, Kenya'} · {dateStr} · {cars.length} listings
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
+              <Link to="/dealer/auctions" style={{ padding: '10px 18px', borderRadius: 10, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Gavel size={13} /> Auction Setup
+              </Link>
               <Link to="/notifications" title="Notifications" style={{
                 position: 'relative', width: 36, height: 36, borderRadius: 10,
                 background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -453,19 +534,21 @@ export default function DealerDashboard() {
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
-                  <StatCard icon={Car}         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" trend={trends?.viewsToBids} />
-                  <StatCard icon={Eye}         label="Total Views"   value={s.totalViews}                     color="#3b82f6" trend={0} />
-                  <StatCard icon={Gavel}       label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" trend={2.5} />
-                  <StatCard icon={DollarSign}  label="Revenue"
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+                  <StatCard icon="🚗"         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" trend={trends?.viewsToBids} />
+                  <StatCard icon="👁️"         label="Total Views"   value={s.totalViews}                     color="#3b82f6" trend={0} />
+                  <StatCard icon="🔨"         label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" trend={2.5} />
+                  <StatCard icon="💰"          label="Revenue"
                     value={totalRevenue >= 1e6 ? `${(totalRevenue/1e6).toFixed(1)}M` : totalRevenue ? `${Math.round(totalRevenue/1000)}K` : '—'}
                     sub="KES" color="#22c55e" trend={5.2} />
-                  <StatCard icon={MessageSquare} label="Inquiries"   value={s.totalInquiries || 0}            color="#8b5cf6" trend={trends?.viewsToInquiries} />
-                  <StatCard icon={Heart}       label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" trend={trends?.viewsToFavorites} />
+                  <StatCard icon="💬"         label="Inquiries"     value={s.totalInquiries || 0}            color="#8b5cf6" trend={trends?.viewsToInquiries} />
+                  <StatCard icon="❤️"         label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" trend={trends?.viewsToFavorites} />
+                  <StatCard icon="📋"         label="Draft Auctions" value={s.draftAuctions ?? s.draftCount ?? 0} color="#6b7280" trend={0} />
+                  <StatCard icon="📊"         label="Conversion"    value={s.conversionRate ? `${(s.conversionRate * 100).toFixed(1)}%` : '—'} color="#a855f7" trend={trends?.viewsToBids} />
                 </div>
 
                 {/* Recent listings preview */}
-                <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+                <div style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
                   <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Recent Listings</span>
                     <button onClick={() => setTab('listings')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View All →</button>
@@ -515,19 +598,17 @@ export default function DealerDashboard() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>{cars.length} Listings</h2>
-                    {/* Sort */}
-                    <select value={sortField} onChange={e => setSortField(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, outline: 'none' }}>
+                    <select value={sortField} onChange={e => setSortField(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, outline: 'none' }}>
                       <option value="createdAt">Newest</option>
                       <option value="price">Price</option>
                       <option value="year">Year</option>
                       <option value="views">Views</option>
                     </select>
-                    <button onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')} style={{ padding: '6px 10px', borderRadius: 8, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>
+                    <button onClick={() => setSortDir(d => d === 'desc' ? 'asc' : 'desc')} style={{ padding: '6px 10px', borderRadius: 8, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer' }}>
                       {sortDir === 'desc' ? '↓ Desc' : '↑ Asc'}
                     </button>
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    {/* CSV Export */}
                     <button onClick={() => { const csv = [['Title','Brand','Model','Year','Price','Mileage','Views','Status'], ...cars.map(c => [c.title, c.brand, c.model, c.year, c.price, c.mileage, c.views, c.status])].map(r => r.join(',')).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'listings.csv'; a.click(); }} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Download size={13} /> CSV
                     </button>
@@ -537,16 +618,29 @@ export default function DealerDashboard() {
                   </div>
                 </div>
 
+                {/* Pagination info */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
+                    Showing {cars.length} of {s.totalCars || cars.length}
+                  </span>
+                </div>
+
                 {/* Bulk action bar */}
-                {selectedIds.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, padding: '10px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 10 }}>
+                <div style={{
+                  maxHeight: selectedIds.length > 0 ? 60 : 0,
+                  opacity: selectedIds.length > 0 ? 1 : 0,
+                  overflow: 'hidden',
+                  transition: 'max-height 0.3s ease, opacity 0.3s ease',
+                  marginBottom: selectedIds.length > 0 ? 12 : 0,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 10 }}>
                     <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{selectedIds.length} selected</span>
                     <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'active' }).then(() => { toast('Marked active', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, cursor: 'pointer' }}>Mark Active</button>
                     <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
                     <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
                     <button onClick={() => setSelectedIds([])} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer', marginLeft: 'auto' }}>Clear</button>
                   </div>
-                )}
+                </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {[...cars].sort((a, b) => {
@@ -558,12 +652,13 @@ export default function DealerDashboard() {
                   }).map(car => {
                     const img = car.images?.[0]?.url || car.images?.[0] || car.image;
                     const isSelected = selectedIds.includes(car._id);
+                    const isLiveAuction = car.auctionStatus === 'live';
+                    const displayStatus = isLiveAuction ? 'live' : (car.status || 'draft');
                     return (
-                      <div key={car._id} style={{ background: '#0C0C0C', border: `1px solid ${isSelected ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
-                        {/* Checkbox */}
+                      <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
                         <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--gold)', width: 16, height: 16, flexShrink: 0 }} />
-                        {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
-                          : <div style={{ width: 64, height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
+                        {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 10, aspectRatio: '4/3', flexShrink: 0 }} />
+                          : <div style={{ width: 64, height: 48, borderRadius: 10, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                             <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{car.title}</span>
@@ -577,24 +672,36 @@ export default function DealerDashboard() {
                         <div style={{ textAlign: 'right', marginRight: 8 }}>
                           <div style={{ fontSize: 14, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
                         </div>
-                        <StatusBadge status={car.status || (car.auctionStatus === 'live' ? 'active' : 'draft')} />
+                        <StatusBadge status={displayStatus} />
                         <div style={{ display: 'flex', gap: 6 }}>
                           <Link to={`/cars/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
                           <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
-                          {/* Quick actions */}
-                          <div style={{ position: 'relative' }}>
-                            <button onClick={async () => {
-                              const action = prompt('Actions: mark-sold, duplicate, copy-link');
-                              if (!action) return;
-                              if (action === 'mark-sold') {
+                          {/* Quick action buttons */}
+                          <div style={{ position: 'relative', display: 'flex', gap: 2 }}>
+                            <button
+                              onClick={async () => {
                                 try { await dealerAPI.markSold(car._id, { buyerName: prompt('Buyer name:') || 'Unknown', salePrice: Number(prompt('Sale price:') || car.price) }); toast('Marked as sold', 'success'); const r = await dealerAPI.cars({ limit: 100 }); setCars(r.cars || r.data || []); } catch { toast('Failed', 'error'); }
-                              } else if (action === 'duplicate') {
+                              }}
+                              title="Mark Sold"
+                              style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}
+                            >
+                              <span role="img" aria-label="sold">💰</span>
+                            </button>
+                            <button
+                              onClick={async () => {
                                 try { const r = await dealerAPI.duplicate(car._id); toast('Duplicated', 'success'); const r2 = await dealerAPI.cars({ limit: 100 }); setCars(r2.cars || r2.data || []); } catch { toast('Failed', 'error'); }
-                              } else if (action === 'copy-link') {
-                                navigator.clipboard.writeText(window.location.origin + '/cars/' + car._id); toast('Link copied', 'success');
-                              }
-                            }} style={{ padding: '6px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }} title="Quick actions">
-                              ⚡
+                              }}
+                              title="Duplicate"
+                              style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)', color: '#8b5cf6', fontSize: 11, cursor: 'pointer' }}
+                            >
+                              <span role="img" aria-label="duplicate">📋</span>
+                            </button>
+                            <button
+                              onClick={() => { navigator.clipboard.writeText(window.location.origin + '/cars/' + car._id); toast('Link copied', 'success'); }}
+                              title="Copy Link"
+                              style={{ padding: '6px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }}
+                            >
+                              <Copy size={12} />
                             </button>
                           </div>
                           <button onClick={() => handleDelete(car._id)} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
@@ -609,47 +716,138 @@ export default function DealerDashboard() {
             {/* ── BIDS ── */}
             {tab === 'bids' && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', marginBottom: 20 }}>Incoming Bids</h2>
-                {bids.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '60px', background: '#0C0C0C', borderRadius: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>Incoming Bids</h2>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    {['all', 'pending', 'accepted', 'rejected'].map(status => (
+                      <button key={status} onClick={() => setBidFilter(status)} style={{
+                        padding: '6px 14px', borderRadius: 8,
+                        background: bidFilter === status ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${bidFilter === status ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.07)'}`,
+                        color: bidFilter === status ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
+                        fontSize: 11, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
+                      }}>
+                        {status === 'all' ? 'All' : status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {filteredBids.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '60px', background: 'var(--card)', borderRadius: 'var(--radius-lg)' }}>
                     <div style={{ fontSize: 40, marginBottom: 14 }}>⚡</div>
-                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>No bids received yet</div>
-                  </div>
-                ) : bids.map(b => (
-                  <div key={b._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 20px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{b.carTitle || b.car?.title || 'Vehicle'}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{b.bidderName || b.user?.name || 'Bidder'} · {new Date(b.createdAt).toLocaleDateString()}</div>
-                    </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{b.isAuto ? 'Auto-bid' : 'Manual'}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                      <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.acceptBid(carId, b._id); toast(`Bid accepted — sale completed!`, 'success'); dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch (e) { toast(e?.response?.data?.message || 'Failed to accept bid', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                        Accept
-                      </button>
-                      <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.rejectBid(carId, b._id); toast('Bid rejected', 'info'); dealerAPI.bids({ limit: 20 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch { toast('Failed to reject', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                        Decline
-                      </button>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
+                      {bidFilter === 'all' ? 'No bids received yet' : `No ${bidFilter} bids`}
                     </div>
                   </div>
-                ))}
+                ) : filteredBids.map(b => {
+                  const bidderName = b.bidderName || b.user?.name || 'Bidder';
+                  const initials = bidderName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+                  const bidCfg = BID_STATUS_CONFIG[b.status] || BID_STATUS_CONFIG.pending;
+                  return (
+                    <div key={b._id} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '14px 20px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: b.accepted ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: b.accepted ? '#22c55e' : 'rgba(255,255,255,0.4)', flexShrink: 0 }}>
+                          {initials}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{b.carTitle || b.car?.title || 'Vehicle'}</span>
+                            <StatusBadge custom={bidCfg} />
+                          </div>
+                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', display: 'flex', gap: 8 }}>
+                            <span>{bidderName}</span>
+                            <span>·</span>
+                            <span>{timeAgo(b.createdAt)}</span>
+                            {b.isAuto && <span>· <span style={{ color: 'var(--gold)' }}>Auto-bid</span></span>}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(b.amount||0).toLocaleString()}</div>
+                      </div>
+                      {b.status === 'pending' && (
+                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                          <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.acceptBid(carId, b._id); toast(`Bid accepted — sale completed!`, 'success'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch (e) { toast(e?.response?.data?.message || 'Failed to accept bid', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            Accept
+                          </button>
+                          <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.rejectBid(carId, b._id); toast('Bid rejected', 'info'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch { toast('Failed to reject', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            Decline
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
+            {/* ── ESCROWS ── */}
+            {tab === 'escrows' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>Escrow Transactions</h2>
+                  <button onClick={fetchEscrows} disabled={escrowLoading} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <RefreshCw size={12} /> {escrowLoading ? 'Loading...' : 'Refresh'}
+                  </button>
+                </div>
+                {escrows.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '60px', background: 'var(--card)', borderRadius: 'var(--radius-lg)' }}>
+                    <div style={{ fontSize: 40, marginBottom: 14 }}>🔒</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>No escrow transactions yet</div>
+                    <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, marginTop: 6 }}>Escrows are created automatically when a bid is accepted</div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+                    {escrows.map(e => {
+                      const amount = e.amount || e.price || 0;
+                      const status = e.status || 'pending';
+                      const stepIndex = ESCROW_STEPS.findIndex(s => s.key === status);
+                      return (
+                        <div key={e._id} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                            <div>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{e.carTitle || e.car?.title || 'Vehicle'}</div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{e.buyerName || e.buyer?.name || 'Buyer'}</div>
+                            </div>
+                            <StatusBadge status={status} />
+                          </div>
+                          <div style={{ marginBottom: 16 }}>
+                            <EscrowProgress status={status} />
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
+                              <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(amount).toLocaleString()}</div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Step {stepIndex + 1}/{ESCROW_STEPS.length}</div>
+                              <div style={{ fontSize: 11, color: ESCROW_STEPS[stepIndex]?.color || 'rgba(255,255,255,0.4)', fontWeight: 600, marginTop: 2, textTransform: 'capitalize' }}>{status}</div>
+                            </div>
+                          </div>
+                          {e.createdAt && (
+                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 12, borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
+                              Created {timeAgo(e.createdAt)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* ── EARNINGS ── */}
             {tab === 'earnings' && (
               <div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', marginBottom: 20 }}>Earnings Overview</h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
-                  <StatCard icon={DollarSign} label="Gross Revenue"  value={earnings?.gross    ? `${(earnings.gross/1e6).toFixed(1)}M`    : '—'} sub="KES" color="var(--gold)" />
-                  <StatCard icon={TrendingUp} label="Net Earnings"   value={earnings?.net      ? `${(earnings.net/1e6).toFixed(1)}M`      : '—'} sub="after commission" color="#22c55e" />
-                  <StatCard icon={BarChart3}  label="Commission Paid" value={earnings?.commission ? `${(earnings.commission/1e3).toFixed(0)}K` : '—'} sub="KES" color="#ef4444" />
+                  <StatCard icon="💰" label="Gross Revenue"  value={earnings?.gross    ? `${(earnings.gross/1e6).toFixed(1)}M`    : '—'} sub="KES" color="var(--gold)" />
+                  <StatCard icon="📈" label="Net Earnings"   value={earnings?.net      ? `${(earnings.net/1e6).toFixed(1)}M`      : '—'} sub="after commission" color="#22c55e" />
+                  <StatCard icon="📉" label="Commission Paid" value={earnings?.commission ? `${(earnings.commission/1e3).toFixed(0)}K` : '—'} sub="KES" color="#ef4444" />
                 </div>
                 {!earnings && (
-                  <div style={{ textAlign: 'center', padding: '40px', background: '#0C0C0C', borderRadius: 16 }}>
+                  <div style={{ textAlign: 'center', padding: '40px', background: 'var(--card)', borderRadius: 'var(--radius-lg)' }}>
                     <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>No earnings data yet — complete a sale to see your revenue.</div>
                   </div>
                 )}
@@ -664,8 +862,7 @@ export default function DealerDashboard() {
                   <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No per-listing fees. Upgrade anytime to list more vehicles and unlock premium placement.</p>
                 </div>
 
-                {/* Current package status */}
-                <div style={{ background: '#0C0C0C', border: '1px solid rgba(212,196,168,0.18)', borderRadius: 16, padding: '24px', marginBottom: 28 }}>
+                <div style={{ background: 'var(--card)', border: '1px solid rgba(212,196,168,0.18)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: 28 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
                     <div>
                       <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>Current Plan</div>
@@ -687,7 +884,6 @@ export default function DealerDashboard() {
                   </div>
                 </div>
 
-                {/* Package upgrade cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
                   {[
                     { id: 'starter',    name: 'Starter',    price: 'KES 2,500/mo',  limit: 10,   color: 'rgba(255,255,255,0.6)',  perks: ['3 listings free (30 days)', 'KES 2,500/mo after trial', 'Standard position'] },
@@ -697,7 +893,7 @@ export default function DealerDashboard() {
                   ].map(pkg => {
                     const isCurrent = user?.dealerPackage === pkg.id;
                     return (
-                      <div key={pkg.id} style={{ background: '#0C0C0C', border: `1px solid ${isCurrent ? pkg.color + '40' : 'rgba(255,255,255,0.07)'}`, borderRadius: 16, padding: '20px', position: 'relative', overflow: 'hidden' }}>
+                      <div key={pkg.id} style={{ background: 'var(--card)', border: `1px solid ${isCurrent ? pkg.color + '40' : 'rgba(255,255,255,0.07)'}`, borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden' }}>
                         {pkg.badge && <div style={{ position: 'absolute', top: 12, right: 12, background: 'var(--gold)', color: '#000', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.08em' }}>{pkg.badge}</div>}
                         {isCurrent && <div style={{ position: 'absolute', top: 12, left: 12, background: '#22c55e', color: '#000', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.06em' }}>ACTIVE</div>}
                         <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', color: pkg.color, marginBottom: 8, marginTop: (isCurrent || pkg.badge) ? 22 : 0 }}>{pkg.name}</div>
