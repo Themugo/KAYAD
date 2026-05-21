@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -11,11 +11,18 @@ export default function ForcePasswordChange() {
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
+  // Redirect after render if there's nothing to do. Doing this in an effect
+  // (rather than calling navigate() during render) prevents an infinite
+  // render → router-state → render loop that can crash with OOM.
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user || !user.mustChangePassword) {
+      navigate(isAdmin ? '/admin/settings' : '/profile', { replace: true });
+    }
+  }, [authLoading, user, isAdmin, navigate]);
+
   if (authLoading) return <div className="loading-center"><div className="spinner" /></div>;
-  if (!user?.mustChangePassword) {
-    navigate(isAdmin ? '/admin/settings' : '/profile', { replace: true });
-    return null;
-  }
+  if (!user?.mustChangePassword) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

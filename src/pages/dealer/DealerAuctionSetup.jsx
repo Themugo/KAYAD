@@ -48,6 +48,92 @@ const labelStyle = {
   color: 'rgba(255,255,255,0.4)', marginBottom: 6,
 };
 
+/**
+ * Row for a single live auction.
+ * Extracted so useCountdown can be called at the top of a component,
+ * not inside a .map() callback (which violates the rules of hooks).
+ */
+function LiveAuctionRow({ car, isLoading, onEnd, onExtend, onExtendHoursChange, styles }) {
+  const time = useCountdown(car.auctionEnd);
+  const { cardStyle, dangerBtn, blueBtn, inputStyle: rowInputStyle } = styles;
+  return (
+    <div style={cardStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px' }}>
+        {/* Live dot */}
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+          background: '#ef4444', animation: 'pulse 1.2s infinite',
+        }} />
+        {/* Thumbnail */}
+        {(car.images?.[0]?.url || car.images?.[0] || car.image) ? (
+          <img src={car.images?.[0]?.url || car.images?.[0] || car.image}
+            alt={car.title} loading="lazy" decoding="async"
+            style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
+        ) : (
+          <div style={{ width: 64, height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />
+        )}
+        {/* Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {car.title || 'Untitled'}
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+            {car.year || '—'} · {car.bidsCount || 0} bid{(car.bidsCount || 0) !== 1 ? 's' : ''}
+          </div>
+        </div>
+        {/* Current bid */}
+        <div style={{ textAlign: 'right', marginRight: 8 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Bid</div>
+          <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+            {formatKES(car.currentBid || 0)}
+          </div>
+        </div>
+        {/* Countdown */}
+        <div style={{ textAlign: 'center', minWidth: 80 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Time Left</div>
+          {time.expired ? (
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444' }}>Ended</span>
+          ) : (
+            <span style={{
+              fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem',
+              color: time.h < 1 ? '#ef4444' : 'var(--gold)', letterSpacing: '0.06em',
+            }}>
+              {String(time.h).padStart(2, '0')}:{String(time.m).padStart(2, '0')}:{String(time.s).padStart(2, '0')}
+            </span>
+          )}
+        </div>
+      </div>
+      {/* Actions row */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button onClick={() => onEnd(car._id)}
+          disabled={!!isLoading}
+          style={{ ...dangerBtn, opacity: isLoading === 'ending' ? 0.5 : 1, cursor: isLoading === 'ending' ? 'wait' : 'pointer' }}>
+          <XCircle size={13} />
+          {isLoading === 'ending' ? 'Ending...' : 'End Auction'}
+        </button>
+        {/* Extend */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <input type="number" min={1} max={48}
+            placeholder="Hours"
+            value={car._extendHours !== undefined ? car._extendHours : ''}
+            onChange={e => onExtendHoursChange(car._id, e.target.value)}
+            style={{ ...rowInputStyle, width: 80, padding: '9px 10px', fontSize: 12 }} />
+          <button onClick={() => onExtend(car._id, Number(car._extendHours || 0))}
+            disabled={!!isLoading || (car._extendCount || 0) >= 3}
+            style={{
+              ...blueBtn,
+              opacity: isLoading === 'extending' || (car._extendCount || 0) >= 3 ? 0.5 : 1,
+              cursor: isLoading === 'extending' || (car._extendCount || 0) >= 3 ? 'default' : 'pointer',
+            }}>
+            <Clock size={13} />
+            {isLoading === 'extending' ? 'Extending...' : `Extend (${car._extendCount || 0}/3)`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DealerAuctionSetup() {
   const { toast } = useToast();
   const [draftCars, setDraftCars] = useState([]);
@@ -378,86 +464,19 @@ export default function DealerAuctionSetup() {
                   </div>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {liveCars.map(car => {
-                      const time = useCountdown(car.auctionEnd);
-                      const isLoading = actionLoading[car._id];
-                      return (
-                        <div key={car._id} style={cardStyle}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px' }}>
-                            {/* Live dot */}
-                            <span style={{
-                              width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-                              background: '#ef4444', animation: 'pulse 1.2s infinite',
-                            }} />
-                            {/* Thumbnail */}
-                            {(car.images?.[0]?.url || car.images?.[0] || car.image) ? (
-                              <img src={car.images?.[0]?.url || car.images?.[0] || car.image}
-                                alt={car.title} loading="lazy" decoding="async"
-                                style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }} />
-                            ) : (
-                              <div style={{ width: 64, height: 48, borderRadius: 8, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />
-                            )}
-                            {/* Info */}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {car.title || 'Untitled'}
-                              </div>
-                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
-                                {car.year || '—'} · {car.bidsCount || 0} bid{(car.bidsCount || 0) !== 1 ? 's' : ''}
-                              </div>
-                            </div>
-                            {/* Current bid */}
-                            <div style={{ textAlign: 'right', marginRight: 8 }}>
-                              <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Current Bid</div>
-                              <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-                                {formatKES(car.currentBid || 0)}
-                              </div>
-                            </div>
-                            {/* Countdown */}
-                            <div style={{ textAlign: 'center', minWidth: 80 }}>
-                              <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>Time Left</div>
-                              {time.expired ? (
-                                <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444' }}>Ended</span>
-                              ) : (
-                                <span style={{
-                                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem',
-                                  color: time.h < 1 ? '#ef4444' : 'var(--gold)', letterSpacing: '0.06em',
-                                }}>
-                                  {String(time.h).padStart(2, '0')}:{String(time.m).padStart(2, '0')}:{String(time.s).padStart(2, '0')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          {/* Actions row */}
-                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                            <button onClick={() => handleEndAuction(car._id)}
-                              disabled={!!isLoading}
-                              style={{ ...dangerBtn, opacity: isLoading === 'ending' ? 0.5 : 1, cursor: isLoading === 'ending' ? 'wait' : 'pointer' }}>
-                              <XCircle size={13} />
-                              {isLoading === 'ending' ? 'Ending...' : 'End Auction'}
-                            </button>
-                            {/* Extend */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <input type="number" min={1} max={48}
-                                placeholder="Hours"
-                                value={car._extendHours !== undefined ? car._extendHours : ''}
-                                onChange={e => setLiveCars(p => p.map(c => c._id === car._id ? { ...c, _extendHours: e.target.value } : c))}
-                                style={{ ...inputStyle, width: 80, padding: '9px 10px', fontSize: 12 }} />
-                              <button onClick={() => handleExtendAuction(car._id, Number(car._extendHours || 0))}
-                                disabled={!!isLoading || (car._extendCount || 0) >= 3}
-                                style={{
-                                  ...blueBtn,
-                                  opacity: isLoading === 'extending' || (car._extendCount || 0) >= 3 ? 0.5 : 1,
-                                  cursor: isLoading === 'extending' || (car._extendCount || 0) >= 3 ? 'default' : 'pointer',
-                                }}>
-                                <Clock size={13} />
-                                {isLoading === 'extending' ? 'Extending...' : `Extend (${car._extendCount || 0}/3)`}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {liveCars.map(car => (
+                      <LiveAuctionRow
+                        key={car._id}
+                        car={car}
+                        isLoading={actionLoading[car._id]}
+                        onEnd={handleEndAuction}
+                        onExtend={handleExtendAuction}
+                        onExtendHoursChange={(id, hours) =>
+                          setLiveCars(p => p.map(c => c._id === id ? { ...c, _extendHours: hours } : c))
+                        }
+                        styles={{ cardStyle, dangerBtn, blueBtn, inputStyle }}
+                      />
+                    ))}
                   </div>
                 )}
               </div>

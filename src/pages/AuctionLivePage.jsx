@@ -564,7 +564,7 @@ export default function AuctionLivePage() {
                   </div>
                   <div style={{
                     fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700,
-                    color: 'var(--gold-light)', lineHeight: 1,
+                    lineHeight: 1,
                     transition: 'transform 0.15s, color 0.2s',
                     transform: bidFlash ? 'scale(1.08)' : 'scale(1)',
                     color: bidFlash ? '#fff' : 'var(--gold-light)',

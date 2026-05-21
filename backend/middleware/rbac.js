@@ -55,7 +55,23 @@ const ROLE_PERMISSIONS = {
 };
 
 export function getEffectiveRole(user) {
+  if (isWebhoist(user)) return "webhoist";
   return user?.role || "guest";
+}
+
+/**
+ * Identifies the platform owner (Webhoist).
+ * The owner has full system access regardless of the role field.
+ * The owner is identified by an email match against process.env.WEBHOIST_EMAIL.
+ *
+ * @param {{email?: string} | null | undefined} user
+ * @returns {boolean}
+ */
+export function isWebhoist(user) {
+  const owner = (process.env.WEBHOIST_EMAIL || "").toLowerCase().trim();
+  if (!owner) return false;
+  const email = String(user?.email || "").toLowerCase().trim();
+  return !!email && email === owner;
 }
 
 export function hasPermission(user, permission) {

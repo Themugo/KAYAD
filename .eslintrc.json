@@ -26,5 +26,17 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/__tests__/**/*.{js,jsx}", "**/*.test.{js,jsx}"],
+      "env": {
+        "node": true,
+        "jest": true
+      },
+      "globals": {
+        "vi": "readonly"
+      }
+    }
+  ]
 }

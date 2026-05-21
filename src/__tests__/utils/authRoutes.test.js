@@ -48,16 +48,22 @@ describe('getPostAuthPath', () => {
     expect(getPostAuthPath(user)).toBe('/force-password-change');
   });
   it('redirects staff to /admin', () => {
-    expect(getPostAuthPath({ role: 'admin' })).toBe('/admin');
-    expect(getPostAuthPath({ role: 'superadmin' })).toBe('/admin');
+    expect(getPostAuthPath({ role: 'admin', emailVerified: true })).toBe('/admin');
+    expect(getPostAuthPath({ role: 'superadmin', emailVerified: true })).toBe('/admin');
   });
   it('redirects dealers to /dealer', () => {
-    expect(getPostAuthPath({ role: 'dealer' })).toBe('/dealer');
+    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: true })).toBe('/dealer');
+  });
+  it('redirects unapproved dealers to /register', () => {
+    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: false })).toBe('/register');
   });
   it('redirects regular users to /dashboard', () => {
-    expect(getPostAuthPath({ role: 'user' })).toBe('/dashboard');
+    expect(getPostAuthPath({ role: 'user', emailVerified: true })).toBe('/dashboard');
+  });
+  it('redirects unverified regular users to /register', () => {
+    expect(getPostAuthPath({ role: 'user', emailVerified: false })).toBe('/register');
   });
   it('uses fallback for unknown roles', () => {
-    expect(getPostAuthPath({ role: 'unknown' }, '/custom')).toBe('/custom');
+    expect(getPostAuthPath({ role: 'unknown', emailVerified: true }, '/custom')).toBe('/custom');
   });
 });

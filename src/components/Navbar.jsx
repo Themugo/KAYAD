@@ -136,7 +136,7 @@ export default function Navbar({ branding }) {
               <input
                 type="text" placeholder="Search makes, models..." value={searchQ}
                 onChange={e => setSearchQ(e.target.value)}
-                onFocus={() => setSearchOpen(true)}
+                aria-label="Search cars"
                 style={{
                   width: '100%', padding: '9px 14px 9px 38px', borderRadius: 10,
                   border: '1px solid rgba(255,255,255,0.06)',
@@ -147,7 +147,12 @@ export default function Navbar({ branding }) {
                 }}
                 onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,196,168,0.18)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.background = 'rgba(212,196,168,0.06)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(212,196,168,0.08)'; }}
+                onFocus={e => {
+                  setSearchOpen(true);
+                  e.currentTarget.style.borderColor = 'var(--gold)';
+                  e.currentTarget.style.background = 'rgba(212,196,168,0.06)';
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(212,196,168,0.08)';
+                }}
                 onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.boxShadow = 'none'; }}
               />
             </form>

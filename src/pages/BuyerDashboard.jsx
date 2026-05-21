@@ -140,7 +140,8 @@ export default function BuyerDashboard() {
       .finally(() => setTrendingLoading(false));
   }, []);
 
-    // Attempt to fetch user's bids — fall back gracefully if no endpoint exists
+  // Attempt to fetch user's bids — fall back gracefully if no endpoint exists
+  useEffect(() => {
     const tryFetchBids = async () => {
       try {
         const res = await fetch('/api/bids/my', { headers: { Authorization: `Bearer ${localStorage.getItem('kayad_token')}` } });

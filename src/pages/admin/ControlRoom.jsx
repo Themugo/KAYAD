@@ -91,13 +91,6 @@ export default function ControlRoom() {
             {lastRefresh && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>Updated {lastRefresh.toLocaleTimeString()}</div>}
           </div>
         </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: '0 0 8px' }}>
-            Operations <span style={{ color: 'var(--gold)' }}>Center</span>
-            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontWeight: 400, marginLeft: 12 }}>
-              {isSuperadmin ? '👑 Superadmin' : '⚙ Admin'}
-            </span>
-          </h1>
-        </div>
 
         {/* System Health */}
         {health && (
@@ -242,7 +235,7 @@ export default function ControlRoom() {
               </Link>
             ))}
           </div>
-        </div>
+        </SectionCard>
       </div>
     </div>
     </ErrorBoundary>

@@ -31,7 +31,11 @@ export function useApi(fn, deps = [], { immediate = true, initialData = null } =
   }, deps); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (immediate) fetch();
+    if (immediate) {
+      // Errors are surfaced via the `error` state. Swallow the rethrow here
+      // so an initial fetch failure does not become an unhandled rejection.
+      fetch().catch(() => {});
+    }
   }, [fetch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return { data, loading, error, refetch: fetch };
