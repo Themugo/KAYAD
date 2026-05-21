@@ -1,231 +1,159 @@
-import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+// src/components/SearchBar.jsx
+// ─────────────────────────────────────────────────────────────────
+// Premium controlled search input.
+//
+// Replaces the previous SearchBar (which had embedded category chips
+// and did its own router navigation, fighting with the page state).
+//
+// Behaviour:
+//   • Controlled by `value` / `onChange` — no internal state for the
+//     query. Parent owns the URL search param.
+//   • Debounced via the parent (we just call onChange on every keystroke
+//     and pressing Enter; the parent decides whether to debounce).
+//   • Lightweight suggestion list driven by `suggestions` prop.
+//   • Clean clear button + visual focus glow.
+//   • Premium typography: DM Sans body, gold glow on focus.
+// ─────────────────────────────────────────────────────────────────
+import { useRef, useState, useEffect } from 'react';
+import { Search, X } from 'lucide-react';
 
-const BRAND_SUGGESTIONS = ['Toyota', 'Nissan', 'BMW', 'Mercedes', 'Audi', 'Subaru', 'Volkswagen'];
-const QUICK_FILTERS = [
-  { label: 'All', value: 'all' },
-  { label: 'Auction', value: 'auction' },
-  { label: 'Buy Now', value: 'fixed' },
-  { label: 'Sold', value: 'sold' },
+const DEFAULT_BRANDS = [
+  'BMW', 'Mercedes', 'Toyota', 'Nissan', 'Subaru',
+  'Audi', 'Lexus', 'Range Rover', 'Volkswagen', 'Mazda',
 ];
 
-export default function SearchBar({ onSearch }) {
-  const navigate = useNavigate();
+export default function SearchBar({
+  value = '',
+  onChange,
+  onSubmit,
+  suggestions = DEFAULT_BRANDS,
+  placeholder = 'Search by make, model, or keyword…',
+  autoFocus = false,
+  size = 'md', // 'sm' | 'md' | 'lg'
+}) {
   const inputRef = useRef(null);
-  const [query, setQuery] = useState('');
-  const [activeChip, setActiveChip] = useState('all');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const filteredSuggestions = BRAND_SUGGESTIONS.filter(s =>
-    s.toLowerCase().includes(query.toLowerCase())
-  );
+  const [focused, setFocused] = useState(false);
 
   useEffect(() => {
-    if (expanded && inputRef.current) inputRef.current.focus();
-  }, [expanded]);
+    if (autoFocus && inputRef.current) inputRef.current.focus();
+  }, [autoFocus]);
 
-  function handleSubmit(val) {
-    const q = (val || query).trim();
-    onSearch?.(q);
-    navigate(`/showroom?search=${encodeURIComponent(q)}`);
-    setShowSuggestions(false);
-    setExpanded(false);
-  }
+  const matched = value
+    ? suggestions.filter(s => s.toLowerCase().includes(value.toLowerCase()))
+    : suggestions;
+  const showSuggestions = focused && matched.length > 0 && matched[0] !== value;
 
-  function handleSuggestionClick(brand) {
-    setQuery(brand);
-    setShowSuggestions(false);
-    handleSubmit(brand);
-    setActiveChip('all');
-  }
-
-  function handleChipClick(value) {
-    setActiveChip(value);
-    navigate(value === 'all' ? '/showroom' : `/showroom?filter=${value}`);
-  }
+  const padY = size === 'sm' ? 9 : size === 'lg' ? 15 : 12;
+  const iconSize = size === 'sm' ? 15 : size === 'lg' ? 19 : 17;
+  const fontSize = size === 'sm' ? 13 : size === 'lg' ? 16 : 14;
 
   return (
-    <div style={{
-      width: '100%',
-      maxWidth: 720,
-      margin: '0 auto',
-    }}>
-      <div style={{
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        width: '100%',
-      }}>
-        <div style={{
+    <div style={{ position: 'relative', width: '100%' }}>
+      <div
+        style={{
           display: 'flex',
           alignItems: 'center',
           width: '100%',
-          background: 'var(--surface)',
-          border: '2px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          transition: 'all 0.3s var(--ease)',
-          outline: 'none',
-          ...(expanded && {
-            borderColor: 'var(--gold)',
-            boxShadow: '0 0 0 4px var(--gold-glow)',
-          }),
-        }}>
-          <Search size={20} style={{
-            color: query ? 'var(--gold)' : 'var(--text-muted)',
-            marginLeft: 18,
+          background: focused ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.02)',
+          border: `1px solid ${focused ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+          borderRadius: 10,
+          boxShadow: focused ? '0 0 0 3px rgba(212,196,168,0.10)' : 'none',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        <Search
+          size={iconSize}
+          style={{
+            color: focused || value ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
+            marginLeft: 12,
             flexShrink: 0,
             transition: 'color 0.2s',
-          }} />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={e => { setQuery(e.target.value); setShowSuggestions(true); }}
-            onFocus={() => { setExpanded(true); setShowSuggestions(true); }}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            onKeyDown={e => { if (e.key === 'Enter') handleSubmit(); }}
-            placeholder="Search by make, model, or keyword..."
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: 'var(--text)',
-              fontSize: 16,
-              fontWeight: 500,
-              padding: '15px 14px',
-              fontFamily: 'var(--font-body)',
-              minWidth: 0,
-            }}
-          />
-          {query && (
-            <button
-              onClick={() => { setQuery(''); inputRef.current?.focus(); }}
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: 'none',
-                borderRadius: '50%',
-                width: 24,
-                height: 24,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                color: 'var(--text-muted)',
-                fontSize: 14,
-                marginRight: 8,
-                flexShrink: 0,
-              }}
-            >✕</button>
-          )}
+          }}
+        />
+        <input
+          ref={inputRef}
+          type="search"
+          value={value}
+          onChange={e => onChange?.(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setTimeout(() => setFocused(false), 150)}
+          onKeyDown={e => { if (e.key === 'Enter') onSubmit?.(value); }}
+          placeholder={placeholder}
+          aria-label="Search cars"
+          style={{
+            flex: 1,
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: '#fff',
+            fontSize,
+            fontWeight: 500,
+            padding: `${padY}px 12px`,
+            fontFamily: 'var(--font-body)',
+            minWidth: 0,
+          }}
+        />
+        {value && (
           <button
-            onClick={() => handleSubmit()}
+            type="button"
+            onClick={() => { onChange?.(''); inputRef.current?.focus(); }}
+            aria-label="Clear search"
             style={{
-              background: 'var(--gold)',
+              background: 'rgba(255,255,255,0.06)',
               border: 'none',
-              borderRadius: `0 var(--radius-lg) var(--radius-lg) 0`,
-              padding: '15px 24px',
+              borderRadius: '50%',
+              width: 22, height: 22,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: 14,
-              color: '#000',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
+              color: 'rgba(255,255,255,0.6)',
+              marginRight: 8,
               flexShrink: 0,
-              transition: 'opacity 0.2s',
             }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}
           >
-            <Search size={16} />
-            <span style={{ display: 'inline' }}>Search</span>
+            <X size={12} />
           </button>
-        </div>
-
-        {showSuggestions && query && filteredSuggestions.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: 6,
-            background: 'var(--card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            zIndex: 50,
-            overflow: 'hidden',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          }}>
-            {filteredSuggestions.map(brand => (
-              <button
-                key={brand}
-                onMouseDown={() => handleSuggestionClick(brand)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  textAlign: 'left',
-                  padding: '11px 18px',
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text)',
-                  fontSize: 14,
-                  cursor: 'pointer',
-                  transition: 'background 0.15s',
-                  fontFamily: 'var(--font-body)',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-              >
-                <Search size={12} style={{ color: 'var(--text-muted)', marginRight: 10 }} />
-                {brand}
-              </button>
-            ))}
-          </div>
         )}
       </div>
 
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        marginTop: 14,
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-      }}>
-        {QUICK_FILTERS.map(f => (
-          <button
-            key={f.value}
-            onClick={() => handleChipClick(f.value)}
-            style={{
-              padding: '7px 18px',
-              borderRadius: 9999,
-              border: `1px solid ${activeChip === f.value ? 'var(--gold)' : 'var(--border)'}`,
-              background: activeChip === f.value ? 'var(--gold-glow-strong)' : 'transparent',
-              color: activeChip === f.value ? 'var(--gold-light)' : 'var(--text-muted)',
-              fontSize: 12,
-              fontWeight: 700,
-              cursor: 'pointer',
-              transition: 'all 0.2s var(--ease)',
-              letterSpacing: '0.04em',
-              fontFamily: 'var(--font-body)',
-            }}
-            onMouseEnter={e => {
-              if (activeChip !== f.value) {
-                e.currentTarget.style.borderColor = 'var(--gold-muted)';
-                e.currentTarget.style.color = 'var(--text)';
-              }
-            }}
-            onMouseLeave={e => {
-              if (activeChip !== f.value) {
-                e.currentTarget.style.borderColor = 'var(--border)';
-                e.currentTarget.style.color = 'var(--text-muted)';
-              }
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {showSuggestions && (
+        <div
+          role="listbox"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 6px)',
+            left: 0, right: 0,
+            background: '#0c0c0c',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 10,
+            overflow: 'hidden',
+            zIndex: 50,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+            maxHeight: 280, overflowY: 'auto',
+          }}
+        >
+          {matched.slice(0, 8).map(brand => (
+            <button
+              key={brand}
+              type="button"
+              onMouseDown={() => { onChange?.(brand); onSubmit?.(brand); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                width: '100%', padding: '10px 14px',
+                background: 'transparent', border: 'none',
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: 13, fontFamily: 'var(--font-body)',
+                cursor: 'pointer', textAlign: 'left',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >
+              <Search size={12} style={{ color: 'rgba(255,255,255,0.35)' }} />
+              <span>{brand}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

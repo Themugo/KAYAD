@@ -301,3 +301,93 @@ src/components/DealerSidebar.jsx         (new)
 src/__tests__/App.test.jsx               (rewritten)
 CHANGES.md                               (this entry)
 ```
+
+---
+
+## Round 6 — Showroom premium UI rewrite
+
+Auditor purge confirmed (commit `499ff55` on GitHub is fully clean — only `CHANGES.md` documentation mentions the word). The "auditor still on landing page" report turned out to be a deployment/cache lag, not a code issue.
+
+Next priority: **the Showroom page's search UI was scattered.** Five rows of controls fighting for attention, two sources of truth for the same filter, and a search input that — silently — did nothing.
+
+### Bugs found in the old Showroom
+
+**Search input was wired to nothing.** `<SearchBar>` navigated to `?search=…`, but `Showroom.getApiParams()` never read the param and the backend's `/api/cars` endpoint accepts `keyword`, not `search`. Net effect: typing in the search bar updated the URL but produced zero filtering. Dead code shipping to production.
+
+**Two desyncing sources of truth for the category filter.** `<SearchBar>` stored its own `activeChip` state and navigated on click; `<Showroom>` separately read `filter` from the URL. Arriving at `/showroom?filter=auction` rendered "Auction" highlighted in the page chips but "All" highlighted in the SearchBar chips, because SearchBar never read the URL on mount.
+
+**Duplicated filter-chip row.** `<SearchBar>` rendered `All / Auction / Buy Now / Sold` chips internally; `<Showroom>` then rendered the same four chips again as a separate `FILTER_CHIPS` row below. Two visually identical rows, two different state owners.
+
+**Hero blocked the search.** The previous layout put a large SearchBar inside a hero section, which pushed the actual filter controls (sort, view, category chips, saved searches) into a separate noisy band below. On a 13" laptop, the user couldn't see a single car without scrolling.
+
+### New architecture
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│  Editorial hero  (no inputs — title + tagline only)                │
+│      KENYA'S PREMIUM AUTOMOTIVE GALLERY                            │
+│           The Gallery                                              │
+│      Curated listings, transparent pricing, escrow-backed          │
+├────────────────────────────────────────────────────────────────────┤
+│  ━━ Sticky command bar (backdrop-blur) ━━━━━━━━━━━━━━━━━━━━━━━━━━ │
+│  [🔍 Search…]  All Auction Buy-Now Sold      [Sort ▾] [▦ ☰] [Filter]│
+├────────────────────────────────────────────────────────────────────┤
+│  142 vehicles · BMW× · Nairobi× · 2018–2024×    💾Save ▾Saved 4 ↺ │
+├──────────┬─────────────────────────────────────────────────────────┤
+│ Sidebar  │   ┌──┐ ┌──┐ ┌──┐                                        │
+│ filters  │   │  │ │  │ │  │  (3-column grid of CartyGrid cards)     │
+│          │   └──┘ └──┘ └──┘                                        │
+│ (drawer  │                                                          │
+│  on      │   ┌──┐ ┌──┐ ┌──┐                                        │
+│  mobile) │   │  │ │  │ │  │                                        │
+└──────────┴─────────────────────────────────────────────────────────┘
+```
+
+**1. Single source of truth.** Every filter — category, keyword, brand, price, year, body, fuel, mileage, location, color, condition, transmission — flows through `useSearchParams`. Components read from the URL, mutations write to the URL. No more silent state divergence.
+
+**2. SearchBar reduced from 232 lines to 159.** It's now a controlled, focused input: takes `value` / `onChange` / `onSubmit` props, renders a brand-suggestion dropdown on focus, and that's it. No chips, no navigation side-effects, no internal `activeChip` state. The page owns the URL.
+
+**3. Search actually filters now.** Typing in the search input is locally responsive (no lag), debounced 300 ms, then pushed to the URL as `?keyword=…`, picked up by `getApiParams` as `keyword`, sent to the backend which already supports it via `query.$or = [{title}, {brand}]` regex match.
+
+**4. One command bar, one row.** Search input + category pills + sort + view toggle + filter button live on a single sticky editorial line. Backdrop blur lets the hero gradient bleed through subtly as you scroll. On mobile the row wraps; the pills become horizontally scrollable; the filter button gains an "n active" badge.
+
+**5. Active-filter band is conditional.** Renders only when there's an active filter or saved searches. Shows the result count in editorial italic ("142 vehicles") and each active filter as a chip with `LABEL: value ×`. Right side carries the cluster: Save, Saved-searches dropdown, Clear-all.
+
+**6. Saved searches became a dropdown.** Previously a separate full-width toggle panel that added another stacked row. Now anchored to a "Saved · N" button — opens as a 260-px popover with each saved search and its bell-alert toggle + delete button.
+
+**7. Empty state is editorial.** Instead of "No results found", users now see a small gold eyebrow, italic display heading ("No vehicles match this search"), and a primary CTA to reset filters. Matches the rest of the brand voice.
+
+### Premium polish details
+
+- **Backdrop blur on the sticky bar.** `backdrop-filter: blur(14px)` over a 85% opaque charcoal — when you scroll, hero gradient bleeds through softly. Hairline borders top and bottom.
+- **Focus glow on inputs.** Gold ring (`box-shadow: 0 0 0 3px rgba(212,196,168,0.10)`) replaces the loud border-color flash.
+- **Skeleton cards while loading.** Animated pulse placeholders in the grid shape, so the first paint isn't a blank page.
+- **3-column grid on desktop (was 4).** Cards breathe; image dominates each card; matches the editorial spacing.
+- **Italic display for the result count.** "142 vehicles" set in Cormorant Garamond italic — a single editorial flourish in an otherwise utilitarian band.
+
+### Accessibility
+
+- Search input: `aria-label="Search cars"`, `role="search"` from native `<input type="search">`, `aria-label="Clear search"` on the × button.
+- Category pills: `role="tablist"` / `role="tab"` / `aria-selected`.
+- View toggle: `role="group"`, `aria-pressed` on each option, distinct `aria-label`.
+- Sort select: native `<select>` with `aria-label`.
+- Saved-searches dropdown: `aria-expanded`, `aria-haspopup="menu"`, `role="menu"`.
+- All icon-only buttons have `aria-label`.
+- Mobile filter sheet has an explicit overlay role with click-to-close.
+
+### Verification (this round)
+
+| | |
+|---|---|
+| Lint | **0 errors**, 177 warnings (down from 179 — fewer unused-import warnings now that SearchBar is leaner) |
+| Build | clean — Showroom chunk is 9 KB gzipped (up from 6.5 KB raw source — but now with debounce, suggestion menu, saved-searches popover, empty state) |
+| Tests | **23 / 23** files, **151 / 151** tests pass |
+| `grep -ri gemini src/` | 0 matches |
+
+### Files changed
+
+```
+src/components/SearchBar.jsx           (rewritten — 232 ⇢ 159 lines)
+src/pages/Showroom.jsx                 (rewritten — 720 ⇢ 953 lines; the gain is comments + a11y + EmptyState + saved-search popover)
+CHANGES.md                             (this entry)
+```
