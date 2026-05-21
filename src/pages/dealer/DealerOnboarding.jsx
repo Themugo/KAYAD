@@ -18,6 +18,7 @@ export default function DealerOnboarding() {
 
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState({});
   const [form, setForm] = useState({
     businessName: '',
     location: '',
@@ -43,13 +44,35 @@ export default function DealerOnboarding() {
     });
   }, [user]);
 
-  const update = (key, val) => setForm(p => ({ ...p, [key]: val }));
+  const update = (key, val) => { setForm(p => ({ ...p, [key]: val })); setErrors(p => { const n = { ...p }; delete n[key]; return n; }); };
+
+  const validate = () => {
+    const errs = {};
+    if (step === 0) {
+      if (!form.businessName.trim()) errs.businessName = 'Business name required';
+      if (!form.location.trim()) errs.location = 'Location required';
+    }
+    if (step === 1) {
+      if (!form.bankName.trim()) errs.bankName = 'Bank name required';
+      if (!form.accountName.trim()) errs.accountName = 'Account name required';
+      if (!form.accountNumber.trim()) errs.accountNumber = 'Account number required';
+      else if (form.accountNumber.trim().length < 6) errs.accountNumber = 'Account number too short';
+      if (!form.mpesaPhone.trim()) errs.mpesaPhone = 'M-Pesa phone required';
+      else if (!/^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''))) errs.mpesaPhone = 'Enter valid Kenyan number (e.g. 0712345678)';
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
 
   const canNext = () => {
     if (step === 0) return form.businessName.trim() && form.location.trim();
-    if (step === 1) return true;
+    if (step === 1) {
+      return form.bankName.trim() && form.accountName.trim() && form.accountNumber.trim().length >= 6 && /^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''));
+    }
     return true;
   };
+
+  const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, 2)); };
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -145,12 +168,16 @@ export default function DealerOnboarding() {
               <div className="input-group" style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Business Name *</label>
                 <input className="input" placeholder="Your dealership or trading name"
-                  value={form.businessName} onChange={e => update('businessName', e.target.value)} />
+                  value={form.businessName} onChange={e => update('businessName', e.target.value)}
+                  style={{ borderColor: errors.businessName ? 'var(--red)' : undefined }} />
+                {errors.businessName && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.businessName}</span>}
               </div>
               <div className="input-group" style={{ marginBottom: 20 }}>
                 <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Location *</label>
                 <input className="input" placeholder="City (e.g. Nairobi, Mombasa)"
-                  value={form.location} onChange={e => update('location', e.target.value)} />
+                  value={form.location} onChange={e => update('location', e.target.value)}
+                  style={{ borderColor: errors.location ? 'var(--red)' : undefined }} />
+                {errors.location && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.location}</span>}
               </div>
               <div className="input-group">
                 <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Bio</label>
@@ -169,19 +196,25 @@ export default function DealerOnboarding() {
               </p>
               <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)', marginBottom: 16 }}>Bank Transfer</h4>
               <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Bank Name</label>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Bank Name *</label>
                 <input className="input" placeholder="e.g. KCB, Equity, Co-op"
-                  value={form.bankName} onChange={e => update('bankName', e.target.value)} />
+                  value={form.bankName} onChange={e => update('bankName', e.target.value)}
+                  style={{ borderColor: errors.bankName ? 'var(--red)' : undefined }} />
+                {errors.bankName && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.bankName}</span>}
               </div>
               <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Name</label>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Name *</label>
                 <input className="input" placeholder="Name on the bank account"
-                  value={form.accountName} onChange={e => update('accountName', e.target.value)} />
+                  value={form.accountName} onChange={e => update('accountName', e.target.value)}
+                  style={{ borderColor: errors.accountName ? 'var(--red)' : undefined }} />
+                {errors.accountName && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.accountName}</span>}
               </div>
               <div className="input-group" style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Number</label>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Number *</label>
                 <input className="input" placeholder="Bank account number"
-                  value={form.accountNumber} onChange={e => update('accountNumber', e.target.value)} />
+                  value={form.accountNumber} onChange={e => update('accountNumber', e.target.value)}
+                  style={{ borderColor: errors.accountNumber ? 'var(--red)' : undefined }} />
+                {errors.accountNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.accountNumber}</span>}
               </div>
               <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)', marginBottom: 16 }}>M-Pesa</h4>
               <div className="input-group" style={{ marginBottom: 16 }}>
@@ -190,9 +223,11 @@ export default function DealerOnboarding() {
                   value={form.paybillNumber} onChange={e => update('paybillNumber', e.target.value)} />
               </div>
               <div className="input-group">
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>M-Pesa Phone (2547...)</label>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>M-Pesa Phone *</label>
                 <input className="input" placeholder="Phone for bid deposits and payouts"
-                  value={form.mpesaPhone} onChange={e => update('mpesaPhone', e.target.value)} />
+                  value={form.mpesaPhone} onChange={e => update('mpesaPhone', e.target.value)}
+                  style={{ borderColor: errors.mpesaPhone ? 'var(--red)' : undefined }} />
+                {errors.mpesaPhone && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.mpesaPhone}</span>}
               </div>
             </div>
           )}
@@ -238,7 +273,7 @@ export default function DealerOnboarding() {
               <ChevronLeft size={14} /> Back
             </button>
             {step < STEPS.length - 1 ? (
-              <button onClick={() => setStep(s => s + 1)} disabled={!canNext()} style={{
+              <button onClick={handleNext} disabled={!canNext()} style={{
                 padding: '10px 24px', borderRadius: 10,
                 background: canNext() ? 'var(--gold)' : 'rgba(255,255,255,0.08)',
                 border: 'none', color: canNext() ? '#000' : 'rgba(255,255,255,0.2)',

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 import { Activity, AlertTriangle, Wifi, WifiOff, Settings, Users, Car, Shield, DollarSign, Megaphone } from 'lucide-react';
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 const SECTIONS = [
   { key: 'users', label: 'Users', desc: 'Manage all accounts', icon: Users, path: '/admin/users' },
@@ -43,14 +44,23 @@ export default function ControlRoom() {
 
   const isSuperadmin = user?.role === 'superadmin';
 
-  useEffect(() => {
+  const [lastRefresh, setLastRefresh] = useState(null);
+
+  const loadData = () => {
     Promise.all([
       adminAPI.demoStatus().catch(() => null),
       adminAPI.systemHealth().catch(() => null),
     ]).then(([d, h]) => {
       setDemo(d);
       setHealth(h?.health || h);
+      setLastRefresh(new Date());
     }).finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadData();
+    const iv = setInterval(loadData, 30000);
+    return () => clearInterval(iv);
   }, []);
 
   const handleCleanup = async () => {
@@ -66,13 +76,21 @@ export default function ControlRoom() {
   };
 
   return (
+    <ErrorBoundary>
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 32px 60px' }}>
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
-            <Activity size={12} style={{ color: 'var(--gold)' }} />
-            <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>System Control Room</span>
+        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, color: '#fff', marginBottom: 4, fontStyle: 'italic' }}>Control Room</h1>
+            <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14 }}>Platform status and system management</p>
           </div>
+          <div style={{ textAlign: 'right' }}>
+            <button onClick={loadData} style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+              ↻ Refresh
+            </button>
+            {lastRefresh && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>Updated {lastRefresh.toLocaleTimeString()}</div>}
+          </div>
+        </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: '0 0 8px' }}>
             Operations <span style={{ color: 'var(--gold)' }}>Center</span>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontFamily: 'var(--font-body)', fontWeight: 400, marginLeft: 12 }}>
@@ -224,8 +242,9 @@ export default function ControlRoom() {
               </Link>
             ))}
           </div>
-        </SectionCard>
+        </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 }

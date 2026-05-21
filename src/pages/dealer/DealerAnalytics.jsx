@@ -162,12 +162,35 @@ export default function DealerAnalytics() {
               })}
             </div>
 
-            {/* Conversion rate */}
-            {summary?.totalCars > 0 && (
-              <div style={{ marginTop: 20, background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 14 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sell-Through Rate</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--gold-light)', marginTop: 4 }}>
-                  {Math.round(((summary?.soldCars || 0) / summary.totalCars) * 100)}%
+            {/* Conversion rate — gauge */}
+            {summary?.totalCars > 0 && (() => {
+              const pct = Math.round(((summary?.soldCars || 0) / summary.totalCars) * 100);
+              const r = 28;
+              const circ = 2 * Math.PI * r;
+              const offset = circ - (pct / 100) * circ;
+              const gaugeColor = pct > 50 ? 'var(--green)' : pct > 20 ? 'var(--gold)' : 'var(--orange)';
+              return (
+                <div style={{ marginTop: 20, background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center' }}>
+                  <svg width="72" height="72" viewBox="0 0 72 72" style={{ marginBottom: 8 }}>
+                    <circle cx="36" cy="36" r={r} fill="none" stroke="var(--border)" strokeWidth="6" />
+                    <circle cx="36" cy="36" r={r} fill="none" stroke={gaugeColor} strokeWidth="6"
+                      strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round"
+                      transform="rotate(-90 36 36)" style={{ transition: 'stroke-dashoffset 0.8s ease' }} />
+                    <text x="36" y="36" textAnchor="middle" dominantBaseline="central"
+                      fill={gaugeColor} fontSize="18" fontWeight="900" fontFamily="var(--font-display)">
+                      {pct}%
+                    </text>
+                  </svg>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sell-Through Rate</div>
+                </div>
+              );
+            })()}
+            {/* Views → Bid ratio */}
+            {analytics?.totalViews > 0 && (
+              <div style={{ marginTop: 12, background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 14 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Views → Bid</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', color: 'var(--blue)', marginTop: 2 }}>
+                  {analytics.conversionRates?.viewsToBids || 0}%
                 </div>
               </div>
             )}

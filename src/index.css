@@ -532,6 +532,8 @@ select.input { cursor: pointer; }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .grid-sidebar-right { grid-template-columns: 1fr; }
   .grid-sidebar-chat { grid-template-columns: 1fr; }
+  .chat-mobile-toggle { display: flex !important; }
+  .chat-sidebar { height: auto !important; }
   /* Navbar smaller on mobile */
   nav { height: calc(72px + env(safe-area-inset-top, 0px)) !important; padding-top: env(safe-area-inset-top, 0px) !important; }
   nav > div { padding: 0 16px !important; }

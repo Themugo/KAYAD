@@ -24,6 +24,8 @@ export default function ChatPage() {
   const [search, setSearch]     = useState('');
   const [attachments, setAttachments] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState({});
+  const [connected, setConnected] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const bottomRef = useRef(null);
   const typingTimer = useRef(null);
   const typingEmitTimer = useRef(null);
@@ -106,6 +108,25 @@ export default function ChatPage() {
 
   useEffect(() => () => clearTimeout(typingTimer.current), []);
   useEffect(() => () => clearInterval(typingEmitTimer.current), []);
+
+  // Socket connection tracking
+  useEffect(() => {
+    if (!socket.current) return;
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    setConnected(socket.current.connected);
+    socket.current.on('connect', onConnect);
+    socket.current.on('disconnect', onDisconnect);
+    return () => {
+      socket.current?.off('connect', onConnect);
+      socket.current?.off('disconnect', onDisconnect);
+    };
+  }, [socket]);
+
+  // Auto-close sidebar on mobile when a chat is selected
+  useEffect(() => {
+    if (active && window.innerWidth < 768) setSidebarOpen(false);
+  }, [active]);
 
   // Join/leave socket room for active chat
   useEffect(() => {
@@ -214,18 +235,31 @@ export default function ChatPage() {
 
   return (
     <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* ─── Mobile toggle ─── */}
+      <div className="chat-mobile-toggle" style={{ display: 'none', padding: '12px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', alignItems: 'center', gap: 10 }}
+        onClick={() => setSidebarOpen(true)}>
+        <button style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer', padding: 0 }}>← Back</button>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{otherInActive?.name || 'Messages'}</span>
+        <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)', display: 'inline-block', animation: connected ? 'pulse 2s infinite' : 'none' }} />
+      </div>
+
       <div className="chat-layout grid-sidebar-chat" style={{ flex: 1, overflow: 'hidden' }}>
 
         {/* ─── Chat List ─── */}
-        <div className="chat-sidebar">
-          <div className="chat-sidebar-header">
-            <h3 style={{ margin: 0, fontSize: '1rem' }}>💬 Messages</h3>
-            <input
-              className="input"
-              placeholder="Search conversations..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              style={{ marginTop: 10, fontSize: 13 }}
+        <div className="chat-sidebar" style={{ display: sidebarOpen ? undefined : 'none' }}>
+          <div className="chat-sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>💬 Messages</h3>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)', display: 'inline-block', animation: connected ? 'pulse 2s infinite' : 'none' }} title={connected ? 'Connected' : 'Disconnected'} />
+            </div>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>{connected ? 'LIVE' : 'OFFLINE'}</span>
+          </div>
+          <input
+            className="input"
+            placeholder="Search conversations..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ margin: '0 16px 10px', fontSize: 13, width: 'auto' }}
             />
           </div>
 
@@ -243,6 +277,9 @@ export default function ChatPage() {
                 >
                   <div className="chat-avatar-wrap">
                     <div className="chat-avatar">{(other?.name || '?')[0].toUpperCase()}</div>
+                    {onlineUsers[other?._id || other?.id] && (
+                      <span style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--surface)' }} />
+                    )}
                   </div>
                   <div className="chat-list-content">
                     <div className="chat-list-name-row">
@@ -268,10 +305,20 @@ export default function ChatPage() {
           <div className="chat-window">
             <div className="chat-window-header">
               <div className="chat-window-header-left">
-                <div className="chat-avatar">{(otherInActive?.name || '?')[0].toUpperCase()}</div>
+                <div className="chat-avatar" style={{ position: 'relative' }}>
+                  {(otherInActive?.name || '?')[0].toUpperCase()}
+                  {onlineUsers[otherInActive?._id || otherInActive?.id] && (
+                    <span style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--surface)' }} />
+                  )}
+                </div>
                 <div>
-                  <div className="chat-window-header-name">
+                  <div className="chat-window-header-name" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     {otherInActive?.name}
+                    {onlineUsers[otherInActive?._id || otherInActive?.id] ? (
+                      <span style={{ fontSize: 10, color: 'var(--green)', fontWeight: 600 }}>● Online</span>
+                    ) : (
+                      <span style={{ fontSize: 10, color: 'var(--text-dim)' }}>● Offline</span>
+                    )}
                   </div>
                   {isTyping ? (
                     <div className="chat-typing-indicator">{isTyping} is typing<span className="typing-dots"><span>.</span><span>.</span><span>.</span></span></div>
