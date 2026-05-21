@@ -243,3 +243,61 @@ The test was wrapping `<ForcePasswordChange>` in real `<AuthProvider>` and four 
 | Infrastructure | 90/100 | 95/100 |
 | Test reliability | 60/100 | **100/100** (no infinite loops, no OOM, deterministic) |
 | **Overall** | **~92/100** | **~100/100** |
+
+---
+
+## Round 5 — UI cleanup, Gemini removal, router rebuild
+
+### The discovery
+
+While auditing the frontend, found that `src/App.jsx` was a **775-line "Gemini Real-Time Repository Auditor"** mounted as the app root — completely unrelated to the KAYAD car-auction platform. It hard-coded calls to `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent`, rendered a code-pasting audit UI, and had **no React Router whatsoever**. The entire KAYAD frontend — `Navbar`, the 50+ pages in `src/pages/`, all the layouts, all five context providers — was sitting in the repo *unwired*. Whatever was deployed at `kayad-motors.vercel.app` was the auditor, not the actual car platform.
+
+### What changed
+
+**1. Deleted `src/App.jsx` (Gemini auditor).** Zero references to `gemini`, `generativelanguage.googleapis.com`, or `auditor` remain in source or build output. Initial bundle dropped from 758 KB (one file, no functional app) to a 60 KB shell + on-demand page chunks.
+
+**2. Created `src/components/DealerSidebar.jsx`.** Mirrors the AdminSidebar pattern. Collapsible sidebar with NavLink-based active states, role-gated (`dealer` / `broker` / `individual_seller` only), and shows the Onboarding link automatically when the seller hasn't been approved yet.
+
+**3. Created `src/components/DealerLayout.jsx`.** Mirrors AdminLayout: sidebar + top breadcrumb bar + notifications icon + avatar. Breadcrumb segments are humanised via a `SEGMENT_LABELS` lookup (`add-car` → "Add Listing", `auction-setup` → "Auction Setup", etc.) so the URL doesn't leak into the UI.
+
+**4. Rewrote `src/App.jsx` from scratch.** A proper KAYAD root with five distinct concerns layered cleanly:
+
+- **Provider stack** in the correct order: `ErrorBoundary` → `BrowserRouter` → `ToastProvider` → `AuthProvider` → `SocketProvider` (needs auth) → `NotificationProvider` (needs auth + socket) → `CompareProvider`.
+- **All 53 pages wired** via `<Routes>`: public (8), auth (6), authenticated user (8), inspector (2), dealer (10), admin (23), plus a `/cars` → `/showroom` redirect and a catch-all 404.
+- **Lazy-loaded every page** with `React.lazy()` + a single `<Suspense fallback={<LoadingPage />}>` boundary at the route level. The initial bundle is now **just the app shell + provider code (~14 KB gzipped)**; each route fetches its own chunk on demand.
+- **Layout wrappers** as tiny composition helpers: `<Public>` for public chrome, `<User>` for logged-in + email-verified, `<Authed>` for logged-in (no email check, for the verification flow itself), `<Dealer>` for seller area, `<Admin>` for staff area. Keeps the `<Routes>` block scannable at a glance.
+- **Scroll restoration** via a `<ScrollToTop />` that listens on `useLocation().pathname` and calls `window.scrollTo({top:0})` on every change.
+
+**5. Rewrote `src/__tests__/App.test.jsx`.** The old test rendered the auditor and asserted on its "KAYAD" header text. New test mocks `socket.io-client` and the `adminAPI.getConfig` network call, then smoke-tests that the full provider stack + router + Suspense fallback render without throwing. Page-level assertions live in their dedicated test files.
+
+### Bundle impact
+
+| | Before (Gemini auditor) | After (real KAYAD app) |
+|---|---|---|
+| `index.html` initial JS | 758 KB / 65 KB gzipped | 60 KB / **14 KB gzipped** |
+| Functional pages | 0 (auditor only) | 53 |
+| Route-based code-split chunks | 0 | 35 |
+| Largest single chunk | 758 KB (the app) | 449 KB / 96 KB gzipped (`pages-staff` — admin-only) |
+| Total dist size | 328 KB | 1.3 MB |
+| PWA precache entries | 16 | 46 |
+
+The total dist size grew because the **actual application now exists**. What ships to the user on first paint is dramatically smaller though — `vendor-react` (54 KB gzipped) + `index` (14 KB gzipped) + whichever single page chunk they landed on (5–14 KB gzipped). Everything else is on-demand.
+
+### Verification (this round)
+
+| | |
+|---|---|
+| `grep -ri gemini src/` | **0 matches** |
+| Lint | **0 errors**, 179 warnings (stylistic, pre-existing) |
+| Build | clean — 35 asset chunks, PWA SW generated, 46 precache entries |
+| Frontend tests | **23 / 23** files, **151 / 151** tests pass |
+
+### Files changed in this round
+
+```
+src/App.jsx                              (rewritten — 776 ⇢ 211 lines)
+src/components/DealerLayout.jsx          (new)
+src/components/DealerSidebar.jsx         (new)
+src/__tests__/App.test.jsx               (rewritten)
+CHANGES.md                               (this entry)
+```
