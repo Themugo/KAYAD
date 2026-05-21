@@ -261,7 +261,6 @@ export default function ChatPage() {
             onChange={e => setSearch(e.target.value)}
             style={{ margin: '0 16px 10px', fontSize: 13, width: 'auto' }}
             />
-          </div>
 
           <div className="chat-list">
             {filteredChats.length === 0 ? (

@@ -640,8 +640,9 @@ export default function CarDetailPage() {
                   Edit Your Listing
                 </Link>
               ) : (
-                {/* ─── INLINE BIDDING ─── */}
-                {isLive && (
+                <>
+                  {/* ─── INLINE BIDDING ─── */}
+                  {isLive && (
                   <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 14 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -719,6 +720,7 @@ export default function CarDetailPage() {
                     </button>
                   )}
                 </div>
+                </>
               )}
 
               {/* Trust Note */}
