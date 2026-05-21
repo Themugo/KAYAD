@@ -1,12 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-slate-950 text-slate-100 selection:bg-indigo-500/30">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- Load Tailwind CSS via high-performance CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind to match local themes, fonts, and dark mode -->
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              slate: {
+                950: '#050505', // Matches Kayad signature premium dark color
+              }
+            },
+            fontFamily: {
+              sans: ['"DM Sans"', 'sans-serif'],
+              serif: ['"Cormorant Garamond"', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+
     <title>Kayad – Kenya's Premium Car Marketplace</title>
     <meta name="description" content="Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments." />
     <meta name="theme-color" content="#050505" />
+    
     <!-- Open Graph / Social sharing -->
     <meta property="og:type"        content="website" />
     <meta property="og:locale"      content="en_KE" />
@@ -15,28 +39,35 @@
     <meta property="og:title"       content="Kayad – Kenya's Premium Car Marketplace" />
     <meta property="og:description" content="Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments." />
     <meta property="og:image"       content="https://kayad.space/icon-512.png" />
+    
     <!-- Twitter Card -->
     <meta name="twitter:card"        content="summary_large_image" />
     <meta name="twitter:title"       content="Kayad – Kenya's Premium Car Marketplace" />
     <meta name="twitter:description" content="Buy, sell and bid on premium cars in Kenya. Live auctions. Secure escrow." />
     <meta name="twitter:image"       content="https://kayad.space/icon-512.png" />
+    
+    <!-- Mobile Standalone Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Kayad" />
+    
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icon-192.png" sizes="192x192" />
     <link rel="mask-icon" href="/favicon.svg" color="#D4C4A8" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <!-- High-Legibility Typography Links -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+    
     <!-- Google Analytics — loaded dynamically by src/lib/analytics.js -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
     </script>
   </head>
-  <body>
+  <body class="bg-slate-950 font-sans text-slate-100 min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
