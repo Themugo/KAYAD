@@ -1,4 +1,3 @@
-// vite.config.js
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -31,14 +30,27 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-          runtimeCaching: [{
-            urlPattern: /^https?:\/\/.*\/api\/.*/i,
-            handler: 'NetworkOnly',
-          }],
+          runtimeCaching: [
+            {
+              urlPattern: /^https?:\/\/.*\/api\/.*/i,
+              handler: 'NetworkOnly',
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                },
+              },
+            }
+          ],
         },
       }),
       env.VITE_BUNDLE_VISUALIZE && visualizer({
-        open: true,
+        open: false,
         gzipSize: true,
         brotliSize: true,
         filename: 'dist/stats.html',
@@ -51,11 +63,14 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_API_BASE_URL || 'http://localhost:5000',
           changeOrigin: true,
+          secure: false,
           cookieDomainRewrite: 'localhost',
         },
         '/socket.io': {
           target: env.VITE_SOCKET_URL || 'http://localhost:5000',
           ws: true,
+          changeOrigin: true,
+          secure: false,
         },
       },
     },
@@ -63,37 +78,43 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: !!env.VITE_SENTRY_DSN,
+      target: 'esnext',
+      cssCodeSplit: true,
 
       rollupOptions: {
         output: {
           manualChunks: (id) => {
-            // Vendor chunk — React + Router + core libs
+            // Vendor chunk — React + Router + core UI logic
             if (id.includes('node_modules/react') ||
                 id.includes('node_modules/react-dom') ||
                 id.includes('node_modules/react-router')) {
               return 'vendor-react';
             }
-            // Socket.io chunk
+            // HTTP Request layer chunk
+            if (id.includes('node_modules/axios')) {
+              return 'vendor-network';
+            }
+            // Socket.io Real-time communications chunk
             if (id.includes('node_modules/socket.io')) {
               return 'vendor-socket';
             }
-            // Sentry chunk — only loads when DSN is set
+            // Sentry exception tracking chunk
             if (id.includes('node_modules/@sentry')) {
               return 'vendor-sentry';
             }
-            // Lucide icons — tree-shaken but still chunk-worthy
+            // Lucide Icons code separation
             if (id.includes('node_modules/lucide-react')) {
               return 'vendor-icons';
             }
-            // Admin pages — only dealers/admins load these
-            if (id.includes('/pages/admin/') || id.includes('/pages/dealer/')) {
+            // Cross-platform check (handles both Linux forward slashes and Windows backward slashes)
+            if (/[\\/]pages[\\/](admin|dealer)[\\/]/.test(id)) {
               return 'pages-staff';
             }
           }
         }
       },
 
-      chunkSizeWarningLimit: 800,
+      chunkSizeWarningLimit: 1000,
     },
 
     define: {
