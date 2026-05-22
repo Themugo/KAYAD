@@ -10,7 +10,7 @@ vi.mock('../../api/api', () => ({
 }));
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
-    user: { _id: 'u1', email: 'admin@kayad.demo', mustChangePassword: true, role: 'admin' },
+    user: { _id: 'u1', email: 'superadmin@kayad.demo', mustChangePassword: true, role: 'admin' },
     loading: false,
     setUser: vi.fn(),
     login: vi.fn(),

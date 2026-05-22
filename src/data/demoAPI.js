@@ -364,10 +364,9 @@ const demoCars = {
     const car = getDemoCar(id);
     if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
     const user = getDemoUser();
-    // Demo is a shared sandbox: any seller-type account can edit any demo
-    // listing, so a dealer demo can showcase editing across the whole catalogue.
-    const canEdit = ['dealer', 'broker', 'individual_seller', 'admin', 'superadmin'].includes(user?.role);
-    if (!canEdit) {
+    const isStaff = ['admin', 'superadmin'].includes(user?.role);
+    const isOwner = String(car.dealer?._id || car.dealer) === user?._id;
+    if (!isOwner && !isStaff) {
       throw { response: { status: 403, data: { message: 'You can only edit your own listings' } } };
     }
       updateDemoCar(id, body);
@@ -379,6 +378,12 @@ const demoCars = {
     await delay(200, 500);
       const car = getDemoCar(id);
       if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+      const user = getDemoUser();
+      const isStaff = ['admin', 'superadmin'].includes(user?.role);
+      const isOwner = String(car.dealer?._id || car.dealer) === user?._id;
+      if (!isOwner && !isStaff) {
+        throw { response: { status: 403, data: { message: 'Not authorized' } } };
+      }
       removeDemoCar(id);
       return wrapSuccess({ message: 'Car deleted' });
   },

@@ -309,8 +309,13 @@ export const updateCar = async (req, res) => {
     const isStaff = STAFF_ROLES.includes(req.user.role);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isDemoMgmt = car.isDemo && (isDealer || isStaff);
-    if (!isOwner && !isStaff && !isDemoMgmt) {
+
+    // Permission rules:
+    //   • Owner always edits their own car
+    //   • Demo dealers can edit demo cars
+    //   • Staff can edit demo cars ONLY — never real dealer/broker/seller listings
+    const canEdit = isOwner || (car.isDemo && (isDealer || isStaff));
+    if (!canEdit) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
 

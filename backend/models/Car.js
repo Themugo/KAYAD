@@ -184,27 +184,27 @@ carSchema.statics.softDelete = async function (ids, userId) {
   );
 };
 
-// Override find to exclude soft-deleted by default
-const originalFind = carSchema.statics.find;
-carSchema.statics.find = function (query, ...rest) {
-  if (query && query.deletedAt === undefined) {
-    query.deletedAt = null;
+// Soft-delete filter — exclude deleted cars by default
+carSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
   }
-  return originalFind.call(this, query, ...rest);
-};
+  next();
+});
 
-const originalFindOne = carSchema.statics.findOne;
-carSchema.statics.findOne = function (query, ...rest) {
-  if (query && query.deletedAt === undefined) {
-    query.deletedAt = null;
+carSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
   }
-  return originalFindOne.call(this, query, ...rest);
-};
+  next();
+});
 
-const originalFindById = carSchema.statics.findById;
-carSchema.statics.findById = function (id, ...rest) {
-  return originalFindById.call(this, id, { deletedAt: null }, ...rest);
-};
+carSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
 
 // =============================
 // 🔥 INDEXES (CRITICAL)
