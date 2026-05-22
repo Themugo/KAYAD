@@ -140,9 +140,16 @@ export const isRedisConnected = () => connected;
 
 // TTLs for common resources (seconds)
 export const CACHE_TTL = {
-  CARS_LIST:    60,      // 1 min  — updates often
-  CAR_DETAIL:   30,      // 30 sec — bids update live
   STATS:        300,     // 5 min  — admin stats
   DEALER_SUMM:  120,     // 2 min
   SEARCH:       45,      // 45 sec
+};
+
+// Close Redis connection on shutdown
+export const closeCache = async () => {
+  if (client) {
+    try { await client.quit(); } catch { /* ignore */ }
+    client = null;
+    connected = false;
+  }
 };

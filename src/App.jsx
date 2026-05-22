@@ -19,6 +19,7 @@
 // ─────────────────────────────────────────────────────────────────────
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 import {
   AuthProvider,
@@ -156,6 +157,11 @@ function ScrollToTop() {
 
 // ─── Root component ─────────────────────────────────────────────────────
 export default function App() {
+  // Seed CSRF cookie on initial load (double-submit cookie pattern)
+  useEffect(() => {
+    axios.get('/api/auth/csrf-token', { withCredentials: true }).catch(() => {});
+  }, []);
+
   return (
     <ErrorBoundary>
       <BrowserRouter>

@@ -74,12 +74,12 @@ import errorHandler from "./middleware/errorHandler.js";
 import requestLogger      from "./middleware/logger.js";
 import { startAuctionEngine }  from "./realtime/auctionEngine.js";
 import { startAuctionTimer }   from "./utils/auctionTimer.js";
-import { startEscrowCron }     from "./services/escrowCron.js";
-import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
-import { startSavedSearchCron } from "./services/savedSearchCron.js";
-import { startPriceAlertCron } from "./services/priceAlertCron.js";
+import { startEscrowCron, stopEscrowCron }     from "./services/escrowCron.js";
+import { startAuctionReminderCron, stopAuctionReminderCron } from "./services/auctionReminderCron.js";
+import { startSavedSearchCron, stopSavedSearchCron } from "./services/savedSearchCron.js";
+import { startPriceAlertCron, stopPriceAlertCron } from "./services/priceAlertCron.js";
 import { initSentry, sentryErrorHandler } from "./utils/sentry.js";
-import { initCache }           from "./utils/cache.js";
+import { initCache, closeCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected }    from "./utils/cache.js";
@@ -119,6 +119,10 @@ app.use(helmet({
   },
 }));
 app.use(extraHeaders());
+
+// ─── COMPRESSION (gzip) ───────────────────────────────────────
+import compression from "compression";
+app.use(compression({ level: 6, threshold: 1024 }));
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
 app.use(requestLogger);
@@ -364,10 +368,10 @@ const bootstrap = async () => {
 
     await startAuctionEngine();
     startAuctionTimer(io);
-    startEscrowCron();
-    startAuctionReminderCron();
-    startSavedSearchCron();
-    startPriceAlertCron();
+    const ecTimer = startEscrowCron();
+    const arTimer = startAuctionReminderCron();
+    const ssTimer = startSavedSearchCron();
+    const paTimer = startPriceAlertCron();
 
     console.log(`  ⏰ EscrowCron: auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`);
     console.log(`  ⏰ AuctionReminderCron: reminders active`);
@@ -375,10 +379,38 @@ const bootstrap = async () => {
     console.log(`  ⏰ PriceAlertCron: 15-min cycle`);
     console.log(`  ⚡ AuctionEngine: running`);
     console.log("");
+
+    // Attach timers for graceful shutdown
+    app.locals.cronTimers = { ecTimer, arTimer, ssTimer, paTimer };
   } catch (err) {
     console.error("❌ Bootstrap failed:", err.message);
     process.exit(1);
   }
+};
+
+// ─── GRACEFUL SHUTDOWN ────────────────────────────────────────
+const shutdown = async (signal) => {
+  console.log(`\n🛑 ${signal} — shutting down gracefully...`);
+
+  // Stop cron jobs
+  const timers = app.locals.cronTimers || {};
+  stopEscrowCron();
+  stopAuctionReminderCron();
+  stopSavedSearchCron(timers.ssTimer);
+  stopPriceAlertCron(timers.paTimer);
+
+  // Close Socket.IO
+  if (io) io.close();
+
+  // Close Redis
+  await closeCache();
+
+  server.close(async () => {
+    await mongoose.connection.close().catch(() => {});
+    console.log("✅ Shutdown complete");
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10_000);
 };
 
 // ─── GRACEFUL SHUTDOWN ────────────────────────────────────────

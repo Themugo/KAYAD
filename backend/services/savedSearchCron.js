@@ -95,6 +95,11 @@ export const startSavedSearchCron = () => {
   };
 
   tick();
-  setInterval(tick, CHECK_INTERVAL);
+  const timer = setInterval(tick, CHECK_INTERVAL);
   console.log(`  ⏰ SavedSearchCron: ${CHECK_INTERVAL / 60000}-min cycle`);
+  return timer;
+};
+
+export const stopSavedSearchCron = (timer) => {
+  if (timer) clearInterval(timer);
 };
