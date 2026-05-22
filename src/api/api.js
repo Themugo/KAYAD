@@ -1,17 +1,62 @@
 // src/api/api.js
 // ============================================================
-// KAYAD — FULL API LAYER (Production — no demo fallback)
+// KAYAD — FULL API LAYER
 // Every backend route mapped exactly to the Express routes
 // ============================================================
 
 import axios from 'axios';
+import { demoAPI } from '../data/demoAPI';
 
 // In dev: Vite proxy forwards /api → backend (see vite.config.js)
 // In prod: Vercel rewrite forwards /api → Render backend (see vercel.json)
 // Always use /api — never set VITE_API_BASE_URL to a full backend URL
 const BASE = '/api';
 
+// ─── Demo mode auto-detection ────────────────────────────────
+let __DEMO_MODE__ = false;
+export const isDemoMode = () => __DEMO_MODE__;
+// Force demo mode on (used by the login page's demo quick-login buttons so
+// the @demo.com accounts work instantly regardless of real-backend state).
+export const enableDemoMode = () => { __DEMO_MODE__ = true; };
+
+export const checkBackendAvailability = async () => {
+  try {
+    await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000 });
+    __DEMO_MODE__ = false;
+    return true;
+  } catch (err) {
+    // Backend is effectively unavailable on: network error, timeout,
+    // gateway errors (502/503/504 — free-tier backend asleep), or 404.
+    const s = err.response?.status;
+    const unavailable =
+      !err.response ||
+      err.code === 'ERR_NETWORK' ||
+      err.code === 'ECONNABORTED' ||
+      err.message?.includes('Network Error') ||
+      [404, 502, 503, 504].includes(s);
+    if (unavailable) {
+      __DEMO_MODE__ = true;
+      return false;
+    }
+    return true;
+  }
+};
+
+// Try backend on startup — if unreachable, switch to demo
+(function initDemoCheck() {
+  checkBackendAvailability()
+    .then((online) => { if (online && import.meta.env.DEV) console.info('[Backend] Reachable'); })
+    .catch((err) => {
+      if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+        __DEMO_MODE__ = true;
+        if (import.meta.env.DEV) console.info('[Demo] Backend unreachable, using demo data');
+      }
+    });
+})();
+
 // ─── MULTI-TAB DETECTION ──────────────────────────────────────
+// localStorage is shared across all tabs. If another tab changes the token,
+// reload to pick up the new auth state.
 let _currentToken = localStorage.getItem('kayad_token');
 window.addEventListener('storage', (e) => {
   if (e.key === 'kayad_token' && e.newValue !== _currentToken) {
@@ -21,14 +66,15 @@ window.addEventListener('storage', (e) => {
 });
 
 // ─── AXIOS INSTANCE ───────────────────────────────────────────
-const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 });
+const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 }); // 15s default; payment calls override to 45s
 
+// Attach JWT from localStorage on every request
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('kayad_token');
   if (token) {
     cfg.headers = cfg.headers || {};
     cfg.headers.Authorization = `Bearer ${token}`;
-    cfg._hadToken = true;
+    cfg._hadToken = true; // mark that this request was made with a token
   }
   return cfg;
 });
@@ -40,6 +86,16 @@ let _queue = [];
 api.interceptors.response.use(
   r => r,
   async err => {
+    // Network error → switch to demo mode
+    if (!err.response) {
+      __DEMO_MODE__ = true;
+      return Promise.reject(err);
+    }
+    // Demo token hitting real backend → activate demo mode, don't attempt refresh
+    if (err.response?.status === 401 && isDemoToken()) {
+      __DEMO_MODE__ = true;
+      return Promise.reject(err);
+    }
     const orig = err.config;
     const requestUrl = orig?.url || "";
     const hasStoredToken = !!localStorage.getItem('kayad_token');
@@ -50,6 +106,9 @@ api.interceptors.response.use(
       requestUrl.includes('/auth/reset-password') ||
       requestUrl.includes('/auth/refresh');
 
+    // Only attempt refresh/clear if the original request HAD a token attached.
+    // Requests made without a token (e.g. wake-up calls, public endpoints) should
+    // NOT trigger auth-expired — a 401 is expected when no token was sent.
     if (err.response?.status === 401 && hasStoredToken && !skipRefresh && !orig._retry && orig._hadToken) {
       if (_refreshing) {
         return new Promise((res, rej) => _queue.push({ res, rej }))
@@ -89,7 +148,66 @@ api.interceptors.response.use(
   }
 );
 
+// ─── HELPERS ───────────────────────────────────────────────────
 const unwrap = res => res.data;
+
+// Check if the stored token is a demo token (base64-encoded JSON with @demo.com email)
+const isDemoToken = () => {
+  const t = localStorage.getItem('kayad_token');
+  if (!t) return false;
+  try {
+    const p = JSON.parse(atob(t));
+    return p.demo === true || p.email?.endsWith('@demo.com') || p.email?.endsWith('.demo') || p.superAdmin === true;
+  } catch { return false; }
+};
+
+// Should we fall back to demo for this error?
+// Yes when the backend is effectively unavailable:
+//   • no response at all (network error / CORS / DNS)
+//   • request timed out
+//   • gateway errors (502/503/504) — common when a free-tier backend is asleep
+//   • 404 on the API itself — backend not deployed at this origin
+// No for genuine 400/401/403/409/422 from a LIVE backend — those are real
+// validation/auth errors and must surface to the user (except a 401 paired
+// with a demo token, which just means the real backend rejected a demo token).
+const shouldFallbackToDemo = (err) => {
+  if (!err.response) return true;                          // network / CORS / DNS / timeout
+  if (err.code === 'ECONNABORTED') return true;            // axios timeout
+  const s = err.response.status;
+  if ([502, 503, 504].includes(s)) return true;            // gateway / backend asleep
+  if (s === 404) return true;                              // API not found at origin
+  if (s === 401 && isDemoToken()) return true;             // real backend rejected a demo token
+  return false;
+};
+
+// Wrap a real API object with demo fallback.
+// Strategy:
+// 1. If the token is a demo token → use demo API directly (real backend will reject it)
+// 2. Otherwise → try real API first
+// 3. On network error (no response) → fall back to demo
+// 4. On 401 from real backend with a demo token → fall back to demo
+function withDemo(realObj, demoObj) {
+  const wrapped = {};
+  for (const key of Object.keys(realObj)) {
+    wrapped[key] = async (...args) => {
+      // If using a demo token, go straight to demo API — real backend will reject it
+      if (demoObj?.[key] && (isDemoToken() || __DEMO_MODE__)) {
+        __DEMO_MODE__ = true;
+        return demoObj[key](...args);
+      }
+
+      try { return await realObj[key](...args); }
+      catch (err) {
+        if (demoObj?.[key] && (__DEMO_MODE__ || shouldFallbackToDemo(err))) {
+          __DEMO_MODE__ = true;
+          return demoObj[key](...args);
+        }
+        throw err;
+      }
+    };
+  }
+  return wrapped;
+}
 
 // ============================================================
 //  AUTH  — routes/authRoutes.js
@@ -98,29 +216,31 @@ const unwrap = res => res.data;
 const _authAPI = {
   register: (body) => api.post('/auth/register', body).then(unwrap),
   login:    (body) => api.post('/auth/login', body).then(unwrap),
-  refresh:  ()     => api.post('/auth/refresh').then(unwrap),
-  logout:   ()     => api.post('/auth/logout').then(unwrap),
-  profile:  ()     => api.get('/auth/profile').then(unwrap),
-  me:       ()     => api.get('/auth/me').then(unwrap),
-  changePassword:   (body) => api.put('/auth/change-password', body).then(unwrap),
+  refresh:  ()     => isDemoToken() ? (__DEMO_MODE__ = true, demoAPI.auth.refresh()) : api.post('/auth/refresh').then(unwrap),
+  logout:   ()     => isDemoToken() ? demoAPI.auth.logout() : api.post('/auth/logout').then(unwrap),
+  profile:  ()     => isDemoToken() ? demoAPI.auth.profile() : api.get('/auth/profile').then(unwrap),
+  me:       ()     => isDemoToken() ? (__DEMO_MODE__ = true, demoAPI.auth.me()) : api.get('/auth/me').then(unwrap),
+  changePassword:   (body) => isDemoToken() ? demoAPI.auth.changePassword(body) : api.put('/auth/change-password', body).then(unwrap),
   forgotPassword:   (body) => api.post('/auth/forgot-password', body).then(unwrap),
   resetPassword:    (body) => api.post('/auth/reset-password', body).then(unwrap),
   verifyEmail:         (token) => api.get(`/auth/verify-email/${token}`).then(unwrap),
   resendVerification:  (body)  => api.post('/auth/resend-verification', body).then(unwrap),
-  updateProfile:       (body) => api.put('/auth/profile', body).then(unwrap),
+  updateProfile:       (body) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
 };
-export const authAPI = _authAPI;
+export const authAPI = withDemo(_authAPI, demoAPI.auth);
 
 // ============================================================
 //  CARS — routes/carRoutes.js
 // ============================================================
 const _carsAPI = {
+  // Public
   list: (params) => api.get('/cars', { params }).then(unwrap),
   get:  (id)     => api.get(`/cars/${id}`).then(unwrap),
   insights: (id) => api.get(`/cars/${id}/insights`).then(unwrap),
   priceHistory: (id) => api.get(`/cars/${id}/price-history`).then(unwrap),
   trackClick: (id) => api.post(`/cars/${id}/click`).then(unwrap),
 
+  // Dealer
   create: (formData) =>
     api.post('/cars', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
   addImages: (id, formData) =>
@@ -132,16 +252,22 @@ const _carsAPI = {
   myCars:    ()      => api.get('/cars/dealer/my-cars').then(unwrap),
   analytics: ()      => api.get('/cars/dealer/analytics').then(unwrap),
 
+  // Actions
   bid: (id, body)        => api.post(`/cars/${id}/bid`, body).then(unwrap),
   toggleFav: (id)        => api.post(`/cars/${id}/favorite`).then(unwrap),
 
+  // Batch
   batch: (body)         => api.post('/cars/batch', body).then(unwrap),
 
+  // Demo
+  demoAll: ()       => api.get('/cars/demo/all').then(unwrap),
+
+  // Admin
   fraudCheck: (id) => api.get(`/cars/admin/${id}/fraud`).then(unwrap),
   adminStart: (id) => api.post(`/cars/admin/${id}/start`).then(unwrap),
   adminEnd:   (id) => api.post(`/cars/admin/${id}/end`).then(unwrap),
 };
-export const carsAPI = _carsAPI;
+export const carsAPI = withDemo(_carsAPI, demoAPI.cars);
 
 // ============================================================
 //  BIDS — routes/bidRoutes.js
@@ -154,16 +280,22 @@ const _bidsAPI = {
   adminSuspicious: ()            => api.get('/bids/admin/suspicious').then(unwrap),
   adminSetWinner:  (bidId)       => api.post(`/bids/admin/${bidId}/set-winner`).then(unwrap),
 };
-export const bidsAPI = _bidsAPI;
+export const bidsAPI = withDemo(_bidsAPI, demoAPI.bids);
 
+// ============================================================
+//  PAYMENTS — routes/paymentRoutes.js
+// ============================================================
 const _paymentsAPI = {
-  initiate:    (body)      => api.post('/payments/initiate', body, { timeout: 45000 }).then(unwrap),
+  initiate:    (body)      => api.post('/payments/initiate', body, { timeout: 45000 }).then(unwrap), // M-Pesa STK can take ~30s
   status:      (id)        => api.get(`/payments/status/${id}`).then(unwrap),
   myPayments:  ()          => api.get('/payments/my').then(unwrap),
   byCheckout:  (checkoutId)=> api.get(`/payments/checkout/${checkoutId}`).then(unwrap),
 };
-export const paymentsAPI = _paymentsAPI;
+export const paymentsAPI = withDemo(_paymentsAPI, demoAPI.payments);
 
+// ============================================================
+//  ESCROW — routes/escrowRoutes.js
+// ============================================================
 const _escrowAPI = {
   mine:    ()              => api.get('/escrow/my').then(unwrap),
   all:     (params)        => api.get('/escrow', { params }).then(unwrap),
@@ -173,8 +305,11 @@ const _escrowAPI = {
   dispute: (id, reason)    => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
   requestRelease: (id)     => api.post(`/escrow/${id}/request-release`).then(unwrap),
 };
-export const escrowAPI = _escrowAPI;
+export const escrowAPI = withDemo(_escrowAPI, demoAPI.escrow);
 
+// ============================================================
+//  ESCROW VAULT — routes/escrowVaultRoutes.js
+// ============================================================
 const _escrowVaultAPI = {
   init:             (carId)          => api.post(`/escrow-vault/${carId}/init`).then(unwrap),
   my:               ()               => api.get('/escrow-vault/my').then(unwrap),
@@ -188,8 +323,11 @@ const _escrowVaultAPI = {
   adminConfirm:     (id)             => api.post(`/escrow-vault/${id}/admin-confirm-funding`).then(unwrap),
   adminRefund:      (id)             => api.post(`/escrow-vault/${id}/admin-refund`).then(unwrap),
 };
-export const escrowVaultAPI = _escrowVaultAPI;
+export const escrowVaultAPI = withDemo(_escrowVaultAPI, demoAPI.escrowVault);
 
+// ============================================================
+//  DEALER — routes/dealerRoutes.js
+// ============================================================
 const _dealerAPI = {
   earnings:   (params) => api.get('/dealer/earnings', { params }).then(unwrap),
   cars:       (params) => api.get('/dealer/cars', { params }).then(unwrap),
@@ -198,29 +336,36 @@ const _dealerAPI = {
   quickStats: ()       => api.get('/dealer/quick-stats').then(unwrap),
   bids:       (params) => api.get('/dealer/bids', { params }).then(unwrap),
 
+  // Listing actions
   duplicate:  (carId)        => api.post(`/dealer/cars/${carId}/duplicate`).then(unwrap),
   markSold:   (carId, body)  => api.patch(`/dealer/cars/${carId}/mark-sold`, body).then(unwrap),
   acceptBid:  (carId, bidId) => api.post(`/dealer/cars/${carId}/accept-bid`, { bidId }).then(unwrap),
   rejectBid:  (carId, bidId) => api.post(`/dealer/cars/${carId}/reject-bid`, { bidId }).then(unwrap),
   bulkStatus: (body)         => api.patch('/dealer/cars/bulk-status', body).then(unwrap),
 
+  // CSV export
   exportCSV:  (params)       => api.get('/dealer/cars', { params, responseType: 'blob' }).then(r => r.data),
 
+  // Team management
   getTeam:        ()             => api.get('/dealer/team').then(unwrap),
   inviteMember:   (body)         => api.post('/dealer/team/invite', body).then(unwrap),
   updateMember:   (memberId, body) => api.patch(`/dealer/team/${memberId}`, body).then(unwrap),
   removeMember:   (memberId)     => api.delete(`/dealer/team/${memberId}`).then(unwrap),
 
+  // Settlement config
   getSettlement:  ()             => api.get('/dealer/settlement').then(unwrap),
   updateSettlement: (body)       => api.put('/dealer/settlement', body).then(unwrap),
 };
-export const dealerAPI = _dealerAPI;
+export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 
+// ============================================================
+//  ADMIN — routes/adminRoutes.js
+// ============================================================
 const _referralAPI = {
   stats: () => api.get('/referral/stats').then(unwrap),
   code:  () => api.get('/referral/code').then(unwrap),
 };
-export const referralAPI = _referralAPI;
+export const referralAPI = withDemo(_referralAPI, {});
 
 const _adminAPI = {
   stats:         ()          => api.get('/admin/stats').then(unwrap),
@@ -230,25 +375,34 @@ const _adminAPI = {
   cars:          (params)    => api.get('/admin/cars', { params }).then(unwrap),
   deleteCar:     (carId)     => api.delete(`/admin/cars/${carId}`).then(unwrap),
 
+  // Seller Settings
   updateSellerSettings: (userId, body) => api.put(`/admin/users/${userId}/seller-settings`, body).then(unwrap),
 
+  // Platform Config
   getConfig:      ()          => api.get('/admin/config').then(unwrap),
   updateConfig:   (body)      => api.put('/admin/config', body).then(unwrap),
 
+  // Audit Log
   getAuditLog:    (params)    => api.get('/admin/audit-log', { params }).then(unwrap),
   appendAuditLog: (body)      => api.post('/admin/audit-log', body).then(unwrap),
 
+  // M-Pesa Test
   testMpesa:      (body)      => api.post('/admin/daraja/test', body).then(unwrap),
 
+  // System Kill-Switch
   systemKillSwitch: (body) => api.post('/admin/system/kill-switch', body).then(unwrap),
   systemRecover:    (body) => api.post('/admin/system/recover', body).then(unwrap),
 
+  // Dealer Verification
   verifyDealer:    (userId, body) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
 
+  // NTSA / Car Verification
   verifyCar:       (carId, body) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
 
+  // Moderation Queue
   moderateCar:     (carId, body) => api.post(`/admin/cars/${carId}/moderate`, body).then(unwrap),
 
+  // Staff Management (superadmin only)
   getStaff:        ()            => api.get('/admin/staff').then(unwrap),
   createStaff:     (body)        => api.post('/admin/staff', body).then(unwrap),
   updateStaff:     (id, body)    => api.put(`/admin/staff/${id}`, body).then(unwrap),
@@ -256,18 +410,23 @@ const _adminAPI = {
   seedDepartments: ()            => api.post('/admin/seed-departments').then(unwrap),
   reseed:          ()            => api.post('/admin/reseed').then(unwrap),
 
+  // User Management
   deleteUser:      (userId)      => api.delete(`/admin/users/${userId}`).then(unwrap),
   deactivateUser:  (userId)      => api.put(`/admin/users/${userId}/deactivate`).then(unwrap),
 
+  // Demo Data Management
   demoStatus:      ()            => api.get('/admin/demo/status').then(unwrap),
   demoCleanup:     ()            => api.delete('/admin/demo/cleanup').then(unwrap),
 
+  // Dealer Package Assignment
   assignPackage:   (userId, body) => api.patch(`/admin/dealers/${userId}/package`, body).then(unwrap),
   updatePackages:  (packages) => api.put('/admin/config/packages', { packages }).then(unwrap),
 
+  // Review Moderation
   reviews:         (params)    => api.get('/admin/reviews', { params }).then(unwrap),
   deleteReview:    (id)        => api.delete(`/admin/reviews/${id}`).then(unwrap),
 
+  // Referral Management
   referrals:        (params)    => api.get('/admin/referrals', { params }).then(unwrap),
   referralStats:    ()          => api.get('/admin/referrals/stats').then(unwrap),
   referralDetail:   (id)        => api.get(`/admin/referrals/${id}`).then(unwrap),
@@ -275,12 +434,14 @@ const _adminAPI = {
   expireReferral:   (id)        => api.post(`/admin/referrals/${id}/expire`).then(unwrap),
   userReferrals:    (userId)    => api.get(`/admin/users/${userId}/referrals`).then(unwrap),
 
+  // Chat Moderation
   chats:            (params)    => api.get('/admin/chats', { params }).then(unwrap),
   chatMessages:     (chatId)    => api.get(`/admin/chats/${chatId}/messages`).then(unwrap),
   deleteChatMessage: (chatId, msgId) => api.delete(`/admin/chats/${chatId}/messages/${msgId}`).then(unwrap),
   blockChat:        (chatId)    => api.post(`/admin/chats/${chatId}/block`).then(unwrap),
   unblockChat:      (chatId)    => api.post(`/admin/chats/${chatId}/unblock`).then(unwrap),
 
+  // Market Data Management
   marketData:       (params)    => api.get('/admin/market-data', { params }).then(unwrap),
   marketDataDetail: (id)        => api.get(`/admin/market-data/${id}`).then(unwrap),
   createMarketData: (body)      => api.post('/admin/market-data', body).then(unwrap),
@@ -288,13 +449,15 @@ const _adminAPI = {
   deleteMarketData: (id)        => api.delete(`/admin/market-data/${id}`).then(unwrap),
   bulkMarketData:  (entries)   => api.post('/admin/market-data/bulk', { entries }).then(unwrap),
 
+  // Alerts (NEW)
   alerts:          (params)    => api.get('/admin/alerts', { params }).then(unwrap),
   markAlertRead:   (id)        => api.post(`/admin/alerts/${id}/read`).then(unwrap),
   markAllAlertsRead: ()        => api.post('/admin/alerts/read-all').then(unwrap),
 
+  // System Health (NEW)
   systemHealth:    ()          => api.get('/admin/system/health').then(unwrap),
 };
-export const adminAPI = _adminAPI;
+export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
 
 // ============================================================
 //  AUCTION ADMIN — routes/auctionAdminRoutes.js (ADMIN ONLY)
@@ -306,15 +469,21 @@ const _auctionAdminAPI = {
   bidHistory:(carId)        => api.get(`/auction-admin/${carId}/bids`).then(unwrap),
   setWinner: (carId, bidId) => api.post(`/auction-admin/${carId}/set-winner`, { bidId }).then(unwrap),
 };
-export const auctionAdminAPI = _auctionAdminAPI;
+export const auctionAdminAPI = withDemo(_auctionAdminAPI, demoAPI.auctionAdmin);
 
+// ============================================================
+//  DEALER AUCTIONS — routes/dealerRoutes.js (DEALER ONLY)
+// ============================================================
 const _dealerAuctionAPI = {
   start:     (carId, body)  => api.post(`/dealer/cars/${carId}/auction/start`, body).then(unwrap),
   end:       (carId)        => api.post(`/dealer/cars/${carId}/auction/end`).then(unwrap),
   extend:    (carId, hours) => api.post(`/dealer/cars/${carId}/auction/extend`, { hours }).then(unwrap),
 };
-export const dealerAuctionAPI = _dealerAuctionAPI;
+export const dealerAuctionAPI = withDemo(_dealerAuctionAPI, demoAPI.auctionAdmin);
 
+// ============================================================
+//  FAVORITES — routes/favoriteRoutes.js
+// ============================================================
 const _favoritesAPI = {
   list:   ()      => api.get('/favorites').then(unwrap),
   add:    (carId) => api.post(`/favorites/${carId}`).then(unwrap),
@@ -322,8 +491,11 @@ const _favoritesAPI = {
   toggle: (carId) => api.post(`/favorites/${carId}/toggle`).then(unwrap),
   setPriceAlert: (carId, notify) => api.put(`/favorites/${carId}/price-alert`, { notifyOnPriceDrop: notify }).then(unwrap),
 };
-export const favoritesAPI = _favoritesAPI;
+export const favoritesAPI = withDemo(_favoritesAPI, demoAPI.favorites);
 
+// ============================================================
+//  CHAT — routes/chatRoutes.js
+// ============================================================
 const _chatAPI = {
   inbox:    ()               => api.get('/chat').then(unwrap),
   start:    (body)           => api.post('/chat', body).then(unwrap),
@@ -332,24 +504,33 @@ const _chatAPI = {
   seen:     (chatId)         => api.post(`/chat/${chatId}/seen`).then(unwrap),
   leave:    (chatId)         => api.delete(`/chat/${chatId}`).then(unwrap),
 };
-export const chatAPI = _chatAPI;
+export const chatAPI = withDemo(_chatAPI, demoAPI.chat);
 
+// ============================================================
+//  NOTIFICATIONS — routes/notificationRoutes.js
+// ============================================================
 const _notifAPI = {
   list:        (params) => api.get('/notifications', { params }).then(unwrap),
   markRead:    (id)     => api.post(`/notifications/${id}/read`).then(unwrap),
   markAllRead: ()       => api.post('/notifications/read-all').then(unwrap),
   remove:      (id)     => api.delete(`/notifications/${id}`).then(unwrap),
 };
-export const notifAPI = _notifAPI;
+export const notifAPI = withDemo(_notifAPI, demoAPI.notif);
 
+// ============================================================
+//  SAVED SEARCHES — routes/savedSearchRoutes.js
+// ============================================================
 const _savedSearchAPI = {
   list:   ()             => api.get('/saved-searches').then(unwrap),
   create: (body)         => api.post('/saved-searches', body).then(unwrap),
   update: (id, body)     => api.put(`/saved-searches/${id}`, body).then(unwrap),
   remove: (id)           => api.delete(`/saved-searches/${id}`).then(unwrap),
 };
-export const savedSearchAPI = _savedSearchAPI;
+export const savedSearchAPI = withDemo(_savedSearchAPI, demoAPI.savedSearch);
 
+// ============================================================
+//  NTSA VERIFICATION — routes/ntsaVerificationRoutes.js
+// ============================================================
 const _ntsaAPI = {
   list:    (params)    => api.get('/ntsa-verification', { params }).then(unwrap),
   queue:   (carId)     => api.post('/ntsa-verification', { carId }).then(unwrap),
@@ -357,13 +538,19 @@ const _ntsaAPI = {
   addDoc:  (id, body)  => api.post(`/ntsa-verification/${id}/documents`, body).then(unwrap),
   status:  (carId)     => api.get(`/ntsa-verification/car/${carId}/status`).then(unwrap),
 };
-export const ntsaAPI = _ntsaAPI;
+export const ntsaAPI = withDemo(_ntsaAPI, demoAPI.ntsa);
 
+// ============================================================
+//  VERIFIED BUYER — routes/userRoutes.js
+// ============================================================
 export const buyerVerificationAPI = {
   submitPreApproval: (body) => api.post('/users/bank-pre-approval', body).then(unwrap),
   removePreApproval: ()     => api.delete('/users/bank-pre-approval').then(unwrap),
 };
 
+// ============================================================
+//  INSPECTIONS — routes/inspectionRoutes.js
+// ============================================================
 const _inspectionAPI = {
   order:           (body)           => api.post('/inspections/order', body).then(unwrap),
   confirmPayment:  (checkoutRequestID) => api.post('/inspections/confirm-payment', { checkoutRequestID }).then(unwrap),
@@ -377,22 +564,28 @@ const _inspectionAPI = {
   get:             (id)             => api.get(`/inspections/${id}`).then(unwrap),
   forCar:          (carId)          => api.get(`/inspections/car/${carId}`).then(unwrap),
 };
-export const inspectionAPI = _inspectionAPI;
+export const inspectionAPI = withDemo(_inspectionAPI, demoAPI.inspection);
 
+// ============================================================
+//  REVIEWS — routes/reviewRoutes.js
+// ============================================================
 const _reviewsAPI = {
   create:       (body)     => api.post('/reviews', body).then(unwrap),
   mine:         ()         => api.get('/reviews/my').then(unwrap),
   forDealer:    (dealerId) => api.get(`/reviews/dealer/${dealerId}`).then(unwrap),
   remove:       (id)       => api.delete(`/reviews/${id}`).then(unwrap),
 };
-export const reviewsAPI = _reviewsAPI;
+export const reviewsAPI = withDemo(_reviewsAPI, demoAPI.reviews);
 
+// ============================================================
+//  TRANSACTIONS — routes/transactionRoutes.js
+// ============================================================
 const _transactionsAPI = {
   list:    (params) => api.get('/transactions', { params }).then(unwrap),
   get:     (id)     => api.get(`/transactions/${id}`).then(unwrap),
   summary: ()       => api.get('/transactions/summary').then(unwrap),
 };
-export const transactionsAPI = _transactionsAPI;
+export const transactionsAPI = withDemo(_transactionsAPI, demoAPI.transactions);
 
 // ============================================================
 //  ADS — routes/adRoutes.js (/ads) + adminRoutes.js (/admin/ads)

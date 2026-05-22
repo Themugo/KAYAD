@@ -19,7 +19,6 @@
 // ─────────────────────────────────────────────────────────────────────
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
 
 import {
   AuthProvider,
@@ -49,10 +48,6 @@ const AuctionCalendar      = lazy(() => import('./pages/AuctionCalendar'));
 const AuctionLivePage      = lazy(() => import('./pages/AuctionLivePage'));
 const EscrowVaultPortal    = lazy(() => import('./pages/EscrowVaultPortal'));
 const NotFoundPage         = lazy(() => import('./pages/NotFoundPage'));
-const AboutPage            = lazy(() => import('./pages/AboutPage'));
-const ContactPage          = lazy(() => import('./pages/ContactPage'));
-const PrivacyPage          = lazy(() => import('./pages/PrivacyPage'));
-const TermsPage            = lazy(() => import('./pages/TermsPage'));
 
 const LoginPage            = lazy(() => import('./pages/LoginPage'));
 const RegisterPage         = lazy(() => import('./pages/RegisterPage'));
@@ -157,11 +152,6 @@ function ScrollToTop() {
 
 // ─── Root component ─────────────────────────────────────────────────────
 export default function App() {
-  // Seed CSRF cookie on initial load (double-submit cookie pattern)
-  useEffect(() => {
-    axios.get('/api/auth/csrf-token', { withCredentials: true }).catch(() => {});
-  }, []);
-
   return (
     <ErrorBoundary>
       <BrowserRouter>
@@ -250,12 +240,6 @@ export default function App() {
 
                       {/* ── 404 ─────────────────────────────────────────────── */}
                       <Route path="*" element={<Public><NotFoundPage /></Public>} />
-
-                      {/* ── Static Pages ────────────────────────────────────── */}
-                      <Route path="/about"    element={<Public><AboutPage /></Public>} />
-                      <Route path="/contact"   element={<Public><ContactPage /></Public>} />
-                      <Route path="/privacy"   element={<Public><PrivacyPage /></Public>} />
-                      <Route path="/terms"     element={<Public><TermsPage /></Public>} />
                     </Routes>
                   </Suspense>
                 </CompareProvider>

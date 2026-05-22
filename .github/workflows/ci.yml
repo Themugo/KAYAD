@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  NODE_VERSION: "20.x"
-
 jobs:
   frontend:
     name: Frontend
@@ -22,21 +19,17 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
           cache: "npm"
           cache-dependency-path: package-lock.json
 
       - run: npm ci
 
-      - name: Lint
-        run: npm run lint
-        continue-on-error: true
+      - run: npm run lint
 
-      - name: Unit tests
-        run: npm test
+      - run: npm test
 
-      - name: Build
-        run: npm run build
+      - run: npm run build
 
   backend:
     name: Backend
@@ -50,32 +43,18 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
-      # Cache mongodb-memory-server binary (~600MB download)
-      - name: Cache MongoDB binaries
-        id: cache-mongo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/mongodb-binaries
-            ~/.mongodb-binaries
-          key: ${{ runner.os }}-mongo-${{ hashFiles('backend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-mongo-
-
       - run: npm ci
 
-      - name: Tests
-        run: npm test
+      - run: npm test
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-32-chars-minimum-x
           MPESA_SKIP_IP_CHECK: "true"
           MONGO_URI: mongodb://localhost:27017/kayad-ci
-          MONGOMS_SYSTEM_BINARY: ""
 
   security-audit:
     name: Security Audit
@@ -85,48 +64,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: 20
 
       - run: npm audit --omit=dev --workspaces
-        continue-on-error: true
-
-  deploy-preview:
-    name: Deploy Preview (Vercel)
-    if: github.event_name == 'pull_request'
-    needs: [frontend, backend]
-    runs-on: ubuntu-latest
-    environment:
-      name: preview
-      url: ${{ steps.deploy.outputs.url }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Preview)
-        id: deploy
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prebuilt"
-        continue-on-error: true
-
-  deploy-production:
-    name: Deploy Production (Vercel)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [frontend, backend, security-audit]
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://kayad.space
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod --prebuilt"
         continue-on-error: true

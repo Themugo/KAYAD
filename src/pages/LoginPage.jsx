@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
-import { authAPI } from '../api/api';
+import { authAPI, enableDemoMode } from '../api/api';
 
 // Demo accounts — these resolve against the in-app demo dataset
 // (src/data/demoData.js). Clicking one forces demo mode so it works
@@ -73,10 +73,13 @@ export function LoginPage() {
     }
   };
 
+  // One-click demo sign-in. Forces demo mode so the @demo.com accounts
+  // resolve against the in-app dataset regardless of live-backend state.
   const handleDemoLogin = async (acct) => {
     setForm({ email: acct.email, password: acct.password });
     setLoading(true);
     try {
+      enableDemoMode();
       const data = await login({ email: acct.email, password: acct.password });
       toast(`Signed in as ${acct.label} (demo)`, 'success');
       navigate(getPostAuthPath(data.user, from), { replace: true });

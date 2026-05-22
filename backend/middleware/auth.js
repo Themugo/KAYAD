@@ -96,8 +96,13 @@ export const protect = async (req, res, next) => {
       });
     }
 
-    // 📧 REQUIRE EMAIL VERIFICATION (OWNER + DEMO EXEMPT)
-    if (!user.emailVerified && !isOwnerEmail(user.email) && !user.isDemo) {
+    // 📧 EMAIL VERIFICATION (config-gated; OWNER + DEMO EXEMPT)
+    // Mirror the login gate: only enforce when verification is actually possible.
+    const _emailConfigured = !!process.env.EMAIL_HOST;
+    const _requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
+      ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+      : _emailConfigured;
+    if (_requireVerification && !user.emailVerified && !isOwnerEmail(user.email) && !user.isDemo) {
       return res.status(403).json({
         success: false,
         message: "Please verify your email before accessing this resource",

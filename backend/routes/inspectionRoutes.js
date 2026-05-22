@@ -2,8 +2,6 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
-import { validate, validateObjectId } from "../middleware/validate.js";
-import { orderInspectionSchema, confirmPaymentSchema, assignInspectorSchema, submitInspectionSchema } from "../validation/inspection.schema.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import Car from "../models/Car.js";
 import { initiatePayment } from "../services/paymentService.js";
@@ -12,7 +10,7 @@ const router = express.Router();
 router.use(protect);
 
 // ── Order an inspection (buyer pays fee) ──────────────────────
-router.post("/order", createLimiter, validate(orderInspectionSchema), asyncHandler(async (req, res) => {
+router.post("/order", createLimiter, asyncHandler(async (req, res) => {
   const { carId, phone, location } = req.body;
   if (!carId || !phone) {
     return res.status(400).json({ success: false, message: "carId and phone required" });
@@ -57,7 +55,7 @@ router.post("/order", createLimiter, validate(orderInspectionSchema), asyncHandl
 }));
 
 // ── Confirm inspection payment (called by payment callback) ──
-router.post("/confirm-payment", validate(confirmPaymentSchema), asyncHandler(async (req, res) => {
+router.post("/confirm-payment", asyncHandler(async (req, res) => {
   const { checkoutRequestID } = req.body;
   if (!checkoutRequestID) return res.status(400).json({ success: false, message: "checkoutRequestID required" });
 
@@ -119,7 +117,7 @@ router.get("/available-inspectors", adminOnly, asyncHandler(async (req, res) => 
 }));
 
 // ── Assign inspector to order ─────────────────────────────────
-router.post("/:id/assign", adminOnly, validate(assignInspectorSchema), asyncHandler(async (req, res) => {
+router.post("/:id/assign", adminOnly, asyncHandler(async (req, res) => {
   const { inspectorId } = req.body;
   if (!inspectorId) return res.status(400).json({ success: false, message: "inspectorId required" });
 
@@ -135,7 +133,7 @@ router.post("/:id/assign", adminOnly, validate(assignInspectorSchema), asyncHand
 }));
 
 // ── Inspector: start inspection ───────────────────────────────
-router.post("/:id/start", validateObjectId, asyncHandler(async (req, res) => {
+router.post("/:id/start", asyncHandler(async (req, res) => {
   const order = await InspectionOrder.findById(req.params.id);
   if (!order) return res.status(404).json({ success: false, message: "Order not found" });
   if (String(order.inspector) !== req.user.id) return res.status(403).json({ success: false, message: "Not your assignment" });
@@ -148,7 +146,7 @@ router.post("/:id/start", validateObjectId, asyncHandler(async (req, res) => {
 }));
 
 // ── Inspector: submit inspection report ───────────────────────
-router.post("/:id/submit", validate(submitInspectionSchema), asyncHandler(async (req, res) => {
+router.post("/:id/submit", asyncHandler(async (req, res) => {
   const order = await InspectionOrder.findById(req.params.id);
   if (!order) return res.status(404).json({ success: false, message: "Order not found" });
   if (String(order.inspector) !== req.user.id) return res.status(403).json({ success: false, message: "Not your assignment" });

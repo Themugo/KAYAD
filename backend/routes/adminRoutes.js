@@ -2,18 +2,8 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validate } from "../middleware/validate.js";
-import {
-  reseedSchema, moderateCarSchema, verifyDealerSchema, verifyCarSchema,
-  createStaffSchema, updateStaffSchema, systemKillSwitchSchema, systemRecoverSchema,
-  createAdSchema, updateAdSchema, creditReferralSchema, createMarketDataSchema,
-  updateMarketDataSchema, bulkMarketDataSchema, updateSellerSettingsSchema,
-  toggleBanSchema, dealerApprovalSchema, platformConfigSchema
-} from "../validation/admin.schema.js";
-import {
-  darajaTestSchema, subdomainSchema, zeroCostOnboardingSchema, packageAssignSchema,
-  auditLogSchema, alertReadSchema
-} from "../validation/misc.schema.js";
+import { validateObjectId } from "../middleware/validate.js";
+import bcrypt from "bcryptjs";
 
 import User from "../models/User.js";
 import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
@@ -44,7 +34,6 @@ router.post(
   "/reseed",
   protect,
   authorize("superadmin"),
-  validate(reseedSchema),
   asyncHandler(async (req, res) => {
     const result = await reseed();
     res.json({ success: true, message: "Database re-seeded", result });
@@ -221,7 +210,6 @@ router.post(
   "/users/:id/toggle-ban",
   adminOrSuper,
   validateObjectId,
-  validate(toggleBanSchema),
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
@@ -257,7 +245,6 @@ router.post(
   "/users/:id/approve-dealer",
   adminOrSuper,
   validateObjectId,
-  validate(dealerApprovalSchema),
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
@@ -301,7 +288,6 @@ router.put(
   "/users/:id/seller-settings",
   adminOrSuper,
   validateObjectId,
-  validate(updateSellerSettingsSchema),
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
@@ -442,7 +428,6 @@ router.post(
   "/cars/:id/verify",
   adminOrSuper,
   validateObjectId,
-  validate(verifyCarSchema),
   asyncHandler(async (req, res) => {
     const { ntsaVerified, dutyStatus, logbookVerified } = req.body;
     const car = await Car.findById(req.params.id);
@@ -463,7 +448,6 @@ router.post(
   "/cars/:id/moderate",
   adminOrSuper,
   validateObjectId,
-  validate(moderateCarSchema),
   asyncHandler(async (req, res) => {
     const { action, adminNote } = req.body;
     if (!["approve", "reject"].includes(action)) {
@@ -533,7 +517,6 @@ router.get(
 router.put(
   "/config",
   adminOrSuper,
-  validate(platformConfigSchema),
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne();
     if (!config) config = new PlatformConfig();
@@ -628,7 +611,6 @@ router.get(
 router.post(
   "/audit-log",
   adminOrSuper,
-  validate(auditLogSchema),
   asyncHandler(async (req, res) => {
     const { action, details } = req.body;
 
@@ -653,7 +635,6 @@ router.post(
 router.post(
   "/system/kill-switch",
   authorize("superadmin"),
-  validate(systemKillSwitchSchema),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
     const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
@@ -690,7 +671,6 @@ router.post(
 router.post(
   "/system/recover",
   authorize("superadmin"),
-  validate(systemRecoverSchema),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
     const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
@@ -731,7 +711,6 @@ router.put(
   "/dealers/:id/subdomain",
   adminOrSuper,
   validateObjectId,
-  validate(subdomainSchema),
   asyncHandler(async (req, res) => {
     const { subdomain } = req.body;
     if (!subdomain) return res.status(400).json({ success: false, message: "Subdomain required" });
@@ -759,7 +738,6 @@ router.post(
   "/users/:id/verify-dealer",
   adminOrSuper,
   validateObjectId,
-  validate(verifyDealerSchema),
   asyncHandler(async (req, res) => {
     const { action } = req.body; // 'approve' or 'reject'
     const user = await User.findById(req.params.id);
@@ -791,7 +769,6 @@ router.post(
 // =============================
 router.post(
   "/daraja/test",
-  validate(darajaTestSchema),
   asyncHandler(async (req, res) => {
     const { phone, amount } = req.body;
 
@@ -981,7 +958,6 @@ router.get(
 router.post(
   "/staff",
   authorize("superadmin"),
-  validate(createStaffSchema),
   asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body;
     const staffRoles = ["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
@@ -1005,7 +981,6 @@ router.put(
   "/staff/:id",
   authorize("superadmin"),
   validateObjectId,
-  validate(updateStaffSchema),
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -1084,7 +1059,6 @@ router.get(
 router.post(
   "/ads",
   adminOrSuper,
-  validate(createAdSchema),
   asyncHandler(async (req, res) => {
     const ad = await Ad.create(req.body);
     res.json({ success: true, ad });
@@ -1096,7 +1070,6 @@ router.put(
   "/ads/:id",
   adminOrSuper,
   validateObjectId,
-  validate(updateAdSchema),
   asyncHandler(async (req, res) => {
     const ad = await Ad.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -1167,7 +1140,6 @@ router.patch(
   "/dealers/:id/package",
   protect,
   adminOnly,
-  validate(packageAssignSchema),
   asyncHandler(async (req, res) => {
     const { dealerPackage, packageListingMax, packageFeatures, durationDays, packageAutoRenew } = req.body;
     const PACKAGES = {
@@ -1203,7 +1175,6 @@ router.post(
   "/zero-cost-onboarding",
   protect,
   adminOnly,
-  validate(zeroCostOnboardingSchema),
   asyncHandler(async (req, res) => {
     const User = (await import("../models/User.js")).default;
     const { dealerIds, durationDays = 90, listingMax = 50 } = req.body;
@@ -1335,7 +1306,7 @@ router.get("/referrals/:id", staffRole, asyncHandler(async (req, res) => {
   res.json({ success: true, referral });
 }));
 
-router.post("/referrals/:id/credit", adminOrSuper, validate(creditReferralSchema), asyncHandler(async (req, res) => {
+router.post("/referrals/:id/credit", adminOrSuper, asyncHandler(async (req, res) => {
   const { amount } = req.body;
   if (!amount || amount <= 0) return res.status(400).json({ success: false, message: "Valid bonus amount is required" });
 
@@ -1516,7 +1487,7 @@ router.get("/market-data/:id", staffRole, asyncHandler(async (req, res) => {
   res.json({ success: true, entry });
 }));
 
-router.post("/market-data", adminOrSuper, validate(createMarketDataSchema), asyncHandler(async (req, res) => {
+router.post("/market-data", adminOrSuper, asyncHandler(async (req, res) => {
   const { brand, model, year, bodyType, fuel, transmission, engineCC, lowPrice, avgPrice, highPrice, sampleSize, source } = req.body;
   if (!brand || !model || !year || lowPrice == null || avgPrice == null || highPrice == null) {
     return res.status(400).json({ success: false, message: "brand, model, year, lowPrice, avgPrice, highPrice are required" });
@@ -1529,7 +1500,7 @@ router.post("/market-data", adminOrSuper, validate(createMarketDataSchema), asyn
   res.status(201).json({ success: true, entry });
 }));
 
-router.put("/market-data/:id", adminOrSuper, validate(updateMarketDataSchema), asyncHandler(async (req, res) => {
+router.put("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
   const allowed = ["brand", "model", "year", "bodyType", "fuel", "transmission", "engineCC", "lowPrice", "avgPrice", "highPrice", "sampleSize", "source"];
   const updates = {};
   for (const field of allowed) {
@@ -1554,7 +1525,7 @@ router.delete("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) =>
   res.json({ success: true, message: "Market data entry deleted" });
 }));
 
-router.post("/market-data/bulk", adminOrSuper, validate(bulkMarketDataSchema), asyncHandler(async (req, res) => {
+router.post("/market-data/bulk", adminOrSuper, asyncHandler(async (req, res) => {
   const { entries } = req.body;
   if (!Array.isArray(entries) || entries.length === 0) {
     return res.status(400).json({ success: false, message: "entries array is required" });
@@ -1603,7 +1574,7 @@ router.get("/alerts", asyncHandler(async (req, res) => {
 // =============================
 // ✅ MARK ALERT READ
 // =============================
-router.post("/alerts/:id/read", validateObjectId, validate(alertReadSchema), asyncHandler(async (req, res) => {
+router.post("/alerts/:id/read", validateObjectId, asyncHandler(async (req, res) => {
   const alert = await AdminAlert.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
   if (!alert) return res.status(404).json({ success: false, message: "Alert not found" });
   res.json({ success: true, alert });
@@ -1612,7 +1583,7 @@ router.post("/alerts/:id/read", validateObjectId, validate(alertReadSchema), asy
 // =============================
 // ✅ MARK ALL ALERTS READ
 // =============================
-router.post("/alerts/read-all", validate(alertReadSchema), asyncHandler(async (req, res) => {
+router.post("/alerts/read-all", asyncHandler(async (req, res) => {
   await AdminAlert.updateMany({ read: false }, { read: true });
   res.json({ success: true, message: "All alerts marked read" });
 }));

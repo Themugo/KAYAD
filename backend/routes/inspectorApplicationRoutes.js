@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validate } from "../middleware/validate.js";
-import { submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema } from "../validation/inspectorApplication.schema.js";
 import {
   submitApplication,
   approveApplication,
@@ -13,7 +11,7 @@ import {
 
 const router = Router();
 
-router.post("/apply", validate(submitApplicationSchema), asyncHandler(submitApplication));
+router.post("/apply", asyncHandler(submitApplication));
 
 router.get("/my", protect, asyncHandler(async (req, res) => {
   const InspectorApplication = (await import("../models/InspectorApplication.js")).default;
@@ -23,7 +21,7 @@ router.get("/my", protect, asyncHandler(async (req, res) => {
 
 router.get("/", protect, adminOnly, asyncHandler(listApplications));
 router.get("/:id", protect, adminOnly, asyncHandler(getApplication));
-router.post("/:id/approve", protect, adminOnly, validate(approveApplicationSchema), asyncHandler(approveApplication));
-router.post("/:id/reject", protect, adminOnly, validate(rejectApplicationSchema), asyncHandler(rejectApplication));
+router.post("/:id/approve", protect, adminOnly, asyncHandler(approveApplication));
+router.post("/:id/reject", protect, adminOnly, asyncHandler(rejectApplication));
 
 export default router;

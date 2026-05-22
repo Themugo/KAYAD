@@ -1,4 +1,4 @@
-export { api, default, formatKES } from './core';
+export { api, default, formatKES, isDemoMode, checkBackendAvailability } from './core';
 export { authAPI } from './auth';
 export { carsAPI } from './cars';
 export { bidsAPI } from './bids';

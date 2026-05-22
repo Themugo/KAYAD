@@ -9,11 +9,9 @@ import {
 
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
-  validate,
   validateObjectId,
   validateCar,
 } from "../middleware/validate.js";
-import { carBatchSchema, promoteSchema } from "../validation/misc.schema.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
@@ -458,7 +456,6 @@ router.post(
 // =============================
 router.post(
   "/batch",
-  validate(carBatchSchema),
   asyncHandler(async (req, res) => {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0 || ids.length > 10) {
@@ -490,7 +487,6 @@ router.patch(
   "/:id/promote",
   protect,
   validateObjectId,
-  validate(promoteSchema),
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });

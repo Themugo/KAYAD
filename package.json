@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "vite --port 3000",
     "dev:staging": "vite --port 3000 --mode staging",
-    "dev:backend": "cd backend && npm run dev",
     "build": "vite build",
     "build:staging": "vite build --mode staging",
     "preview": "vite preview",

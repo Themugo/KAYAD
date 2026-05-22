@@ -3,8 +3,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validate, validateObjectId } from "../middleware/validate.js";
-import { escrowActionSchema } from "../validation/misc.schema.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 
 import {
@@ -91,7 +90,6 @@ router.post(
   "/:id/dispute",
   protect,
   validateObjectId,
-  validate(escrowActionSchema),
   asyncHandler(async (req, res) => {
     const { reason } = req.body;
     if (!reason?.trim()) return res.status(400).json({ success: false, message: "Dispute reason required" });

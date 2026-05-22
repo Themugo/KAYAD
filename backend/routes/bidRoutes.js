@@ -1,8 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validate, validateObjectId, validateBid } from "../middleware/validate.js";
-import { setWinnerSchema } from "../validation/misc.schema.js";
+import { validateObjectId, validateBid } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
 import {
   mpesaIpWhitelist,
@@ -152,7 +151,6 @@ router.post(
   protect,
   adminOnly,
   validateObjectId,
-  validate(setWinnerSchema),
   asyncHandler(async (req, res) => {
     const bid = await Bid.markWinner(req.params.bidId);
 

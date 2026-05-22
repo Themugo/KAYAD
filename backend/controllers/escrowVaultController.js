@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import Car from "../models/Car.js";
 import EscrowVault from "../models/EscrowVault.js";
 import { sendOTP, verifyOTP } from "../services/otpService.js";
@@ -189,7 +189,7 @@ export const markInspectionComplete = async (req, res) => {
   }
 };
 
-const hashOtp = (otp) => bcrypt.hash(String(otp), 10);
+const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
 const generateOtp = () => Math.floor(1000 + Math.random() * 9000);
 
@@ -221,7 +221,7 @@ export const requestReleaseOtp = async (req, res) => {
     }
 
     const otp = generateOtp();
-    const otpHash = await hashOtp(otp);
+    const otpHash = hashOtp(otp);
     const otpExpiry = new Date(Date.now() + 600000);
 
     vault.releaseOtp = otpHash;
@@ -276,7 +276,7 @@ export const releaseWithOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "OTP expired. Request a new one." });
     }
 
-    if (!(await bcrypt.compare(String(otp), vault.releaseOtp))) {
+    if (vault.releaseOtp !== hashOtp(otp)) {
       vault.otpAttempts += 1;
       await vault.save();
       return res.status(400).json({ success: false, message: "Invalid OTP" });

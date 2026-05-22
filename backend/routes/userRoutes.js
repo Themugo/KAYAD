@@ -1,8 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
-import { validate, validateObjectId } from "../middleware/validate.js";
-import { userSettingsSchema, bankPreApprovalSchema } from "../validation/misc.schema.js";
+import { validateObjectId } from "../middleware/validate.js";
 import User from "../models/User.js";
 
 const router = express.Router();
@@ -48,7 +47,6 @@ router.get(
 router.put(
   "/settings",
   protect,
-  validate(userSettingsSchema),
   asyncHandler(async (req, res) => {
     const allowed = ["notifications", "visibility", "language", "currency", "timezone"];
     const updates = {};
@@ -94,7 +92,6 @@ router.get(
 router.post(
   "/bank-pre-approval",
   protect,
-  validate(bankPreApprovalSchema),
   asyncHandler(async (req, res) => {
     const { documentUrl, bankName, approvedAmount } = req.body;
     if (!documentUrl || !bankName || !approvedAmount) {

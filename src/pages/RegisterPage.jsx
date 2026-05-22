@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { adminAPI } from '../api/api';
+import { adminAPI, isDemoMode } from '../api/api';
 import { Eye, EyeOff, ChevronRight, Check, Clock, ShieldCheck, Mail } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, isSellerRole, safeRedirectPath } from '../utils/authRoutes';
@@ -223,16 +223,20 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
       const body = { ...form, role, ...(refCode ? { referralCode: refCode } : {}), ...(selPkg ? { dealerPackage: selPkg } : {}) };
       if (!isDealer && !isSeller) { delete body.businessName; delete body.location; }
       const data = await register(body);
+      const newUser = data.user || data;
       toast('Account created! Welcome to Kayad 🎉', 'success');
-      if (role === 'dealer') {
-        // Dealer → show waiting room (needs admin approval)
-        setDone(data.user || data);
-      } else if (needsPkg) {
-        // Auto-approved seller → go straight to dealer hub
+      if (role === 'dealer' && !newUser?.approved) {
+        // Dealer awaiting admin approval → waiting room
+        setDone(newUser);
+      } else if (isDealer || isSeller) {
+        // Approved seller/dealer (incl. all demo accounts) → straight to the hub
         navigate('/dealer', { replace: true });
+      } else if (isDemoMode() || newUser?.emailVerified) {
+        // Demo buyers (or already-verified) → straight into the app
+        navigate('/dashboard', { replace: true });
       } else {
         // Buyer → show verification prompt (email not yet verified)
-        setDone(data.user || data);
+        setDone(newUser);
       }
     } catch (err) {
       toast(err.response?.data?.message || 'Registration failed', 'error');

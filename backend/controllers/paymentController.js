@@ -187,33 +187,13 @@ export const getUserPayments = async (req, res) => {
 // =============================
 export const getAllPayments = async (req, res) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
-    const skip = (page - 1) * limit;
-
-    const filter = {};
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.type) filter.type = req.query.type;
-    if (req.query.user) filter.user = req.query.user;
-
-    const [payments, total] = await Promise.all([
-      Payment.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Payment.countDocuments(filter),
-    ]);
+    const payments = await Payment.find()
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
       payments,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
-      },
     });
 
   } catch (err) {

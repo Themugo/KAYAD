@@ -9,7 +9,7 @@ const carSchema = new mongoose.Schema(
     brand: { type: String, index: true },
     model: { type: String },
     year: { type: Number, index: true },
-    price: { type: Number, min: 0 },
+    price: { type: Number },
 
     // =============================
     // 📍 LOCATION
@@ -184,27 +184,26 @@ carSchema.statics.softDelete = async function (ids, userId) {
   );
 };
 
-// Use query middleware instead of overriding statics (avoids Mongoose init race)
-function autoFilterDeleted() {
-  const filter = this.getFilter();
-  if (filter.deletedAt === undefined) {
-    filter.deletedAt = null;
+// Override find to exclude soft-deleted by default
+const originalFind = carSchema.statics.find;
+carSchema.statics.find = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) {
+    query.deletedAt = null;
   }
-}
+  return originalFind.call(this, query, ...rest);
+};
 
-carSchema.pre("find", autoFilterDeleted);
-carSchema.pre("findOne", autoFilterDeleted);
-carSchema.pre("findOneAndUpdate", autoFilterDeleted);
-carSchema.pre("findOneAndDelete", autoFilterDeleted);
-carSchema.pre("countDocuments", autoFilterDeleted);
-carSchema.pre("updateMany", autoFilterDeleted);
-carSchema.pre("deleteMany", function () {
-  // Don't auto-filter deleteMany — admin may want to purge
-});
+const originalFindOne = carSchema.statics.findOne;
+carSchema.statics.findOne = function (query, ...rest) {
+  if (query && query.deletedAt === undefined) {
+    query.deletedAt = null;
+  }
+  return originalFindOne.call(this, query, ...rest);
+};
 
-// Override findById to exclude soft-deleted
+const originalFindById = carSchema.statics.findById;
 carSchema.statics.findById = function (id, ...rest) {
-  return this.findOne({ _id: id, deletedAt: null }, ...rest);
+  return originalFindById.call(this, id, { deletedAt: null }, ...rest);
 };
 
 // =============================
@@ -216,7 +215,7 @@ carSchema.index({ "location.city": 1 });
 carSchema.index({ createdAt: -1 });
 carSchema.index({ views: -1 });
 carSchema.index({ allowBid: 1, auctionStatus: 1 });
-carSchema.index({ auctionStatus: 1, auctionEnd: 1 });
+carSchema.index({ deletedAt: 1 });
 
 carSchema.index({
   title: "text",

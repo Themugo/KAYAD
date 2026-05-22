@@ -2,8 +2,6 @@
 
 Kenya's Premium Car Marketplace — Live Auctions · M-Pesa · Escrow
 
-[![CI](https://github.com/Themugo/KAYAD/actions/workflows/ci.yml/badge.svg)](https://github.com/Themugo/KAYAD/actions/workflows/ci.yml)
-
 ---
 
 ## Architecture Overview

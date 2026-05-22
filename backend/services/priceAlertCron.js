@@ -7,12 +7,7 @@ const CHECK_INTERVAL = 15 * 60 * 1000;
 export function startPriceAlertCron() {
   console.log(`  ⏰ PriceAlertCron: ${CHECK_INTERVAL / 60000}-min cycle`);
   run();
-  const timer = setInterval(run, CHECK_INTERVAL);
-  return timer;
-}
-
-export function stopPriceAlertCron(timer) {
-  if (timer) clearInterval(timer);
+  setInterval(run, CHECK_INTERVAL);
 }
 
 async function run() {

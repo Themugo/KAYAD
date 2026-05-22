@@ -66,6 +66,28 @@ export const clearDemoUser = () => {
   try { localStorage.removeItem(DEMO_USER_KEY); } catch { /* ignore */ }
 };
 
+// Demo team persistence (per dealer). Seeded with a couple of members so the
+// Team tab isn't empty in a pitch.
+const DEMO_TEAM_KEY = 'kayad_demo_team';
+const seedTeam = () => ([
+  { _id: 'demo-member-seed-1', name: 'Sarah Njeri', email: 'sarah@nairobiautohub.co.ke', role: 'sales_agent', permissions: ['view_leads', 'respond_chats'], status: 'active', invitedAt: new Date(Date.now() - 30 * 86400000).toISOString() },
+  { _id: 'demo-member-seed-2', name: 'David Omondi', email: 'david@nairobiautohub.co.ke', role: 'lot_agent', permissions: ['list_cars', 'edit_cars'], status: 'active', invitedAt: new Date(Date.now() - 12 * 86400000).toISOString() },
+]);
+const readDemoTeam = (dealerId) => {
+  const key = `${DEMO_TEAM_KEY}:${dealerId || 'self'}`;
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw) return JSON.parse(raw);
+  } catch { /* ignore */ }
+  const seeded = seedTeam();
+  try { localStorage.setItem(key, JSON.stringify(seeded)); } catch { /* ignore */ }
+  return seeded;
+};
+const writeDemoTeam = (dealerId, team) => {
+  const key = `${DEMO_TEAM_KEY}:${dealerId || 'self'}`;
+  try { localStorage.setItem(key, JSON.stringify(team)); } catch { /* ignore */ }
+};
+
 // Demo token — base64-encoded JSON the api.js `isDemoToken()` helper can read.
 // isDemoToken() does JSON.parse(atob(token)) and checks `.email` / `.superAdmin`,
 // so the token MUST carry those fields. Returning a token here is what keeps the
@@ -556,6 +578,100 @@ const demoDealer = {
       data: DEMO_DEALER_STATS.summary,
       ...DEMO_DEALER_STATS.summary,
     });
+  },
+
+  // ─── Bids on the dealer's own listings ──────────────────────────
+  bids: async () => {
+    await delay();
+    const user = getDemoUser();
+    const myCarIds = demoDealerCars(user?._id).map(c => c._id);
+    const bids = DEMO_BIDS
+      .filter(b => myCarIds.includes(b.car))
+      .map(b => {
+        const car = getDemoCar(b.car);
+        return { ...b, car: car ? { _id: car._id, title: car.title, images: car.images } : b.car, status: b.status || 'active' };
+      });
+    return wrapSuccess({ bids, data: bids });
+  },
+
+  acceptBid: async (bidId) => {
+    await delay(300, 700);
+    return wrapSuccess({ message: 'Bid accepted', bidId, status: 'accepted' });
+  },
+
+  rejectBid: async (bidId) => {
+    await delay(300, 700);
+    return wrapSuccess({ message: 'Bid rejected', bidId, status: 'rejected' });
+  },
+
+  // ─── Listing actions ────────────────────────────────────────────
+  markSold: async (carId) => {
+    await delay(300, 700);
+    updateDemoCar(carId, { auctionStatus: 'sold', allowBid: false, allowBuy: false, soldAt: new Date().toISOString() });
+    const car = getDemoCar(carId);
+    return wrapSuccess({ message: 'Listing marked as sold', car: car ? transformCar(car) : null });
+  },
+
+  bulkStatus: async (ids = [], status) => {
+    await delay(400, 900);
+    (Array.isArray(ids) ? ids : [ids]).forEach(id => updateDemoCar(id, { auctionStatus: status }));
+    return wrapSuccess({ message: `${(Array.isArray(ids) ? ids : [ids]).length} listing(s) updated`, status });
+  },
+
+  duplicate: async (carId) => {
+    await delay(400, 900);
+    const src = getDemoCar(carId);
+    if (!src) throw { response: { status: 404, data: { message: 'Listing not found' } } };
+    const copy = { ...src, _id: 'demo-car-' + Date.now(), title: `${src.title} (Copy)`, views: 0, bidsCount: 0, currentBid: 0, createdAt: new Date().toISOString() };
+    addDemoCar(copy);
+    return wrapSuccess({ message: 'Listing duplicated', car: transformCar(copy) });
+  },
+
+  // ─── Team management ────────────────────────────────────────────
+  getTeam: async () => {
+    await delay();
+    const user = getDemoUser();
+    const team = readDemoTeam(user?._id);
+    return wrapSuccess({ members: team, team, data: team });
+  },
+
+  inviteMember: async ({ email, role, permissions } = {}) => {
+    await delay(300, 700);
+    const user = getDemoUser();
+    const team = readDemoTeam(user?._id);
+    if (team.some(m => m.email === email)) {
+      throw { response: { status: 400, data: { message: 'This person is already on your team' } } };
+    }
+    const member = {
+      _id: 'demo-member-' + Date.now(),
+      name: (email || 'member').split('@')[0],
+      email: email || 'member@demo.com',
+      role: role || 'sales_agent',
+      permissions: permissions || [],
+      status: 'active',
+      invitedAt: new Date().toISOString(),
+    };
+    team.push(member);
+    writeDemoTeam(user?._id, team);
+    return wrapSuccess({ member, message: 'Team member invited' });
+  },
+
+  updateMember: async (memberId, updates = {}) => {
+    await delay(300, 600);
+    const user = getDemoUser();
+    const team = readDemoTeam(user?._id);
+    const i = team.findIndex(m => m._id === memberId);
+    if (i >= 0) team[i] = { ...team[i], ...updates };
+    writeDemoTeam(user?._id, team);
+    return wrapSuccess({ member: team[i], message: 'Team member updated' });
+  },
+
+  removeMember: async (memberId) => {
+    await delay(300, 600);
+    const user = getDemoUser();
+    const team = readDemoTeam(user?._id).filter(m => m._id !== memberId);
+    writeDemoTeam(user?._id, team);
+    return wrapSuccess({ message: 'Team member removed' });
   },
 
   quickStats: async () => {

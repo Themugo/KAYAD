@@ -492,3 +492,55 @@ CHANGES.md             (this entry)
 | Lint | 0 errors, 187 warnings (stylistic) |
 | Tests | 23/23 files, 151/151 pass |
 | Demo rehydrate-after-reload | verified — getDemoUser recovers role from token → no 403 on writes |
+
+---
+
+## Round 9 — Go-to-market audit: registration, auth, listing, dealer dashboard
+
+Goal: registration (buyer / dealer / seller) hits the backend with flawless auth; car listing works end-to-end for every role incl. demo; dealer dashboard is pitch-ready.
+
+### Auth — email-verification lockout (real backend)
+
+Login and the auth middleware both hard-required `emailVerified`, but verification emails only send when `EMAIL_HOST` is set. With no SMTP, real users could never verify → permanently locked out after their first session. A silent go-to-market killer.
+
+Fix (`backend/controllers/authController.js`, `backend/middleware/auth.js`): verification is now gated by `REQUIRE_EMAIL_VERIFICATION` (explicit `true`/`false`), defaulting to *whether SMTP is actually configured*. No SMTP → users can log in (verification becomes a soft nudge); once you wire SMTP, set `REQUIRE_EMAIL_VERIFICATION=true` to enforce it. Demo and owner accounts remain exempt either way.
+
+### Registration routing
+
+`RegisterPage` always sent dealers to the "waiting for approval" room — even demo dealers (who are auto-approved), stranding them. Buyers always hit a "verify your email" prompt — a dead end with no SMTP.
+
+Fix (`src/pages/RegisterPage.jsx`):
+- Dealers go to the waiting room only when `!newUser.approved`. Approved sellers/dealers (all demo accounts, and live dealers on auto-approve) land straight in `/dealer`.
+- Buyers in demo mode (or already verified) go straight to `/dashboard` instead of a verify-email dead end.
+
+### Listing — verified flawless for every role
+
+Simulated the full register → reload → list chain for buyer, dealer, broker, and individual_seller. All sessions survive reload (Round 8 persistence fix), all sellers can create listings, new listings carry the seller's id so they appear in both the dealer dashboard and the public showroom.
+
+The real backend's package/trial limits (free trial = 3 listings, then upgrade) are intentional monetization gates — demo mode bypasses them so pitches are unconstrained, and live dealers get a working trial.
+
+### Dealer dashboard — 9 missing demo methods (pitch-critical)
+
+The dealer dashboard calls 14 `dealerAPI` methods, but the demo layer only implemented 5. The other 9 (`bids`, `getTeam`, `inviteMember`, `updateMember`, `removeMember`, `acceptBid`, `rejectBid`, `markSold`, `bulkStatus`, `duplicate`) fell through to the unreachable backend and threw — so the Bids tab, Team tab, and listing actions were broken whenever you demoed as a dealer. **This is exactly the kind of thing that embarrasses you in front of a dealer.**
+
+Fix (`src/data/demoAPI.js`): implemented all 9. Bids resolve against the dealer's own listings; team management persists to localStorage and is seeded with two members so the Team tab is never empty; mark-sold / bulk-status / duplicate mutate the demo car set so the UI reacts live.
+
+### Files changed
+
+```
+backend/controllers/authController.js  (config-gated email verification)
+backend/middleware/auth.js             (same gate on protected routes)
+src/pages/RegisterPage.jsx             (approved → hub; demo buyer → dashboard)
+src/data/demoAPI.js                    (+9 demo dealer methods, team persistence)
+CHANGES.md                             (this entry)
+```
+
+### Verification
+
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 187 warnings (stylistic) |
+| Tests | 23/23 files, 151/151 pass |
+| Demo dealer dashboard methods | 14/14 implemented |
+| Register flows (buyer/dealer/broker/seller) | route correctly, survive reload, sellers can list |

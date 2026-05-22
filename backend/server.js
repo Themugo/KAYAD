@@ -13,7 +13,6 @@ import cors         from "cors";
 import dotenv       from "dotenv";
 import helmet       from "helmet";
 import morgan       from "morgan";
-import compression  from "compression";
 import cookieParser from "cookie-parser";
 import { Server }   from "socket.io";
 import jwt          from "jsonwebtoken";
@@ -36,7 +35,7 @@ import {
   validateMpesaCallback,
 } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
-import { csrfProtection, setCsrfCookie } from "./middleware/csrf.js";
+import { csrfProtection } from "./middleware/csrf.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
@@ -75,12 +74,12 @@ import errorHandler from "./middleware/errorHandler.js";
 import requestLogger      from "./middleware/logger.js";
 import { startAuctionEngine }  from "./realtime/auctionEngine.js";
 import { startAuctionTimer }   from "./utils/auctionTimer.js";
-import { startEscrowCron, stopEscrowCron }     from "./services/escrowCron.js";
-import { startAuctionReminderCron, stopAuctionReminderCron } from "./services/auctionReminderCron.js";
-import { startSavedSearchCron, stopSavedSearchCron } from "./services/savedSearchCron.js";
-import { startPriceAlertCron, stopPriceAlertCron } from "./services/priceAlertCron.js";
+import { startEscrowCron }     from "./services/escrowCron.js";
+import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
+import { startSavedSearchCron } from "./services/savedSearchCron.js";
+import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { initSentry, sentryErrorHandler } from "./utils/sentry.js";
-import { initCache, closeCache }           from "./utils/cache.js";
+import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected }    from "./utils/cache.js";
@@ -120,9 +119,6 @@ app.use(helmet({
   },
 }));
 app.use(extraHeaders());
-
-// ─── COMPRESSION (gzip) ───────────────────────────────────────
-app.use(compression({ level: 6, threshold: 1024 }));
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
 app.use(requestLogger);
@@ -207,23 +203,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
-import redisClient from "./config/redis.js";
-
-let ioAdapter = null;
-if (redisClient) {
-  try {
-    const { createAdapter } = await import("@socket.io/redis-adapter");
-    const pubClient = redisClient.duplicate();
-    const subClient = redisClient.duplicate();
-    ioAdapter = createAdapter(pubClient, subClient);
-    console.log("🔌 Socket.IO Redis adapter configured (cluster-ready)");
-  } catch (err) {
-    console.warn("⚠️ Socket.IO Redis adapter unavailable:", err.message);
-  }
-}
-
 const io = new Server(server, {
-  adapter: ioAdapter,
   cors: {
     origin: NODE_ENV === "production" ? allowedOrigins : true,
     credentials: true,
@@ -272,13 +252,8 @@ app.use(responseWrapper);
 // ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
 app.use("/api", checkSystemStatus);
 
-// ─── CSRF PROTECTION (global, for all mutating routes) ──
-app.use("/api", csrfProtection);
-
 // ─── API ROUTES ───────────────────────────────────────────────
-app.use("/api/auth/csrf-token", setCsrfCookie, (req, res) => {
-  res.json({ csrfToken: req.csrfToken });
-});
+app.use("/api/auth/refresh",  csrfProtection);  // CSRF for cookie-based refresh
 app.use("/api/auth",          authLimiter, authRoutes);
 app.use("/api/cars",          carRoutes);
 app.use("/api/bids",          bidRoutes);
@@ -368,10 +343,10 @@ const bootstrap = async () => {
 
     await startAuctionEngine();
     startAuctionTimer(io);
-    const ecTimer = startEscrowCron();
-    const arTimer = startAuctionReminderCron();
-    const ssTimer = startSavedSearchCron();
-    const paTimer = startPriceAlertCron();
+    startEscrowCron();
+    startAuctionReminderCron();
+    startSavedSearchCron();
+    startPriceAlertCron();
 
     console.log(`  ⏰ EscrowCron: auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`);
     console.log(`  ⏰ AuctionReminderCron: reminders active`);
@@ -379,9 +354,6 @@ const bootstrap = async () => {
     console.log(`  ⏰ PriceAlertCron: 15-min cycle`);
     console.log(`  ⚡ AuctionEngine: running`);
     console.log("");
-
-    // Attach timers for graceful shutdown
-    app.locals.cronTimers = { ecTimer, arTimer, ssTimer, paTimer };
   } catch (err) {
     console.error("❌ Bootstrap failed:", err.message);
     process.exit(1);
@@ -391,26 +363,12 @@ const bootstrap = async () => {
 // ─── GRACEFUL SHUTDOWN ────────────────────────────────────────
 const shutdown = async (signal) => {
   console.log(`\n🛑 ${signal} — shutting down gracefully...`);
-
-  // Stop cron jobs
-  const timers = app.locals.cronTimers || {};
-  stopEscrowCron();
-  stopAuctionReminderCron();
-  stopSavedSearchCron(timers.ssTimer);
-  stopPriceAlertCron(timers.paTimer);
-
-  // Close Socket.IO
-  if (io) io.close();
-
-  // Close Redis
-  await closeCache();
-
   server.close(async () => {
-    await mongoose.connection.close().catch(() => {});
+    await mongoose.connection.close();
     console.log("✅ Shutdown complete");
     process.exit(0);
   });
-  setTimeout(() => process.exit(1), 10_000);
+  setTimeout(() => process.exit(1), 10_000); // force after 10s
 };
 
 if (NODE_ENV !== "test") {
