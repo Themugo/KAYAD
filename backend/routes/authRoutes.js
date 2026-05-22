@@ -16,7 +16,8 @@ import {
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
-import { validateAuth } from "../middleware/validate.js";
+import { validate, validateAuth } from "../middleware/validate.js";
+import { resendVerificationSchema } from "../validation/auth.schema.js";
 
 const router = express.Router();
 
@@ -107,7 +108,7 @@ router.put(
 // 📧 EMAIL VERIFICATION
 // =============================
 router.get("/verify-email/:token", authLimiter, asyncHandler(verifyEmail));
-router.post("/resend-verification", authLimiter, asyncHandler(resendVerification));
+router.post("/resend-verification", authLimiter, validate(resendVerificationSchema), asyncHandler(resendVerification));
 
 // =============================
 // 🔑 PASSWORD RESET (public)

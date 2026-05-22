@@ -1,7 +1,8 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validate, validateObjectId } from "../middleware/validate.js";
+import { auctionStartSchema, auctionExtendSchema, setWinnerSchema } from "../validation/misc.schema.js";
 
 import Car from "../models/Car.js";
 import User from "../models/User.js";
@@ -28,6 +29,7 @@ router.use(protect, adminOnly);
 router.post(
   "/:carId/start",
   validateObjectId,
+  validate(auctionStartSchema),
   asyncHandler(async (req, res) => {
     const { startingBid = 0, durationMs } = req.body;
 
@@ -110,6 +112,7 @@ router.post(
 router.post(
   "/:carId/extend",
   validateObjectId,
+  validate(auctionExtendSchema),
   asyncHandler(async (req, res) => {
     const { extraMs } = req.body;
 
@@ -170,6 +173,7 @@ router.get(
 router.post(
   "/:carId/set-winner",
   validateObjectId,
+  validate(setWinnerSchema),
   asyncHandler(async (req, res) => {
     const { bidId } = req.body;
 

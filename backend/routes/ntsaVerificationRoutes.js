@@ -1,6 +1,8 @@
 import express from "express";
 import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validate } from "../middleware/validate.js";
+import { queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema } from "../validation/ntsa.schema.js";
 import NtsaVerificationRequest from "../models/NtsaVerificationRequest.js";
 import Car from "../models/Car.js";
 
@@ -40,7 +42,7 @@ router.get("/car/:carId/status", asyncHandler(async (req, res) => {
 }));
 
 // Request verification for own car (dealer/owner) or admin-enqueue
-router.post("/", asyncHandler(async (req, res) => {
+router.post("/", validate(queueNtsaVerificationSchema), asyncHandler(async (req, res) => {
   const { carId } = req.body;
   if (!carId) return res.status(400).json({ success: false, message: "carId required" });
 
@@ -67,7 +69,7 @@ router.post("/", asyncHandler(async (req, res) => {
 }));
 
 // Process a verification request (approve/reject)
-router.post("/:id/process", adminOnly, asyncHandler(async (req, res) => {
+router.post("/:id/process", adminOnly, validate(processNtsaVerificationSchema), asyncHandler(async (req, res) => {
   const { status, adminNotes, dutyStatus, chassisVerified, logbookVerified, importVerified } = req.body;
   if (!["passed", "failed"].includes(status)) {
     return res.status(400).json({ success: false, message: "status must be 'passed' or 'failed'" });
@@ -99,7 +101,7 @@ router.post("/:id/process", adminOnly, asyncHandler(async (req, res) => {
 }));
 
 // Upload supporting documents for a request (admin or requestor)
-router.post("/:id/documents", asyncHandler(async (req, res) => {
+router.post("/:id/documents", validate(addNtsaDocumentSchema), asyncHandler(async (req, res) => {
   const { url, label } = req.body;
   if (!url) return res.status(400).json({ success: false, message: "url required" });
 

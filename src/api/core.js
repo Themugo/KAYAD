@@ -6,6 +6,11 @@ const BASE = '/api';
 let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__;
 
+const getCookie = (name) => {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
 export const checkBackendAvailability = async () => {
   try {
     await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000, withCredentials: true });
@@ -28,6 +33,10 @@ const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 
 api.interceptors.request.use(cfg => {
   cfg._hadToken = true;
   cfg.headers['X-Requested-By'] = 'kayad-app';
+  const csrfToken = getCookie('csrf-token');
+  if (csrfToken && ['post', 'put', 'patch', 'delete'].includes(cfg.method)) {
+    cfg.headers['X-CSRF-Token'] = csrfToken;
+  }
   return cfg;
 });
 
@@ -46,7 +55,11 @@ api.interceptors.response.use(
       orig._retry = true;
       _refreshing = true;
       try {
-        await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true });
+        const refreshRes = await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true });
+        // Refresh might set new csrf-token cookie — seed it
+        if (refreshRes.headers['set-cookie']?.some(c => c.startsWith('csrf-token='))) {
+          axios.get(`${BASE}/auth/csrf-token`, { withCredentials: true }).catch(() => {});
+        }
         _queue.forEach(p => p.res()); _queue = [];
         return api(orig);
       } catch {

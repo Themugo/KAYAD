@@ -4,6 +4,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId } from "../middleware/validate.js";
 import { otpLimiter, webhookLimiter } from "../middleware/rateLimiter.js";
 import {
+  escrowVaultInitSchema,
   escrowVaultWebhookSchema,
   releaseOtpSchema,
 } from "../validation/platform.schema.js";
@@ -25,7 +26,7 @@ const router = Router();
 
 router.post("/webhook/:id/funded", webhookLimiter, validate(escrowVaultWebhookSchema), asyncHandler(webhookFundsReceived));
 
-router.post("/:id/init", protect, asyncHandler(initEscrowVault));
+router.post("/:id/init", protect, validate(escrowVaultInitSchema), asyncHandler(initEscrowVault));
 router.get("/my", protect, asyncHandler(getUserVaults));
 router.get("/car/:id", protect, asyncHandler(getVaultForCar));
 router.get("/:id", protect, asyncHandler(getVaultById));

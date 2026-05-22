@@ -10,6 +10,8 @@ import Escrow from "../models/Escrow.js";
 import Chat from "../models/Chat.js";
 import Favorite from "../models/Favorite.js";
 import Message from "../models/Message.js";
+import { validate, validateObjectId } from "../middleware/validate.js";
+import { teamInviteSchema, updateTeamMemberSchema, markSoldSchema, acceptBidSchema, bulkStatusSchema, auctionStartSchema, auctionExtendSchema, settlementSchema } from "../validation/dealer.schema.js";
 
 const router = express.Router();
 
@@ -342,6 +344,7 @@ router.get(
 
 router.put(
   "/settlement",
+  validate(settlementSchema),
   asyncHandler(async (req, res) => {
     const { mpesaBusiness, mpesaBusinessName, paymentDetails, bankName, bankAccount } = req.body;
     const User = (await import("../models/User.js")).default;
@@ -372,7 +375,7 @@ router.get("/team", asyncHandler(async (req, res) => {
 }));
 
 // POST /api/dealer/team/invite   — invite by email (creates invite record)
-router.post("/team/invite", asyncHandler(async (req, res) => {
+router.post("/team/invite", validate(teamInviteSchema), asyncHandler(async (req, res) => {
   const { email, role = "sales_agent", permissions = {} } = req.body;
   if (!email) return res.status(400).json({ success: false, message: "Email required" });
 
@@ -417,7 +420,7 @@ router.post("/team/invite", asyncHandler(async (req, res) => {
 }));
 
 // PATCH /api/dealer/team/:memberId  — update role/permissions
-router.patch("/team/:memberId", asyncHandler(async (req, res) => {
+router.patch("/team/:memberId", validate(updateTeamMemberSchema), asyncHandler(async (req, res) => {
   const record = await DealerTeam.findOne({ _id: req.params.memberId, dealer: req.user.id });
   if (!record) return res.status(404).json({ success: false, message: "Team member not found" });
 
@@ -439,7 +442,7 @@ router.delete("/team/:memberId", asyncHandler(async (req, res) => {
 // =============================
 // 🔄 DUPLICATE LISTING
 // =============================
-router.post("/cars/:id/duplicate", asyncHandler(async (req, res) => {
+router.post("/cars/:id/duplicate", validateObjectId, asyncHandler(async (req, res) => {
   const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
@@ -468,7 +471,7 @@ router.post("/cars/:id/duplicate", asyncHandler(async (req, res) => {
 // =============================
 // ✅ MARK LISTING AS SOLD
 // =============================
-router.patch("/cars/:id/mark-sold", asyncHandler(async (req, res) => {
+router.patch("/cars/:id/mark-sold", validate(markSoldSchema), asyncHandler(async (req, res) => {
   const { buyerName, buyerEmail, salePrice, saleNotes } = req.body;
   const car = await Car.findOneAndUpdate(
     { _id: req.params.id, dealer: req.user.id },
@@ -488,7 +491,7 @@ router.patch("/cars/:id/mark-sold", asyncHandler(async (req, res) => {
 // =============================
 // 📋 BULK STATUS UPDATE
 // =============================
-router.patch("/cars/bulk-status", asyncHandler(async (req, res) => {
+router.patch("/cars/bulk-status", validate(bulkStatusSchema), asyncHandler(async (req, res) => {
   const { ids, status } = req.body;
   if (!Array.isArray(ids) || !status) {
     return res.status(400).json({ success: false, message: "ids (array) and status required" });
@@ -503,7 +506,7 @@ router.patch("/cars/bulk-status", asyncHandler(async (req, res) => {
 // =============================
 // 🏆 ACCEPT BID (SOLD TO BIDDER)
 // =============================
-router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
+router.post("/cars/:id/accept-bid", validate(acceptBidSchema), asyncHandler(async (req, res) => {
   const { bidId } = req.body;
   if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
 
@@ -538,7 +541,7 @@ router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
 // =============================
 // ❌ REJECT BID
 // =============================
-router.post("/cars/:id/reject-bid", asyncHandler(async (req, res) => {
+router.post("/cars/:id/reject-bid", validate(acceptBidSchema), asyncHandler(async (req, res) => {
   const { bidId } = req.body;
   if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
 
@@ -571,7 +574,7 @@ import { startAuction, endAuction } from "../realtime/auctionEngine.js";
 import { syncAuctionResult } from "../realtime/syncService.js";
 
 // 🚀 Start auction on dealer's own car
-router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
+router.post("/cars/:id/auction/start", validate(auctionStartSchema), asyncHandler(async (req, res) => {
   const { durationMs, startingBid, reservePrice } = req.body;
   if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
 
@@ -644,7 +647,7 @@ router.post("/cars/:id/auction/end", asyncHandler(async (req, res) => {
 }));
 
 // ⏱ Extend auction (max 3 extensions per auction)
-router.post("/cars/:id/auction/extend", asyncHandler(async (req, res) => {
+router.post("/cars/:id/auction/extend", validate(auctionExtendSchema), asyncHandler(async (req, res) => {
   const { hours } = req.body;
   if (!hours) return res.status(400).json({ success: false, message: "hours required" });
 
