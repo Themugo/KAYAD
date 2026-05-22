@@ -98,44 +98,31 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          {/* Center Slogan */}
-          <div className="hidden lg:flex flex-col items-center">
-            <span className="text-gold/70 text-sm italic tracking-wide font-light">
-              Luxury in Motion
-            </span>
-            <div className="w-16 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent mt-0.5" />
-          </div>
-
-          {/* Right Section */}
-          <div className="flex items-center gap-6">
+          {/* Right: Nav + User */}
+          <div className="flex items-center gap-3">
             {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center gap-6 text-sm font-medium">
-              <Link to="/showroom" className={`nav-link ${isActive('/showroom') ? 'active' : ''}`}>
+            <div className="hidden lg:flex items-center gap-1 text-sm font-medium">
+              <Link to="/showroom" className={`px-3 py-2 rounded-xl transition-colors ${isActive('/showroom') ? 'text-gold bg-gold/10' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
                 Gallery
               </Link>
-              
-              <Link to="/showroom?filter=auction" className="nav-link flex items-center gap-2">
+              <Link to="/showroom?filter=auction" className={`px-3 py-2 rounded-xl transition-colors flex items-center gap-2 ${loc.pathname === '/showroom?filter=auction' ? 'text-gold bg-gold/10' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
                 Live Auctions
               </Link>
-
               {isSellerRole(user?.role) && (
-                <Link to="/dealer" className={`nav-link ${isActive('/dealer') ? 'active' : ''}`}>
+                <Link to="/dealer" className={`px-3 py-2 rounded-xl transition-colors ${isActive('/dealer') ? 'text-gold bg-gold/10' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
                   Dealer Hub
                 </Link>
               )}
-
               {isAdmin && (
-                <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>
+                <Link to="/admin" className={`px-3 py-2 rounded-xl transition-colors ${isActive('/admin') ? 'text-gold bg-gold/10' : 'text-white/70 hover:text-white hover:bg-white/5'}`}>
                   Admin
                 </Link>
               )}
             </div>
-
-            <div ref={dropRef} className="flex items-center gap-3">
             {/* Socket Status */}
             {connected && (
               <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-success/30 bg-success/10 text-success text-xs font-bold">
@@ -243,7 +230,6 @@ export default function Navbar({ branding }) {
             >
               {mobileOpen ? <X size={26} /> : <Menu size={26} />}
             </button>
-          </div>
           </div>
         </div>
       </nav>
