@@ -21,7 +21,7 @@ export const enableDemoMode = () => { __DEMO_MODE__ = true; };
 
 export const checkBackendAvailability = async () => {
   try {
-    await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000 });
+    await axios.get(`${BASE}/cars?limit=1`, { timeout: 2500 });
     __DEMO_MODE__ = false;
     return true;
   } catch (err) {

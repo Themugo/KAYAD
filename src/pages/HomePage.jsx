@@ -14,7 +14,7 @@ const AnimatedStat = ({ value, label }) => {
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        const target = typeof value === 'string' ? parseInt(value.replace(/[^0-9]/g,'')) || 100 : (value || 0);
+        const target = typeof value === 'string' ? parseInt(value.replace(/[^0-9]/g,'')) || 0 : (value || 0);
         const suffix = typeof value === 'string' ? value.replace(/[0-9]/g,'') : '';
         let start = 0;
         const dur = Math.min(1200, target * 8);
@@ -99,6 +99,7 @@ export default function HomePage() {
       setStats({
         totalCars:    all.length,
         liveAuctions: live.length,
+        buyNow:       all.filter(c => c.allowBuy !== false && c.auctionStatus !== 'live').length,
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
       });
@@ -225,10 +226,10 @@ export default function HomePage() {
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: 1, background: 'rgba(255,255,255,0.03)',
         }}>
-          <AnimatedStat label="Cars Sold"  value={stats ? `${(stats.totalCars * 3 + 142).toLocaleString()}+`  : '—'} />
-          <AnimatedStat label="Active Dealers"  value={stats ? `${Math.max(12, stats.brands * 2 + 8)}` : '—'} />
-          <AnimatedStat label="Live Auctions"    value={stats ? `${stats.liveAuctions}`       : '—'} />
-          <AnimatedStat label="Happy Buyers" value={stats ? `${(stats.totalCars * 2 + 87).toLocaleString()}+` : '—'} />
+          <AnimatedStat label="Cars Listed"     value={stats ? `${stats.totalCars}` : '0'} />
+          <AnimatedStat label="Brands"          value={stats ? `${stats.brands}` : '0'} />
+          <AnimatedStat label="Live Auctions"   value={stats ? `${stats.liveAuctions}` : '0'} />
+          <AnimatedStat label="Buy Now"         value={stats ? `${stats.buyNow}` : '0'} />
         </div>
       </section>
 

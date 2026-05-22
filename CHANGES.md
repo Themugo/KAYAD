@@ -544,3 +544,63 @@ CHANGES.md                             (this entry)
 | Tests | 23/23 files, 151/151 pass |
 | Demo dealer dashboard methods | 14/14 implemented |
 | Register flows (buyer/dealer/broker/seller) | route correctly, survive reload, sellers can list |
+
+---
+
+## Round 10 — Tighten everything: Tailwind build, fragmentation, demo data integrity
+
+Reported from the live site (kayad.space): Node version override on Vercel; a stuck "Connecting to Server" banner; fragmented landing + gallery layout; landing stats showing fake "100"s and an empty gallery.
+
+### The fragmentation — root cause
+
+The navbar and many components use **Tailwind utility classes** (`flex`, `hidden md:flex`, `items-center`, `bg-gold`, …) — 44 in the navbar alone. The Tailwind CDN that used to supply them at runtime was removed in Round 6 (it was genuine auditor cruft, and the CSP blocks CDNs anyway), but **Tailwind was never re-added to the build**. So every Tailwind class was dead → flex layouts collapsed → everything stacked vertically. That's the fragmentation in the screenshots. (`glow.css` using `@layer components` confirmed Tailwind was always part of the intended design.)
+
+Fix — Tailwind installed properly into the Vite build:
+- `tailwindcss@3.4`, `postcss`, `autoprefixer` as dev deps.
+- `tailwind.config.js` maps every custom token (`gold`, `gold-light`, `surface`, `card`, `text-muted`, `success`, `shadow-gold`, `font-display`, …) onto the existing CSS variables in `index.css`, so all existing className usage works unchanged.
+- `postcss.config.js` runs Tailwind + autoprefixer through Vite.
+- `@tailwind base/components/utilities` added to the top of `index.css`.
+- `glow.css` unwrapped from `@layer components` to plain CSS (it was a standalone import outside the Tailwind pipeline).
+- Result: CSS bundle grew 6 KB → 23 KB (gzip 5.9 KB) — now containing the real generated utilities. JIT means only used classes ship.
+
+### "Connecting to Server" banner
+
+That banner is from the **old deployed build** (pre-Tailwind-fix) and isn't in the current code. The current `DemoModeBanner` was a full-width orange "backend is offline — some features may not work" bar — alarming in front of a dealer. Replaced it with a **subtle bottom-right "Preview Mode · sample data" pill** (dismissible, gold accent) that signals demo data without screaming failure.
+
+### Landing stats showing "100"
+
+`AnimatedStat` had `parseInt(value) || 100` — so any unloaded stat (`'—'`) defaulted to **100**. With the gallery empty (old build), all four stats showed 100. Fixed the fallback to `0`, and replaced the fabricated marketing numbers (`totalCars * 3 + 142`, etc.) with **honest figures derived from the actual dataset**: Cars Listed, Brands, Live Auctions, Buy Now. No more inflated "Happy Buyers" a dealer could call out.
+
+### Demo data integrity
+
+- All 20 demo cars were `draft` → "0 cars live", empty live-auction section. **Promoted the first 4 to live auctions** with staggered countdowns (2.5h–44h), current bids, and bid counts, so the live board, ticker, and Live Auctions stat are populated for a pitch.
+- Backend probe timeout cut 5s → 2.5s so demo data appears faster instead of a long blank wait.
+
+### Node version
+
+Added `.nvmrc` (`20`) alongside the existing `engines.node: "20.x"` so Vercel and local pin to the same Node major. If Vercel still warns, set the project's Node Version to 20.x in Project Settings → General.
+
+### Files changed
+
+```
+tailwind.config.js              (new — token mapping)
+postcss.config.js               (new)
+package.json / package-lock     (+ tailwindcss, postcss, autoprefixer)
+.nvmrc                          (new — node 20)
+src/index.css                   (+ @tailwind directives)
+src/styles/glow.css             (unwrap @layer)
+src/components/DemoModeBanner.jsx (subtle Preview Mode pill)
+src/pages/HomePage.jsx          (fix ||100 bug, honest stats)
+src/data/demoData.js            (4 live auctions seeded)
+src/api/api.js                  (2.5s probe timeout)
+src/__tests__/components/DemoModeBanner.test.jsx (text update)
+CHANGES.md                      (this entry)
+```
+
+### Verification
+
+| | |
+|---|---|
+| Build | clean — Tailwind utilities now in bundle (`.flex`, `.hidden`, `.items-center` present) |
+| Lint | 0 errors, 187 warnings (stylistic) |
+| Tests | 23/23 files, 151/151 pass |

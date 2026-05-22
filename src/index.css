@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ============================================
    KAYAD — GLOBAL DESIGN SYSTEM v2.0
    Premium Kenyan Automotive Marketplace

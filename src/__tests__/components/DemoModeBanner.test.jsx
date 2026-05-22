@@ -10,8 +10,8 @@ vi.mock('../../api/api', () => ({
 describe('DemoModeBanner', () => {
   afterEach(() => { cleanup(); });
 
-  it('renders demo mode banner', async () => {
+  it('renders preview mode banner', async () => {
     render(<DemoModeBanner />);
-    expect(await screen.findByText(/demo mode/i)).toBeInTheDocument();
+    expect(await screen.findByText(/preview mode/i)).toBeInTheDocument();
   });
 });

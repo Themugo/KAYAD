@@ -119,6 +119,21 @@ let _cars = [
   { _id:'car-broker1', title:'Mazda Demio 2019', brand:'Mazda', price:890000, year:2019, fuel:'Petrol', transmission:'Automatic', mileage:62000, bodyType:'Hatchback', color:'Silver', location:{city:'Nairobi'}, description:'Well maintained Mazda Demio. Perfect first car. All payments via escrow.', features:['AC','Bluetooth','Power Windows','Central Locking'], images:IMG.maz, views:234, allowBid:true, allowBuy:true, auctionStatus:'draft', isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'demo-broker-1', name:'Grace Wanjiku', role:'broker', dealerRating:4.2, trustScore:78, verified:true, tier:'verified', verifications:['email','phone','id'], escrowMandatory:true, memberSince:'2024', totalTransactions:18} },
   { _id:'car-broker2', title:'Toyota Vitz 2020', brand:'Toyota', price:1250000, year:2020, fuel:'Petrol', transmission:'Automatic', mileage:34000, bodyType:'Hatchback', color:'Blue', location:{city:'Nairobi'}, description:'Toyota Vitz 2020 Grade 5. Very clean, one local owner. Escrow protected.', features:['AC','Keyless Entry','Reverse Camera','Bluetooth','Fuel Efficient'], images:IMG.hon, views:567, allowBid:true, allowBuy:true, auctionStatus:'draft', isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'demo-broker-1', name:'Grace Wanjiku', role:'broker', dealerRating:4.2, trustScore:78, verified:true, tier:'verified', verifications:['email','phone','id'], escrowMandatory:true, memberSince:'2024', totalTransactions:18} },
 ];
+
+// Promote a few listings to LIVE auctions with active countdowns so the
+// live-auction section, the ticker, and the Live Auctions stat are populated
+// out of the box (a static draft-only catalogue looks lifeless in a pitch).
+(() => {
+  const liveEnds = [2.5, 6, 19, 44]; // hours from now — staggered for a realistic board
+  _cars.slice(0, 4).forEach((c, i) => {
+    c.auctionStatus = 'live';
+    c.allowBid = true;
+    c.auctionEnd = new Date(Date.now() + liveEnds[i] * 3600 * 1000).toISOString();
+    c.currentBid = Math.round((c.price || 1000000) * 0.82);
+    c.bidsCount = 6 + i * 3;
+  });
+})();
+
 export const DEMO_CARS = _cars;
 export function addDemoCar(car) { _cars.push(car); }
 export function updateDemoCar(id, updates) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars[i] = { ..._cars[i], ...updates }; }
