@@ -110,7 +110,8 @@ export default function Showroom() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px)');
-  const gridCols = isMobile ? 'repeat(1, 1fr)' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)';
+  const isWide   = useMediaQuery('(min-width: 1500px)');
+  const gridCols = isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(3, 1fr)' : isWide ? 'repeat(4, 1fr)' : 'repeat(4, 1fr)';
 
   // ─── Local UI state ────────────────────────────────────────────────────
   const [cars, setCars]                 = useState([]);

@@ -655,3 +655,48 @@ CHANGES.md                     (this entry)
 | Lint | 0 errors, 187 warnings |
 | Tests | 23/23 files, 151/151 pass |
 | Detail-page undefined classes | 0 |
+
+---
+
+## Round 12 — Card/navbar/compare polish + landing/showroom audit
+
+Visual fine-tuning across the catalogue and landing.
+
+### Card (CartyGrid)
+- **LIVE duplication fixed.** `isLive` triggered on `auctionStatus==='live' || allowBid || isAuction`, so any biddable car (incl. draft broker cars) wrongly showed LIVE. Now strictly `auctionStatus === 'live'`. Also removed the navbar socket "LIVE" status badge that competed with the "Live Auctions" link.
+- **Like → detail.** Removed the favorite toggle from the card (grid + list). Liking now happens on the detail page after seeing full info; the whole card links to detail.
+- **Smaller price + title.** Title `text-lg` 2-line → `text-[15px]` 1-line; price `text-2xl` → `text-base` with a small "Price/Current Bid" label. Tighter padding (`p-5`→`p-4`). Cards are now denser and display-focused.
+- **Fewer colored tabs.** Dropped the green NTSA badge from the card; kept only LIVE (red) + DEMO (amber). Compare is a subtle hover-reveal button (no always-on heart + compare stack).
+
+### Compare drawer
+Was a full-width bottom bar rendering all 4 slots (with empty `+` placeholders) — bulky and covering the catalogue. Rewritten as a **compact centered floating pill** showing only the cars actually added, with Clear + Compare (disabled until 2 cars). Much smaller footprint.
+
+### Navbar
+- **Removed the search box entirely** (redundant with the showroom's refine panel). Cleaned up the unused state/handler/import.
+- **Persistent nav after login.** Primary links (Gallery, Live Auctions, Dealer Hub, Admin) now show from the `md` breakpoint (was `lg`), so there's always a visible way back to the gallery/home after login instead of having to start afresh. Logo links home.
+
+### Showroom / catalogue
+- **4 cars per row** on desktop (was 3); 3 on tablet, 2 on small screens.
+- Homepage grids tuned to `minmax(270px)` for a consistent ~4-per-row.
+
+### Landing page audit
+- Cleaner data segmentation: **Elite Selection = promoted picks** (topped up to 4), **Live Auctions = real live**, **Recent Arrivals = newest buy-now** (up to 8). Previously "featured" leaned on `allowBid` and overlapped with live.
+- Combined with Round 10 (honest stats, compact hero, live demo auctions) the landing now leads with real inventory fast, minimal chrome, denser car display.
+
+### Files changed
+```
+src/components/CartyGrid.jsx     (LIVE fix, like→detail, smaller price/title, fewer badges, cleanup)
+src/components/CompareDrawer.jsx (compact centered pill)
+src/components/Navbar.jsx        (remove search, persistent nav, remove socket LIVE badge)
+src/pages/Showroom.jsx           (4 per row)
+src/pages/HomePage.jsx           (segmentation, 4-per-row grids)
+CHANGES.md                       (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 187 warnings |
+| Tests | 23/23 files, 151/151 pass |
+| LIVE badge per card | exactly 1 (and only for real live auctions) |

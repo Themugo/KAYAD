@@ -5,9 +5,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
-import { favoritesAPI } from '../api/api';
 import { timeAgo } from '../utils/helpers';
-import { MapPin, Gauge, Settings, ShieldCheck, Heart, Eye, Zap, Flame, BarChart3, ChevronRight } from 'lucide-react';
+import { MapPin, Gauge, Settings, BarChart3, ChevronRight } from 'lucide-react';
 import LazyImage from './LazyImage';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
@@ -23,7 +22,6 @@ function firstImage(car) {
 }
 
 const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile = false }) {
-  const [isFav, setIsFav] = useState(false);
   const [hovered, setHovered] = useState(false);
 
   const navigate = useNavigate();
@@ -34,28 +32,11 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   if (!car) return null;
 
   const isCompared = isComparing(car._id);
-  const isLive = car.auctionStatus === 'live' || car.allowBid || car.isAuction;
+  const isLive = car.auctionStatus === 'live';
   const linkTo = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
   const img = firstImage(car);
   const city = car.location?.city || car.location || 'Nairobi';
   const price = Number(car.currentBid || car.price || 0);
-
-  const handleFav = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isAuth) {
-      navigate(`/register?redirect=/showroom`);
-      return;
-    }
-    try {
-      const res = await favoritesAPI.toggle(car._id);
-      const nowFav = res.favorited === true || res.favorited === 'true';
-      setIsFav(nowFav);
-      toast(nowFav ? 'Saved to wishlist' : 'Removed from wishlist', 'success');
-    } catch {
-      toast('Failed to update wishlist', 'error');
-    }
-  };
 
   const fuelIcon = car.fuel?.toLowerCase() === 'diesel' ? '🛢️' 
                  : car.fuel?.toLowerCase() === 'electric' ? '⚡' : '⛽';
@@ -98,28 +79,28 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-5 flex flex-col">
+          <div className="flex-1 p-4 flex flex-col">
             <div className="flex justify-between items-start gap-4">
-              <h3 className="text-lg font-semibold line-clamp-2 flex-1">
+              <h3 className="text-[15px] font-semibold line-clamp-1 flex-1">
                 {car.year && <span className="text-text-muted">{car.year} </span>}
                 {car.title}
               </h3>
 
               <div className="text-right">
-                <div className="text-xs text-text-muted uppercase tracking-widest">
+                <div className="text-[9px] text-text-muted uppercase tracking-widest font-bold">
                   {isLive ? 'Current Bid' : 'Price'}
                 </div>
-                <div className="price-tag text-2xl font-bold text-gold-light">
+                <div className="price-tag text-base font-bold text-gold-light leading-tight">
                   KES {price.toLocaleString()}
                 </div>
               </div>
             </div>
 
             {/* Meta */}
-            <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-text-muted mt-3">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted mt-2">
               {car.mileage && (
                 <span className="flex items-center gap-1.5">
-                  <Gauge size={15} /> {car.mileage.toLocaleString()} km
+                  <Gauge size={13} /> {car.mileage.toLocaleString()} km
                 </span>
               )}
               {car.fuel && (
@@ -129,32 +110,28 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               )}
               {car.transmission && (
                 <span className="flex items-center gap-1.5">
-                  <Settings size={15} /> {car.transmission}
+                  <Settings size={13} /> {car.transmission}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
-                <MapPin size={15} /> {city}
+                <MapPin size={13} /> {city}
               </span>
             </div>
 
             {/* Bottom Bar */}
-            <div className="mt-auto pt-5 border-t border-border flex items-center justify-between text-sm">
+            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between text-sm">
               <div className="text-text-muted text-xs">
                 {car.views && `${car.views} views • `}
                 {car.createdAt && `${timeAgo(car.createdAt)}`}
               </div>
 
-              <div className="flex items-center gap-3">
-                <button onClick={handleFav} className="p-2 hover:bg-surface rounded-xl transition-colors">
-                  <Heart size={18} className={isFav ? 'fill-red-500 text-red-500' : 'text-text-muted'} />
-                </button>
-                <button
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-                  className={`p-2 rounded-xl transition-colors ${isCompared ? 'bg-gold text-black' : 'hover:bg-surface text-text-muted'}`}
-                >
-                  <BarChart3 size={18} />
-                </button>
-              </div>
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
+                title={isCompared ? 'Remove from compare' : 'Add to compare'}
+                className={`p-2 rounded-xl transition-colors ${isCompared ? 'bg-gold text-black' : 'hover:bg-surface text-text-muted'}`}
+              >
+                <BarChart3 size={16} />
+              </button>
             </div>
           </div>
         </motion.div>
@@ -185,12 +162,8 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
               {isLive && <div className="badge badge-red flex items-center gap-1.5"><span className="live-dot" /> LIVE</div>}
-              {car.ntsaVerified && <div className="badge badge-green text-xs">NTSA</div>}
+              {car.isDemo && <div className="badge badge-orange">DEMO</div>}
             </div>
-
-            {car.isDemo && (
-              <div className="absolute top-3 right-3 badge badge-orange">DEMO</div>
-            )}
 
             {car.year && (
               <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded">
@@ -200,47 +173,46 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
           </div>
 
           {/* Info */}
-          <div className="p-5 flex-1 flex flex-col">
-            <h3 className="font-semibold text-lg leading-tight mb-3 line-clamp-2 group-hover:text-gold transition-colors">
+          <div className="p-4 flex-1 flex flex-col">
+            <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1 group-hover:text-gold transition-colors">
               {car.title}
             </h3>
 
-            <div className="flex items-center gap-4 text-sm text-text-muted mb-4">
+            <div className="flex items-center gap-3 text-xs text-text-muted mb-3">
               {car.mileage && (
                 <span className="flex items-center gap-1">
-                  <Gauge size={15} /> {(car.mileage / 1000).toFixed(0)}k km
+                  <Gauge size={13} /> {(car.mileage / 1000).toFixed(0)}k km
                 </span>
               )}
               <span className="flex items-center gap-1">
-                <MapPin size={15} /> {city}
+                <MapPin size={13} /> {city}
               </span>
             </div>
 
-            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between">
-              <div className="price-tag text-2xl font-bold text-gold-light">
-                KES {price.toLocaleString()}
+            <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
+              <div>
+                <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold">
+                  {isLive ? 'Current Bid' : 'Price'}
+                </div>
+                <div className="price-tag text-base font-bold text-gold-light leading-tight">
+                  KES {price.toLocaleString()}
+                </div>
               </div>
-              <ChevronRight className="text-gold opacity-40 group-hover:opacity-100 transition-opacity" />
+              <ChevronRight size={18} className="text-gold opacity-40 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
         </div>
       </Link>
 
-      {/* Floating Action Buttons */}
-      <button
-        onClick={handleFav}
-        className="absolute top-4 right-4 z-20 p-2.5 bg-black/70 hover:bg-black backdrop-blur-md rounded-full transition-all hover:scale-110"
-      >
-        <Heart size={18} className={isFav ? 'fill-red-500 text-red-500' : 'text-white'} />
-      </button>
-
+      {/* Compare — subtle, appears on hover */}
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-        className={`absolute top-16 right-4 z-20 p-2.5 rounded-full backdrop-blur-md transition-all hover:scale-110 border ${
-          isCompared ? 'bg-gold text-black border-gold' : 'bg-black/70 border-border hover:border-gold'
+        title={isCompared ? 'Remove from compare' : 'Add to compare'}
+        className={`absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border opacity-0 group-hover:opacity-100 ${
+          isCompared ? 'bg-gold text-black border-gold opacity-100' : 'bg-black/60 text-white border-white/20 hover:border-gold'
         }`}
       >
-        <BarChart3 size={18} />
+        <BarChart3 size={15} />
       </button>
     </motion.div>
   );

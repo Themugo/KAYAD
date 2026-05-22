@@ -93,13 +93,16 @@ export default function HomePage() {
     carsAPI.list({ limit: 50 }).then(data => {
       const all = data.cars || data.data || [];
       const live = all.filter(c => c.auctionStatus === 'live');
+      const promoted = all.filter(c => c.isPromoted && c.auctionStatus !== 'live');
+      const buyNow = all.filter(c => c.auctionStatus !== 'live');
       setLiveAuctions(live.slice(0, 4));
-      setFeatured(all.filter(c => c.auctionStatus === 'live' || c.allowBid).slice(0, 4));
-      setRecent(all.filter(c => !(c.auctionStatus === 'live' || c.allowBid)).slice(0, 4));
+      // Elite Selection = promoted picks, topped up with other buy-now cars to 4
+      setFeatured([...promoted, ...buyNow.filter(c => !c.isPromoted)].slice(0, 4));
+      setRecent(buyNow.slice(0, 8));
       setStats({
         totalCars:    all.length,
         liveAuctions: live.length,
-        buyNow:       all.filter(c => c.allowBuy !== false && c.auctionStatus !== 'live').length,
+        buyNow:       buyNow.filter(c => c.allowBuy !== false).length,
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
       });
@@ -269,7 +272,7 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(239,68,68,0.7)'}
               >View All Auctions →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 16 }}>
               {liveAuctions.map(car => (
                 <div key={car._id} style={{ position: 'relative' }}>
                   <div style={{
@@ -329,13 +332,13 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 16 }}>
               {[1,2,3,4].map(i => (
                 <div key={i} style={{ aspectRatio: '16/11', background: 'rgba(255,255,255,0.03)', borderRadius: 12, animation: 'pulse 1.8s infinite' }} />
               ))}
             </div>
           ) : cars.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 16 }}>
               {cars.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           ) : (
@@ -372,7 +375,7 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
               >Browse All →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 16 }}>
               {recent.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           </div>

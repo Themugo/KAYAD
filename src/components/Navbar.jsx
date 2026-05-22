@@ -8,7 +8,7 @@ import NotificationCenter from './NotificationCenter';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, User, Menu, X, LogOut } from 'lucide-react';
+import { Bell, User, Menu, X, LogOut } from 'lucide-react';
 
 export default function Navbar({ branding }) {
   const { user, isAuth, isAdmin, logout } = useAuth();
@@ -23,7 +23,6 @@ export default function Navbar({ branding }) {
   const [userDrop, setUserDrop] = useState(false);
   const [notifDrop, setNotifDrop] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchQ, setSearchQ] = useState('');
 
   const dropRef = useRef(null);
 
@@ -64,13 +63,6 @@ export default function Navbar({ branding }) {
     navigate('/');
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQ.trim()) {
-      navigate(`/showroom?search=${encodeURIComponent(searchQ.trim())}`);
-      setSearchQ('');
-    }
-  };
 
   const isActive = (path) => {
     if (path === '/') return loc.pathname === '/';
@@ -107,24 +99,10 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                <Search size={18} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search makes, models, or locations..."
-                value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
-                className="w-full bg-surface border border-border pl-11 py-3 rounded-2xl text-sm focus:border-gold focus:bg-card transition-all outline-none"
-              />
-            </form>
-          </div>
+          <div className="flex-1" />
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
             <Link to="/showroom" className={`nav-link ${isActive('/showroom') ? 'active' : ''}`}>
               Gallery
             </Link>
@@ -152,14 +130,6 @@ export default function Navbar({ branding }) {
 
           {/* Right Section */}
           <div ref={dropRef} className="flex items-center gap-3">
-            {/* Socket Status */}
-            {connected && (
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-success/30 bg-success/10 text-success text-xs font-bold">
-                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                LIVE
-              </div>
-            )}
-
             {isAuth ? (
               <>
                 {/* Notifications */}
