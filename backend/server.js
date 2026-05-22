@@ -35,7 +35,7 @@ import {
   validateMpesaCallback,
 } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
-import { csrfProtection } from "./middleware/csrf.js";
+import { csrfProtection, setCsrfCookie } from "./middleware/csrf.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
@@ -268,8 +268,13 @@ app.use(responseWrapper);
 // ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
 app.use("/api", checkSystemStatus);
 
+// ─── CSRF PROTECTION (global, for all mutating routes) ──
+app.use("/api", csrfProtection);
+
 // ─── API ROUTES ───────────────────────────────────────────────
-app.use("/api/auth/refresh",  csrfProtection);  // CSRF for cookie-based refresh
+app.use("/api/auth/csrf-token", setCsrfCookie, (req, res) => {
+  res.json({ csrfToken: req.csrfToken });
+});
 app.use("/api/auth",          authLimiter, authRoutes);
 app.use("/api/cars",          carRoutes);
 app.use("/api/bids",          bidRoutes);

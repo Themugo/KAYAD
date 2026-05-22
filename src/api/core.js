@@ -25,7 +25,11 @@ export const checkBackendAvailability = async () => {
 
 const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 });
 
-api.interceptors.request.use(cfg => { cfg._hadToken = true; return cfg; });
+api.interceptors.request.use(cfg => {
+  cfg._hadToken = true;
+  cfg.headers['X-Requested-By'] = 'kayad-app';
+  return cfg;
+});
 
 let _refreshing = false;
 let _queue = [];
