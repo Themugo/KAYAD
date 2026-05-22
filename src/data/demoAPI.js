@@ -5,6 +5,10 @@ import {
   filterDemoCars, getDemoCar, addDemoCar, updateDemoCar, removeDemoCar,
 } from './demoData';
 
+// ⚠️ ARCHITECTURAL DEBT: ~1,500 lines of mock API that duplicate
+// real backend endpoints. Each new feature needs a parallel mock here.
+// Consider removing for production and using a single backend path.
+
 // ─── Helpers ──────────────────────────────────────────────────────
 const delay = (min = 200, max = 800) =>
   new Promise(r => setTimeout(r, min + Math.random() * (max - min)));

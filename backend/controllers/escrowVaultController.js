@@ -32,14 +32,18 @@ export const initEscrowVault = async (req, res) => {
 
     const ref = `KYD-${carId.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 
+    if (!process.env.ESCROW_ACCOUNT_NUMBER) {
+      console.error("ESCROW_ACCOUNT_NUMBER not set — escrow vault cannot be created");
+      return res.status(500).json({ success: false, message: "Escrow not configured. Contact support." });
+    }
     const vault = await EscrowVault.create({
       car: carId,
       buyer: userId,
       seller: car.dealer,
       amount: car.winner.amount,
       bankTransferRef: ref,
-      platformAccountName: "KAYAD Escrow Services Ltd",
-      platformAccountNumber: process.env.ESCROW_ACCOUNT_NUMBER || "010XXXXXXXXX",
+      platformAccountName: process.env.ESCROW_PLATFORM_NAME || "KAYAD Escrow Services Ltd",
+      platformAccountNumber: process.env.ESCROW_ACCOUNT_NUMBER,
       platformBankName: process.env.ESCROW_BANK_NAME || "Equity Bank Kenya",
       history: [{ action: "Escrow vault initialized", at: new Date(), by: userId }],
     });

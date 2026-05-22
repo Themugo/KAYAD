@@ -15,8 +15,7 @@ export default function AppInstallPrompt() {
   const handleInstall = () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === 'accepted') console.log('User installed Kayad');
+    deferredPrompt.userChoice.then(() => {
       setDeferredPrompt(null);
     });
   };

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
 import { useToast } from '../context/ToastContext';
+import api from '../api/api';
 
 export default function ContactPage() {
   usePageMeta('Contact Us', 'Get in touch with the Kayad team. We\'re here to help with any questions about buying, selling, or auctions.');
@@ -12,11 +13,15 @@ export default function ContactPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
-    setTimeout(() => {
+    try {
+      await api.post('/contact', form);
       toast('Message sent! We\'ll get back to you soon.', 'success');
       setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to send message', 'error');
+    } finally {
       setSending(false);
-    }, 1000);
+    }
   };
 
   return (
