@@ -13,6 +13,7 @@ import cors         from "cors";
 import dotenv       from "dotenv";
 import helmet       from "helmet";
 import morgan       from "morgan";
+import compression  from "compression";
 import cookieParser from "cookie-parser";
 import { Server }   from "socket.io";
 import jwt          from "jsonwebtoken";
@@ -121,7 +122,6 @@ app.use(helmet({
 app.use(extraHeaders());
 
 // ─── COMPRESSION (gzip) ───────────────────────────────────────
-import compression from "compression";
 app.use(compression({ level: 6, threshold: 1024 }));
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
@@ -411,17 +411,6 @@ const shutdown = async (signal) => {
     process.exit(0);
   });
   setTimeout(() => process.exit(1), 10_000);
-};
-
-// ─── GRACEFUL SHUTDOWN ────────────────────────────────────────
-const shutdown = async (signal) => {
-  console.log(`\n🛑 ${signal} — shutting down gracefully...`);
-  server.close(async () => {
-    await mongoose.connection.close();
-    console.log("✅ Shutdown complete");
-    process.exit(0);
-  });
-  setTimeout(() => process.exit(1), 10_000); // force after 10s
 };
 
 if (NODE_ENV !== "test") {

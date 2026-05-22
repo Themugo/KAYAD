@@ -17,7 +17,7 @@ import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import { validate, validateAuth } from "../middleware/validate.js";
-import { resendVerificationSchema } from "../validation/auth.schema.js";
+import { resendVerificationSchema } from "../validation/misc.schema.js";
 
 const router = express.Router();
 
