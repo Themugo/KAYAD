@@ -355,6 +355,9 @@ const _dealerAPI = {
   // Settlement config
   getSettlement:  ()             => api.get('/dealer/settlement').then(unwrap),
   updateSettlement: (body)       => api.put('/dealer/settlement', body).then(unwrap),
+
+  // Activity audit log (own actions)
+  getMyActivityLog: (params)     => api.get('/security-logs/my', { params }).then(unwrap),
 };
 export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 

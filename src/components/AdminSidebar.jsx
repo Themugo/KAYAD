@@ -33,13 +33,14 @@ const ALL_LINKS = [
   { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
   { to: '/admin/staff', icon: Crown, label: 'Staff' },
   { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
+  { to: '/admin/webhoist', icon: Crown, label: 'Webhoist', superadmin: true },
 ];
 
 const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
 const roleLinks = (role) => {
   if (role === 'superadmin') return ALL_LINKS;
-  return ALL_LINKS.filter(l => !l.danger);
+  return ALL_LINKS.filter(l => !l.danger && !l.superadmin);
 };
 
 export default function AdminSidebar({ mobileOpen, onToggle }) {

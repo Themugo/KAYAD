@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Car, PlusCircle, Gavel, TrendingUp,
-  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award,
+  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -13,6 +13,7 @@ const DEALER_LINKS = [
   { to: '/dealer/analytics', icon: TrendingUp, label: 'Analytics' },
   { to: '/dealer/settlement', icon: DollarSign, label: 'Settlement' },
   { to: '/dealer/team', icon: Users, label: 'Team' },
+  { to: '/dealer/activity-log', icon: ClipboardList, label: 'Activity Log' },
   { to: '/dealer/settings', icon: Settings, label: 'Settings' },
 ];
 
