@@ -9,7 +9,7 @@ const carSchema = new mongoose.Schema(
     brand: { type: String, index: true },
     model: { type: String },
     year: { type: Number, index: true },
-    price: { type: Number },
+    price: { type: Number, min: 0 },
 
     // =============================
     // 📍 LOCATION
@@ -216,6 +216,7 @@ carSchema.index({ "location.city": 1 });
 carSchema.index({ createdAt: -1 });
 carSchema.index({ views: -1 });
 carSchema.index({ allowBid: 1, auctionStatus: 1 });
+carSchema.index({ auctionStatus: 1, auctionEnd: 1 });
 
 carSchema.index({
   title: "text",

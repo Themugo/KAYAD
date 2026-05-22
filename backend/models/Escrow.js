@@ -20,7 +20,7 @@ const escrowSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "held", "released", "refunded", "disputed"],
+      enum: ["pending", "held", "released", "refunded", "disputed", "pending_review"],
       default: "pending",
       index: true,
     },
@@ -36,6 +36,8 @@ const escrowSchema = new mongoose.Schema(
 
     notes: String,
     disputeReason: String,
+    reviewReason: String,
+    reviewFlaggedAt: Date,
 
     history: [{ action: String, by: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, at: { type: Date, default: Date.now } }],
     lastActionKey: String,
@@ -73,7 +75,7 @@ escrowSchema.methods.confirmDelivery = function (userId) {
 };
 
 escrowSchema.methods.releaseFunds = function (adminId) {
-  if (!["held", "disputed"].includes(this.status)) throw new Error("Escrow not in releasable state");
+  if (!["held", "disputed", "pending_review"].includes(this.status)) throw new Error("Escrow not in releasable state");
   const commissionRate = 0.05;
   this.commission = this.amount * commissionRate;
   this.sellerAmount = this.amount - this.commission;
@@ -85,7 +87,7 @@ escrowSchema.methods.releaseFunds = function (adminId) {
 };
 
 escrowSchema.methods.refundBuyer = function (adminId, reason) {
-  if (!["held", "disputed"].includes(this.status)) throw new Error("Cannot refund this escrow");
+  if (!["held", "disputed", "pending_review"].includes(this.status)) throw new Error("Cannot refund this escrow");
   this.status = "refunded";
   this.refundedAt = new Date();
   this.refundedBy = adminId;
@@ -105,10 +107,20 @@ escrowSchema.methods.openDispute = function (userId, reason) {
 };
 
 escrowSchema.methods.autoRelease = function () {
+  // DEPRECATED: Auto-release is no longer safe.
+  // Use flagForReview() instead.
   if (this.status !== "held" || !this.autoReleaseEligibleAt) return null;
   if (new Date() < this.autoReleaseEligibleAt) return null;
-  this.autoReleased = true;
-  return this.releaseFunds(null);
+  return null; // Do NOT auto-release — requires admin review
+};
+
+escrowSchema.methods.flagForReview = function (reason) {
+  if (this.status !== "held") throw new Error("Escrow not in held state");
+  this.status = "pending_review";
+  this.reviewReason = reason || "Auto-flagged: deadline passed without buyer confirmation.";
+  this.reviewFlaggedAt = new Date();
+  this.addHistory(`Flagged for admin review — ${this.reviewReason}`);
+  return this.save();
 };
 
 const Escrow = mongoose.models.Escrow || mongoose.model("Escrow", escrowSchema);

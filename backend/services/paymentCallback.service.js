@@ -42,13 +42,19 @@ export const handleMpesaCallback = async (callbackData) => {
       return;
     }
 
-    if (payment.status === "success") {
+    // ── IDEMPOTENCY: atomic check-and-return ──────────────
+    // If already processed (success or failed), return immediately.
+    // The unique constraint on checkoutRequestId + mpesaReceipt
+    // prevents duplicate processing at the DB level.
+    if (payment.processed || payment.status === "success") {
+      console.log(`⏭️ Callback idempotent: ${checkoutId} already ${payment.status}`);
       await session.commitTransaction();
       return payment;
     }
 
     if (!success) {
       payment.status = "failed";
+      payment.processed = true;
       payment.resultDesc = stk.ResultDesc || "M-Pesa transaction failed";
       await payment.save({ session });
 
@@ -95,6 +101,7 @@ export const handleMpesaCallback = async (callbackData) => {
     payment.status = "success";
     payment.mpesaReceipt = receipt;
     payment.paidAt = new Date();
+    payment.processed = true;
 
     await payment.save({ session });
 
