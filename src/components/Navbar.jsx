@@ -67,7 +67,7 @@ export default function Navbar({ branding }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQ.trim()) {
-      navigate(`/showroom?search=${encodeURIComponent(searchQ.trim())}`);
+      navigate(`/showroom?keyword=${encodeURIComponent(searchQ.trim())}`);
       setSearchQ('');
     }
   };
@@ -280,9 +280,64 @@ export default function Navbar({ branding }) {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="mobile-menu-panel"
               onClick={e => e.stopPropagation()}
+              style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '85%', maxWidth: 360, background: '#0a0a0a', overflowY: 'auto', padding: '24px 20px' }}
             >
-              {/* Mobile Content - similar structure as before but cleaner */}
-              {/* ... (I kept it shorter for brevity - you can expand using same pattern) */}
+              {/* Mobile Search */}
+              <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ marginBottom: 24 }}>
+                <div style={{ position: 'relative' }}>
+                  <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search makes, models..."
+                    value={searchQ}
+                    onChange={(e) => setSearchQ(e.target.value)}
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 12px 12px 40px', color: '#fff', fontSize: 14, outline: 'none' }}
+                  />
+                </div>
+              </form>
+
+              {/* Mobile Nav Links */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <Link to="/showroom" onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, color: isActive('/showroom') ? 'var(--gold)' : 'rgba(255,255,255,0.7)', background: isActive('/showroom') ? 'rgba(212,196,168,0.08)' : 'transparent', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
+                  Gallery
+                </Link>
+                <Link to="/showroom?filter=auction" onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
+                  Live Auctions
+                </Link>
+                {isSellerRole(user?.role) && (
+                  <Link to="/dealer" onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, color: isActive('/dealer') ? 'var(--gold)' : 'rgba(255,255,255,0.7)', background: isActive('/dealer') ? 'rgba(212,196,168,0.08)' : 'transparent', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
+                    Dealer Hub
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, color: isActive('/admin') ? 'var(--gold)' : 'rgba(255,255,255,0.7)', background: isActive('/admin') ? 'rgba(212,196,168,0.08)' : 'transparent', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
+                    Admin Panel
+                  </Link>
+                )}
+              </div>
+
+              {/* Mobile User Section */}
+              {isAuth && (
+                <>
+                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 20, paddingTop: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {[
+                      { to: '/dashboard', label: 'Dashboard' },
+                      { to: '/profile', label: 'Profile' },
+                      { to: '/favorites', label: 'Saved Cars' },
+                      { to: '/chat', label: 'Messages' },
+                      { to: '/notifications', label: 'Notifications' },
+                    ].map(({ to, label }) => (
+                      <Link key={to} to={to} onClick={() => setMobileOpen(false)} style={{ padding: '12px 16px', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 14, textDecoration: 'none' }}>
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                  <button onClick={() => { handleLogout(); setMobileOpen(false); }} style={{ marginTop: 16, width: '100%', padding: '14px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                    <LogOut size={16} /> Sign Out
+                  </button>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}
