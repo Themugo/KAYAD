@@ -3,10 +3,11 @@ import User from "../models/User.js";
 import { cacheGet, cacheSet } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
+import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
+import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 
-const STAFF_ROLES = ["admin", "superadmin", "moderator", "technical_support"];
-const DEALER_ROLES = ["dealer", "broker", "individual_seller"];
+const DEALER_ROLES = SELLER_ROLES; // backward compat
 
 // =============================
 // 🧠 SAFE NUMBER PARSER
@@ -286,6 +287,10 @@ export const createCar = async (req, res) => {
 
     await cacheSet("cars:list:*", null, 1);
 
+    await logActionFromReq(req, "create_car", {
+      target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
+    });
+
     res.status(201).json({ success: true, data: car });
   } catch (err) {
     console.error("❌ CREATE ERROR:", err.message);
@@ -365,6 +370,10 @@ export const updateCar = async (req, res) => {
     await car.save();
     await cacheSet("cars:list:*", null, 1);
 
+    await logActionFromReq(req, "update_car", {
+      target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
+    });
+
     res.json({ success: true, data: car });
   } catch (err) {
     console.error("❌ UPDATE ERROR:", err.message);
@@ -380,7 +389,7 @@ export const deleteCar = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = ["admin","superadmin","moderator"].includes(req.user.role);
+    const isStaff = STAFF_ROLES.includes(req.user.role);
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     const isDemoMgmt = car.isDemo && (isDealer || isStaff);
@@ -404,6 +413,10 @@ export const deleteCar = async (req, res) => {
     }
 
     await cacheSet("cars:list:*", null, 1);
+
+    await logActionFromReq(req, "delete_car", {
+      target: req.params.id, targetModel: "Car", details: { title: car.title },
+    });
 
     res.json({
       success: true,
@@ -459,6 +472,11 @@ export const deleteCarImage = async (req, res) => {
     await car.save();
     await cacheSet("cars:list:*", null, 1);
 
+    await logActionFromReq(req, "delete_car_image", {
+      target: car._id, targetModel: "Car",
+      details: { imageIndex, removedPublicId: removedImage?.public_id },
+    });
+
     res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
   } catch (err) {
     console.error("❌ DELETE IMAGE ERROR:", err.message);
@@ -511,6 +529,11 @@ export const addCarImages = async (req, res) => {
     await car.save();
     await cacheSet("cars:list:*", null, 1);
 
+    await logActionFromReq(req, "add_car_images", {
+      target: car._id, targetModel: "Car",
+      details: { addedCount: newImages.length, totalImages: car.images.length },
+    });
+
     res.json({ success: true, data: { images: car.images } });
   } catch (err) {
     console.error("❌ ADD IMAGES ERROR:", err.message);
@@ -532,7 +555,7 @@ export const getCar = async (req, res) => {
     }
 
     const isOwner = req.user && String(car.dealer?._id) === String(req.user.id);
-    const isAdmin = req.user && ["admin", "superadmin", "moderator"].includes(req.user.role);
+    const isAdmin = req.user && STAFF_ROLES.includes(req.user.role);
     if (car.status !== "active" && car.status !== "sold" && !isOwner && !isAdmin) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
@@ -580,6 +603,11 @@ export const placeBid = async (req, res) => {
     car.bidsCount += 1;
 
     await car.save();
+
+    await logActionFromReq(req, "place_bid", {
+      target: car._id, targetModel: "Car",
+      details: { amount: Number(amount), bidsCount: car.bidsCount },
+    });
 
     res.json({
       success: true,

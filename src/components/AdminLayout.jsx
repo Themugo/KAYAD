@@ -7,6 +7,7 @@ const ROLE_LABELS = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
   technical_support: 'Tech Support', hr: 'HR', accounts: 'Accounts',
   escrow_officer: 'Escrow Officer', ad_manager: 'Ad Manager', moderator: 'Moderator',
+  ghost_checker: 'Ghost Checker',
 };
 
 export default function AdminLayout({ children }) {
@@ -19,7 +20,8 @@ export default function AdminLayout({ children }) {
     return <Navigate to="/login" state={{ from: loc }} replace />;
   }
 
-  const isStaff = ['admin', 'superadmin', 'moderator', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager'].includes(user?.role);
+  const STAFF_ROLES = ['admin', 'superadmin', 'moderator', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'ghost_checker'];
+  const isStaff = STAFF_ROLES.includes(user?.role);
   if (!isStaff) {
     return <Navigate to="/" replace />;
   }

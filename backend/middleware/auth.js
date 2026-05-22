@@ -2,6 +2,7 @@
 
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 
 const WEBHOIST_EMAIL = (process.env.WEBHOIST_EMAIL || "").toLowerCase().trim();
 const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
@@ -139,7 +140,6 @@ export const protect = async (req, res, next) => {
 // =============================
 // 👑 ADMIN ONLY (all staff roles)
 // =============================
-const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
 export const adminOnly = (req, res, next) => {
   if (!req.user || !STAFF_ROLES.includes(req.user.role)) {
     return res.status(403).json({
@@ -155,7 +155,7 @@ export const adminOnly = (req, res, next) => {
 // 🧑‍💼 DEALER & BROKER (ADMIN INCLUDED)
 // =============================
 export const dealerOnly = (req, res, next) => {
-  if (!req.user || !["dealer", "broker", "individual_seller", ...STAFF_ROLES].includes(req.user.role)) {
+  if (!req.user || ![...SELLER_ROLES, ...STAFF_ROLES].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
       message: "Dealer, broker, or seller access only",

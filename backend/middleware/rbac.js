@@ -1,58 +1,37 @@
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
+import {
+  PERM,
+  ROLE_PERMISSIONS as CENTRAL_PERMISSIONS,
+  WEBHOIST,
+  isWebhoist as checkWebhoist,
+} from "../config/roles.js";
 
-export const PERMISSIONS = {
-  MANAGE_USERS:        "manage_users",
-  MANAGE_CARS:         "manage_cars",
-  MANAGE_AUCTIONS:     "manage_auctions",
-  MANAGE_BIDS:         "manage_bids",
-  MANAGE_ESCROWS:      "manage_escrows",
-  MANAGE_PAYMENTS:     "manage_payments",
-  MANAGE_REVIEWS:      "manage_reviews",
-  MANAGE_ADS:          "manage_ads",
-  MANAGE_SETTINGS:     "manage_settings",
-  VIEW_ANALYTICS:      "view_analytics",
-  ISSUE_REFUND:        "issue_refund",
-  KILL_SWITCH:         "kill_switch",
-  VERIFY_DEALER:       "verify_dealer",
-  MANAGE_DEALERS:      "manage_dealers",
-  VIEW_AUDIT_LOG:      "view_audit_log",
-  ESCROW_OPERATIONS:   "escrow_operations",
-  MODERATE_CONTENT:    "moderate_content",
-  GHOST_CHECK:         "ghost_check",
-};
+// Backward-compatible re-exports
+export const PERMISSIONS = Object.freeze({
+  MANAGE_USERS:        PERM.MANAGE_USERS,
+  MANAGE_CARS:         PERM.MANAGE_CARS,
+  MANAGE_AUCTIONS:     PERM.MANAGE_AUCTIONS,
+  MANAGE_BIDS:         PERM.MANAGE_AUCTIONS,
+  MANAGE_ESCROWS:      PERM.MANAGE_ESCROW,
+  MANAGE_PAYMENTS:     PERM.MANAGE_FINANCE,
+  MANAGE_REVIEWS:      PERM.MANAGE_MODERATION,
+  MANAGE_ADS:          PERM.MANAGE_ADS,
+  MANAGE_SETTINGS:     PERM.MANAGE_PLATFORM,
+  VIEW_ANALYTICS:      PERM.VIEW_ANALYTICS,
+  ISSUE_REFUND:        PERM.MANAGE_FINANCE,
+  KILL_SWITCH:         PERM.MANAGE_PLATFORM,
+  VERIFY_DEALER:       PERM.MANAGE_USERS,
+  MANAGE_DEALERS:      PERM.MANAGE_STAFF,
+  VIEW_AUDIT_LOG:      PERM.VIEW_LOGS,
+  ESCROW_OPERATIONS:   PERM.MANAGE_ESCROW,
+  MODERATE_CONTENT:    PERM.MANAGE_MODERATION,
+  GHOST_CHECK:         PERM.MANAGE_INSPECTIONS,
+});
 
-const ROLE_PERMISSIONS = {
-  superadmin: Object.values(PERMISSIONS),
-  admin: [
-    PERMISSIONS.MANAGE_USERS, PERMISSIONS.MANAGE_CARS, PERMISSIONS.MANAGE_AUCTIONS,
-    PERMISSIONS.MANAGE_BIDS, PERMISSIONS.MANAGE_ESCROWS, PERMISSIONS.MANAGE_PAYMENTS,
-    PERMISSIONS.MANAGE_REVIEWS, PERMISSIONS.MANAGE_ADS, PERMISSIONS.MANAGE_SETTINGS,
-    PERMISSIONS.VIEW_ANALYTICS, PERMISSIONS.ISSUE_REFUND, PERMISSIONS.KILL_SWITCH,
-    PERMISSIONS.VERIFY_DEALER, PERMISSIONS.MANAGE_DEALERS, PERMISSIONS.VIEW_AUDIT_LOG,
-    PERMISSIONS.MODERATE_CONTENT,
-  ],
-  escrow_officer: [
-    PERMISSIONS.MANAGE_ESCROWS, PERMISSIONS.ESCROW_OPERATIONS, PERMISSIONS.VIEW_ANALYTICS,
-  ],
-  ad_manager: [
-    PERMISSIONS.MANAGE_ADS, PERMISSIONS.VIEW_ANALYTICS,
-  ],
-  moderator: [
-    PERMISSIONS.MODERATE_CONTENT, PERMISSIONS.MANAGE_REVIEWS, PERMISSIONS.MANAGE_CARS,
-  ],
-  ghost_checker: [
-    PERMISSIONS.GHOST_CHECK, PERMISSIONS.MANAGE_CARS,
-  ],
-  broker: [
-    PERMISSIONS.MANAGE_CARS, PERMISSIONS.MANAGE_AUCTIONS,
-  ],
-  dealer: [
-    PERMISSIONS.MANAGE_CARS,
-  ],
-  user: [],
-  guest: [],
-};
+// Merge centralized permissions into rbac's expected format,
+// keeping backward compatibility for code that reads ROLE_PERMISSIONS directly.
+const ROLE_PERMISSIONS = { ...CENTRAL_PERMISSIONS, guest: [] };
 
 export function getEffectiveRole(user) {
   if (isWebhoist(user)) return "webhoist";
@@ -68,10 +47,7 @@ export function getEffectiveRole(user) {
  * @returns {boolean}
  */
 export function isWebhoist(user) {
-  const owner = (process.env.WEBHOIST_EMAIL || "").toLowerCase().trim();
-  if (!owner) return false;
-  const email = String(user?.email || "").toLowerCase().trim();
-  return !!email && email === owner;
+  return checkWebhoist(user);
 }
 
 export function hasPermission(user, permission) {

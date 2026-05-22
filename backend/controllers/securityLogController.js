@@ -36,6 +36,40 @@ export const getSecurityLogs = async (req, res) => {
   }
 };
 
+export const getMySecurityLogs = async (req, res) => {
+  try {
+    const { action, page = 1, limit = 30 } = req.query;
+    const filter = { actor: req.user.id };
+    if (action) filter.action = { $regex: action, $options: "i" };
+
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 200);
+
+    const [logs, total] = await Promise.all([
+      SecurityLog.find(filter)
+        .populate("actor", "name email role")
+        .sort({ timestamp: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 200))
+        .lean(),
+      SecurityLog.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      logs,
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 200),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 200)),
+      },
+    });
+  } catch (err) {
+    console.error("❌ GET MY SECURITY LOGS ERROR:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch logs" });
+  }
+};
+
 export const getSecurityLogSummary = async (req, res) => {
   try {
     const [total, criticalCount, recentActions] = await Promise.all([

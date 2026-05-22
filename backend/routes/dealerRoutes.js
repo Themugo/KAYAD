@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import { protect, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { logActionFromReq } from "../utils/securityLogger.js";
 
 import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
@@ -353,6 +354,11 @@ router.put(
     if (paymentDetails !== undefined) update.paymentDetails = paymentDetails;
     const user = await User.findByIdAndUpdate(req.user.id, update, { new: true })
       .select("mpesaBusiness mpesaBusinessName paymentDetails bankName bankAccount");
+
+    await logActionFromReq(req, "update_settlement", {
+      details: { fields: Object.keys(update) },
+    });
+
     res.json({ success: true, settlement: user });
   })
 );
@@ -426,6 +432,11 @@ router.patch("/team/:memberId", asyncHandler(async (req, res) => {
   if (permissions) Object.assign(record.permissions, permissions);
   if (status) record.status = status;
   await record.save();
+
+  await logActionFromReq(req, "team_update", {
+    details: { teamMemberId: req.params.memberId, role, status },
+  });
+
   res.json({ success: true, member: record });
 }));
 
@@ -433,6 +444,11 @@ router.patch("/team/:memberId", asyncHandler(async (req, res) => {
 router.delete("/team/:memberId", asyncHandler(async (req, res) => {
   const record = await DealerTeam.findOneAndDelete({ _id: req.params.memberId, dealer: req.user.id });
   if (!record) return res.status(404).json({ success: false, message: "Not found" });
+
+  await logActionFromReq(req, "team_remove", {
+    details: { teamMemberId: req.params.memberId, removedEmail: record.inviteEmail },
+  });
+
   res.json({ success: true, message: "Removed from team" });
 }));
 
@@ -462,6 +478,10 @@ router.post("/cars/:id/duplicate", asyncHandler(async (req, res) => {
     updatedAt: undefined,
   });
 
+  await logActionFromReq(req, "duplicate_listing", {
+    target: dup._id, targetModel: "Car", details: { originalId: req.params.id, newTitle: dup.title },
+  });
+
   res.status(201).json({ success: true, car: dup });
 }));
 
@@ -482,6 +502,11 @@ router.patch("/cars/:id/mark-sold", asyncHandler(async (req, res) => {
     { new: true }
   );
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+  await logActionFromReq(req, "mark_sold", {
+    target: car._id, targetModel: "Car", details: { buyerName, salePrice },
+  });
+
   res.json({ success: true, car });
 }));
 
@@ -497,6 +522,11 @@ router.patch("/cars/bulk-status", asyncHandler(async (req, res) => {
     { _id: { $in: ids }, dealer: req.user.id },
     { $set: { status } }
   );
+
+  await logActionFromReq(req, "bulk_status_update", {
+    details: { ids, status, modified: result.modifiedCount },
+  });
+
   res.json({ success: true, modified: result.modifiedCount });
 }));
 
@@ -532,6 +562,11 @@ router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
     }
   } catch { /* non-critical */ }
 
+  await logActionFromReq(req, "accept_bid", {
+    target: car._id, targetModel: "Car",
+    details: { bidId: bid._id, bidder: bid.user, amount: bid.amount },
+  });
+
   res.json({ success: true, car, bid });
 }));
 
@@ -560,6 +595,11 @@ router.post("/cars/:id/reject-bid", asyncHandler(async (req, res) => {
       sendNotification(bid.user, `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`).catch(() => {});
     }
   } catch { /* non-critical */ }
+
+  await logActionFromReq(req, "reject_bid", {
+    target: car._id, targetModel: "Car",
+    details: { bidId: bid._id, bidder: bid.user, amount: bid.amount },
+  });
 
   res.json({ success: true, message: "Bid rejected" });
 }));
@@ -625,6 +665,11 @@ router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
   car.auctionEnd = new Date(Date.now() + durationMs);
   await car.save();
 
+  await logActionFromReq(req, "auction_start", {
+    target: car._id, targetModel: "Car",
+    details: { startingBid: startingBidVal, reservePrice: reserveVal, durationMs },
+  });
+
   res.json({ success: true, message: "Auction started", endTime: result.endTime, reservePrice: reserveVal });
 }));
 
@@ -639,6 +684,11 @@ router.post("/cars/:id/auction/end", asyncHandler(async (req, res) => {
 
   const result = await endAuction(car._id.toString());
   await syncAuctionResult({ roomId: car._id.toString(), winner: result.winner });
+
+  await logActionFromReq(req, "auction_end", {
+    target: car._id, targetModel: "Car",
+    details: { winner: result.winner, finalBid: result.finalBid },
+  });
 
   res.json({ success: true, result });
 }));
@@ -669,6 +719,11 @@ router.post("/cars/:id/auction/extend", asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+
+  await logActionFromReq(req, "auction_extend", {
+    target: car._id, targetModel: "Car",
+    details: { hours, extensionsUsed: extensionCount + 1, newEndTime: updated.auctionEnd },
+  });
 
   res.json({ success: true, newEndTime: updated.auctionEnd, extensionsUsed: extensionCount + 1 });
 }));

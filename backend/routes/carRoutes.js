@@ -15,6 +15,8 @@ import {
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
+import { logActionFromReq } from "../utils/securityLogger.js";
+import { STAFF_ROLES } from "../config/roles.js";
 
 import {
   getCars,
@@ -492,7 +494,7 @@ router.patch(
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     const isOwner = car.dealer?.toString() === req.user.id;
-    const isStaff = ["admin","superadmin","moderator"].includes(req.user.role);
+    const isStaff = STAFF_ROLES.includes(req.user.role);
     if (!isOwner && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
 
     const { isPromoted, coverImage } = req.body;

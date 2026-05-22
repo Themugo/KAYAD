@@ -35,7 +35,7 @@ const ALL_LINKS = [
   { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
 ];
 
-const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr'];
+const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
 const roleLinks = (role) => {
   if (role === 'superadmin') return ALL_LINKS;
