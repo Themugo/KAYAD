@@ -20,7 +20,7 @@
   "dependencies": {
     "@sentry/react": "^8.0.0",
     "axios": "^1.6.0",
-    "framer-motion": "^11.18.2",
+    "framer-motion": "^12.40.0",
     "lucide-react": "^0.460.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
