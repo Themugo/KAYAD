@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useNotifications } from '../context/NotificationContext';
 import NotificationCenter from './NotificationCenter';
+import { carsAPI } from '../api/api';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +24,22 @@ export default function Navbar({ branding }) {
   const [userDrop, setUserDrop] = useState(false);
   const [notifDrop, setNotifDrop] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hasLiveAuction, setHasLiveAuction] = useState(false);
+
+  // Check for live auctions on mount + every 60s
+  useEffect(() => {
+    const check = () => {
+      carsAPI.list({ limit: 50, category: 'all' })
+        .then(data => {
+          const all = data.cars || data.data || [];
+          setHasLiveAuction(all.some(c => c.auctionStatus === 'live'));
+        })
+        .catch(() => {});
+    };
+    check();
+    const iv = setInterval(check, 60000);
+    return () => clearInterval(iv);
+  }, []);
 
   const dropRef = useRef(null);
 
@@ -108,11 +125,13 @@ export default function Navbar({ branding }) {
             </Link>
             
             <Link to="/auctions/calendar" className="nav-link flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-              Auctions
+              {hasLiveAuction && (
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </span>
+              )}
+              <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
             </Link>
 
             {isSellerRole(user?.role) && (
@@ -257,11 +276,13 @@ export default function Navbar({ branding }) {
                     Gallery
                   </Link>
                   <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
-                    Auctions
+                    {hasLiveAuction && (
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                      </span>
+                    )}
+                    <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
                   </Link>
                   {isSellerRole(user?.role) && (
                     <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>

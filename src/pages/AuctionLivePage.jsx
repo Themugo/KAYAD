@@ -9,8 +9,10 @@ import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
 import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
+import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
 import api from '../api/api';
+import { ChevronLeft, ChevronRight, Eye, Users, MapPin, Star, CheckCircle } from 'lucide-react';
 import '../styles/auction-live.css';
 
 const AVATAR_COLORS = ['#f59e0b','#3b82f6','#22c55e','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'];
@@ -178,6 +180,23 @@ export default function AuctionLivePage() {
   const prevBidRef = useRef(0);
   const newBidIdsRef = useRef(new Set());
 
+  // Gallery navigation
+  const [imgIdx, setImgIdx] = useState(0);
+  const [showGallery, setShowGallery] = useState(false);
+  const totalImages = car?.images?.length || 0;
+  const auctionImages = car?.images || [];
+  const firstImgSrc = (idx = 0) => {
+    const img = auctionImages[idx];
+    if (!img) return '';
+    return typeof img === 'string' ? img : img?.url || '';
+  };
+  const prevImg = useCallback(() => setImgIdx(i => (totalImages > 0 ? (i > 0 ? i - 1 : totalImages - 1) : 0)), [totalImages]);
+  const nextImg = useCallback(() => setImgIdx(i => (totalImages > 0 ? (i < totalImages - 1 ? i + 1 : 0) : 0)), [totalImages]);
+
+  // Spectator join state
+  const [spectatorMode, setSpectatorMode] = useState(false);
+  const spectatorRef = useRef(null);
+
   // Simulated live viewers
   const [liveViewers, setLiveViewers] = useState(0);
   useEffect(() => {
@@ -236,6 +255,27 @@ export default function AuctionLivePage() {
     if (!id) return;
     joinAuction(id);
   }, [id, connected]);
+
+  // Keyboard image navigation
+  useEffect(() => {
+    const h = (e) => {
+      if (e.key === 'ArrowLeft') { prevImg(); }
+      if (e.key === 'ArrowRight') { nextImg(); }
+    };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [prevImg, nextImg]);
+
+  // Auto-scroll spectator feed
+  useEffect(() => {
+    if (!spectatorMode || !spectatorRef.current) return;
+    const iv = setInterval(() => {
+      if (spectatorRef.current) {
+        spectatorRef.current.scrollTop = spectatorRef.current.scrollHeight;
+      }
+    }, 2000);
+    return () => clearInterval(iv);
+  }, [spectatorMode, bids]);
 
   // Check SMS bidding registration
   useEffect(() => {
@@ -389,15 +429,22 @@ export default function AuctionLivePage() {
 
           {/* ─── LEFT: Car + Bid History ─── */}
           <div>
-            {/* Car image */}
-            <div className="auction-car-image">
+            {/* Car image gallery */}
+            <div className="auction-car-image" onClick={() => totalImages > 0 && setShowGallery(true)} style={{ cursor: totalImages > 0 ? 'zoom-in' : 'default' }}>
               <div className="auction-car-image-wrap">
-                {car.images?.length > 0 ? (
-                  <img src={(car.images[car.coverImage ?? 0]?.url || car.images[car.coverImage ?? 0])} alt={car.title} decoding="async" />
+                {totalImages > 0 ? (
+                  <img src={firstImgSrc(imgIdx) || firstImgSrc(0)} alt={car.title} decoding="async" />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, color: 'var(--text-dim)' }}>🚗</div>
                 )}
               </div>
+              {totalImages > 1 && (
+                <>
+                  <button onClick={e => { e.stopPropagation(); prevImg(); }} className="gallery-nav-btn gallery-nav-left"><ChevronLeft size={18} /></button>
+                  <button onClick={e => { e.stopPropagation(); nextImg(); }} className="gallery-nav-btn gallery-nav-right"><ChevronRight size={18} /></button>
+                  <div className="gallery-counter">{imgIdx + 1} / {totalImages}</div>
+                </>
+              )}
               {car.isDemo && (
                 <div style={{
                   position: 'absolute', top: 8, right: 8,
@@ -405,6 +452,17 @@ export default function AuctionLivePage() {
                   borderRadius: 5, padding: '2px 7px', zIndex: 5,
                 }}>
                   <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                </div>
+              )}
+              {car.isPromoted && (
+                <div style={{
+                  position: 'absolute', top: 8, left: 8,
+                  background: 'rgba(212,196,168,0.92)', backdropFilter: 'blur(8px)',
+                  borderRadius: 5, padding: '2px 8px', zIndex: 5,
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                  <Star size={9} style={{ color: '#0A1628' }} />
+                  <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.06em' }}>FEATURED</span>
                 </div>
               )}
               {/* Countdown overlay on image */}
@@ -424,6 +482,28 @@ export default function AuctionLivePage() {
               )}
             </div>
 
+            {/* Thumbnails */}
+            {totalImages > 1 && (
+              <div style={{
+                display: 'flex', gap: 8, marginBottom: 16, overflow: 'auto',
+                paddingBottom: 4,
+              }}>
+                {auctionImages.map((img, i) => {
+                  const src = typeof img === 'string' ? img : img?.url;
+                  return (
+                    <div key={i} onClick={() => setImgIdx(i)} style={{
+                      width: 72, height: 52, borderRadius: 6, overflow: 'hidden',
+                      border: i === imgIdx ? '2px solid var(--gold)' : '2px solid transparent',
+                      flexShrink: 0, cursor: 'pointer', transition: 'border 0.2s',
+                      opacity: i === imgIdx ? 1 : 0.5,
+                    }}>
+                      {src && <img src={src} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Car specs strip */}
             <div className="card" style={{ marginBottom: 16 }}>
               <div className="auction-specs-strip">
@@ -442,6 +522,134 @@ export default function AuctionLivePage() {
                 ))}
               </div>
             </div>
+
+            {/* Description & Features */}
+            {car.description && (
+              <div className="card" style={{ padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, marginBottom: 8 }}>About This Vehicle</div>
+                <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, margin: 0 }}>{car.description}</p>
+                {car.features?.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                    {car.features.map((f, i) => (
+                      <span key={i} style={{
+                        fontSize: 10, padding: '3px 8px', borderRadius: 4,
+                        background: 'rgba(212,196,168,0.08)', color: 'var(--text-muted)',
+                        border: '1px solid rgba(212,196,168,0.1)',
+                        display: 'flex', alignItems: 'center', gap: 4,
+                      }}>
+                        <CheckCircle size={8} /> {f}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ═══ LIVE ACTIVITY FEED ═══ */}
+            <div className="card" style={{ marginBottom: 14, overflow: 'hidden' }}>
+              <div style={{
+                padding: '12px 16px', borderBottom: '1px solid var(--border)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{
+                    display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+                    background: '#ef4444', animation: 'pulse 1.5s infinite',
+                  }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Live Activity</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+                  <span><Eye size={11} style={{ display: 'inline', marginRight: 2 }} />{liveViewers} watching</span>
+                  <span>👥 {bidCount} bids</span>
+                </div>
+              </div>
+              <div ref={spectatorRef} style={{
+                maxHeight: 200, overflowY: 'auto', padding: '6px 0',
+                background: 'rgba(0,0,0,0.15)',
+              }}>
+                {bids.length === 0 ? (
+                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
+                    No activity yet. Waiting for first bid...
+                  </div>
+                ) : (
+                  bids.slice(0, 20).map((bid, i) => {
+                    const isTop = i === 0;
+                    return (
+                      <div key={bid._id || i} style={{
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        padding: '5px 16px', fontSize: 11,
+                        borderBottom: '1px solid rgba(255,255,255,0.03)',
+                        animation: 'slideInRight 0.3s ease both',
+                        background: isTop ? 'rgba(212,196,168,0.04)' : 'transparent',
+                      }}>
+                        <span style={{ fontSize: 14 }}>{isTop ? '⚡' : '💰'}</span>
+                        <span style={{ flex: 1, color: 'var(--text-muted)' }}>
+                          <strong style={{ color: '#fff' }}>{bid.bidderTag || `Bidder #${bids.length - i}`}</strong>
+                          {' '}placed a bid
+                        </span>
+                        <span style={{ fontWeight: 700, color: isTop ? 'var(--gold-light)' : 'var(--text)', fontSize: 12 }}>
+                          {formatKES(bid.amount)}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+              <div style={{
+                padding: '8px 16px', borderTop: '1px solid var(--border)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                fontSize: 10, color: 'var(--text-muted)',
+              }}>
+                <span>🔴 Live — {formatTime(new Date().toISOString())}</span>
+                <span>{bids.length} activity events</span>
+              </div>
+            </div>
+
+            {/* ═══ SPECTATOR JOIN ═══ */}
+            {!isAuth && !spectatorMode && (
+              <div style={{
+                marginBottom: 14, padding: 16,
+                borderRadius: 'var(--radius-lg)',
+                background: 'linear-gradient(135deg, rgba(212,196,168,0.08), rgba(212,196,168,0.02))',
+                border: '1px solid rgba(212,196,168,0.15)',
+                textAlign: 'center',
+                animation: 'fadeInUp 0.5s ease',
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 6 }}>🎥</div>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Join the Live Show</div>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4, margin: '0 0 10px' }}>
+                  Watch this auction unfold in real time. See every bid, every move — no account needed.
+                </p>
+                <button
+                  onClick={() => setSpectatorMode(true)}
+                  className="btn btn-gold"
+                  style={{ fontSize: 12, padding: '8px 24px' }}
+                >
+                  🎬 Join Live Show
+                </button>
+              </div>
+            )}
+
+            {spectatorMode && (
+              <div style={{
+                marginBottom: 14, padding: 12, borderRadius: 'var(--radius-lg)',
+                background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)',
+                display: 'flex', alignItems: 'center', gap: 8,
+                animation: 'fadeInUp 0.4s ease',
+              }}>
+                <span style={{ fontSize: 20, lineHeight: 1 }}>👁</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#22c55e' }}>You're watching live</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                    Spectator · {liveViewers} others watching
+                  </div>
+                </div>
+                <span style={{
+                  display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+                  background: '#22c55e', animation: 'pulse 1.5s infinite',
+                }} />
+              </div>
+            )}
 
             {/* Market Valuation */}
             <div style={{ marginBottom: 16 }}>
@@ -839,6 +1047,11 @@ export default function AuctionLivePage() {
             </div>
           </div>
         </div>
+
+      {/* Gallery Modal */}
+      {showGallery && (
+        <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+      )}
 
       {/* Winner Modal */}
       {showWinner && (
