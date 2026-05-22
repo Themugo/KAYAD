@@ -9,11 +9,24 @@ import {
 const delay = (min = 200, max = 800) =>
   new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
 
-// Demo session state — no localStorage tokens needed
+// Demo session state
 let _demoUser = null;
 export const setDemoUser = (user) => { _demoUser = user; };
 export const getDemoUser = () => _demoUser;
 export const clearDemoUser = () => { _demoUser = null; };
+
+// Demo token — base64-encoded JSON the api.js `isDemoToken()` helper can read.
+// isDemoToken() does JSON.parse(atob(token)) and checks `.email` / `.superAdmin`,
+// so the token MUST carry those fields. Returning a token here is what keeps the
+// app in demo mode after login (otherwise it stores "undefined" and breaks auth).
+export const makeDemoToken = (user) =>
+  btoa(JSON.stringify({
+    _id: user._id,
+    email: user.email,
+    role: user.role,
+    superAdmin: !!user.superAdmin,
+    demo: true,
+  }));
 
 const withUser = (fn) => (...args) => {
   const user = getDemoUser();
@@ -68,7 +81,7 @@ const demoAuth = {
     };
     const { password, ...safe } = newUser;
     setDemoUser(safe);
-    return wrapSuccess({ user: safe });
+    return wrapSuccess({ user: safe, token: makeDemoToken(safe) });
   },
 
   login: async (body) => {
@@ -78,14 +91,14 @@ const demoAuth = {
     if (user.isBanned) throw { response: { status: 403, data: { message: 'Your account has been suspended' } } };
     const { password, ...safe } = user;
     setDemoUser(safe);
-    return wrapSuccess({ user: safe });
+    return wrapSuccess({ user: safe, token: makeDemoToken(safe) });
   },
 
   refresh: async () => {
     await delay(100, 300);
     const user = getDemoUser();
     if (!user) throw { response: { status: 401, data: { message: 'Session expired' } } };
-    return wrapSuccess({ user });
+    return wrapSuccess({ user, token: makeDemoToken(user) });
   },
 
   logout: async () => {

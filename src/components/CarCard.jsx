@@ -1,87 +1,174 @@
-import { memo } from 'react';
+// src/components/CarCard.jsx
+import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Heart, MapPin, Clock } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { formatKES } from '../api/api';
 
-const CarCard = memo(function CarCard({ car, isComparing, onToggleCompare, compareCount }) {
+const CarCard = memo(function CarCard({ 
+  car, 
+  isComparing, 
+  onToggleCompare, 
+  compareCount,
+  onFavorite,
+  isFavorited = false 
+}) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   const coverIdx = car.coverImage ?? 0;
   const img = car.images?.[coverIdx]?.url || car.images?.[coverIdx];
+  
   const isLive = car.auctionStatus === 'live';
+  const currentPrice = isLive && car.currentBid > 0 ? car.currentBid : car.price;
+
   const linkTo = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
 
   return (
-    <Link to={linkTo} style={{ display: 'block' }}>
-      <div className="card" style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-        <div className="car-img-wrap">
+    <motion.div
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="card group relative overflow-hidden h-full flex flex-col"
+    >
+      <Link to={linkTo} className="flex flex-col h-full">
+        {/* Image Section */}
+        <div className="car-img-wrap relative">
+          {!imgLoaded && (
+            <div className="absolute inset-0 bg-surface flex items-center justify-center z-10">
+              <span className="text-4xl opacity-30">🚗</span>
+            </div>
+          )}
+          
           {img ? (
-            <img src={img} alt={car.title} loading="lazy" decoding="async" />
+            <img
+              src={img}
+              alt={`${car.title}`}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            />
           ) : (
-            <div className="car-img-placeholder">🚗</div>
+            <div className="car-img-placeholder flex items-center justify-center h-full text-6xl opacity-40">
+              🚗
+            </div>
           )}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            height: '40%',
-            background: 'linear-gradient(transparent, rgba(10,22,40,0.85))',
-            pointerEvents: 'none',
-          }} />
+
+          {/* Gradient Overlay */}
+          <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
+
+          {/* Badges */}
           {isLive && (
-            <div style={{ position: 'absolute', top: 10, left: 10 }}>
-              <span className="badge badge-green" style={{ fontSize: 10 }}>
-                <span className="live-dot" /> LIVE
+            <div className="absolute top-3 left-3">
+              <span className="badge badge-green flex items-center gap-1.5 px-3 py-1 text-xs font-bold tracking-wider">
+                <span className="live-dot" /> LIVE AUCTION
               </span>
             </div>
           )}
+
           {car.isDemo && (
-            <div style={{ position: 'absolute', top: 10, right: 10 }}>
-              <span className="badge" style={{ fontSize: 9, background: 'rgba(251,191,36,0.92)', color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>
-                🧪 DEMO
+            <div className="absolute top-3 right-3">
+              <span className="badge badge-orange text-xs font-bold">DEMO</span>
+            </div>
+          )}
+
+          {/* Favorite Button */}
+          {onFavorite && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onFavorite(car._id);
+              }}
+              className="absolute top-3 right-3 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full transition-all hover:scale-110 z-20"
+            >
+              <Heart
+                size={18}
+                className={`transition-colors duration-200 ${
+                  isFavorited 
+                    ? 'fill-red-500 text-red-500' 
+                    : 'text-white hover:text-red-400'
+                }`}
+              />
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-5 flex flex-col">
+          <h3 className="text-lg font-semibold leading-tight mb-3 line-clamp-2 group-hover:text-gold transition-colors">
+            {car.title}
+          </h3>
+
+          {/* Quick Specs */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            {car.year && (
+              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
+                {car.year}
               </span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ padding: '14px 16px' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.title}</h3>
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-            {car.year && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{car.year}</span>}
-            {car.fuel && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{car.fuel}</span>}
-            {car.mileage && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{Number(car.mileage).toLocaleString()} km</span>}
+            )}
+            {car.fuel && (
+              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
+                {car.fuel}
+              </span>
+            )}
+            {car.mileage && (
+              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
+                {Number(car.mileage).toLocaleString()} km
+              </span>
+            )}
           </div>
 
+          {/* Location */}
           {car.location?.city && (
-            <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 8 }}>📍 {car.location.city}</div>
+            <div className="flex items-center gap-1.5 text-text-muted text-sm mb-4">
+              <MapPin size={15} />
+              <span>{car.location.city}</span>
+            </div>
           )}
 
-          <div className="gold-line" style={{ margin: '8px 0' }} />
+          <div className="gold-line my-2" />
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="price-tag" style={{ fontSize: '1.1rem' }}>
-              {isLive && car.currentBid > 0 ? formatKES(car.currentBid) : formatKES(car.price)}
+          {/* Price & Action */}
+          <div className="mt-auto flex items-end justify-between">
+            <div>
+              <p className="price-tag text-2xl font-bold text-gold-light">
+                {formatKES(currentPrice)}
+              </p>
+              {isLive && (
+                <div className="flex items-center gap-1 text-xs text-text-muted mt-1">
+                  <Clock size={14} />
+                  <span>Current Bid</span>
+                </div>
+              )}
             </div>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>View →</span>
+
+            <span className="text-gold text-sm font-medium opacity-70 group-hover:opacity-100 transition-opacity">
+              View →
+            </span>
           </div>
         </div>
+      </Link>
 
-        {onToggleCompare && (
-          <button
-            onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
-            title={isComparing ? 'Remove from compare' : compareCount >= 4 ? 'Max 4 for comparison' : 'Add to compare'}
-            style={{
-              position: 'absolute', top: 10, right: 10,
-              background: isComparing ? 'var(--gold)' : 'rgba(10,22,40,0.8)',
-              border: `1px solid ${isComparing ? 'var(--gold)' : 'var(--border)'}`,
-              borderRadius: 6, padding: '2px 7px', fontSize: 10,
-              color: isComparing ? '#0A1628' : 'var(--text)',
-              cursor: compareCount >= 4 && !isComparing ? 'not-allowed' : 'pointer',
-              fontWeight: 600, opacity: compareCount >= 4 && !isComparing ? 0.5 : 1,
-              backdropFilter: 'blur(4px)', zIndex: 5,
-            }}
-          >
-            {isComparing ? '✓' : '⇄'}
-          </button>
-        )}
-      </div>
-    </Link>
+      {/* Compare Button */}
+      {onToggleCompare && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleCompare();
+          }}
+          disabled={compareCount >= 4 && !isComparing}
+          title={isComparing ? 'Remove from compare' : compareCount >= 4 ? 'Maximum 4 vehicles' : 'Add to compare'}
+          className={`absolute top-3 right-14 z-20 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border backdrop-blur-md
+            ${isComparing 
+              ? 'bg-gold text-black border-gold' 
+              : 'bg-black/70 border-border hover:border-gold text-text-muted hover:text-white'
+            }`}
+        >
+          {isComparing ? '✓' : '⇄'}
+        </button>
+      )}
+    </motion.div>
   );
 });
 

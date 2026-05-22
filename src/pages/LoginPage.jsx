@@ -5,7 +5,17 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
-import { authAPI } from '../api/api';
+import { authAPI, enableDemoMode } from '../api/api';
+
+// Demo accounts — these resolve against the in-app demo dataset
+// (src/data/demoData.js). Clicking one forces demo mode so it works
+// instantly whether or not the live backend is reachable.
+const DEMO_ACCOUNTS = [
+  { label: 'Buyer',      email: 'buyer@demo.com',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
+  { label: 'Dealer',     email: 'dealer@demo.com', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
+  { label: 'Broker',     email: 'broker@demo.com', password: 'Kayad@Demo2026!', tint: '#a855f7' },
+  { label: 'Admin',      email: 'admin@demo.com',  password: 'Kayad@Demo2026!', tint: '#22c55e' },
+];
 
 export function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
@@ -60,6 +70,22 @@ export function LoginPage() {
       toast('Failed to resend. Try again later.', 'error');
     } finally {
       setResending(false);
+    }
+  };
+
+  // One-click demo sign-in. Forces demo mode so the @demo.com accounts
+  // resolve against the in-app dataset regardless of live-backend state.
+  const handleDemoLogin = async (acct) => {
+    setForm({ email: acct.email, password: acct.password });
+    setLoading(true);
+    try {
+      enableDemoMode();
+      const data = await login({ email: acct.email, password: acct.password });
+      toast(`Signed in as ${acct.label} (demo)`, 'success');
+      navigate(getPostAuthPath(data.user, from), { replace: true });
+    } catch (err) {
+      toast(err.response?.data?.message || 'Demo sign-in failed', 'error');
+      setLoading(false);
     }
   };
 
@@ -134,6 +160,64 @@ export function LoginPage() {
               </button>
             </div>
           )}
+
+            <div style={{ margin: '20px 0 12px' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                margin: '0 0 12px',
+              }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+                <span style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
+                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)',
+                  whiteSpace: 'nowrap',
+                }}>
+                  Or explore with a demo account
+                </span>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {DEMO_ACCOUNTS.map(acct => (
+                  <button
+                    key={acct.email}
+                    type="button"
+                    onClick={() => handleDemoLogin(acct)}
+                    disabled={loading}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                      padding: '10px 12px',
+                      borderRadius: 9,
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'rgba(255,255,255,0.02)',
+                      color: 'rgba(255,255,255,0.85)',
+                      fontSize: 12.5, fontWeight: 700,
+                      cursor: loading ? 'wait' : 'pointer',
+                      transition: 'all 0.18s ease',
+                      fontFamily: 'var(--font-body, sans-serif)',
+                    }}
+                    onMouseEnter={e => {
+                      if (loading) return;
+                      e.currentTarget.style.borderColor = acct.tint;
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                    }}
+                  >
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: acct.tint, flexShrink: 0 }} />
+                    {acct.label}
+                  </button>
+                ))}
+              </div>
+              <p style={{
+                fontSize: 10.5, color: 'rgba(255,255,255,0.3)',
+                textAlign: 'center', margin: '10px 0 0',
+                fontFamily: 'var(--font-body, sans-serif)',
+              }}>
+                Demo data only — no real transactions occur.
+              </p>
+            </div>
 
             <div className="gold-line" />
 

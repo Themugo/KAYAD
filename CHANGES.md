@@ -391,3 +391,55 @@ src/components/SearchBar.jsx           (rewritten — 232 ⇢ 159 lines)
 src/pages/Showroom.jsx                 (rewritten — 720 ⇢ 953 lines; the gain is comments + a11y + EmptyState + saved-search popover)
 CHANGES.md                             (this entry)
 ```
+
+---
+
+## Round 7 — Deployment + login audit & fixes
+
+Audit triggered by: Vercel deployment failing + login not working. Pulled the live repo (`Themugo/KAYAD`) and reproduced both.
+
+### Root cause: 6 GitHub-web-editor commits broke the build
+
+After the previous two clean commits, six "Update X.jsx" commits introduced a half-finished refactor that never built:
+
+1. **`framer-motion` imported, never installed.** Used in `Navbar`, `CarCard`, `CartyGrid`, `BuyerDashboard`, `CarDetailPage` but absent from `package.json`. Rollup: `Failed to resolve import "framer-motion"`. → Added `framer-motion@^11.18.2`.
+2. **`CarDetailPage.jsx` reduced to a stub** importing six `components/car-detail/*` files that were never committed (`CarGallery`, `DetailSidebar`, `SpecsSection`, `FeaturesSection`, `DealerProfile`, `ReviewsSection`). → Restored the working 871-line self-contained version from `e8cbe9f~1`.
+3. **`BuyerDashboard.jsx` broken** — `import CarCard from '../../components/CarCard'` (wrong depth) + `import StatCard from '../../components/dashboard/StatCard'` (file never created; author left a "you can create this" comment). → Restored the working 538-line version with `StatCard` defined inline.
+4. **`CartyGrid.jsx` referenced an undefined `daysAgo()`** → switched to the existing `timeAgo` helper from `utils/helpers.js`.
+
+Build now passes: 35 chunks, PWA SW generated, 0 lint errors.
+
+### Root cause: demo login was fundamentally broken
+
+1. **Demo `login`/`register` returned `{ user }` with no `token`.** `AuthContext.login` ran `localStorage.setItem('kayad_token', data.token)` → stored the literal string `"undefined"`. On the next request `isDemoToken()` did `JSON.parse(atob("undefined"))` → threw → returned `false` → the app left demo mode → sent `"undefined"` to the live backend → 401 → user appeared logged out. **This silently broke every demo login.** → Added `makeDemoToken(user)` (base64 JSON carrying `email`, `role`, `superAdmin`, `demo:true`) and returned it from `login`, `register`, and `refresh`.
+2. **Demo fallback was too narrow.** `withDemo` only fell back on pure network errors (`!err.response`). A free-tier backend returning 502/503/504 while asleep, or a 404 from a mis-deployed origin, would NOT trigger demo — so the whole site looked broken. → Introduced `shouldFallbackToDemo(err)` covering network errors, timeouts (`ECONNABORTED`), gateway errors (502/503/504), 404, and 401-with-demo-token. Applied to both `withDemo` and the startup `checkBackendAvailability`.
+3. **`isDemoToken()` missed the superadmin.** It only matched `@demo.com`; the superadmin is `admin@kayad.demo`. → Now also matches `.demo` suffix and the `demo:true` flag.
+4. **Demo accounts were invisible.** The LoginPage had no demo UI at all. → Added a one-click demo quick-login panel (Buyer / Dealer / Broker / Admin) that calls `enableDemoMode()` first so it works instantly regardless of backend state.
+
+### Known issue flagged (not a code bug)
+
+- **Frontend demo accounts (`@demo.com`) and backend seed accounts (`@kayad.space`) are different sets** with different passwords. Which one works depends on whether the backend is reachable. Recommend aligning them in a future pass.
+- **The live backend requires email verification before login** (`authController.js` returns 403 for `!emailVerified && !isDemo`). Self-registered users can't log in until they click the verification link — so SMTP env vars (`SMTP_*`) must be configured on the backend, or new buyers will be stuck. Seeded accounts carry `isDemo:true` and bypass this.
+
+### Files changed
+
+```
+package.json                    (+ framer-motion)
+package-lock.json               (lockfile)
+src/pages/CarDetailPage.jsx     (restored working version)
+src/pages/BuyerDashboard.jsx    (restored working version)
+src/components/CartyGrid.jsx    (daysAgo → timeAgo)
+src/data/demoAPI.js             (demo token on login/register/refresh)
+src/api/api.js                  (shouldFallbackToDemo, enableDemoMode, broader checkBackendAvailability)
+src/pages/LoginPage.jsx         (demo quick-login panel)
+CHANGES.md                      (this entry)
+```
+
+### Verification
+
+| | |
+|---|---|
+| Build | clean — was failing on `framer-motion` |
+| Lint | 0 errors, 186 warnings (stylistic) |
+| Tests | 23/23 files, 151/151 pass |
+| Demo token round-trip | verified: login→store→isDemoToken all PASS |

@@ -15,6 +15,9 @@ const BASE = '/api';
 // ─── Demo mode auto-detection ────────────────────────────────
 let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__;
+// Force demo mode on (used by the login page's demo quick-login buttons so
+// the @demo.com accounts work instantly regardless of real-backend state).
+export const enableDemoMode = () => { __DEMO_MODE__ = true; };
 
 export const checkBackendAvailability = async () => {
   try {
@@ -22,7 +25,16 @@ export const checkBackendAvailability = async () => {
     __DEMO_MODE__ = false;
     return true;
   } catch (err) {
-    if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error') || !err.response) {
+    // Backend is effectively unavailable on: network error, timeout,
+    // gateway errors (502/503/504 — free-tier backend asleep), or 404.
+    const s = err.response?.status;
+    const unavailable =
+      !err.response ||
+      err.code === 'ERR_NETWORK' ||
+      err.code === 'ECONNABORTED' ||
+      err.message?.includes('Network Error') ||
+      [404, 502, 503, 504].includes(s);
+    if (unavailable) {
       __DEMO_MODE__ = true;
       return false;
     }
@@ -145,8 +157,27 @@ const isDemoToken = () => {
   if (!t) return false;
   try {
     const p = JSON.parse(atob(t));
-    return p.email?.endsWith('@demo.com') || p.superAdmin === true;
+    return p.demo === true || p.email?.endsWith('@demo.com') || p.email?.endsWith('.demo') || p.superAdmin === true;
   } catch { return false; }
+};
+
+// Should we fall back to demo for this error?
+// Yes when the backend is effectively unavailable:
+//   • no response at all (network error / CORS / DNS)
+//   • request timed out
+//   • gateway errors (502/503/504) — common when a free-tier backend is asleep
+//   • 404 on the API itself — backend not deployed at this origin
+// No for genuine 400/401/403/409/422 from a LIVE backend — those are real
+// validation/auth errors and must surface to the user (except a 401 paired
+// with a demo token, which just means the real backend rejected a demo token).
+const shouldFallbackToDemo = (err) => {
+  if (!err.response) return true;                          // network / CORS / DNS / timeout
+  if (err.code === 'ECONNABORTED') return true;            // axios timeout
+  const s = err.response.status;
+  if ([502, 503, 504].includes(s)) return true;            // gateway / backend asleep
+  if (s === 404) return true;                              // API not found at origin
+  if (s === 401 && isDemoToken()) return true;             // real backend rejected a demo token
+  return false;
 };
 
 // Wrap a real API object with demo fallback.
@@ -167,7 +198,7 @@ function withDemo(realObj, demoObj) {
 
       try { return await realObj[key](...args); }
       catch (err) {
-        if (demoObj?.[key] && (!err.response || __DEMO_MODE__ || (err.response?.status === 401 && isDemoToken()))) {
+        if (demoObj?.[key] && (__DEMO_MODE__ || shouldFallbackToDemo(err))) {
           __DEMO_MODE__ = true;
           return demoObj[key](...args);
         }
