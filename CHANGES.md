@@ -700,3 +700,44 @@ CHANGES.md                       (this entry)
 | Lint | 0 errors, 187 warnings |
 | Tests | 23/23 files, 151/151 pass |
 | LIVE badge per card | exactly 1 (and only for real live auctions) |
+
+---
+
+## Round 13 — System audit + remove demo admin/webhost
+
+Comprehensive audit after the user's independent build work. Overall the system is in good shape; fixes below address regressions + the demo-admin removal.
+
+### Regressions found & fixed
+- **2 lint errors** — empty `catch {}` blocks in the new demo-car localStorage persistence (`demoData.js`). Added `/* ignore */`.
+- **1 failing test** — `AuctionCalendar` filter tabs were relabeled ("🟢 Live Now", "All Auctions"); updated the stale test to match.
+
+### Demo admin / webhost removal (per request)
+Admin and webhost are operational roles never shown to prospects, so all demo access to them is gone:
+- Removed the demo `admin@demo.com` and `superadmin@kayad.demo` accounts from `DEMO_USERS`.
+- Removed the **Admin** quick-login button from the login page (only Buyer / Dealer / Broker remain).
+- `adminAPI` no longer falls back to demo data (`withDemo` removed) — a real administrator always sees real data or a clear error, never fabricated demo numbers.
+- Repointed orphaned `demo-admin-1` references in demo reviews/chats/notifications to the real demo dealer (`demo-dealer-1`).
+
+### Auth flow audit (verified healthy — no changes needed)
+- **Token refresh** correctly skips demo tokens (no `exp`) — no refresh loop.
+- **Mount validation** only clears auth on real 401/403, keeps the session on network errors.
+- **Self-registration is locked down** — only `dealer`/`broker`/`individual_seller` are accepted; any `admin`/`superadmin` request silently downgrades to `user`. No privilege-escalation path.
+- **Webhost model is correct** — the platform owner is identified by `WEBHOIST_EMAIL` (env), is not a DB/demo account, bypasses all role checks, and can create/assign staff via `POST/PUT /admin/staff` (guarded `authorize("superadmin")`). The create-staff route refuses to mint another superadmin.
+
+### Files changed
+```
+src/data/demoData.js                       (remove demo admin/superadmin, fix catch blocks, repoint refs)
+src/pages/LoginPage.jsx                    (remove Admin quick-login button)
+src/api/api.js                             (adminAPI real-only)
+src/__tests__/pages/AuctionCalendar.test.jsx (update tab labels)
+CHANGES.md                                 (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 189 warnings |
+| Tests | 23/23 files, 151/151 pass |
+| Demo admin/webhost login paths | 0 |
+| Self-register privilege escalation | not possible |

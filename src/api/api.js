@@ -460,7 +460,10 @@ const _adminAPI = {
   // System Health (NEW)
   systemHealth:    ()          => api.get('/admin/system/health').then(unwrap),
 };
-export const adminAPI = withDemo(_adminAPI, demoAPI.admin);
+// Admin & webhost are real-backend only — there is no demo admin/webhost.
+// Falling back to demo data here would show a real administrator fabricated
+// numbers, so admin endpoints always hit the live API (or surface an error).
+export const adminAPI = _adminAPI;
 
 // ============================================================
 //  AUCTION ADMIN — routes/auctionAdminRoutes.js (ADMIN ONLY)

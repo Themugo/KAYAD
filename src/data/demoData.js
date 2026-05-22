@@ -9,14 +9,14 @@ const ADMIN_DEALER = DEMO_DEALER_REF;
 const DEMO_CARS_KEY = 'kayad_demo_cars';
 
 function saveCars() {
-  try { localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars)); } catch {}
+  try { localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars)); } catch { /* ignore */ }
 }
 
 function loadCars() {
   try {
     const raw = localStorage.getItem(DEMO_CARS_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch { /* ignore */ }
   return null;
 }
 
@@ -56,39 +56,6 @@ export const DEMO_USERS = {
     dealerRating: 4.7,
     createdAt: new Date(now - 180 * DAY).toISOString(),
     reviewCount: 42,
-    tokenVersion: 0,
-  },
-  superadmin: {
-    _id: 'demo-superadmin-1',
-    name: 'Webhost Owner',
-    email: 'superadmin@kayad.demo',
-    password: 'Admin@2026!',
-    role: 'superadmin',
-    phone: '254700000001',
-    location: 'Nairobi, Kenya',
-    bio: 'Platform owner & system administrator',
-    isBanned: false,
-    approved: true,
-    dealerRating: 0,
-    emailVerified: true,
-    superAdmin: true,
-    mustChangePassword: false,
-    createdAt: new Date(now - 365 * DAY).toISOString(),
-    tokenVersion: 0,
-  },
-  admin: {
-    _id: 'demo-admin-1',
-    name: 'Admin User',
-    email: 'admin@demo.com',
-    password: 'Kayad@Demo2026!',
-    role: 'admin',
-    phone: '254734567890',
-    location: 'Nairobi',
-    emailVerified: true,
-    isBanned: false,
-    approved: true,
-    dealerRating: 0,
-    createdAt: new Date(now - 365 * DAY).toISOString(),
     tokenVersion: 0,
   },
   broker: {
@@ -229,36 +196,36 @@ export const DEMO_NOTIFICATIONS = [
   { _id:'notif-13', user:DEMO_USERS.dealer._id, title:'Listing Approved', message:'Your Mercedes-Benz GLE listing has been approved.', type:'system', read:true, createdAt:new Date(now-2*DAY).toISOString() },
 
   // Admin notifications
-  { _id:'notif-8', user:DEMO_USERS.admin._id, title:'New User Registered', message:'A new dealer account requires approval.', type:'system', read:false, createdAt:new Date(now-1*DAY).toISOString() },
-  { _id:'notif-9', user:DEMO_USERS.admin._id, title:'Suspicious Activity', message:'Multiple rapid bids detected on car-lc1.', type:'system', read:true, createdAt:new Date(now-2*DAY).toISOString() },
-  { _id:'notif-10', user:DEMO_USERS.admin._id, title:'Large Escrow Release', message:'KES 12,000,000 escrow pending release for Mercedes GLE.', type:'escrow', read:false, createdAt:new Date(now-1*DAY).toISOString() },
-  { _id:'notif-14', user:DEMO_USERS.admin._id, title:'Dispute Raised', message:'Buyer opened a dispute on escrow esc-5.', type:'escrow', read:false, createdAt:new Date(now-0.5*DAY).toISOString() },
+  { _id:'notif-8', user:DEMO_USERS.dealer._id, title:'New User Registered', message:'A new dealer account requires approval.', type:'system', read:false, createdAt:new Date(now-1*DAY).toISOString() },
+  { _id:'notif-9', user:DEMO_USERS.dealer._id, title:'Suspicious Activity', message:'Multiple rapid bids detected on car-lc1.', type:'system', read:true, createdAt:new Date(now-2*DAY).toISOString() },
+  { _id:'notif-10', user:DEMO_USERS.dealer._id, title:'Large Escrow Release', message:'KES 12,000,000 escrow pending release for Mercedes GLE.', type:'escrow', read:false, createdAt:new Date(now-1*DAY).toISOString() },
+  { _id:'notif-14', user:DEMO_USERS.dealer._id, title:'Dispute Raised', message:'Buyer opened a dispute on escrow esc-5.', type:'escrow', read:false, createdAt:new Date(now-0.5*DAY).toISOString() },
 ];
 
 export const DEMO_REVIEWS = [
-  { _id:'rev-1', user:{_id:DEMO_USERS.buyer._id,name:'James Kariuki'}, dealer:'demo-admin-1', car:'car-maz1', rating:5, comment:'Excellent service! The Mazda CX-5 was exactly as described. Nairobi Auto Hub made the process smooth.', createdAt:new Date(now-15*DAY).toISOString() },
-  { _id:'rev-2', user:{_id:'other-buyer-1',name:'Mary Wanjiku'}, dealer:'demo-admin-1', rating:4, comment:'Professional dealer, fair pricing. Would buy from them again.', createdAt:new Date(now-30*DAY).toISOString() },
-  { _id:'rev-3', user:{_id:'other-buyer-2',name:'John Ochieng'}, dealer:'demo-admin-1', rating:5, comment:'Top-notch dealership. The Mercedes GLE was immaculate. Highly recommended!', createdAt:new Date(now-20*DAY).toISOString() },
+  { _id:'rev-1', user:{_id:DEMO_USERS.buyer._id,name:'James Kariuki'}, dealer:'demo-dealer-1', car:'car-maz1', rating:5, comment:'Excellent service! The Mazda CX-5 was exactly as described. Nairobi Auto Hub made the process smooth.', createdAt:new Date(now-15*DAY).toISOString() },
+  { _id:'rev-2', user:{_id:'other-buyer-1',name:'Mary Wanjiku'}, dealer:'demo-dealer-1', rating:4, comment:'Professional dealer, fair pricing. Would buy from them again.', createdAt:new Date(now-30*DAY).toISOString() },
+  { _id:'rev-3', user:{_id:'other-buyer-2',name:'John Ochieng'}, dealer:'demo-dealer-1', rating:5, comment:'Top-notch dealership. The Mercedes GLE was immaculate. Highly recommended!', createdAt:new Date(now-20*DAY).toISOString() },
 ];
 
 export const DEMO_CHATS = [
-  { _id:'chat-1', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-admin-1',name:'Admin User'}], car:{_id:'car-maz1',title:'Mazda CX-5 2023'}, lastMessage:{message:'Yes, it is still available. Would you like to schedule a test drive?',createdAt:new Date(now-0.5*DAY).toISOString()}, unreadCount:1, createdAt:new Date(now-5*DAY).toISOString() },
-  { _id:'chat-2', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-admin-1',name:'Admin User'}], car:{_id:'car-lc1',title:'Toyota Land Cruiser V8 2021'}, lastMessage:{message:'The vehicle is in our showroom, come for a viewing.',createdAt:new Date(now-1*DAY).toISOString()}, unreadCount:0, createdAt:new Date(now-3*DAY).toISOString() },
+  { _id:'chat-1', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-dealer-1',name:'Nairobi Auto Hub'}], car:{_id:'car-maz1',title:'Mazda CX-5 2023'}, lastMessage:{message:'Yes, it is still available. Would you like to schedule a test drive?',createdAt:new Date(now-0.5*DAY).toISOString()}, unreadCount:1, createdAt:new Date(now-5*DAY).toISOString() },
+  { _id:'chat-2', participants:[{_id:DEMO_USERS.buyer._id,name:'James Kariuki'},{_id:'demo-dealer-1',name:'Nairobi Auto Hub'}], car:{_id:'car-lc1',title:'Toyota Land Cruiser V8 2021'}, lastMessage:{message:'The vehicle is in our showroom, come for a viewing.',createdAt:new Date(now-1*DAY).toISOString()}, unreadCount:0, createdAt:new Date(now-3*DAY).toISOString() },
 ];
 
 export const DEMO_MESSAGES = {
   'chat-1': [
-    { _id:'msg-1', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'Hi, is the Mazda CX-5 still available?', createdAt:new Date(now-5*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
-    { _id:'msg-2', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
-    { _id:'msg-3', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'This weekend would work. Do you have Saturday slots?', createdAt:new Date(now-4*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
-    { _id:'msg-4', chatId:'chat-1', sender:'demo-admin-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
-    { _id:'msg-5', chatId:'chat-1', sender:'demo-admin-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString(), seen:false, seenBy:[], attachments:[{url:'https://placehold.co/600x400/D4C4A8/1a1a2e?text=Mazda+CX-5',type:'image',name:'Mazda CX-5 Interior'}], },
+    { _id:'msg-1', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'Hi, is the Mazda CX-5 still available?', createdAt:new Date(now-5*DAY).toISOString(), seen:true, seenBy:['demo-dealer-1'] },
+    { _id:'msg-2', chatId:'chat-1', sender:'demo-dealer-1', message:'Yes, it is still available! When would you like to view it?', createdAt:new Date(now-4.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-3', chatId:'chat-1', sender:DEMO_USERS.buyer._id, message:'This weekend would work. Do you have Saturday slots?', createdAt:new Date(now-4*DAY).toISOString(), seen:true, seenBy:['demo-dealer-1'] },
+    { _id:'msg-4', chatId:'chat-1', sender:'demo-dealer-1', message:'Saturday 10am works perfectly. We are in Industrial Area, Nairobi.', createdAt:new Date(now-3.8*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-5', chatId:'chat-1', sender:'demo-dealer-1', message:'Yes, it is still available. Would you like to schedule a test drive?', createdAt:new Date(now-0.5*DAY).toISOString(), seen:false, seenBy:[], attachments:[{url:'https://placehold.co/600x400/D4C4A8/1a1a2e?text=Mazda+CX-5',type:'image',name:'Mazda CX-5 Interior'}], },
   ],
   'chat-2': [
-    { _id:'msg-6', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'I am interested in the Land Cruiser. Can you share more photos?', createdAt:new Date(now-3*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
-    { _id:'msg-7', chatId:'chat-2', sender:'demo-admin-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
-    { _id:'msg-8', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'Great, please send them over. Also, is the price negotiable?', createdAt:new Date(now-2*DAY).toISOString(), seen:true, seenBy:['demo-admin-1'] },
-    { _id:'msg-9', chatId:'chat-2', sender:'demo-admin-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString(), seen:false, seenBy:[] },
+    { _id:'msg-6', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'I am interested in the Land Cruiser. Can you share more photos?', createdAt:new Date(now-3*DAY).toISOString(), seen:true, seenBy:['demo-dealer-1'] },
+    { _id:'msg-7', chatId:'chat-2', sender:'demo-dealer-1', message:'Sure! I have interior and exterior shots. Also, we have a video walkthrough.', createdAt:new Date(now-2.9*DAY).toISOString(), seen:true, seenBy:[DEMO_USERS.buyer._id] },
+    { _id:'msg-8', chatId:'chat-2', sender:DEMO_USERS.buyer._id, message:'Great, please send them over. Also, is the price negotiable?', createdAt:new Date(now-2*DAY).toISOString(), seen:true, seenBy:['demo-dealer-1'] },
+    { _id:'msg-9', chatId:'chat-2', sender:'demo-dealer-1', message:'The vehicle is in our showroom, come for a viewing.', createdAt:new Date(now-1*DAY).toISOString(), seen:false, seenBy:[] },
   ],
 };
 

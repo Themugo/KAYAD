@@ -23,8 +23,8 @@ describe('AuctionCalendar', () => {
         <AuctionCalendar />
       </MemoryRouter>
     );
-    expect(screen.getByText('All')).toBeInTheDocument();
-    expect(screen.getByText('🟢 Live')).toBeInTheDocument();
+    expect(screen.getByText('All Auctions')).toBeInTheDocument();
+    expect(screen.getByText('🟢 Live Now')).toBeInTheDocument();
     expect(screen.getByText('⏳ Upcoming')).toBeInTheDocument();
   });
 });

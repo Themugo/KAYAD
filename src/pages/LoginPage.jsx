@@ -14,7 +14,6 @@ const DEMO_ACCOUNTS = [
   { label: 'Buyer',      email: 'buyer@demo.com',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
   { label: 'Dealer',     email: 'dealer@demo.com', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
   { label: 'Broker',     email: 'broker@demo.com', password: 'Kayad@Demo2026!', tint: '#a855f7' },
-  { label: 'Admin',      email: 'admin@demo.com',  password: 'Kayad@Demo2026!', tint: '#22c55e' },
 ];
 
 export function LoginPage() {
