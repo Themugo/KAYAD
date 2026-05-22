@@ -8,7 +8,7 @@ import NotificationCenter from './NotificationCenter';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, User, Menu, X, LogOut } from 'lucide-react';
+import { Bell, Menu, X, LogOut } from 'lucide-react';
 
 export default function Navbar({ branding }) {
   const { user, isAuth, isAdmin, logout } = useAuth();
@@ -23,7 +23,6 @@ export default function Navbar({ branding }) {
   const [userDrop, setUserDrop] = useState(false);
   const [notifDrop, setNotifDrop] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [searchQ, setSearchQ] = useState('');
 
   const dropRef = useRef(null);
 
@@ -64,14 +63,6 @@ export default function Navbar({ branding }) {
     navigate('/');
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQ.trim()) {
-      navigate(`/showroom?keyword=${encodeURIComponent(searchQ.trim())}`);
-      setSearchQ('');
-    }
-  };
-
   const isActive = (path) => {
     if (path === '/') return loc.pathname === '/';
     return loc.pathname === path || loc.pathname.startsWith(path + '/');
@@ -107,24 +98,8 @@ export default function Navbar({ branding }) {
             </span>
           </Link>
 
-          {/* Desktop Search */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted">
-                <Search size={18} />
-              </div>
-              <input
-                type="text"
-                placeholder="Search makes, models, or locations..."
-                value={searchQ}
-                onChange={(e) => setSearchQ(e.target.value)}
-                className="w-full bg-surface border border-border pl-11 py-3 rounded-2xl text-sm focus:border-gold focus:bg-card transition-all outline-none"
-              />
-            </form>
-          </div>
-
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
+          <div className="hidden lg:flex items-center justify-center gap-10 text-sm font-medium flex-1">
             <Link to="/showroom" className={`nav-link ${isActive('/showroom') ? 'active' : ''}`}>
               Gallery
             </Link>
@@ -282,20 +257,6 @@ export default function Navbar({ branding }) {
               onClick={e => e.stopPropagation()}
               style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '85%', maxWidth: 360, background: '#0a0a0a', overflowY: 'auto', padding: '24px 20px' }}
             >
-              {/* Mobile Search */}
-              <form onSubmit={(e) => { handleSearch(e); setMobileOpen(false); }} style={{ marginBottom: 24 }}>
-                <div style={{ position: 'relative' }}>
-                  <Search size={18} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
-                  <input
-                    type="text"
-                    placeholder="Search makes, models..."
-                    value={searchQ}
-                    onChange={(e) => setSearchQ(e.target.value)}
-                    style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 12px 12px 40px', color: '#fff', fontSize: 14, outline: 'none' }}
-                  />
-                </div>
-              </form>
-
               {/* Mobile Nav Links */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <Link to="/showroom" onClick={() => setMobileOpen(false)} style={{ padding: '14px 16px', borderRadius: 12, color: isActive('/showroom') ? 'var(--gold)' : 'rgba(255,255,255,0.7)', background: isActive('/showroom') ? 'rgba(212,196,168,0.08)' : 'transparent', fontWeight: 600, fontSize: 15, textDecoration: 'none' }}>
