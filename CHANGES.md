@@ -443,3 +443,52 @@ CHANGES.md                      (this entry)
 | Lint | 0 errors, 186 warnings (stylistic) |
 | Tests | 23/23 files, 151/151 pass |
 | Demo token round-trip | verified: login→store→isDemoToken all PASS |
+
+---
+
+## Round 8 — Demo-mode write failures + landing page fixes
+
+User report (running the live demo): save-car-after-edit, save-account, and complete-listing all fail; hero card fragmented; landing page not showing cars; landing text too large.
+
+### Demo-mode save failures — root cause
+
+The demo user session (`_demoUser`) was held **in memory only**, while the auth token persists in `localStorage`. After any page reload the app looked logged-in (token present) but `_demoUser` was `null`, so every write op — `cars.create` (complete listing), `cars.update` (save edit), `auth.updateProfile` (save account) — called `getDemoUser()`, got `null`, and threw 403/401.
+
+Fix (`src/data/demoAPI.js`):
+- Persist the demo user to `localStorage` (`kayad_demo_user`) in `setDemoUser`.
+- `getDemoUser()` now rehydrates from storage, then from the auth token (looks the email up in `DEMO_USERS`, or reconstructs a minimal user from the token payload) when memory is empty.
+- `clearDemoUser()` clears both.
+- `updateProfile` now persists its change via `setDemoUser` so edits survive reloads.
+- `cars.list` now runs `transformCar` on each result and returns both `cars` and `data` keys for component compatibility.
+
+This makes demo sessions survive reloads and unblocks all three save flows.
+
+### Routing mismatch — cars not clickable (regression from the router rewrite)
+
+When the Gemini auditor was replaced, the new router defined `/car/:id` and `/auctions/live/:id`, but the components (CartyGrid, CarCard, and ~30 other links) navigate to `/cars/:id` (24 uses) and `/auction/:id` (5 uses). Every car click 404'd.
+
+Fix (`src/App.jsx`): added `/cars/:id` and `/auction/:id` routes (keeping the old `/car/:id` and `/auctions/live/:id` as aliases) so all existing component links resolve.
+
+### Landing page
+
+- **Compact hero.** Removed the `minHeight: 62vh`, dropped the title from `clamp(2.8rem, 7vw, 5.2rem)` to `clamp(2rem, 4.5vw, 3.4rem)`, tightened padding (`56/40` → `40/30`) and margins, shortened the subtitle. Cars now sit above the fold instead of being pushed a full screen down.
+- **Removed the fine-grid texture overlay** in the hero — the 60px grid lines stacked with the radial glow and bottom fade were the "fragmented" look. Hero is now a clean single gradient.
+- **Responsive grids.** All car grids changed from a hardcoded `repeat(4, 1fr)` (4 cramped columns on phones) to `repeat(auto-fill, minmax(250px, 1fr))`, and the stats bar to `repeat(auto-fit, minmax(150px, 1fr))`. They now reflow to 1–4 columns by viewport width.
+
+### Files changed
+
+```
+src/data/demoAPI.js    (persist + rehydrate demo user; transform list; persist profile)
+src/App.jsx            (+ /cars/:id and /auction/:id routes)
+src/pages/HomePage.jsx (compact hero, remove grid texture, responsive grids)
+CHANGES.md             (this entry)
+```
+
+### Verification
+
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 187 warnings (stylistic) |
+| Tests | 23/23 files, 151/151 pass |
+| Demo rehydrate-after-reload | verified — getDemoUser recovers role from token → no 403 on writes |

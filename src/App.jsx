@@ -168,10 +168,12 @@ export default function App() {
                       <Route path="/"                    element={<Public><HomePage /></Public>} />
                       <Route path="/showroom"            element={<Public><Showroom /></Public>} />
                       <Route path="/cars"                element={<Navigate to="/showroom" replace />} />
+                      <Route path="/cars/:id"            element={<Public><CarDetailPage /></Public>} />
                       <Route path="/car/:id"             element={<Public><CarDetailPage /></Public>} />
                       <Route path="/compare"             element={<Public><ComparePage /></Public>} />
                       <Route path="/auctions"            element={<Public><AuctionCalendar /></Public>} />
                       <Route path="/auctions/calendar"   element={<Public><AuctionCalendar /></Public>} />
+                      <Route path="/auction/:id"         element={<Public><AuctionLivePage /></Public>} />
                       <Route path="/auctions/live/:id"   element={<Public><AuctionLivePage /></Public>} />
                       <Route path="/escrow-vault"        element={<Public><EscrowVaultPortal /></Public>} />
 

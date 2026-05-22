@@ -124,31 +124,23 @@ export default function HomePage() {
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         textAlign: 'center',
-        padding: '56px 24px 40px',
-        minHeight: '62vh',
+        padding: '40px 24px 30px',
       }}>
         {/* Radial gold glow */}
         <div style={{
-          position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)',
-          width: 800, height: 500,
-          background: 'radial-gradient(ellipse, rgba(212,196,168,0.10) 0%, transparent 65%)',
+          position: 'absolute', top: '-25%', left: '50%', transform: 'translateX(-50%)',
+          width: 760, height: 380,
+          background: 'radial-gradient(ellipse, rgba(212,196,168,0.08) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
-        {/* Fine grid texture */}
-        <div style={{
-          position: 'absolute', inset: 0, opacity: 0.02,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
-          backgroundSize: '60px 60px', pointerEvents: 'none',
-        }} />
-
         {/* Top ornament */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 22, zIndex: 1 }}>
-          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
-          <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', textShadow: '0 0 20px rgba(212,196,168,0.12)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, zIndex: 1 }}>
+          <div style={{ height: 1, width: 36, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
+          <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
             Kenya's Premium Car Marketplace
           </span>
-          <div style={{ height: 1, width: 48, background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
+          <div style={{ height: 1, width: 36, background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
         </div>
 
         {/* Live Auctions badge */}
@@ -156,8 +148,8 @@ export default function HomePage() {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-            borderRadius: 9999, padding: '4px 14px',
-            marginBottom: 18, zIndex: 1,
+            borderRadius: 9999, padding: '4px 12px',
+            marginBottom: 14, zIndex: 1,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
             <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
@@ -168,21 +160,21 @@ export default function HomePage() {
 
         <h1 style={{
           fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
-          fontSize: 'clamp(2.8rem, 7vw, 5.2rem)', lineHeight: 0.9,
+          fontSize: 'clamp(2rem, 4.5vw, 3.4rem)', lineHeight: 1,
           textTransform: 'uppercase', color: '#fff',
-          marginBottom: 16, letterSpacing: '-0.01em', zIndex: 1,
+          marginBottom: 12, letterSpacing: '-0.01em', zIndex: 1,
         }}>
           Where Kenya{' '}
-          <span style={{ color: 'var(--gold)', textShadow: '0 0 48px rgba(212,196,168,0.28)' }}>Drives</span>
+          <span style={{ color: 'var(--gold)', textShadow: '0 0 40px rgba(212,196,168,0.28)' }}>Drives</span>
         </h1>
 
         <p style={{
-          color: 'rgba(255,255,255,0.65)', fontSize: 16, maxWidth: 560,
-          margin: '0 auto 30px', lineHeight: 1.7, zIndex: 1,
+          color: 'rgba(255,255,255,0.6)', fontSize: 14, maxWidth: 500,
+          margin: '0 auto 22px', lineHeight: 1.6, zIndex: 1,
           fontWeight: 400,
         }}>
-          East Africa's most sophisticated automotive marketplace — live auctions with automatic extensions, 
-          verified dealers, and M-Pesa secured escrow. Every bid, every second counts.
+          Live auctions, verified dealers, and M-Pesa secured escrow — East Africa's
+          most sophisticated automotive marketplace.
         </p>
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', zIndex: 1 }}>
@@ -230,7 +222,7 @@ export default function HomePage() {
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{
           maxWidth: 1400, margin: '0 auto', padding: '0 28px',
-          display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: 1, background: 'rgba(255,255,255,0.03)',
         }}>
           <AnimatedStat label="Cars Sold"  value={stats ? `${(stats.totalCars * 3 + 142).toLocaleString()}+`  : '—'} />
@@ -276,7 +268,7 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(239,68,68,0.7)'}
               >View All Auctions →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
               {liveAuctions.map(car => (
                 <div key={car._id} style={{ position: 'relative' }}>
                   <div style={{
@@ -336,13 +328,13 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
               {[1,2,3,4].map(i => (
                 <div key={i} style={{ aspectRatio: '16/11', background: 'rgba(255,255,255,0.03)', borderRadius: 12, animation: 'pulse 1.8s infinite' }} />
               ))}
             </div>
           ) : cars.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
               {cars.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           ) : (
@@ -379,7 +371,7 @@ export default function HomePage() {
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
               >Browse All →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
               {recent.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           </div>

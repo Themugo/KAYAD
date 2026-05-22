@@ -9,11 +9,62 @@ import {
 const delay = (min = 200, max = 800) =>
   new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
 
-// Demo session state
+// Demo session state.
+// IMPORTANT: the demo user must survive page reloads. The auth token lives in
+// localStorage, so an in-memory-only user means that after a refresh the app
+// looks logged-in (token present) but every write op (create/update/profile)
+// calls getDemoUser() → null → 403/401. We therefore persist the demo user to
+// localStorage and rehydrate it from the token when memory is empty.
+const DEMO_USER_KEY = 'kayad_demo_user';
 let _demoUser = null;
-export const setDemoUser = (user) => { _demoUser = user; };
-export const getDemoUser = () => _demoUser;
-export const clearDemoUser = () => { _demoUser = null; };
+
+const readStoredDemoUser = () => {
+  try {
+    const raw = localStorage.getItem(DEMO_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+};
+
+// Rebuild the demo user from the auth token (set at login). Looks the user up
+// in the seeded DEMO_USERS by email, falling back to a minimal user object
+// reconstructed from the token payload (covers freshly-registered demo users).
+const rehydrateFromToken = () => {
+  let token;
+  try { token = localStorage.getItem('kayad_token'); } catch { token = null; }
+  if (!token) return null;
+  let payload;
+  try { payload = JSON.parse(atob(token)); } catch { return null; }
+  if (!payload?.email) return null;
+  const seeded = Object.values(DEMO_USERS).find(u => u.email === payload.email);
+  if (seeded) {
+    const { password, ...safe } = seeded;
+    return safe;
+  }
+  return { _id: payload._id, email: payload.email, role: payload.role || 'user', superAdmin: !!payload.superAdmin };
+};
+
+export const setDemoUser = (user) => {
+  _demoUser = user;
+  try {
+    if (user) localStorage.setItem(DEMO_USER_KEY, JSON.stringify(user));
+    else localStorage.removeItem(DEMO_USER_KEY);
+  } catch { /* storage unavailable — fall back to memory only */ }
+};
+
+export const getDemoUser = () => {
+  if (_demoUser) return _demoUser;
+  // Memory empty (e.g. after a page reload) — rehydrate from storage, then token.
+  _demoUser = readStoredDemoUser() || rehydrateFromToken();
+  if (_demoUser) {
+    try { localStorage.setItem(DEMO_USER_KEY, JSON.stringify(_demoUser)); } catch { /* ignore */ }
+  }
+  return _demoUser;
+};
+
+export const clearDemoUser = () => {
+  _demoUser = null;
+  try { localStorage.removeItem(DEMO_USER_KEY); } catch { /* ignore */ }
+};
 
 // Demo token — base64-encoded JSON the api.js `isDemoToken()` helper can read.
 // isDemoToken() does JSON.parse(atob(token)) and checks `.email` / `.superAdmin`,
@@ -127,8 +178,9 @@ const demoAuth = {
     await delay();
     const user = getDemoUser();
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
-    Object.assign(user, body);
-    const { password, ...safe } = user;
+    const updated = { ...user, ...body };
+    setDemoUser(updated);
+    const { password, ...safe } = updated;
     return wrapSuccess({ user: safe });
   },
 
@@ -156,7 +208,9 @@ const demoDealerCars = (userId) => DEMO_CARS.filter(c => c.dealer?._id === (user
 const demoCars = {
   list: async (params = {}) => {
     await delay();
-    return wrapSuccess(filterDemoCars(params));
+    const result = filterDemoCars(params);
+    const cars = (result.cars || []).map(transformCar);
+    return wrapSuccess({ ...result, cars, data: cars });
   },
 
   get: async (id) => {
