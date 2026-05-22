@@ -351,7 +351,7 @@ const demoCars = {
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       if (f instanceof File && f.size > 0) {
-        newImages.push({ url: `https://placehold.co/800x600/1a1a2e/ffffff?text=Car+${(car.images?.length || 0) + i + 1}`, public_id: null });
+        newImages.push({ url: f.size > 0 ? URL.createObjectURL(f) : `https://images.unsplash.com/photo-${1500000000 + Math.floor(Math.random() * 999999)}?w=800&q=80`, public_id: null });
       }
     }
     const updated = { ...car, images: [...(car.images || []), ...newImages] };
