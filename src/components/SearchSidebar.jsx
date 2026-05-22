@@ -23,14 +23,14 @@ function Section({ title, children, defaultOpen = true, count }) {
         padding: '10px 16px', gap: 8,
       }}>
         <span style={{
-          flex: 1, textAlign: 'left', fontSize: 11, fontWeight: 700,
+          flex: 1, textAlign: 'left', fontSize: 12.5, fontWeight: 700,
           textTransform: 'uppercase', letterSpacing: '0.14em',
           color: 'rgba(255,255,255,0.55)',
         }}>{title}</span>
         {count > 0 && (
           <span style={{
             background: 'rgba(212,196,168,0.15)', color: 'var(--gold)',
-            fontSize: 9, fontWeight: 800, borderRadius: 9999, padding: '1px 7px',
+            fontSize: 10, fontWeight: 800, borderRadius: 9999, padding: '2px 8px',
           }}>{count}</span>
         )}
         <ChevronDown size={13} style={{
@@ -49,18 +49,18 @@ function Chip({ active, onClick, children, count }) {
   return (
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      width: '100%', padding: '9px 16px',
+      width: '100%', padding: '10px 18px',
       background: active ? 'rgba(212,196,168,0.1)' : 'transparent',
       border: 'none', borderLeft: active ? '2px solid var(--gold)' : '2px solid transparent',
       color: active ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
-      fontSize: 13, fontWeight: active ? 600 : 400,
+      fontSize: 14.5, fontWeight: active ? 700 : 500,
       cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left',
     }}
       onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = '#fff'; } }}
       onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; } }}
     >
       <span>{children}</span>
-      {count != null && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 400 }}>{count}</span>}
+      {count != null && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>{count}</span>}
     </button>
   );
 }
@@ -72,7 +72,7 @@ function RangeInput({ placeholder, value, onChange }) {
         flex: 1, padding: '8px 12px', borderRadius: 8,
         border: '1px solid rgba(255,255,255,0.08)',
         background: 'rgba(255,255,255,0.04)',
-        color: '#fff', fontSize: 12, outline: 'none',
+        color: '#fff', fontSize: 13.5, outline: 'none',
         transition: 'border-color 0.2s',
       }}
       onFocus={e => e.target.style.borderColor = 'rgba(212,196,168,0.4)'}
@@ -149,7 +149,7 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
               </button>
             )}
             <SlidersHorizontal size={15} style={{ color: 'var(--gold)' }} />
-            <span style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff' }}>
+            <span style={{ fontSize: 15, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff' }}>
               Refine
             </span>
             {activeCount > 0 && (
@@ -203,7 +203,7 @@ export default function SearchSidebar({ cars, filters, onFilterChange, onBrandCh
                 width: '100%', padding: '8px 12px 8px 30px',
                 borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)',
                 background: 'rgba(255,255,255,0.04)', color: '#fff',
-                fontSize: 12, outline: 'none', boxSizing: 'border-box',
+                fontSize: 13.5, outline: 'none', boxSizing: 'border-box',
               }}
               onFocus={e => e.target.style.borderColor = 'rgba(212,196,168,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.08)'}

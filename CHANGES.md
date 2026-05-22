@@ -604,3 +604,54 @@ CHANGES.md                      (this entry)
 | Build | clean — Tailwind utilities now in bundle (`.flex`, `.hidden`, `.items-center` present) |
 | Lint | 0 errors, 187 warnings (stylistic) |
 | Tests | 23/23 files, 151/151 pass |
+
+---
+
+## Round 11 — Fine-tuning: detail page, edit 404, demo stickers, sidebar balance, account control
+
+### 1. Car detail page "exaggerated in size"
+
+Root cause: the detail page used ~120 CSS classes (`car-detail-page`, `detail-grid`, `price-card`, `spec-grid`, `ntsa-status-*`, `dealer-*`, etc.) that were **never defined anywhere** — so it rendered as full-width unstyled stacked blocks. Wrote a complete `src/styles/car-detail.css`: 1240px max-width container, responsive 2-column grid (1.7fr gallery/specs + 1fr sticky purchase panel, collapses to one column ≤900px), gallery capped at 16:10 / 460px, plus styling for price card, spec/feature grids, dealer card, NTSA status, reviews, badges, owner controls. Verified 0 undefined classes remain. Works for both buy-now and auction layouts.
+
+### 2. Dealer edit → 404 + edit all demo cars
+
+- The dashboard linked to `/dealer/edit/:id` (4 places) but the route was `/dealer/edit-car/:id`. Added `/dealer/edit/:id` as a route alias.
+- Demo `cars.update` required strict ownership. Relaxed it so any demo seller role can edit, and the flagship dealer demo (`demo-dealer-1`) now sees the whole sample catalogue in its dashboard — so it can showcase editing every demo car.
+
+### 3. Demo / display sticker
+
+Every demo car is now tagged `isDemo: true` in `transformCar` (real backend cars never carry this). Both the grid card and detail page show a bold amber **DEMO** sticker. So once real cars are added, browsers instantly tell sample data from real listings. Added the `.badge-orange` (DEMO) style plus the missing `.badge-red/green/gold/blue` variants.
+
+### 4. Showroom sidebar text balance
+
+The refine sidebar text (11–13px) felt tiny next to the car grid. Bumped section headers 11→12.5, filter rows 13→14.5 (weight 400→500), inputs 12→13.5, REFINE header 13→15, counts 11→12. Better visual balance with the right-hand grid.
+
+### 5. Broker / dealer demo overlap
+
+`demoDealerCars` had started returning all cars for both. Fixed: only the dealer demo (`demo-dealer-1`) and admins see the full catalogue; the broker demo (Grace Wanjiku) is scoped to its own two listings — the two accounts are now clearly distinct.
+
+### 6. Admin control over accounts + demo data
+
+The admin user-management page already wired suspend/deactivate/delete, but the demo admin only implemented `toggleBan` (a no-op). Implemented a mutable demo admin store with working `toggleBan` (suspend), `deactivateUser`, `deleteUser`, `approveDealer`, plus `demoStatus`, `demoCleanup` (purge all demo accounts + listings so the live market shows only real dealers), and `reseed` (restore). The admin user list now tags every account `isDemo: true`. Combined with #3, this is the full picture: demo cars appear in the catalogue with a DEMO sticker during client pitches, and a real admin can purge demo data so the live market only surfaces real dealers/sellers.
+
+### Files changed
+
+```
+src/styles/car-detail.css      (new — full detail-page stylesheet)
+src/pages/CarDetailPage.jsx    (import the stylesheet)
+src/App.jsx                    (+ /dealer/edit/:id alias)
+src/components/SearchSidebar.jsx (font-size balance)
+src/index.css                  (badge variants incl. DEMO sticker)
+src/data/demoData.js           (—)
+src/data/demoAPI.js            (isDemo tag, edit-all-cars, broker scoping, admin account control + demo cleanup)
+CHANGES.md                     (this entry)
+```
+
+### Verification
+
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 187 warnings |
+| Tests | 23/23 files, 151/151 pass |
+| Detail-page undefined classes | 0 |

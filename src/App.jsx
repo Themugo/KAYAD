@@ -206,6 +206,7 @@ export default function App() {
                       <Route path="/dealer/setup"        element={<Dealer><DealerSetup /></Dealer>} />
                       <Route path="/dealer/add-car"      element={<Dealer><AddCarPage /></Dealer>} />
                       <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
+                      <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
                       <Route path="/dealer/auction-setup"      element={<Dealer><DealerAuctionSetup /></Dealer>} />
                       <Route path="/dealer/auctions"     element={<Dealer><DealerAuctionSetup /></Dealer>} />
                       <Route path="/dealer/analytics"    element={<Dealer><DealerAnalytics /></Dealer>} />

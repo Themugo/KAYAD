@@ -109,6 +109,16 @@ const withUser = (fn) => (...args) => {
 
 const wrapSuccess = (data) => ({ success: true, ...data });
 
+// Mutable working copy of the admin user list so demo suspend/deactivate/
+// delete/cleanup actually mutate state during a pitch. Reset restores the seed.
+let _adminUsersStore = DEMO_ADMIN_USERS.map(u => ({ ...u }));
+const _adminUsers = () => _adminUsersStore;
+const _resetAdminUsers = (val) => {
+  _adminUsersStore = val === null
+    ? DEMO_ADMIN_USERS.map(u => ({ ...u }))
+    : val;
+};
+
 const makeEmail = (name) =>
   `${name?.toLowerCase().replace(/[^a-z]/g, '')}@kayad.space`;
 
@@ -116,6 +126,7 @@ const transformCar = (c) => {
   if (!c) return c;
   return {
     ...c,
+    isDemo: true, // marks sample data so the UI can show a DEMO sticker vs. real listings
     model: c.model || c.title?.split(' ').slice(1).slice(0, -1).join(' ') || c.brand,
     dealerPhone: c.dealer?.phone || c.dealerPhone || '2547XXXXXX',
     trustScore: c.trustScore ?? Math.round(85 + Math.random() * 15),
@@ -225,7 +236,16 @@ const demoAuth = {
 };
 
 // ─── Demo Cars API ────────────────────────────────────────────────
-const demoDealerCars = (userId) => DEMO_CARS.filter(c => c.dealer?._id === (userId || 'demo-dealer-1'));
+const demoDealerCars = (userId) => {
+  const user = getDemoUser();
+  // The flagship dealer demo (Nairobi Auto Hub) manages the whole sample
+  // catalogue so it can showcase editing every demo car. The broker demo
+  // (Grace Wanjiku) stays scoped to its OWN listings so the two accounts are
+  // clearly distinct. Admins/superadmins see everything.
+  const seesAll = userId === 'demo-dealer-1' || ['admin', 'superadmin'].includes(user?.role);
+  if (seesAll) return DEMO_CARS;
+  return DEMO_CARS.filter(c => c.dealer?._id === userId);
+};
 
 const demoCars = {
   list: async (params = {}) => {
@@ -331,7 +351,10 @@ const demoCars = {
     const car = getDemoCar(id);
     if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
     const user = getDemoUser();
-    if (user?.role !== 'superadmin' && user?._id !== car.dealer?._id) {
+    // Demo is a shared sandbox: any seller-type account can edit any demo
+    // listing, so a dealer demo can showcase editing across the whole catalogue.
+    const canEdit = ['dealer', 'broker', 'individual_seller', 'admin', 'superadmin'].includes(user?.role);
+    if (!canEdit) {
       throw { response: { status: 403, data: { message: 'You can only edit your own listings' } } };
     }
       updateDemoCar(id, body);
@@ -693,7 +716,7 @@ const demoAdmin = {
 
   users: async (params = {}) => {
     await delay();
-    let users = [...DEMO_ADMIN_USERS];
+    let users = _adminUsers().map(u => ({ ...u, isDemo: true }));
     if (params.role) users = users.filter(u => u.role === params.role);
     if (params.search) {
       const q = params.search.toLowerCase();
@@ -712,13 +735,56 @@ const demoAdmin = {
     return wrapSuccess({ users, data: users, pagination: { total, page: 1, limit: params.limit || 50, pages: 1 }, total });
   },
 
-  toggleBan: async () => {
+  toggleBan: async (id) => {
     await delay();
-    return wrapSuccess({ message: 'Ban toggled' });
+    const list = _adminUsers();
+    const u = list.find(x => x._id === id);
+    if (u) u.isBanned = !u.isBanned;
+    return wrapSuccess({ message: u?.isBanned ? 'User suspended' : 'User unsuspended', isBanned: !!u?.isBanned });
   },
 
-  approveDealer: async () => {
+  deactivateUser: async (id) => {
     await delay();
+    const list = _adminUsers();
+    const u = list.find(x => x._id === id);
+    if (u) u.deactivatedAt = u.deactivatedAt ? null : new Date().toISOString();
+    return wrapSuccess({ message: u?.deactivatedAt ? 'User deactivated' : 'User reactivated', deactivatedAt: u?.deactivatedAt || null });
+  },
+
+  deleteUser: async (id) => {
+    await delay(300, 700);
+    const list = _adminUsers();
+    const i = list.findIndex(x => x._id === id);
+    if (i >= 0) list.splice(i, 1);
+    return wrapSuccess({ message: 'User and associated data deleted' });
+  },
+
+  // Demo-data control — lets a real admin show how sample accounts/cars are
+  // purged so the live market only surfaces real dealers and sellers.
+  demoStatus: async () => {
+    await delay();
+    const demoUsers = _adminUsers().filter(u => u.isDemo !== false).length;
+    return wrapSuccess({ demoUsers, demoCars: DEMO_CARS.length, isDemoActive: true, data: { demoUsers, demoCars: DEMO_CARS.length } });
+  },
+
+  demoCleanup: async () => {
+    await delay(500, 1100);
+    const removedUsers = _adminUsers().length;
+    const removedCars = DEMO_CARS.length;
+    _resetAdminUsers([]);
+    return wrapSuccess({ message: `Demo data cleared — ${removedUsers} accounts and ${removedCars} listings removed. The live market now shows only real dealers.`, removedUsers, removedCars });
+  },
+
+  reseed: async () => {
+    await delay(500, 1100);
+    _resetAdminUsers(null); // null → restore original seed
+    return wrapSuccess({ message: 'Demo data restored' });
+  },
+
+  approveDealer: async (id) => {
+    await delay();
+    const u = _adminUsers().find(x => x._id === id);
+    if (u) u.approved = true;
     return wrapSuccess({ message: 'Dealer approved' });
   },
 
