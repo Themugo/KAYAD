@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { carsAPI } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
@@ -86,12 +86,15 @@ export default function HomePage() {
   const [recent,      setRecent]      = useState([]);
   const [liveAuctions, setLiveAuctions] = useState([]);
   const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState(null);
   const [stats,       setStats]       = useState(null);
   const scrollRef     = useRef(null);
 
-  useEffect(() => {
+  const fetchCars = useCallback(() => {
+    setLoading(true);
+    setError(null);
     carsAPI.list({ limit: 50 }).then(data => {
-      const all = data.cars || data.data || [];
+      const all = data.data || [];
       const live = all.filter(c => c.auctionStatus === 'live');
       setLiveAuctions(live.slice(0, 4));
       setFeatured(all.filter(c => c.auctionStatus === 'live' || c.allowBid).slice(0, 4));
@@ -102,8 +105,13 @@ export default function HomePage() {
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
       });
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(err => {
+      const msg = err.response?.data?.message || err.message || 'Failed to connect to server';
+      setError(msg);
+    }).finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { fetchCars(); }, [fetchCars]);
 
   const cars = loading ? [] : (featured.length > 0 ? featured : recent);
   const liveCount = stats?.liveAuctions || liveAuctions.length || 0;
@@ -333,13 +341,22 @@ export default function HomePage() {
                 <div key={i} style={{ aspectRatio: '16/11', background: 'rgba(255,255,255,0.03)', borderRadius: 12, animation: 'pulse 1.8s infinite' }} />
               ))}
             </div>
+          ) : error ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 12 }}>{error}</div>
+              <button onClick={fetchCars} style={{
+                padding: '10px 24px', background: 'var(--gold)', color: '#000',
+                borderRadius: 9999, fontWeight: 700, fontSize: 11, border: 'none',
+                cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em',
+              }}>Retry</button>
+            </div>
           ) : cars.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 16 }}>
               {cars.map(car => <CartyGrid key={car._id} car={car} />)}
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '48px 0', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
-              No vehicles yet — <Link to="/showroom" style={{ color: 'var(--gold)', textDecoration: 'none' }}>browse the gallery</Link>
+              No vehicles in the gallery yet
             </div>
           )}
         </div>

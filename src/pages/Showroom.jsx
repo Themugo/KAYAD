@@ -128,6 +128,7 @@ export default function Showroom() {
   const [showSavedMenu, setShowSavedMenu]       = useState(false);
   const [showSavePrompt, setShowSavePrompt]     = useState(false);
   const [saveName, setSaveName]                 = useState('');
+  const [fetchError, setFetchError]             = useState(null);
 
   // Local mirror of the keyword for snappy typing; debounced before going to URL.
   const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');
@@ -250,12 +251,13 @@ export default function Showroom() {
     setLoading(true);
     try {
       const data = await carsAPI.list(getApiParams(pageNum));
-      const newCars = data.data || data.cars || [];
+      const newCars = data.data || [];
       setCars(prev => (replace ? newCars : [...prev, ...newCars]));
       setTotalCount(data.pagination?.total || 0);
       setHasMore(pageNum < (data.pagination?.pages || 1));
-    } catch {
-      if (replace) setCars([]);
+      setFetchError(null);
+    } catch (err) {
+      if (replace) { setCars([]); setFetchError(err.response?.data?.message || err.message || 'Failed to load cars'); }
     } finally {
       setLoading(false);
       loadingRef.current = false;
@@ -857,6 +859,15 @@ export default function Showroom() {
                       animation: 'pulse 1.4s ease-in-out infinite',
                     }} />
                   ))}
+                </div>
+              ) : fetchError ? (
+                <div style={{ textAlign: 'center', padding: '48px 20px' }}>
+                  <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginBottom: 12 }}>{fetchError}</div>
+                  <button onClick={() => loadCars(1, true)} style={{
+                    padding: '10px 24px', background: 'var(--gold)', color: '#000',
+                    borderRadius: 9999, fontWeight: 700, fontSize: 11, border: 'none',
+                    cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em',
+                  }}>Retry</button>
                 </div>
               ) : cars.length === 0 ? (
                 <EmptyState onClear={() => onFilterChange('clear')} />
