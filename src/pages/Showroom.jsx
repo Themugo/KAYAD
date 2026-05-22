@@ -53,7 +53,6 @@ import { useToast } from '../context/ToastContext';
 // ─── Constants ───────────────────────────────────────────────────────────
 const CATEGORY_PILLS = [
   { value: 'all',     label: 'All' },
-  { value: 'auction', label: 'Auction' },
   { value: 'fixed',   label: 'Buy Now' },
   { value: 'sold',    label: 'Sold' },
 ];

@@ -107,12 +107,12 @@ export default function Navbar({ branding }) {
               Gallery
             </Link>
             
-            <Link to="/showroom?filter=auction" className="nav-link flex items-center gap-2">
+            <Link to="/auctions/calendar" className="nav-link flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              Live Auctions
+              Auctions
             </Link>
 
             {isSellerRole(user?.role) && (
@@ -251,8 +251,48 @@ export default function Navbar({ branding }) {
               className="mobile-menu-panel"
               onClick={e => e.stopPropagation()}
             >
-              {/* Mobile Content - similar structure as before but cleaner */}
-              {/* ... (I kept it shorter for brevity - you can expand using same pattern) */}
+              <div className="flex flex-col h-full">
+                <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+                  <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    Gallery
+                  </Link>
+                  <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-3" onClick={() => setMobileOpen(false)}>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                    Auctions
+                  </Link>
+                  {isSellerRole(user?.role) && (
+                    <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                      Dealer Hub
+                    </Link>
+                  )}
+                  {isAdmin && (
+                    <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                      Admin
+                    </Link>
+                  )}
+                  <hr className="border-border my-4" />
+                  {isAuth ? (
+                    <>
+                      <Link to="/profile" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Profile</Link>
+                      <Link to="/dashboard" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Dashboard</Link>
+                      <Link to="/favorites" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Saved Cars</Link>
+                      <div className="pt-4">
+                        <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="mobile-nav-link text-danger">
+                          Sign Out
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-3 pt-2">
+                      <Link to="/login" className="btn btn-outline w-full text-center" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                      <Link to="/register" className="btn btn-gold w-full text-center" onClick={() => setMobileOpen(false)}>Join Free</Link>
+                    </div>
+                  )}
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

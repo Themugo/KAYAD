@@ -270,6 +270,19 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
   box-shadow: var(--shadow-lg);
 }
 
+/* ─────── MOBILE MENU ─────── */
+.mobile-menu-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 80%;
+  max-width: 360px;
+  background: #0a0a0a;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.6);
+}
+
 /* ─────── DASHBOARD & SIDEBAR ─────── */
 .sidebar-link.active {
   color: var(--gold);
@@ -289,6 +302,49 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 
 @media (max-width: 480px) {
   .btn { padding: 11px 20px; font-size: 14px; }
+}
+
+@media (max-width: 640px) {
+  .nav-link { font-size: 11px; padding: 4px 8px; }
+  .mobile-menu-panel {
+    width: 85% !important;
+    max-width: 320px;
+  }
+  .mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    border-radius: 14px;
+    transition: all 0.2s;
+  }
+  .mobile-nav-link:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--gold);
+  }
+}
+
+@media (min-width: 641px) {
+  .mobile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 22px;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    border-radius: 14px;
+    transition: all 0.2s;
+  }
+  .mobile-nav-link:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--gold);
+  }
 }
 
 /* Additional premium utilities */

@@ -193,7 +193,7 @@ export default function HomePage() {
             onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(212,196,168,0.28)'; }}
           >Enter The Gallery</Link>
 
-          <Link to="/showroom?filter=auction" style={{
+          <Link to="/auctions/calendar" style={{
             padding: '14px 36px', background: 'transparent', color: 'rgba(255,255,255,0.75)',
             borderRadius: 9999, fontWeight: 600, fontSize: 11,
             textTransform: 'uppercase', letterSpacing: '0.1em',
@@ -262,7 +262,7 @@ export default function HomePage() {
                   Live <span style={{ color: 'var(--gold)' }}>Auctions</span>
                 </h2>
               </div>
-              <Link to="/showroom?filter=auction" style={{
+              <Link to="/auctions/calendar" style={{
                 fontSize: 11, color: 'rgba(239,68,68,0.7)', fontWeight: 700,
                 textDecoration: 'none', letterSpacing: '0.06em',
                 display: 'flex', alignItems: 'center', gap: 4,
@@ -393,7 +393,7 @@ export default function HomePage() {
                 title: 'Live Auctions',
                 desc: 'Real-time bidding with automatic time extensions and snipe protection. Every bid, every second counts.',
                 cta: 'Bid Now',
-                href: '/showroom?filter=auction',
+                href: '/auctions/calendar',
                 accent: 'rgba(212,196,168,0.06)',
                 icon: (
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -499,7 +499,7 @@ export default function HomePage() {
               <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16 }}>Browse</div>
               {[
                 { to: '/showroom', label: 'Gallery' },
-                { to: '/showroom?filter=auction', label: 'Live Auctions' },
+                { to: '/auctions/calendar', label: 'Live Auctions' },
                 { to: '/showroom?sort=price_asc', label: 'Best Deals' },
               ].map(({ to, label }) => (
                 <Link key={to} to={to} style={{ display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}

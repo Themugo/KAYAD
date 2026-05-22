@@ -59,8 +59,7 @@ export default function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { to: '/showroom', label: 'The Gallery' },
-                { to: '/showroom?filter=auction', label: 'Live Auctions' },
-                { to: '/auctions/calendar', label: 'Auction Calendar' },
+                { to: '/auctions/calendar', label: 'Auctions' },
                 { to: '/showroom', label: 'Recent Arrivals' },
               ].map(l => (
                 <Link key={l.label} to={l.to} style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', textDecoration: 'none', transition: 'color 0.2s' }}

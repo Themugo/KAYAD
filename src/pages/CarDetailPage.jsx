@@ -61,13 +61,6 @@ function GalleryImage({ car, idx, onPrev, onNext, total }) {
         </>
       )}
 
-      {car?.auctionStatus === 'live' && (
-        <div className="gallery-badge-live">
-          <span className="live-dot-pulse" />
-          <span>LIVE AUCTION</span>
-        </div>
-      )}
-
       {car?.isPromoted && (
         <div className="gallery-badge-featured">
           <Star size={10} />

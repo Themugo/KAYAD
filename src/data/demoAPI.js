@@ -286,10 +286,23 @@ const demoCars = {
       const images = [];
       try {
         const files = formData.getAll('images');
+        const demoCarImages = [
+          'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=800&q=80',
+          'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80',
+          'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=800&q=80',
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80',
+          'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80',
+          'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80',
+          'https://images.unsplash.com/photo-1554744511-0d3d7f8b0a1e?w=800&q=80',
+          'https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800&q=80',
+        ];
         for (let i = 0; i < files.length; i++) {
           const f = files[i];
           if (f instanceof File && f.size > 0) {
-            images.push({ url: `https://placehold.co/800x600/1a1a2e/ffffff?text=Car+${i + 1}`, public_id: null });
+            images.push({
+              url: f.size > 0 ? URL.createObjectURL(f) : (demoCarImages[i] || demoCarImages[0]),
+              public_id: null,
+            });
           }
         }
       } catch { /* formData may not have images field - OK */ }

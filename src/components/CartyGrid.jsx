@@ -32,8 +32,8 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   if (!car) return null;
 
   const isCompared = isComparing(car._id);
-  const isLive = car.auctionStatus === 'live';
-  const linkTo = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const isOnAuction = ['live', 'scheduled'].includes(car.auctionStatus);
+  const linkTo = isOnAuction ? `/auction/${car._id}` : `/cars/${car._id}`;
   const img = firstImage(car);
   const city = car.location?.city || car.location || 'Nairobi';
   const price = Number(car.currentBid || car.price || 0);
@@ -63,10 +63,8 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
-              {isLive && (
-                <div className="badge badge-red flex items-center gap-1.5 text-xs font-bold">
-                  <span className="live-dot" /> LIVE
-                </div>
+              {isOnAuction && (
+                <div className="badge badge-gold text-xs">On Auction</div>
               )}
               {car.ntsaVerified && (
                 <div className="badge badge-green text-xs">NTSA OK</div>
@@ -88,7 +86,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
               <div className="text-right">
                 <div className="text-[9px] text-text-muted uppercase tracking-widest font-bold">
-                  {isLive ? 'Current Bid' : 'Price'}
+                  {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
                 </div>
                 <div className="price-tag text-base font-bold text-gold-light leading-tight">
                   KES {price.toLocaleString()}
@@ -161,7 +159,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-              {isLive && <div className="badge badge-red flex items-center gap-1.5"><span className="live-dot" /> LIVE</div>}
+              {isOnAuction && <div className="badge badge-gold">On Auction</div>}
               {car.isDemo && <div className="badge badge-orange">DEMO</div>}
             </div>
 
@@ -192,7 +190,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
             <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
               <div>
                 <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold">
-                  {isLive ? 'Current Bid' : 'Price'}
+                  {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
                 </div>
                 <div className="price-tag text-base font-bold text-gold-light leading-tight">
                   KES {price.toLocaleString()}

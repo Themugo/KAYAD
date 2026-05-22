@@ -17,11 +17,12 @@ const CarCard = memo(function CarCard({
 
   const coverIdx = car.coverImage ?? 0;
   const img = car.images?.[coverIdx]?.url || car.images?.[coverIdx];
-  
-  const isLive = car.auctionStatus === 'live';
-  const currentPrice = isLive && car.currentBid > 0 ? car.currentBid : car.price;
 
-  const linkTo = isLive ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const isOnAuction = ['live', 'scheduled'].includes(car.auctionStatus);
+  const currentPrice = isOnAuction && car.currentBid > 0 ? car.currentBid : car.price;
+  const linkTo = isOnAuction ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const sellerName = car.dealer?.name || car.dealer?.businessName || '';
+  const isBank = car.dealer?.isBank || car.bankOwned;
 
   return (
     <motion.div
@@ -57,14 +58,13 @@ const CarCard = memo(function CarCard({
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
 
           {/* Badges */}
-          {isLive && (
+          {isOnAuction && (
             <div className="absolute top-3 left-3">
-              <span className="badge badge-green flex items-center gap-1.5 px-3 py-1 text-xs font-bold tracking-wider">
-                <span className="live-dot" /> LIVE AUCTION
+              <span className="badge badge-gold flex items-center gap-1.5 px-3 py-1 text-xs font-bold tracking-wider">
+                On Auction
               </span>
             </div>
           )}
-
           {car.isDemo && (
             <div className="absolute top-3 right-3">
               <span className="badge badge-orange text-xs font-bold">DEMO</span>
@@ -128,16 +128,24 @@ const CarCard = memo(function CarCard({
 
           <div className="gold-line my-2" />
 
+          {/* Seller Info */}
+          {(sellerName || isBank) && (
+            <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2">
+              {isBank && <span className="badge badge-blue text-[9px] px-2 py-0.5">Bank</span>}
+              {sellerName && <span>{sellerName}</span>}
+            </div>
+          )}
+
           {/* Price & Action */}
           <div className="mt-auto flex items-end justify-between">
             <div>
               <p className="price-tag text-2xl font-bold text-gold-light">
                 {formatKES(currentPrice)}
               </p>
-              {isLive && (
+              {isOnAuction && (
                 <div className="flex items-center gap-1 text-xs text-text-muted mt-1">
                   <Clock size={14} />
-                  <span>Current Bid</span>
+                  <span>{car.currentBid > 0 ? 'Current Bid' : 'Starting Bid'}</span>
                 </div>
               )}
             </div>

@@ -122,17 +122,6 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }) {
               objectFit: 'contain',
             }}
           />
-          {car?.auctionStatus === 'live' && (
-            <div style={{
-              position: 'absolute', top: 12, left: 12,
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              background: 'rgba(239,68,68,0.92)', backdropFilter: 'blur(8px)',
-              borderRadius: 8, padding: '5px 12px',
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.2s infinite' }} />
-              <span style={{ fontSize: 10, color: '#fff', fontWeight: 800, letterSpacing: '0.08em' }}>LIVE AUCTION</span>
-            </div>
-          )}
           {car?.isPromoted && (
             <div style={{
               position: 'absolute', top: 12, right: 12,

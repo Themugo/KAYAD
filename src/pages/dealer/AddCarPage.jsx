@@ -77,8 +77,8 @@ export default function AddCarPage() {
       fd.append('coverImage', String(coverImage));
       images.forEach(img => fd.append('images', img));
 
-      await carsAPI.create(fd);
-      setDone(form);
+      const result = await carsAPI.create(fd);
+      setDone(result?.data || result || form);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Failed to create listing';
       const code = err.response?.data?.code;
@@ -107,7 +107,17 @@ export default function AddCarPage() {
                 : 'Your listing is now live and visible to buyers across the marketplace.'}
             </p>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 16, marginBottom: 28, textAlign: 'left' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              {(done.images?.length > 0) && (
+                <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflow: 'auto' }}>
+                  {done.images.slice(0, 4).map((img, i) => (
+                    <img key={i} src={typeof img === 'string' ? img : img?.url} alt=""
+                      style={{ width: 64, height: 48, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#111' }}
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  ))}
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}> 
                 <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{done.title}</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--gold)' }}>KES {Number(done.price || 0).toLocaleString()}</span>
               </div>
