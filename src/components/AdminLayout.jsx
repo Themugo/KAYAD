@@ -1,6 +1,6 @@
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../context/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { Bell, ChevronRight } from 'lucide-react';
 
 const ROLE_LABELS = {
@@ -10,8 +10,19 @@ const ROLE_LABELS = {
 };
 
 export default function AdminLayout({ children }) {
-  const { user } = useAuth();
+  const { user, isAuth, loading } = useAuth();
   const loc = useLocation();
+
+  if (loading) return null;
+
+  if (!isAuth) {
+    return <Navigate to="/login" state={{ from: loc }} replace />;
+  }
+
+  const isStaff = ['admin', 'superadmin', 'moderator', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager'].includes(user?.role);
+  if (!isStaff) {
+    return <Navigate to="/" replace />;
+  }
   const segments = loc.pathname.split('/').filter(Boolean);
 
   return (
