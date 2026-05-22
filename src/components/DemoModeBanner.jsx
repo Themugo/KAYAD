@@ -1,34 +1,38 @@
 import { useState, useEffect } from 'react';
-import { checkBackendAvailability, isDemoMode } from '../api/api';
 import { X, RefreshCw, Terminal } from 'lucide-react';
+import axios from 'axios';
 
-export default function DemoModeBanner() {
+export default function BackendStatusBanner() {
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [retrying, setRetrying] = useState(false);
-  const [backendUp, setBackendUp] = useState(false);
 
   useEffect(() => {
     const check = async () => {
-      if (isDemoMode()) await checkBackendAvailability();
-      const demo = isDemoMode();
-      setVisible(demo);
-      setBackendUp(!demo);
+      try {
+        await axios.get('/api/cars?limit=1', { timeout: 5000 });
+        setVisible(false);
+      } catch {
+        setVisible(true);
+      }
     };
     check();
-    const interval = setInterval(check, 15000);
+    const interval = setInterval(check, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const handleRetry = async () => {
     setRetrying(true);
-    const online = await checkBackendAvailability();
-    setBackendUp(online);
-    if (online) setVisible(false);
+    try {
+      await axios.get('/api/cars?limit=1', { timeout: 5000 });
+      setVisible(false);
+    } catch {
+      setVisible(true);
+    }
     setRetrying(false);
   };
 
-  if (!visible || dismissed || backendUp) return null;
+  if (!visible || dismissed) return null;
 
   return (
     <div style={{
@@ -40,9 +44,9 @@ export default function DemoModeBanner() {
       fontSize: 12, color: 'rgba(255, 255, 255, 0.8)',
     }}>
       <Terminal size={14} style={{ color: '#f59e0b', flexShrink: 0 }} />
-      <span style={{ fontWeight: 600, color: '#f59e0b' }}>Backend Offline</span>
+      <span style={{ fontWeight: 600, color: '#f59e0b' }}>Connecting to Server</span>
       <span style={{ color: 'rgba(255,255,255,0.5)' }}>—</span>
-      <span>Run <code style={{ background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: 4, fontFamily: 'monospace', fontSize: 11 }}>npm run dev:full</code> to start backend + frontend</span>
+      <span>Please wait while we connect you to our servers</span>
       <button onClick={handleRetry} disabled={retrying} style={{
         display: 'inline-flex', alignItems: 'center', gap: 4,
         background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -50,7 +54,7 @@ export default function DemoModeBanner() {
         fontSize: 11, fontWeight: 600, cursor: 'pointer',
       }}>
         <RefreshCw size={12} style={{ animation: retrying ? 'spin 1s linear infinite' : 'none' }} />
-        {retrying ? 'Checking...' : 'Retry'}
+        {retrying ? 'Connecting...' : 'Retry'}
       </button>
       <button onClick={() => setDismissed(true)} style={{
         background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',

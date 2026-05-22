@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { carsAPI, isDemoMode } from '../api/api';
-import { filterMockCars } from '../data/mockCars';
+import { carsAPI } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
 
 export default function AuctionCalendar() {
@@ -12,22 +11,15 @@ export default function AuctionCalendar() {
 
   useEffect(() => {
     const load = () => {
-      const all = isDemoMode() ? filterMockCars({}) : [];
-      const auctionCars = all.filter(c => c.auctionStatus === 'live' || c.auctionStatus === 'scheduled' || c.allowBid);
-      setCars(auctionCars);
       setLoading(false);
     };
-    if (isDemoMode()) {
-      load();
-    } else {
-      carsAPI.list({ limit: 100 })
-        .then(data => {
-          const all = data.cars || data.data || [];
-          setCars(all.filter(c => c.auctionStatus === 'live' || c.auctionStatus === 'scheduled' || c.allowBid));
-        })
-        .catch(load)
-        .finally(() => setLoading(false));
-    }
+    carsAPI.list({ limit: 100 })
+      .then(data => {
+        const all = data.cars || data.data || [];
+        setCars(all.filter(c => c.auctionStatus === 'live' || c.auctionStatus === 'scheduled' || c.allowBid));
+      })
+      .catch(load)
+      .finally(() => setLoading(false));
   }, []);
 
   const filtered = filter === 'all' ? cars : cars.filter(c => c.auctionStatus === filter);

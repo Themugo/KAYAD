@@ -3,7 +3,7 @@ import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
-import DemoModeBanner from './DemoModeBanner';
+import BackendStatusBanner from './DemoModeBanner';
 
 export default function AppLayout({ children }) {
   const [config, setConfig] = useState(null);
@@ -41,9 +41,9 @@ export default function AppLayout({ children }) {
       <a href="#app-main-content" className="skip-link">
         Skip to main content
       </a>
-      <DemoModeBanner />
+      <BackendStatusBanner />
       <Navbar branding={config?.branding} />
-      <main id="app-main-content" className="app-main" role="main" tabIndex={-1}>
+      <main id="app-main-content" className="app-main" role="main" tabIndex={-1} style={{ paddingTop: 80 }}>
         {children}
       </main>
       <Footer />
