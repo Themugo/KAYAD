@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import DealerSidebar from './DealerSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Link } from 'react-router-dom';
-import { Bell, ChevronRight, Home } from 'lucide-react';
+import { Bell, ChevronRight, Home, Menu } from 'lucide-react';
 
 const ROLE_LABELS = {
   dealer: 'Dealer',
@@ -26,10 +27,11 @@ export default function DealerLayout({ children }) {
   const { user } = useAuth();
   const loc = useLocation();
   const segments = loc.pathname.split('/').filter(Boolean);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050505' }}>
-      <DealerSidebar />
+      <DealerSidebar mobileOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top header bar */}
         <div style={{
@@ -39,6 +41,13 @@ export default function DealerLayout({ children }) {
         }}>
           {/* Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
+            <button
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, marginRight: 4 }}
+            >
+              <Menu size={18} />
+            </button>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', color: 'var(--gold)', fontWeight: 700, textDecoration: 'none' }} title="Back to homepage">
               <Home size={12} />
               <span style={{ marginLeft: 4 }}>Kayad</span>

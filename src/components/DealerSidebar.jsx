@@ -21,7 +21,7 @@ const ONBOARDING_LINK = { to: '/dealer/onboarding', icon: Award, label: 'Onboard
 
 const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'];
 
-export default function DealerSidebar() {
+export default function DealerSidebar({ mobileOpen, onToggle }) {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -32,14 +32,15 @@ export default function DealerSidebar() {
     : [ONBOARDING_LINK, ...DEALER_LINKS];
 
   return (
-    <div style={{
+    <>
+    {mobileOpen && <div className="dealer-sidebar-backdrop" onClick={onToggle} />}
+    <div className={`dealer-sidebar ${mobileOpen ? 'open' : ''}`} style={{
       width: collapsed ? 52 : 220,
-      transition: 'width 0.25s ease',
+      transition: 'width 0.25s ease, transform 0.3s ease',
       background: '#080808',
       borderRight: '1px solid rgba(255,255,255,0.05)',
       display: 'flex', flexDirection: 'column',
-      position: 'sticky', top: 0, height: '100vh',
-      overflow: 'hidden', flexShrink: 0, zIndex: 100,
+      overflow: 'hidden', flexShrink: 0,
     }}>
       <div style={{
         padding: collapsed ? '12px 0' : '16px 18px',
@@ -104,5 +105,6 @@ export default function DealerSidebar() {
         </div>
       )}
     </div>
+    </>
   );
 }

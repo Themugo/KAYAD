@@ -13,6 +13,16 @@ import {
 const delay = (min = 200, max = 800) =>
   new Promise(r => setTimeout(r, min + Math.random() * (max - min)));
 
+// Convert a File to a base64 data URL so it survives page refreshes
+// via localStorage (blob URLs from URL.createObjectURL() are ephemeral).
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsDataURL(file);
+  });
+
 // Demo session state.
 // IMPORTANT: the demo user must survive page reloads. The auth token lives in
 // localStorage, so an in-memory-only user means that after a refresh the app
@@ -303,10 +313,8 @@ const demoCars = {
         for (let i = 0; i < files.length; i++) {
           const f = files[i];
           if (f instanceof File && f.size > 0) {
-            images.push({
-              url: f.size > 0 ? URL.createObjectURL(f) : (demoCarImages[i] || demoCarImages[0]),
-              public_id: null,
-            });
+            const url = f.size > 0 ? await fileToBase64(f) : (demoCarImages[i] || demoCarImages[0]);
+            images.push({ url, public_id: null });
           }
         }
       } catch { /* formData may not have images field - OK */ }
@@ -355,7 +363,8 @@ const demoCars = {
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       if (f instanceof File && f.size > 0) {
-        newImages.push({ url: f.size > 0 ? URL.createObjectURL(f) : `https://images.unsplash.com/photo-${1500000000 + Math.floor(Math.random() * 999999)}?w=800&q=80`, public_id: null });
+        const url = f.size > 0 ? await fileToBase64(f) : `https://images.unsplash.com/photo-${1500000000 + Math.floor(Math.random() * 999999)}?w=800&q=80`;
+        newImages.push({ url, public_id: null });
       }
     }
     const updated = { ...car, images: [...(car.images || []), ...newImages] };

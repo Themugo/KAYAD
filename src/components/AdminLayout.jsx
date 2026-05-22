@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
-import { Bell, ChevronRight } from 'lucide-react';
+import { Bell, ChevronRight, Menu } from 'lucide-react';
 
 const ROLE_LABELS = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
@@ -13,6 +14,7 @@ const ROLE_LABELS = {
 export default function AdminLayout({ children }) {
   const { user, isAuth, loading } = useAuth();
   const loc = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading) return null;
 
@@ -29,7 +31,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050505' }}>
-      <AdminSidebar />
+      <AdminSidebar mobileOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top header bar */}
         <div style={{
@@ -39,6 +41,13 @@ export default function AdminLayout({ children }) {
         }}>
           {/* Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
+            <button
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, marginRight: 4 }}
+            >
+              <Menu size={18} />
+            </button>
             <span style={{ color: 'var(--gold)', fontWeight: 700 }}>Kayad</span>
             {segments.map((seg, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

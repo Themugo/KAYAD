@@ -42,7 +42,7 @@ const roleLinks = (role) => {
   return ALL_LINKS.filter(l => !l.danger);
 };
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ mobileOpen, onToggle }) {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [alertCount, setAlertCount] = useState(0);
@@ -56,14 +56,15 @@ export default function AdminSidebar() {
   const links = roleLinks(user.role);
 
   return (
-    <div style={{
+    <>
+    {mobileOpen && <div className="admin-sidebar-backdrop" onClick={onToggle} />}
+    <div className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} style={{
       width: collapsed ? 52 : 220,
-      transition: 'width 0.25s ease',
+      transition: 'width 0.25s ease, transform 0.3s ease',
       background: '#080808',
       borderRight: '1px solid rgba(255,255,255,0.05)',
       display: 'flex', flexDirection: 'column',
-      position: 'sticky', top: 0, height: '100vh',
-      overflow: 'hidden', flexShrink: 0, zIndex: 100,
+      overflow: 'hidden', flexShrink: 0,
     }}>
       <div style={{
         padding: collapsed ? '12px 0' : '16px 18px',
@@ -121,5 +122,6 @@ export default function AdminSidebar() {
         </div>
       )}
     </div>
+    </>
   );
 }
