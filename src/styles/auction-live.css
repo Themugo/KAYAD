@@ -1,0 +1,236 @@
+/* ============================================================
+   KAYAD — Auction Live Page
+   Premium two-column layout — car/bid-history left, bid-panel right
+   ============================================================ */
+
+.auction-live-page {
+  background: var(--bg);
+}
+
+/* ---- Header ---- */
+.auction-live-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* ---- Grid ---- */
+.auction-live-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr 360px;
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .auction-live-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* ---- Bid panel sticky ---- */
+.auction-live-bid-panel {
+  position: sticky;
+  top: 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 920px) {
+  .auction-live-bid-panel {
+    position: static;
+  }
+}
+
+/* ---- Main car image ---- */
+.auction-car-image {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+  border: 1px solid var(--border);
+}
+.auction-car-image-wrap {
+  aspect-ratio: 16 / 10;
+  max-height: 400px;
+  background: var(--surface);
+}
+.auction-car-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+.auction-car-image:hover .auction-car-image-wrap img {
+  transform: scale(1.03);
+}
+
+/* ---- Specs strip ---- */
+.auction-specs-strip {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+}
+.auction-spec-item-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.auction-spec-item-value {
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+}
+
+/* ---- Bid history panel ---- */
+.bid-history-card {
+  overflow: hidden;
+}
+.bid-history-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.bid-history-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 2px 0;
+}
+.bid-row {
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+  position: relative;
+}
+.bid-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+/* ---- Current bid card ---- */
+.current-bid-card {
+  padding: 20px;
+  margin-bottom: 12px;
+  position: relative;
+  border: 1px solid rgba(212,196,168,0.2);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.current-bid-card:hover {
+  border-color: rgba(212,196,168,0.4);
+  box-shadow: 0 0 24px rgba(212,196,168,0.06);
+}
+.current-bid-amount {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gold-light);
+  transition: transform 0.15s, color 0.2s;
+}
+
+/* ---- Bidder leaderboard ---- */
+.leaderboard-card {
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+.leaderboard-card:hover {
+  border-color: rgba(212,196,168,0.25);
+}
+.leaderboard-title {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.leaderboard-rank {
+  width: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+.leaderboard-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+.leaderboard-name {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 500;
+  color: #fff;
+}
+.leaderboard-amount {
+  text-align: right;
+}
+.leaderboard-amount-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold-light);
+}
+.leaderboard-bidcount {
+  font-size: 8px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ---- Quick bid chips ---- */
+.quick-bid-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.quick-bid-chip {
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.quick-bid-chip:hover {
+  border-color: rgba(212,196,168,0.3);
+  color: var(--gold);
+}
+.quick-bid-chip.active {
+  background: var(--gold);
+  color: #0A1628;
+  border-color: var(--gold);
+  font-weight: 700;
+}

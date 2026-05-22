@@ -11,6 +11,7 @@ import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import usePageMeta from '../hooks/usePageMeta';
 import api from '../api/api';
+import '../styles/auction-live.css';
 
 const AVATAR_COLORS = ['#f59e0b','#3b82f6','#22c55e','#ef4444','#a855f7','#ec4899','#14b8a6','#f97316'];
 
@@ -360,63 +361,63 @@ export default function AuctionLivePage() {
   if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
 
   return (
-    <div className="page" style={{ background: 'var(--bg)' }}>
+    <div className="auction-live-page">
       {confetti && <ConfettiOverlay />}
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <div className="container" style={{ paddingTop: 24, paddingBottom: 24 }}>
 
         {/* ─── Header ─── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
-          <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 13 }}>← All Cars</Link>
-          <span style={{ color: 'var(--border)' }}>·</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="auction-live-header">
+          <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 12 }}>← All Cars</Link>
+          <span style={{ color: 'var(--border)', fontSize: 10 }}>·</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {auctionLive ? (
               <span className="badge badge-green"><span className="live-dot" /> LIVE AUCTION</span>
             ) : (
               <span className="badge badge-muted">Auction Ended</span>
             )}
-            <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{car.title}</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{car.title}</span>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Viewers */}
             <ViewersCounter />
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
           </div>
         </div>
 
-        <div className="grid-sidebar-right" style={{ gap: 28, gridTemplateColumns: '1fr 380px' }}>
+        <div className="auction-live-grid">
 
           {/* ─── LEFT: Car + Bid History ─── */}
           <div>
             {/* Car image */}
-            <div style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 20, position: 'relative' }}>
-              <div style={{ aspectRatio: '16/9', background: 'var(--surface)' }}>
+            <div className="auction-car-image">
+              <div className="auction-car-image-wrap">
                 {car.images?.length > 0 ? (
-                  <img src={(car.images[car.coverImage ?? 0]?.url || car.images[car.coverImage ?? 0])} alt={car.title} decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={(car.images[car.coverImage ?? 0]?.url || car.images[car.coverImage ?? 0])} alt={car.title} decoding="async" />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 80, color: 'var(--text-dim)' }}>🚗</div>
+                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, color: 'var(--text-dim)' }}>🚗</div>
                 )}
               </div>
               {car.isDemo && (
                 <div style={{
-                  position: 'absolute', top: 10, right: 10,
+                  position: 'absolute', top: 8, right: 8,
                   background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
-                  borderRadius: 6, padding: '3px 8px', zIndex: 5,
+                  borderRadius: 5, padding: '2px 7px', zIndex: 5,
                 }}>
-                  <span style={{ fontSize: 9, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                  <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
                 </div>
               )}
               {/* Countdown overlay on image */}
               {car.auctionEnd && auctionLive && (
                 <div style={{
-                  position: 'absolute', bottom: 12, left: 12,
-                  background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)',
-                  borderRadius: 10, padding: '8px 14px',
-                  display: 'flex', alignItems: 'center', gap: 8,
+                  position: 'absolute', bottom: 10, left: 10,
+                  background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(10px)',
+                  borderRadius: 8, padding: '6px 12px',
+                  display: 'flex', alignItems: 'center', gap: 6,
                   zIndex: 5,
                 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Ends In</span>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: isEnding ? '#ef4444' : 'var(--gold)', }}>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Ends In</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: isEnding ? '#ef4444' : 'var(--gold)', }}>
                     <CountdownDisplay endTime={car.auctionEnd} />
                   </span>
                 </div>
@@ -424,8 +425,8 @@ export default function AuctionLivePage() {
             </div>
 
             {/* Car specs strip */}
-            <div className="card" style={{ padding: '16px 20px', marginBottom: 20 }}>
-              <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div className="card" style={{ marginBottom: 16 }}>
+              <div className="auction-specs-strip">
                 {[
                   { label: 'Brand', val: car.brand },
                   { label: 'Year', val: car.year },
@@ -435,15 +436,15 @@ export default function AuctionLivePage() {
                   { label: 'Location', val: car.location?.city },
                 ].filter(s => s.val).map(s => (
                   <div key={s.label}>
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
-                    <div style={{ fontWeight: 600, fontSize: 14 }}>{s.val}</div>
+                    <div className="auction-spec-item-label">{s.label}</div>
+                    <div className="auction-spec-item-value">{s.val}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Market Valuation */}
-            <div style={{ marginBottom: 20 }}>
+            <div style={{ marginBottom: 16 }}>
               <MarketValuationMatrix
                 carId={id}
                 carPrice={car.price || currentBid}
@@ -454,83 +455,78 @@ export default function AuctionLivePage() {
             </div>
 
             {/* Bid History */}
-            <div className="card" style={{ overflow: 'hidden' }}>
-              <div style={{
-                padding: '16px 20px', borderBottom: '1px solid var(--border)',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <h3 style={{ fontSize: '1rem' }}>Bid History</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="card bid-history-card">
+              <div className="bid-history-header">
+                <h3 style={{ fontSize: '0.9rem', margin: 0 }}>Bid History</h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <OutbidBell show={outbidAlert} />
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{bidCount} bids</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{bidCount} bids</span>
                 </div>
               </div>
-              <div ref={bidListRef} style={{ maxHeight: 400, overflowY: 'auto', padding: '4px 0' }}>
+              <div ref={bidListRef} className="bid-history-list">
                 {bids.length === 0 ? (
-                  <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
+                  <div style={{ padding: '28px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
                     No bids yet — be the first!
                   </div>
-                ) : bids.map((bid, i) => {
-                  const color = hashColor(bid.bidderTag || `#${bidCount - i}`);
-                  const isNew = i === 0 && bidFlash;
-                  return (
-                    <div key={bid._id || i} className="bid-row" style={{
-                      padding: '10px 20px',
-                      animation: isNew ? 'slideInRight 0.35s ease both, bidGlow 0.8s ease both' : 'fadeInDown 0.3s ease both',
-                      background: isNew ? 'rgba(212,196,168,0.06)' : 'transparent',
-                      position: 'relative',
-                    }}>
-                      {isNew && <PriceParticles active={priceParticles} />}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{
-                          width: 34, height: 34, borderRadius: '50%',
-                          background: i === 0 ? 'var(--gold)' : color,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 11, fontWeight: 800,
-                          color: i === 0 ? '#0A1628' : '#fff',
-                          flexShrink: 0,
-                          transition: 'transform 0.2s',
-                          transform: isNew ? 'scale(1.15)' : 'scale(1)',
-                        }}>
-                          {i === 0 ? '👑' : getAvatarInitials(bid.bidderTag || `Bidder ${bidCount - i}`).slice(0, 2)}
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: i === 0 ? 'var(--gold-light)' : 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                            {bid.bidderTag || `Bidder #${bidCount - i}`}
-                            {bid.isVerifiedBuyer && (
-                              <span style={{
-                                fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                                background: 'rgba(59,130,246,0.15)', color: '#3B82F6',
-                                fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
-                              }}>✓ Buyer</span>
-                            )}
+                
+                  ) : bids.map((bid, i) => {
+                    const color = hashColor(bid.bidderTag || `#${bidCount - i}`);
+                    const isNew = i === 0 && bidFlash;
+                    return (
+                      <div key={bid._id || i} className="bid-row" style={{
+                        animation: isNew ? 'slideInRight 0.35s ease both, bidGlow 0.8s ease both' : 'fadeInDown 0.3s ease both',
+                        background: isNew ? 'rgba(212,196,168,0.06)' : 'transparent',
+                      }}>
+                        {isNew && <PriceParticles active={priceParticles} />}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{
+                            width: 30, height: 30, borderRadius: '50%',
+                            background: i === 0 ? 'var(--gold)' : color,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: 10, fontWeight: 800,
+                            color: i === 0 ? '#0A1628' : '#fff',
+                            flexShrink: 0,
+                            transition: 'transform 0.2s',
+                            transform: isNew ? 'scale(1.12)' : 'scale(1)',
+                          }}>
+                            {i === 0 ? '👑' : getAvatarInitials(bid.bidderTag || `Bidder ${bidCount - i}`).slice(0, 2)}
                           </div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: i === 0 ? 'var(--gold-light)' : 'var(--text)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                              {bid.bidderTag || `Bidder #${bidCount - i}`}
+                              {bid.isVerifiedBuyer && (
+                                <span style={{
+                                  fontSize: 8, padding: '1px 5px', borderRadius: 3,
+                                  background: 'rgba(59,130,246,0.15)', color: '#3B82F6',
+                                  fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
+                                }}>✓ Buyer</span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right', marginLeft: 'auto' }}>
+                          <div style={{
+                            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem',
+                            color: i === 0 ? 'var(--gold-light)' : 'var(--text)',
+                            transition: 'transform 0.2s',
+                            transform: isNew ? 'scale(1.08)' : 'scale(1)',
+                          }}>
+                            {formatKES(bid.amount)}
+                          </div>
+                          {bid.mpesaPaid && (
+                            <span style={{ fontSize: 9, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
+                          )}
                         </div>
                       </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{
-                          fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem',
-                          color: i === 0 ? 'var(--gold-light)' : 'var(--text)',
-                          transition: 'transform 0.2s',
-                          transform: isNew ? 'scale(1.1)' : 'scale(1)',
-                        }}>
-                          {formatKES(bid.amount)}
-                        </div>
-                        {bid.mpesaPaid && (
-                          <span style={{ fontSize: 10, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
 
           {/* ─── RIGHT: Bid Panel ─── */}
-          <div>
-            <div style={{ position: 'sticky', top: 88 }}>
+          <div className="auction-live-bid-panel">
 
               {/* Reserve Indicator */}
               {car.reservePrice > 0 && (
@@ -552,26 +548,21 @@ export default function AuctionLivePage() {
               )}
 
               {/* Current Bid Display */}
-              <div className="card" style={{
-                padding: 24, marginBottom: 16, position: 'relative',
-                border: `1px solid ${bidFlash ? 'rgba(212,196,168,0.6)' : 'rgba(212,196,168,0.3)'}`,
-                transition: 'border-color 0.3s',
+              <div className="current-bid-card" style={{
+                borderColor: bidFlash ? 'rgba(212,196,168,0.6)' : 'rgba(212,196,168,0.2)',
               }}>
                 {bidFlash && <PriceParticles active={priceParticles} />}
-                <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+                <div style={{ textAlign: 'center', marginBottom: 14 }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
                   </div>
-                  <div style={{
-                    fontFamily: 'var(--font-display)', fontSize: '2.4rem', fontWeight: 700,
-                    lineHeight: 1,
-                    transition: 'transform 0.15s, color 0.2s',
+                  <div className="current-bid-amount" style={{
                     transform: bidFlash ? 'scale(1.08)' : 'scale(1)',
-                    color: bidFlash ? '#fff' : 'var(--gold-light)',
+                    color: bidFlash ? '#fff' : undefined,
                   }}>
                     {formatKES(currentBid || car.price)}
                   </div>
-                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
                     {bidCount} bid{bidCount !== 1 ? 's' : ''}
                   </div>
                 </div>
@@ -623,20 +614,14 @@ export default function AuctionLivePage() {
                 )}
 
                 {/* Bid increment chips */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Quick Amounts</div>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Quick Amounts</div>
+                  <div className="quick-bid-chips">
                     {[minBid, minBid + 10000, minBid + 25000, minBid + 50000].map(amt => (
                       <button
                         key={amt}
                         onClick={() => setBidAmount(String(amt))}
-                        style={{
-                          background: bidAmount === String(amt) ? 'var(--gold)' : 'var(--surface)',
-                          color: bidAmount === String(amt) ? '#0A1628' : 'var(--text-muted)',
-                          border: `1px solid ${bidAmount === String(amt) ? 'var(--gold)' : 'var(--border)'}`,
-                          borderRadius: 6, padding: '6px 10px', fontSize: 12, cursor: 'pointer',
-                          fontWeight: bidAmount === String(amt) ? 700 : 400,
-                        }}
+                        className={`quick-bid-chip ${bidAmount === String(amt) ? 'active' : ''}`}
                       >
                         {formatKES(amt)}
                       </button>
@@ -645,8 +630,8 @@ export default function AuctionLivePage() {
                 </div>
 
                 {/* Bid Amount Input */}
-                <div className="input-group" style={{ marginBottom: 12 }}>
-                  <label className="input-label">Your Bid (KES)</label>
+                <div className="input-group" style={{ marginBottom: 10 }}>
+                  <label className="input-label" style={{ fontSize: 11 }}>Your Bid (KES)</label>
                   <input
                     className="input"
                     type="number"
@@ -655,16 +640,16 @@ export default function AuctionLivePage() {
                     onChange={e => setBidAmount(e.target.value)}
                     min={minBid}
                   />
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                     Minimum: {formatKES(minBid)}
                   </div>
                 </div>
 
                 {/* Proxy Bid — Max Cap */}
-                <div className="input-group" style={{ marginBottom: 12 }}>
-                  <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div className="input-group" style={{ marginBottom: 10 }}>
+                  <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
                     Max Auto-Bid (optional)
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 400 }}>
+                    <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 400 }}>
                       — Bid4U: we bid up to this cap
                     </span>
                   </label>
@@ -682,8 +667,8 @@ export default function AuctionLivePage() {
                 </div>
 
                 {/* M-Pesa Phone */}
-                <div className="input-group" style={{ marginBottom: 20 }}>
-                  <label className="input-label">M-Pesa Number (Bid Commitment)</label>
+                <div className="input-group" style={{ marginBottom: 16 }}>
+                  <label className="input-label" style={{ fontSize: 11 }}>M-Pesa Number (Bid Commitment)</label>
                   <div className="mpesa-wrap">
                     <span className="mpesa-prefix">🇰🇪</span>
                     <input
@@ -693,7 +678,7 @@ export default function AuctionLivePage() {
                       onChange={e => setPhone(e.target.value)}
                     />
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
                     Small commitment fee sent directly to dealer
                   </div>
                 </div>
@@ -705,57 +690,46 @@ export default function AuctionLivePage() {
                     disabled={placing || !bidAmount || Number(bidAmount) < minBid}
                     style={{
                       animation: isEnding ? 'pulse 1s infinite' : 'none',
+                      fontSize: 13, padding: '11px 20px',
                     }}
                   >
-                    {placing ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Placing...</> : '⚡ Place Bid'}
+                    {placing ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Placing...</> : '⚡ Place Bid'}
                   </button>
                 ) : isOwner ? (
-                  <div style={{ textAlign: 'center', padding: 12, color: 'var(--text-muted)', fontSize: 13 }}>
+                  <div style={{ textAlign: 'center', padding: 10, color: 'var(--text-muted)', fontSize: 12 }}>
                     You cannot bid on your own listing.
                   </div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: 12, background: 'rgba(239,68,68,0.05)', borderRadius: 8 }}>
-                    <span style={{ color: 'var(--red)', fontSize: 13 }}>This auction has ended.</span>
+                  <div style={{ textAlign: 'center', padding: 10, background: 'rgba(239,68,68,0.05)', borderRadius: 6 }}>
+                    <span style={{ color: 'var(--red)', fontSize: 12 }}>This auction has ended.</span>
                   </div>
                 )}
               </div>
 
               {/* Bidder Leaderboard */}
               {leaderboard.length > 0 && (
-                <div className="card" style={{ padding: 16, marginBottom: 12 }}>
-                  <div style={{
-                    fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase',
-                    letterSpacing: '0.06em', fontWeight: 700, marginBottom: 12,
-                    display: 'flex', alignItems: 'center', gap: 6,
-                  }}>
+                <div className="leaderboard-card">
+                  <div className="leaderboard-title">
                     <span>🏆</span> Bidder Leaderboard
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {leaderboard.map((b, i) => (
-                      <div key={b.tag} style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '4px 0',
+                      <div key={b.tag} className="leaderboard-row" style={{
                         borderBottom: i < leaderboard.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
                       }}>
-                        <div style={{
-                          width: 20, fontSize: 10, fontWeight: 700, textAlign: 'center',
+                        <div className="leaderboard-rank" style={{
                           color: i === 0 ? 'var(--gold)' : i < 3 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)',
                         }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
-                        <div style={{
-                          width: 24, height: 24, borderRadius: '50%',
-                          background: hashColor(b.tag),
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 9, fontWeight: 800, color: '#fff', flexShrink: 0,
-                        }}>
+                        <div className="leaderboard-avatar" style={{ background: hashColor(b.tag) }}>
                           {getAvatarInitials(b.tag).slice(0, 2)}
                         </div>
-                        <div style={{ flex: 1, fontSize: 12, fontWeight: 500, color: '#fff' }}>
+                        <div className="leaderboard-name">
                           {b.tag}
-                          {b.isVerified && <span style={{ color: '#3B82F6', marginLeft: 4, fontSize: 10 }}>✓</span>}
+                          {b.isVerified && <span style={{ color: '#3B82F6', marginLeft: 3, fontSize: 9 }}>✓</span>}
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--gold-light)' }}>{formatKES(b.amount)}</div>
-                          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>{b.count} bid{b.count !== 1 ? 's' : ''}</div>
+                        <div className="leaderboard-amount">
+                          <div className="leaderboard-amount-value">{formatKES(b.amount)}</div>
+                          <div className="leaderboard-bidcount">{b.count} bid{b.count !== 1 ? 's' : ''}</div>
                         </div>
                       </div>
                     ))}
@@ -764,27 +738,27 @@ export default function AuctionLivePage() {
               )}
 
               {/* Escrow info */}
-              <div className="card" style={{ padding: 16 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}>🔒 How Bidding Works</strong>
-                  <p>1. Place your bid + M-Pesa commitment to the dealer.</p>
-                  <p>2. If you win, full payment goes into <strong>escrow</strong>.</p>
-                  <p>3. Escrow releases when car is received & confirmed.</p>
+              <div className="card" style={{ padding: 14 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 4 }}>🔒 How Bidding Works</strong>
+                  <p style={{ margin: '2px 0' }}>1. Place your bid + M-Pesa commitment to the dealer.</p>
+                  <p style={{ margin: '2px 0' }}>2. If you win, full payment goes into <strong>escrow</strong>.</p>
+                  <p style={{ margin: '2px 0' }}>3. Escrow releases when car is received & confirmed.</p>
                 </div>
               </div>
 
               {/* Dealer */}
               {car.dealer && (
-                <div className="card" style={{ padding: 16, marginTop: 12 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Seller</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700 }}>
+                <div className="card" style={{ padding: 14, marginTop: 10 }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Seller</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700, fontSize: 13 }}>
                       {(car.dealer?.name || 'D')[0].toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{car.dealer?.name}</div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{car.dealer?.name}</div>
                       {car.dealer?.dealerRating && (
-                        <div style={{ color: 'var(--gold)', fontSize: 12 }}>★ {car.dealer.dealerRating}/5</div>
+                        <div style={{ color: 'var(--gold)', fontSize: 11 }}>★ {car.dealer.dealerRating}/5</div>
                       )}
                     </div>
                   </div>
@@ -793,7 +767,7 @@ export default function AuctionLivePage() {
 
               {/* SMS Bidding Agent */}
               {auctionLive && isAuth && (
-                <div className="card" style={{ padding: 16, marginTop: 12 }}>
+                <div className="card" style={{ padding: 14, marginTop: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     <span style={{ fontSize: 16 }}>💬</span>
                     <span style={{ fontWeight: 600, fontSize: 13 }}>SMS Proxy Agent</span>
@@ -865,7 +839,6 @@ export default function AuctionLivePage() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Winner Modal */}
       {showWinner && (
