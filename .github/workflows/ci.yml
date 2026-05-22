@@ -57,7 +57,7 @@ jobs:
       # Cache mongodb-memory-server binary (~600MB download)
       - name: Cache MongoDB binaries
         id: cache-mongo
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/mongodb-binaries
