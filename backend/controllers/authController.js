@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { formatPhone } from "../utils/format.js";
 import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
@@ -42,9 +43,14 @@ const sendRefreshToken = (res, token) => {
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
-const sendAuthResponse = (res, user) => {
+const sendAuthResponse = async (res, user) => {
   const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const { token: refreshToken, jti } = generateRefreshToken(user);
+
+  // Store hash of the JTI for rotation tracking (one-time use)
+  const jtiHash = crypto.createHash("sha256").update(jti).digest("hex");
+  await User.findByIdAndUpdate(user._id, { refreshTokenHash: jtiHash });
+
   const safeUser = serializeUser(user);
 
   sendRefreshToken(res, refreshToken);
@@ -203,7 +209,7 @@ export const register = async (req, res) => {
       notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
-    return sendAuthResponse(res.status(201), user);
+    return await sendAuthResponse(res.status(201), user);
 
   } catch (err) {
     console.error("❌ REGISTER ERROR:", err);
@@ -269,7 +275,7 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    return sendAuthResponse(res, user);
+    return await sendAuthResponse(res, user);
 
   } catch (err) {
     console.error("❌ LOGIN ERROR:", err);
@@ -278,7 +284,7 @@ export const login = async (req, res) => {
 };
 
 // =============================
-// 🔁 REFRESH TOKEN (ROTATING)
+// 🔁 REFRESH TOKEN (ROTATING — one-time use)
 // =============================
 export const refreshToken = async (req, res) => {
   try {
@@ -310,7 +316,7 @@ export const refreshToken = async (req, res) => {
       }
     }
 
-    const user = await User.findById(decoded.id).select("+tokenVersion");
+    const user = await User.findById(decoded.id).select("+tokenVersion +refreshTokenHash");
 
     if (!user) {
       return R.notFound(res, "User not found");
@@ -320,12 +326,22 @@ export const refreshToken = async (req, res) => {
       return R.error(res, "Session invalidated", 403);
     }
 
+    // ── ROTATION CHECK: verify this refresh token hasn't been used ──
+    if (decoded.jti && user.refreshTokenHash) {
+      const jtiHash = crypto.createHash("sha256").update(decoded.jti).digest("hex");
+      if (jtiHash !== user.refreshTokenHash) {
+        // Token was already used — possible theft. Invalidate all sessions.
+        await User.findByIdAndUpdate(user._id, { $inc: { tokenVersion: 1 }, refreshTokenHash: null });
+        return R.error(res, "Session invalidated — possible token reuse detected", 403);
+      }
+    }
+
     if (usedAccessFallback && !req.headers.authorization) {
       return R.error(res, "Refresh cookie required", 403);
     }
 
-    // Issue new tokens without bumping tokenVersion (only password change/logout does that)
-    return sendAuthResponse(res, user);
+    // Issue new rotating tokens (stores new JTI hash, invalidating old one)
+    return await sendAuthResponse(res, user);
 
   } catch (err) {
     console.error("❌ REFRESH ERROR:", err);
@@ -342,6 +358,7 @@ export const logout = async (req, res) => {
       // 🔥 invalidate all refresh tokens
       await User.findByIdAndUpdate(req.user.id, {
         $inc: { tokenVersion: 1 },
+        refreshTokenHash: null,
       });
     }
 
@@ -438,7 +455,7 @@ export const changePassword = async (req, res) => {
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
-    return sendAuthResponse(res, user);
+    return await sendAuthResponse(res, user);
   } catch (err) {
     R.error(res, err.message, 500);
   }

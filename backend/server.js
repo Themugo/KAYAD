@@ -203,7 +203,23 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 }));
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
+import redisClient from "./config/redis.js";
+
+let ioAdapter = null;
+if (redisClient) {
+  try {
+    const { createAdapter } = await import("@socket.io/redis-adapter");
+    const pubClient = redisClient.duplicate();
+    const subClient = redisClient.duplicate();
+    ioAdapter = createAdapter(pubClient, subClient);
+    console.log("🔌 Socket.IO Redis adapter configured (cluster-ready)");
+  } catch (err) {
+    console.warn("⚠️ Socket.IO Redis adapter unavailable:", err.message);
+  }
+}
+
 const io = new Server(server, {
+  adapter: ioAdapter,
   cors: {
     origin: NODE_ENV === "production" ? allowedOrigins : true,
     credentials: true,

@@ -329,6 +329,15 @@ export const startAuctionEngine = async () => {
 // =============================
 export const endAuction = async (roomId) => {
   try {
+    // ── SINGLE AUTHORITATIVE CHECK ──────────────────────────
+    // The Car model is the source of truth for auction status.
+    // If the car is already ended, skip — prevents double-ending
+    // when both auctionTimer and auctionEngine fire.
+    const car = await Car.findById(roomId).select("auctionStatus");
+    if (car?.auctionStatus === "ended") {
+      return { success: false, reason: "already_ended" };
+    }
+
     const auction = await Auction.findOne({ roomId });
 
     // 🛑 prevent double ending

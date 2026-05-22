@@ -280,6 +280,15 @@ const userSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 🔁 ROTATING REFRESH TOKEN (one-time use)
+    // =============================
+    refreshTokenHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
+
+    // =============================
     // 🔒 FORCE PASSWORD CHANGE (demo / seeded accounts)
     // =============================
     mustChangePassword: {

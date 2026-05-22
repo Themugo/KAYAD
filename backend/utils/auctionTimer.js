@@ -1,43 +1,42 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
+import Auction from "../models/Auction.js";
 
 // =============================
-// ⏱ AUCTION TIMER ENGINE (OPTIMIZED)
+// ⏱ AUCTION TIMER ENGINE — SINGLE AUTHORITATIVE END
+// =============================
+// This is the ONLY mechanism that ends auctions. The auctionEngine's
+// endAuction() checks Car.auctionStatus before proceeding, so there
+// is no race condition.
+//
+// Polls every 5 seconds for auctions ending within the next 5 seconds.
+// Uses findOneAndUpdate atomic operation to prevent double-ending.
 // =============================
 export const startAuctionTimer = (io) => {
-  setInterval(async () => {
+  let _handle = null;
+
+  const tick = async () => {
     try {
       const now = new Date();
 
-      // =============================
-      // 🔥 GET EXPIRING AUCTIONS ONLY
-      // =============================
+      // Get auctions ending in the next 5 seconds
       const endingCars = await Car.find({
         allowBid: true,
         auctionStatus: "live",
-        auctionEnd: { $lte: new Date(now.getTime() + 5000) }, // next 5s
+        auctionEnd: { $lte: new Date(now.getTime() + 5000) },
       }).select("_id auctionEnd");
 
       for (const car of endingCars) {
-        // =============================
-        // 🛡 ATOMIC END (PREVENT DUPLICATES)
-        // =============================
+        // ── ATOMIC END (prevents double-ending) ─────────────
         const updated = await Car.findOneAndUpdate(
-          {
-            _id: car._id,
-            auctionStatus: "live",
-          },
-          {
-            auctionStatus: "ended",
-          },
+          { _id: car._id, auctionStatus: "live" },
+          { auctionStatus: "ended" },
           { new: true }
         );
 
         if (!updated) continue; // already ended elsewhere
 
-        // =============================
-        // 🏆 GET TOP BID (ONE QUERY)
-        // =============================
+        // ── Get top bid ─────────────────────────────────────
         const topBid = await Bid.findOne({
           carId: car._id,
           status: "paid",
@@ -59,27 +58,49 @@ export const startAuctionTimer = (io) => {
           await updated.save();
         }
 
-        // =============================
-        // 🔥 EMIT RESULT
-        // =============================
+        // ── Also update the Auction model if it exists ──────
+        try {
+          await Auction.findOneAndUpdate(
+            { roomId: car._id.toString(), status: "active" },
+            {
+              status: topBid ? "completed" : "cancelled",
+              winner: winner ? { userId: topBid.user, amount: topBid.amount } : null,
+            }
+          );
+        } catch (_) {
+          // Auction model may not exist for all cars — safe to skip
+        }
+
+        // ── Emit result to all connected clients ────────────
         io.to(car._id.toString()).emit("auctionEnded", {
           carId: car._id,
           winner,
         });
 
-        // =============================
-        // 🔔 ADMIN ALERT (USE YOUR SYSTEM)
-        // =============================
+        // ── Admin alert ─────────────────────────────────────
         if (global.triggerAdminAlert) {
           global.triggerAdminAlert("auction", {
             event: "ended",
             carId: car._id,
           });
         }
-      }
 
+        console.log(`🏁 Auction ended: ${car._id}${winner ? ` — Winner: ${winner.bidderTag} @ KES ${winner.amount.toLocaleString()}` : " — No bids"}`);
+      }
     } catch (err) {
       console.error("❌ AUCTION TIMER ERROR:", err);
     }
-  }, 5000); // 🔥 5 sec instead of 1 sec
+  };
+
+  // Run immediately on start, then every 5 seconds
+  tick();
+  _handle = setInterval(tick, 5000);
+
+  console.log("⏰ AuctionTimer started — 5s poll interval");
+
+  return _handle;
+};
+
+export const stopAuctionTimer = () => {
+  if (_handle) clearInterval(_handle);
 };

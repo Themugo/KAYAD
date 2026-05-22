@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 let ACCESS_SECRET, REFRESH_SECRET;
 const getAccess  = () => ACCESS_SECRET  || (ACCESS_SECRET  = process.env.JWT_SECRET);
@@ -23,17 +24,22 @@ export const generateAccessToken = (user) => {
 };
 
 // =============================
-// 🔄 GENERATE REFRESH TOKEN
+// 🔄 GENERATE REFRESH TOKEN (with unique JTI for rotation)
 // =============================
 export const generateRefreshToken = (user) => {
-  return jwt.sign(
-    {
-      id: user._id || user.id,
-      tokenVersion: user.tokenVersion || 0,
-    },
-    getRefresh(),
-    { expiresIn: REFRESH_EXPIRES }
-  );
+  const jti = crypto.randomUUID(); // unique token ID for rotation tracking
+  return {
+    token: jwt.sign(
+      {
+        id: user._id || user.id,
+        tokenVersion: user.tokenVersion || 0,
+        jti,
+      },
+      getRefresh(),
+      { expiresIn: REFRESH_EXPIRES }
+    ),
+    jti, // returned for server-side tracking
+  };
 };
 
 // =============================
