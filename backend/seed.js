@@ -105,12 +105,12 @@ export async function reseed() {
   if (webhostEmail) {
     let admin = await User.findOne({ email: webhostEmail });
     if (!admin) {
-      admin = await User.create({ name: webhostName, email: webhostEmail, password: webhostPassword, role: "superadmin", isDemo: true, emailVerified: true });
+      admin = await User.create({ name: webhostName, email: webhostEmail, password: webhostPassword, role: "superadmin", isDemo: false, emailVerified: true });
       created.webhost.push(webhostEmail);
     } else {
       admin.password = webhostPassword;
       admin.role = "superadmin";
-      admin.isDemo = true;
+      admin.isDemo = false;
       admin.emailVerified = true;
       await admin.save();
       created.webhost.push(`${webhostEmail} (updated)`);

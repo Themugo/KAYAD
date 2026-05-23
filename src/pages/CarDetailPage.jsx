@@ -107,7 +107,8 @@ export default function CarDetailPage() {
   const [car, setCar] = useState(null);
   usePageMeta(
     car ? `${car.title} - ${car.brand} ${car.model} ${car.year}` : 'Car Details',
-    car ? `${car.title} - ${car.brand} ${car.model} ${car.year} in ${car.location}. Price: KES ${Number(car.price).toLocaleString()}. View details on Kayad.` : 'View premium car details on Kayad Marketplace.'
+    car ? `${car.title} - ${car.brand} ${car.model} ${car.year} in ${car.location}. Price: KES ${Number(car.price).toLocaleString()}. View details on Kayad.` : 'View premium car details on Kayad Marketplace.',
+    car ? { image: (car.images?.[0]?.url || car.images?.[0]), type: 'product' } : {}
   );
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -819,9 +820,32 @@ export default function CarDetailPage() {
                     {isFav ? 'Saved to Wishlist' : 'Save Car'}
                   </button>
 
-                  <button onClick={() => { navigator.clipboard?.writeText(window.location.href); toast('Link copied!', 'success'); }} className="cta-fav" style={{ fontSize: 11 }}>
-                    📋 Share
-                  </button>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => {
+                        const text = `Check out this ${car.title} on KAYAD — KES ${Number(car.currentBid || car.price || 0).toLocaleString()}\n${window.location.href}`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+                      }}
+                      className="cta-fav"
+                      style={{ fontSize: 11, flex: 1, color: '#25D366', borderColor: 'rgba(37,211,102,0.3)' }}
+                    >
+                      <MessageCircle size={13} /> WhatsApp
+                    </button>
+                    <button onClick={() => { navigator.clipboard?.writeText(window.location.href); toast('Link copied!', 'success'); }} className="cta-fav" style={{ fontSize: 11, flex: 1 }}>
+                      📋 Copy link
+                    </button>
+                  </div>
+
+                  {(dealer?.phone || car.dealerPhone) && (
+                    <a
+                      href={`https://wa.me/${String(dealer?.phone || car.dealerPhone).replace(/[^0-9]/g, '').replace(/^0/, '254')}?text=${encodeURIComponent(`Hi, I'm interested in the ${car.title} listed on KAYAD (${window.location.href})`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="cta-fav"
+                      style={{ fontSize: 12, justifyContent: 'center', color: '#25D366', borderColor: 'rgba(37,211,102,0.3)', textDecoration: 'none' }}
+                    >
+                      <MessageCircle size={14} /> Chat with seller on WhatsApp
+                    </a>
+                  )}
 
                   {isFav && (
                     <button onClick={handlePriceAlert} className={`cta-fav ${priceAlertOn ? 'cta-fav-active' : ''}`} style={{ borderColor: priceAlertOn ? 'rgba(212,196,168,0.2)' : undefined }}>

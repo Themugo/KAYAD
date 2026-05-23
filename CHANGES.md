@@ -783,3 +783,39 @@ CHANGES.md                     (this entry)
 | Build | clean |
 | Lint | 0 errors, 189 warnings |
 | Tests | 23/23 files, 151/151 pass |
+
+---
+
+## Round 15 — Deployment enablement + distribution features
+
+### Backend verified deployable
+- Syntax-checked all 192 backend files — 0 errors; the server boots cleanly given a `MONGO_URI` (the only hard requirement; all integrations degrade gracefully).
+- **Bug fix:** the seeded webhost owner was flagged `isDemo: true` — meaning a demo-cleanup could delete the real platform owner. Now `isDemo: false`.
+- `render.yaml` now declares `SEED_ADMIN_EMAIL` + `SEED_ADMIN_PASSWORD` so the Render Blueprint prompts for the owner credentials at deploy time.
+
+### GO-LIVE.md runbook (new)
+Step-by-step, copy-paste path from demo mode to a live backend: MongoDB Atlas → secrets → Render Blueprint → domain → seed → verify, plus an optional-integrations table (M-Pesa, email, Cloudinary, SMS, Sentry) and the social-preview fast-follow note. Minimum to launch = a Mongo string + three secrets.
+
+### WhatsApp share + contact (distribution)
+On the car detail page: a **Share to WhatsApp** button (car + price + link) and a **Chat with seller on WhatsApp** button (deep-links to the seller's number, Kenyan `2547…` normalised). Copy-link retained. This is the #1 organic distribution channel for the market.
+
+### Per-listing social previews
+`usePageMeta` upgraded from title+description to the full Open Graph / Twitter set (og:title/description/image/url/type), and the detail page now passes the car's photo + `product` type — so shared listings preview the actual car on JS-rendering clients. Crawler-facing prerender for no-JS bots (WhatsApp/FB) documented in GO-LIVE.md as the post-deploy fast-follow.
+
+### Files changed
+```
+backend/seed.js            (webhost isDemo:false fix)
+render.yaml                (declare seed owner vars)
+GO-LIVE.md                 (new runbook)
+src/hooks/usePageMeta.js   (full OG/Twitter meta)
+src/pages/CarDetailPage.jsx (WhatsApp share + contact, pass image to meta)
+CHANGES.md                 (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Backend syntax | 192/192 files pass |
+| Frontend build | clean |
+| Lint | 0 errors, 189 warnings |
+| Tests | 23/23 files, 151/151 pass |
