@@ -352,7 +352,7 @@ export default function EditCarPage() {
                 <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginBottom: 16 }}>No photos yet. Click "Upload Photos" to add images.</div>
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginTop: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 12, marginTop: 16 }}>
                 {images.map((img, i) => {
                   const src = typeof img === 'string' ? img : img?.url;
                   const isCover = i === coverImage;

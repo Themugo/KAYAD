@@ -392,7 +392,7 @@ export default function AddCarPage() {
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 10, fontWeight: 600 }}>
                     📌 Click any photo to set it as the main cover image. Auto-selected: Photo #{coverImage + 1}.
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 10 }}>
                     {previews.map((src, i) => (
                       <div key={i} style={{ aspectRatio: '4/3', borderRadius: 10, overflow: 'hidden', position: 'relative', border: `2px solid ${i === coverImage ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`, transition: 'all 0.15s', cursor: 'pointer' }}
                         onClick={() => setCoverImage(i)}>

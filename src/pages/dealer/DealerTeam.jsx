@@ -273,7 +273,7 @@ export default function DealerTeam() {
                   {isEditing && (
                     <div style={{ padding: '0 20px 18px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                       <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', margin: '14px 0 12px' }}>Fine-grained Permissions</div>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 8 }}>
                         {PERMISSIONS.map(p => {
                           const on = m.permissions?.[p.key] ?? false;
                           return (
@@ -298,7 +298,7 @@ export default function DealerTeam() {
         {/* ROLES LEGEND */}
         <div style={{ marginTop: 32, background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '20px 24px' }}>
           <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.25)', marginBottom: 14 }}>Role Guide</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 148px), 1fr))', gap: 12 }}>
             {ROLES.map(r => (
               <div key={r.id}>
                 <RoleBadge role={r.id} />

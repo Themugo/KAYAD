@@ -80,7 +80,7 @@ export default function DealerAnalytics() {
         </div>
 
         {/* ─── Top KPIs ─── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 16, marginBottom: 28 }}>
           {[
             { label: 'Total Listings',    val: summary?.totalCars || 0,                    icon: '🚗', color: 'var(--text)' },
             { label: 'Total Views',       val: compactNumber(analytics?.totalViews || 0),  icon: '👁', color: 'var(--blue)' },

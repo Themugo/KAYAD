@@ -387,7 +387,7 @@ export default function HomePage() {
           ════════════════════════════════════════════════════════ */}
       <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '48px 0' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 2, overflow: 'hidden' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 2, overflow: 'hidden' }}>
             {[
               {
                 title: 'Live Auctions',

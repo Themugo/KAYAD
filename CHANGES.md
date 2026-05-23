@@ -905,3 +905,40 @@ That's it — tier limits, fees and the approval queue activate instantly.
 | Backend syntax | pass |
 | Free with no config doc | confirmed (auto-approve + free listings) |
 | Frontend build/lint/test | clean · 0 errors · 151/151 |
+
+---
+
+## Round 18 — Mobile usability audit + professional responsive pass
+
+Audit finding: viewport meta and a `useMediaQuery` hook existed, but only 1 page used it while 12 pages used hardcoded `repeat(N, 1fr)` grids (highest CSS specificity — can't be overridden by media queries), so dashboards and stat rows didn't collapse on phones. That was the fragmentation.
+
+### Global mobile layer (src/index.css)
+- Hard stop on horizontal overflow: `html,body { overflow-x: hidden; max-width:100% }`, `*{min-width:0}` (lets flex/grid children shrink without overriding intentional inline min-widths), `img/svg/video max-width:100%`.
+- Fluid display headings (`clamp()`), edge-safe container padding (16px ≤768, 13px ≤480).
+- Tables scroll inside their own box instead of stretching the page.
+- 44px minimum tap targets for buttons/CTAs on mobile.
+- Near-full-screen modals on ≤480px.
+- Reusable `.rgrid`/`.rgrid-2..6` responsive grid utility classes for future use.
+
+### Fixed grids → responsive (21 grids across 12 files)
+Converted inline `repeat(N, 1fr)` to `repeat(auto-fit, minmax(min(100%, Vpx), 1fr))`. Because `auto-fit` collapses empty tracks, a 4-item stat row stays 4-wide on desktop (item count caps it) and stacks to 2/1 columns on phones — no JS, no media query, no overflow. Touched: BuyerDashboard, DealerDashboard (6), DealerTeam, DealerAnalytics, DealerSettings, AddCarPage, EditCarPage, AdminDashboard, InspectorDashboard, HomePage, ReferralStats.
+- Showroom catalogue tuned separately to a card-appropriate `minmax(270px)` (auto-fill) so the many-item grid is ~4-up on desktop, not over-packed; dropped the now-redundant JS breakpoint vars.
+
+### Already-responsive (verified, no change needed)
+Auction room (`auction-live-grid` collapses at ≤920px), car detail page (`car-detail.css` media queries), admin/dealer sidebars (slide-in overlays on mobile), navbar (hamburger menu).
+
+### Files changed
+```
+src/index.css                 (global mobile layer + rgrid utilities)
+src/pages/Showroom.jsx         (card-width catalogue grid, drop unused vars)
++ 11 pages/components           (fixed grids → responsive minmax)
+CHANGES.md                     (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 189 warnings |
+| Tests | 23/23 files, 151/151 pass |
+| Fixed non-responsive grids remaining | 0 |

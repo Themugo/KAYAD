@@ -34,7 +34,7 @@ export default function ReferralStats() {
         <h3 style={{ fontSize: '1rem', color: '#fff', margin: 0 }}>Refer & Earn</h3>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { label: 'Invited', val: stats?.referralCount || 0, icon: '👥' },
           { label: 'Credits', val: formatKES(stats?.credits || 0), icon: '💰' },

@@ -419,3 +419,57 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 .card-auction-enter:hover {
   background: rgba(212,196,168,0.1);
 }
+
+/* =============================================================
+   GLOBAL MOBILE LAYER — professional phone usability
+   Prevents horizontal overflow, scales spacing/type, and makes
+   common inline-styled patterns behave on narrow screens.
+   ============================================================= */
+
+/* 1. Never allow horizontal scroll / overflow on the document */
+html, body { max-width: 100%; overflow-x: hidden; }
+*, *::before, *::after { min-width: 0; }            /* let flex/grid children shrink */
+img, video, canvas, svg { max-width: 100%; height: auto; }
+
+/* 2. Media objects & long words don't blow out layout */
+.detail-card, .card, .modal-box, .price-card, .detail-card * { overflow-wrap: anywhere; }
+
+@media (max-width: 768px) {
+  /* Containers breathe but stay edge-safe */
+  .container { padding-left: 16px; padding-right: 16px; }
+
+  /* Fluid display headings so hero/section titles don't overflow */
+  h1 { font-size: clamp(1.6rem, 7vw, 2.4rem); line-height: 1.12; }
+  h2 { font-size: clamp(1.3rem, 5.5vw, 1.9rem); line-height: 1.15; }
+
+  /* Tables scroll inside their own box instead of stretching the page */
+  table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Buttons/links get comfortable tap targets */
+  button, a.btn, .btn, .cta-primary, .cta-secondary { min-height: 44px; }
+}
+
+@media (max-width: 480px) {
+  .container { padding-left: 13px; padding-right: 13px; }
+  /* Modals go (near) full-screen so content isn't cramped */
+  .modal-box { width: 94vw !important; max-width: 94vw !important; padding: 20px !important; border-radius: 16px; }
+}
+
+/* 3. Responsive grid utility classes — N-up on desktop, auto-collapse on phone.
+   Use className="rgrid rgrid-4" instead of inline gridTemplateColumns. */
+.rgrid { display: grid; gap: 16px; }
+.rgrid-2 { grid-template-columns: repeat(2, 1fr); }
+.rgrid-3 { grid-template-columns: repeat(3, 1fr); }
+.rgrid-4 { grid-template-columns: repeat(4, 1fr); }
+.rgrid-5 { grid-template-columns: repeat(5, 1fr); }
+.rgrid-6 { grid-template-columns: repeat(6, 1fr); }
+@media (max-width: 1024px) {
+  .rgrid-5, .rgrid-6 { grid-template-columns: repeat(3, 1fr); }
+  .rgrid-4 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 680px) {
+  .rgrid-3, .rgrid-4, .rgrid-5, .rgrid-6 { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+@media (max-width: 420px) {
+  .rgrid-2, .rgrid-3, .rgrid-4, .rgrid-5, .rgrid-6 { grid-template-columns: 1fr; }
+}

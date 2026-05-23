@@ -237,7 +237,7 @@ export default function DealerSettings() {
                 <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Payment & Commission</div>
                 <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Your platform commission rate and payment methods</div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 28 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 16, marginBottom: 28 }}>
                 {[
                   { label: 'Commission Rate',    value: `${user?.commission ?? 5}%`,     color: '#ef4444' },
                   { label: 'Waiver',             value: `${user?.waiver || 0}%`,          color: '#22c55e' },

@@ -129,7 +129,7 @@ function TeamTab({ user, toast }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginBottom: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 148px), 1fr))', gap: 10, marginBottom: 24 }}>
         {DEALER_ROLES.map(r => (
           <div key={r.id} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 14px' }}>
             <div style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em', color: r.color, marginBottom: 5 }}>{r.label}</div>
@@ -183,7 +183,7 @@ function TeamTab({ user, toast }) {
                 {isExp && (
                   <div style={{ padding: '0 20px 18px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 16 }}>
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Fine-grained Permissions</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 8 }}>
                       {Object.entries(PERM_LABELS).map(([key, label]) => {
                         const on = m.permissions?.[key] ?? false;
                         return (
@@ -534,7 +534,7 @@ export default function DealerDashboard() {
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 16, marginBottom: 28 }}>
                   <StatCard icon="🚗"         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" trend={trends?.viewsToBids} />
                   <StatCard icon="👁️"         label="Total Views"   value={s.totalViews}                     color="#3b82f6" trend={0} />
                   <StatCard icon="🔨"         label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" trend={2.5} />
@@ -797,7 +797,7 @@ export default function DealerDashboard() {
                     <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12, marginTop: 6 }}>Escrows are created automatically when a bid is accepted</div>
                   </div>
                 ) : (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 14 }}>
                     {escrows.map(e => {
                       const amount = e.amount || e.price || 0;
                       const status = e.status || 'pending';
@@ -841,7 +841,7 @@ export default function DealerDashboard() {
             {tab === 'earnings' && (
               <div>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', marginBottom: 20 }}>Earnings Overview</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 16, marginBottom: 24 }}>
                   <StatCard icon="💰" label="Gross Revenue"  value={earnings?.gross    ? `${(earnings.gross/1e6).toFixed(1)}M`    : '—'} sub="KES" color="var(--gold)" />
                   <StatCard icon="📈" label="Net Earnings"   value={earnings?.net      ? `${(earnings.net/1e6).toFixed(1)}M`      : '—'} sub="after commission" color="#22c55e" />
                   <StatCard icon="📉" label="Commission Paid" value={earnings?.commission ? `${(earnings.commission/1e3).toFixed(0)}K` : '—'} sub="KES" color="#ef4444" />
@@ -884,7 +884,7 @@ export default function DealerDashboard() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 14 }}>
                   {[
                     { id: 'starter',    name: 'Starter',    price: 'KES 2,500/mo',  limit: 10,   color: 'rgba(255,255,255,0.6)',  perks: ['3 listings free (30 days)', 'KES 2,500/mo after trial', 'Standard position'] },
                     { id: 'growth',     name: 'Growth',     price: 'KES 6,500/mo',  limit: 30,   color: '#3b82f6',                perks: ['30 listings', 'Priority search', 'Chat support'] },

@@ -145,7 +145,7 @@ export default function InspectorDashboard() {
                       {catPassed}✓ {catFailed > 0 ? `${catFailed}✗ ` : ''}
                     </span>
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 4 }}>
                     {items.map((item, i) => {
                       const globalIdx = checklist.indexOf(item);
                       return (
