@@ -28,11 +28,13 @@ const platformConfigSchema = new mongoose.Schema({
   escrowReleaseDays: { type: Number, default: 3 },
   maxListingImages:  { type: Number, default: 8 },
 
-  // Toggles
+  // Toggles — defaults set for LAUNCH MODE: everything free and open so the
+  // marketplace can fill with real inventory. Flip any of these from the admin
+  // Settings page (no code change) once you're ready to monetise.
   allowGuestBrowsing:    { type: Boolean, default: true },
-  requireDealerApproval: { type: Boolean, default: true },
-  waivePayments:         { type: Boolean, default: false },
-  freeMarket:            { type: Boolean, default: false },
+  requireDealerApproval: { type: Boolean, default: false }, // dealers auto-approved for now
+  waivePayments:         { type: Boolean, default: true },  // no listing/enrolment fees yet
+  freeMarket:            { type: Boolean, default: true },  // tiers exist but aren't enforced yet
 
   // ── BRANDING ──────────────────────────────────────────
   branding: {

@@ -862,3 +862,46 @@ CHANGES.md                         (this entry)
 | Backend syntax | all files pass |
 | Owner detection | both emails → webhoist; others → own role; case-insensitive |
 | Frontend build/lint/test | clean · 0 errors · 151/151 |
+
+---
+
+## Round 17 — Free launch mode, admin-controlled monetisation
+
+Direction: open everything now so the marketplace fills with real cars; keep every monetisation lever admin-toggleable so they switch on later **without code changes**.
+
+### Free + open by default
+- `PlatformConfig` defaults flipped: `requireDealerApproval: false`, `waivePayments: true`, `freeMarket: true`.
+- **All self-registration is free** — registration never charges; account is created immediately.
+- **Dealers/brokers/sellers are auto-approved** — `needsApproval` is now true only if an admin *explicitly* turns `requireDealerApproval` on. A fresh DB (no config doc) = auto-approve.
+- **No listing / enrolment fees** — `carController` bypasses every tier limit, trial-expiry and fee gate while `freeMarket` is on (or `waivePayments`). Absent config = free.
+
+### Tiers stay alive, under admin control
+- The full package/tier system (`starter`/`growth`/`elite`/`enterprise`/`seller_basic`/`seller_pro`) is intact and editable in the admin Packages settings. It simply isn't *enforced* while `freeMarket` is on.
+- To monetise later (no code): admin turns `freeMarket` OFF in Settings → tier limits + fees defined in the package editor immediately take effect. `listingFee`, `auctionRegistrationFee`, `ghostCheckFee`, `commissionPercentage`, `requireDealerApproval` are all already persisted by the settings route.
+
+### UX
+- Register page shows a green "Launch offer — all plans are FREE right now" banner when free mode is on, so the visible tiers don't imply a charge.
+- Admin Settings frontend defaults aligned to free mode.
+
+### Files changed
+```
+backend/models/PlatformConfig.js   (free/open defaults)
+backend/controllers/carController.js (monetisation master switch, bypass fee gates)
+backend/controllers/authController.js (auto-approve unless explicitly required)
+src/pages/admin/AdminSettings.jsx  (frontend defaults match)
+src/pages/RegisterPage.jsx         (free-mode launch banner)
+CHANGES.md                         (this entry)
+```
+
+### How to turn monetisation ON later (no code)
+1. Admin → Settings → define/adjust packages (prices, listing caps, trials).
+2. Toggle **Free Market** OFF (and **Waive Payments** OFF).
+3. Optionally toggle **Require Dealer Approval** ON.
+That's it — tier limits, fees and the approval queue activate instantly.
+
+### Verification
+| | |
+|---|---|
+| Backend syntax | pass |
+| Free with no config doc | confirmed (auto-approve + free listings) |
+| Frontend build/lint/test | clean · 0 errors · 151/151 |

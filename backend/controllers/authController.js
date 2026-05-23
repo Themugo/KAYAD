@@ -102,7 +102,9 @@ export const register = async (req, res) => {
     const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
     const isSeller = SELLER_ROLES.includes(role);
     const config = await PlatformConfig.findOne().lean().catch(() => null);
-    const needsApproval = isSeller && config?.requireDealerApproval !== false;
+    // Auto-approve sellers/dealers unless an admin has explicitly turned
+    // requireDealerApproval ON. Absent config (fresh DB) = auto-approve.
+    const needsApproval = isSeller && config?.requireDealerApproval === true;
     const selectedPackage = isSeller && dealerPackage
       ? (config?.packages || []).find(pkg => pkg.id === dealerPackage && pkg.isActive)
       : null;

@@ -139,6 +139,11 @@ export const createCar = async (req, res) => {
     const pkgs   = config?.packages || [];
     const pkg    = pkgs.find(p => p.id === seller.dealerPackage) || null;
 
+    // Monetisation master switch (admin-controlled, no code change to flip):
+    // free unless an admin has explicitly turned freeMarket OFF. Absent config
+    // (fresh DB) therefore means free — listings are unlimited and free.
+    const monetisationOff = config?.freeMarket !== false || config?.waivePayments === true;
+
     const isDealer = seller.role === "dealer";
     const isSeller = seller.role === "broker" || seller.role === "individual_seller";
     const currentListingCount = isDemoSeller
@@ -148,7 +153,10 @@ export const createCar = async (req, res) => {
     // Determine if user is allowed to create a listing (without incrementing yet)
     let shouldIncrementListingCount = false;
 
-    if (!isDemoSeller && isDealer && pkg) {
+    if (monetisationOff) {
+      // Free-for-all launch mode — allow the listing, still track count for analytics.
+      shouldIncrementListingCount = !isDemoSeller;
+    } else if (!isDemoSeller && isDealer && pkg) {
       const now = new Date();
 
       if (pkg.isFree && pkg.trialDays > 0) {
@@ -198,7 +206,7 @@ export const createCar = async (req, res) => {
       }
     }
 
-    if (!isDemoSeller && isSeller) {
+    if (!monetisationOff && !isDemoSeller && isSeller) {
       const sellerPkg = pkgs.find(p => p.id === seller.dealerPackage) || null;
 
       if (!seller.firstVehicleUsed || currentListingCount === 0) {

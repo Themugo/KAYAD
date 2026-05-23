@@ -200,10 +200,13 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
+  const [freeMode, setFreeMode] = useState(false);
+
   useEffect(() => {
     adminAPI.getConfig().then(({ config: c }) => {
       if (c?.packages) setLivePkgs(c.packages);
-    }).catch(() => {});
+      setFreeMode(c?.freeMarket !== false || c?.waivePayments === true);
+    }).catch(() => setFreeMode(true));
   }, []);
 
   const isDealer = role === 'dealer';
@@ -303,6 +306,11 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
           <p style={{ color:'rgba(255,255,255,0.35)', fontSize:14, margin:0 }}>
             No per-listing fees. Pick a plan — list freely within your allowance.
           </p>
+          {freeMode && (
+            <div style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:8, padding:'8px 16px', background:'rgba(34,197,94,0.1)', border:'1px solid rgba(34,197,94,0.3)', borderRadius:9999, color:'#22c55e', fontSize:13, fontWeight:700 }}>
+              🎉 Launch offer — all plans are FREE right now. List as much as you like; pick any plan to get started.
+            </div>
+          )}
         </div>
 
         <div style={{ display:'grid', gridTemplateColumns:`repeat(${pkgList.length}, 1fr)`, gap:14, marginBottom:28 }}>
