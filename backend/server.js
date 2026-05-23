@@ -276,6 +276,7 @@ app.use(compression());
 app.use(cookieParser());
 app.use(bodyGuard());
 <<<<<<< HEAD
+<<<<<<< HEAD
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
@@ -286,6 +287,8 @@ import { mediumTimeout, fastTimeout, externalTimeout, uploadTimeout } from "./mi
 // Apply default medium timeout to all routes (can be overridden per route)
 app.use(mediumTimeout);
 =======
+=======
+>>>>>>> fee53605 (Add performance optimizations and developer tooling)
 app.use(compression()); // Enable gzip compression
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
