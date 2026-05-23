@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/car-detail.css';
 import { CountdownDisplay } from '../hooks/useCountdown';
+import BackButton from '../components/BackButton';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
@@ -18,7 +19,7 @@ import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
   Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
-  Star, Eye, Bookmark, Zap, Award, Lock, ArrowLeft, Pin, TrendingUp,
+  Star, Eye, Bookmark, Zap, Award, Lock, Pin, TrendingUp,
   CheckCircle, AlertTriangle, Clock, BarChart3
 } from 'lucide-react';
 
@@ -361,9 +362,7 @@ export default function CarDetailPage() {
 
       {/* Breadcrumb */}
       <div className="detail-breadcrumb">
-        <button onClick={() => navigate(-1)} className="back-btn">
-          <ArrowLeft size={14} /> Back to Gallery
-        </button>
+        <BackButton fallback="/showroom" label="Back" />
       </div>
 
       <div className="detail-grid">

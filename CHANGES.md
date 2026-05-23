@@ -942,3 +942,34 @@ CHANGES.md                     (this entry)
 | Lint | 0 errors, 189 warnings |
 | Tests | 23/23 files, 151/151 pass |
 | Fixed non-responsive grids remaining | 0 |
+
+---
+
+## Round 19 — Navigation polish: Home tab + smart back navigation
+
+Small-but-high-impact UX fixes now that the big gaps are closed.
+
+### Dedicated Home tab
+Previously the only way home was clicking the KAYAD logo — non-obvious for most users. Added an explicit **Home** tab to the nav (desktop + mobile menu), active only on `/` (exact match). The logo + wordmark now serve purely as branding while still following the universal logo→home convention. Branding (logo text/image/tagline/colours) remains fully admin-controlled via the existing Admin → Settings → Branding page.
+
+### Smart back navigation
+New reusable `BackButton` component that returns the user to the **actual previous page** in their history (`navigate(-1)`) — the gallery, homepage, dashboard or wherever they came from — instead of a fixed destination. Falls back to a sensible route (home/showroom) when there's no history (direct link or refresh, detected via `location.key`).
+- Replaced the car detail page's misleading "Back to Gallery" (which assumed everyone came from the gallery) with the smart Back.
+- Replaced the auction room's "← All Cars" (which always jumped home) with the smart Back, so leaving the auction room returns you to the car/listing you came from.
+- Scroll-to-top on route change was already wired (App.jsx) — verified.
+
+### Files changed
+```
+src/components/BackButton.jsx   (new — history-aware back)
+src/components/Navbar.jsx        (Home tab, desktop + mobile)
+src/pages/CarDetailPage.jsx      (smart Back, drop unused ArrowLeft)
+src/pages/AuctionLivePage.jsx    (smart Back, drop unused Link)
+CHANGES.md                       (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 189 warnings |
+| Tests | 23/23 files, 151/151 pass |

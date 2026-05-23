@@ -1,12 +1,13 @@
 // src/pages/AuctionLivePage.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, bidsAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
+import BackButton from '../components/BackButton';
 import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import GalleryModal from '../components/GalleryModal';
@@ -407,7 +408,7 @@ export default function AuctionLivePage() {
 
         {/* ─── Header ─── */}
         <div className="auction-live-header">
-          <Link to="/" style={{ color: 'var(--text-muted)', fontSize: 12 }}>← All Cars</Link>
+          <BackButton fallback="/showroom" label="Back" className="" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0 }} />
           <span style={{ color: 'var(--border)', fontSize: 10 }}>·</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {auctionLive ? (

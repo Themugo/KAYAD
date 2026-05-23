@@ -120,6 +120,10 @@ export default function Navbar({ branding }) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+              Home
+            </Link>
+
             <Link to="/showroom" className={`nav-link ${isActive('/showroom') ? 'active' : ''}`}>
               Gallery
             </Link>
@@ -272,6 +276,9 @@ export default function Navbar({ branding }) {
             >
               <div className="flex flex-col h-full">
                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+                  <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    Home
+                  </Link>
                   <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                     Gallery
                   </Link>
