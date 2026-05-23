@@ -45,6 +45,8 @@ describe('CountdownDisplay', () => {
   it('renders countdown when future', () => {
     const future = new Date(Date.now() + 3600000).toISOString();
     const { container } = render(<CountdownDisplay endTime={future} />);
-    expect(container.querySelector('.countdown')).toBeTruthy();
+    // New timer renders Hrs/Min/Sec labels with tabular digit blocks
+    expect(container.textContent).toMatch(/Hrs/i);
+    expect(container.textContent).toMatch(/Sec/i);
   });
 });

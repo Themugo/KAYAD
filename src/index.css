@@ -409,3 +409,13 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
     display: none !important;
   }
 }
+
+/* Auction-entry segment on the catalogue card (the split right zone) */
+.card-auction-enter {
+  min-width: 58px;
+  transition: background 0.18s ease, color 0.18s ease;
+  border-radius: 0 0 var(--radius-lg, 16px) 0;
+}
+.card-auction-enter:hover {
+  background: rgba(212,196,168,0.1);
+}

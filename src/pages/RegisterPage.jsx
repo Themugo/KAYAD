@@ -9,10 +9,10 @@ import { getPostAuthPath, isSellerRole, safeRedirectPath } from '../utils/authRo
 
 // ── Constants ─────────────────────────────────────────────────
 const ROLES = [
-  { val: 'user',              icon: '👤', title: 'Car Buyer',          desc: 'Browse listings, bid on auctions, buy securely.' },
-  { val: 'dealer',            icon: '🏪', title: 'Car Dealer',          desc: 'List your full inventory, run live auctions, grow your business.', badge: 'Business' },
-  { val: 'broker',            icon: '🤝', title: 'Private Seller',      desc: 'List cars occasionally — earn commission on referrals.', badge: 'Popular' },
-  { val: 'individual_seller', icon: '🚗', title: 'Individual Seller',  desc: 'Sell your own car. No business account needed. Free first listing.' },
+  { val: 'user',              icon: '👤', title: 'Car Buyer',       desc: 'Browse listings, bid on auctions, buy securely.' },
+  { val: 'dealer',            icon: '🏪', title: 'Car Dealer',      desc: 'Showroom business. List your inventory at scale, sell on behalf of owners, run live auctions.', badge: 'Business' },
+  { val: 'broker',            icon: '🤝', title: 'Broker',          desc: 'Middleman with no showroom. Help private owners sell their used cars and earn commission.', badge: 'Commission' },
+  { val: 'individual_seller', icon: '🚗', title: 'Private Seller',  desc: 'Selling your own car? List it properly — first listing free, no business account needed.', badge: 'Free' },
 ];
 
 const DEFAULT_PKG = {

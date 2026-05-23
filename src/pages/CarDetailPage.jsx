@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/car-detail.css';
+import { CountdownDisplay } from '../hooks/useCountdown';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
@@ -619,7 +620,12 @@ export default function CarDetailPage() {
                   {car.auctionEnd && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <span>📅</span>
-                      <span>{isLive ? 'Ends' : 'Starts'}: <strong style={{ color: 'var(--text)' }}>{fmtAuctionDate(car.auctionEnd)}</strong></span>
+                      <span>{isLive ? 'Ends' : 'Auction date'}: <strong style={{ color: 'var(--text)' }}>{fmtAuctionDate(car.auctionEnd)}</strong></span>
+                    </div>
+                  )}
+                  {isLive && car.auctionEnd && (
+                    <div style={{ marginTop: 4 }}>
+                      <CountdownDisplay endTime={car.auctionEnd} size="sm" />
                     </div>
                   )}
                   {car.bidsCount > 0 && (

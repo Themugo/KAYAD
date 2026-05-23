@@ -469,15 +469,13 @@ export default function AuctionLivePage() {
               {car.auctionEnd && auctionLive && (
                 <div style={{
                   position: 'absolute', bottom: 10, left: 10,
-                  background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(10px)',
-                  borderRadius: 8, padding: '6px 12px',
-                  display: 'flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
+                  borderRadius: 10, padding: '8px 12px',
+                  display: 'flex', flexDirection: 'column', gap: 5,
                   zIndex: 5,
                 }}>
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>Ends In</span>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: isEnding ? '#ef4444' : 'var(--gold)', }}>
-                    <CountdownDisplay endTime={car.auctionEnd} />
-                  </span>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Ends In</span>
+                  <CountdownDisplay endTime={car.auctionEnd} size="sm" />
                 </div>
               )}
             </div>
@@ -799,22 +797,16 @@ export default function AuctionLivePage() {
                 {/* Countdown */}
                 {car.auctionEnd && (
                   <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>
                       {isEnding ? (
-                        <span style={{ color: '#ef4444', fontWeight: 700 }}>🔴 Auction Ending</span>
+                        <span style={{ color: '#ef4444', fontWeight: 800 }}>● Auction Ending</span>
                       ) : 'Time Remaining'}
                     </div>
-                    <div style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: isEnding ? '1.8rem' : '1.5rem',
-                      fontWeight: 700,
-                      color: isEnding ? '#ef4444' : 'var(--gold)',
-                      animation: isEnding ? 'pulse 1s infinite' : 'none',
-                    }}>
-                      <CountdownDisplay endTime={car.auctionEnd} />
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <CountdownDisplay endTime={car.auctionEnd} size="lg" />
                     </div>
                     {extended && (
-                      <div style={{ marginTop: 8, padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)', animation: 'slideInRight 0.4s ease both' }}>
+                      <div style={{ marginTop: 12, display: 'inline-flex', padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)', animation: 'slideInRight 0.4s ease both' }}>
                         ⏱ Extended by 2 min
                       </div>
                     )}

@@ -15,11 +15,40 @@ const delay = (min = 200, max = 800) =>
 
 // Convert a File to a base64 data URL so it survives page refreshes
 // via localStorage (blob URLs from URL.createObjectURL() are ephemeral).
+// Downscale + compress an uploaded image to a small JPEG data URL before
+// storing. Raw camera photos are 3-8 MB each as base64 and instantly blow
+// past the ~5 MB localStorage quota — which made saveCars() fail silently and
+// the dealer's listings vanish on refresh. Capping the longest edge at ~1100px
+// and re-encoding as JPEG keeps each image ~60-150 KB, so a full listing with
+// several photos persists comfortably.
 const fileToBase64 = (file) =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve) => {
+    const MAX_EDGE = 1100;
+    const QUALITY = 0.72;
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(new Error('File read failed'));
+    reader.onerror = () => resolve('');
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const img = new Image();
+      img.onerror = () => resolve(dataUrl); // fall back to original if decode fails
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if (width > MAX_EDGE || height > MAX_EDGE) {
+            if (width >= height) { height = Math.round(height * (MAX_EDGE / width)); width = MAX_EDGE; }
+            else { width = Math.round(width * (MAX_EDGE / height)); height = MAX_EDGE; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', QUALITY));
+        } catch {
+          resolve(dataUrl);
+        }
+      };
+      img.src = dataUrl;
+    };
     reader.readAsDataURL(file);
   });
 
@@ -138,13 +167,20 @@ const makeEmail = (name) =>
 
 const transformCar = (c) => {
   if (!c) return c;
+  // Honour a chosen display/cover image: consumers render images[0], so if a
+  // valid coverImage index is set, surface that image first.
+  let images = c.images;
+  const cov = Number(c.coverImage);
+  if (Array.isArray(images) && Number.isInteger(cov) && cov > 0 && cov < images.length) {
+    images = [images[cov], ...images.filter((_, i) => i !== cov)];
+  }
   return {
     ...c,
     isDemo: true, // marks sample data so the UI can show a DEMO sticker vs. real listings
     model: c.model || c.title?.split(' ').slice(1).slice(0, -1).join(' ') || c.brand,
     dealerPhone: c.dealer?.phone || c.dealerPhone || '2547XXXXXX',
     trustScore: c.trustScore ?? Math.round(85 + Math.random() * 15),
-    images: c.images,
+    images,
     dealer: c.dealer ? {
       ...c.dealer,
       id: c.dealer._id,
@@ -349,6 +385,14 @@ const demoCars = {
       };
       if (newCar.auctionStatus === 'live') {
         newCar.auctionEnd = new Date(Date.now() + 7 * 86400000).toISOString();
+      }
+      // Honour the seller's chosen display image: the grid and detail page use
+      // images[0] as the cover, so move the selected one to the front.
+      const coverIdx = Number(formData.get('coverImage')) || 0;
+      if (coverIdx > 0 && coverIdx < newCar.images.length) {
+        const [chosen] = newCar.images.splice(coverIdx, 1);
+        newCar.images.unshift(chosen);
+        newCar.coverImage = 0;
       }
       addDemoCar(newCar);
       return wrapSuccess({ car: transformCar(newCar), data: transformCar(newCar) });

@@ -9,7 +9,19 @@ const ADMIN_DEALER = DEMO_DEALER_REF;
 const DEMO_CARS_KEY = 'kayad_demo_cars';
 
 function saveCars() {
-  try { localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars)); } catch { /* ignore */ }
+  try {
+    localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars));
+  } catch {
+    // Quota exceeded — strip base64 images from the oldest user-added listings
+    // (keep their data + seed URL images) and retry, so we never lose listings.
+    try {
+      const trimmed = _cars.map(c => {
+        const imgs = (c.images || []).filter(im => !String(im?.url || im).startsWith('data:'));
+        return { ...c, images: imgs.length ? imgs : (c.images || []).slice(0, 1) };
+      });
+      localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
+    } catch { /* give up on persistence; in-memory state still works this session */ }
+  }
 }
 
 function loadCars() {

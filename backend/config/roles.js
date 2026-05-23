@@ -67,7 +67,7 @@ export const ROLE_PERMISSIONS = {
   user:               [],
   individual_seller:  [PERM.MANAGE_CARS],
   broker:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
-  dealer:             [PERM.MANAGE_CARS],
+  dealer:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   ghost_checker:      [PERM.MANAGE_INSPECTIONS, PERM.VIEW_ANALYTICS],
   moderator:          [PERM.MANAGE_MODERATION, PERM.VIEW_LOGS],
   ad_manager:         [PERM.MANAGE_ADS, PERM.VIEW_ANALYTICS],

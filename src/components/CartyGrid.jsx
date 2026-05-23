@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
 import { timeAgo } from '../utils/helpers';
-import { MapPin, Gauge, Settings, BarChart3, ChevronRight } from 'lucide-react';
+import { MapPin, Gauge, Settings, BarChart3, ChevronRight, Gavel } from 'lucide-react';
 import LazyImage from './LazyImage';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
@@ -33,7 +33,10 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
   const isCompared = isComparing(car._id);
   const isOnAuction = ['live', 'scheduled'].includes(car.auctionStatus);
-  const linkTo = isOnAuction ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const isLiveAuction = car.auctionStatus === 'live';
+  const detailTo = `/cars/${car._id}`;
+  const auctionTo = `/auction/${car._id}`;
+  const linkTo = detailTo;
   const img = firstImage(car);
   const city = car.location?.city || car.location || 'Nairobi';
   const price = Number(car.currentBid || car.price || 0);
@@ -146,9 +149,9 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
     >
-      <Link to={linkTo} className="block">
-        <div className="card h-full flex flex-col overflow-hidden">
-          {/* Image */}
+      <div className="card h-full flex flex-col overflow-hidden">
+        {/* Image + core info → car details */}
+        <Link to={detailTo} className="block">
           <div className="car-img-wrap relative">
             <LazyImage
               src={img}
@@ -169,9 +172,11 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               </div>
             )}
           </div>
+        </Link>
 
-          {/* Info */}
-          <div className="p-4 flex-1 flex flex-col">
+        {/* Info */}
+        <div className="p-4 flex-1 flex flex-col">
+          <Link to={detailTo} className="block">
             <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1 group-hover:text-gold transition-colors">
               {car.title}
             </h3>
@@ -186,21 +191,38 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
                 <MapPin size={13} /> {city}
               </span>
             </div>
+          </Link>
 
-            <div className="mt-auto pt-3 border-t border-border flex items-center justify-between">
-              <div>
-                <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold">
-                  {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
-                </div>
-                <div className="price-tag text-base font-bold text-gold-light leading-tight">
-                  KES {price.toLocaleString()}
-                </div>
+          {/* ── Split footer: price → details · segment → auction room ── */}
+          <div className="mt-auto pt-3 border-t border-border flex items-stretch">
+            <Link to={detailTo} className="flex-1 min-w-0 block group/price">
+              <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold">
+                {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
               </div>
-              <ChevronRight size={18} className="text-gold opacity-40 group-hover:opacity-100 transition-opacity" />
-            </div>
+              <div className="price-tag text-base font-bold text-gold-light leading-tight">
+                KES {price.toLocaleString()}
+              </div>
+            </Link>
+
+            {isOnAuction ? (
+              <Link
+                to={auctionTo}
+                className="card-auction-enter flex flex-col items-center justify-center pl-3 ml-3 border-l border-border text-gold"
+                title="Enter auction room"
+              >
+                <Gavel size={16} className={isLiveAuction ? 'text-red-400' : 'text-gold'} />
+                <span className="text-[8px] font-bold uppercase tracking-wider mt-1 whitespace-nowrap">
+                  {isLiveAuction ? 'Bid Live' : 'Auction'}
+                </span>
+              </Link>
+            ) : (
+              <Link to={detailTo} className="flex items-center pl-3 ml-3 border-l border-border">
+                <ChevronRight size={18} className="text-gold opacity-40 group-hover:opacity-100 transition-opacity" />
+              </Link>
+            )}
           </div>
         </div>
-      </Link>
+      </div>
 
       {/* Compare — subtle, appears on hover */}
       <button

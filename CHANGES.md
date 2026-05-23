@@ -741,3 +741,45 @@ CHANGES.md                                 (this entry)
 | Tests | 23/23 files, 151/151 pass |
 | Demo admin/webhost login paths | 0 |
 | Self-register privilege escalation | not possible |
+
+---
+
+## Round 14 — Card split + demo persistence/image fixes + roles
+
+### Card split (catalogue grid)
+The card footer is now two distinct click zones, matching the requested layout:
+- Left (label + price) → car detail page.
+- Right segment → for on-auction cars, a bordered gavel segment ("Bid live" / "Auction") that goes straight to the auction room; non-auction cars keep a plain chevron to details.
+The image and title also link to details. LIVE/auction clutter stays off the photo (only "On Auction" + DEMO chips top-left).
+
+### Demo dealer cars vanishing on refresh (data loss) — fixed
+Root cause: uploaded photos were stored as full-size base64 in the car object, blowing past the ~5 MB localStorage quota; `saveCars()` then failed silently (empty catch) and the listing was gone on reload.
+- Uploaded images are now downscaled to ≤1100px and re-encoded as JPEG (~quality 0.72) before storage — typically 60–150 KB each, so a full listing persists.
+- `saveCars()` degrades gracefully: on quota error it retries after stripping base64 images from the oldest listings, so listings are never wholly lost.
+
+### Display/cover image selection — fixed
+The chosen cover index was stored but ignored (the grid/detail always used `images[0]`, so it looked like it auto-picked the first). Now:
+- On create, the selected cover is moved to the front of the images array.
+- `transformCar` also honours a `coverImage` index on every read (covers create, edit and promote), so the seller's chosen display image shows everywhere.
+
+### Roles
+(From the prior role pass, included here.) `src/config/roleDefinitions.js` defines dealer (showroom, scale, consignment, new+used, auctions), broker (no showroom, resale-only, commission, consignment auctions) and private seller (own car, first listing free). Register cards corrected (broker is a middleman, not a "private seller"); backend permissions give dealers `MANAGE_AUCTIONS`.
+
+### Files changed
+```
+src/components/CartyGrid.jsx   (split footer, Gavel segment → auction room)
+src/index.css                  (.card-auction-enter segment style)
+src/data/demoData.js           (quota-resilient saveCars)
+src/data/demoAPI.js            (image downscaling, cover-image honoured in create + transformCar)
+src/config/roleDefinitions.js  (role capabilities)
+src/pages/RegisterPage.jsx     (corrected role cards)
+backend/config/roles.js        (dealer MANAGE_AUCTIONS)
+CHANGES.md                     (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Build | clean |
+| Lint | 0 errors, 189 warnings |
+| Tests | 23/23 files, 151/151 pass |
