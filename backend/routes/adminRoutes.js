@@ -30,6 +30,7 @@ const router = express.Router();
 // 🔄 RE-SEED PRODUCTION DB (webhost/superadmin only)
 // =============================
 import { reseed } from "../seed.js";
+import { protectAccount } from "../middleware/protectAccount.js";
 router.post(
   "/reseed",
   protect,
@@ -210,6 +211,7 @@ router.post(
   "/users/:id/toggle-ban",
   adminOrSuper,
   validateObjectId,
+  protectAccount,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
 
@@ -800,6 +802,7 @@ router.delete(
   "/users/:id",
   authorize("superadmin"),
   validateObjectId,
+  protectAccount,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -830,6 +833,7 @@ router.put(
   "/users/:id/deactivate",
   authorize("superadmin"),
   validateObjectId,
+  protectAccount,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -981,6 +985,7 @@ router.put(
   "/staff/:id",
   authorize("superadmin"),
   validateObjectId,
+  protectAccount,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -997,6 +1002,7 @@ router.delete(
   "/staff/:id",
   authorize("superadmin"),
   validateObjectId,
+  protectAccount,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });

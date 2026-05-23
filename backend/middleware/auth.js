@@ -3,11 +3,10 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
+import { OWNER_EMAILS, isOwnerEmail } from "../config/owners.js";
 
-const WEBHOIST_EMAIL = (process.env.WEBHOIST_EMAIL || "").toLowerCase().trim();
-const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
-
-const isOwnerEmail = (email) => OWNER_EMAILS.includes(String(email).toLowerCase().trim());
+// OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
+// comma-separated WEBHOIST_EMAIL list (multiple platform owners).
 
 // =============================
 // 🔐 PROTECT ROUTES

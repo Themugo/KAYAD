@@ -43,9 +43,10 @@ The repo already contains `render.yaml`. On render.com:
    | `JWT_SECRET` | first secret from Step 2 |
    | `REFRESH_TOKEN_SECRET` | second secret from Step 2 |
    | `FRONTEND_URL` | `https://kayad.space` |
-   | `WEBHOIST_EMAIL` | the email YOU will log in with as platform owner |
-   | `SEED_ADMIN_EMAIL` | same as `WEBHOIST_EMAIL` (the seed creates this account) |
+   | `WEBHOIST_EMAIL` | `jimmythemugo@gmail.com,webhost@kayad.space` (comma-separated — both become immutable owners) |
+   | `SEED_ADMIN_EMAIL` | `jimmythemugo@gmail.com` (the primary owner the seed creates) |
    | `SEED_ADMIN_PASSWORD` | a strong password for first login |
+   | `SEED_WEBHOST_PW` | password for the second (kayad-domain) owner |
 
 3. Deploy. Watch the logs for `DB connected` and `Server listening`.
 4. Your backend is now at something like `https://kayad-backend.onrender.com`.
@@ -109,3 +110,30 @@ real `og:title`, `og:description` and `og:image`. This needs the live backend,
 which is why it's a fast-follow rather than a launch blocker. The client-side
 meta tags are already in place (see `src/hooks/usePageMeta.js`) for any client
 that does render JS.
+
+---
+
+## Owner / admin model (who can do what)
+
+**Platform owners (webhosts)** are defined by the `WEBHOIST_EMAIL` env list —
+identity is by email, never a database flag, so an owner can't be created or
+removed by editing the database. Configured owners:
+
+- `jimmythemugo@gmail.com` — **primary owner** (most protected; can never be
+  suspended, deactivated, deleted, re-roled, or have its email changed).
+- `webhost@kayad.space` — a second owner identity on the kayad domain with the
+  same full powers, so the owner can operate day-to-day under a branded email.
+
+Both bypass every permission check and can do everything an admin can, plus
+create/manage admins and staff.
+
+**Admins** are created by an owner via the staff page. They can run the
+platform, but:
+- They **cannot** edit, delete, re-role, suspend, or deactivate any owner
+  account (the API returns 403 — enforced by `middleware/protectAccount.js`).
+- They cannot promote anyone to owner (owner status is env-only, not assignable
+  in the app).
+
+So the owner accounts are immutable to everyone but the owners themselves, and
+even an owner cannot change an owner account's email or role through the admin
+routes. To add or remove an owner, you change `WEBHOIST_EMAIL` and redeploy.

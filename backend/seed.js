@@ -102,18 +102,28 @@ export async function reseed() {
   const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("Jimmy@Kayad2026!");
   const webhostName     = process.env.SEED_ADMIN_NAME || "Jimmy Mugo (Webhost)";
 
-  if (webhostEmail) {
-    let admin = await User.findOne({ email: webhostEmail });
+  // Provision EVERY configured platform owner (WEBHOIST_EMAIL may be a
+  // comma-separated list, e.g. the gmail owner + a kayad-domain owner). Each
+  // is created/normalised as a superadmin and is treated as immutable by the
+  // admin routes (see middleware/protectAccount.js).
+  const { OWNER_EMAILS } = await import("./config/owners.js");
+  const ownerList = OWNER_EMAILS.length ? OWNER_EMAILS : (webhostEmail ? [webhostEmail.toLowerCase()] : []);
+
+  for (const ownerEmail of ownerList) {
+    const isPrimary = ownerEmail === (webhostEmail || ownerList[0])?.toLowerCase();
+    const pw = isPrimary ? webhostPassword : (process.env.SEED_WEBHOST_PW || webhostPassword);
+    const name = isPrimary ? webhostName : "KAYAD Webhost";
+    let admin = await User.findOne({ email: ownerEmail });
     if (!admin) {
-      admin = await User.create({ name: webhostName, email: webhostEmail, password: webhostPassword, role: "superadmin", isDemo: false, emailVerified: true });
-      created.webhost.push(webhostEmail);
+      admin = await User.create({ name, email: ownerEmail, password: pw, role: "superadmin", isDemo: false, emailVerified: true });
+      created.webhost.push(ownerEmail);
     } else {
-      admin.password = webhostPassword;
+      admin.password = pw;
       admin.role = "superadmin";
       admin.isDemo = false;
       admin.emailVerified = true;
       await admin.save();
-      created.webhost.push(`${webhostEmail} (updated)`);
+      created.webhost.push(`${ownerEmail} (updated)`);
     }
   }
 

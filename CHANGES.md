@@ -819,3 +819,46 @@ CHANGES.md                 (this entry)
 | Frontend build | clean |
 | Lint | 0 errors, 189 warnings |
 | Tests | 23/23 files, 151/151 pass |
+
+---
+
+## Round 16 — Multi-owner webhost + account immutability
+
+### Owner model
+- New `backend/config/owners.js` — single source of truth for platform owners, identified by a **comma-separated `WEBHOIST_EMAIL`** list (identity by email, never a DB flag). Exposes `OWNER_EMAILS`, `MAIN_OWNER_EMAIL`, `isOwnerEmail`, `isMainOwnerEmail`, `isOwnerUser`.
+- Configured owners: `jimmythemugo@gmail.com` (primary) + `webhost@kayad.space` (second owner identity, kayad domain, same full powers). Both bypass all checks and can do everything an admin can.
+- `auth.js` and `rbac.js` now both source owner detection from this module.
+
+### Bug fixed (latent)
+`rbac.js` imported `isWebhoist` from `roles.js`, which never exported it — so `rbac.isWebhoist()`/`getEffectiveRole()` would throw if reached. Repointed to the centralized `isOwnerUser`; verified `getEffectiveRole` returns `webhoist` for both owner emails regardless of their DB role.
+
+### Account immutability
+- New `backend/middleware/protectAccount.js`, wired into the 5 user/staff mutating routes (toggle-ban, deactivate, delete user, staff update, staff delete):
+  - Owner accounts can only be touched by an owner; other admins get 403.
+  - Owner accounts can never be deleted via admin routes (even by an owner).
+  - An owner's `email` and `role` are immutable through the API.
+  - The **primary** owner can never be suspended or deactivated by anyone.
+- Owner status is env-only — not assignable in-app — so no admin can promote themselves or anyone to owner. Admins are created by an owner via the staff page; they cannot edit the main owner.
+
+### Seed + config
+- Seed now provisions **every** configured owner email as an immutable superadmin (`isDemo:false`), primary uses `SEED_ADMIN_PASSWORD`, others use `SEED_WEBHOST_PW`.
+- `render.yaml` declares `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`; `.env.example` documents the comma-separated owner list; `GO-LIVE.md` gains an "Owner / admin model" section.
+
+### Files changed
+```
+backend/config/owners.js          (new — owner source of truth)
+backend/middleware/protectAccount.js (new — immutability guard)
+backend/middleware/auth.js         (use centralized owners)
+backend/middleware/rbac.js         (fix broken isWebhoist import)
+backend/routes/adminRoutes.js      (protectAccount on 5 routes)
+backend/seed.js                    (provision all owners, isDemo:false)
+backend/.env.example, render.yaml, GO-LIVE.md  (docs)
+CHANGES.md                         (this entry)
+```
+
+### Verification
+| | |
+|---|---|
+| Backend syntax | all files pass |
+| Owner detection | both emails → webhoist; others → own role; case-insensitive |
+| Frontend build/lint/test | clean · 0 errors · 151/151 |

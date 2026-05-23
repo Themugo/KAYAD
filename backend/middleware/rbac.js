@@ -4,8 +4,8 @@ import {
   PERM,
   ROLE_PERMISSIONS as CENTRAL_PERMISSIONS,
   WEBHOIST,
-  isWebhoist as checkWebhoist,
 } from "../config/roles.js";
+import { isOwnerUser } from "../config/owners.js";
 
 // Backward-compatible re-exports
 export const PERMISSIONS = Object.freeze({
@@ -47,7 +47,7 @@ export function getEffectiveRole(user) {
  * @returns {boolean}
  */
 export function isWebhoist(user) {
-  return checkWebhoist(user);
+  return isOwnerUser(user);
 }
 
 export function hasPermission(user, permission) {
