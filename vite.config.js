@@ -27,6 +27,20 @@ export default defineConfig(({ mode }) => {
             { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
             { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
           ],
+          screenshots: [
+            {
+              src: 'screenshot-wide.png',
+              sizes: '1280x720',
+              type: 'image/png',
+              form_factor: 'wide',
+            },
+            {
+              src: 'screenshot-narrow.png',
+              sizes: '750x1334',
+              type: 'image/png',
+              form_factor: 'narrow',
+            },
+          ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
@@ -40,11 +54,14 @@ export default defineConfig(({ mode }) => {
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
+                networkTimeoutSeconds: 10,
                 expiration: {
                   maxEntries: 50,
                   maxAgeSeconds: 5 * 60, // 5 minutes
                 },
-                networkTimeoutSeconds: 10,
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
               },
             },
             {
@@ -54,7 +71,7 @@ export default defineConfig(({ mode }) => {
                 cacheName: 'images-cache',
                 expiration: {
                   maxEntries: 200,
-                  maxAgeSeconds: 30 * 24 * 60 * 60,
+                  maxAgeSeconds: 60 * 24 * 60 * 60, // 60 Days
                 },
               },
             },
@@ -62,14 +79,27 @@ export default defineConfig(({ mode }) => {
               urlPattern: /\.(?:js|css)$/,
               handler: 'StaleWhileRevalidate',
               options: {
-                cacheName: 'static-cache',
+                cacheName: 'static-resources',
                 expiration: {
                   maxEntries: 100,
-                  maxAgeSeconds: 24 * 60 * 60, // 1 day
+                  maxAgeSeconds: 24 * 60 * 60, // 24 hours
                 },
               },
-            }
+            },
+            {
+              urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'cloudinary-images',
+                expiration: {
+                  maxEntries: 300,
+                  maxAgeSeconds: 90 * 24 * 60 * 60, // 90 Days
+                },
+              },
+            },
           ],
+          skipWaiting: true,
+          clientsClaim: true,
         },
       }),
       env.VITE_BUNDLE_VISUALIZE && visualizer({
