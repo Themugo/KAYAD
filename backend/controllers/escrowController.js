@@ -5,6 +5,7 @@ import Payment from "../models/Payment.js";
 import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { getIO } from "../utils/io.js";
+import { isValidId } from "../utils/validateId.js";
 
 // =============================
 // 📄 GET ALL ESCROWS (ADMIN)
@@ -57,6 +58,7 @@ export const getUserEscrows = async (req, res) => {
 // =============================
 export const getEscrowById = async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
     const escrow = await Escrow.findById(req.params.id)
       .populate("car buyer seller payment");
 
@@ -96,6 +98,7 @@ export const getEscrowById = async (req, res) => {
 // =============================
 export const confirmDelivery = async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
     const escrow = await Escrow.findById(req.params.id);
     if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
 
@@ -243,6 +246,7 @@ export const releaseEscrow = async (req, res) => {
   try {
     session.startTransaction();
 
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
     const escrow = await Escrow.findById(req.params.id)
       .populate("car seller payment")
       .session(session);

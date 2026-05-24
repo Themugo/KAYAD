@@ -59,7 +59,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     checkoutRequestID: checkoutID,
     phone: formattedPhone, amount,
     status: payment.status, carId,
-  }).catch(() => {});
+  }).catch((e) => console.warn("⚠️ Payment notification failed:", e.message));
 
   return {
     success: true, mode, checkoutID,
@@ -89,7 +89,7 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
   await MpesaTransaction.findOneAndUpdate(
     { checkoutRequestID },
     { status: "success", mpesaReceipt: receipt }
-  ).catch(() => {});
+  ).catch((e) => console.warn("⚠️ Payment service notification failed:", e.message));
 
   // 📧 Payment confirmed email (fire-and-forget)
   try {
@@ -175,7 +175,7 @@ export const failPayment = async (checkoutRequestID, resultDesc = "") => {
   await MpesaTransaction.findOneAndUpdate(
     { checkoutRequestID },
     { status: "failed" }
-  ).catch(() => {});
+  ).catch((e) => console.warn("⚠️ Payment service notification failed:", e.message));
 
   // ── EMIT failure ────────────────────────────────────────────
   const io = getIO();

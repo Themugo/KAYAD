@@ -1,4 +1,5 @@
 import { Router } from "express";
+import InspectorApplication from "../models/InspectorApplication.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -14,7 +15,7 @@ const router = Router();
 router.post("/apply", asyncHandler(submitApplication));
 
 router.get("/my", protect, asyncHandler(async (req, res) => {
-  const InspectorApplication = (await import("../models/InspectorApplication.js")).default;
+  
   const apps = await InspectorApplication.find({ user: req.user.id }).sort({ createdAt: -1 }).lean();
   res.json({ success: true, applications: apps });
 }));

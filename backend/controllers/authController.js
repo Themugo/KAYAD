@@ -211,7 +211,7 @@ export const register = async (req, res) => {
     }
 
     if (needsApproval) {
-      notifyAdminsOfPendingSeller(user).catch(() => {});
+      notifyAdminsOfPendingSeller(user).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
     }
 
     return sendAuthResponse(res.status(201), user);
@@ -237,6 +237,12 @@ export const login = async (req, res) => {
 
     const user = await User.findOne({ email }).select("+password +tokenVersion");
 
+    // ─── Check lockout BEFORE password verification ──────
+    if (user?.lockUntil && user.lockUntil > new Date()) {
+      const remaining = Math.ceil((user.lockUntil - new Date()) / 60000);
+      return R.error(res, `Account locked. Try again in ${remaining} minute(s).`, 429);
+    }
+
     if (!user || !(await user.matchPassword(password))) {
       // ─── Account lockout ────────────────────────────────
       if (user && !user.isBanned) {
@@ -257,12 +263,6 @@ export const login = async (req, res) => {
     if (user.loginAttempts || user.lockUntil) {
       user.loginAttempts = 0;
       user.lockUntil = null;
-    }
-
-    // ─── Check lockout ────────────────────────────────────
-    if (user.lockUntil && user.lockUntil > new Date()) {
-      const remaining = Math.ceil((user.lockUntil - new Date()) / 60000);
-      return R.error(res, `Account locked. Try again in ${remaining} minute(s).`, 429);
     }
 
     if (user.isBanned) {
@@ -316,31 +316,23 @@ export const refreshToken = async (req, res) => {
     }
 
     let decoded;
-    let usedAccessFallback = false;
 
     try {
       decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
-    } catch {
-      try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
-        usedAccessFallback = true;
-      } catch {
-        return R.error(res, "Invalid refresh token", 403);
-      }
+    } catch (err) {
+      // Expired or invalid refresh tokens are rejected — no fallback
+      const msg = err.name === "TokenExpiredError" ? "Refresh token expired — please login again" : "Invalid refresh token";
+      return R.error(res, msg, 403);
     }
 
     const user = await User.findById(decoded.id).select("+tokenVersion");
 
     if (!user) {
-      return R.notFound(res, "User not found");
+      return R.error(res, "Invalid credentials", 403);
     }
 
-    if (decoded.tokenVersion !== user.tokenVersion) {
-      return R.error(res, "Session invalidated", 403);
-    }
-
-    if (usedAccessFallback && !req.headers.authorization) {
-      return R.error(res, "Refresh cookie required", 403);
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== user.tokenVersion) {
+      return R.error(res, "Session invalidated — please login again", 403);
     }
 
     // Issue new tokens without bumping tokenVersion (only password change/logout does that)
@@ -428,7 +420,7 @@ export const updateProfile = async (req, res) => {
 
     res.json({ success: true, user: serializeUser(user) });
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };
 
@@ -459,7 +451,7 @@ export const changePassword = async (req, res) => {
 
     return sendAuthResponse(res, user);
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };
 
@@ -487,7 +479,7 @@ export const verifyEmail = async (req, res) => {
 
     res.json({ success: true, message: "Email verified successfully. You can now log in." });
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };
 
@@ -523,7 +515,7 @@ export const resendVerification = async (req, res) => {
 
     res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };
 
@@ -551,7 +543,7 @@ export const forgotPassword = async (req, res) => {
 
     res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };
 
@@ -574,10 +566,11 @@ export const resetPassword = async (req, res) => {
     user.password = password;
     user.resetToken = undefined;
     user.resetTokenExpire = undefined;
+    user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all existing sessions
     await user.save();
 
     res.json({ success: true, message: "Password reset successfully. You can now sign in." });
   } catch (err) {
-    R.error(res, err.message, 500);
+    R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
 };

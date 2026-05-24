@@ -1,6 +1,7 @@
 // backend/controllers/paymentController.js
 
 import Payment from "../models/Payment.js";
+import { isValidId } from "../utils/validateId.js";
 import {
   initiatePayment as initiate,
 } from "../services/paymentService.js";
@@ -200,8 +201,10 @@ export const getAllPayments = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const filter = {};
-    if (req.query.status) filter.status = req.query.status;
-    if (req.query.type) filter.type = req.query.type;
+    const VALID_STATUSES = ["pending", "success", "failed", "cancelled"];
+    const VALID_TYPES = ["bid", "auction_win", "buy", "listing", "subscription", "escrow"];
+    if (req.query.status && VALID_STATUSES.includes(req.query.status)) filter.status = req.query.status;
+    if (req.query.type && VALID_TYPES.includes(req.query.type)) filter.type = req.query.type;
 
     const [payments, total] = await Promise.all([
       Payment.find(filter)
@@ -233,6 +236,10 @@ export const getAllPayments = async (req, res) => {
 // =============================
 export const getPaymentById = async (req, res) => {
   try {
+    if (!isValidId(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid payment ID" });
+    }
+
     const payment = await Payment.findById(req.params.id).lean();
 
     if (!payment) {

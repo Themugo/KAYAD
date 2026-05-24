@@ -14,6 +14,7 @@ import {
 } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
+import MarketData from "../models/MarketData.js";
 import { uploadLimiter } from "../middleware/rateLimiter.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
@@ -291,7 +292,7 @@ router.get(
     const car = await Car.findById(req.params.id).lean();
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const MarketData = (await import("../models/MarketData.js")).default;
+    
 
     const [fromPlatform, fromMarketData] = await Promise.all([
       Car.find({
@@ -480,7 +481,7 @@ router.use((req, res, next) => {
   if (["POST","PUT","PATCH","DELETE"].includes(req.method)) {
     res.on("finish", () => {
       if (res.statusCode < 400) {
-        cacheDelPattern("cache:GET:/api/cars*").catch(() => {});
+        cacheDelPattern("cache:GET:/api/cars*").catch((e) => console.warn("⚠️ Cache clear failed:", e.message));
       }
     });
   }

@@ -120,6 +120,7 @@ export const extraHeaders = () => (req, res, next) => {
   res.setHeader("X-DNS-Prefetch-Control", "off");
   res.setHeader("X-Download-Options", "noopen");
   res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.removeHeader("X-Powered-By");
   next();
 };

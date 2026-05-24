@@ -113,7 +113,7 @@ export const protect = async (req, res, next) => {
     // ✅ ATTACH USER (WITH OWNER BYPASS)
     // =============================
     // 🔄 Update lastActive (fire-and-forget)
-    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch(() => {});
+    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch((e) => console.warn("⚠️ lastActive update failed:", e.message));
 
     const isOwner = isOwnerEmail(user.email);
     req.user = {

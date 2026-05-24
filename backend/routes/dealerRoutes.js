@@ -11,6 +11,17 @@ import Escrow from "../models/Escrow.js";
 import Chat from "../models/Chat.js";
 import Favorite from "../models/Favorite.js";
 import Message from "../models/Message.js";
+import User from "../models/User.js";
+import DealerTeam from "../models/DealerTeam.js";
+import { sendNotification } from "../services/notification.service.js";
+
+// Email service — top-level, no-ops if unavailable
+let dealerEmailService = {};
+try {
+  dealerEmailService = await import("../services/email.service.js");
+} catch (e) {
+  console.warn("⚠️ Dealer email service unavailable:", e.message);
+}
 
 const router = express.Router();
 
@@ -326,7 +337,7 @@ router.get(
 router.get(
   "/settlement",
   asyncHandler(async (req, res) => {
-    const User = (await import("../models/User.js")).default;
+    
     const user = await User.findById(req.user.id).select("mpesaBusiness mpesaBusinessName paymentDetails bankName bankAccount");
     res.json({
       success: true,
@@ -345,7 +356,7 @@ router.put(
   "/settlement",
   asyncHandler(async (req, res) => {
     const { mpesaBusiness, mpesaBusinessName, paymentDetails, bankName, bankAccount } = req.body;
-    const User = (await import("../models/User.js")).default;
+    
     const update = {};
     if (mpesaBusiness !== undefined) update.mpesaBusiness = mpesaBusiness;
     if (mpesaBusinessName !== undefined) update.mpesaBusinessName = mpesaBusinessName;
@@ -366,7 +377,6 @@ router.put(
 // ─────────────────────────────────────────────────────────────
 // 👥 DEALER TEAM MANAGEMENT
 // ─────────────────────────────────────────────────────────────
-import DealerTeam from "../models/DealerTeam.js";
 import crypto from "crypto";
 
 // GET  /api/dealer/team          — list all team members
@@ -383,7 +393,7 @@ router.post("/team/invite", asyncHandler(async (req, res) => {
   if (!email) return res.status(400).json({ success: false, message: "Email required" });
 
   // Check if already in team
-  const User = (await import("../models/User.js")).default;
+  
   const existing = await User.findOne({ email: email.toLowerCase().trim() });
 
   const token = crypto.randomBytes(24).toString("hex");
@@ -412,7 +422,7 @@ router.post("/team/invite", asyncHandler(async (req, res) => {
     { upsert: true, new: true }
   );
 
-  const { sendTeamInviteEmail } = await import("../services/email.service.js").catch(() => ({}));
+  const { sendTeamInviteEmail } = dealerEmailService;
   if (typeof sendTeamInviteEmail === "function") {
     sendTeamInviteEmail(email, req.user.name, role, token).catch(e =>
       console.warn("⚠️  Team invite email failed:", e.message)
@@ -541,7 +551,7 @@ router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
   if (car.sold) return res.status(400).json({ success: false, message: "Already sold" });
 
-  const Bid = (await import("../models/Bid.js")).default;
+  
   const bid = await Bid.findOne({ _id: bidId, carId: car._id });
   if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
 
@@ -556,7 +566,7 @@ router.post("/cars/:id/accept-bid", asyncHandler(async (req, res) => {
 
   // Notify winner
   try {
-    const { sendSaleNotification } = await import("../services/notification.service.js").catch(() => ({}));
+    
     if (typeof sendSaleNotification === "function") {
       sendSaleNotification(bid.user, car.title).catch(e => console.warn("Sale notif failed:", e.message));
     }
@@ -580,7 +590,7 @@ router.post("/cars/:id/reject-bid", asyncHandler(async (req, res) => {
   const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
   if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-  const Bid = (await import("../models/Bid.js")).default;
+  
   const bid = await Bid.findOne({ _id: bidId, carId: car._id });
   if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
 
@@ -590,9 +600,9 @@ router.post("/cars/:id/reject-bid", asyncHandler(async (req, res) => {
 
   // Notify bidder
   try {
-    const { sendNotification } = await import("../services/notification.service.js").catch(() => ({}));
+    
     if (typeof sendNotification === "function") {
-      sendNotification(bid.user, `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`).catch(() => {});
+      sendNotification(bid.user, `Your bid of KES ${Number(bid.amount).toLocaleString()} on ${car.title} was declined.`).catch((e) => console.warn("⚠️ Bid decline notification failed:", e.message));
     }
   } catch { /* non-critical */ }
 
@@ -632,7 +642,7 @@ router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
   }
 
   // Listing lock check
-  const User = (await import("../models/User.js")).default;
+  
   const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
   if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
     return res.status(403).json({

@@ -577,7 +577,7 @@ export const getCar = async (req, res) => {
       delete car.dealer?.visibility;
     }
 
-    Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
+    Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch((e) => console.warn("⚠️ View count increment failed:", e.message));
 
     res.json({ success: true, data: car });
 

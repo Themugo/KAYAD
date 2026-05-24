@@ -86,7 +86,7 @@ export const startSavedSearchCron = () => {
 
         if (shouldNotify(prefs, "sms") && user.phone) {
           const msg = `Kayad: ${fresh.length} new vehicle${fresh.length > 1 ? "s" : ""} matching "${search.name}". ${titles}${rest}. View: https://kayad.space/saved-searches`;
-          sendSMS(user.phone, msg).catch(() => {});
+          sendSMS(user.phone, msg).catch((e) => console.warn("⚠️ Saved search SMS failed:", e.message));
         }
       }
     } catch (err) {

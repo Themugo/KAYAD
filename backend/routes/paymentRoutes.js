@@ -59,7 +59,7 @@ router.get(
   "/checkout/:checkoutRequestId",
   protect,
   asyncHandler(async (req, res) => {
-    const Payment = (await import("../models/Payment.js")).default;
+    
 
     const payment = await Payment.findOne({
       checkoutRequestId: req.params.checkoutRequestId,

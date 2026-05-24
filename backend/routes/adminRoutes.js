@@ -16,8 +16,21 @@ import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import Ad from "../models/Ad.js";
 import AdminAlert from "../models/AdminAlert.js";
+import GlobalSettings from "../models/GlobalSettings.js";
+import Review from "../models/Review.js";
+import Referral from "../models/Referral.js";
+import Transaction from "../models/Transaction.js";
+import Chat from "../models/Chat.js";
+import MarketData from "../models/MarketData.js";
 import { stkPush } from "../services/mpesaService.js";
 import { sendNotification } from "../services/notification.service.js";
+
+let adminEmailService = {};
+try {
+  adminEmailService = await import("../services/email.service.js");
+} catch (e) {
+  console.warn("⚠️ Admin email service unavailable:", e.message);
+}
 
 // Routes that only admin/superadmin can access
 const adminOrSuper = authorize("admin", "superadmin");
@@ -271,7 +284,7 @@ router.post(
 
     await user.save();
 
-    const { sendDealerApprovedEmail } = await import("../services/email.service.js").catch(() => ({}));
+    const { sendDealerApprovedEmail } = adminEmailService;
     if (typeof sendDealerApprovedEmail === "function") {
       sendDealerApprovedEmail(user).catch(e =>
         console.warn("⚠️  Dealer approval email failed:", e.message)
@@ -283,7 +296,7 @@ router.post(
       title: "Seller Account Approved",
       message: "Your seller account has been approved. You can now list vehicles and access seller features.",
       type: "info",
-    }).catch(() => {});
+    }).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
 
     res.json({
       success: true,
@@ -422,7 +435,7 @@ router.delete(
             },
           },
         ]
-      ).catch(() => {});
+      ).catch((e) => console.warn("⚠️ Dealer listing count update failed:", e.message));
     }
 
     res.json({
@@ -648,7 +661,7 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
-    const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
+    
     let settings = await GlobalSettings.findOne();
     if (!settings) settings = await GlobalSettings.create({});
 
@@ -684,7 +697,7 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
-    const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
+    
     let settings = await GlobalSettings.findOne();
     if (!settings) settings = await GlobalSettings.create({});
 
@@ -1113,7 +1126,7 @@ router.delete(
 router.get(
   "/payments",
   asyncHandler(async (req, res) => {
-    const Payment = (await import("../models/Payment.js")).default;
+    
     const { page, limit, skip } = getPagination(req);
 
     const filter = {};
@@ -1191,7 +1204,7 @@ router.post(
   protect,
   adminOnly,
   asyncHandler(async (req, res) => {
-    const User = (await import("../models/User.js")).default;
+    
     const { dealerIds, durationDays = 90, listingMax = 50 } = req.body;
 
     const filter = dealerIds?.length > 0
@@ -1246,21 +1259,21 @@ router.get("/reviews", staffRole, asyncHandler(async (req, res) => {
 
   const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
   const [reviews, total] = await Promise.all([
-    (await import("../models/Review.js")).default.find(filter)
+    Review.find(filter)
       .populate("user", "name email")
       .populate("dealer", "name email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Math.min(Number(limit), 50))
       .lean(),
-    (await import("../models/Review.js")).default.countDocuments(filter),
+    Review.countDocuments(filter),
   ]);
 
   res.json({ success: true, reviews, pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) } });
 }));
 
 router.delete("/reviews/:id", adminOrSuper, asyncHandler(async (req, res) => {
-  const Review = await import("../models/Review.js").then(m => m.default);
+  
   const review = await Review.findByIdAndDelete(req.params.id);
   if (!review) return res.status(404).json({ success: false, message: "Review not found" });
   res.json({ success: true, message: "Review deleted" });
@@ -1271,8 +1284,8 @@ router.delete("/reviews/:id", adminOrSuper, asyncHandler(async (req, res) => {
 // =============================
 
 router.get("/referrals/stats", adminOrSuper, cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/referrals/stats"), asyncHandler(async (req, res) => {
-  const Referral = await import("../models/Referral.js").then(m => m.default);
-  const Transaction = await import("../models/Transaction.js").then(m => m.default);
+  
+  
 
   const [totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus] = await Promise.all([
     Referral.countDocuments(),
@@ -1295,7 +1308,7 @@ router.get("/referrals", staffRole, asyncHandler(async (req, res) => {
   if (referrer) filter.referrer = referrer;
   if (referee) filter.referee = referee;
 
-  const Referral = await import("../models/Referral.js").then(m => m.default);
+  
   const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
   const [referrals, total] = await Promise.all([
     Referral.find(filter)
@@ -1312,7 +1325,7 @@ router.get("/referrals", staffRole, asyncHandler(async (req, res) => {
 }));
 
 router.get("/referrals/:id", staffRole, asyncHandler(async (req, res) => {
-  const Referral = await import("../models/Referral.js").then(m => m.default);
+  
   const referral = await Referral.findById(req.params.id)
     .populate("referrer", "name email referralCode credits referralEarnings referralCount")
     .populate("referee", "name email")
@@ -1325,14 +1338,14 @@ router.post("/referrals/:id/credit", adminOrSuper, asyncHandler(async (req, res)
   const { amount } = req.body;
   if (!amount || amount <= 0) return res.status(400).json({ success: false, message: "Valid bonus amount is required" });
 
-  const Referral = await import("../models/Referral.js").then(m => m.default);
-  const Transaction = await import("../models/Transaction.js").then(m => m.default);
+  
+  
 
   const referral = await Referral.findById(req.params.id);
   if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
   if (referral.status !== "pending") return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
-  const User = await import("../models/User.js").then(m => m.default);
+  
 
   referral.status = "credited";
   referral.bonusAmount = amount;
@@ -1358,7 +1371,7 @@ router.post("/referrals/:id/credit", adminOrSuper, asyncHandler(async (req, res)
 }));
 
 router.post("/referrals/:id/expire", adminOrSuper, asyncHandler(async (req, res) => {
-  const Referral = await import("../models/Referral.js").then(m => m.default);
+  
   const referral = await Referral.findById(req.params.id);
   if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
   if (referral.status !== "pending") return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
@@ -1372,8 +1385,8 @@ router.post("/referrals/:id/expire", adminOrSuper, asyncHandler(async (req, res)
 }));
 
 router.get("/users/:id/referrals", adminOrSuper, asyncHandler(async (req, res) => {
-  const Referral = await import("../models/Referral.js").then(m => m.default);
-  const User = await import("../models/User.js").then(m => m.default);
+  
+  
 
   const user = await User.findById(req.params.id).select("name email referralCode referralEarnings referralCount credits").lean();
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -1395,7 +1408,7 @@ router.get("/chats", staffRole, asyncHandler(async (req, res) => {
   const filter = {};
   if (isBlocked !== undefined) filter.isBlocked = isBlocked === "true";
 
-  const Chat = await import("../models/Chat.js").then(m => m.default);
+  
   const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
 
   let query = Chat.find(filter)
@@ -1407,7 +1420,7 @@ router.get("/chats", staffRole, asyncHandler(async (req, res) => {
     .lean();
 
   if (search) {
-    const users = await (await import("../models/User.js")).default.find({
+    const users = await User.find({
       $or: [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }],
     }).select("_id").lean();
     const userIds = users.map(u => u._id);
@@ -1429,7 +1442,7 @@ router.get("/chats", staffRole, asyncHandler(async (req, res) => {
 }));
 
 router.get("/chats/:chatId/messages", adminOrSuper, asyncHandler(async (req, res) => {
-  const Chat = await import("../models/Chat.js").then(m => m.default);
+  
   const chat = await Chat.findById(req.params.chatId)
     .populate("participants", "name email")
     .populate("messages.sender", "name email")
@@ -1440,7 +1453,7 @@ router.get("/chats/:chatId/messages", adminOrSuper, asyncHandler(async (req, res
 }));
 
 router.delete("/chats/:chatId/messages/:messageId", adminOrSuper, asyncHandler(async (req, res) => {
-  const Chat = await import("../models/Chat.js").then(m => m.default);
+  
   const chat = await Chat.findById(req.params.chatId);
   if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
@@ -1457,7 +1470,7 @@ router.delete("/chats/:chatId/messages/:messageId", adminOrSuper, asyncHandler(a
 }));
 
 router.post("/chats/:chatId/block", adminOrSuper, asyncHandler(async (req, res) => {
-  const Chat = await import("../models/Chat.js").then(m => m.default);
+  
   const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
   if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
@@ -1466,7 +1479,7 @@ router.post("/chats/:chatId/block", adminOrSuper, asyncHandler(async (req, res) 
 }));
 
 router.post("/chats/:chatId/unblock", adminOrSuper, asyncHandler(async (req, res) => {
-  const Chat = await import("../models/Chat.js").then(m => m.default);
+  
   const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
   if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
@@ -1485,7 +1498,7 @@ router.get("/market-data", staffRole, asyncHandler(async (req, res) => {
   if (model) filter.model = { $regex: model, $options: "i" };
   if (year) filter.year = Number(year);
 
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
   const [entries, total] = await Promise.all([
     MarketData.find(filter).sort({ brand: 1, model: 1, year: -1 }).skip(skip).limit(Math.min(Number(limit), 50)).lean(),
@@ -1496,7 +1509,7 @@ router.get("/market-data", staffRole, asyncHandler(async (req, res) => {
 }));
 
 router.get("/market-data/:id", staffRole, asyncHandler(async (req, res) => {
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   const entry = await MarketData.findById(req.params.id).lean();
   if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
   res.json({ success: true, entry });
@@ -1508,7 +1521,7 @@ router.post("/market-data", adminOrSuper, asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: "brand, model, year, lowPrice, avgPrice, highPrice are required" });
   }
 
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   const entry = await MarketData.create({ brand, model, year, bodyType, fuel, transmission, engineCC, lowPrice, avgPrice, highPrice, sampleSize, source });
 
   await AuditLog.create({ admin: req.user._id, action: "Create Market Data", target: `MarketData ${entry._id}`, details: `Created ${brand} ${model} ${year}` });
@@ -1523,7 +1536,7 @@ router.put("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
   }
   updates.lastUpdated = new Date();
 
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   const entry = await MarketData.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
   if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
 
@@ -1532,7 +1545,7 @@ router.put("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
 }));
 
 router.delete("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   const entry = await MarketData.findByIdAndDelete(req.params.id);
   if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
 
@@ -1546,7 +1559,7 @@ router.post("/market-data/bulk", adminOrSuper, asyncHandler(async (req, res) => 
     return res.status(400).json({ success: false, message: "entries array is required" });
   }
 
-  const MarketData = await import("../models/MarketData.js").then(m => m.default);
+  
   let created = 0;
   const errors = [];
 

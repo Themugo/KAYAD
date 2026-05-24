@@ -57,7 +57,7 @@ export const handleMpesaCallback = async (callbackData) => {
         userId: payment.user,
         title: "Payment Failed",
         message: `KES ${payment.amount} — ${payment.resultDesc}`,
-      }).catch(() => {});
+      }).catch((e) => console.warn("⚠️ Payment callback notification failed:", e.message));
 
       await session.commitTransaction();
 
@@ -107,7 +107,7 @@ export const handleMpesaCallback = async (callbackData) => {
         transactionId: receipt || payment._id.toString(),
         carDetails: payment.car?.toString() || "—",
         date: new Date(),
-      }).catch(() => {});
+      }).catch((e) => console.warn("⚠️ Payment callback notification failed:", e.message));
     } catch (_) {}
 
     if (payment.type === "bid") {

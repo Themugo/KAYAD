@@ -1,4 +1,6 @@
 import express from "express";
+import User from "../models/User.js";
+import GlobalSettings from "../models/GlobalSettings.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
@@ -28,7 +30,7 @@ router.post("/order", createLimiter, asyncHandler(async (req, res) => {
     return res.status(409).json({ success: false, message: "You already have an active inspection for this vehicle" });
   }
 
-  const GlobalSettings = (await import("../models/GlobalSettings.js")).default;
+  
   const settings = await GlobalSettings.findOne().lean();
   const fee = settings?.ghostCheckFee || 2500;
 
@@ -108,7 +110,7 @@ router.get("/", adminOnly, asyncHandler(async (req, res) => {
 
 // ── Get available inspectors (users with ghost_checker role) ──
 router.get("/available-inspectors", adminOnly, asyncHandler(async (req, res) => {
-  const User = (await import("../models/User.js")).default;
+  
   const inspectors = await User.find({ role: "ghost_checker", isInspector: true })
     .select("name email phone locationCity inspectionSpecialty averageRating completedChecks")
     .lean();
@@ -164,7 +166,7 @@ router.post("/:id/submit", asyncHandler(async (req, res) => {
   await order.save();
 
   // Update inspector stats
-  const User = (await import("../models/User.js")).default;
+  
   await User.findByIdAndUpdate(req.user.id, { $inc: { completedChecks: 1 } });
 
   // Update Car trust rating

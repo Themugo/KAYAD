@@ -10,7 +10,15 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import Notification from "../models/Notification.js";
+import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
+
+let cronEmailService = {};
+try {
+  cronEmailService = await import("./email.service.js");
+} catch (e) {
+  console.warn("⚠️ Auction reminder email service unavailable:", e.message);
+}
 
 const ENABLED = process.env.AUCTION_REMINDER_ENABLED !== "false";
 
@@ -54,8 +62,7 @@ const runReminders = async () => {
 
         if (activeBidders.length === 0) continue;
 
-        const { sendAuctionEndingSoonEmail } = await import("./email.service.js").catch(() => ({}));
-        const User = (await import("../models/User.js")).default;
+        const { sendAuctionEndingSoonEmail } = cronEmailService;
 
         for (const userId of activeBidders) {
           const user = await User.findById(userId).select("email name");

@@ -33,11 +33,11 @@ export const sendNotification = async ({
     }
 
     if (email) {
-      sendEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch(() => {});
+      sendEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) => console.warn("⚠️ Notification email failed:", e.message));
     }
 
     if (phone) {
-      sendSMS(phone, `${title}: ${message}`).catch(() => {});
+      sendSMS(phone, `${title}: ${message}`).catch((e) => console.warn("⚠️ Notification SMS failed:", e.message));
     }
 
     return notification;

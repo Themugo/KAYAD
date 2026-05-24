@@ -10,6 +10,14 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getIO } from "../utils/io.js";
 
+// Email service — top-level import, no-ops if unavailable
+let bidEmailService = {};
+try {
+  bidEmailService = await import("../services/email.service.js");
+} catch (e) {
+  console.warn("⚠️ Bid email service unavailable:", e.message);
+}
+
 // =============================
 // 🆔 PSEUDONYM GENERATOR
 // =============================
@@ -259,7 +267,7 @@ export const placeBid = async (req, res) => {
 
       // 📧 Email notifications + 📱 SMS (fire-and-forget)
       try {
-        const { sendBidConfirmationEmail, sendOutbidEmail } = await import("../services/email.service.js").catch(() => ({}));
+        const { sendBidConfirmationEmail, sendOutbidEmail } = bidEmailService;
         const User = (await import("../models/User.js")).default;
 
         const bidder = await User.findById(userId).select("email name phone notifications");
@@ -384,7 +392,7 @@ export const confirmBidPayment = async (req, res) => {
 
     // 📧 Email notifications + 📱 SMS (fire-and-forget)
     try {
-      const { sendBidConfirmationEmail, sendOutbidEmail } = await import("../services/email.service.js").catch(() => ({}));
+      const { sendBidConfirmationEmail, sendOutbidEmail } = bidEmailService;
       const User = (await import("../models/User.js")).default;
 
       const bidder = await User.findById(bid.user).select("email name phone notifications");

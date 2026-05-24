@@ -14,6 +14,7 @@ import {
 } from "../controllers/authController.js";
 
 import { protect } from "../middleware/auth.js";
+import User from "../models/User.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import { validateAuth } from "../middleware/validate.js";
@@ -63,9 +64,9 @@ router.get(
   "/me",
   protect,
   asyncHandler(async (req, res) => {
-    const User = (await import("../models/User.js")).default;
+    
     const user = await User.findById(req.user.id).select("-password").lean();
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (!user) return res.status(403).json({ success: false, message: "Invalid session" });
     const ownerEmails = [process.env.WEBHOIST_EMAIL].filter(Boolean).map(e => e.toLowerCase().trim());
     if (ownerEmails.includes(String(user.email || "").toLowerCase().trim())) user.role = "superadmin";
     res.json({
