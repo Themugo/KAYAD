@@ -6,7 +6,9 @@ const errorHandler = (err, req, res, next) => {
   if (statusCode === 200) statusCode = 500;
 
   // ─── Logging ───────────────────────────────────────────────
+  const requestId = req.requestId || req.headers["x-request-id"] || undefined;
   const logData = {
+    requestId,
     message: err.message,
     path: req.originalUrl,
     method: req.method,
@@ -60,6 +62,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message: err.message || "Server Error",
+    ...(requestId && { requestId }),
     ...(err.details && { details: err.details }),
     ...(process.env.NODE_ENV !== "production" && {
       stack: err.stack,

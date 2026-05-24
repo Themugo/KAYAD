@@ -10,6 +10,7 @@
 
 import Escrow       from "../models/Escrow.js";
 import Notification from "../models/Notification.js";
+import { getIO } from "../utils/io.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
 const ENABLED      = process.env.ESCROW_CRON_ENABLED !== "false";
@@ -18,7 +19,7 @@ const ENABLED      = process.env.ESCROW_CRON_ENABLED !== "false";
 const notify = async (userId, title, message, type = "escrow") => {
   try {
     const notif = await Notification.create({ user: userId, title, message, type });
-    global.io?.to(`user_${userId}`).emit("notification", notif);
+    getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {
     console.error("❌ Notify failed:", e.message);
   }
@@ -68,7 +69,7 @@ const runAutoRelease = async () => {
       }
 
       // Socket notification
-      global.io?.emit("escrowReleased", {
+      getIO()?.emit("escrowReleased", {
         escrowId:     escrow._id,
         amount:       escrow.amount,
         autoReleased: true,
@@ -110,7 +111,7 @@ const runDisputeWarnings = async () => {
       }
 
       // Notify admin via admin room
-      global.io?.to("admins").emit("notification", {
+      getIO()?.to("admins").emit("notification", {
         title:   "Escrow Approaching Auto-Release",
         message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (${escrow.amount} KES) releases in 2 days.`,
         type:    "escrow",

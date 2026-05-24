@@ -88,6 +88,13 @@ export const mpesaIpWhitelist = (req, res, next) => {
 // ── MPESA CALLBACK SIGNATURE VALIDATOR ───────────────────────
 // Validates that callback body has required Safaricom structure
 export const validateMpesaCallback = (req, res, next) => {
+  // Content-Type must be JSON — reject form data, XML, etc.
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (!ct.includes("application/json")) {
+    console.error("❌ M-Pesa callback wrong Content-Type:", ct);
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid content type" });
+  }
+
   const body = req.body;
 
   // Must have Body.stkCallback

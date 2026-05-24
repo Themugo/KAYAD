@@ -1,5 +1,6 @@
 // backend/controllers/notificationController.js
 import Notification from "../models/Notification.js";
+import { getIO } from "../utils/io.js";
 
 // GET /api/notifications
 export const getNotifications = async (req, res) => {
@@ -75,7 +76,7 @@ export const createNotification = async ({ user, title, message, type = "info", 
     const notif = await Notification.create({ user, title, message, type, data });
 
     // Push via socket.io
-    const io = global.io;
+    const io = getIO();
     if (io) {
       io.to(`user_${user}`).emit("notification", notif);
     }

@@ -161,15 +161,23 @@ export const checkPaymentStatus = async (req, res) => {
 // =============================
 export const getUserPayments = async (req, res) => {
   try {
-    const payments = await Payment.find({
-      user: req.user.id,
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const [payments, total] = await Promise.all([
+      Payment.find({ user: req.user.id })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Payment.countDocuments({ user: req.user.id }),
+    ]);
 
     res.json({
       success: true,
       payments,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
 
   } catch (err) {
@@ -187,13 +195,27 @@ export const getUserPayments = async (req, res) => {
 // =============================
 export const getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.find()
-      .sort({ createdAt: -1 })
-      .lean();
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.type) filter.type = req.query.type;
+
+    const [payments, total] = await Promise.all([
+      Payment.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Payment.countDocuments(filter),
+    ]);
 
     res.json({
       success: true,
       payments,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
 
   } catch (err) {
@@ -217,6 +239,20 @@ export const getPaymentById = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: "Payment not found",
+      });
+    }
+
+    // 🔒 SECURITY CHECK — only owner or admin can view
+    const STAFF = ["admin", "superadmin", "escrow_officer", "accounts"];
+    if (
+      req.user &&
+      payment.user &&
+      payment.user.toString() !== req.user.id &&
+      !STAFF.includes(req.user.role)
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to view this payment",
       });
     }
 

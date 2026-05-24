@@ -1,4 +1,5 @@
 import { emitAuctionExtended } from "../socket/socket.js";
+import { getIO } from "./io.js";
 
 const SNIPE_WINDOW_MS = (parseInt(process.env.AUCTION_SNIPE_WINDOW_SECONDS, 10) || 120) * 1000;
 const EXTENSION_MS = (parseInt(process.env.AUCTION_SNIPE_EXTENSION_SECONDS, 10) || 120) * 1000;
@@ -23,8 +24,8 @@ export const applySnipingProtection = async (car) => {
     await car.save();
     const carId = car._id.toString();
     emitAuctionExtended(carId, car.auctionEnd);
-    if (global.io) {
-      global.io.to(`car_${carId}`).emit("timeExtended", { newEndTime: car.auctionEnd });
+    if (getIO()) {
+      getIO().to(`car_${carId}`).emit("timeExtended", { newEndTime: car.auctionEnd });
     }
     return true;
   }

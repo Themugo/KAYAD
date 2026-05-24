@@ -3,6 +3,7 @@
 import Chat from "../models/Chat.js";
 import mongoose from "mongoose";
 import { sendSMS } from "../utils/sms.js";
+import { getIO } from "../utils/io.js";
 
 // =============================
 // 💬 START / CREATE CHAT
@@ -91,8 +92,8 @@ export const sendMessage = async (req, res) => {
 
     const savedMsg = chat.messages[chat.messages.length - 1];
 
-    if (global.io) {
-      global.io.to(`chat_${chatId}`).emit("newMessage", {
+    if (getIO()) {
+      getIO().to(`chat_${chatId}`).emit("newMessage", {
         _id: savedMsg._id,
         chatId,
         sender: req.user.id,
@@ -194,8 +195,8 @@ export const markAsSeen = async (req, res) => {
 
     await chat.markAsSeen(req.user.id);
 
-    if (global.io) {
-      global.io.to(`chat_${chatId}`).emit("messagesSeen", { chatId, userId: req.user.id });
+    if (getIO()) {
+      getIO().to(`chat_${chatId}`).emit("messagesSeen", { chatId, userId: req.user.id });
     }
 
     res.json({ success: true });

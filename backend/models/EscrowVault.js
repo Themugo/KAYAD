@@ -20,7 +20,7 @@ const escrowVaultSchema = new mongoose.Schema({
     default: "awaiting_payment",
   },
   platformAccountName: { type: String, default: "KAYAD Escrow Services Ltd" },
-  platformAccountNumber: { type: String, default: process.env.ESCROW_ACCOUNT_NUMBER || "010XXXXXXXXX" },
+  platformAccountNumber: { type: String, default: process.env.ESCROW_ACCOUNT_NUMBER || "" },
   platformBankName: { type: String, default: process.env.ESCROW_BANK_NAME || "Equity Bank Kenya" },
   releaseOtp: String,
   otpExpiry: Date,

@@ -4,6 +4,7 @@ import Bid from "../models/Bid.js";
 import Car from "../models/Car.js";
 import { createEscrow } from "../services/escrow.service.js";
 import { sendNotification } from "../services/notification.service.js";
+import { getIO } from "../utils/io.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -60,7 +61,7 @@ export const handleMpesaCallback = async (callbackData) => {
 
       await session.commitTransaction();
 
-      const io = global.io;
+      const io = getIO();
       if (io) {
         io.to(`user_${payment.user}`).emit("paymentFailed", {
           checkoutID: checkoutId,
@@ -138,8 +139,8 @@ export const handleMpesaCallback = async (callbackData) => {
             car.highestBidder = bid.user;
             await car.save({ session });
 
-            if (global.io) {
-              global.io.to(`car_${car._id}`).emit("auctionUpdate", {
+            if (getIO()) {
+              getIO().to(`car_${car._id}`).emit("auctionUpdate", {
                 carId: car._id,
                 currentBid: bid.amount,
               });
@@ -169,7 +170,7 @@ export const handleMpesaCallback = async (callbackData) => {
     await session.commitTransaction();
     session.endSession();
 
-    const io = global.io;
+    const io = getIO();
     if (io) {
       const payload = { checkoutID: checkoutId, receipt, paymentId: payment._id };
       io.to(`user_${payment.user}`).emit("paymentSuccess", payload);

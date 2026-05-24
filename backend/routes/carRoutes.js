@@ -14,6 +14,7 @@ import {
 } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
+import { uploadLimiter } from "../middleware/rateLimiter.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES } from "../config/roles.js";
@@ -154,6 +155,7 @@ router.post(
   "/",
   protect,
   dealerOnly,
+  uploadLimiter,
   upload.array("images", 10),
   handleUploadError,
   validateCar,
@@ -193,6 +195,7 @@ router.post(
   "/:id/images",
   protect,
   dealerOnly,
+  uploadLimiter,
   upload.array("images", 10),
   handleUploadError,
   asyncHandler(addCarImages)

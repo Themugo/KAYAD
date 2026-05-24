@@ -5,12 +5,12 @@
 // 🔥 SAFE EMIT
 const emit = (room, event, data) => {
   try {
-    if (!global.io) {
+    if (!getIO()) {
       console.warn("⚠️ Socket not initialized");
       return;
     }
 
-    global.io.to(room).emit(event, data);
+    getIO().to(room).emit(event, data);
 
   } catch (err) {
     console.error("❌ SOCKET EMIT ERROR:", err.message);
@@ -63,8 +63,8 @@ export const emitTimerUpdate = (roomId, timeLeft) => {
 // =============================
 export const emitListingUpdate = (carId, data) => {
   try {
-    if (!global.io) return;
-    global.io.to("showroom").emit("listingUpdate", { carId, ...data });
+    if (!getIO()) return;
+    getIO().to("showroom").emit("listingUpdate", { carId, ...data });
   } catch (err) {
     console.error("❌ LISTING UPDATE EMIT ERROR:", err.message);
   }

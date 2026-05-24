@@ -1,11 +1,21 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { formatPhone } from "../utils/format.js";
 import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+
+// Email service — imported once at module level. Functions are no-ops
+// if the email transport isn't configured (EMAIL_HOST not set).
+let emailService = {};
+try {
+  emailService = await import("../services/email.service.js");
+} catch (e) {
+  console.warn("⚠️  Email service unavailable:", e.message);
+}
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
 const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
@@ -171,7 +181,7 @@ export const register = async (req, res) => {
           title: "🎉 Referral Bonus!",
           message: `You earned KES ${REFERRAL_BONUS.toLocaleString()} for referring ${name}. Thanks for spreading the word!`,
           type: "referral",
-        }).catch(() => {});
+        }).catch((e) => console.warn("⚠️ Referral creation failed:", e.message));
       } catch (refErr) {
         console.warn("⚠️ Referral credit failed:", refErr.message);
       }
@@ -179,14 +189,13 @@ export const register = async (req, res) => {
 
     // 📧 Generate email verification token
     try {
-      const crypto = await import("crypto");
       const verifyToken = crypto.randomBytes(32).toString("hex");
       user.emailVerifyToken  = verifyToken;
       user.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
       await user.save();
 
       // Send verification email (non-blocking — don't fail registration if email fails)
-      const { sendVerificationEmail, sendWelcomeEmail } = await import("../services/email.service.js").catch(() => ({}));
+      const { sendVerificationEmail, sendWelcomeEmail } = emailService;
       if (typeof sendVerificationEmail === "function") {
         sendVerificationEmail(user.email, user.name, verifyToken).catch((e) =>
           console.warn("⚠️  Verification email failed:", e.message)
@@ -443,7 +452,7 @@ export const changePassword = async (req, res) => {
     const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) return R.error(res, "Current password is incorrect", 400);
 
-    user.password = await bcrypt.hash(newPassword, 12);
+    user.password = newPassword; // pre-save hook will hash this
     user.mustChangePassword = false;
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
@@ -499,14 +508,13 @@ export const resendVerification = async (req, res) => {
     }
 
     // Generate new token
-    const crypto = await import("crypto");
     const verifyToken = crypto.randomBytes(32).toString("hex");
     user.emailVerifyToken = verifyToken;
     user.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     await user.save();
 
     // Send verification email
-    const { sendVerificationReminderEmail } = await import("../services/email.service.js").catch(() => ({}));
+    const { sendVerificationReminderEmail } = emailService;
     if (typeof sendVerificationReminderEmail === "function") {
       sendVerificationReminderEmail(user.email, user.name, verifyToken).catch((e) =>
         console.warn("⚠️  Resend verification email failed:", e.message)
@@ -531,13 +539,12 @@ export const forgotPassword = async (req, res) => {
     // Always return 200 to prevent user enumeration
     if (!user) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
 
-    const crypto = await import("crypto");
     const token = crypto.randomBytes(32).toString("hex");
     user.resetToken = token;
     user.resetTokenExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     await user.save();
 
-    const { sendPasswordResetEmail } = await import("../services/email.service.js").catch(() => ({}));
+    const { sendPasswordResetEmail } = emailService;
     if (typeof sendPasswordResetEmail === "function") {
       sendPasswordResetEmail(user, token).catch(e => console.warn("⚠️  Reset email failed:", e.message));
     }

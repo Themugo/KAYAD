@@ -36,6 +36,7 @@ import {
 } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection } from "./middleware/csrf.js";
+import { protect, adminOnly } from "./middleware/auth.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
@@ -84,6 +85,7 @@ import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected }    from "./utils/cache.js";
+import { setIO }               from "./utils/io.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, "../.env") });
@@ -118,7 +120,19 @@ app.use(helmet({
       formAction: ["'self'"],
     },
   },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true,
+  },
 }));
+
+// Permissions-Policy — restrict browser features
+app.use((req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=(self)");
+  next();
+});
+
 app.use(extraHeaders());
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
@@ -145,20 +159,23 @@ app.use(cors({
   origin: (origin, cb) => {
     if (!origin || NODE_ENV === "development") return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
-    if (/\.vercel\.app$/.test(origin) || /^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+    // Only allow YOUR Vercel deployments — not all *.vercel.app
+    if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
+    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
     console.warn("⚠️ CORS blocked:", origin, "— set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render");
     cb(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-By", "X-CSRF-Token", "X-XSRF-Token"],
+  maxAge: 86400, // Cache preflight for 24 hours
 }));
 
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
 app.use(bodyGuard());
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ extended: true, limit: "15mb" }));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 // Serve uploaded files with strict headers to prevent script execution
 app.use("/uploads", (req, res, next) => {
   const ext = req.path.split(".").pop()?.toLowerCase();
@@ -186,7 +203,7 @@ app.use((req, res, next) => {
   metrics.requests++;
   next();
 });
-app.get("/metrics", (req, res) => {
+app.get("/metrics", protect, adminOnly, (req, res) => {
   res.json({
     uptime: Math.round((Date.now() - metrics.startedAt) / 1000),
     totalRequests: metrics.requests,
@@ -198,15 +215,30 @@ app.get("/metrics", (req, res) => {
 });
 
 // ─── API DOCS ─────────────────────────────────────────────────
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: ".swagger-ui .topbar { display: none }",
-  customSiteTitle: "KAYAD API Docs",
-}));
+if (NODE_ENV !== "production") {
+  // Open access in development
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "KAYAD API Docs",
+  }));
+} else {
+  // Require admin auth in production
+  app.use("/api-docs", protect, adminOnly, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "KAYAD API Docs",
+  }));
+}
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: NODE_ENV === "production" ? allowedOrigins : true,
+    origin: (origin, cb) => {
+      if (!origin || NODE_ENV === "development") return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+      cb(new Error(`Socket CORS blocked: ${origin}`));
+    },
     credentials: true,
   },
   pingTimeout:  60000,
@@ -214,8 +246,8 @@ const io = new Server(server, {
   transports: ["websocket", "polling"],
 });
 
-global.io = io;
 app.set("io", io);
+setIO(io);
 
 // Socket JWT auth
 io.use((socket, next) => {
@@ -232,12 +264,15 @@ io.on("connection", (socket) => {
   const uid = socket.user?.id || socket.user?._id;
   if (uid) socket.join(`user_${uid}`);
 
+  // Validate room IDs to prevent arbitrary room injection
+  const isValidId = (id) => typeof id === "string" && /^[a-f0-9]{24}$/i.test(id);
+
   socket.on("joinAuction", (carId) => {
-    if (carId) { socket.join(String(carId)); socket.join(`car_${carId}`); }
+    if (isValidId(carId)) { socket.join(String(carId)); socket.join(`car_${carId}`); }
   });
 
-  socket.on("joinChat",     (chatId) => { if (chatId) socket.join(`chat_${chatId}`); });
-  socket.on("leaveChat",    (chatId) => { if (chatId) socket.leave(`chat_${chatId}`); });
+  socket.on("joinChat",     (chatId) => { if (isValidId(chatId)) socket.join(`chat_${chatId}`); });
+  socket.on("leaveChat",    (chatId) => { if (isValidId(chatId)) socket.leave(`chat_${chatId}`); });
   socket.on("typing",       ({ chatId, userId, name }) => {
     if (chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
   });
@@ -295,16 +330,32 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ─── DATABASE ─────────────────────────────────────────────────
-const connectDB = async () => {
+const connectDB = async (retries = 5, delay = 2000) => {
   if (mongoose.connection.readyState === 1) return mongoose.connection;
   if (!process.env.MONGO_URI) throw new Error("MONGO_URI missing in .env");
-  const conn = await mongoose.connect(process.env.MONGO_URI, {
-    maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "10"),
-    serverSelectionTimeoutMS: 5000,
-    socketTimeoutMS: 45000,
-  });
-  console.log(`✅ MongoDB: ${conn.connection.host}`);
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const conn = await mongoose.connect(process.env.MONGO_URI, {
+        maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "10"),
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
+      });
+      console.log(`✅ MongoDB: ${conn.connection.host}`);
+      return conn;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      const backoff = delay * Math.pow(2, attempt - 1);
+      console.warn(`⚠️  MongoDB connection attempt ${attempt}/${retries} failed: ${err.message}. Retrying in ${backoff}ms...`);
+      await new Promise((r) => setTimeout(r, backoff));
+    }
+  }
 };
+
+// ── Mongoose connection monitoring ──────────────────────────
+mongoose.connection.on("disconnected", () => console.warn("⚠️ MongoDB disconnected"));
+mongoose.connection.on("reconnected",  () => console.log("✅ MongoDB reconnected"));
+mongoose.connection.on("error", (err) => console.error("🔥 MongoDB error:", err.message));
 
 // ─── ENV VALIDATION ───────────────────────────────────────────
 // (validateEnv is imported from ./utils/env.js)

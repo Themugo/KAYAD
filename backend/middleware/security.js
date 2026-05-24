@@ -52,18 +52,39 @@ const xssClean = (obj, depth = 0) => {
   return obj;
 };
 
-// Fields that should NOT be XSS-escaped (passwords, tokens, HTML-content)
+// Fields that should NOT be XSS-escaped (passwords, tokens — NOT user content)
 const XSS_SKIP_FIELDS = new Set([
   "password", "currentPassword", "newPassword",
   "token", "refreshToken", "checkoutRequestID",
-  "content", "description", "bio",    // allow rich text
 ]);
+
+// Fields that allow limited HTML (bold, italic, links) — sanitized, not skipped
+const RICH_TEXT_FIELDS = new Set(["content", "description", "bio"]);
+
+// Strip dangerous tags/attributes but allow safe formatting
+const sanitizeRichText = (str) => {
+  return str
+    // Remove script/style/iframe/object/embed tags and their content
+    .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi, "")
+    .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*\/?>/gi, "")
+    // Remove event handlers (onclick, onerror, onload, etc.)
+    .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/\s+on\w+\s*=\s*\S+/gi, "")
+    // Remove javascript: and data: URIs in href/src attributes
+    .replace(/(href|src|action)\s*=\s*["']\s*(javascript|data|vbscript)\s*:/gi, '$1="')
+    // Remove style attributes (can be used for CSS injection/exfil)
+    .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
+    // Strip null bytes
+    .replace(/\0/g, "");
+};
 
 export const xssProtection = () => (req, res, next) => {
   if (req.body && typeof req.body === "object") {
     for (const key of Object.keys(req.body)) {
       if (XSS_SKIP_FIELDS.has(key)) continue;
-      if (typeof req.body[key] === "string") {
+      if (RICH_TEXT_FIELDS.has(key) && typeof req.body[key] === "string") {
+        req.body[key] = sanitizeRichText(req.body[key]);
+      } else if (typeof req.body[key] === "string") {
         req.body[key] = escapeHtml(req.body[key]);
       } else if (typeof req.body[key] === "object") {
         xssClean(req.body[key]);

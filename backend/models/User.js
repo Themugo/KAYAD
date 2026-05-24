@@ -309,10 +309,11 @@ userSchema.pre("save", async function (next) {
     // 🔥 ONLY hash if changed
     if (!this.isModified("password")) return next();
 
-    // 🔥 prevent double hash
-    if (this.password.startsWith("$2")) return next();
+    // 🔥 prevent double hash — check if it's already a bcrypt hash
+    // bcrypt hashes are always 60 chars and match $2[aby]$
+    if (/^\$2[aby]\$\d{1,2}\$.{53}$/.test(this.password)) return next();
 
-    this.password = await bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 12);
 
     next();
   } catch (err) {
@@ -375,17 +376,25 @@ userSchema.statics.softDelete = async function (ids, adminId) {
   );
 };
 
-const _origFind = userSchema.statics.find;
-userSchema.statics.find = function (query, ...rest) {
-  if (query && query.deletedAt === undefined) query.deletedAt = null;
-  return _origFind.call(this, query, ...rest);
-};
+// ── SOFT-DELETE QUERY MIDDLEWARE ──────────────────────────────
+// Automatically excludes soft-deleted users from all queries
+// unless { includeSoftDeleted: true } is set in options.
+// Covers: find, findOne, findById, countDocuments, findOneAndUpdate, etc.
+const SOFT_DELETE_OPERATIONS = [
+  "find", "findOne", "findOneAndUpdate", "findOneAndDelete",
+  "findOneAndReplace", "countDocuments", "count", "updateMany",
+  "updateOne", "deleteOne", "deleteMany",
+];
 
-const _origFindOne = userSchema.statics.findOne;
-userSchema.statics.findOne = function (query, ...rest) {
-  if (query && query.deletedAt === undefined) query.deletedAt = null;
-  return _origFindOne.call(this, query, ...rest);
-};
+for (const op of SOFT_DELETE_OPERATIONS) {
+  userSchema.pre(op, function () {
+    if (this.getOptions()?.includeSoftDeleted) return;
+    const filter = this.getFilter();
+    if (filter && filter.deletedAt === undefined) {
+      this.where({ deletedAt: null });
+    }
+  });
+}
 
 // =============================
 const User =

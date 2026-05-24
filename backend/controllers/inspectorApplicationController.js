@@ -72,7 +72,7 @@ export const approveApplication = async (req, res) => {
         name: application.fullName,
         email: application.email,
         phone: application.phone,
-        password: process.env.SEED_INSPECTOR_PW || "Inspector@Kayad2026!",
+        password: process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
         role: "ghost_checker",
       });
     } else {

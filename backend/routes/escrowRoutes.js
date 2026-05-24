@@ -16,6 +16,7 @@ import {
   requestRelease,
 } from "../controllers/escrowController.js";
 import Escrow from "../models/Escrow.js";
+import { getIO } from "../utils/io.js";
 
 const router = express.Router();
 
@@ -111,9 +112,9 @@ router.post(
     escrow.history.push({ action: `disputed: ${reason}` });
     await escrow.save();
 
-    if (global.io) {
-      global.io.to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });
-      global.io.to(`user_${escrow.seller}`).emit("escrowDisputed", { escrowId: escrow._id });
+    if (getIO()) {
+      getIO().to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });
+      getIO().to(`user_${escrow.seller}`).emit("escrowDisputed", { escrowId: escrow._id });
     }
 
     res.json({ success: true, message: "Dispute raised", escrow });

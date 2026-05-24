@@ -10,13 +10,14 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import Notification from "../models/Notification.js";
+import { getIO } from "../utils/io.js";
 
 const ENABLED = process.env.AUCTION_REMINDER_ENABLED !== "false";
 
 const notify = async (userId, title, message, type = "auction") => {
   try {
     const notif = await Notification.create({ user: userId, title, message, type });
-    global.io?.to(`user_${userId}`).emit("notification", notif);
+    getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {
     console.error("❌ Notify failed:", e.message);
   }

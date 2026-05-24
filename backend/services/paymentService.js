@@ -2,6 +2,7 @@
 import Payment         from "../models/Payment.js";
 import MpesaTransaction from "../models/MpesaTransaction.js";
 import { stkPush }     from "./mpesaService.js";
+import { getIO } from "../utils/io.js";
 
 const formatPhone = (phone) => {
   if (!phone) return null;
@@ -145,7 +146,7 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
   }
 
   // ── EMIT: user gets real-time confirmation ──────────────────
-  const io = global.io;
+  const io = getIO();
   if (io) {
     const payload = { checkoutID: checkoutRequestID, receipt, paymentId: payment._id };
 
@@ -177,7 +178,7 @@ export const failPayment = async (checkoutRequestID, resultDesc = "") => {
   ).catch(() => {});
 
   // ── EMIT failure ────────────────────────────────────────────
-  const io = global.io;
+  const io = getIO();
   if (io) {
     const payload = { checkoutID: checkoutRequestID, reason: resultDesc };
     io.to(`user_${payment.user}`).emit("paymentFailed", payload);

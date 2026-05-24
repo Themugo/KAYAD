@@ -4,6 +4,7 @@ import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
 import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { getIO } from "../utils/io.js";
 
 // =============================
 // 📄 GET ALL ESCROWS (ADMIN)
@@ -113,7 +114,7 @@ export const confirmDelivery = async (req, res) => {
       const UserModel = (await import("../models/User.js")).default;
       const seller = await UserModel.findById(escrow.seller).select("phone notifications");
       if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(seller.phone, `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`).catch(() => {});
+        sendSMS(seller.phone, `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     } catch (_) {}
 
@@ -150,8 +151,8 @@ export const requestRelease = async (req, res) => {
     await escrow.save();
 
     // Notify admin via socket
-    if (global.io) {
-      global.io.emit("adminAlert", {
+    if (getIO()) {
+      getIO().emit("adminAlert", {
         type: "escrow_release_requested",
         message: `Buyer requested release of escrow KES ${Number(escrow.amount).toLocaleString("en-KE")} for ${escrow.car?.title || "vehicle"}`,
         escrowId: escrow._id,
@@ -182,21 +183,21 @@ export const notifyEscrowReleased = async (escrow) => {
     if (populated?.seller?._id) {
       const seller = await UserModel.findById(populated.seller._id).select("phone notifications");
       if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(seller.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`).catch(() => {});
+        sendSMS(seller.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
     // 📱 SMS to buyer (if phone known)
     if (populated?.buyer) {
       const buyer = await UserModel.findById(populated.buyer).select("phone notifications");
       if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(buyer.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`).catch(() => {});
+        sendSMS(buyer.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
-    global.io?.to(`user_${populated?.seller?._id}`).emit("escrowReleased", {
+    getIO()?.to(`user_${populated?.seller?._id}`).emit("escrowReleased", {
       escrowId: populated?._id,
       amount:   populated?.amount,
     });
-    global.io?.to(`user_${populated?.buyer}`).emit("escrowReleased", {
+    getIO()?.to(`user_${populated?.buyer}`).emit("escrowReleased", {
       escrowId: populated?._id,
       amount:   populated?.amount,
     });
@@ -221,10 +222,10 @@ export const notifyEscrowRefunded = async (escrow) => {
     if (populated?.buyer?._id) {
       const buyer = await UserModel.findById(populated.buyer._id).select("phone notifications");
       if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(buyer.phone, `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`).catch(() => {});
+        sendSMS(buyer.phone, `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
-    global.io?.to(`user_${populated?.buyer?._id}`).emit("escrowRefunded", {
+    getIO()?.to(`user_${populated?.buyer?._id}`).emit("escrowRefunded", {
       escrowId: populated?._id,
       amount:   populated?.amount,
     });
@@ -304,8 +305,8 @@ export const releaseEscrow = async (req, res) => {
     // =============================
     // 🔥 REALTIME UPDATE
     // =============================
-    if (global.io) {
-      global.io.to(escrow.car.toString()).emit("escrowReleased", {
+    if (getIO()) {
+      getIO().to(escrow.car.toString()).emit("escrowReleased", {
         escrowId: escrow._id,
         sellerAmount,
         commission,
@@ -407,8 +408,8 @@ export const refundEscrow = async (req, res) => {
     // =============================
     // 🔥 REALTIME UPDATE
     // =============================
-    if (global.io) {
-      global.io.to(escrow.car.toString()).emit("escrowRefunded", {
+    if (getIO()) {
+      getIO().to(escrow.car.toString()).emit("escrowRefunded", {
         escrowId: escrow._id,
         amount: escrow.amount,
       });

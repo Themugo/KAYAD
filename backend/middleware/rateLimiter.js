@@ -167,6 +167,19 @@ export const createLimiter = rateLimit({
 });
 
 // =============================
+// 📸 UPLOAD LIMITER
+// =============================
+export const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, // 30 upload requests per 15 min
+  keyGenerator,
+  handler: (req, res) => {
+    console.warn("🚫 RATE LIMIT (UPLOAD):", { user: req.user?.id });
+    res.status(429).json(rateLimitMessage("Too many uploads. Try again later."));
+  },
+});
+
+// =============================
 // ⚡ SOCKET RATE LIMIT
 // =============================
 const userHits = new Map();

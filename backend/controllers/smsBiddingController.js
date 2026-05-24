@@ -6,6 +6,7 @@ import { initiatePayment } from "../services/paymentService.js";
 import { emitListingUpdate } from "../socket/socket.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendSMS } from "../utils/sms.js";
+import { getIO } from "../utils/io.js";
 
 // =============================
 // 🔢 SMS BID PARSER
@@ -40,7 +41,7 @@ export const handleInboundSms = async (req, res) => {
     }
 
     // Look up registered SMS bidder
-    const smsBidder = await SmsBidder.findOne({ phone: cleanedPhone, active: true }).populate("subscriptions.car");
+    const smsBidder = await SmsBidder.findOne({ phone: cleanedPhone, active: true }).populate("subscriptions.car", "title brand model year auctionStatus currentBid auctionEnd");
     if (!smsBidder || smsBidder.subscriptions.length === 0) {
       await sendSMS(cleanedPhone, "You are not registered for SMS bidding. Visit KAYAD to link your phone.");
       return res.json({ success: true, message: "Unregistered phone" });
@@ -105,8 +106,8 @@ export const handleInboundSms = async (req, res) => {
     }
 
     // Socket events
-    if (global.io) {
-      global.io.to(`car_${car._id}`).emit("auctionUpdate", {
+    if (getIO()) {
+      getIO().to(`car_${car._id}`).emit("auctionUpdate", {
         carId: car._id.toString(),
         currentBid: amount,
       });

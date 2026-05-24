@@ -89,9 +89,11 @@ export async function reseed() {
   const created = { webhost: [], admin: [], demos: [], staff: [], dealers: [], cars: 0 };
 
   const isProd = process.env.NODE_ENV === "production";
-  const devFallback = (pw) => {
-    if (isProd) throw new Error(`Seed password required via env var in production`);
-    console.warn(`⚠️  Using dev-only fallback password — set SEED_* env vars for production`);
+  const { randomBytes } = await import("crypto");
+  const devFallback = (label) => {
+    if (isProd) throw new Error(`Seed password required via env var (${label}) in production`);
+    const pw = randomBytes(16).toString("base64url") + "!A1";
+    console.warn(`⚠️  Generated random dev password for ${label} — set SEED_* env vars for production`);
     return pw;
   };
 
@@ -99,7 +101,7 @@ export async function reseed() {
   // 1. WEBHOST (IMMUTABLE SUPERADMIN) — owns the platform
   // ══════════════════════════════════════════════════════════
   const webhostEmail    = process.env.SEED_ADMIN_EMAIL;
-  const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("Jimmy@Kayad2026!");
+  const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PASSWORD");
   const webhostName     = process.env.SEED_ADMIN_NAME || "Jimmy Mugo (Webhost)";
 
   // Provision EVERY configured platform owner (WEBHOIST_EMAIL may be a
@@ -130,8 +132,7 @@ export async function reseed() {
   // ══════════════════════════════════════════════════════════
   // 2. PLATFORM ADMIN
   // ══════════════════════════════════════════════════════════
-  const adminAcc = await User.findOne({ email: "admin@kayad.space" });
-  const adminPw = process.env.SEED_ADMIN_PW || devFallback("Admin@Kayad2026!");
+  const adminPw = process.env.SEED_ADMIN_PW || devFallback("SEED_ADMIN_PW");
   await upsertUser(
     { email: "admin@kayad.space" },
     { name: "Platform Admin", email: "admin@kayad.space", password: adminPw, role: "admin", approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
@@ -142,9 +143,9 @@ export async function reseed() {
   // 3. DEMO ACCOUNTS (3 only — Dealer, Seller, Buyer)
   // ══════════════════════════════════════════════════════════
   const demos = [
-    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || devFallback("Dealer@Kayad2026!"), role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || devFallback("Seller@Kayad2026!"), role: "broker", approved: true, businessName: "Private Seller", mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || devFallback("Buyer@Kayad2026!"),  role: "user",   approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Demo Dealer",  email: "dealer@kayad.space", password: process.env.SEED_DEALER_PW || devFallback("SEED_DEALER_PW"), role: "dealer", approved: true, businessName: "Kayad Motors Demo", location: "Nairobi", dealerPackage: "starter", dealerRating: 4.7, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Demo Seller",  email: "seller@kayad.space", password: process.env.SEED_SELLER_PW || devFallback("SEED_SELLER_PW"), role: "broker", approved: true, businessName: "Private Seller", mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Demo Buyer",   email: "buyer@kayad.space",  password: process.env.SEED_BUYER_PW  || devFallback("SEED_BUYER_PW"),  role: "user",   approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
   ];
 
   for (const acc of demos) {
@@ -155,8 +156,8 @@ export async function reseed() {
   // 3b. ADDITIONAL DEALER ACCOUNTS (Elite + Pending)
   // ══════════════════════════════════════════════════════════
   const extraDealers = [
-    { name: "Elite Dealer", email: "elite@kayad.space", password: process.env.SEED_ELITE_PW || devFallback("Elite@Kayad2026!"), role: "dealer", approved: true, businessName: "Elite Motors Kenya", location: "Nairobi", dealerPackage: "elite", dealerRating: 4.9, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Pending Dealer", email: "pending@kayad.space", password: process.env.SEED_PENDING_PW || devFallback("Pending@Kayad2026!"), role: "dealer", approved: false, businessName: "New Ventures Ltd", location: "Nairobi", mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Elite Dealer", email: "elite@kayad.space", password: process.env.SEED_ELITE_PW || devFallback("SEED_ELITE_PW"), role: "dealer", approved: true, businessName: "Elite Motors Kenya", location: "Nairobi", dealerPackage: "elite", dealerRating: 4.9, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Pending Dealer", email: "pending@kayad.space", password: process.env.SEED_PENDING_PW || devFallback("SEED_PENDING_PW"), role: "dealer", approved: false, businessName: "New Ventures Ltd", location: "Nairobi", mustChangePassword: true, isDemo: true, emailVerified: true },
   ];
 
   for (const acc of extraDealers) {
@@ -167,13 +168,13 @@ export async function reseed() {
   // 3c. STAFF ACCOUNTS (departmental roles)
   // ══════════════════════════════════════════════════════════
   const staffAccounts = [
-    { name: "HR Manager",       email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("Hr@Kayad2026!"),     role: "hr",              approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Accounts Officer", email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW || devFallback("Acc@Kayad2026!"),    role: "accounts",        approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Escrow Officer",   email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW   || devFallback("Escrow@Kayad2026!"), role: "escrow_officer",   approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Marketing Lead",   email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("Market@Kayad2026!"),  role: "marketing",       approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Ad Manager",       email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("Ads@Kayad2026!"),    role: "ad_manager",      approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Tech Support",     email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("Support@Kayad2026!"), role: "technical_support", approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
-    { name: "Moderator",        email: "mod@kayad.space",       password: process.env.SEED_MOD_PW     || devFallback("Mod@Kayad2026!"),    role: "moderator",       approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "HR Manager",       email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("SEED_HR_PW"),      role: "hr",              approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Accounts Officer", email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"), role: "accounts",        approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Escrow Officer",   email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW   || devFallback("SEED_ESCROW_PW"),  role: "escrow_officer",   approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Marketing Lead",   email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("SEED_MARKET_PW"),  role: "marketing",       approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Ad Manager",       email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("SEED_ADS_PW"),     role: "ad_manager",      approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Tech Support",     email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"), role: "technical_support", approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
+    { name: "Moderator",        email: "mod@kayad.space",       password: process.env.SEED_MOD_PW     || devFallback("SEED_MOD_PW"),     role: "moderator",       approved: true, mustChangePassword: true, isDemo: true, emailVerified: true },
   ];
 
   for (const acc of staffAccounts) {

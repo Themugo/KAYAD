@@ -3,6 +3,7 @@
 import AdminAlert from "../models/AdminAlert.js";
 import { sendEmail } from "../services/email.service.js";
 import { sendSMS } from "../utils/sms.js";
+import { getIO } from "./io.js";
 
 // =============================
 // ⚙️ CONFIG
@@ -37,8 +38,8 @@ export const triggerAdminAlert = async (
     // =============================
     // ⚡ REAL-TIME (SOCKET)
     // =============================
-    if (global.io) {
-      global.io.to("admins").emit("adminAlert", {
+    if (getIO()) {
+      getIO().to("admins").emit("adminAlert", {
         id: alert._id,
         ...payload,
       });

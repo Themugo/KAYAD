@@ -2,6 +2,7 @@ import Notification from "../models/Notification.js";
 import { sendEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { withRetry } from "../utils/retry.js";
+import { getIO } from "../utils/io.js";
 
 export const sendNotification = async ({
   userId,
@@ -20,15 +21,15 @@ export const sendNotification = async ({
       read: false,
     }), { retries: 1, baseDelayMs: 200 });
 
-    if (global.io) {
+    if (getIO()) {
       const payload = {
         id: notification._id,
         title,
         message,
         type,
       };
-      global.io.to(userId.toString()).emit("notification", payload);
-      global.io.to(`user_${userId.toString()}`).emit("notification", payload);
+      getIO().to(userId.toString()).emit("notification", payload);
+      getIO().to(`user_${userId.toString()}`).emit("notification", payload);
     }
 
     if (email) {
