@@ -5,18 +5,29 @@ export default function AuctionSneakPeek({ cars = [] }) {
   const [upcoming, setUpcoming] = useState([]);
 
   useEffect(() => {
-    const withCountdown = cars.filter(c => c.auctionStatus === 'live' || c.auctionStatus === 'scheduled').slice(0, 6).map(c => {
-      const end = c.auctionEnd ? new Date(c.auctionEnd) : new Date(Date.now() + 86400000);
-      const diff = end - new Date();
-      const days = Math.floor(diff / 86400000);
-      const hrs = Math.floor((diff % 86400000) / 3600000);
-      return {
-        ...c,
-        timeUntil: diff > 0 ? `${days}d ${hrs}h` : 'Ending soon',
-        image: c.images?.[0]?.url || c.images?.[0] || '',
-      };
-    });
-    setUpcoming(withCountdown);
+    const now = Date.now();
+
+    // Only show cars with a future auctionStart — truly upcoming, not static status
+    const scheduled = cars
+      .filter(c => {
+        const start = c.auctionStart ? new Date(c.auctionStart).getTime() : 0;
+        return start > now;
+      })
+      .sort((a, b) => new Date(a.auctionStart) - new Date(b.auctionStart))
+      .slice(0, 6)
+      .map(c => {
+        const start = new Date(c.auctionStart);
+        const diff = start - now;
+        const days = Math.floor(diff / 86400000);
+        const hrs = Math.floor((diff % 86400000) / 3600000);
+        return {
+          ...c,
+          timeUntil: days > 0 ? `${days}d ${hrs}h` : `${hrs}h`,
+          image: c.images?.[0]?.url || c.images?.[0] || '',
+        };
+      });
+
+    setUpcoming(scheduled);
   }, [cars]);
 
   if (upcoming.length === 0) return null;

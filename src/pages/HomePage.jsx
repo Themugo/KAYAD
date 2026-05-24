@@ -42,11 +42,15 @@ const LiveTicker = ({ count }) => {
   const [scrollPos, setScrollPos] = useState(0);
   const tickerRef = useRef(null);
   useEffect(() => {
+    if (!count) return;
     const iv = setInterval(() => {
-      setScrollPos(prev => (prev + 1) % 200);
+      setScrollPos(prev => (prev + 0.5) % 2000);
     }, 30);
     return () => clearInterval(iv);
-  }, []);
+  }, [count]);
+
+  if (!count) return null;
+
   return (
     <div style={{
       background: 'linear-gradient(90deg, rgba(239,68,68,0.08), rgba(239,68,68,0.03))',
@@ -55,21 +59,17 @@ const LiveTicker = ({ count }) => {
       padding: '4px 0',
       overflow: 'hidden',
       position: 'relative',
+      zIndex: 1,
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 24, whiteSpace: 'nowrap',
         transform: `translateX(${-scrollPos}px)`,
-        transition: 'transform 0.03s linear',
       }} ref={tickerRef}>
-        {Array.from({ length: 8 }).map((_, i) => (
+        {Array.from({ length: 12 }).map((_, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.06em' }}>
               🔴 {count} {count === 1 ? 'CAR' : 'CARS'} LIVE NOW — BIDDING OPEN
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.15)' }}>◆</span>
-            <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 600 }}>
-              NEXT AUCTION CLOSING SOON
             </span>
             <span style={{ color: 'rgba(255,255,255,0.15)' }}>◆</span>
           </div>
@@ -92,16 +92,38 @@ export default function HomePage() {
   useEffect(() => {
     carsAPI.list({ page: 1, limit: 50, sort: '' }).then(data => {
       const all = data.cars || data.data || [];
-      const live = all.filter(c => c.auctionStatus === 'live');
-      const promoted = all.filter(c => c.isPromoted && c.auctionStatus !== 'live');
-      const buyNow = all.filter(c => c.auctionStatus !== 'live');
+      const now = Date.now();
+
+      // Time-aware filtering — don't just trust the static auctionStatus field
+      const live = all.filter(c => {
+        const start = c.auctionStart ? new Date(c.auctionStart).getTime() : 0;
+        const end = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
+        return start > 0 && end > 0 && start <= now && end > now;
+      });
+
+      const upcoming = all.filter(c => {
+        const start = c.auctionStart ? new Date(c.auctionStart).getTime() : 0;
+        return start > now;
+      }).sort((a, b) => new Date(a.auctionStart) - new Date(b.auctionStart));
+
+      const nonAuction = all.filter(c => {
+        const start = c.auctionStart ? new Date(c.auctionStart).getTime() : 0;
+        const end = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
+        const isLive = start > 0 && end > 0 && start <= now && end > now;
+        const isSched = start > now;
+        return !isLive && !isSched;
+      });
+
+      const promoted = nonAuction.filter(c => c.isPromoted);
+      const buyNow = nonAuction;
+
       setLiveAuctions(live.slice(0, 4));
-      // Elite Selection = promoted picks, topped up with other buy-now cars to 4
       setFeatured([...promoted, ...buyNow.filter(c => !c.isPromoted)].slice(0, 4));
       setRecent(buyNow.slice(0, 8));
       setStats({
         totalCars:    all.length,
         liveAuctions: live.length,
+        upcoming:     upcoming.length,
         buyNow:       buyNow.filter(c => c.allowBuy !== false).length,
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
@@ -273,19 +295,31 @@ export default function HomePage() {
               >View All Auctions →</Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-              {liveAuctions.map(car => (
-                <div key={car._id} style={{ position: 'relative' }}>
-                  <div style={{
-                    position: 'absolute', top: 8, left: 8, zIndex: 2,
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    background: 'rgba(239,68,68,0.9)', borderRadius: 6, padding: '3px 8px',
-                  }}>
-                    <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.5s infinite' }} />
-                    <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.06em' }}>LIVE</span>
+              {liveAuctions.map(car => {
+                const endTime = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+                const remaining = endTime - Date.now();
+                const hrs = Math.max(0, Math.floor(remaining / 3600000));
+                const mins = Math.max(0, Math.floor((remaining % 3600000) / 60000));
+                const secs = Math.max(0, Math.floor((remaining % 60000) / 1000));
+                const timeStr = remaining > 0 ? `${hrs}h ${mins}m ${secs}s` : 'Ending soon';
+
+                return (
+                  <div key={car._id} style={{ position: 'relative' }}>
+                    <div style={{
+                      position: 'absolute', top: 8, left: 8, zIndex: 2,
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      background: 'rgba(239,68,68,0.9)', borderRadius: 6, padding: '3px 10px',
+                    }}>
+                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.5s infinite' }} />
+                      <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.06em' }}>LIVE</span>
+                      <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.7)', fontWeight: 600, marginLeft: 2 }}>
+                        {timeStr}
+                      </span>
+                    </div>
+                    <CartyGrid car={car} />
                   </div>
-                  <CartyGrid key={car._id} car={car} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

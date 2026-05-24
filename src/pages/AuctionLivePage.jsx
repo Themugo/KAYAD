@@ -261,7 +261,13 @@ export default function AuctionLivePage() {
 
   const minBid = currentBid + 5000;
   const isOwner = user?.id === car?.dealer?._id?.toString() || user?.id === car?.dealer?.toString();
-  const auctionLive = car?.auctionStatus === 'live';
+
+  // Time-aware: is the auction actually live right now?
+  const _now = Date.now();
+  const _aStart = car?.auctionStart ? new Date(car.auctionStart).getTime() : 0;
+  const _aEnd = car?.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+  const auctionLive = _aStart > 0 && _aEnd > 0 && _aStart <= _now && _aEnd > _now;
+
   const reserveMet = !car?.reservePrice || currentBid >= car.reservePrice;
 
   // Leaderboard sorted by highest bid

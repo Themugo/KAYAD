@@ -142,7 +142,7 @@ export default function AdminCars() {
                       </td>
                       <td>
                         <span className={`badge ${STATUS_BADGE[car.auctionStatus] || 'badge-muted'}`}>
-                          {car.auctionStatus === 'live' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
+                          {(() => { const s = car.auctionStart ? new Date(car.auctionStart).getTime() : 0; const e = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0; const n = Date.now(); return s > 0 && e > 0 && s <= n && e > n; })() && <span className="live-dot" style={{ width: 6, height: 6 }} />}
                           {car.auctionStatus || 'listed'}
                         </span>
                       </td>

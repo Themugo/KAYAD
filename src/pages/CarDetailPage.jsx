@@ -113,7 +113,13 @@ export default function CarDetailPage() {
   const _dealerId = String(car?.dealer?._id || car?.dealer || '');
   const isOwner = !!(_userId && _dealerId && _userId === _dealerId);
   const canManage = isOwner || isAdmin;
-  const isLive = car?.auctionStatus === 'live';
+
+  // Time-aware auction status
+  const _now = Date.now();
+  const _auctionStart = car?.auctionStart ? new Date(car.auctionStart).getTime() : 0;
+  const _auctionEnd = car?.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+  const isLive = _auctionStart > 0 && _auctionEnd > 0 && _auctionStart <= _now && _auctionEnd > _now;
+
   const dealer = car?.dealer;
   const dv = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
 

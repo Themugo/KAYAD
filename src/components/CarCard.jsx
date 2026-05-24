@@ -18,9 +18,16 @@ const CarCard = memo(function CarCard({
   const coverIdx = car.coverImage ?? 0;
   const img = car.images?.[coverIdx]?.url || car.images?.[coverIdx];
 
-  const isOnAuction = ['live', 'scheduled'].includes(car.auctionStatus);
+  // Time-aware auction status — don't trust static DB field alone
+  const now = Date.now();
+  const auctionStart = car.auctionStart ? new Date(car.auctionStart).getTime() : 0;
+  const auctionEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+  const isLiveNow = auctionStart > 0 && auctionEnd > 0 && auctionStart <= now && auctionEnd > now;
+  const isScheduled = auctionStart > now;
+  const isOnAuction = isLiveNow || isScheduled;
+
   const currentPrice = isOnAuction && car.currentBid > 0 ? car.currentBid : car.price;
-  const linkTo = isOnAuction ? `/auction/${car._id}` : `/cars/${car._id}`;
+  const linkTo = isLiveNow ? `/auction/${car._id}` : `/cars/${car._id}`;
   const sellerName = car.dealer?.name || car.dealer?.businessName || '';
   const isBank = car.dealer?.isBank || car.bankOwned;
 
@@ -58,16 +65,29 @@ const CarCard = memo(function CarCard({
           <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
 
           {/* Badges */}
-          {isOnAuction && (
+          {isLiveNow && (
             <div className="absolute top-3 left-3">
-              <span className="badge badge-gold flex items-center gap-1.5 px-3 py-1 text-xs font-bold tracking-wider">
-                On Auction
+              <span className="badge badge-gold flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider"
+                style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+                LIVE
+              </span>
+            </div>
+          )}
+          {isScheduled && (
+            <div className="absolute top-3 left-3">
+              <span className="badge badge-gold flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider">
+                Upcoming
               </span>
             </div>
           )}
           {car.isDemo && (
             <div className="absolute top-3 right-3">
-              <span className="badge badge-orange text-xs font-bold">DEMO</span>
+              <span style={{
+                fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
+                background: 'rgba(249,115,22,0.85)', color: '#fff',
+                padding: '2px 6px', borderRadius: 4,
+              }}>DEMO</span>
             </div>
           )}
 

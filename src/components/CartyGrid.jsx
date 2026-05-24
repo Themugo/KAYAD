@@ -32,8 +32,16 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   if (!car) return null;
 
   const isCompared = isComparing(car._id);
-  const isOnAuction = ['live', 'scheduled'].includes(car.auctionStatus);
-  const isLiveAuction = car.auctionStatus === 'live';
+
+  // Time-aware auction status
+  const now = Date.now();
+  const auctionStart = car.auctionStart ? new Date(car.auctionStart).getTime() : 0;
+  const auctionEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+  const isLiveNow = auctionStart > 0 && auctionEnd > 0 && auctionStart <= now && auctionEnd > now;
+  const isScheduled = auctionStart > now;
+  const isOnAuction = isLiveNow || isScheduled;
+  const isLiveAuction = isLiveNow;
+
   const detailTo = `/cars/${car._id}`;
   const auctionTo = `/auction/${car._id}`;
   const linkTo = detailTo;
@@ -66,16 +74,27 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2">
-              {isOnAuction && (
-                <div className="badge badge-gold text-xs">On Auction</div>
+              {isLiveNow && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
+                  style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
+                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+                  LIVE
+                </div>
               )}
+              {isScheduled && <div className="badge badge-gold text-xs">Upcoming</div>}
               {car.ntsaVerified && (
                 <div className="badge badge-green text-xs">NTSA OK</div>
               )}
             </div>
 
             {car.isDemo && (
-              <div className="absolute top-3 right-3 badge badge-orange text-xs">DEMO</div>
+              <div className="absolute top-3 right-3">
+                <span style={{
+                  fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
+                  background: 'rgba(249,115,22,0.85)', color: '#fff',
+                  padding: '2px 6px', borderRadius: 4,
+                }}>DEMO</span>
+              </div>
             )}
           </div>
 
@@ -162,8 +181,21 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-              {isOnAuction && <div className="badge badge-gold">On Auction</div>}
-              {car.isDemo && <div className="badge badge-orange">DEMO</div>}
+              {isLiveNow && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
+                  style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
+                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+                  LIVE
+                </div>
+              )}
+              {isScheduled && <div className="badge badge-gold text-[9px]">Upcoming</div>}
+              {car.isDemo && (
+                <span style={{
+                  fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
+                  background: 'rgba(249,115,22,0.85)', color: '#fff',
+                  padding: '2px 6px', borderRadius: 4, display: 'inline-block',
+                }}>DEMO</span>
+              )}
             </div>
 
             {car.year && (

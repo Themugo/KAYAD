@@ -32,7 +32,12 @@ export default function Navbar({ branding }) {
       carsAPI.list({ limit: 50, category: 'all' })
         .then(data => {
           const all = data.cars || data.data || [];
-          setHasLiveAuction(all.some(c => c.auctionStatus === 'live'));
+          const now = Date.now();
+          setHasLiveAuction(all.some(c => {
+            const start = c.auctionStart ? new Date(c.auctionStart).getTime() : 0;
+            const end = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
+            return start > 0 && end > 0 && start <= now && end > now;
+          }));
         })
         .catch(() => {});
     };
