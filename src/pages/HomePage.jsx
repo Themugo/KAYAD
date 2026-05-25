@@ -510,76 +510,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════
-          FOOTER
-          ════════════════════════════════════════════════════════ */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.04)', padding: '36px 28px 24px' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 32, marginBottom: 28 }}>
-            <div>
-              <div style={{
-                width: 36, height: 36, borderRadius: 10,
-                background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(212,196,168,0.25)', marginBottom: 10,
-              }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
-              </div>
-              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', lineHeight: 1.6, maxWidth: 240, margin: 0 }}>
-                Kenya's premium automotive marketplace. Buy, sell, and bid on verified vehicles with secure M-Pesa escrow.
-              </p>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Browse</div>
-              {[
-                { to: '/showroom', label: 'Gallery' },
-                { to: '/auctions/calendar', label: 'Live Auctions' },
-                { to: '/showroom?sort=price_asc', label: 'Best Deals' },
-              ].map(({ to, label }) => (
-                <Link key={to} to={to} style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 8, transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
-                >{label}</Link>
-              ))}
-            </div>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Sell</div>
-              {[
-                { to: '/register?role=dealer', label: 'List a Car' },
-                { to: '/register?role=dealer', label: 'Become a Dealer' },
-                { to: '/dealer', label: 'Dealer Hub' },
-              ].map(({ to, label }) => (
-                <Link key={to} to={to} style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 8, transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
-                >{label}</Link>
-              ))}
-            </div>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Support</div>
-              {[
-                { to: '/about', label: 'About Us' },
-                { to: '/contact', label: 'Contact' },
-                { to: '/privacy', label: 'Privacy Policy' },
-                { to: '/terms', label: 'Terms of Service' },
-              ].map(({ to, label }) => (
-                <Link key={to} to={to} style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.25)', textDecoration: 'none', marginBottom: 8, transition: 'color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.55)'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
-                >{label}</Link>
-              ))}
-            </div>
-          </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>
-              © {new Date().getFullYear()} Kayad Ltd. All rights reserved.
-            </div>
-            <div style={{ display: 'flex', gap: 14, fontSize: 11, color: 'rgba(255,255,255,0.15)' }}>
-              <span>🇰🇪 Nairobi, Kenya</span>
-            </div>
-          </div>
-        </div>
-      </footer>
+
     </div>
     </>
   );
