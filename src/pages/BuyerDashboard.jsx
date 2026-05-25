@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI, bidsAPI } from '../api/api';
+import BackButton from '../components/BackButton';
 
 function StatCard({ icon, label, value, sub, accent = 'var(--gold)', to }) {
   const inner = (
@@ -187,6 +188,7 @@ export default function BuyerDashboard() {
         borderBottom: '1px solid var(--border)', padding: '40px 0 36px',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
+          <BackButton fallback="/" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 12, padding: 0 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
               Buyer Dashboard

@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Car, PlusCircle, Gavel, TrendingUp,
-  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList,
+  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList, X,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -53,14 +53,26 @@ export default function DealerSidebar({ mobileOpen, onToggle }) {
             Dealer
           </span>
         )}
-        <button
-          type="button"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', display: 'flex', padding: 4 }}
-        >
-          {collapsed ? <PanelRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+          {mobileOpen && (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label="Close sidebar"
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', padding: 4 }}
+            >
+              <X size={16} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', display: 'flex', padding: 4 }}
+          >
+            {collapsed ? <PanelRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        </div>
       </div>
 
       <div style={{

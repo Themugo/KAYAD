@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DealerSidebar from './DealerSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Link } from 'react-router-dom';
@@ -28,6 +28,11 @@ export default function DealerLayout({ children }) {
   const loc = useLocation();
   const segments = loc.pathname.split('/').filter(Boolean);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#050505' }}>

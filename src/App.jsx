@@ -38,6 +38,7 @@ import AppLayout from './components/AppLayout';
 import AdminLayout from './components/AdminLayout';
 import DealerLayout from './components/DealerLayout';
 import AppInstallPrompt from './components/AppInstallPrompt';
+import useSwipeBack from './hooks/useSwipeBack';
 
 // ─── Public / auth pages ────────────────────────────────────────────────
 const HomePage             = lazy(() => import('./pages/HomePage'));
@@ -154,6 +155,7 @@ function ScrollToTop() {
 
 // ─── Root component ─────────────────────────────────────────────────────
 export default function App() {
+  useSwipeBack();
   return (
     <ErrorBoundary>
       <BrowserRouter>

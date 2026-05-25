@@ -280,6 +280,12 @@ export default function Navbar({ branding }) {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex flex-col h-full">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>Menu</span>
+                  <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-2 hover:bg-surface rounded-xl transition-colors" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', padding: 8 }}>
+                    <X size={22} />
+                  </button>
+                </div>
                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
                   <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                     Home

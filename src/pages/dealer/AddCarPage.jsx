@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { carsAPI } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import BackButton from '../../components/BackButton';
 import { CheckCircle, Clock } from 'lucide-react';
 
 const BRANDS  = ['Toyota','Mercedes-Benz','BMW','Land Rover','Subaru','Mazda','Nissan','Honda','Volkswagen','Lexus','Audi','Mitsubishi','Hyundai','Kia','Ford','Jeep','Peugeot','Isuzu'];
@@ -148,6 +149,7 @@ export default function AddCarPage() {
 
         {/* Header */}
         <div style={{ marginBottom: 32 }}>
+          <BackButton fallback="/dealer" className="back-btn" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 12, padding: 0 }} />
           <div className="section-eyebrow">Dealer Hub</div>
           <h2>List a Car</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>

@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
-  Gift, MessageSquare, TrendingUp, Bell,
+  Gift, MessageSquare, TrendingUp, Bell, X,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
@@ -73,10 +73,18 @@ export default function AdminSidebar({ mobileOpen, onToggle }) {
         display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between',
       }}>
         {!collapsed && <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Admin</span>}
-        <button onClick={() => setCollapsed(!collapsed)}
-          style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', display: 'flex', padding: 4 }}>
-          {collapsed ? <PanelRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+          {mobileOpen && (
+            <button onClick={onToggle} aria-label="Close sidebar"
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', padding: 4 }}>
+              <X size={16} />
+            </button>
+          )}
+          <button onClick={() => setCollapsed(!collapsed)}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', display: 'flex', padding: 4 }}>
+            {collapsed ? <PanelRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
+        </div>
       </div>
 
       <div style={{

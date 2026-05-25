@@ -7,6 +7,7 @@ import { authAPI, paymentsAPI, reviewsAPI, carsAPI, formatKES } from '../api/api
 import { timeAgo, formatDate, initials, validatePassword } from '../utils/helpers';
 import { SkeletonRow, SkeletonText } from '../components/Skeleton';
 import ReferralStats from '../components/ReferralStats';
+import BackButton from '../components/BackButton';
 
 const TABS = ['Profile', 'Security', 'Activity', 'Reviews', 'Referrals'];
 
@@ -82,6 +83,7 @@ export default function ProfilePage() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 40, paddingBottom: 40, maxWidth: 780 }}>
+        <BackButton fallback="/" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }} />
 
         {/* ─── Header card ─── */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, marginBottom: 36, flexWrap: 'wrap' }}>

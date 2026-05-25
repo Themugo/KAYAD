@@ -3,7 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, dealerAPI, dealerAuctionAPI, formatKES, api } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { Save, Trash2, ChevronLeft, Star, Zap, Image, Settings, Pin, Upload, Plus, Copy } from 'lucide-react';
+import BackButton from '../../components/BackButton';
+import { Save, Trash2, Star, Zap, Image, Settings, Pin, Upload, Plus, Copy } from 'lucide-react';
 
 const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai','Porsche','Land Rover','Jaguar'];
 const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hybrid','CNG'];
@@ -229,9 +230,7 @@ export default function EditCarPage() {
     <div style={{ background: '#050505', minHeight: '100vh' }}>
       <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '28px 0 0' }}>
         <div style={{ maxWidth: 980, margin: '0 auto', padding: '0 28px' }}>
-          <button onClick={() => navigate('/dealer')} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }}>
-            <ChevronLeft size={14} /> Back to My Listings
-          </button>
+          <BackButton fallback="/dealer" label="Back to My Listings" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 5 }}>Edit Listing</div>

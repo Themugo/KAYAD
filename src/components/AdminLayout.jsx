@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
@@ -15,6 +15,11 @@ export default function AdminLayout({ children }) {
   const { user, isAuth, loading } = useAuth();
   const loc = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
 
   if (loading) return null;
 
