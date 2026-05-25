@@ -4,6 +4,10 @@ import { withRetry } from "./retry.js";
 
 const { SMS_PROVIDER = "mock", AT_API_KEY, AT_USERNAME = "sandbox", AT_SENDER_ID } = process.env;
 
+if (SMS_PROVIDER === "mock" || !AT_API_KEY) {
+  console.warn("⚠️ SMS is in MOCK mode — no real messages will be sent. Set AT_API_KEY and SMS_PROVIDER=africastalking to enable.");
+}
+
 const formatPhone = (phone) => {
   if (!phone) return null;
   let p = phone.toString().trim();

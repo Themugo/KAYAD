@@ -1,4 +1,5 @@
 import Contact from "../models/Contact.js";
+import { sendEmail } from "../services/email.service.js";
 
 export const submitContact = async (req, res) => {
   try {
@@ -6,7 +7,21 @@ export const submitContact = async (req, res) => {
     if (!name || !email || !subject || !message) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
-    await Contact.create({ name, email, subject, message });
+    const contact = await Contact.create({ name, email, subject, message });
+
+    sendEmail({
+      to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
+      subject: `Contact form: ${subject}`,
+      html: `<div style="font-family:sans-serif;background:#050505;color:#E2DDD5;padding:24px;max-width:500px;">
+        <h2 style="color:#D4AF37;">New Contact Form Submission</h2>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Subject:</strong> ${subject}</p>
+        <hr style="border-color:#252E3D;" />
+        <p>${message}</p>
+      </div>`,
+    });
+
     res.json({ success: true, message: "Message received. We'll get back to you soon." });
   } catch (err) {
     console.error("Contact form error:", err);
