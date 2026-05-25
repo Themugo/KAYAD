@@ -173,10 +173,10 @@ export default function AdminAuctions() {
 
                   {/* Thumbnail */}
                   <div style={{ width: 80, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
-                    {car.images?.[0]?.url
-                      ? <img src={car.images[0].url} alt={car.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {(() => { const src = car.images?.[0]?.url || car.images?.[0]; return src
+                      ? <img src={src} alt={car.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚗</div>
-                    }
+                    })()}
                   </div>
 
                   {/* Info */}

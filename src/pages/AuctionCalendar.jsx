@@ -77,7 +77,7 @@ export default function AuctionCalendar() {
               const days = Math.max(0, Math.floor(diff / 86400000));
               const hrs = Math.max(0, Math.floor((diff % 86400000) / 3600000));
               const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));
-              const image = car.images?.[0]?.url || car.images?.[0] || car.coverImage || '';
+              const image = car.images?.[0]?.url || car.images?.[0] || '';
               return (
                 <Link key={car._id} to={isLive ? `/auction/${car._id}` : `/cars/${car._id}`} style={{ textDecoration: 'none' }}>
                   <div className="card" style={{ overflow: 'hidden', transition: 'transform 0.25s, box-shadow 0.25s', border: '1px solid var(--border)' }}

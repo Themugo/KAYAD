@@ -17,14 +17,13 @@ const delay = (min = 200, max = 800) =>
 // via localStorage (blob URLs from URL.createObjectURL() are ephemeral).
 // Downscale + compress an uploaded image to a small JPEG data URL before
 // storing. Raw camera photos are 3-8 MB each as base64 and instantly blow
-// past the ~5 MB localStorage quota — which made saveCars() fail silently and
-// the dealer's listings vanish on refresh. Capping the longest edge at ~1100px
-// and re-encoding as JPEG keeps each image ~60-150 KB, so a full listing with
-// several photos persists comfortably.
+// past the ~5 MB localStorage quota. Capping the longest edge at ~800px
+// and re-encoding as JPEG keeps each image ~30-80 KB, so a full listing
+// with several photos persists comfortably even on mobile (5 MB quota).
 const fileToBase64 = (file) =>
   new Promise((resolve) => {
-    const MAX_EDGE = 1100;
-    const QUALITY = 0.72;
+    const MAX_EDGE = 800;
+    const QUALITY = 0.6;
     const reader = new FileReader();
     reader.onerror = () => resolve('');
     reader.onload = () => {

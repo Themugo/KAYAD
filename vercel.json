@@ -13,6 +13,10 @@
       "destination": "https://api.kayad.space/socket.io/$1"
     },
     {
+      "source": "/uploads/(.*)",
+      "destination": "https://api.kayad.space/uploads/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

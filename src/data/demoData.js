@@ -11,16 +11,31 @@ const DEMO_CARS_KEY = 'kayad_demo_cars';
 function saveCars() {
   try {
     localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars));
-  } catch {
-    // Quota exceeded — strip base64 images from the oldest user-added listings
-    // (keep their data + seed URL images) and retry, so we never lose listings.
+  } catch (e) {
+    // Quota exceeded — try progressive surrender so we never lose all data.
+    // Level 1: keep only cover image (index 0) for each car
+    try {
+      const trimmed = _cars.map(c => {
+        const imgs = (c.images || []).filter(im => !String(im?.url || im).startsWith('data:'));
+        const dataImages = (c.images || []).filter(im => String(im?.url || im).startsWith('data:'));
+        // Keep first data image (cover) + all non-data URLs
+        const kept = [...imgs, ...(dataImages.length > 0 ? [dataImages[0]] : [])];
+        return { ...c, images: kept.length ? kept : (c.images || []).slice(0, 1) };
+      });
+      localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
+      console.warn('[Demo] localStorage quota near limit — kept only cover images');
+      return;
+    } catch { /* level 1 failed */ }
+
+    // Level 2: strip all base64 images, keep only non-data URLs
     try {
       const trimmed = _cars.map(c => {
         const imgs = (c.images || []).filter(im => !String(im?.url || im).startsWith('data:'));
         return { ...c, images: imgs.length ? imgs : (c.images || []).slice(0, 1) };
       });
       localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
-    } catch { /* give up on persistence; in-memory state still works this session */ }
+      console.warn('[Demo] localStorage quota exceeded — base64 image data stripped');
+    } catch { /* give up; in-memory state still works this session */ }
   }
 }
 

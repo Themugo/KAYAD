@@ -33,9 +33,13 @@
     <link rel="mask-icon" href="/favicon.svg" color="#D4C4A8" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Premium typography -->
+    <!-- Critical resource hints: preconnect to third-party origins to speed up TLS + DNS -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+    <link rel="preconnect" href="https://api.kayad.space" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://api.kayad.space" />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
 
     <!-- Initial background colour so the page doesn't flash white before React mounts -->

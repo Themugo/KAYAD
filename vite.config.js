@@ -37,12 +37,12 @@ export default defineConfig(({ mode }) => {
             },
             {
               urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-              handler: 'CacheFirst',
+              handler: 'StaleWhileRevalidate',
               options: {
                 cacheName: 'images-cache',
                 expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+                  maxEntries: 200,
+                  maxAgeSeconds: 30 * 24 * 60 * 60,
                 },
               },
             }
@@ -105,10 +105,6 @@ export default defineConfig(({ mode }) => {
             // Lucide Icons code separation
             if (id.includes('node_modules/lucide-react')) {
               return 'vendor-icons';
-            }
-            // Cross-platform check (handles both Linux forward slashes and Windows backward slashes)
-            if (/[\\/]pages[\\/](admin|dealer)[\\/]/.test(id)) {
-              return 'pages-staff';
             }
           }
         }

@@ -19,32 +19,35 @@ export const isDemoMode = () => __DEMO_MODE__;
 // the @demo.com accounts work instantly regardless of real-backend state).
 export const enableDemoMode = () => { __DEMO_MODE__ = true; };
 
-export const checkBackendAvailability = async () => {
-  try {
-    await axios.get(`${BASE}/cars?limit=1`, { timeout: 2500 });
-    __DEMO_MODE__ = false;
-    return true;
-  } catch (err) {
-    // Backend is effectively unavailable on: network error, timeout,
-    // gateway errors (502/503/504 — free-tier backend asleep), or 404.
-    const s = err.response?.status;
-    const unavailable =
-      !err.response ||
-      err.code === 'ERR_NETWORK' ||
-      err.code === 'ECONNABORTED' ||
-      err.message?.includes('Network Error') ||
-      [404, 502, 503, 504].includes(s);
-    if (unavailable) {
+export const checkBackendAvailability = async (retries = 2) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000 });
+      __DEMO_MODE__ = false;
+      return true;
+    } catch (err) {
+      const s = err.response?.status;
+      const unavailable =
+        !err.response ||
+        err.code === 'ERR_NETWORK' ||
+        err.code === 'ECONNABORTED' ||
+        err.message?.includes('Network Error') ||
+        [404, 502, 503, 504].includes(s);
+      if (!unavailable) return true;
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * attempt));
+        continue;
+      }
       __DEMO_MODE__ = true;
       return false;
     }
-    return true;
   }
+  return false;
 };
 
-// Try backend on startup — if unreachable, switch to demo
+// Try backend on startup with retries
 (function initDemoCheck() {
-  checkBackendAvailability()
+  checkBackendAvailability(2)
     .then((online) => { if (online && import.meta.env.DEV) console.info('[Backend] Reachable'); })
     .catch((err) => {
       if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
