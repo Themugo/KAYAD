@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: 'prompt',
         includeAssets: ['favicon.svg', 'icon.svg', 'icon-192.png', 'icon-512.png'],
         manifest: {
           name: "Kayad – Kenya's Premium Car Marketplace",

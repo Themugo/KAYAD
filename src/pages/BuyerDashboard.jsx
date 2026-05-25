@@ -220,7 +220,7 @@ export default function BuyerDashboard() {
         ) : (
           <>
             {/* ── TAB BAR ── */}
-            <div style={{ display: 'flex', gap: 4, marginBottom: 28, borderBottom: '1px solid var(--border)', paddingBottom: 2 }}>
+            <div className="tab-bar" style={{ marginBottom: 28, paddingBottom: 2 }}>
               {['overview', 'escrows', 'bids'].map(t => (
                 <button key={t} onClick={() => setTab(t)} style={{
                   padding: '10px 20px', borderRadius: '10px 10px 0 0', border: 'none',

@@ -184,15 +184,11 @@ export default function DealerDashboard() {
           )}
 
           {/* TABS */}
-          <div style={{ display: 'flex', gap: 2 }}>
+          <div className="tab-bar" style={{ gap: 2 }}>
             {TABS.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setTab(id)} style={{
+              <button key={id} onClick={() => setTab(id)} className={`tab-btn ${tab === id ? 'active' : ''}`} style={{
                 display: 'flex', alignItems: 'center', gap: 6,
-                padding: '12px 18px', background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: 13, fontWeight: tab === id ? 700 : 500,
-                color: tab === id ? '#fff' : 'rgba(255,255,255,0.4)',
-                borderBottom: `2px solid ${tab === id ? 'var(--gold)' : 'transparent'}`,
-                transition: 'all 0.2s',
+                padding: '12px 18px',
               }}>
                 <Icon size={14} /> {label}
               </button>

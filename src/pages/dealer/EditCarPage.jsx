@@ -258,9 +258,9 @@ export default function EditCarPage() {
               </div>
             </div>
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: 2 }}>
+            <div className="tab-bar" style={{ gap: 2 }}>
               {TABS.map(({ id, label, icon: Icon }) => (
-                <button key={id} onClick={() => setTab(id)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: tab === id ? 700 : 500, color: tab === id ? '#fff' : 'rgba(255,255,255,0.4)', borderBottom: tab === id ? '2px solid var(--gold)' : '2px solid transparent', transition: 'all 0.2s' }}>
+                <button key={id} onClick={() => setTab(id)} className={`tab-btn ${tab === id ? 'active' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px' }}>
                   <Icon size={13} /> {label}
                 </button>
               ))}
