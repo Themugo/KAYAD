@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { notifAPI } from '../api/api';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
@@ -86,7 +86,7 @@ export function NotificationProvider({ children }) {
     };
   }, [isAuth, on, prependNotification]);
 
-  const markAsRead = async (id) => {
+  const markAsRead = useCallback(async (id) => {
     try {
       await notifAPI.markRead(id);
       setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
@@ -94,9 +94,9 @@ export function NotificationProvider({ children }) {
     } catch (error) {
       console.warn('Unable to mark notification as read', error);
     }
-  };
+  }, []);
 
-  const markAllRead = async () => {
+  const markAllRead = useCallback(async () => {
     try {
       await notifAPI.markAllRead();
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -104,9 +104,9 @@ export function NotificationProvider({ children }) {
     } catch (error) {
       console.warn('Unable to mark all notifications as read', error);
     }
-  };
+  }, []);
 
-  const deleteNotif = async (id) => {
+  const deleteNotif = useCallback(async (id) => {
     try {
       await notifAPI.remove(id);
       setNotifications(prev => {
@@ -117,13 +117,15 @@ export function NotificationProvider({ children }) {
     } catch (error) {
       console.warn('Unable to delete notification', error);
     }
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    notifications, unreadCount, loading,
+    fetchNotifications, markAsRead, markAllRead, deleteNotif,
+  }), [notifications, unreadCount, loading, fetchNotifications, markAsRead, markAllRead, deleteNotif]);
 
   return (
-    <NotificationContext.Provider value={{
-      notifications, unreadCount, loading,
-      fetchNotifications, markAsRead, markAllRead, deleteNotif,
-    }}>
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );

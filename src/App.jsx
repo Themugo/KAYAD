@@ -38,7 +38,6 @@ import AppLayout from './components/AppLayout';
 import AdminLayout from './components/AdminLayout';
 import DealerLayout from './components/DealerLayout';
 import AppInstallPrompt from './components/AppInstallPrompt';
-import UpdatePrompt from './components/UpdatePrompt';
 import useSwipeBack from './hooks/useSwipeBack';
 
 // ─── Public / auth pages ────────────────────────────────────────────────
@@ -166,7 +165,6 @@ export default function App() {
               <NotificationProvider>
                 <CompareProvider>
                   <AppInstallPrompt />
-                  <UpdatePrompt />
                   <ScrollToTop />
                   <Suspense fallback={<LoadingPage />}>
                     <Routes>

@@ -65,8 +65,8 @@ const runReminders = async () => {
         const { sendAuctionEndingSoonEmail } = cronEmailService;
 
         for (const userId of activeBidders) {
-          const user = await User.findById(userId).select("email name");
-          if (user?.email && typeof sendAuctionEndingSoonEmail === "function") {
+          const user = await User.findById(userId).select("email name notifications");
+          if (user?.email && user?.notifications?.email !== false && typeof sendAuctionEndingSoonEmail === "function") {
             sendAuctionEndingSoonEmail(user, car, threshold.minutes).catch(e =>
               console.warn("⚠️ Auction reminder email failed:", e.message)
             );

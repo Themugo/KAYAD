@@ -2,6 +2,7 @@
 import Payment         from "../models/Payment.js";
 import MpesaTransaction from "../models/MpesaTransaction.js";
 import { stkPush }     from "./mpesaService.js";
+import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
 
 const formatPhone = (phone) => {
@@ -109,19 +110,19 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     }
   } catch (_) {}
 
-  // ── PDF RECEIPT (fire-and-forget) ─────────────────────────
+  // ── DIGITAL RECEIPT (email + SMS + WhatsApp) ──────────────
   try {
-    const { generateReceipt } = await import("./pdfService.js");
-    const pdfBuffer = await generateReceipt({
-      title: payment.type === "escrow" ? "Escrow Payment Confirmed" : "Payment Confirmed",
-      buyerName: payment.user?.toString() || "—",
-      amount: payment.amount,
-      transactionId: receipt || payment._id.toString(),
-      carDetails: payment.car?.toString() || "—",
-      date: new Date(),
-    });
-    // Could store to file/cloud in future
-  } catch (_) { /* PDF generation non-critical */ }
+    const User = (await import("../models/User.js")).default;
+    const userDoc = await User.findById(payment.user).select("email name phone").lean();
+    if (userDoc) {
+      sendDigitalReceipt({
+        amount: payment.amount,
+        carTitle: payment.car?.toString() || "Vehicle",
+        mpesaReceipt: receipt || String(payment._id).slice(-8),
+        user: { email: userDoc.email, phone: userDoc.phone, id: userDoc._id },
+      }).catch((e) => console.warn("⚠️ Digital receipt failed:", e.message));
+    }
+  } catch (_) {}
 
   // If escrow payment, mark escrow as held
   if (payment.type === "escrow") {

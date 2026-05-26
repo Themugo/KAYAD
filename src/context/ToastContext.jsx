@@ -1,5 +1,5 @@
 // src/context/ToastContext.jsx
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 const ToastCtx = createContext(null);
 
@@ -15,7 +15,7 @@ export function ToastProvider({ children }) {
   const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
 
   return (
-    <ToastCtx.Provider value={{ toast }}>
+    <ToastCtx.Provider value={useMemo(() => ({ toast }), [toast])}>
       {children}
       <div style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {toasts.map(t => (

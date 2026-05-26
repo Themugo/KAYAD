@@ -4,6 +4,8 @@ import Bid from "../models/Bid.js";
 import Car from "../models/Car.js";
 import { createEscrow } from "../services/escrow.service.js";
 import { sendNotification } from "../services/notification.service.js";
+import { sendDigitalReceipt } from "../services/receiptService.js";
+import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
 
 const MAX_RETRIES = 3;
@@ -99,16 +101,14 @@ export const handleMpesaCallback = async (callbackData) => {
 
     await payment.save({ session });
 
-    try {
-      const { generateReceipt } = await import("./pdfService.js");
-      generateReceipt({
-        title: payment.type === "purchase" ? "Purchase Payment Confirmed" : "Payment Confirmed",
-        amount: payment.amount,
-        transactionId: receipt || payment._id.toString(),
-        carDetails: payment.car?.toString() || "—",
-        date: new Date(),
-      }).catch((e) => console.warn("⚠️ Payment callback notification failed:", e.message));
-    } catch (_) {}
+    let userDoc = null;
+    try { userDoc = await User.findById(payment.user).select("email name phone").lean(); } catch (_) {}
+    sendDigitalReceipt({
+      amount: payment.amount,
+      carTitle: payment.car?.toString() || "Vehicle",
+      mpesaReceipt: receipt || String(payment._id).slice(-8),
+      user: userDoc || { email: null, phone: null, id: payment.user },
+    }).catch((e) => console.warn("⚠️ Digital receipt failed:", e.message));
 
     if (payment.type === "bid") {
       await retry(async () => {

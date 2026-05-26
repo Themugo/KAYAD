@@ -224,10 +224,10 @@ const _authAPI = {
   profile:  ()     => isDemoToken() ? demoAPI.auth.profile() : api.get('/auth/profile').then(unwrap),
   me:       ()     => isDemoToken() ? (__DEMO_MODE__ = true, demoAPI.auth.me()) : api.get('/auth/me').then(unwrap),
   changePassword:   (body) => isDemoToken() ? demoAPI.auth.changePassword(body) : api.put('/auth/change-password', body).then(unwrap),
-  forgotPassword:   (body) => api.post('/auth/forgot-password', body).then(unwrap),
-  resetPassword:    (body) => api.post('/auth/reset-password', body).then(unwrap),
-  verifyEmail:         (token) => api.get(`/auth/verify-email/${token}`).then(unwrap),
-  resendVerification:  (body)  => api.post('/auth/resend-verification', body).then(unwrap),
+  forgotPassword:   (body) => isDemoToken() ? demoAPI.auth.forgotPassword(body) : api.post('/auth/forgot-password', body).then(unwrap),
+  resetPassword:    (body) => isDemoToken() ? demoAPI.auth.resetPassword(body) : api.post('/auth/reset-password', body).then(unwrap),
+  verifyEmail:         (token) => isDemoToken() ? demoAPI.auth.verifyEmail(token) : api.get(`/auth/verify-email/${token}`).then(unwrap),
+  resendVerification:  (body)  => isDemoToken() ? demoAPI.auth.resendVerification(body) : api.post('/auth/resend-verification', body).then(unwrap),
   updateProfile:       (body) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
 };
 export const authAPI = withDemo(_authAPI, demoAPI.auth);
@@ -361,6 +361,10 @@ const _dealerAPI = {
 
   // Activity audit log (own actions)
   getMyActivityLog: (params)     => api.get('/security-logs/my', { params }).then(unwrap),
+
+  // Dealer profile (used by DealerSetup.jsx)
+  getProfile:   ()       => api.get('/dealer/profile').then(unwrap),
+  updateProfile: (body)  => api.put('/dealer/profile', body).then(unwrap),
 };
 export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 
@@ -462,6 +466,13 @@ const _adminAPI = {
 
   // System Health (NEW)
   systemHealth:    ()          => api.get('/admin/system/health').then(unwrap),
+
+  // Inspector applications (admin)
+  inspectorApplications: (params) => api.get('/inspector-applications', { params }).then(unwrap),
+  reviewInspector: (id, action, body) => api.post(`/inspector-applications/${id}/${action}`, body).then(unwrap),
+
+  // Branding / upload logo
+  uploadLogo: (formData) => api.post('/admin/upload-logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
 };
 // Admin & webhost are real-backend only — there is no demo admin/webhost.
 // Falling back to demo data here would show a real administrator fabricated
@@ -605,6 +616,31 @@ export const adsAPI = {
   create:     (body)   => api.post('/admin/ads', body).then(unwrap),
   update:     (id, body) => api.put(`/admin/ads/${id}`, body).then(unwrap),
   remove:     (id)     => api.delete(`/admin/ads/${id}`).then(unwrap),
+};
+
+// ============================================================
+//  SMS BIDDING — routes/smsBiddingRoutes.js (/sms-bidding)
+// ============================================================
+export const smsBiddingAPI = {
+  my:          ()                => api.get('/sms-bidding/my').then(unwrap),
+  register:    (phone)           => api.post('/sms-bidding/register', { phone }).then(unwrap),
+  subscribe:   (body)            => api.post('/sms-bidding/subscribe', body).then(unwrap),
+  unsubscribe: (carId)           => api.delete(`/sms-bidding/unsubscribe/${carId}`).then(unwrap),
+};
+
+// ============================================================
+//  CONTACT — routes/contactRoutes.js (/contact)
+// ============================================================
+export const contactAPI = {
+  send: (body) => api.post('/contact', body).then(unwrap),
+};
+
+// ============================================================
+//  INSPECTOR APPLICATIONS — routes/inspectorRoutes.js
+//  (Applicant-facing — POST /apply)
+// ============================================================
+export const inspectorAPI = {
+  apply: (body) => api.post('/inspector-applications/apply', body).then(unwrap),
 };
 
 // ============================================================

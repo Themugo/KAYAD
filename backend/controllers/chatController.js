@@ -113,7 +113,7 @@ export const sendMessage = async (req, res) => {
       const otherUserId = chat.participants.find(p => String(p) !== String(req.user.id));
       if (otherUserId) {
         const otherUser = await User.findById(otherUserId).select("email name phone notifications");
-        if (otherUser?.email && typeof sendNewMessageEmail === "function") {
+        if (otherUser?.email && otherUser?.notifications?.email !== false && typeof sendNewMessageEmail === "function") {
           const fromUser = await User.findById(req.user.id).select("name");
           sendNewMessageEmail(otherUser, fromUser?.name || "A user", chat.car?.title || null).catch(e =>
             console.warn("⚠️ New message email failed:", e.message)

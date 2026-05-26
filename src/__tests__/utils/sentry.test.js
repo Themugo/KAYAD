@@ -18,11 +18,6 @@ describe('Sentry utilities', () => {
     await sentry.initSentry();
   });
 
-  it('withSentryBoundary returns the component when not initialized', () => {
-    const Comp = () => null;
-    expect(sentry.withSentryBoundary(Comp)).toBe(Comp);
-  });
-
   it('reportError logs to console when not initialized', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     sentry.reportError(new Error('test'), { context: 'test' });

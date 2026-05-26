@@ -58,15 +58,6 @@ export const initSentry = async () => {
   }
 };
 
-// Wrap a React component with Sentry error boundary
-export const withSentryBoundary = (Component, fallback = null) => {
-  if (!initialized || !Sentry) return Component;
-  return Sentry.withErrorBoundary(Component, {
-    fallback: fallback || (() => null),
-    showDialog: false,
-  });
-};
-
 // Manually report an error
 export const reportError = (err, context = {}) => {
   if (!initialized || !Sentry) {

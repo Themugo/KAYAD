@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import usePageMeta from '../hooks/usePageMeta';
 import { useToast } from '../context/ToastContext';
-import api from '../api/api';
+import { contactAPI } from '../api/api';
 
 export default function ContactPage() {
   usePageMeta('Contact Us', 'Get in touch with the Kayad team. We\'re here to help with any questions about buying, selling, or auctions.');
@@ -14,7 +14,7 @@ export default function ContactPage() {
     e.preventDefault();
     setSending(true);
     try {
-      await api.post('/contact', form);
+      await contactAPI.send(form);
       toast('Message sent! We\'ll get back to you soon.', 'success');
       setForm({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
@@ -64,20 +64,20 @@ export default function ContactPage() {
           <form onSubmit={handleSubmit} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: 28 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Name</label>
-                <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required placeholder="Your name" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label htmlFor="contact-name" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Name</label>
+                <input id="contact-name" type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required placeholder="Your name" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Email</label>
-                <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required placeholder="you@example.com" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label htmlFor="contact-email" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Email</label>
+                <input id="contact-email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required placeholder="you@example.com" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Subject</label>
-                <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} required placeholder="How can we help?" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label htmlFor="contact-subject" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Subject</label>
+                <input id="contact-subject" type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} required placeholder="How can we help?" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Message</label>
-                <textarea rows={4} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} required placeholder="Tell us more..." style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label htmlFor="contact-message" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Message</label>
+                <textarea id="contact-message" rows={4} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} required placeholder="Tell us more..." style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
               <button type="submit" disabled={sending} className="btn btn-gold btn-full" style={{ marginTop: 8 }}>
                 {sending ? 'Sending...' : 'Send Message'}

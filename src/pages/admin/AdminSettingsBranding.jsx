@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { default as api } from '../../api/api';
+import { adminAPI } from '../../api/api';
 
 const Field = ({ label, hint, children }) => (
   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:16 }}>
@@ -49,8 +49,8 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
                   const form = new FormData();
                   form.append('logo', file);
                   try {
-                    const res = await api.post('/admin/upload-logo', form, { headers:{ 'Content-Type':'multipart/form-data' } });
-                    if (res.data?.url) setBranding(p => ({...p, logoUrl:res.data.url}));
+                    const res = await adminAPI.uploadLogo(form);
+                    if (res?.url) setBranding(p => ({...p, logoUrl:res.url}));
                   } catch { alert('Upload failed'); }
                 }} style={{ fontSize:13, color:'rgba(255,255,255,0.6)' }} />
               </div>

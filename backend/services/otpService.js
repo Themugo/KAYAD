@@ -8,12 +8,22 @@ const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@kayad.space";
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
+const retry = async (fn, retries = 2, delay = 1000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try { return await fn(); }
+    catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delay * attempt));
+    }
+  }
+};
+
 const sendSMS = async (to, message) => {
   if (AT_API_KEY) {
     try {
-      await axios.post("https://api.africastalking.com/version1/messaging", {
+      await retry(() => axios.post("https://api.africastalking.com/version1/messaging", {
         username: AT_USERNAME, to, message,
-      }, { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } });
+      }, { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } }));
       return;
     } catch (err) { console.error("SMS error:", err.message); }
   }
@@ -25,7 +35,7 @@ const sendEmail = async (to, subject, text) => {
     try {
       const { default: sgMail } = await import("@sendgrid/mail");
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      await sgMail.send({ to, from: FROM_EMAIL, subject, text });
+      await retry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }));
       return;
     } catch (err) { console.error("Email error:", err.message); }
   }

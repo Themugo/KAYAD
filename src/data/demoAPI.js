@@ -282,6 +282,31 @@ const demoAuth = {
     setDemoUser(safe);
     return wrapSuccess({ user: safe, message: 'Password changed successfully' });
   },
+
+  forgotPassword: async () => {
+    await delay(300, 600);
+    return wrapSuccess({ message: 'If that email is registered, a reset link has been sent.' });
+  },
+
+  resetPassword: async () => {
+    await delay(300, 600);
+    return wrapSuccess({ message: 'Password has been reset successfully.' });
+  },
+
+  verifyEmail: async () => {
+    await delay(200, 400);
+    const user = getDemoUser();
+    if (user) {
+      user.emailVerified = true;
+      setDemoUser(user);
+    }
+    return wrapSuccess({ message: 'Email verified successfully' });
+  },
+
+  resendVerification: async () => {
+    await delay(300, 600);
+    return wrapSuccess({ message: 'Verification email sent' });
+  },
 };
 
 // ─── Demo Cars API ────────────────────────────────────────────────

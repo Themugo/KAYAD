@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setSentryUser, clearSentryUser } from '../utils/sentry';
@@ -135,8 +135,16 @@ export function AuthProvider({ children }) {
   const isAuth        = !!user;
   const isEmailVerified = !!user?.emailVerified;
 
+  const value = useMemo(() => ({
+    user, token, loading,
+    isAuth, isEmailVerified,
+    isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
+    isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
+    login, register, logout, setUser,
+  }), [user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, login, register, logout, setUser]);
+
   return (
-    <AuthCtx.Provider value={{ user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, login, register, logout, setUser }}>
+    <AuthCtx.Provider value={value}>
       {children}
     </AuthCtx.Provider>
   );

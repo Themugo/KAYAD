@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
-import api from '../api/api';
+import { inspectorAPI } from '../api/api';
 
 const SPECIALTIES = [
   'Engine & Drivetrain', 'Suspension & Steering', 'Electrical & Electronics',
@@ -42,7 +42,7 @@ export default function InspectorApply() {
     if (specialties.length === 0) { toast('Select at least one specialty', 'error'); return; }
     setSubmitting(true);
     try {
-      await api.post('/inspector-applications/apply', {
+      await inspectorAPI.apply({
         ...form,
         yearsOfExperience: Number(form.yearsOfExperience),
         specialties,

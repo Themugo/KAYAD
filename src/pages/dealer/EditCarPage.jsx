@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, dealerAPI, dealerAuctionAPI, formatKES, api } from '../../api/api';
+import { carsAPI, dealerAPI, dealerAuctionAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import BackButton from '../../components/BackButton';
@@ -358,15 +358,14 @@ export default function EditCarPage() {
                   const isDeleting = deletingIdx === i;
                   return (
                     <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: isCover ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.07)', aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s', opacity: isDeleting ? 0.5 : 1 }}>
-                      {src && <img src={src} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => handleSetCover(i)} />}
+                      {src && <img src={src} alt={isCover ? `Cover image ${i + 1}` : `Image ${i + 1}`} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => handleSetCover(i)} />}
                       <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : 'transparent', transition: 'background 0.2s' }} onClick={() => handleSetCover(i)} />
                       {/* Cover pin button */}
-                      <div style={{ position: 'absolute', top: 6, left: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      <div aria-label={isCover ? "Cover image" : "Set as cover"} style={{ position: 'absolute', top: 6, left: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                         onClick={(e) => { e.stopPropagation(); handleSetCover(i); }}>
                         <Pin size={13} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.6)' }} />
                       </div>
-                      {/* Delete button */}
-                      <div style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: 'rgba(239,68,68,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      <div aria-label="Delete image" style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: 'rgba(239,68,68,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
                         onClick={(e) => { e.stopPropagation(); handleDeleteImage(i); }}>
                         <Trash2 size={13} style={{ color: '#fff' }} />
                       </div>

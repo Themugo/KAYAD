@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { dealerAPI, carsAPI, adminAPI, notifAPI, escrowAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, Edit3, Trash2, Eye, ChevronRight, TrendingUp, Car, DollarSign, Gavel, BarChart3, ArrowUpRight, Users, UserPlus, Shield, Mail, X, Check, MessageSquare, Heart, Bell, Copy, Download, BadgePercent, ArrowDown, Clock, Filter, RefreshCw } from 'lucide-react';
+import { Plus, Edit3, Trash2, ChevronRight, TrendingUp, Car, Gavel, BarChart3, Users, Shield, Bell, Copy, Download, BadgePercent, RefreshCw } from 'lucide-react';
 
 // Extracted components
 import TeamTab from './components/TeamTab';
@@ -20,7 +20,6 @@ const TABS = TABS_CONFIG.map(t => ({
 export default function DealerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [summary, setSummary]     = useState(null);
   const [cars, setCars]           = useState([]);
   const [bids, setBids]           = useState([]);
@@ -49,6 +48,7 @@ export default function DealerDashboard() {
   };
 
   useEffect(() => {
+    let ignore = false;
     const carsPromise = canManageDemoCars
       ? Promise.all([
           dealerAPI.cars({ limit: 100 }).catch(() => ({ cars: [] })),
@@ -67,6 +67,7 @@ export default function DealerDashboard() {
       notifAPI.list({ limit: 1, unread: true }).catch(() => ({})),
       dealerAPI.analytics({ days: 30 }).catch(() => ({})),
     ]).then(([s, c, cfg, n, a]) => {
+      if (ignore) return;
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
       setConfig(cfg.config || cfg);
@@ -75,13 +76,17 @@ export default function DealerDashboard() {
       if (an?.conversionRates) {
         setTrends(an.conversionRates);
       }
-    }).finally(() => setLoading(false));
+    }).finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, [canManageDemoCars]);
 
   useEffect(() => {
-    if (tab === 'bids') dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {});
-    if (tab === 'earnings') dealerAPI.earnings({ days: 365 }).then(d => setEarnings(d.earnings || d.data || d)).catch(() => {});
+    if (tab !== 'bids' && tab !== 'earnings' && tab !== 'escrows') return;
+    let ignore = false;
+    if (tab === 'bids') dealerAPI.bids({ limit: 50 }).then(d => { if (!ignore) setBids(d.bids || []); }).catch(() => {});
+    if (tab === 'earnings') dealerAPI.earnings({ days: 365 }).then(d => { if (!ignore) setEarnings(d.earnings || d.data || d); }).catch(() => {});
     if (tab === 'escrows') fetchEscrows();
+    return () => { ignore = true; };
   }, [tab]);
 
   const handleDelete = async (carId) => {
@@ -245,7 +250,7 @@ export default function DealerDashboard() {
                           <Link to={`/dealer/edit/${car._id}`} style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                             <Edit3 size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
                           </Link>
-                          <button onClick={() => handleDelete(car._id)} style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <button onClick={() => handleDelete(car._id)} aria-label="Delete listing" style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Trash2 size={12} style={{ color: 'rgba(239,68,68,0.6)' }} />
                           </button>
                         </div>

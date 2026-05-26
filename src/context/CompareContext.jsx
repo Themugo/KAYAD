@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 
 const CompareCtx = createContext(null);
 
@@ -53,13 +53,15 @@ export function CompareProvider({ children }) {
 
   const isComparing = useCallback((carId) => compareIds.includes(carId), [compareIds]);
 
+  const value = useMemo(() => ({
+    compareIds,
+    compareCount: compareIds.length,
+    maxCompare: MAX_COMPARE,
+    addCar, removeCar, toggleCar, clearAll, isComparing,
+  }), [compareIds, addCar, removeCar, toggleCar, clearAll, isComparing]);
+
   return (
-    <CompareCtx.Provider value={{
-      compareIds,
-      compareCount: compareIds.length,
-      maxCompare: MAX_COMPARE,
-      addCar, removeCar, toggleCar, clearAll, isComparing,
-    }}>
+    <CompareCtx.Provider value={value}>
       {children}
     </CompareCtx.Provider>
   );

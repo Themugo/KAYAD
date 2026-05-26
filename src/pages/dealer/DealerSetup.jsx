@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import api from '../../api/api';
+import { dealerAPI } from '../../api/api';
 import usePageMeta from '../../hooks/usePageMeta';
 
 export default function DealerSetup() {
@@ -25,7 +25,9 @@ export default function DealerSetup() {
   });
 
   useEffect(() => {
-    api.get('/dealer/profile').then(d => {
+    let ignore = false;
+    dealerAPI.getProfile().then(d => {
+      if (ignore) return;
       const p = d.dealer || d.data || d;
       if (p) {
         setForm({
@@ -39,13 +41,14 @@ export default function DealerSetup() {
           showLocation: p.visibility?.showLocation !== false,
         });
       }
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => {}).finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, []);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      await api.put('/dealer/profile', {
+      await dealerAPI.updateProfile({
         ...form,
         visibility: {
           showPhone: form.showPhone,

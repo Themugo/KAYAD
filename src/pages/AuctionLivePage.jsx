@@ -1,7 +1,7 @@
 // src/pages/AuctionLivePage.jsx
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { carsAPI, bidsAPI, formatKES } from '../api/api';
+import { carsAPI, bidsAPI, smsBiddingAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -12,8 +12,7 @@ import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
-import api from '../api/api';
-import { ChevronLeft, ChevronRight, Eye, Users, MapPin, Star, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, Star, CheckCircle } from 'lucide-react';
 import '../styles/auction-live.css';
 
 // Extracted visual effects
@@ -102,12 +101,14 @@ export default function AuctionLivePage() {
 
   // Load car + bid history
   useEffect(() => {
+    let ignore = false;
     Promise.all([
       carsAPI.get(id),
       bidsAPI.getForCar(id).catch(() => ({ bids: [] })),
     ]).then(([carData, bidData]) => {
       const c = carData.car || carData.data || carData;
       if (!c || !c._id) return Promise.reject();
+      if (ignore) return;
       setCar(c);
       setCurrentBid(c.currentBid || c.price || 0);
       setPrevBid(c.currentBid || c.price || 0);
@@ -118,7 +119,7 @@ export default function AuctionLivePage() {
       setBidAmount(String(minNext));
     }).catch(() => {
       const mock = getMockCar(id);
-      if (mock) {
+      if (mock && !ignore) {
         setCar(mock);
         setCurrentBid(mock.currentBid || mock.price || 0);
         setPrevBid(mock.currentBid || mock.price || 0);
@@ -126,7 +127,8 @@ export default function AuctionLivePage() {
         const minNext = (mock.currentBid || mock.price || 0) + 5000;
         setBidAmount(String(minNext));
       }
-    }).finally(() => setLoading(false));
+    }).finally(() => { if (!ignore) setLoading(false); });
+    return () => { ignore = true; };
   }, [id]);
 
   // Join auction socket room
@@ -159,12 +161,15 @@ export default function AuctionLivePage() {
   // Check SMS bidding registration
   useEffect(() => {
     if (!isAuth) return;
-    api.get('/sms-bidding/my').then(d => {
+    let ignore = false;
+    smsBiddingAPI.my().then(d => {
+      if (ignore) return;
       if (d.smsBidder?.active && d.smsBidder?.phone) {
         setSmsRegistered(true);
         setSmsSubscribed(d.smsBidder.subscriptions?.some(s => s.car?._id === id || s.car === id));
       }
     }).catch(() => {});
+    return () => { ignore = true; };
   }, [id, isAuth]);
 
   // Real-time bid events
@@ -325,8 +330,8 @@ export default function AuctionLivePage() {
               </div>
               {totalImages > 1 && (
                 <>
-                  <button onClick={e => { e.stopPropagation(); prevImg(); }} className="gallery-nav-btn gallery-nav-left"><ChevronLeft size={18} /></button>
-                  <button onClick={e => { e.stopPropagation(); nextImg(); }} className="gallery-nav-btn gallery-nav-right"><ChevronRight size={18} /></button>
+                  <button onClick={e => { e.stopPropagation(); prevImg(); }} aria-label="Previous image" className="gallery-nav-btn gallery-nav-left"><ChevronLeft size={18} /></button>
+                  <button onClick={e => { e.stopPropagation(); nextImg(); }} aria-label="Next image" className="gallery-nav-btn gallery-nav-right"><ChevronRight size={18} /></button>
                   <div className="gallery-counter">{imgIdx + 1} / {totalImages}</div>
                 </>
               )}
@@ -868,7 +873,7 @@ export default function AuctionLivePage() {
                         try {
                           const phone = prompt('Enter your M-Pesa phone number for SMS bidding:', '07');
                           if (phone && phone.trim()) {
-                            await api.post('/sms-bidding/register', { phone: phone.trim() });
+                            await smsBiddingAPI.register(phone.trim());
                             setSmsRegistered(true);
                             toast('SMS bidding activated!', 'success');
                           }
@@ -892,7 +897,7 @@ export default function AuctionLivePage() {
                           onClick={async () => {
                             setTogglingSms(true);
                             try {
-                              await api.post('/sms-bidding/subscribe', { carId: id, notifyOnOutbid: true });
+                              await smsBiddingAPI.subscribe({ carId: id, notifyOnOutbid: true });
                               setSmsSubscribed(true);
                               toast('Subscribed! You will get SMS outbid alerts.', 'success');
                             } catch (err) {
@@ -907,7 +912,7 @@ export default function AuctionLivePage() {
                           onClick={async () => {
                             setTogglingSms(true);
                             try {
-                              await api.delete(`/sms-bidding/unsubscribe/${id}`);
+                              await smsBiddingAPI.unsubscribe(id);
                               setSmsSubscribed(false);
                               toast('Unsubscribed from SMS alerts', 'info');
                             } catch (err) {

@@ -1,5 +1,5 @@
 // src/context/SocketContext.jsx
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 
@@ -37,35 +37,39 @@ export function SocketProvider({ children }) {
     };
   }, [isAuth, token]);
 
-  const joinAuction = (carId) => {
+  const joinAuction = useCallback((carId) => {
     socketRef.current?.emit('joinAuction', carId);
-  };
+  }, []);
 
-  const joinAdmin = () => {
+  const joinAdmin = useCallback(() => {
     socketRef.current?.emit('joinAdmin');
-  };
+  }, []);
 
-  const joinShowroom = () => {
+  const joinShowroom = useCallback(() => {
     socketRef.current?.emit('joinShowroom');
-  };
+  }, []);
 
-  const leaveShowroom = () => {
+  const leaveShowroom = useCallback(() => {
     socketRef.current?.emit('leaveShowroom');
-  };
+  }, []);
 
-  const on = (event, handler) => {
+  const on = useCallback((event, handler) => {
     const s = socketRef.current;
     if (!s) return () => {};
     s.on(event, handler);
     return () => s.off(event, handler);
-  };
+  }, []);
 
-  const emit = (event, data) => {
+  const emit = useCallback((event, data) => {
     socketRef.current?.emit(event, data);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit,
+  }), [connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit]);
 
   return (
-    <SocketCtx.Provider value={{ connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit }}>
+    <SocketCtx.Provider value={value}>
       {children}
     </SocketCtx.Provider>
   );

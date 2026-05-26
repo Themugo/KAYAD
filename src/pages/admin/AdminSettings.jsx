@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
-import { adminAPI, default as api } from '../../api/api';
+import { adminAPI } from '../../api/api';
 import AdminSettingsGeneral from './AdminSettingsGeneral';
 import AdminSettingsBranding from './AdminSettingsBranding';
 import AdminSettingsPayments from './AdminSettingsPayments';

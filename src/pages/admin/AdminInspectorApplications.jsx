@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from '../../api/api';
+import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function AdminInspectorApplications() {
@@ -15,7 +15,7 @@ export default function AdminInspectorApplications() {
     setLoading(true);
     const params = {};
     if (statusFilter) params.status = statusFilter;
-    api.get('/inspector-applications', { params })
+    adminAPI.inspectorApplications(params)
       .then(d => setApps(d.applications || []))
       .catch(() => toast('Failed to load', 'error'))
       .finally(() => setLoading(false));
@@ -28,7 +28,7 @@ export default function AdminInspectorApplications() {
     try {
       const body = { reviewNotes: reviewNotes[id] || '' };
       if (action === 'approve') body.assignedSpecialty = 'Pre-Purchase Inspection';
-      await api.post(`/inspector-applications/${id}/${action}`, body);
+      await adminAPI.reviewInspector(id, action, body);
       toast(`Application ${action}ed`, 'success');
       fetchApps();
     } catch (err) {

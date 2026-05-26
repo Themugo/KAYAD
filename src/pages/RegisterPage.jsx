@@ -112,13 +112,20 @@ function WaitingRoom({ user, onLogout }) {
               <Mail size={36} style={{ color:'#3b82f6' }} />
             </div>
             <div style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontWeight:900, fontSize:'clamp(1.6rem,4vw,2.2rem)', color:'#fff', marginBottom:8 }}>
-              Verify Your <span style={{ color:'#3b82f6' }}>Email</span>
+              {isDemoMode() ? <>Demo <span style={{color:'#f97316'}}>Mode</span></> : <>Verify Your <span style={{color:'#3b82f6'}}>Email</span></>}
             </div>
-            <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14, lineHeight:1.8, maxWidth:400, margin:'0 auto 36px' }}>
-              Hi <strong style={{ color:'rgba(255,255,255,0.75)' }}>{user?.name?.split(' ')[0]}</strong>, we sent a verification link to{' '}
-              <strong style={{ color:'rgba(255,255,255,0.6)' }}>{user?.email}</strong>.
-              Please check your inbox (and spam) and click the link to activate your account.
-            </p>
+            {isDemoMode() ? (
+              <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14, lineHeight:1.8, maxWidth:420, margin:'0 auto 36px' }}>
+                You're in <strong style={{ color:'#f97316' }}>demo mode</strong> — email sending is simulated.
+                Your account is ready to use. You can log in with your credentials or use the demo quick-login buttons on the login page.
+              </p>
+            ) : (
+              <p style={{ color:'rgba(255,255,255,0.4)', fontSize:14, lineHeight:1.8, maxWidth:400, margin:'0 auto 36px' }}>
+                Hi <strong style={{ color:'rgba(255,255,255,0.75)' }}>{user?.name?.split(' ')[0]}</strong>, we sent a verification link to{' '}
+                <strong style={{ color:'rgba(255,255,255,0.6)' }}>{user?.email}</strong>.
+                Please check your inbox (and spam) and click the link to activate your account.
+              </p>
+            )}
           </>
         )}
 
