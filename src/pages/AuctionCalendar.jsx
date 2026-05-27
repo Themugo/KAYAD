@@ -9,6 +9,12 @@ export default function AuctionCalendar() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('live');
+  const [nowMs, setNowMs] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const enrichWithTimeStatus = (all) => {
@@ -33,7 +39,15 @@ export default function AuctionCalendar() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = filter === 'all' ? cars : cars.filter(c => c._timeStatus === filter);
+  const getTimeStatus = (car) => {
+    const start = car.auctionStart ? new Date(car.auctionStart).getTime() : 0;
+    const end = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
+    if (start > 0 && end > 0 && start <= nowMs && end > nowMs) return 'live';
+    if (start > nowMs) return 'scheduled';
+    return 'ended';
+  };
+  const filtered = (filter === 'all' ? cars : cars.filter(c => getTimeStatus(c) === filter))
+    .filter(c => getTimeStatus(c) !== 'ended');
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
@@ -68,12 +82,11 @@ export default function AuctionCalendar() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 20 }}>
             {filtered.map(car => {
-              const now = new Date();
-              const isLive = car._timeStatus === 'live';
+              const isLive = getTimeStatus(car) === 'live';
               const startDate = car.auctionStart ? new Date(car.auctionStart) : null;
               const endDate = car.auctionEnd ? new Date(car.auctionEnd) : null;
               const countdownTarget = isLive ? endDate : startDate;
-              const diff = countdownTarget ? countdownTarget - now : 0;
+              const diff = countdownTarget ? countdownTarget.getTime() - nowMs : 0;
               const days = Math.max(0, Math.floor(diff / 86400000));
               const hrs = Math.max(0, Math.floor((diff % 86400000) / 3600000));
               const mins = Math.max(0, Math.floor((diff % 3600000) / 60000));

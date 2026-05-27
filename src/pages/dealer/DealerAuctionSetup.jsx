@@ -1,39 +1,17 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { dealerAPI, formatKES } from '../../api/api';
+import { dealerAPI, dealerAuctionAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { useCountdown } from '../../hooks/useCountdown';
 import { Play, Clock, XCircle, ChevronDown, ChevronUp, Gavel } from 'lucide-react';
 
 const DURATIONS = [
-  { label: '24 hours', value: 86400000 },
-  { label: '48 hours', value: 172800000 },
-  { label: '72 hours', value: 259200000 },
-  { label: '5 days',   value: 432000000 },
-  { label: '7 days',   value: 604800000 },
+  { label: '24 hours', value: 24 },
+  { label: '48 hours', value: 48 },
+  { label: '72 hours', value: 72 },
+  { label: '5 days',   value: 120 },
+  { label: '7 days',   value: 168 },
 ];
-
-function useCountdown(endTime) {
-  const calc = () => {
-    if (!endTime) return { h: 0, m: 0, s: 0, expired: true, total: 0 };
-    const diff = new Date(endTime).getTime() - Date.now();
-    if (diff <= 0) return { h: 0, m: 0, s: 0, expired: true, total: 0 };
-    return {
-      h: Math.floor(diff / 3600000),
-      m: Math.floor((diff % 3600000) / 60000),
-      s: Math.floor((diff % 60000) / 1000),
-      expired: false,
-      total: diff,
-    };
-  };
-  const [time, setTime] = useState(calc);
-  useEffect(() => {
-    if (!endTime) return;
-    setTime(calc());
-    const id = setInterval(() => { const t = calc(); setTime(t); if (t.expired) clearInterval(id); }, 1000);
-    return () => clearInterval(id);
-  }, [endTime]);
-  return time;
-}
 
 const inputStyle = {
   width: '100%', padding: '9px 12px', borderRadius: 8,
@@ -96,9 +74,9 @@ function LiveAuctionRow({ car, isLoading, onEnd, onExtend, onExtendHoursChange, 
           ) : (
             <span style={{
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.1rem',
-              color: time.h < 1 ? '#ef4444' : 'var(--gold)', letterSpacing: '0.06em',
+              color: (time.d === 0 && time.h < 1) ? '#ef4444' : 'var(--gold)', letterSpacing: '0.06em',
             }}>
-              {String(time.h).padStart(2, '0')}:{String(time.m).padStart(2, '0')}:{String(time.s).padStart(2, '0')}
+              {time.d > 0 ? `${time.d}d ` : ''}{String(time.h).padStart(2, '0')}:{String(time.m).padStart(2, '0')}:{String(time.s).padStart(2, '0')}
             </span>
           )}
         </div>
@@ -140,34 +118,41 @@ export default function DealerAuctionSetup() {
   const [liveCars, setLiveCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
-  const [config, setConfig] = useState({});
   const [liveTab, setLiveTab] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
 
-  const fetchCars = async () => {
+  const fetchCars = useCallback(async () => {
     setLoading(true);
     try {
-      const [draftRes, liveRes] = await Promise.all([
-        dealerAPI.cars({ auctionStatus: 'draft', limit: 100 }),
-        dealerAPI.cars({ auctionStatus: 'live', limit: 100 }),
-      ]);
-      setDraftCars((draftRes.cars || draftRes.data || []).map(c => ({
+      const carsRes = await dealerAPI.cars({ limit: 300 });
+      const allCars = carsRes.cars || carsRes.data || [];
+      const now = Date.now();
+      const isLiveAuction = (c) => {
+        const end = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
+        if (c.auctionStatus === 'live') return true;
+        return end > now;
+      };
+
+      setDraftCars(allCars.filter(c => !isLiveAuction(c)).map(c => ({
         ...c,
         _startingBid: c.price || '',
         _reservePrice: '',
-        _duration: 86400000,
+        _durationHours: 24,
         _autoExtend: false,
-        _extendCount: 0,
+        _extendCount: c.extensionCount || 0,
       })));
-      setLiveCars(liveRes.cars || liveRes.data || []);
+      setLiveCars(allCars.filter(isLiveAuction).map(c => ({
+        ...c,
+        _extendCount: c.extensionCount || 0,
+      })));
     } catch {
       toast('Failed to load cars', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  useEffect(() => { fetchCars(); }, []);
+  useEffect(() => { fetchCars(); }, [fetchCars]);
 
   const updateDraft = (id, field, value) => {
     setDraftCars(p => p.map(c => c._id === id ? { ...c, [field]: value } : c));
@@ -187,15 +172,13 @@ export default function DealerAuctionSetup() {
     setActionLoading(p => ({ ...p, [car._id]: 'starting' }));
     try {
       const body = {
-        durationMs: car._duration,
+        durationMs: Number(car._durationHours || 24) * 60 * 60 * 1000,
         startingBid,
         ...(reservePrice !== undefined && { reservePrice }),
       };
-      await dealerAPI.startAuction(car._id, body);
+      await dealerAuctionAPI.start(car._id, body);
       toast('Auction is now LIVE!', 'success');
-      setDraftCars(p => p.filter(c => c._id !== car._id));
-      const liveRes = await dealerAPI.cars({ auctionStatus: 'live', limit: 100 });
-      setLiveCars(liveRes.cars || liveRes.data || []);
+      await fetchCars();
     } catch (err) {
       toast(err?.response?.data?.message || 'Failed to start auction', 'error');
     } finally {
@@ -204,12 +187,12 @@ export default function DealerAuctionSetup() {
   };
 
   const handleEndAuction = async (carId) => {
-    if (!confirm('End this auction now?')) return;
+    if (!window.confirm('End this auction now?')) return;
     setActionLoading(p => ({ ...p, [carId]: 'ending' }));
     try {
-      await dealerAPI.endAuction(carId);
+      await dealerAuctionAPI.end(carId);
       toast('Auction ended', 'info');
-      setLiveCars(p => p.filter(c => c._id !== carId));
+      await fetchCars();
     } catch {
       toast('Failed to end auction', 'error');
     } finally {
@@ -219,7 +202,7 @@ export default function DealerAuctionSetup() {
 
   const handleExtendAuction = async (carId, hours) => {
     const car = liveCars.find(c => c._id === carId);
-    const currentExtends = car?._extendCount || 0;
+    const currentExtends = car?._extendCount || car?.extensionCount || 0;
     if (currentExtends >= 3) {
       toast('Maximum 3 extensions reached', 'error');
       return;
@@ -230,13 +213,9 @@ export default function DealerAuctionSetup() {
     }
     setActionLoading(p => ({ ...p, [carId]: 'extending' }));
     try {
-      await dealerAPI.extendAuction(carId, { hours });
+      await dealerAuctionAPI.extend(carId, hours);
       toast(`Auction extended by ${hours}h`, 'success');
-      setLiveCars(p => p.map(c => c._id === carId ? {
-        ...c, _extendCount: (c._extendCount || 0) + 1, _extendHours: '',
-      } : c));
-      const liveRes = await dealerAPI.cars({ auctionStatus: 'live', limit: 100 });
-      setLiveCars(liveRes.cars || liveRes.data || []);
+      await fetchCars();
     } catch {
       toast('Failed to extend auction', 'error');
     } finally {
@@ -255,21 +234,11 @@ export default function DealerAuctionSetup() {
     background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)',
     borderRadius: 16, overflow: 'hidden',
   };
-  const sectionTitle = {
-    fontFamily: 'var(--font-display)', fontStyle: 'italic',
-    fontSize: '1.3rem', color: '#fff', margin: 0,
-  };
   const goldBtn = {
     padding: '10px 22px', background: 'var(--gold)', border: 'none',
     borderRadius: 9, color: '#000', fontSize: 12, fontWeight: 900,
     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
     textTransform: 'uppercase', letterSpacing: '0.06em',
-  };
-  const ghostBtn = {
-    padding: '10px 22px', background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.09)', borderRadius: 9,
-    color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: 600,
-    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
   };
   const dangerBtn = {
     padding: '10px 22px', background: 'rgba(239,68,68,0.1)',
@@ -404,14 +373,17 @@ export default function DealerAuctionSetup() {
                                 {/* Duration */}
                                 <div>
                                   <label style={labelStyle}>Duration</label>
-                                  <select value={car._duration}
-                                    onChange={e => updateDraft(car._id, '_duration', Number(e.target.value))}
+                                  <select value={car._durationHours || 24}
+                                    onChange={e => updateDraft(car._id, '_durationHours', Number(e.target.value))}
                                     style={inputStyle}>
                                     {DURATIONS.map(d => (
                                       <option key={d.value} value={d.value} style={{ background: '#111' }}>{d.label}</option>
                                     ))}
                                   </select>
                                 </div>
+                              </div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 14 }}>
+                                Auction will run for <strong style={{ color: '#fff' }}>{car._durationHours || 24}h</strong> from the moment you start it.
                               </div>
                               {/* Auto-extend toggle */}
                               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
