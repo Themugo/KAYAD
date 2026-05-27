@@ -21,7 +21,6 @@ const favoriteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Car",
       required: true,
-      index: true,
     },
 
     // =============================

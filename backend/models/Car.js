@@ -171,7 +171,7 @@ const carSchema = new mongoose.Schema(
 // 🗑️ SOFT DELETE
 // =============================
 carSchema.add({
-  deletedAt: { type: Date, default: null, index: true },
+  deletedAt: { type: Date, default: null },
   deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 

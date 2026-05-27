@@ -1,6 +1,6 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
-import { cacheGet, cacheSet } from "../utils/cache.js";
+import { cacheDelPattern } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
@@ -47,7 +47,10 @@ export const getCars = async (req, res) => {
     }
 
     if (brand) query.brand = { $in: brand.split(",") };
-    if (city) query["location.city"] = city;
+    if (city) {
+      const safeCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query["location.city"] = { $regex: `^${safeCity}$`, $options: "i" };
+    }
 
     if (minPrice || maxPrice) {
       query.price = {};
@@ -61,11 +64,12 @@ export const getCars = async (req, res) => {
       if (yearMax) query.year.$lte = toNumber(yearMax, 9999);
     }
 
-    if (body) query.bodyType = body;
-    if (fuel) query.fuel = fuel;
-    if (transmission) query.transmission = transmission;
-    if (color) query.color = color;
-    if (condition) query.condition = condition;
+    const exactText = (value) => ({ $regex: `^${String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" });
+    if (body) query.bodyType = exactText(body);
+    if (fuel) query.fuel = exactText(fuel);
+    if (transmission) query.transmission = exactText(transmission);
+    if (color) query.color = exactText(color);
+    if (condition) query.condition = exactText(condition);
 
     if (mileageMin || mileageMax) {
       query.mileage = {};
@@ -293,7 +297,7 @@ export const createCar = async (req, res) => {
       await User.findByIdAndUpdate(req.user.id, updateOps);
     }
 
-    await cacheSet("cars:list:*", null, 1);
+    await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "create_car", {
       target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
@@ -376,7 +380,7 @@ export const updateCar = async (req, res) => {
     }
 
     await car.save();
-    await cacheSet("cars:list:*", null, 1);
+    await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "update_car", {
       target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
@@ -420,7 +424,7 @@ export const deleteCar = async (req, res) => {
       }
     }
 
-    await cacheSet("cars:list:*", null, 1);
+    await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "delete_car", {
       target: req.params.id, targetModel: "Car", details: { title: car.title },
@@ -478,7 +482,7 @@ export const deleteCarImage = async (req, res) => {
     }
 
     await car.save();
-    await cacheSet("cars:list:*", null, 1);
+    await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "delete_car_image", {
       target: car._id, targetModel: "Car",
@@ -535,7 +539,7 @@ export const addCarImages = async (req, res) => {
 
     car.images = [...(car.images || []), ...newImages];
     await car.save();
-    await cacheSet("cars:list:*", null, 1);
+    await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "add_car_images", {
       target: car._id, targetModel: "Car",

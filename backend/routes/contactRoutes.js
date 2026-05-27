@@ -1,7 +1,7 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { submitContact, listContacts, markRead } from "../controllers/contactController.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 

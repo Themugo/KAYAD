@@ -48,6 +48,24 @@ router.use((req, res, next) => {
   next();
 });
 
+// Public shell config. The app layout uses this to apply branding before a
+// visitor is logged in; admin writes and all sensitive settings stay protected.
+router.get(
+  "/public/config",
+  asyncHandler(async (req, res) => {
+    let config = await PlatformConfig.findOne()
+      .select("platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing")
+      .lean();
+
+    if (!config) {
+      config = await PlatformConfig.create({});
+      config = config.toObject();
+    }
+
+    res.json({ success: true, config });
+  })
+);
+
 // =============================
 // 🔄 RE-SEED PRODUCTION DB (webhost/superadmin only)
 // =============================
