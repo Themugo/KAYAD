@@ -1,11 +1,21 @@
 import GlobalSettings from "../models/GlobalSettings.js";
 
+let cachedSettings = null;
+let cachedAt = 0;
+const SETTINGS_TTL_MS = 10_000;
+
 export const checkSystemStatus = async (req, res, next) => {
   try {
-    const settings = await GlobalSettings.findOne();
+    const now = Date.now();
+    if (!cachedSettings || now - cachedAt > SETTINGS_TTL_MS) {
+      cachedSettings = await GlobalSettings.findOne().lean();
+      cachedAt = now;
+    }
+    const settings = cachedSettings;
     if (!settings) return next();
 
     if (settings.systemStatus?.isMaintenanceMode) {
+      res.setHeader("Retry-After", "60");
       return res.status(503).json({
         success: false,
         message: settings.systemStatus.emergencyMessage || "System under scheduled maintenance.",

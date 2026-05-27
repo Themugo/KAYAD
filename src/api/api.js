@@ -19,8 +19,16 @@ export const isDemoMode = () => __DEMO_MODE__;
 // Force demo mode on (used by the login page's demo quick-login buttons so
 // the @demo.com accounts work instantly regardless of real-backend state).
 export const enableDemoMode = () => { __DEMO_MODE__ = true; };
+let _backendProbePromise = null;
+let _lastProbeAt = 0;
+const PROBE_COOLDOWN_MS = 20_000;
 
 export const checkBackendAvailability = async (retries = 2) => {
+  const now = Date.now();
+  if (_backendProbePromise) return _backendProbePromise;
+  if (now - _lastProbeAt < PROBE_COOLDOWN_MS) return !__DEMO_MODE__;
+  _lastProbeAt = now;
+  _backendProbePromise = (async () => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await axios.get(HEALTH_ENDPOINT, { timeout: 5000 });
@@ -44,6 +52,12 @@ export const checkBackendAvailability = async (retries = 2) => {
     }
   }
   return false;
+  })();
+  try {
+    return await _backendProbePromise;
+  } finally {
+    _backendProbePromise = null;
+  }
 };
 
 // Backend availability is checked lazily by API calls. Avoid probing /api/cars
@@ -63,9 +77,13 @@ window.addEventListener('storage', (e) => {
 
 // ─── AXIOS INSTANCE ───────────────────────────────────────────
 const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 }); // 15s default; payment calls override to 45s
+const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+const IDEMPOTENT_METHODS = new Set(['get', 'head', 'options']);
+const MAX_RETRIES = 2;
 
 // Attach JWT from localStorage on every request
 api.interceptors.request.use(cfg => {
+  cfg._retryCount = cfg._retryCount || 0;
   const token = localStorage.getItem('kayad_token');
   if (token) {
     cfg.headers = cfg.headers || {};
@@ -82,6 +100,19 @@ let _queue = [];
 api.interceptors.response.use(
   r => r,
   async err => {
+    const orig = err.config || {};
+    const method = String(orig.method || 'get').toLowerCase();
+    const status = err.response?.status;
+    const canRetry = IDEMPOTENT_METHODS.has(method) && (RETRYABLE_STATUSES.has(status) || !err.response);
+    if (canRetry && (orig._retryCount || 0) < MAX_RETRIES) {
+      orig._retryCount = (orig._retryCount || 0) + 1;
+      const retryAfterHeader = Number(err.response?.headers?.['retry-after']);
+      const retryAfterMs = Number.isFinite(retryAfterHeader) ? retryAfterHeader * 1000 : 0;
+      const backoffMs = Math.max(retryAfterMs, 300 * (2 ** (orig._retryCount - 1)));
+      await new Promise((resolve) => setTimeout(resolve, backoffMs));
+      return api(orig);
+    }
+
     // Network error → switch to demo mode
     if (!err.response) {
       __DEMO_MODE__ = true;
@@ -92,7 +123,6 @@ api.interceptors.response.use(
       __DEMO_MODE__ = true;
       return Promise.reject(err);
     }
-    const orig = err.config;
     const requestUrl = orig?.url || "";
     const hasStoredToken = !!localStorage.getItem('kayad_token');
     const skipRefresh =

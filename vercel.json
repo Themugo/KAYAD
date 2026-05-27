@@ -5,6 +5,14 @@
   "installCommand": "npm install",
   "rewrites": [
     {
+      "source": "/health",
+      "destination": "https://api.kayad.space/health"
+    },
+    {
+      "source": "/health/(.*)",
+      "destination": "https://api.kayad.space/health/$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "https://api.kayad.space/api/$1"
     },

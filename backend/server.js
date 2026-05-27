@@ -97,6 +97,14 @@ const server   = http.createServer(app);
 const PORT     = process.env.PORT     || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const FRONTEND = process.env.FRONTEND_URL || "http://localhost:3000";
+const parseOriginHostname = (origin) => {
+  try {
+    return new URL(origin).hostname;
+  } catch {
+    return null;
+  }
+};
+const FRONTEND_HOSTNAME = parseOriginHostname(FRONTEND);
 
 // ─── SENTRY (must be first) ───────────────────────────────────
 await initSentry(app);
@@ -113,7 +121,12 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "https://js.sentry-cdn.com"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
-      connectSrc: ["'self'", FRONTEND, `wss://${new URL(FRONTEND).hostname}`, "https://*.sentry.io"],
+      connectSrc: [
+        "'self'",
+        FRONTEND,
+        ...(FRONTEND_HOSTNAME ? [`wss://${FRONTEND_HOSTNAME}`] : []),
+        "https://*.sentry.io",
+      ],
       fontSrc: ["'self'", "data:"],
       frameAncestors: ["'none'"],
       baseUri: ["'self'"],
@@ -151,8 +164,9 @@ app.use(globalLimiter);
 
 // ─── CORS ─────────────────────────────────────────────────────
 const allowedOrigins = [
-  FRONTEND, `https://${new URL(FRONTEND).hostname}`, `https://www.${new URL(FRONTEND).hostname}`,
-  ...(process.env.EXTRA_CORS_ORIGINS || "").split(",").filter(Boolean),
+  FRONTEND,
+  ...(FRONTEND_HOSTNAME ? [`https://${FRONTEND_HOSTNAME}`, `https://www.${FRONTEND_HOSTNAME}`] : []),
+  ...(process.env.EXTRA_CORS_ORIGINS || "").split(",").map((v) => v.trim()).filter(Boolean),
 ];
 
 app.use(cors({
@@ -176,6 +190,11 @@ app.use(cookieParser());
 app.use(bodyGuard());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
+app.use((req, res, next) => {
+  req.setTimeout(65_000);
+  res.setTimeout(65_000);
+  next();
+});
 // Serve uploaded files with strict headers to prevent script execution
 app.use("/uploads", (req, res, next) => {
   const ext = req.path.split(".").pop()?.toLowerCase();
@@ -415,6 +434,8 @@ const bootstrap = async () => {
 
 // ─── GRACEFUL SHUTDOWN ────────────────────────────────────────
 const shutdown = async (signal) => {
+  if (shutdown.inProgress) return;
+  shutdown.inProgress = true;
   console.log(`\n🛑 ${signal} — shutting down gracefully...`);
   server.close(async () => {
     await mongoose.connection.close();
@@ -427,7 +448,10 @@ const shutdown = async (signal) => {
 if (NODE_ENV !== "test") {
   process.on("SIGTERM",            () => shutdown("SIGTERM"));
   process.on("SIGINT",             () => shutdown("SIGINT"));
-  process.on("unhandledRejection", (err) => console.error("❌ Unhandled rejection:", err.message));
+  process.on("unhandledRejection", (err) => {
+    console.error("❌ Unhandled rejection:", err?.message || err);
+    shutdown("unhandledRejection");
+  });
   process.on("uncaughtException",  (err) => { console.error("❌ Uncaught exception:", err.message); process.exit(1); });
 }
 

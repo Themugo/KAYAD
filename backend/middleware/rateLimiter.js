@@ -13,7 +13,9 @@ const keyGenerator = (req) => {
 // 🚫 SKIP TRUSTED USERS
 // =============================
 const skipTrusted = (req) => {
-  return ["admin"].includes(req.user?.role);
+  if (["admin"].includes(req.user?.role)) return true;
+  if (req.path?.startsWith("/health") || req.path?.startsWith("/api/health")) return true;
+  return false;
 };
 
 // =============================

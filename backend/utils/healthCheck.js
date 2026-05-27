@@ -13,10 +13,14 @@ const START_TIME = Date.now();
 
 // ── SHALLOW CHECK — for load balancers (fast) ─────────────────
 const shallowHealth = (req, res) => {
+  const dbReady = mongoose.connection.readyState === 1;
   res.json({
-    status: "ok",
+    status: dbReady ? "ok" : "degraded",
     service: "Kayad API",
     version: process.env.APP_VERSION || "1.0.0",
+    checks: {
+      mongodb: dbReady ? "ok" : "degraded",
+    },
     uptime: Math.round((Date.now() - START_TIME) / 1000),
     env: process.env.NODE_ENV,
     ts: new Date().toISOString(),
@@ -71,15 +75,23 @@ const deepHealth = async (req, res) => {
 export const registerHealthRoutes = (app) => {
   // Primary health endpoint — UptimeRobot pings this
   app.get("/health", shallowHealth);
+  app.get("/api/health", shallowHealth);
 
   // Deep health — internal monitoring
   app.get("/health/deep", deepHealth);
+  app.get("/api/health/deep", deepHealth);
 
   // Kubernetes liveness probe
   app.get("/health/live", (_, res) => res.json({ status: "ok" }));
+  app.get("/api/health/live", (_, res) => res.json({ status: "ok" }));
 
   // Kubernetes readiness probe
   app.get("/health/ready", async (_, res) => {
+    const dbReady = mongoose.connection.readyState === 1;
+    if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
+    res.json({ status: "ready" });
+  });
+  app.get("/api/health/ready", async (_, res) => {
     const dbReady = mongoose.connection.readyState === 1;
     if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
     res.json({ status: "ready" });
