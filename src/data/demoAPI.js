@@ -943,15 +943,43 @@ const demoAdmin = {
 const demoAuctionAdmin = {
   start: async (carId, body) => {
     await delay();
-    return wrapSuccess({ message: 'Auction started', car: transformCar({ ...getDemoCar(carId), auctionStatus: 'live', auctionEnd: body?.duration ? new Date(Date.now() + body.duration).toISOString() : new Date(Date.now() + 86400000).toISOString() }) });
+    const car = getDemoCar(carId);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    const durationMs = Number(body?.durationMs || body?.duration || 86400000);
+    const updated = {
+      ...car,
+      auctionStatus: 'live',
+      allowBid: true,
+      auctionStartTime: new Date().toISOString(),
+      auctionEnd: new Date(Date.now() + durationMs).toISOString(),
+      currentBid: Number(body?.startingBid || car.currentBid || car.price || 0),
+      reservePrice: body?.reservePrice || null,
+      extensionCount: 0,
+    };
+    updateDemoCar(carId, updated);
+    return wrapSuccess({ message: 'Auction started', car: transformCar(updated) });
   },
   end: async (carId) => {
     await delay();
-    return wrapSuccess({ message: 'Auction ended', car: transformCar({ ...getDemoCar(carId), auctionStatus: 'ended' }) });
+    const car = getDemoCar(carId);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    const updated = { ...car, auctionStatus: 'ended', allowBid: false, auctionEnd: new Date().toISOString() };
+    updateDemoCar(carId, updated);
+    return wrapSuccess({ message: 'Auction ended', car: transformCar(updated) });
   },
   extend: async (carId, body) => {
     await delay();
-    return wrapSuccess({ message: 'Auction extended', car: transformCar(getDemoCar(carId)) });
+    const car = getDemoCar(carId);
+    if (!car) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    const hours = Number(typeof body === 'number' ? body : body?.hours || 0);
+    const baseEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : Date.now();
+    const updated = {
+      ...car,
+      auctionEnd: new Date(Math.max(baseEnd, Date.now()) + hours * 60 * 60 * 1000).toISOString(),
+      extensionCount: (car.extensionCount || 0) + 1,
+    };
+    updateDemoCar(carId, updated);
+    return wrapSuccess({ message: 'Auction extended', car: transformCar(updated) });
   },
   bidHistory: async (carId) => {
     await delay();
