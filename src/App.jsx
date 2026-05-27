@@ -148,17 +148,21 @@ const Admin = ({ children }) => (
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [pathname]);
+  return null;
+}
+
+function SwipeBackHandler() {
+  useSwipeBack();
   return null;
 }
 
 // ─── Root component ─────────────────────────────────────────────────────
 export default function App() {
-  useSwipeBack();
   return (
     <ErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastProvider>
           <AuthProvider>
             <SocketProvider>
@@ -166,6 +170,7 @@ export default function App() {
                 <CompareProvider>
                   <AppInstallPrompt />
                   <ScrollToTop />
+                  <SwipeBackHandler />
                   <Suspense fallback={<LoadingPage />}>
                     <Routes>
                       {/* ── Public ──────────────────────────────────────────── */}

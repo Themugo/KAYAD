@@ -11,6 +11,7 @@ import { demoAPI } from '../data/demoAPI';
 // In prod: Vercel rewrite forwards /api → Render backend (see vercel.json)
 // Always use /api — never set VITE_API_BASE_URL to a full backend URL
 const BASE = '/api';
+const HEALTH_ENDPOINT = `${BASE}/health`;
 
 // ─── Demo mode auto-detection ────────────────────────────────
 let __DEMO_MODE__ = false;
@@ -22,7 +23,7 @@ export const enableDemoMode = () => { __DEMO_MODE__ = true; };
 export const checkBackendAvailability = async (retries = 2) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await axios.get(`${BASE}/cars?limit=1`, { timeout: 5000 });
+      await axios.get(HEALTH_ENDPOINT, { timeout: 5000 });
       __DEMO_MODE__ = false;
       return true;
     } catch (err) {
@@ -45,17 +46,9 @@ export const checkBackendAvailability = async (retries = 2) => {
   return false;
 };
 
-// Try backend on startup with retries
-(function initDemoCheck() {
-  checkBackendAvailability(2)
-    .then((online) => { if (online && import.meta.env.DEV) console.info('[Backend] Reachable'); })
-    .catch((err) => {
-      if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
-        __DEMO_MODE__ = true;
-        if (import.meta.env.DEV) console.info('[Demo] Backend unreachable, using demo data');
-      }
-    });
-})();
+// Backend availability is checked lazily by API calls. Avoid probing /api/cars
+// on page load; that endpoint can wake a sleeping backend and create noisy 502s
+// before the UI has asked for data.
 
 // ─── MULTI-TAB DETECTION ──────────────────────────────────────
 // localStorage is shared across all tabs. If another tab changes the token,
@@ -177,7 +170,7 @@ const shouldFallbackToDemo = (err) => {
   if (!err.response) return true;                          // network / CORS / DNS / timeout
   if (err.code === 'ECONNABORTED') return true;            // axios timeout
   const s = err.response.status;
-  if ([502, 503, 504].includes(s)) return true;            // gateway / backend asleep
+  if (s >= 500) return true;                               // backend failure / asleep
   if (s === 404) return true;                              // API not found at origin
   if (s === 401 && isDemoToken()) return true;             // real backend rejected a demo token
   return false;
@@ -390,6 +383,7 @@ const _adminAPI = {
 
   // Platform Config
   getConfig:      ()          => api.get('/admin/config').then(unwrap),
+  getPublicConfig: ()         => api.get('/admin/public/config').then(unwrap),
   updateConfig:   (body)      => api.put('/admin/config', body).then(unwrap),
 
   // Audit Log
@@ -545,6 +539,12 @@ const _savedSearchAPI = {
   create: (body)         => api.post('/saved-searches', body).then(unwrap),
   update: (id, body)     => api.put(`/saved-searches/${id}`, body).then(unwrap),
   remove: (id)           => api.delete(`/saved-searches/${id}`).then(unwrap),
+  // Backward-compatible aliases used by some pages.
+  delete: (id)           => api.delete(`/saved-searches/${id}`).then(unwrap),
+  toggleAlerts: async (id, enabled) => {
+    const body = enabled === undefined ? {} : { notifyOnNewMatch: enabled };
+    return api.put(`/saved-searches/${id}`, body).then(unwrap);
+  },
 };
 export const savedSearchAPI = withDemo(_savedSearchAPI, demoAPI.savedSearch);
 

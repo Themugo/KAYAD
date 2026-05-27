@@ -9,7 +9,7 @@ export default function AppLayout({ children }) {
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
-    adminAPI.getConfig().then(cfg => {
+    adminAPI.getPublicConfig().then(cfg => {
       setConfig(cfg.config || cfg);
     }).catch(() => {});
   }, []);

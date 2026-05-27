@@ -11,12 +11,19 @@ export default function DemoModeBanner() {
 
   useEffect(() => {
     const check = async () => {
-      if (isDemoMode()) await checkBackendAvailability();
-      setVisible(isDemoMode());
+      if (document.visibilityState !== 'visible') return;
+      if (isDemoMode()) await checkBackendAvailability(1);
+      const inDemo = isDemoMode();
+      setVisible(inDemo);
+      if (!inDemo) setDismissed(false);
     };
     check();
-    const interval = setInterval(check, 15000);
-    return () => clearInterval(interval);
+    const interval = setInterval(check, 60000);
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', check);
+    };
   }, []);
 
   if (!visible || dismissed) return null;

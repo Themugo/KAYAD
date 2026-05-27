@@ -11,6 +11,7 @@ export default function useSwipeBack() {
   useEffect(() => {
     const onTouchStart = (e) => {
       const touch = e.touches[0];
+      if (!touch) return;
       touchRef.current = {
         startX: touch.clientX,
         startY: touch.clientY,
@@ -20,6 +21,7 @@ export default function useSwipeBack() {
 
     const onTouchEnd = (e) => {
       const touch = e.changedTouches[0];
+      if (!touch) return;
       const dx = touch.clientX - touchRef.current.startX;
       const dy = touch.clientY - touchRef.current.startY;
       const dt = Date.now() - touchRef.current.startTime;

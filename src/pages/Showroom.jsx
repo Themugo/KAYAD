@@ -272,9 +272,13 @@ export default function Showroom() {
   const handleSaveSearch = async () => {
     if (!saveName.trim()) { toast('Give the search a name', 'error'); return; }
     try {
-      const queryStr = searchParams.toString();
-      const res = await savedSearchAPI.create({ name: saveName.trim(), query: queryStr });
-      setSavedSearches(prev => [res.savedSearch || res, ...prev]);
+      const filtersPayload = Object.fromEntries(searchParams.entries());
+      const res = await savedSearchAPI.create({
+        name: saveName.trim(),
+        filters: filtersPayload,
+        notifyOnNewMatch: true,
+      });
+      setSavedSearches(prev => [res.search || res.savedSearch || res, ...prev]);
       setShowSavePrompt(false);
       setSaveName('');
       toast('✓ Saved', 'success');
@@ -283,14 +287,22 @@ export default function Showroom() {
 
   const handleRestoreSavedSearch = saved => {
     const params = new URLSearchParams(saved.query || '');
+    if (!saved.query && saved.filters && typeof saved.filters === 'object') {
+      Object.entries(saved.filters).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && String(val).length > 0) {
+          params.set(key, String(val));
+        }
+      });
+    }
     setSearchParams(params);
     setShowSavedMenu(false);
   };
 
   const handleToggleAlert = async saved => {
     try {
-      const updated = await savedSearchAPI.toggleAlerts(saved._id);
-      setSavedSearches(prev => prev.map(s => (s._id === saved._id ? updated.savedSearch || updated : s)));
+      const nextNotify = !(saved.notify ?? saved.alertsEnabled);
+      const updated = await savedSearchAPI.toggleAlerts(saved._id, nextNotify);
+      setSavedSearches(prev => prev.map(s => (s._id === saved._id ? updated.search || updated.savedSearch || updated : s)));
     } catch { toast('Could not toggle alerts', 'error'); }
   };
 
@@ -690,15 +702,15 @@ export default function Showroom() {
                           <button
                             type="button"
                             onClick={() => handleToggleAlert(s)}
-                            aria-label={s.alertsEnabled ? 'Disable alerts' : 'Enable alerts'}
+                            aria-label={(s.notify ?? s.alertsEnabled) ? 'Disable alerts' : 'Enable alerts'}
                             style={{
                               background: 'transparent', border: 'none',
                               cursor: 'pointer', display: 'flex',
-                              color: s.alertsEnabled ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.3)',
+                              color: (s.notify ?? s.alertsEnabled) ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.3)',
                               padding: 2,
                             }}
                           >
-                            {s.alertsEnabled ? <Bell size={13} /> : <BellOff size={13} />}
+                            {(s.notify ?? s.alertsEnabled) ? <Bell size={13} /> : <BellOff size={13} />}
                           </button>
                           <button
                             type="button"
