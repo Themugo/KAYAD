@@ -19,20 +19,20 @@ describe("Auction Admin Routes", () => {
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Auct Admin", email: `auctadmin-${ts}@test.ke`, password: "admin123", role: "admin" });
+      .send({ name: "Auct Admin", email: `auctadmin-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
     adminId = adminRes.body.user._id;
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Auct User", email: `auctuser-${ts}@test.ke`, password: "user12345" });
+      .send({ name: "Auct User", email: `auctuser-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
 
     const User = mongoose.model("User");
     const dealer = await User.create({
       name: "Auct Dealer",
       email: `auctdeal-${ts}@test.ke`,
-      password: "dealer123",
+      password: "Test@12345",
       role: "dealer",
       commissionBalance: 0,
       listingsLocked: false,

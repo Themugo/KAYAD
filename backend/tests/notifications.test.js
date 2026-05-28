@@ -22,7 +22,7 @@ describe("Notification Routes", () => {
 
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Notif User", email: `notif-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Notif User", email: `notif-${ts}@test.ke`, password: "Test@12345" });
     token = res.body.token;
     userId = res.body.user._id;
 

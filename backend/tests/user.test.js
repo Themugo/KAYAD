@@ -19,18 +19,18 @@ describe("User Routes", () => {
 
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Test User", email: `usr-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Test User", email: `usr-${ts}@test.ke`, password: "Test@12345" });
     userToken = res.body.token;
     userId = res.body.user._id;
 
     // Create some extra users for search tests
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "Alpha Dealer", email: `alpha-${ts}@test.ke`, password: "dealer123", role: "dealer" });
+      .send({ name: "Alpha Dealer", email: `alpha-${ts}@test.ke`, password: "Test@12345", role: "dealer" });
 
     await request(app)
       .post("/api/auth/register")
-      .send({ name: "Beta Buyer", email: `beta-${ts}@test.ke`, password: "buyer12345" });
+      .send({ name: "Beta Buyer", email: `beta-${ts}@test.ke`, password: "Test@12345" });
   });
 
   afterAll(async () => {

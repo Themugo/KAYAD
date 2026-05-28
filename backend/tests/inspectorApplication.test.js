@@ -19,13 +19,13 @@ describe("Inspector Application Routes", () => {
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Insp Admin", email: `inspadmin-${ts}@test.ke`, password: "admin123", role: "admin" });
+      .send({ name: "Insp Admin", email: `inspadmin-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
     adminId = adminRes.body.user._id;
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Insp User", email: `inspuser-${ts}@test.ke`, password: "user12345" });
+      .send({ name: "Insp User", email: `inspuser-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
   });
 

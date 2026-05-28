@@ -19,7 +19,7 @@ describe("Transaction Routes", () => {
     const ts = Date.now();
     const res = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Tx User", email: `tx-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Tx User", email: `tx-${ts}@test.ke`, password: "Test@12345" });
     token = res.body.token;
   });
 

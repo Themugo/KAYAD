@@ -23,7 +23,7 @@ describe("Dealer Routes", () => {
 
     const dealerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Test Dealer", email: `dealer-${ts}@test.ke`, password: "pass12345", role: "dealer" });
+      .send({ name: "Test Dealer", email: `dealer-${ts}@test.ke`, password: "Test@12345", role: "dealer" });
     dealerToken = dealerRes.body.token;
     dealerId = dealerRes.body.user._id;
 
@@ -31,7 +31,7 @@ describe("Dealer Routes", () => {
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Regular User", email: `user-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Regular User", email: `user-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
 
     await Car.create({

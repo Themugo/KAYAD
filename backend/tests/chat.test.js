@@ -22,13 +22,13 @@ describe("Chat Routes", () => {
 
     const resA = await request(app)
       .post("/api/auth/register")
-      .send({ name: "User A", email: `chata-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "User A", email: `chata-${ts}@test.ke`, password: "Test@12345" });
     tokenA = resA.body.token;
     userIdA = resA.body.user._id;
 
     const resB = await request(app)
       .post("/api/auth/register")
-      .send({ name: "User B", email: `chatb-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "User B", email: `chatb-${ts}@test.ke`, password: "Test@12345" });
     tokenB = resB.body.token;
     userIdB = resB.body.user._id;
 

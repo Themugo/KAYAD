@@ -19,18 +19,18 @@ describe("NTSA Verification Routes", () => {
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "NTSA Admin", email: `ntsaadmin-${ts}@test.ke`, password: "admin123", role: "admin" });
+      .send({ name: "NTSA Admin", email: `ntsaadmin-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
 
     const ownerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Car Owner", email: `ntsaowner-${ts}@test.ke`, password: "owner123" });
+      .send({ name: "Car Owner", email: `ntsaowner-${ts}@test.ke`, password: "Test@12345" });
     ownerToken = ownerRes.body.token;
     ownerId = ownerRes.body.user._id;
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Random User", email: `ntsauser-${ts}@test.ke`, password: "user12345" });
+      .send({ name: "Random User", email: `ntsauser-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
 
     const Car = mongoose.model("Car");

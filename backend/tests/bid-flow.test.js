@@ -18,7 +18,7 @@ describe("Bid Flow", () => {
     const dEmail = `dealer-${Date.now()}@test.ke`;
     const reg = await request(app)
       .post("/api/auth/register")
-      .send({ name: dName, email: dEmail, password: "testpass12345", role: "dealer" });
+      .send({ name: dName, email: dEmail, password: "Test@12345", role: "dealer" });
     dealerToken = reg.body.token;
     const carRes = await request(app)
       .get("/api/cars?limit=1");

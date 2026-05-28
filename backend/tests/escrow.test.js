@@ -23,13 +23,13 @@ describe("Escrow System", () => {
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Test Admin", email: `admin-${ts}@test.com`, password: "admin123", role: "admin" });
+      .send({ name: "Test Admin", email: `admin-${ts}@test.com`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
     adminId = adminRes.body.user._id;
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Test Buyer", email: `buyer-${ts}@test.com`, password: "buyer123" });
+      .send({ name: "Test Buyer", email: `buyer-${ts}@test.com`, password: "Test@12345" });
     userToken = userRes.body.token;
     userId = userRes.body.user._id;
 

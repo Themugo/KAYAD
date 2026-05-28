@@ -21,18 +21,18 @@ describe("Inspection Routes", () => {
 
     const buyerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Insp Buyer", email: `inspbuy-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Insp Buyer", email: `inspbuy-${ts}@test.ke`, password: "Test@12345" });
     buyerToken = buyerRes.body.token;
     buyerId = buyerRes.body.user._id;
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Insp Admin", email: `inspadm-${ts}@test.ke`, password: "admin123", role: "admin" });
+      .send({ name: "Insp Admin", email: `inspadm-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
 
     const inspectorRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Ghost Checker", email: `ghost-${ts}@test.ke`, password: "checker123" });
+      .send({ name: "Ghost Checker", email: `ghost-${ts}@test.ke`, password: "Test@12345" });
     inspectorToken = inspectorRes.body.token;
     inspectorId = inspectorRes.body.user._id;
 
@@ -250,7 +250,7 @@ describe("Inspection Routes", () => {
     it("denies access to unrelated user", async () => {
       const otherRes = await request(app)
         .post("/api/auth/register")
-        .send({ name: "Stranger", email: `stranger-${Date.now()}@test.ke`, password: "pass12345" });
+        .send({ name: "Stranger", email: `stranger-${Date.now()}@test.ke`, password: "Test@12345" });
       const otherToken = otherRes.body.token;
       const res = await request(app)
         .get(`/api/inspections/${orderId}`)

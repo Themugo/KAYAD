@@ -25,7 +25,7 @@ describe("Bidding System", () => {
 
     const dealerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Dealer", email: `dealer-bid-${ts}@test.ke`, password: "pass12345", role: "dealer" });
+      .send({ name: "Dealer", email: `dealer-bid-${ts}@test.ke`, password: "Test@12345", role: "dealer" });
     dealerToken = dealerRes.body.token;
     dealerId = dealerRes.body.user._id;
 
@@ -33,13 +33,13 @@ describe("Bidding System", () => {
 
     const buyerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Buyer", email: `buyer-bid-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Buyer", email: `buyer-bid-${ts}@test.ke`, password: "Test@12345" });
     buyerToken = buyerRes.body.token;
     buyerId = buyerRes.body.user._id;
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Admin", email: `admin-bid-${ts}@test.ke`, password: "pass12345", role: "admin" });
+      .send({ name: "Admin", email: `admin-bid-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
     adminId = adminRes.body.user._id;
 

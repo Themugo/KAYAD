@@ -15,7 +15,7 @@ const { default: app } = await import("../server.js");
 const TEST_USER = {
   name:     "Test User",
   email:    `test-${Date.now()}@gari.test`,
-  password: "testpass123",
+  password: "Test@12345",
   role:     "user",
 };
 
@@ -93,7 +93,7 @@ describe("🔑 Authentication", () => {
     const res = await request(app)
       .put("/api/auth/change-password")
       .set("Authorization", `Bearer ${token}`)
-      .send({ currentPassword: TEST_USER.password, newPassword: "newpass456" })
+      .send({ currentPassword: TEST_USER.password, newPassword: "New@Pass456" })
       .expect(200);
 
     expect(res.body.success).toBe(true);
@@ -110,7 +110,7 @@ describe("🔑 Authentication", () => {
   test("POST /api/auth/reset-password — rejects without token", async () => {
     const res = await request(app)
       .post("/api/auth/reset-password")
-      .send({ token: "invalid", password: "newpass123" })
+      .send({ token: "invalid", password: "New@Pass123" })
       .expect(400);
     expect(res.body.success).toBe(false);
   });
@@ -150,7 +150,7 @@ describe("🔑 Authentication", () => {
   test("POST /api/auth/refresh — returns new token after login", async () => {
     const loginRes = await request(app)
       .post("/api/auth/login")
-      .send({ email: TEST_USER.email, password: "newpass456" });
+      .send({ email: TEST_USER.email, password: "New@Pass456" });
     const freshToken = loginRes.body.token;
     const res = await request(app)
       .post("/api/auth/refresh")

@@ -21,13 +21,13 @@ describe("Review Routes", () => {
 
     const buyerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Buyer Rev", email: `revbuy-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Buyer Rev", email: `revbuy-${ts}@test.ke`, password: "Test@12345" });
     buyerToken = buyerRes.body.token;
     buyerId = buyerRes.body.user._id;
 
     const dealerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Dealer Rev", email: `revdeal-${ts}@test.ke`, password: "pass12345", role: "dealer" });
+      .send({ name: "Dealer Rev", email: `revdeal-${ts}@test.ke`, password: "Test@12345", role: "dealer" });
     dealerToken = dealerRes.body.token;
     dealerId = dealerRes.body.user._id;
   });

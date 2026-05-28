@@ -19,13 +19,13 @@ describe("SMS Bidding Routes", () => {
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "SMS User", email: `smsuser-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "SMS User", email: `smsuser-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
     userId = userRes.body.user._id;
 
     const dealerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "SMS Dealer", email: `smsdeal-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "SMS Dealer", email: `smsdeal-${ts}@test.ke`, password: "Test@12345" });
     dealerToken = dealerRes.body.token;
     dealerId = dealerRes.body.user._id;
 

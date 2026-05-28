@@ -22,7 +22,7 @@ describe("Payments", () => {
     const ts = Date.now();
     const reg = await request(app)
       .post("/api/auth/register")
-      .send({ name: `buyer-${ts}`, email: `buyer-${ts}@test.ke`, password: "testpass12345", role: "user" });
+      .send({ name: `buyer-${ts}`, email: `buyer-${ts}@test.ke`, password: "Test@12345", role: "user" });
     buyerToken = reg.body.token;
     const buyerId = reg.body.user._id;
 

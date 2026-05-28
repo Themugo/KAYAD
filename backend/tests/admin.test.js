@@ -23,19 +23,19 @@ describe("Admin Routes", () => {
 
     const adminRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Admin", email: `admin-${ts}@test.ke`, password: "pass12345", role: "admin" });
+      .send({ name: "Admin", email: `admin-${ts}@test.ke`, password: "Test@12345", role: "admin" });
     adminToken = adminRes.body.token;
     adminId = adminRes.body.user._id;
 
     const userRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Target User", email: `target-${ts}@test.ke`, password: "pass12345" });
+      .send({ name: "Target User", email: `target-${ts}@test.ke`, password: "Test@12345" });
     userToken = userRes.body.token;
     targetUserId = userRes.body.user._id;
 
     const dealerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Dealer", email: `dealer-adm-${ts}@test.ke`, password: "pass12345", role: "dealer" });
+      .send({ name: "Dealer", email: `dealer-adm-${ts}@test.ke`, password: "Test@12345", role: "dealer" });
     const dealerId = dealerRes.body.user._id;
     await User.findByIdAndUpdate(dealerId, { approved: true });
 
