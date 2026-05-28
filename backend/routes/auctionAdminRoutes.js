@@ -1,5 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission } from "../middleware/rbac.js";
+import { PERM } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -18,7 +20,8 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 const router = express.Router();
 
 // =============================
-// 🔒 ADMIN ONLY
+// 🔒 ALL routes require auth + at minimum staff-level access
+// Individual permission checks enforce granular RBAC
 // =============================
 router.use(protect, adminOnly);
 
@@ -27,6 +30,7 @@ router.use(protect, adminOnly);
 // =============================
 router.post(
   "/:carId/start",
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const { startingBid = 0, durationMs } = req.body;
@@ -65,6 +69,7 @@ router.post(
     });
 
     car.auctionStatus = "live";
+    car.allowBid = true;
     car.startingBid = startingBid;
     car.currentBid = startingBid;
     car.auctionStartTime = new Date();
@@ -85,6 +90,7 @@ router.post(
 // =============================
 router.post(
   "/:carId/end",
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const carId = req.params.carId;
@@ -95,6 +101,12 @@ router.post(
     await syncAuctionResult({
       roomId: carId,
       winner: result.winner,
+    });
+
+    // Always mark auction as ended and close bidding
+    await Car.findByIdAndUpdate(carId, {
+      auctionStatus: "ended",
+      allowBid: false,
     });
 
     res.json({
@@ -109,6 +121,7 @@ router.post(
 // =============================
 router.post(
   "/:carId/extend",
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const { extraMs } = req.body;
@@ -127,8 +140,9 @@ router.post(
       });
     }
 
+    const currentEnd = new Date(car.auctionEnd).getTime();
     car.auctionEnd = new Date(
-      new Date(car.auctionEnd).getTime() + extraMs
+      Math.max(currentEnd, Date.now()) + extraMs
     );
 
     await car.save();
@@ -169,6 +183,7 @@ router.get(
 // =============================
 router.post(
   "/:carId/set-winner",
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const { bidId } = req.body;
@@ -195,6 +210,8 @@ router.post(
         amount: bid.amount,
       },
       sold: true,
+      auctionStatus: "ended",
+      allowBid: false,
     });
 
     res.json({

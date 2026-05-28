@@ -54,20 +54,21 @@ export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, t
     <div style={{
       background: 'var(--card)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden',
-      transition: 'border-color 0.2s',
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-        <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', color }}>
-          {icon}
-        </div>
-        {to && <ArrowUpRight size={14} style={{ color: 'rgba(255,255,255,0.2)' }} />}
+      transition: 'border-color 0.2s, transform 0.2s',
+    }}
+      onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}40`; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}
+    >
+      <div style={{ position: 'absolute', right: -18, top: -18, width: 72, height: 72, borderRadius: '50%', background: color, opacity: 0.07 }} />
+      <div style={{ width: 38, height: 38, borderRadius: 10, background: `${color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, marginBottom: 12 }}>
+        {icon}
       </div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
       <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{value}</div>
       {(sub || showTrend) && (
-        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
           {sub}
-          {showTrend && <span style={{ color: isUp ? '#22c55e' : '#ef4444', fontWeight: 700 }}>{isUp ? '↑' : '↓'}{Math.abs(trend)}%</span>}
+          {showTrend && <span style={{ color: isUp ? '#22c55e' : '#ef4444', fontWeight: 700, fontSize: 10 }}>{isUp ? '↑' : '↓'}{Math.abs(trend)}%</span>}
         </div>
       )}
     </div>

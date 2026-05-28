@@ -24,6 +24,7 @@ import {
   AuthProvider,
   RequireAuth,
   RequireAdmin,
+  RequireAdminPage,
   RequireSeller,
   RequireEmailVerified,
 } from './context/AuthContext';
@@ -143,6 +144,13 @@ const Admin = ({ children }) => (
   </RequireAdmin>
 );
 
+/** Admin area with per-page role enforcement — used for sensitive pages. */
+const SecureAdmin = ({ children }) => (
+  <RequireAdminPage>
+    <AdminLayout>{children}</AdminLayout>
+  </RequireAdminPage>
+);
+
 // ─── Scroll restoration ────────────────────────────────────────────────
 /** Scrolls to the top on every route change so deep pages don't load mid-scroll. */
 function ScrollToTop() {
@@ -226,29 +234,29 @@ export default function App() {
 
                       {/* ── Admin / Staff ─────────────────────────────────── */}
                       <Route path="/admin"                          element={<Admin><AdminDashboard /></Admin>} />
-                      <Route path="/admin/users"                    element={<Admin><AdminUsers /></Admin>} />
-                      <Route path="/admin/sellers"                  element={<Admin><AdminSellers /></Admin>} />
-                      <Route path="/admin/cars"                     element={<Admin><AdminCars /></Admin>} />
-                      <Route path="/admin/moderation"               element={<Admin><AdminCarModeration /></Admin>} />
-                      <Route path="/admin/auctions"                 element={<Admin><AdminAuctions /></Admin>} />
-                      <Route path="/admin/bids"                     element={<Admin><AdminBids /></Admin>} />
-                      <Route path="/admin/escrows"                  element={<Admin><AdminEscrows /></Admin>} />
-                      <Route path="/admin/escrow-vault"             element={<Admin><AdminEscrowVault /></Admin>} />
-                      <Route path="/admin/reviews"                  element={<Admin><AdminReviews /></Admin>} />
-                      <Route path="/admin/referrals"                element={<Admin><AdminReferrals /></Admin>} />
-                      <Route path="/admin/chats"                    element={<Admin><AdminChatModeration /></Admin>} />
-                      <Route path="/admin/market-data"              element={<Admin><AdminMarketData /></Admin>} />
-                      <Route path="/admin/transactions"             element={<Admin><AdminTransactions /></Admin>} />
-                      <Route path="/admin/ntsa-queue"               element={<Admin><AdminNtsaQueue /></Admin>} />
-                      <Route path="/admin/inspections"              element={<Admin><AdminInspections /></Admin>} />
-                      <Route path="/admin/inspector-applications"   element={<Admin><AdminInspectorApplications /></Admin>} />
-                      <Route path="/admin/security-log"             element={<Admin><AdminSecurityLog /></Admin>} />
-                      <Route path="/admin/ads"                      element={<Admin><AdManager /></Admin>} />
-                      <Route path="/admin/settings"                 element={<Admin><AdminSettings /></Admin>} />
-                      <Route path="/admin/staff"                    element={<Admin><AdminStaff /></Admin>} />
-                      <Route path="/admin/control-room"             element={<Admin><ControlRoom /></Admin>} />
-                      <Route path="/admin/panic-room"               element={<Admin><PanicRoom /></Admin>} />
-                      <Route path="/admin/webhoist"                 element={<Admin><WebhoistOverview /></Admin>} />
+                      <Route path="/admin/users"                    element={<SecureAdmin><AdminUsers /></SecureAdmin>} />
+                      <Route path="/admin/sellers"                  element={<SecureAdmin><AdminSellers /></SecureAdmin>} />
+                      <Route path="/admin/cars"                     element={<SecureAdmin><AdminCars /></SecureAdmin>} />
+                      <Route path="/admin/moderation"               element={<SecureAdmin><AdminCarModeration /></SecureAdmin>} />
+                      <Route path="/admin/auctions"                 element={<SecureAdmin><AdminAuctions /></SecureAdmin>} />
+                      <Route path="/admin/bids"                     element={<SecureAdmin><AdminBids /></SecureAdmin>} />
+                      <Route path="/admin/escrows"                  element={<SecureAdmin><AdminEscrows /></SecureAdmin>} />
+                      <Route path="/admin/escrow-vault"             element={<SecureAdmin><AdminEscrowVault /></SecureAdmin>} />
+                      <Route path="/admin/reviews"                  element={<SecureAdmin><AdminReviews /></SecureAdmin>} />
+                      <Route path="/admin/referrals"                element={<SecureAdmin><AdminReferrals /></SecureAdmin>} />
+                      <Route path="/admin/chats"                    element={<SecureAdmin><AdminChatModeration /></SecureAdmin>} />
+                      <Route path="/admin/market-data"              element={<SecureAdmin><AdminMarketData /></SecureAdmin>} />
+                      <Route path="/admin/transactions"             element={<SecureAdmin><AdminTransactions /></SecureAdmin>} />
+                      <Route path="/admin/ntsa-queue"               element={<SecureAdmin><AdminNtsaQueue /></SecureAdmin>} />
+                      <Route path="/admin/inspections"              element={<SecureAdmin><AdminInspections /></SecureAdmin>} />
+                      <Route path="/admin/inspector-applications"   element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
+                      <Route path="/admin/security-log"             element={<SecureAdmin><AdminSecurityLog /></SecureAdmin>} />
+                      <Route path="/admin/ads"                      element={<SecureAdmin><AdManager /></SecureAdmin>} />
+                      <Route path="/admin/settings"                 element={<SecureAdmin><AdminSettings /></SecureAdmin>} />
+                      <Route path="/admin/staff"                    element={<SecureAdmin><AdminStaff /></SecureAdmin>} />
+                      <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
+                      <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
+                      <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
 
                       {/* ── 404 ─────────────────────────────────────────────── */}
                       <Route path="*" element={<Public><NotFoundPage /></Public>} />

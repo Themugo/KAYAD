@@ -668,6 +668,7 @@ router.post("/cars/:id/auction/start", asyncHandler(async (req, res) => {
   });
 
   car.auctionStatus = "live";
+  car.allowBid = true;
   car.startingBid = startingBidVal;
   car.currentBid = startingBidVal;
   car.reservePrice = reserveVal;
@@ -695,6 +696,11 @@ router.post("/cars/:id/auction/end", asyncHandler(async (req, res) => {
   const result = await endAuction(car._id.toString());
   await syncAuctionResult({ roomId: car._id.toString(), winner: result.winner });
 
+  // Always mark auction as ended and stop accepting bids
+  car.auctionStatus = "ended";
+  car.allowBid = false;
+  await car.save();
+
   await logActionFromReq(req, "auction_end", {
     target: car._id, targetModel: "Car",
     details: { winner: result.winner, finalBid: result.finalBid },
@@ -721,10 +727,13 @@ router.post("/cars/:id/auction/extend", asyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, message: `Maximum ${MAX_EXTENSIONS} extensions per auction reached` });
   }
 
+  const currentEnd = new Date(car.auctionEnd).getTime();
+  const newEnd = new Date(Math.max(currentEnd, Date.now()) + hours * 60 * 60 * 1000);
+
   const updated = await Car.findOneAndUpdate(
     { _id: req.params.id, dealer: req.user.id, auctionStatus: "live" },
     {
-      $set: { auctionEnd: new Date(Date.now() + hours * 60 * 60 * 1000) },
+      $set: { auctionEnd: newEnd },
       $inc: { extensionCount: 1 },
     },
     { new: true }

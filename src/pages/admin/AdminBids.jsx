@@ -68,25 +68,27 @@ export default function AdminBids() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 24 }}>
-          <div className="section-eyebrow">Admin</div>
-          <h2>Bid Management</h2>
+          <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>Admin</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#fff', margin: '0 0 4px' }}>Bid Management</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Monitor all bids, fraud scores, M-Pesa payments, and declare auction winners.</p>
         </div>
 
         {/* Stats row */}
         <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
             { label: 'Total Bids',    val: total.toLocaleString(),   icon: '⚡', color: 'var(--gold)' },
-            { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: '✅', color: 'var(--green)' },
-            { label: 'Unpaid Bids',   val: unpaidCount,              icon: '⏳', color: 'var(--orange)' },
-            { label: 'Suspicious',    val: suspicious.length,        icon: '⚠️', color: 'var(--red)' },
+            { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: '✅', color: '#22c55e' },
+            { label: 'Unpaid Bids',   val: unpaidCount,              icon: '⏳', color: '#f97316' },
+            { label: 'Suspicious',    val: suspicious.length,        icon: '⚠️', color: '#ef4444' },
           ].map(s => (
-            <div key={s.label} className="stat-box">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div key={s.label} className="stat-box" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: -16, top: -16, width: 64, height: 64, borderRadius: '50%', background: s.color, opacity: 0.06 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${s.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, fontSize: 16 }}>{s.icon}</div>
                   <div className="stat-label">{s.label}</div>
                   <div className="stat-value" style={{ color: s.color, fontSize: '1.4rem' }}>{s.val}</div>
                 </div>
-                <span style={{ fontSize: 22 }}>{s.icon}</span>
               </div>
             </div>
           ))}

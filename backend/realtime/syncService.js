@@ -57,6 +57,8 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
     car.sold = true;
     car.status = "sold";
     car.currentBid = bid;
+    car.auctionStatus = "ended";
+    car.allowBid = false;
     car.winner = {
       user: userId,
       amount: bid,

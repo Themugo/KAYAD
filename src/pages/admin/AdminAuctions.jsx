@@ -115,8 +115,8 @@ export default function AdminAuctions() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 28 }}>
-          <div className="section-eyebrow">Admin</div>
-          <h2>Auction Control</h2>
+          <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>Admin</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#fff', margin: '0 0 6px' }}>Auction Control</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>
             Start, end, extend auctions and declare winners.
           </p>
@@ -125,17 +125,18 @@ export default function AdminAuctions() {
         {/* Stats bar */}
         <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
-            { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: '🔴' },
-            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold-light)', icon: '⏸' },
-            { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: '🏁' },
+            { label: 'Live Auctions', val: liveCars.length,  color: '#22c55e', icon: '🔴' },
+            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold)', icon: '⏸' },
+            { label: 'Completed', val: endedCars.length,     color: 'rgba(255,255,255,0.5)', icon: '🏁' },
           ].map(s => (
-            <div key={s.label} className="stat-box">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div key={s.label} className="stat-box" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: -16, top: -16, width: 64, height: 64, borderRadius: '50%', background: s.color, opacity: 0.06 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${s.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, fontSize: 16 }}>{s.icon}</div>
                   <div className="stat-label">{s.label}</div>
-                  <div className="stat-value" style={{ color: s.color }}>{s.val}</div>
+                  <div className="stat-value" style={{ color: s.color, fontSize: '1.8rem' }}>{s.val}</div>
                 </div>
-                <span style={{ fontSize: 28 }}>{s.icon}</span>
               </div>
             </div>
           ))}

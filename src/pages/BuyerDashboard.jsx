@@ -13,18 +13,15 @@ function StatCard({ icon, label, value, sub, accent = 'var(--gold)', to }) {
       transition: 'border-color 0.2s, transform 0.2s',
       cursor: to ? 'pointer' : 'default', position: 'relative', overflow: 'hidden',
     }}
-      onMouseEnter={e => { if (to) { e.currentTarget.style.borderColor = 'var(--gold-glow-strong)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
+      onMouseEnter={e => { if (to) { e.currentTarget.style.borderColor = `${accent}40`; e.currentTarget.style.transform = 'translateY(-2px)'; }}}
       onMouseLeave={e => { if (to) { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = 'none'; }}}
     >
-      <div style={{ position: 'absolute', top: 0, right: 0, width: 80, height: 80, borderRadius: '0 0 0 80px', background: `${accent}08` }} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: `${accent}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: accent }}>
-          {icon}
-        </div>
-        {to && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>}
+      <div style={{ position: 'absolute', right: -18, top: -18, width: 72, height: 72, borderRadius: '50%', background: accent, opacity: 0.07 }} />
+      <div style={{ width: 40, height: 40, borderRadius: 10, background: `${accent}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, color: accent, marginBottom: 14 }}>
+        {icon}
       </div>
+      <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
       <div style={{ fontSize: '2rem', fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', color: '#fff', lineHeight: 1, marginBottom: 6 }}>{value}</div>
-      <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
       {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>{sub}</div>}
     </div>
   );

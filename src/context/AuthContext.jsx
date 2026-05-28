@@ -196,3 +196,49 @@ export function RequireAdmin({ children }) {
   );
   return children;
 }
+
+// Granular admin guard — restricts specific admin pages to allowed roles
+const ADMIN_PAGE_ROLES = {
+  '/admin/panic-room':     ['superadmin'],
+  '/admin/control-room':   ['superadmin', 'admin'],
+  '/admin/webhoist':       ['superadmin'],
+  '/admin/staff':          ['superadmin', 'admin', 'hr'],
+  '/admin/settings':       ['superadmin', 'admin'],
+  '/admin/security-log':   ['superadmin', 'admin'],
+  '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr', 'moderator'],
+  '/admin/transactions':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
+  '/admin/escrows':        ['superadmin', 'admin', 'accounts', 'escrow_officer'],
+  '/admin/escrow-vault':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
+  '/admin/ads':            ['superadmin', 'admin', 'marketing', 'ad_manager'],
+  '/admin/moderation':     ['superadmin', 'admin', 'moderator'],
+  '/admin/cars':           ['superadmin', 'admin', 'moderator', 'technical_support'],
+  '/admin/sellers':        ['superadmin', 'admin', 'hr'],
+  '/admin/auctions':       ['superadmin', 'admin'],
+  '/admin/bids':           ['superadmin', 'admin'],
+  '/admin/inspections':    ['superadmin', 'admin', 'ghost_checker'],
+  '/admin/ntsa-queue':     ['superadmin', 'admin'],
+  '/admin/market-data':    ['superadmin', 'admin'],
+  '/admin/reviews':        ['superadmin', 'admin', 'moderator'],
+  '/admin/referrals':      ['superadmin', 'admin'],
+  '/admin/chats':          ['superadmin', 'admin', 'moderator'],
+};
+
+export function RequireAdminPage({ children }) {
+  const { user, isAdmin, isAuth, loading } = useAuth();
+  const loc = useLocation();
+  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+
+  const allowedRoles = ADMIN_PAGE_ROLES[loc.pathname];
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
+        <div style={{ fontSize:'4rem' }}>🔒</div>
+        <h1 style={{ fontSize:'1.5rem', fontWeight:'bold', color:'#fff' }}>Insufficient Permissions</h1>
+        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>Your role (<strong>{user?.role}</strong>) does not have access to this page. Contact a super-admin for access.</p>
+      </div>
+    );
+  }
+  return children;
+}
