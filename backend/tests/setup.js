@@ -26,6 +26,10 @@ export async function startTestDB() {
       });
       usingMemoryServer = false;
       isMockDb = false;
+      // CI uses ONE shared database across all test files. Clear it on connect
+      // so each file starts from a clean slate (prevents cross-file pollution
+      // that breaks exact-count assertions).
+      await clearTestDB();
       return process.env.MONGO_URI;
     } catch {
       // Connection failed — fall through to memory server
@@ -75,14 +79,24 @@ export async function stopTestDB() {
 }
 
 export async function clearTestDB() {
-  if (mongoose.connection.readyState === 1) {
+  if (mongoose.connection.readyState !== 1) return;
+  try {
+    // List the ACTUAL collections in the database (not just those registered
+    // as Mongoose models in this process) so leftovers from other test files
+    // are also cleared on a shared CI database.
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    for (const { name } of collections) {
+      try {
+        await mongoose.connection.db.collection(name).deleteMany({});
+      } catch {
+        // ignore (e.g. system collections / mock mode)
+      }
+    }
+  } catch {
+    // Fallback to registered model collections (e.g. mock mode)
     const collections = mongoose.connection.collections;
     for (const key in collections) {
-      try {
-        await collections[key].deleteMany({});
-      } catch {
-        // ignore errors on mock collections
-      }
+      try { await collections[key].deleteMany({}); } catch { /* ignore */ }
     }
   }
 }
