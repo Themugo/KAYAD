@@ -68,6 +68,14 @@ const userSchema = new mongoose.Schema(
       default: "user",
       index: true,
     },
+
+    // ─── Assignable permissions (granted/revoked by superadmin) ───
+    // Effective permissions = role defaults ∪ grantedPermissions − revokedPermissions.
+    // Superadmin & webhoist always have full access regardless of these.
+    grantedPermissions: { type: [String], default: [] },
+    revokedPermissions: { type: [String], default: [] },
+    permissionsUpdatedAt: { type: Date },
+    permissionsUpdatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     verificationStatus: {
       type: String,
       enum: ["unverified", "pending", "verified", "rejected"],

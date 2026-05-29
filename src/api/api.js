@@ -441,6 +441,9 @@ const _adminAPI = {
   createStaff:     (body)        => api.post('/admin/staff', body).then(unwrap),
   updateStaff:     (id, body)    => api.put(`/admin/staff/${id}`, body).then(unwrap),
   deleteStaff:     (id)          => api.delete(`/admin/staff/${id}`).then(unwrap),
+  getPermCatalog:  ()            => api.get('/admin/staff/permissions/catalog').then(unwrap),
+  getStaffPerms:   (id)          => api.get(`/admin/staff/${id}/permissions`).then(unwrap),
+  setStaffPerms:   (id, body)    => api.put(`/admin/staff/${id}/permissions`, body).then(unwrap),
   seedDepartments: ()            => api.post('/admin/seed-departments').then(unwrap),
   reseed:          ()            => api.post('/admin/reseed').then(unwrap),
 

@@ -4,6 +4,12 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setSentryUser, clearSentryUser } from '../utils/sentry';
 import { STAFF_ROLES, isSellerRole } from '../utils/authRoutes';
+import {
+  getEffectivePermissions,
+  userHasPermission,
+  PAGE_PERMISSIONS,
+  SUPERADMIN_ONLY,
+} from '../utils/permissions';
 
 const AuthCtx = createContext(null);
 
@@ -135,13 +141,18 @@ export function AuthProvider({ children }) {
   const isAuth        = !!user;
   const isEmailVerified = !!user?.emailVerified;
 
+  // Effective permissions = role defaults ∪ granted − revoked (assigned by superadmin)
+  const permissions = useMemo(() => getEffectivePermissions(user), [user]);
+  const can = useCallback((perm) => userHasPermission(user, perm), [user]);
+
   const value = useMemo(() => ({
     user, token, loading,
     isAuth, isEmailVerified,
     isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
+    permissions, can,
     login, register, logout, setUser,
-  }), [user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, login, register, logout, setUser]);
+  }), [user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>
@@ -224,21 +235,50 @@ const ADMIN_PAGE_ROLES = {
 };
 
 export function RequireAdminPage({ children }) {
-  const { user, isAdmin, isAuth, loading } = useAuth();
+  const { user, isAdmin, isAuth, loading, can } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isAuth) return <Navigate to="/login" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
-  const allowedRoles = ADMIN_PAGE_ROLES[loc.pathname];
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+  const path = loc.pathname;
+
+  // Superadmin sees everything
+  if (user?.role === 'superadmin') return children;
+
+  // Superadmin-only pages are never unlocked by a granted permission
+  if (SUPERADMIN_ONLY.has(path)) {
+    return (
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
+        <div style={{ fontSize:'4rem' }}>🔒</div>
+        <h1 style={{ fontSize:'1.5rem', fontWeight:'bold', color:'#fff' }}>Superadmin Only</h1>
+        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>This area is restricted to the platform superadmin.</p>
+      </div>
+    );
+  }
+
+  // Access granted if: the role is in the page's allow-list, OR the user has been
+  // assigned the permission that unlocks this page.
+  const allowedRoles = ADMIN_PAGE_ROLES[path];
+  const requiredPerm = PAGE_PERMISSIONS[path];
+  const roleAllows = !allowedRoles || allowedRoles.includes(user?.role);
+  const permAllows = requiredPerm ? can(requiredPerm) : false;
+
+  if (!roleAllows && !permAllows) {
     return (
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
         <div style={{ fontSize:'4rem' }}>🔒</div>
         <h1 style={{ fontSize:'1.5rem', fontWeight:'bold', color:'#fff' }}>Insufficient Permissions</h1>
-        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>Your role (<strong>{user?.role}</strong>) does not have access to this page. Contact a super-admin for access.</p>
+        <p style={{ color:'#888', maxWidth:'400px', fontSize: 14 }}>Your role (<strong>{user?.role}</strong>) does not have access to this page. Ask a superadmin to assign you the relevant duty.</p>
       </div>
     );
   }
   return children;
+}
+
+// Guard a component/section by a single permission.
+export function RequirePermission({ perm, children, fallback = null }) {
+  const { can, loading } = useAuth();
+  if (loading) return null;
+  return can(perm) ? children : fallback;
 }

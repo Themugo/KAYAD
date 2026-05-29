@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
+import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../utils/permissions';
 
 const ALL_LINKS = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -31,16 +32,25 @@ const ALL_LINKS = [
   { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
   { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
-  { to: '/admin/staff', icon: Crown, label: 'Staff' },
+  { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
+  { to: '/admin/staff-permissions', icon: Shield, label: 'Staff Permissions', superadmin: true },
   { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
   { to: '/admin/webhoist', icon: Crown, label: 'Webhoist', superadmin: true },
 ];
 
 const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
-const roleLinks = (role) => {
+const roleLinks = (user) => {
+  const role = user?.role;
   if (role === 'superadmin') return ALL_LINKS;
-  return ALL_LINKS.filter(l => !l.danger && !l.superadmin);
+  const perms = getEffectivePermissions(user);
+  return ALL_LINKS.filter(l => {
+    if (l.danger || l.superadmin) return false;        // owner-only items hidden
+    if (SUPERADMIN_ONLY.has(l.to)) return false;
+    const required = PAGE_PERMISSIONS[l.to];
+    if (!required) return true;                         // ungated link (e.g. dashboard)
+    return perms.includes(required);                    // show only if duty assigned
+  });
 };
 
 export default function AdminSidebar({ mobileOpen, onToggle }) {
@@ -54,7 +64,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }) {
 
   if (!user || !ELIGIBLE_ROLES.includes(user.role)) return null;
 
-  const links = roleLinks(user.role);
+  const links = roleLinks(user);
 
   return (
     <>

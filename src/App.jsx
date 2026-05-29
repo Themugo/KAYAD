@@ -104,6 +104,7 @@ const AdminSecurityLog             = lazy(() => import('./pages/admin/AdminSecur
 const AdManager                    = lazy(() => import('./pages/admin/AdManager'));
 const AdminSettings                = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminStaff                   = lazy(() => import('./pages/admin/AdminStaff'));
+const AdminStaffPermissions        = lazy(() => import('./pages/admin/AdminStaffPermissions'));
 const ControlRoom                  = lazy(() => import('./pages/admin/ControlRoom'));
 const PanicRoom                    = lazy(() => import('./pages/admin/PanicRoom'));
 const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOverview'));
@@ -254,6 +255,7 @@ export default function App() {
                       <Route path="/admin/ads"                      element={<SecureAdmin><AdManager /></SecureAdmin>} />
                       <Route path="/admin/settings"                 element={<SecureAdmin><AdminSettings /></SecureAdmin>} />
                       <Route path="/admin/staff"                    element={<SecureAdmin><AdminStaff /></SecureAdmin>} />
+                      <Route path="/admin/staff-permissions"        element={<SecureAdmin><AdminStaffPermissions /></SecureAdmin>} />
                       <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
                       <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
                       <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />

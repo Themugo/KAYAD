@@ -107,3 +107,60 @@ export const isAtLeast = (role, minRole) => {
   if (role === WEBHOIST) return true;
   return getRoleLevel(role) >= getRoleLevel(minRole);
 };
+
+// ============================================================
+//  ASSIGNABLE PERMISSIONS (superadmin grants/revokes per user)
+// ============================================================
+
+// Permissions a superadmin may grant or revoke on an individual staff member.
+// FULL_ACCESS is intentionally excluded — it is reserved for superadmin/webhoist.
+export const ASSIGNABLE_PERMISSIONS = [
+  PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS, PERM.MANAGE_USERS, PERM.MANAGE_ESCROW,
+  PERM.MANAGE_ADS, PERM.MANAGE_MODERATION, PERM.MANAGE_SUPPORT, PERM.MANAGE_FINANCE,
+  PERM.MANAGE_STAFF, PERM.VIEW_LOGS, PERM.VIEW_ANALYTICS, PERM.MANAGE_INSPECTIONS,
+  PERM.MANAGE_PLATFORM, PERM.BYPASS_RATE_LIMIT,
+];
+
+// Human-readable labels + descriptions for the superadmin assignment UI.
+export const PERM_LABELS = {
+  [PERM.MANAGE_CARS]:        { label: "Manage Listings",    desc: "Approve, edit and remove car listings",        group: "Marketplace" },
+  [PERM.MANAGE_AUCTIONS]:    { label: "Manage Auctions",    desc: "Start, end, extend auctions and bids",         group: "Marketplace" },
+  [PERM.MANAGE_MODERATION]:  { label: "Moderation",         desc: "Review flagged content, reviews and chats",    group: "Marketplace" },
+  [PERM.MANAGE_USERS]:       { label: "Manage Users",       desc: "View and manage customer & seller accounts",   group: "Users" },
+  [PERM.MANAGE_STAFF]:       { label: "Manage Staff",       desc: "Manage dealer applications & staff records",    group: "Users" },
+  [PERM.MANAGE_ESCROW]:      { label: "Escrow Operations",  desc: "Hold and release escrow funds",                group: "Finance" },
+  [PERM.MANAGE_FINANCE]:     { label: "Finance",            desc: "Transactions, refunds and payouts",            group: "Finance" },
+  [PERM.MANAGE_ADS]:         { label: "Ads & Promotions",   desc: "Manage ad placements and campaigns",           group: "Growth" },
+  [PERM.VIEW_ANALYTICS]:     { label: "View Analytics",     desc: "Access reports and market data",               group: "Growth" },
+  [PERM.MANAGE_INSPECTIONS]: { label: "Inspections",        desc: "Ghost-check vehicles & NTSA queue",            group: "Operations" },
+  [PERM.MANAGE_SUPPORT]:     { label: "Support",            desc: "Handle support tickets and user help",         group: "Operations" },
+  [PERM.VIEW_LOGS]:          { label: "View Security Logs", desc: "Read audit and security logs",                 group: "Operations" },
+  [PERM.MANAGE_PLATFORM]:    { label: "Platform Settings",  desc: "Edit platform-wide settings",                  group: "System" },
+  [PERM.BYPASS_RATE_LIMIT]:  { label: "Bypass Rate Limit",  desc: "Exempt from API rate limiting",                group: "System" },
+};
+
+/**
+ * Compute a user's EFFECTIVE permissions:
+ *   role defaults ∪ grantedPermissions − revokedPermissions
+ * Superadmin and webhoist always receive the full permission set.
+ */
+export const getEffectivePermissions = (user) => {
+  if (!user) return [];
+  if (user.role === "superadmin" || user.role === WEBHOIST) {
+    return Object.values(PERM);
+  }
+  const base = new Set(ROLE_PERMISSIONS[user.role] || []);
+  for (const p of (user.grantedPermissions || [])) base.add(p);
+  for (const p of (user.revokedPermissions || [])) base.delete(p);
+  return [...base];
+};
+
+/**
+ * Permission check that honours per-user grants/revokes.
+ * Pass the full user object (must include role + granted/revoked arrays).
+ */
+export const userHasPermission = (user, permission) => {
+  if (!user) return false;
+  if (user.role === "superadmin" || user.role === WEBHOIST) return true;
+  return getEffectivePermissions(user).includes(permission);
+};

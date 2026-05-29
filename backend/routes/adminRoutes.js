@@ -1,6 +1,12 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
+import {
+  ASSIGNABLE_PERMISSIONS,
+  PERM_LABELS,
+  ROLE_PERMISSIONS,
+  getEffectivePermissions,
+} from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
@@ -991,10 +997,99 @@ router.get(
   asyncHandler(async (req, res) => {
     const staffRoles = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
     const staff = await User.find({ role: { $in: staffRoles } })
-      .select("name email role isBanned lastLogin createdAt")
+      .select("name email role isBanned lastLogin createdAt grantedPermissions revokedPermissions permissionsUpdatedAt")
       .sort({ createdAt: -1 })
       .lean();
-    res.json({ success: true, staff });
+    // Attach computed effective permissions for the UI
+    const enriched = staff.map(s => ({
+      ...s,
+      effectivePermissions: getEffectivePermissions(s),
+      rolePermissions: ROLE_PERMISSIONS[s.role] || [],
+    }));
+    res.json({ success: true, staff: enriched });
+  })
+);
+
+// GET PERMISSION CATALOG (assignable permissions + labels) — for the assignment UI
+router.get(
+  "/staff/permissions/catalog",
+  authorize("superadmin"),
+  asyncHandler(async (req, res) => {
+    const catalog = ASSIGNABLE_PERMISSIONS.map(p => ({
+      key: p,
+      label: PERM_LABELS[p]?.label || p,
+      desc: PERM_LABELS[p]?.desc || "",
+      group: PERM_LABELS[p]?.group || "Other",
+    }));
+    res.json({ success: true, catalog });
+  })
+);
+
+// GET ONE STAFF MEMBER'S EFFECTIVE PERMISSIONS
+router.get(
+  "/staff/:id/permissions",
+  authorize("superadmin"),
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id)
+      .select("name email role grantedPermissions revokedPermissions permissionsUpdatedAt")
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    res.json({
+      success: true,
+      permissions: {
+        role: user.role,
+        rolePermissions: ROLE_PERMISSIONS[user.role] || [],
+        grantedPermissions: user.grantedPermissions || [],
+        revokedPermissions: user.revokedPermissions || [],
+        effectivePermissions: getEffectivePermissions(user),
+        updatedAt: user.permissionsUpdatedAt,
+      },
+    });
+  })
+);
+
+// UPDATE A STAFF MEMBER'S ASSIGNED PERMISSIONS (superadmin only)
+router.put(
+  "/staff/:id/permissions",
+  authorize("superadmin"),
+  validateObjectId,
+  protectAccount,
+  auditLog("update_staff_permissions"),
+  asyncHandler(async (req, res) => {
+    let { grantedPermissions = [], revokedPermissions = [] } = req.body;
+
+    // Validate against the assignable catalog — reject unknown/forbidden keys
+    const allowed = new Set(ASSIGNABLE_PERMISSIONS);
+    grantedPermissions = [...new Set(grantedPermissions)].filter(p => allowed.has(p));
+    revokedPermissions = [...new Set(revokedPermissions)].filter(p => allowed.has(p));
+
+    // A permission can't be both granted and revoked — grant wins, drop from revoked
+    revokedPermissions = revokedPermissions.filter(p => !grantedPermissions.includes(p));
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    // Never modify another superadmin's permissions through this endpoint
+    if (user.role === "superadmin") {
+      return res.status(403).json({ success: false, message: "Cannot modify a superadmin's permissions" });
+    }
+
+    user.grantedPermissions = grantedPermissions;
+    user.revokedPermissions = revokedPermissions;
+    user.permissionsUpdatedAt = new Date();
+    user.permissionsUpdatedBy = req.user.id;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Permissions updated",
+      permissions: {
+        grantedPermissions: user.grantedPermissions,
+        revokedPermissions: user.revokedPermissions,
+        effectivePermissions: getEffectivePermissions(user),
+      },
+    });
   })
 );
 

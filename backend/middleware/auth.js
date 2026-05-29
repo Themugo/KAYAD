@@ -122,6 +122,8 @@ export const protect = async (req, res, next) => {
       effectiveRole: isOwner ? "webhoist" : user.role,
       name: user.name,
       email: user.email,
+      grantedPermissions: user.grantedPermissions || [],
+      revokedPermissions: user.revokedPermissions || [],
     };
 
     next();

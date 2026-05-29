@@ -4,6 +4,7 @@ import {
   PERM,
   ROLE_PERMISSIONS as CENTRAL_PERMISSIONS,
   WEBHOIST,
+  getEffectivePermissions,
 } from "../config/roles.js";
 import { isOwnerUser } from "../config/owners.js";
 
@@ -51,13 +52,15 @@ export function isWebhoist(user) {
 }
 
 export function hasPermission(user, permission) {
-  const role = getEffectiveRole(user);
-  const perms = ROLE_PERMISSIONS[role] || [];
-  return perms.includes(permission);
+  if (isWebhoist(user)) return true;
+  if (user?.role === "superadmin") return true;
+  // Effective = role defaults ∪ granted − revoked (per-user assignments)
+  return getEffectivePermissions(user).includes(permission);
 }
 
 export function getPermissions(user) {
-  return ROLE_PERMISSIONS[getEffectiveRole(user)] || [];
+  if (isWebhoist(user)) return Object.values(PERM);
+  return getEffectivePermissions(user);
 }
 
 export function requirePermission(...permissions) {
