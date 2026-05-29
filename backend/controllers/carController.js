@@ -633,10 +633,10 @@ export const getCar = async (req, res) => {
     // A background flush syncs to MongoDB every 60s (see server.js viewFlush).
     // Falls back to fire-and-forget $inc when Redis is unavailable.
     try {
-      const { getRedisClient, isRedisConnected } = await import("../config/redis.js");
+      const { isRedisConnected } = await import("../utils/cache.js");
       if (isRedisConnected()) {
-        const redis = getRedisClient();
-        await redis.hIncrBy("kayad:view_counts", String(car._id), 1);
+        const redisClient = (await import("../config/redis.js")).default;
+        await redisClient.hIncrBy("kayad:view_counts", String(car._id), 1);
       } else {
         Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
       }
