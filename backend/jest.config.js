@@ -6,7 +6,7 @@ export default {
   testTimeout: 60000,
   forceExit: true,
   detectOpenHandles: true,
-  verbose: true,
+  verbose: false,
   maxWorkers: 1,
   collectCoverageFrom: [
     "utils/**/*.js",

@@ -95,7 +95,7 @@ const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margi
 export const sendEmail = async ({ to, subject, html, text }) => {
   const t = getTransporter();
   if (!t) {
-    console.log(`📧 [Email disabled] Would send "${subject}" to ${to}`);
+    if (process.env.NODE_ENV !== "test") console.log(`📧 [Email disabled] Would send "${subject}" to ${to}`);
     return { success: true, disabled: true };
   }
   try {

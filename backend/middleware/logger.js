@@ -2,6 +2,8 @@
 
 import crypto from "crypto";
 
+const SILENT = process.env.NODE_ENV === "test" || process.env.LOG_SILENT === "true";
+
 const logger = (req, res, next) => {
   const start = Date.now();
 
@@ -11,6 +13,9 @@ const logger = (req, res, next) => {
   const requestId = crypto.randomUUID();
 
   req.requestId = requestId;
+
+  // Skip verbose request/response logging during tests (keeps CI logs readable)
+  if (SILENT) return next();
 
   // =============================
   // 📡 REQUEST LOG
