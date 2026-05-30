@@ -60,12 +60,28 @@ jobs:
 
       - run: npm ci
 
-      - run: npm test
+      - name: Run backend tests
+        id: backend_tests
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee /tmp/backend-test.log
         env:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-32-chars-minimum-x
           MPESA_SKIP_IP_CHECK: "true"
           MONGO_URI: mongodb://localhost:27017/kayad-ci
+
+      - name: Surface test failures
+        if: failure()
+        working-directory: ./backend
+        run: |
+          {
+            echo "## ❌ Backend test failures";
+            echo "";
+            echo '```';
+            grep -nE "✕|●|FAIL |Tests:|Test Suites:|Expected|Received|expect\(|TypeError|ReferenceError|ValidationError|at Object" /tmp/backend-test.log | head -150 || echo "(no matching lines — see raw log)";
+            echo '```';
+          } >> "$GITHUB_STEP_SUMMARY"
 
   security-audit:
     name: Security Audit
