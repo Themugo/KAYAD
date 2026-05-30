@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI, formatKES } from '../../api/api';
+import { MiniBarChart, BreakdownBars } from '../../components/AdminWidgets';
 import { Users, Car, DollarSign, ShieldCheck, Gavel, AlertTriangle, Settings, BarChart3, ChevronRight, Activity, TrendingUp, Lock, Megaphone, UserCheck, Crown, ClipboardCheck, Star, Shield, Gift, MessageSquare, Bell, Eye, Check, PlusCircle, Server, Clock, Database, Wifi, RefreshCw } from 'lucide-react';
 
 const ROLE_CONFIG = {
@@ -148,15 +149,21 @@ export default function AdminDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [recentUsers, setRecentUsers] = useState([]);
+  const [sysHealth, setSysHealth] = useState(null);
 
   const fetchData = useCallback(() => {
     setLoading(true);
     Promise.all([
       adminAPI.stats().catch(() => ({ stats: {} })),
       adminAPI.alerts({ limit: 10, read: 'false' }).catch(() => ({ alerts: [], unreadCount: 0 })),
-    ]).then(([s, a]) => {
+      adminAPI.users({ limit: 5 }).catch(() => ({ users: [] })),
+      adminAPI.systemHealth().catch(() => ({ health: null })),
+    ]).then(([s, a, u, h]) => {
       setStats(s.stats || {});
       setAlerts(a.alerts || []);
+      setRecentUsers(u.users || u.data || []);
+      setSysHealth(h.health || null);
       setLastRefresh(new Date());
     }).finally(() => setLoading(false));
   }, []);
@@ -200,19 +207,13 @@ export default function AdminDashboard() {
     isKes ? formatKES(val) : Number(val || 0).toLocaleString('en-KE');
 
   const platformHealth = [
-    { label: 'Redis',      status: 'connected',  icon: Database },
-    { label: 'Socket.IO',  status: 'connected',  icon: Wifi },
-    { label: 'Last Backup',status: '2h ago',      icon: Clock },
-    { label: 'Uptime',     status: '99.97%',      icon: Activity },
+    { label: 'System Status', status: sysHealth ? (sysHealth.status === 'healthy' ? 'connected' : sysHealth.status) : '—', icon: Activity },
+    { label: 'Live Auctions', status: sysHealth ? `${sysHealth.liveAuctions ?? 0}` : '—', icon: Gavel },
+    { label: 'Pending Escrows', status: sysHealth ? `${sysHealth.pendingEscrows ?? 0}` : '—', icon: Lock },
+    { label: 'Alerts (24h)', status: sysHealth ? `${sysHealth.criticalAlerts24h ?? 0}` : '—', icon: AlertTriangle },
   ];
 
-  const recentUsers = [
-    { name: 'Grace Mwangi',     email: 'grace.mwangi@email.com',    role: 'Dealer',      date: '2026-05-20' },
-    { name: 'Peter Kamau',      email: 'peter.kamau@email.com',     role: 'Individual',  date: '2026-05-19' },
-    { name: 'Faith Akinyi',     email: 'faith.akinyi@email.com',    role: 'Broker',      date: '2026-05-19' },
-    { name: 'James Ochieng',    email: 'james.ochieng@email.com',   role: 'Dealer',      date: '2026-05-18' },
-    { name: 'Sarah Wanjiku',    email: 'sarah.wanjiku@email.com',   role: 'Individual',  date: '2026-05-18' },
-  ];
+  const roleLabel = (r) => ({ dealer: 'Dealer', individual_seller: 'Individual', broker: 'Broker', user: 'Buyer' }[r] || (r ? r.replace(/_/g, ' ') : 'User'));
 
   return (
     <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px 32px 48px' }}>
@@ -292,7 +293,46 @@ export default function AdminDashboard() {
             })}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 16, marginBottom: 28 }}>
+          {/* Platform at a glance + user composition */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 16, marginBottom: 28 }} className="overview-row">
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 22px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Platform at a Glance</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>Live totals across the marketplace</div>
+              </div>
+              <div style={{ padding: '24px 22px 18px' }}>
+                <MiniBarChart
+                  data={[
+                    { label: 'Users',    value: Number(s.totalUsers) || 0,     color: '#3b82f6' },
+                    { label: 'Cars',     value: Number(s.totalCars) || 0,      color: 'var(--gold)' },
+                    { label: 'Auctions', value: Number(s.activeAuctions) || 0, color: '#f97316' },
+                    { label: 'Bids',     value: Number(s.totalBids) || 0,      color: '#06b6d4' },
+                    { label: 'Escrows',  value: Number(s.totalEscrows) || 0,   color: '#ef4444' },
+                  ]}
+                  height={160}
+                  format={(v) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v || 0}`)}
+                />
+              </div>
+            </div>
+            <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <div style={{ padding: '16px 22px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>User Composition</span>
+              </div>
+              <div style={{ padding: '20px 22px' }}>
+                <BreakdownBars
+                  total={Number(s.totalUsers) || 0}
+                  data={[
+                    { name: 'Dealers',            count: Number(s.totalDealers) || 0,      color: 'var(--gold)' },
+                    { name: 'Individual Sellers', count: Number(s.individualSellers) || 0, color: '#3b82f6' },
+                    { name: 'Brokers',            count: Number(s.brokers) || 0,           color: '#a855f7' },
+                    { name: 'Buyers & Others',    count: Math.max((Number(s.totalUsers) || 0) - ((Number(s.totalDealers) || 0) + (Number(s.individualSellers) || 0) + (Number(s.brokers) || 0)), 0), color: '#22c55e' },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 16, marginBottom: 28 }} className="admin-3col">
             <div style={{
               background: 'var(--card)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-lg)', padding: '20px',
@@ -424,7 +464,9 @@ export default function AdminDashboard() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
                 {platformHealth.map(h => {
-                  const healthy = h.status === 'connected';
+                  const healthy = h.label === 'Alerts (24h)'
+                    ? (Number(h.status) === 0)
+                    : (h.label === 'System Status' ? h.status === 'connected' : true);
                   return (
                     <div key={h.label} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -474,15 +516,18 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
+                  {recentUsers.length === 0 && (
+                    <tr><td colSpan={4} style={{ padding: '20px 12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>No recent registrations</td></tr>
+                  )}
                   {recentUsers.map((u, i) => (
-                    <tr key={i} style={{ borderBottom: i < recentUsers.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                      <td style={{ padding: '10px 12px', color: '#fff', fontWeight: 600, fontSize: 12 }}>{u.name}</td>
+                    <tr key={u._id || i} style={{ borderBottom: i < recentUsers.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                      <td style={{ padding: '10px 12px', color: '#fff', fontWeight: 600, fontSize: 12 }}>{u.name || '—'}</td>
                       <td style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: 12 }}>{u.email}</td>
                       <td style={{ padding: '10px 12px', fontSize: 12 }}>
-                        <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{u.role}</span>
+                        <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{roleLabel(u.role)}</span>
                       </td>
                       <td style={{ padding: '10px 12px', color: 'var(--text-muted)', fontSize: 11 }}>
-                        {new Date(u.date).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                       </td>
                     </tr>
                   ))}
