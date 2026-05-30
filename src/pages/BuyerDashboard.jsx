@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI, bidsAPI } from '../api/api';
 import BackButton from '../components/BackButton';
+import { MiniBarChart, BreakdownBars } from '../components/AdminWidgets';
 
 function StatCard({ icon, label, value, sub, accent = 'var(--gold)', to }) {
   const inner = (
@@ -161,6 +162,38 @@ export default function BuyerDashboard() {
   const activeEscrows = escrows.filter(e => ['pending','held','disputed'].includes(e.status));
   const unreadMessages = chats.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
+  // ── Spending overview (last 6 months) from real payments ──
+  const spendMonthly = (() => {
+    const now = new Date();
+    const buckets = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      buckets.push({ key: `${d.getFullYear()}-${d.getMonth()}`, label: d.toLocaleDateString('en-KE', { month: 'short' }), value: 0 });
+    }
+    const map = Object.fromEntries(buckets.map(b => [b.key, b]));
+    (payments || []).forEach(p => {
+      const d = new Date(p.createdAt || p.date || Date.now());
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (map[key]) map[key].value += Number(p.amount || p.total || 0);
+    });
+    return buckets;
+  })();
+  const totalSpent = (payments || []).reduce((sum, p) => sum + (Number(p.amount || p.total || 0)), 0);
+
+  // ── Saved cars by type from real favorites ──
+  const savedByType = (() => {
+    const m = {};
+    (favorites || []).forEach(f => {
+      const car = f.car || f;
+      const t = car.bodyType || car.brand || 'Other';
+      m[t] = (m[t] || 0) + 1;
+    });
+    const colors = ['var(--gold)', '#3b82f6', '#22c55e', '#a855f7', '#f97316'];
+    return Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 5)
+      .map(([name, count], i) => ({ name, count, color: colors[i % colors.length] }));
+  })();
+  const fmtK = (v) => (v >= 1e6 ? `${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `${Math.round(v / 1e3)}K` : `${v || 0}`);
+
   const statusBadge = (status) => {
     const map = {
       pending:  { bg: 'rgba(212,196,168,0.12)', color: 'var(--gold)' },
@@ -241,6 +274,38 @@ export default function BuyerDashboard() {
                   <StatCard icon="⚡" label="Active Bids" value={myBids.filter(b => !b.status || ['pending','active'].includes(b.status)).length} sub={myBids.length ? 'across auctions' : 'place a bid to start'} accent="var(--gold)" to="/showroom?filter=auction" />
                   <StatCard icon="⭐" label="Watchlist" value={watchlist.length || '-'} sub={watchlist.length ? 'saved searches' : 'track vehicles'} accent="#3b82f6" to="/showroom" />
                   <StatCard icon="✉" label="Messages" value={unreadMessages || (chats.length || '-')} sub={unreadMessages > 0 ? `${unreadMessages} unread` : chats.length ? 'all read' : 'no messages'} accent="var(--purple)" to="/chat" />
+                </div>
+
+                {/* ── SPENDING OVERVIEW + SAVED BY TYPE ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) minmax(0, 1fr)', gap: 16, marginBottom: 28 }} className="overview-row">
+                  <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Spending Overview</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Payments · last 6 months</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Total</div>
+                        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {fmtK(totalSpent)}</div>
+                      </div>
+                    </div>
+                    <div style={{ padding: '24px 22px 18px' }}>
+                      {totalSpent > 0
+                        ? <MiniBarChart data={spendMonthly} color="var(--gold)" height={160} format={(v) => `KES ${fmtK(v)}`} />
+                        : <div style={{ textAlign: 'center', padding: '36px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>No payments yet — your purchases will appear here</div>}
+                    </div>
+                  </div>
+
+                  <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 22px', borderBottom: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Saved by Type</span>
+                    </div>
+                    <div style={{ padding: '20px 22px' }}>
+                      {savedByType.length
+                        ? <BreakdownBars data={savedByType} total={favorites.length} />
+                        : <div style={{ textAlign: 'center', padding: '24px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>No saved cars yet</div>}
+                    </div>
+                  </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}>
