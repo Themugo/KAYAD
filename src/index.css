@@ -513,3 +513,8 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
   scrollbar-width: none;
 }
 .tab-bar::-webkit-scrollbar { display: none; }
+
+/* Dealer overview — stack the 2-column rows on small screens */
+@media (max-width: 860px) {
+  .overview-row { grid-template-columns: 1fr !important; }
+}

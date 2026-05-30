@@ -103,6 +103,37 @@ export function DemoBadge({ edited }) {
   );
 }
 
+// Lightweight dependency-free bar chart (matches the hand-rolled inline style).
+// data: [{ label, value }]. format(value) controls the hover/peak label.
+export function MiniBarChart({ data = [], color = 'var(--gold)', height = 150, format = (v) => v }) {
+  const max = Math.max(...data.map(d => d.value || 0), 1);
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height, padding: '0 2px' }}>
+      {data.map((d, i) => {
+        const pct = max > 0 ? (d.value / max) * 100 : 0;
+        return (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, height: '100%', justifyContent: 'flex-end' }}>
+            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', fontWeight: 700, fontFamily: 'var(--font-display)', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+              {d.value ? format(d.value) : ''}
+            </span>
+            <div
+              title={`${d.label}: ${format(d.value)}`}
+              style={{
+                width: '100%', maxWidth: 46, height: `${Math.max(pct, 2)}%`, minHeight: 4,
+                borderRadius: '8px 8px 2px 2px',
+                background: `linear-gradient(180deg, ${color} 0%, ${color}40 100%)`,
+                boxShadow: `0 0 18px ${color}22`,
+                transition: 'height 0.4s ease',
+              }}
+            />
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{d.label}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export function EscrowProgress({ status }) {
   const idx = ESCROW_STEPS.findIndex(s => s.key === status);
   return (

@@ -7,6 +7,7 @@ import { Plus, Edit3, Trash2, ChevronRight, TrendingUp, Car, Gavel, BarChart3, U
 
 // Extracted components
 import TeamTab from './components/TeamTab';
+import DealerOverview from './components/DealerOverview';
 import {
   TABS_CONFIG, STATUS_CONFIG, BID_STATUS_CONFIG, ESCROW_STEPS,
   timeAgo, StatCard, StatusBadge, DemoBadge, EscrowProgress,
@@ -209,63 +210,14 @@ export default function DealerDashboard() {
           <>
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
-              <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 16, marginBottom: 28 }}>
-                  <StatCard icon="🚗"         label="Listings"      value={s.totalCars || cars.length}       color="var(--gold)" trend={trends?.viewsToBids} />
-                  <StatCard icon="👁️"         label="Total Views"   value={s.totalViews}                     color="#3b82f6" trend={0} />
-                  <StatCard icon="🔨"         label="Active Bids"   value={s.activeBids}                     color="#f97316" to="/dealer" trend={2.5} />
-                  <StatCard icon="💰"          label="Revenue"
-                    value={totalRevenue >= 1e6 ? `${(totalRevenue/1e6).toFixed(1)}M` : totalRevenue ? `${Math.round(totalRevenue/1000)}K` : '—'}
-                    sub="KES" color="#22c55e" trend={5.2} />
-                  <StatCard icon="💬"         label="Inquiries"     value={s.totalInquiries || 0}            color="#8b5cf6" trend={trends?.viewsToInquiries} />
-                  <StatCard icon="❤️"         label="Favorites"    value={s.totalFavorites || 0}            color="#ef4444" trend={trends?.viewsToFavorites} />
-                  <StatCard icon="📋"         label="Draft Auctions" value={s.draftAuctions ?? s.draftCount ?? 0} color="#6b7280" trend={0} />
-                  <StatCard icon="📊"         label="Conversion"    value={s.conversionRate ? `${(s.conversionRate * 100).toFixed(1)}%` : '—'} color="#a855f7" trend={trends?.viewsToBids} />
-                </div>
-
-                {/* Recent listings preview */}
-                <div style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-                  <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Recent Listings</span>
-                    <button onClick={() => setTab('listings')} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View All →</button>
-                  </div>
-                  {cars.slice(0, 5).map(car => {
-                    const img = car.images?.[0]?.url || car.images?.[0] || car.image;
-                    return (
-                      <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 54, height: 40, objectFit: 'cover', borderRadius: 7, flexShrink: 0 }} />
-                          : <div style={{ width: 54, height: 40, borderRadius: 7, background: 'rgba(255,255,255,0.04)', flexShrink: 0 }} />}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</span>
-                            {car.isDemo && <DemoBadge edited={!!car.demoEditedAt} />}
-                          </div>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{car.views || 0} views · {car.year}</div>
-                        </div>
-                        <div style={{ textAlign: 'right', flexShrink: 0, marginRight: 12 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(car.price||0).toLocaleString()}</div>
-                        </div>
-                        <StatusBadge status={car.status || (car.auctionStatus === 'live' ? 'active' : 'draft')} />
-                        <div style={{ display: 'flex', gap: 6, marginLeft: 4 }}>
-                          <Link to={`/dealer/edit/${car._id}`} style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                            <Edit3 size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
-                          </Link>
-                          <button onClick={() => handleDelete(car._id)} aria-label="Delete listing" style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Trash2 size={12} style={{ color: 'rgba(239,68,68,0.6)' }} />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {cars.length === 0 && (
-                    <div style={{ padding: '48px', textAlign: 'center' }}>
-                      <div style={{ fontSize: 36, marginBottom: 12 }}>🚗</div>
-                      <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)', marginBottom: 16 }}>No listings yet</div>
-                      <Link to="/dealer/add-car" style={{ padding: '10px 24px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontSize: 12, fontWeight: 900, textDecoration: 'none' }}>Add Your First Car</Link>
-                    </div>
-                  )}
-                </div>
-              </>
+              <DealerOverview
+                summary={s}
+                cars={cars}
+                totalRevenue={totalRevenue}
+                trends={trends}
+                onDelete={handleDelete}
+                goToTab={setTab}
+              />
             )}
 
             {/* ── LISTINGS ── */}
