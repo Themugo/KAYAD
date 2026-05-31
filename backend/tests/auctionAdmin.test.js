@@ -151,6 +151,7 @@ describe("Auction Admin Routes", () => {
         carId,
         user: new mongoose.Types.ObjectId(adminId),
         amount: 750000,
+        phone: "254712345678",
         status: "paid",
       });
       bidId = bid._id;
