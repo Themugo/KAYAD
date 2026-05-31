@@ -4,6 +4,9 @@
   "description": "Kayad API — Live Auctions, M-Pesa, Escrow",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",

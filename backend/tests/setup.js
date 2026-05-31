@@ -54,8 +54,21 @@ export async function startTestDB() {
 
     return uri;
   } catch (err) {
-    console.warn("⚠️  MongoMemoryServer unavailable:", err.message);
-    console.warn("   Set MONGO_URI env var (or MEMORY_DB_VERSION) to run DB-dependent tests.");
+    const isExecFormat = /EFTYPE|spawn|exec format/i.test(err.message || "");
+    console.warn("\n" + "=".repeat(70));
+    console.warn("⚠️  No test database available — DB-dependent tests will fail.");
+    console.warn("    Reason:", err.message);
+    if (isExecFormat) {
+      console.warn("    This usually means the bundled mongod can't run on your");
+      console.warn("    Node version. This project targets Node 20 (see .nvmrc).");
+    }
+    console.warn("    Fix (either one):");
+    console.warn("      • Use Node 20:   nvm install 20 && nvm use 20");
+    console.warn("      • Or point at a real DB:");
+    console.warn("        set MONGO_URI=mongodb://127.0.0.1:27017/kayad-test  (Windows cmd)");
+    console.warn("        export MONGO_URI=mongodb+srv://<atlas-uri>/kayad-test  (or Atlas)");
+    console.warn("    CI is unaffected — it always provides MONGO_URI.");
+    console.warn("=".repeat(70) + "\n");
 
     process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
     usingMemoryServer = false;

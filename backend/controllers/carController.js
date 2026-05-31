@@ -33,8 +33,10 @@ export const getCars = async (req, res) => {
       page = 1, limit = 12,
     } = req.query;
 
-    const pageNum = toNumber(page, 1);
-    const limitNum = toNumber(limit, 12);
+    const pageNum = Math.max(toNumber(page, 1), 1);
+    // Hard cap: clamp limit to 1..100 so a request like ?limit=999999 can
+    // never trigger an unbounded query (pagination cap — Issue: security test).
+    const limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
     const query = { status: "active" };
 
