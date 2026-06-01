@@ -14,11 +14,13 @@ const BASE = '/api';
 const HEALTH_ENDPOINT = `${BASE}/health`;
 
 // ─── Demo mode auto-detection ────────────────────────────────
+// Production override: set VITE_ENABLE_DEMO=false to disable demo mode entirely
+const DEMO_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEMO !== 'false';
 let __DEMO_MODE__ = false;
-export const isDemoMode = () => __DEMO_MODE__;
+export const isDemoMode = () => __DEMO_MODE__ && DEMO_MODE_ENABLED;
 // Force demo mode on (used by the login page's demo quick-login buttons so
 // the @demo.com accounts work instantly regardless of real-backend state).
-export const enableDemoMode = () => { __DEMO_MODE__ = true; };
+export const enableDemoMode = () => { if (DEMO_MODE_ENABLED) __DEMO_MODE__ = true; };
 let _backendProbePromise = null;
 let _lastProbeAt = 0;
 const PROBE_COOLDOWN_MS = 20_000;
