@@ -46,7 +46,7 @@ describe("Auction Admin Routes", () => {
       dealer: dealer._id,
       status: "active",
       allowBid: true,
-      auctionStatus: "pending",
+      auctionStatus: "draft",
     });
     carId = car._id;
   });

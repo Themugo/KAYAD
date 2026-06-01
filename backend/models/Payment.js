@@ -41,6 +41,7 @@ const paymentSchema = new mongoose.Schema(
         "listing",
         "subscription",
         "escrow",
+        "inspection",
       ],
       required: true,
       index: true,

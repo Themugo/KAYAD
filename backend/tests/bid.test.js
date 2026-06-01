@@ -33,7 +33,7 @@ describe("Bidding System", () => {
 
     const buyerRes = await request(app)
       .post("/api/auth/register")
-      .send({ name: "Buyer", email: `buyer-bid-${ts}@test.ke`, password: "Test@12345" });
+      .send({ name: "Buyer", email: `buyer-bid-${ts}@test.ke`, password: "Test@12345", phone: "254712345678" });
     buyerToken = buyerRes.body.token;
     buyerId = buyerRes.body.user._id;
 

@@ -224,6 +224,13 @@ const userSchema = new mongoose.Schema(
     },
 
     // =============================
+    // 🌐 USER SETTINGS
+    // =============================
+    language: { type: String, default: "en" },
+    currency: { type: String, default: "KES" },
+    timezone: { type: String, default: "Africa/Nairobi" },
+
+    // =============================
     // 🔗 REFERRAL SYSTEM
     // =============================
     referralCode: { type: String, unique: true, sparse: true, index: true },

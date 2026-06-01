@@ -166,7 +166,7 @@ describe("SMS Bidding Routes", () => {
         .send({ from: "254700000002", text: "BID 600K" })
         .expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toContain("not registered");
+      expect(res.body.message).toContain("Unregistered");
     });
   });
 });

@@ -34,14 +34,20 @@ router.post("/order", createLimiter, asyncHandler(async (req, res) => {
   const settings = await GlobalSettings.findOne().lean();
   const fee = settings?.ghostCheckFee || 2500;
 
-  const payment = await initiatePayment({
-    userId: req.user.id,
-    carId,
-    type: "inspection",
-    amount: fee,
-    phone,
-    metadata: { service: "inspection" },
-  });
+  let payment;
+  try {
+    payment = await initiatePayment({
+      userId: req.user.id,
+      carId,
+      type: "inspection",
+      amount: fee,
+      phone,
+      metadata: { service: "inspection" },
+    });
+  } catch (err) {
+    console.error("Payment initiation failed:", err.message);
+    return res.status(400).json({ success: false, message: err.message });
+  }
 
   const order = await InspectionOrder.create({
     car: carId,

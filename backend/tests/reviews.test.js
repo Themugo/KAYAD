@@ -39,7 +39,7 @@ describe("Review Routes", () => {
   it("POST /api/reviews — requires auth", async () => {
     await request(app)
       .post("/api/reviews")
-      .send({ dealer: dealerId, rating: 5, comment: "Great!" })
+      .send({ dealerId: dealerId, rating: 5, comment: "Great!" })
       .expect(401);
   });
 

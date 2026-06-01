@@ -55,7 +55,7 @@ describe("Chat Routes", () => {
     const res = await request(app)
       .post("/api/chat")
       .set("Authorization", `Bearer ${tokenA}`)
-      .send({ participantId: userIdB, carId })
+      .send({ participantId: userIdB, carId, initialMessage: "Hello, I'm interested in this car" })
       .expect(201);
     expect(res.body.success).toBe(true);
   });
@@ -78,7 +78,7 @@ describe("Chat Routes", () => {
     const res = await request(app)
       .post(`/api/chat/${chatId}/message`)
       .set("Authorization", `Bearer ${tokenA}`)
-      .send({ text: "Hello from User A!" })
+      .send({ content: "Hello from User A!" })
       .expect(201);
     // sendMessage returns the message object directly (no success wrapper)
     expect(res.body.text).toBe("Hello from User A!");

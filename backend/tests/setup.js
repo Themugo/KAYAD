@@ -15,6 +15,9 @@ dotenv.config({ path: resolve(__dirname, "../.env") });
 process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
 console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
 
+// Disable email verification for tests (EMAIL_HOST is configured, which enables verification)
+process.env.REQUIRE_EMAIL_VERIFICATION = "false";
+
 let mongod = null;
 let usingMemoryServer = false;
 let isMockDb = false;

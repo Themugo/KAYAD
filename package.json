@@ -20,7 +20,7 @@
     "test:e2e": "npx playwright test --config e2e/playwright.config.js"
   },
   "dependencies": {
-    "@sentry/react": "^8.0.0",
+    "@sentry/react": "^8.55.2",
     "axios": "^1.6.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.460.0",

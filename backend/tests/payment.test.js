@@ -5,6 +5,7 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
+process.env.REQUIRE_EMAIL_VERIFICATION = "false";
 
 import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
 import mongoose from "mongoose";

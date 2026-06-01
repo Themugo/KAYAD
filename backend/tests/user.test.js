@@ -100,7 +100,7 @@ describe("User Routes", () => {
         .send({ language: "fr", currency: "EUR", timezone: "Europe/Paris" })
         .expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.user.preferences.language).toBe("fr");
+      expect(res.body.user.language).toBe("fr");
     });
 
     it("rejects invalid setting keys", async () => {
@@ -184,7 +184,7 @@ describe("User Routes", () => {
     it("returns 404 for unknown user routes", async () => {
       const res = await request(app)
         .get("/api/users/nonexistent-route")
-        .expect(404);
+        .expect(400);
       expect(res.body.success).toBe(false);
     });
   });

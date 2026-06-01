@@ -97,6 +97,13 @@ describe("🔑 Authentication", () => {
       .expect(200);
 
     expect(res.body.success).toBe(true);
+
+    // Re-login after password change to get new token
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" })
+      .expect(200);
+    token = loginRes.body.token;
   });
 
   test("POST /api/auth/forgot-password — sends reset email", async () => {
@@ -131,6 +138,13 @@ describe("🔑 Authentication", () => {
   });
 
   test("GET /api/auth/profile — returns user profile", async () => {
+    // Re-login to ensure we have a valid token
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" })
+      .expect(200);
+    token = loginRes.body.token;
+
     const res = await request(app)
       .get("/api/auth/profile")
       .set("Authorization", `Bearer ${token}`)
@@ -140,6 +154,13 @@ describe("🔑 Authentication", () => {
   });
 
   test("POST /api/auth/logout — logs out user", async () => {
+    // Re-login to ensure we have a valid token
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" })
+      .expect(200);
+    token = loginRes.body.token;
+
     const res = await request(app)
       .post("/api/auth/logout")
       .set("Authorization", `Bearer ${token}`)
@@ -154,7 +175,7 @@ describe("🔑 Authentication", () => {
     const freshToken = loginRes.body.token;
     const res = await request(app)
       .post("/api/auth/refresh")
-      .set("Authorization", `Bearer ${freshToken}`)
+      .set("Cookie", loginRes.headers["set-cookie"])
       .set("X-Requested-By", "kayad-app")
       .expect(200);
     expect(res.body.token).toBeTruthy();

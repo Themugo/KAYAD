@@ -60,12 +60,12 @@ export const getUserChats = async (req, res) => {
 // =============================
 export const sendMessage = async (req, res) => {
   try {
-    const { text, message, attachments } = req.body;
-    const msgText = text || message;
+    const { content, text, message, attachments } = req.body;
+    const msgText = content || text || message;
     const { chatId } = req.params;
 
     if (!chatId || !msgText) {
-      return res.status(400).json({ success: false, message: "chatId and text required" });
+      return res.status(400).json({ success: false, message: "chatId and content required" });
     }
 
     if (!mongoose.Types.ObjectId.isValid(chatId)) {
