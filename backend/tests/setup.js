@@ -41,6 +41,9 @@ export async function startTestDB() {
     const { MongoMemoryServer } = await import("mongodb-memory-server");
     mongod = await MongoMemoryServer.create({
       binary: { version: MEMORY_DB_VERSION },
+      instance: {
+        timeout: 60000, // Increase startup timeout to 60 seconds
+      },
     });
     const uri = mongod.getUri();
     process.env.MONGO_URI = uri;
