@@ -1,5 +1,9 @@
 // backend/tests/setup.js
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+// Load environment variables for tests
+dotenv.config();
 
 let mongod = null;
 let usingMemoryServer = false;
@@ -17,12 +21,12 @@ export async function startTestDB() {
     await mongoose.connection.close();
   }
 
-  // If MONGO_URI is already set (e.g., CI provides it), use it directly
+  // If MONGO_URI is already set (e.g., CI provides it or Atlas), use it directly
   if (process.env.MONGO_URI && !process.env.MONGO_URI.includes("kayad-test-mock")) {
     try {
       await mongoose.connect(process.env.MONGO_URI, {
         maxPoolSize: 5,
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 10000,
       });
       usingMemoryServer = false;
       isMockDb = false;
@@ -30,26 +34,13 @@ export async function startTestDB() {
       // so each file starts from a clean slate (prevents cross-file pollution
       // that breaks exact-count assertions).
       await clearTestDB();
+      console.log("✅ Connected to MongoDB:", process.env.MONGO_URI.replace(/:.*@/, ":***@"));
       return process.env.MONGO_URI;
-    } catch {
+    } catch (err) {
       // Connection failed — fall through to memory server
-      console.warn("⚠️  MONGO_URI connection failed, falling back to in-memory MongoDB");
+      console.warn("⚠️  MONGO_URI connection failed:", err.message);
+      console.warn("    Falling back to in-memory MongoDB");
     }
-  }
-
-  // Skip MongoDB Memory Server on Windows due to binary compatibility issues
-  // Use mock mode instead for Windows systems
-  if (process.platform === 'win32') {
-    console.warn("\n" + "=".repeat(70));
-    console.warn("⚠️  MongoDB Memory Server skipped on Windows (binary compatibility)");
-    console.warn("    Using mock mode for testing.");
-    console.warn("    To use a real DB, set MONGO_URI in environment.");
-    console.warn("=".repeat(70) + "\n");
-    process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
-    usingMemoryServer = false;
-    isMockDb = true;
-    mongoose.set("bufferCommands", false);
-    return process.env.MONGO_URI;
   }
 
   try {
