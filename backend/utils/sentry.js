@@ -52,7 +52,7 @@ export const initSentry = async (app) => {
     sentryEnabled = true;
 
     // Add Sentry request handler (must be first middleware)
-    if (app) {
+    if (app && Sentry.Handlers) {
       app.use(Sentry.Handlers.requestHandler());
       app.use(Sentry.Handlers.tracingHandler());
     }
@@ -65,7 +65,7 @@ export const initSentry = async (app) => {
 
 // Add Sentry error handler (must be last middleware, before your own errorHandler)
 export const sentryErrorHandler = (app) => {
-  if (sentryEnabled && Sentry && app) {
+  if (sentryEnabled && Sentry && Sentry.Handlers && app) {
     app.use(Sentry.Handlers.errorHandler());
   }
 };

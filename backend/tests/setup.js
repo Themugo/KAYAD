@@ -37,6 +37,21 @@ export async function startTestDB() {
     }
   }
 
+  // Skip MongoDB Memory Server on Windows due to binary compatibility issues
+  // Use mock mode instead for Windows systems
+  if (process.platform === 'win32') {
+    console.warn("\n" + "=".repeat(70));
+    console.warn("⚠️  MongoDB Memory Server skipped on Windows (binary compatibility)");
+    console.warn("    Using mock mode for testing.");
+    console.warn("    To use a real DB, set MONGO_URI in environment.");
+    console.warn("=".repeat(70) + "\n");
+    process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
+    usingMemoryServer = false;
+    isMockDb = true;
+    mongoose.set("bufferCommands", false);
+    return process.env.MONGO_URI;
+  }
+
   try {
     const { MongoMemoryServer } = await import("mongodb-memory-server");
     mongod = await MongoMemoryServer.create({
@@ -44,6 +59,8 @@ export async function startTestDB() {
       instance: {
         timeout: 60000, // Increase startup timeout to 60 seconds
       },
+      // Skip auto-download if binary fails to run
+      autoDownload: true,
     });
     const uri = mongod.getUri();
     process.env.MONGO_URI = uri;
