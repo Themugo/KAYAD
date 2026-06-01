@@ -1,9 +1,14 @@
 // backend/tests/setup.js
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
 
-// Load environment variables for tests
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load environment variables for tests from backend/.env
+dotenv.config({ path: resolve(__dirname, "../.env") });
 
 let mongod = null;
 let usingMemoryServer = false;
@@ -26,7 +31,7 @@ export async function startTestDB() {
     try {
       await mongoose.connect(process.env.MONGO_URI, {
         maxPoolSize: 5,
-        serverSelectionTimeoutMS: 10000,
+        serverSelectionTimeoutMS: 15000,
       });
       usingMemoryServer = false;
       isMockDb = false;
@@ -41,6 +46,10 @@ export async function startTestDB() {
       console.warn("⚠️  MONGO_URI connection failed:", err.message);
       console.warn("    Falling back to in-memory MongoDB");
     }
+  } else {
+    console.warn("⚠️  MONGO_URI not set or is mock URI");
+    console.warn("    Set MONGO_URI in backend/.env to use a real database");
+    console.warn("    Falling back to in-memory MongoDB");
   }
 
   try {
