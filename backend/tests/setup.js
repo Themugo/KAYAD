@@ -11,7 +11,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: resolve(__dirname, "../.env") });
 
 // Force MONGO_URI for tests (Jest env issue)
-// Note: Atlas connection failing due to DNS timeout - using local MongoDB for now
+// Note: Using local MongoDB for testing (Atlas has DNS resolution issue)
 process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
 console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
 
