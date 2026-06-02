@@ -21,3 +21,10 @@ coverage/
 .vscode/
 .vs/
 *.tsbuildinfo
+start.bat
+*.msi
+*.zip
+uploads/
+design-previews/
+test-output.txt
+*.test-output.txt

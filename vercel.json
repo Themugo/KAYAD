@@ -6,23 +6,23 @@
   "rewrites": [
     {
       "source": "/health",
-      "destination": "https://api.kayad.space/health"
+      "destination": "https://kayad-backend.onrender.com/health"
     },
     {
       "source": "/health/(.*)",
-      "destination": "https://api.kayad.space/health/$1"
+      "destination": "https://kayad-backend.onrender.com/health/$1"
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://api.kayad.space/api/$1"
+      "destination": "https://kayad-backend.onrender.com/api/$1"
     },
     {
       "source": "/socket.io/(.*)",
-      "destination": "https://api.kayad.space/socket.io/$1"
+      "destination": "https://kayad-backend.onrender.com/socket.io/$1"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://api.kayad.space/uploads/$1"
+      "destination": "https://kayad-backend.onrender.com/uploads/$1"
     },
     {
       "source": "/(.*)",
@@ -63,7 +63,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kayad.space wss://api.kayad.space https://www.google-analytics.com; frame-ancestors 'none'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kayad.space wss://api.kayad.space https://kayad-backend.onrender.com wss://kayad-backend.onrender.com https://www.google-analytics.com; frame-ancestors 'none'; form-action 'self'"
         }
       ]
     },
