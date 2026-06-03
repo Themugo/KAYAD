@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import React from 'react';
+import { vi } from 'vitest';
 
 globalThis.React = React;
 
@@ -22,3 +23,31 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
   configurable: true,
 });
+
+Object.defineProperty(window, 'scrollTo', {
+  value: vi.fn(),
+  configurable: true,
+});
+
+Object.defineProperty(window, 'matchMedia', {
+  value: vi.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+  configurable: true,
+  writable: true,
+});
+
+class ResizeObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+globalThis.ResizeObserver = ResizeObserverMock;

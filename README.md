@@ -87,6 +87,6 @@ npm run test:e2e
 
 ## Deployment Notes
 
-Kayad is branded for the canonical domain `kayad.space` and `www.kayad.space`. Keep environment URLs, CORS origins, OAuth/callback URLs, sitemap entries, and deployment host settings aligned with that domain before launch.
+Kayad is branded for the canonical domain `kayad.space`. Configure `www.kayad.space` as a permanent redirect to `kayad.space` so browsers do not keep separate service-worker caches with different app shells. Keep environment URLs, CORS origins, OAuth/callback URLs, sitemap entries, and deployment host settings aligned with the canonical domain before launch.
 
 See [DEPLOY.md](DEPLOY.md), [GO-LIVE.md](GO-LIVE.md), and [MONITORING.md](MONITORING.md) for production release, smoke testing, and incident-response guidance.

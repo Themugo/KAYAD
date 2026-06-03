@@ -36,7 +36,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     const stkRes = await stkPush(formattedPhone, amount);
     if (stkRes?.CheckoutRequestID) {
       checkoutID = stkRes.CheckoutRequestID;
-      mode = "mpesa";
+      mode = String(checkoutID).toLowerCase().startsWith("mock_") ? "mock" : "mpesa";
     }
   } catch (err) {
     if (process.env.NODE_ENV === "production") {

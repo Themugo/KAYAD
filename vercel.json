@@ -3,6 +3,19 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.kayad.space"
+        }
+      ],
+      "destination": "https://kayad.space/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/health",

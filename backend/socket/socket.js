@@ -2,6 +2,8 @@
 // 📡 SOCKET EMITTERS (FULL SAFE)
 // =============================
 
+import { getIO } from "../utils/io.js";
+
 // 🔥 SAFE EMIT
 const emit = (room, event, data) => {
   try {

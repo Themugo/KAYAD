@@ -2,6 +2,8 @@ import InspectorApplication from "../models/InspectorApplication.js";
 import User from "../models/User.js";
 import { sendNotification } from "../services/notification.service.js";
 
+const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
+
 // =============================
 // 📝 SUBMIT APPLICATION
 // =============================
@@ -29,11 +31,17 @@ export const submitApplication = async (req, res) => {
       toolsAvailable, preferredRegions: preferredRegions || [], cvUrl, certificationDocs: certificationDocs || [],
     });
 
-    await sendNotification({
-      userId: null, type: "system",
+    const reviewers = await User.find({ role: { $in: INSPECTOR_REVIEW_ROLES } })
+      .select("_id email")
+      .lean();
+
+    await Promise.all(reviewers.map((reviewer) => sendNotification({
+      userId: reviewer._id,
+      type: "system",
       title: "New Inspector Application",
       message: `${fullName} (${email}) has applied as an inspector. ${yearsOfExperience} years, ${location}.`,
-    });
+      email: reviewer.email,
+    })));
 
     res.json({ success: true, application });
   } catch (err) {

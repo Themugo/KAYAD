@@ -17,6 +17,14 @@ console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
 
 // Disable email verification for tests (EMAIL_HOST is configured, which enables verification)
 process.env.REQUIRE_EMAIL_VERIFICATION = "false";
+process.env.EMAIL_HOST = "";
+process.env.EMAIL_USER = "";
+process.env.EMAIL_PASS = "";
+process.env.EMAIL_FROM = "test@kayad.space";
+process.env.SMS_PROVIDER = "mock";
+process.env.AT_API_KEY = "";
+process.env.PAYMENT_MODE = "mock";
+process.env.MPESA_ENV = "mock";
 
 let mongod = null;
 let usingMemoryServer = false;

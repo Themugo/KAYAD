@@ -15,7 +15,7 @@ const HEALTH_ENDPOINT = `${BASE}/health`;
 
 // ─── Demo mode auto-detection ────────────────────────────────
 // Production override: set VITE_ENABLE_DEMO=false to disable demo mode entirely
-const DEMO_MODE_ENABLED = import.meta.env.VITE_ENABLE_DEMO !== 'false';
+const DEMO_MODE_ENABLED = (import.meta.env?.VITE_ENABLE_DEMO ?? 'true') !== 'false';
 let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__ && DEMO_MODE_ENABLED;
 // Force demo mode on (used by the login page's demo quick-login buttons so

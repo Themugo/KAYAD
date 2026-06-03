@@ -53,6 +53,26 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
     </script>
+    <script>
+      if (window.location.hostname === 'www.kayad.space') {
+        Promise.all([
+          'serviceWorker' in navigator
+            ? navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                return Promise.all(registrations.map(function (registration) {
+                  return registration.unregister();
+                }));
+              }).catch(function () {})
+            : Promise.resolve(),
+          'caches' in window
+            ? caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (key) { return caches.delete(key); }));
+              }).catch(function () {})
+            : Promise.resolve()
+        ]).finally(function () {
+          window.location.replace('https://kayad.space' + window.location.pathname + window.location.search + window.location.hash);
+        });
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

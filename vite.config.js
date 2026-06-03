@@ -30,6 +30,10 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
+          navigateFallback: '/index.html',
           runtimeCaching: [
             {
               urlPattern: /^https?:\/\/.*\/api\/.*/i,
