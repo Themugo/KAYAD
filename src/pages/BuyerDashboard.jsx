@@ -95,7 +95,7 @@ function TimeRemaining({ endTime }) {
 }
 
 export default function BuyerDashboard() {
-  const { user, isDealer, isBroker, isAdmin } = useAuth();
+  const { user, isDealer, isBroker, isAdmin, logout } = useAuth();
   const { connected } = useSocket();
   const navigate = useNavigate();
   const [favorites,  setFavorites]  = useState([]);
@@ -239,6 +239,16 @@ export default function BuyerDashboard() {
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 8 }}>
             Browse, bid, and buy with escrow protection
           </p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            <Link to="/" style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+              Home
+            </Link>
+            <button onClick={async () => { await logout(); navigate('/'); }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)', color: 'rgba(239,68,68,0.7)', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
 
