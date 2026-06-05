@@ -8,6 +8,7 @@ export const STAFF_ROLES = [
   'escrow_officer',
   'ad_manager',
   'moderator',
+  'ghost_checker',
 ];
 
 export const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'];
@@ -32,6 +33,7 @@ export function getPostAuthPath(user, fallback = '/') {
   const safeFallback = safeRedirectPath(fallback, '/');
   if (user?.mustChangePassword) return '/force-password-change';
   if (!user?.emailVerified && user?.role === 'user') return '/register';
+  if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
     if (!user?.approved) return '/register';
