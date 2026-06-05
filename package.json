@@ -22,7 +22,7 @@
     "audit:fix": "npm audit fix --omit=dev"
   },
   "dependencies": {
-    "@sentry/react": "^8.55.2",
+    "@sentry/react": "^10.56.0",
     "axios": "^1.6.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.460.0",
