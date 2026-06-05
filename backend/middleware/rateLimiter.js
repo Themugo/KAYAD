@@ -182,6 +182,25 @@ export const uploadLimiter = rateLimit({
 });
 
 // =============================
+// 🛡️ ADMIN LIMITER (does NOT skip admins)
+// =============================
+export const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.ADMIN_RATE_LIMIT_MAX || "200"),
+  keyGenerator,
+  skip: (req) => req.path?.startsWith("/health") || req.path?.startsWith("/api/health"),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    console.warn("🚫 RATE LIMIT (ADMIN):", {
+      path: req.originalUrl,
+      user: req.user?.id || "guest",
+    });
+    res.status(429).json(rateLimitMessage("Too many admin requests"));
+  },
+});
+
+// =============================
 // ⚡ SOCKET RATE LIMIT
 // =============================
 const userHits = new Map();

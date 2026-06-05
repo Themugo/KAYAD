@@ -100,16 +100,17 @@ router.post(
     const user = await User.findByIdAndUpdate(
       req.user.id,
       {
-        verifiedBuyer: true,
+        verifiedBuyer: false,
         "bankPreApproval.documentUrl": documentUrl,
         "bankPreApproval.bankName": bankName,
-        "bankPreApproval.approvedAmount": approvedAmount,
-        "bankPreApproval.expiresAt": new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
-        "bankPreApproval.verifiedAt": new Date(),
+        "bankPreApproval.approvedAmount": Number(approvedAmount),
+        "bankPreApproval.expiresAt": null,
+        "bankPreApproval.verifiedAt": null,
+        "bankPreApproval.verifiedBy": null,
       },
       { new: true }
     ).select("-password");
-    res.json({ success: true, user });
+    res.json({ success: true, message: "Pre-approval documents submitted for admin verification", user });
   })
 );
 

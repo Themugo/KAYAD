@@ -39,7 +39,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
       mode = String(checkoutID).toLowerCase().startsWith("mock_") ? "mock" : "mpesa";
     }
   } catch (err) {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV !== "development") {
       throw err;
     }
     console.warn("STK Push failed, using mock mode:", err.message);

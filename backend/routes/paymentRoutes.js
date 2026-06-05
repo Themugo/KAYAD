@@ -53,7 +53,7 @@ router.post(
 );
 
 // =============================
-// 🧪 DEBUG: CHECK BY CHECKOUT ID
+// 🧪 DEBUG: CHECK BY CHECKOUT ID (scoped to own user)
 // =============================
 router.get(
   "/checkout/:checkoutRequestId",
@@ -63,6 +63,7 @@ router.get(
 
     const payment = await Payment.findOne({
       checkoutRequestId: req.params.checkoutRequestId,
+      user: req.user.id,
     });
 
     if (!payment) {

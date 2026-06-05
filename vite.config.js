@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
           name: "Kayad – Kenya's Premium Car Marketplace",
           short_name: 'Kayad',
           description: 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.',
-          theme_color: '#D4AF37',
+          theme_color: '#050505',
           background_color: '#050505',
           display: 'standalone',
           start_url: '/',

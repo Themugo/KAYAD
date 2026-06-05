@@ -82,6 +82,9 @@ router.post(
   protect,
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ success: false, message: "Reseed disabled in production" });
+    }
     const result = await reseed();
     res.json({ success: true, message: "Database re-seeded", result });
   })
@@ -817,7 +820,11 @@ router.post(
 // =============================
 router.post(
   "/daraja/test",
+  authorize("superadmin"),
   asyncHandler(async (req, res) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(403).json({ success: false, message: "STK Push test disabled in production" });
+    }
     const { phone, amount } = req.body;
 
     if (!phone || !amount) {

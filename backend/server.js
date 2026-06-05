@@ -20,7 +20,7 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 // ─── Rate Limiters (from middleware) ───────────────────────────
-import { globalLimiter, authLimiter, socketRateLimit } from "./middleware/rateLimiter.js";
+import { globalLimiter, authLimiter, adminLimiter, socketRateLimit } from "./middleware/rateLimiter.js";
 
 // ─── Security Middleware ───────────────────────────────────────
 import {
@@ -337,7 +337,7 @@ app.use("/api/auth",          authLimiter, authRoutes);
 app.use("/api/cars",          carRoutes);
 app.use("/api/bids",          bidRoutes);
 app.use("/api/dealer",        dealerRoutes);
-app.use("/api/admin",         adminRoutes);
+app.use("/api/admin",         adminLimiter, adminRoutes);
 
 // M-Pesa callback gets IP whitelist before routes mount
 app.use("/api/payments/callback",   mpesaIpWhitelist, validateMpesaCallback);

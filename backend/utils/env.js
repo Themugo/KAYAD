@@ -44,6 +44,10 @@ const REQUIRED_VARS = [
   { key: "MONGO_URI", desc: "MongoDB connection string" },
 ];
 
+const PRODUCTION_REQUIRED_VARS = [
+  { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret (separate from JWT_SECRET)" },
+];
+
 const PRODUCTION_VARS = [
   { key: "FRONTEND_URL", desc: "Production frontend URL for CORS" },
 ];
@@ -103,7 +107,7 @@ export const validateEnv = (opts = { silent: false }) => {
 
   // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
   if (process.env.NODE_ENV === "production") {
-    for (const { key, desc } of PRODUCTION_VARS) {
+    for (const { key, desc } of [...PRODUCTION_VARS, ...PRODUCTION_REQUIRED_VARS]) {
       try {
         getEnv(key, { required: true });
       } catch {

@@ -4,7 +4,7 @@ import User from "../models/User.js";
 
 const AT_API_KEY = process.env.AT_API_KEY;
 const AT_USERNAME = process.env.AT_USERNAME || "kayad";
-const FROM_EMAIL = process.env.FROM_EMAIL || "noreply@kayad.space";
+const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@kayad.space";
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
