@@ -1,0 +1,46 @@
+# Auto-normalize line endings
+* text=auto eol=lf
+
+# JavaScript / JSX
+*.js text
+*.jsx text
+*.mjs text
+*.cjs text
+
+# JSON
+*.json text
+
+# Markdown
+*.md text
+
+# CSS / PostCSS
+*.css text
+*.pcss text
+
+# Shell scripts
+*.sh text eol=lf
+
+# YAML
+*.yml text
+*.yaml text
+
+# Environment files
+.env* text
+
+# Binary files (do not normalize)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+*.zip binary
+*.tar binary
+
+# Lock files
+package-lock.json -diff
