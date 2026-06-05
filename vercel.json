@@ -9,33 +9,33 @@
       "has": [
         {
           "type": "host",
-          "value": "www.kayad.space"
+          "value": "kayad.space"
         }
       ],
-      "destination": "https://kayad.space/$1",
+      "destination": "https://www.kayad.space/$1",
       "permanent": true
     }
   ],
   "rewrites": [
     {
       "source": "/health",
-      "destination": "https://kayad-backend.onrender.com/health"
+      "destination": "https://api.kayad.space/health"
     },
     {
       "source": "/health/(.*)",
-      "destination": "https://kayad-backend.onrender.com/health/$1"
+      "destination": "https://api.kayad.space/health/$1"
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://kayad-backend.onrender.com/api/$1"
+      "destination": "https://api.kayad.space/api/$1"
     },
     {
       "source": "/socket.io/(.*)",
-      "destination": "https://kayad-backend.onrender.com/socket.io/$1"
+      "destination": "https://api.kayad.space/socket.io/$1"
     },
     {
       "source": "/uploads/(.*)",
-      "destination": "https://kayad-backend.onrender.com/uploads/$1"
+      "destination": "https://api.kayad.space/uploads/$1"
     },
     {
       "source": "/(.*)",
@@ -86,6 +86,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }
