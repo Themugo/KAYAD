@@ -14,7 +14,7 @@ describe("email.service", () => {
     process.env.EMAIL_USER = "user";
     process.env.EMAIL_PASS = "pass";
     process.env.EMAIL_FROM = "test@kayad.space";
-    process.env.FRONTEND_URL = "https://kayad.space";
+    process.env.FRONTEND_URL = "https://www.kayad.space";
   });
 
   it("sendEmail returns disabled when EMAIL_HOST is not set", async () => {

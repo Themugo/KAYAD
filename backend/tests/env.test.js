@@ -74,7 +74,7 @@ describe("validateEnv", () => {
 
   it("passes in production when FRONTEND_URL is set", () => {
     process.env.NODE_ENV = "production";
-    process.env.FRONTEND_URL = "https://kayad.space";
+    process.env.FRONTEND_URL = "https://www.kayad.space";
     expect(() => validateEnv({ silent: true })).not.toThrow();
   });
 });

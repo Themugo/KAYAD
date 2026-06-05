@@ -42,7 +42,7 @@ The repo already contains `render.yaml`. On render.com:
    | `MONGO_URI` | the Atlas string from Step 1 |
    | `JWT_SECRET` | first secret from Step 2 |
    | `REFRESH_TOKEN_SECRET` | second secret from Step 2 |
-   | `FRONTEND_URL` | `https://kayad.space` |
+   | `FRONTEND_URL` | `https://www.kayad.space` |
    | `WEBHOIST_EMAIL` | `jimmythemugo@gmail.com,webhost@kayad.space` (comma-separated — both become immutable owners) |
    | `SEED_ADMIN_EMAIL` | `jimmythemugo@gmail.com` (the primary owner the seed creates) |
    | `SEED_ADMIN_PASSWORD` | a strong password for first login |
@@ -75,7 +75,7 @@ password immediately** (the seed sets `mustChangePassword`).
 ## Step 6 — Verify
 
 - Visit `https://api.kayad.space/health` → should return `200 OK`.
-- Load `https://kayad.space` → the "Preview Mode" pill should disappear; the
+- Load `https://www.kayad.space` → the "Preview Mode" pill should disappear; the
   gallery now shows real (empty until you add cars) data, not demo cars.
 - Log in as the webhost → create an admin via the staff page.
 - Add a real car listing → confirm it appears with **no** DEMO sticker.

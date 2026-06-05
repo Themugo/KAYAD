@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import { withRetry } from "../utils/retry.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
-const APP_URL  = process.env.FRONTEND_URL || "https://kayad.space";
+const APP_URL  = process.env.FRONTEND_URL || "https://www.kayad.space";
 const FROM     = process.env.EMAIL_FROM || `noreply@kayad.space`;
 const ENABLED  = !!process.env.EMAIL_HOST;
 

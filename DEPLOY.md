@@ -77,13 +77,13 @@ NODE_ENV=production
 MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/kayad
 JWT_SECRET=<run: openssl rand -hex 32>
 REFRESH_TOKEN_SECRET=<run: openssl rand -hex 32>
-FRONTEND_URL=https://kayad.space
+FRONTEND_URL=https://www.kayad.space
 MPESA_ENV=production
 MPESA_CONSUMER_KEY=your_key
 MPESA_CONSUMER_SECRET=your_secret
 MPESA_SHORTCODE=your_shortcode
 MPESA_PASSKEY=your_passkey
-MPESA_CALLBACK_URL=https://kayad.space/api/payments/callback
+MPESA_CALLBACK_URL=https://www.kayad.space/api/payments/callback
 CLOUDINARY_CLOUD_NAME=your_name
 CLOUDINARY_API_KEY=your_key
 CLOUDINARY_API_SECRET=your_secret
@@ -96,8 +96,8 @@ nano frontend/.env
 ```
 
 ```env
-VITE_API_BASE_URL=https://kayad.space
-VITE_SOCKET_URL=https://kayad.space
+VITE_API_BASE_URL=https://www.kayad.space
+VITE_SOCKET_URL=https://www.kayad.space
 ```
 
 ---

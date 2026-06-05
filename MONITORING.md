@@ -49,11 +49,11 @@ npm run build
 2. Add New Monitor:
    - Monitor Type: HTTP(s)
     - Friendly Name: Kayad API
-   - URL: https://kayad.space/health
+   - URL: https://www.kayad.space/health
    - Monitoring Interval: 5 minutes
 
 3. Add another monitor:
-   - URL: https://kayad.space
+   - URL: https://www.kayad.space
     - Name: Kayad Frontend
 
 4. Add alert contacts: your email, phone (SMS), and Slack webhook
@@ -64,7 +64,7 @@ npm run build
 { "status": "ok", "uptime": 3600, "env": "production" }
 ```
 
-**Deep health check:** `https://kayad.space/health/deep` — shows MongoDB, Redis, Sentry, and memory status.
+**Deep health check:** `https://www.kayad.space/health/deep` — shows MongoDB, Redis, Sentry, and memory status.
 
 ---
 
@@ -162,7 +162,7 @@ pm2 restart kayad-backend
 
 **Test:**
 ```bash
-curl -X POST https://kayad.space/api/auth/register \
+curl -X POST https://www.kayad.space/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test","email":"you@email.com","password":"test123"}'
 # → Welcome email should arrive within 30 seconds
@@ -304,7 +304,7 @@ TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 Run this to check which integrations are active:
 
 ```bash
-curl https://kayad.space/health/deep | python3 -m json.tool
+curl https://www.kayad.space/health/deep | python3 -m json.tool
 ```
 
 Expected output when all integrations active:

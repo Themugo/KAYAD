@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { referralAPI, formatKES } from '../api/api';
 import { Gift, Users, Copy, Check } from 'lucide-react';
 
-const SHARE_URL = import.meta.env.VITE_FRONTEND_URL || 'https://kayad.space';
+const SHARE_URL = import.meta.env.VITE_FRONTEND_URL || 'https://www.kayad.space';
 
 export default function ReferralStats() {
   const [stats, setStats] = useState(null);

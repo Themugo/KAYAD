@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const BASE = 'https://kayad.space';
+const BASE = 'https://www.kayad.space';
 
 function inject(json) {
   const el = document.createElement('script');
@@ -79,7 +79,7 @@ export function WebSiteStructuredData() {
   return null;
 }
 
-export function ItemListStructuredData({ items, type = 'Vehicle' }) {
+export function ItemListStructuredData({ items }) {
   useEffect(() => {
     if (!items?.length) return;
     return inject({

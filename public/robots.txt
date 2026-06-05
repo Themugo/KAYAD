@@ -13,4 +13,4 @@ Disallow: /chat/
 Disallow: /payments/
 Disallow: /checkout/
 
-Sitemap: https://kayad.space/sitemap.xml
+Sitemap: https://www.kayad.space/sitemap.xml
