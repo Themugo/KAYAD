@@ -1,11 +1,12 @@
 // ecosystem.config.cjs — PM2 process manager config
 // Usage: pm2 start ecosystem.config.cjs --env production
+const path = require('path');
 module.exports = {
   apps: [
     {
       name: 'kayad-backend',
       script: './backend/server.js',
-      cwd: '/var/www/kayad',
+      cwd: path.resolve(__dirname),
       instances: 'max',          // cluster mode — use all CPU cores
       exec_mode: 'cluster',
       watch: false,
@@ -19,8 +20,8 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 5000,
       },
-      error_file: '/var/log/kayad/backend-error.log',
-      out_file:   '/var/log/kayad/backend-out.log',
+      error_file: './logs/backend-error.log',
+      out_file:   './logs/backend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss',
       // Graceful reload — wait for in-flight requests to finish
       kill_timeout:    10000,   // 10s (matches server.js force-exit timer)

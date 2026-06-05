@@ -17,7 +17,9 @@
     "format:check": "prettier --check \"src/**/*.{js,jsx,css,json}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "npx playwright test --config e2e/playwright.config.js"
+    "test:e2e": "npx playwright test --config e2e/playwright.config.js",
+    "audit": "npm audit --omit=dev",
+    "audit:fix": "npm audit fix --omit=dev"
   },
   "dependencies": {
     "@sentry/react": "^8.55.2",

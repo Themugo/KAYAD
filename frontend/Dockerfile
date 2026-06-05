@@ -9,7 +9,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --only=production && npm ci
+RUN npm ci
 
 COPY . .
 
@@ -23,7 +23,6 @@ FROM nginx:stable-alpine
 
 RUN addgroup -S kayad && adduser -S kayad -G kayad
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80

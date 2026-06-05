@@ -43,8 +43,8 @@ The repo already contains `render.yaml`. On render.com:
    | `JWT_SECRET` | first secret from Step 2 |
    | `REFRESH_TOKEN_SECRET` | second secret from Step 2 |
    | `FRONTEND_URL` | `https://www.kayad.space` |
-   | `WEBHOIST_EMAIL` | `jimmythemugo@gmail.com,webhost@kayad.space` (comma-separated — both become immutable owners) |
-   | `SEED_ADMIN_EMAIL` | `jimmythemugo@gmail.com` (the primary owner the seed creates) |
+    | `WEBHOIST_EMAIL` | `owner@kayad.space,webhost@kayad.space` (comma-separated — both become immutable owners) |
+    | `SEED_ADMIN_EMAIL` | the primary owner email the seed creates (e.g. `owner@kayad.space`) |
    | `SEED_ADMIN_PASSWORD` | a strong password for first login |
    | `SEED_WEBHOST_PW` | password for the second (kayad-domain) owner |
 
