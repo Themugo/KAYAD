@@ -37,7 +37,15 @@ export default defineConfig(({ mode }) => {
           runtimeCaching: [
             {
               urlPattern: /^https?:\/\/.*\/api\/.*/i,
-              handler: 'NetworkOnly',
+              handler: 'NetworkFirst',
+              options: {
+                cacheName: 'api-cache',
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 5 * 60, // 5 minutes
+                },
+                networkTimeoutSeconds: 10,
+              },
             },
             {
               urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
@@ -47,6 +55,17 @@ export default defineConfig(({ mode }) => {
                 expiration: {
                   maxEntries: 200,
                   maxAgeSeconds: 30 * 24 * 60 * 60,
+                },
+              },
+            },
+            {
+              urlPattern: /\.(?:js|css)$/,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'static-cache',
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 24 * 60 * 60, // 1 day
                 },
               },
             }
