@@ -5,10 +5,7 @@
 // =============================
 export const paginate = (req) => {
   const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.min(
-    100,
-    Math.max(1, parseInt(req.query.limit) || 10)
-  );
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 10));
 
   const skip = (page - 1) * limit;
 
@@ -18,11 +15,7 @@ export const paginate = (req) => {
 // =============================
 // 📊 PAGINATION RESPONSE BUILDER
 // =============================
-export const buildPagination = ({
-  total,
-  page,
-  limit,
-}) => {
+export const buildPagination = ({ total, page, limit }) => {
   const pages = Math.ceil(total / limit);
 
   return {

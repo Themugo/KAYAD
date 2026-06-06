@@ -27,18 +27,14 @@ export const detectFraud = ({
     reasons.push("Unrealistic bid amount");
   }
 
-  const multiplier =
-    previousBid > 1_000_000
-      ? LIMITS.SPIKE_MULTIPLIER_HIGH
-      : LIMITS.SPIKE_MULTIPLIER_LOW;
+  const multiplier = previousBid > 1_000_000 ? LIMITS.SPIKE_MULTIPLIER_HIGH : LIMITS.SPIKE_MULTIPLIER_LOW;
 
   if (previousBid > 0 && bid > previousBid * multiplier) {
     score += 2;
     reasons.push("Abnormal bid spike");
   }
 
-  const dynamicInterval =
-    previousBid > 1_000_000 ? 2000 : LIMITS.BASE_MIN_INTERVAL;
+  const dynamicInterval = previousBid > 1_000_000 ? 2000 : LIMITS.BASE_MIN_INTERVAL;
 
   if (lastBidTime && now - lastBidTime < dynamicInterval) {
     score += 2;
@@ -55,21 +51,14 @@ export const detectFraud = ({
     reasons.push("Unusual bidding volume");
   }
 
-  if (
-    auctionAverageBid > 0 &&
-    bid > auctionAverageBid * 3
-  ) {
+  if (auctionAverageBid > 0 && bid > auctionAverageBid * 3) {
     score += 2;
     reasons.push("Far above average bid range");
   }
 
-  if (
-    previousBidderId &&
-    currentUserId &&
-    previousBidderId === currentUserId
-  ) {
+  if (previousBidderId && currentUserId && previousBidderId === currentUserId) {
     const recentBids = bidHistory.filter(
-      (b) => b.userId === currentUserId && now - b.time < LIMITS.CONSECUTIVE_BIDS_WINDOW
+      (b) => b.userId === currentUserId && now - b.time < LIMITS.CONSECUTIVE_BIDS_WINDOW,
     );
     if (recentBids.length >= 2) {
       score += 2;

@@ -9,9 +9,10 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
 
   const securityAmount = amount || auction.bidSecurityAmount || 50000;
 
-  const destination = auction.paymentRecipient === "DEALER_DIRECT"
-    ? auction.dealerMpesaShortcode
-    : process.env.KAYAD_MASTER_PAYBILL || "174379";
+  const destination =
+    auction.paymentRecipient === "DEALER_DIRECT"
+      ? auction.dealerMpesaShortcode
+      : process.env.KAYAD_MASTER_PAYBILL || "174379";
 
   // Trigger STK Push
   let checkoutID = "MOCK_" + Date.now();
@@ -65,7 +66,9 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
       carDetails: transaction.car?.toString() || "—",
       date: new Date(),
     });
-  } catch (_) { /* PDF generation non-critical */ }
+  } catch (_) {
+    /* PDF generation non-critical */
+  }
 
   await sendNotification({
     userId: transaction.user,

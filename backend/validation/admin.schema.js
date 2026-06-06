@@ -19,23 +19,37 @@ export const platformConfigSchema = z.object({
   reviewsEnabled: z.boolean().optional(),
   requireDealerApproval: z.boolean().optional(),
   commissionRate: z.number().min(0).max(50).optional(),
-  packages: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    priceMonthly: z.number(),
-    listingMax: z.number(),
-    durationDays: z.number(),
-    trialDays: z.number().optional(),
-    isFree: z.boolean().optional(),
-    isActive: z.boolean().optional(),
-    features: z.array(z.string()).optional(),
-  })).optional(),
+  packages: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        priceMonthly: z.number(),
+        listingMax: z.number(),
+        durationDays: z.number(),
+        trialDays: z.number().optional(),
+        isFree: z.boolean().optional(),
+        isActive: z.boolean().optional(),
+        features: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const createStaffSchema = z.object({
   name: z.string().min(2).max(100),
   email: z.string().email(),
-  role: z.enum(["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator", "ghost_checker"]),
+  role: z.enum([
+    "admin",
+    "marketing",
+    "technical_support",
+    "hr",
+    "accounts",
+    "escrow_officer",
+    "ad_manager",
+    "moderator",
+    "ghost_checker",
+  ]),
   password: z.string().min(8).max(128),
 });
 

@@ -64,7 +64,22 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "dealer", "broker", "admin", "superadmin", "escrow_officer", "ad_manager", "moderator", "ghost_checker", "individual_seller", "marketing", "technical_support", "hr", "accounts"],
+      enum: [
+        "user",
+        "dealer",
+        "broker",
+        "admin",
+        "superadmin",
+        "escrow_officer",
+        "ad_manager",
+        "moderator",
+        "ghost_checker",
+        "individual_seller",
+        "marketing",
+        "technical_support",
+        "hr",
+        "accounts",
+      ],
       default: "user",
       index: true,
     },
@@ -175,18 +190,18 @@ const userSchema = new mongoose.Schema(
     // =============================
     // 📦 DEALER LISTING PACKAGE
     // =============================
-    trialStartedAt:    { type: Date, default: null },    // when they first got a free trial plan
-    trialListingsUsed: { type: Number, default: 0 },     // listings created during trial window
-    firstVehicleUsed:  { type: Boolean, default: false }, // for sellers: 1 free vehicle claimed
+    trialStartedAt: { type: Date, default: null }, // when they first got a free trial plan
+    trialListingsUsed: { type: Number, default: 0 }, // listings created during trial window
+    firstVehicleUsed: { type: Boolean, default: false }, // for sellers: 1 free vehicle claimed
 
     dealerPackage: {
       type: String,
       default: "none",
     },
-    packageExpiresAt:  { type: Date, default: null },
-    packageListingMax: { type: Number, default: 0 },   // 0 = unlimited for enterprise
-    packageFeatures:   [String],                        // e.g. ["featured_homepage","priority_search"]
-    packageAutoRenew:  { type: Boolean, default: false },
+    packageExpiresAt: { type: Date, default: null },
+    packageListingMax: { type: Number, default: 0 }, // 0 = unlimited for enterprise
+    packageFeatures: [String], // e.g. ["featured_homepage","priority_search"]
+    packageAutoRenew: { type: Boolean, default: false },
 
     // =============================
     // 💼 SELLER FINANCIAL SETTINGS
@@ -302,7 +317,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // =============================
@@ -316,7 +331,10 @@ userSchema.pre("save", async function (next) {
 
     // Auto-generate referral code for new users
     if (!this.referralCode) {
-      const prefix = (this.name || "user").replace(/[^a-zA-Z0-9]/g, "").slice(0, 6).toUpperCase();
+      const prefix = (this.name || "user")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 6)
+        .toUpperCase();
       const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
       this.referralCode = `${prefix}${suffix}`;
     }
@@ -387,7 +405,7 @@ userSchema.statics.softDelete = async function (ids, adminId) {
   const idArray = Array.isArray(ids) ? ids : [ids];
   return this.updateMany(
     { _id: { $in: idArray }, deletedAt: null },
-    { $set: { deletedAt: new Date(), deletedBy: adminId } }
+    { $set: { deletedAt: new Date(), deletedBy: adminId } },
   );
 };
 
@@ -396,9 +414,17 @@ userSchema.statics.softDelete = async function (ids, adminId) {
 // unless { includeSoftDeleted: true } is set in options.
 // Covers: find, findOne, findById, countDocuments, findOneAndUpdate, etc.
 const SOFT_DELETE_OPERATIONS = [
-  "find", "findOne", "findOneAndUpdate", "findOneAndDelete",
-  "findOneAndReplace", "countDocuments", "count", "updateMany",
-  "updateOne", "deleteOne", "deleteMany",
+  "find",
+  "findOne",
+  "findOneAndUpdate",
+  "findOneAndDelete",
+  "findOneAndReplace",
+  "countDocuments",
+  "count",
+  "updateMany",
+  "updateOne",
+  "deleteOne",
+  "deleteMany",
 ];
 
 for (const op of SOFT_DELETE_OPERATIONS) {
@@ -412,7 +438,6 @@ for (const op of SOFT_DELETE_OPERATIONS) {
 }
 
 // =============================
-const User =
-  mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

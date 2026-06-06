@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
-process.env.NODE_ENV   = "test";
+process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
 import { startTestDB, stopTestDB } from "./setup.js";
@@ -13,37 +13,30 @@ await startTestDB();
 const { default: app } = await import("../server.js");
 
 const TEST_USER = {
-  name:     "Test User",
-  email:    `test-${Date.now()}@gari.test`,
+  name: "Test User",
+  email: `test-${Date.now()}@gari.test`,
   password: "Test@12345",
-  role:     "user",
+  role: "user",
 };
 
 let token = "";
 let userId = "";
 
 describe("🔑 Authentication", () => {
-
   test("POST /api/auth/register — creates new user", async () => {
-    const res = await request(app)
-      .post("/api/auth/register")
-      .send(TEST_USER)
-      .expect(201);
+    const res = await request(app).post("/api/auth/register").send(TEST_USER).expect(201);
 
     expect(res.body.success).toBe(true);
     expect(res.body.token).toBeTruthy();
     expect(res.body.user.email).toBe(TEST_USER.email);
     expect(res.body.user.password).toBeUndefined();
 
-    token  = res.body.token;
+    token = res.body.token;
     userId = res.body.user._id;
   });
 
   test("POST /api/auth/register — rejects duplicate email", async () => {
-    await request(app)
-      .post("/api/auth/register")
-      .send(TEST_USER)
-      .expect(400);
+    await request(app).post("/api/auth/register").send(TEST_USER).expect(400);
   });
 
   test("POST /api/auth/login — valid credentials return token", async () => {
@@ -57,25 +50,17 @@ describe("🔑 Authentication", () => {
   });
 
   test("POST /api/auth/login — wrong password returns 401", async () => {
-    await request(app)
-      .post("/api/auth/login")
-      .send({ email: TEST_USER.email, password: "wrongpassword" })
-      .expect(401);
+    await request(app).post("/api/auth/login").send({ email: TEST_USER.email, password: "wrongpassword" }).expect(401);
   });
 
   test("GET /api/auth/me — returns user from token", async () => {
-    const res = await request(app)
-      .get("/api/auth/me")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/auth/me").set("Authorization", `Bearer ${token}`).expect(200);
 
     expect(res.body.user.email).toBe(TEST_USER.email);
   });
 
   test("GET /api/auth/me — rejects missing token", async () => {
-    await request(app)
-      .get("/api/auth/me")
-      .expect(401);
+    await request(app).get("/api/auth/me").expect(401);
   });
 
   test("PUT /api/auth/profile — updates name and phone", async () => {
@@ -107,10 +92,7 @@ describe("🔑 Authentication", () => {
   });
 
   test("POST /api/auth/forgot-password — sends reset email", async () => {
-    const res = await request(app)
-      .post("/api/auth/forgot-password")
-      .send({ email: TEST_USER.email })
-      .expect(200);
+    const res = await request(app).post("/api/auth/forgot-password").send({ email: TEST_USER.email }).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -131,10 +113,7 @@ describe("🔑 Authentication", () => {
   });
 
   test("PUT /api/auth/profile — rejects without auth", async () => {
-    await request(app)
-      .put("/api/auth/profile")
-      .send({ name: "Hacker" })
-      .expect(401);
+    await request(app).put("/api/auth/profile").send({ name: "Hacker" }).expect(401);
   });
 
   test("GET /api/auth/profile — returns user profile", async () => {
@@ -145,10 +124,7 @@ describe("🔑 Authentication", () => {
       .expect(200);
     token = loginRes.body.token;
 
-    const res = await request(app)
-      .get("/api/auth/profile")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/auth/profile").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(res.body.user.email).toBe(TEST_USER.email);
   });
@@ -161,10 +137,7 @@ describe("🔑 Authentication", () => {
       .expect(200);
     token = loginRes.body.token;
 
-    const res = await request(app)
-      .post("/api/auth/logout")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -180,5 +153,4 @@ describe("🔑 Authentication", () => {
       .expect(200);
     expect(res.body.token).toBeTruthy();
   });
-
 });

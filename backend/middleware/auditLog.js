@@ -38,9 +38,7 @@ export const auditLog = (action) => (req, res, next) => {
       };
 
       // Fire and forget — don't block the response
-      AuditLog.create(entry).catch((err) =>
-        console.warn("⚠️ Audit log write failed:", err.message)
-      );
+      AuditLog.create(entry).catch((err) => console.warn("⚠️ Audit log write failed:", err.message));
     }
 
     originalEnd.apply(res, args);

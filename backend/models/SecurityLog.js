@@ -1,19 +1,22 @@
 import mongoose from "mongoose";
 
-const securityLogSchema = new mongoose.Schema({
-  action: { type: String, required: true, index: true },
-  actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
-  actorRole: String,
-  target: { type: mongoose.Schema.Types.ObjectId, refPath: "targetModel", index: true },
-  targetModel: { type: String, enum: ["Car", "User", "Bid", "Escrow", "EscrowVault", "Payment", "Notification"] },
-  resourceId: String,
-  details: { type: mongoose.Schema.Types.Mixed },
-  ip: String,
-  userAgent: String,
-  metadata: { type: mongoose.Schema.Types.Mixed },
-  severity: { type: String, enum: ["info", "warning", "critical"], default: "info" },
-  timestamp: { type: Date, default: Date.now, index: true },
-}, { timestamps: false });
+const securityLogSchema = new mongoose.Schema(
+  {
+    action: { type: String, required: true, index: true },
+    actor: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true },
+    actorRole: String,
+    target: { type: mongoose.Schema.Types.ObjectId, refPath: "targetModel", index: true },
+    targetModel: { type: String, enum: ["Car", "User", "Bid", "Escrow", "EscrowVault", "Payment", "Notification"] },
+    resourceId: String,
+    details: { type: mongoose.Schema.Types.Mixed },
+    ip: String,
+    userAgent: String,
+    metadata: { type: mongoose.Schema.Types.Mixed },
+    severity: { type: String, enum: ["info", "warning", "critical"], default: "info" },
+    timestamp: { type: Date, default: Date.now, index: true },
+  },
+  { timestamps: false },
+);
 
 securityLogSchema.pre("save", function (next) {
   if (!this.isNew) {

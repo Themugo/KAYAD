@@ -62,8 +62,7 @@ const bidSchema = new mongoose.Schema(
     // =============================
     bidderTag: {
       type: String,
-      default: () =>
-        `Bidder-${Math.floor(1000 + Math.random() * 9000)}`,
+      default: () => `Bidder-${Math.floor(1000 + Math.random() * 9000)}`,
     },
 
     // =============================
@@ -122,7 +121,7 @@ const bidSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -181,16 +180,9 @@ bidSchema.statics.markWinner = async function (bidId) {
   const bid = await this.findById(bidId);
   if (!bid) return null;
 
-  await this.updateMany(
-    { carId: bid.carId },
-    { isWinningBid: false }
-  );
+  await this.updateMany({ carId: bid.carId }, { isWinningBid: false });
 
-  return this.findByIdAndUpdate(
-    bidId,
-    { isWinningBid: true },
-    { new: true }
-  );
+  return this.findByIdAndUpdate(bidId, { isWinningBid: true }, { new: true });
 };
 
 // =============================
@@ -241,10 +233,7 @@ bidSchema.pre("save", async function (next) {
 // =============================
 // 🔒 INDEXES
 // =============================
-bidSchema.index(
-  { carId: 1, user: 1, maxBid: 1 },
-  { unique: false }
-);
+bidSchema.index({ carId: 1, user: 1, maxBid: 1 }, { unique: false });
 // Auto-bidding engine: sort paid bids by maxBid descending (Issue #4)
 bidSchema.index({ carId: 1, status: 1, maxBid: -1 });
 // User bid history (admin + buyer dashboard)
@@ -252,7 +241,6 @@ bidSchema.index({ user: 1, status: 1, createdAt: -1 });
 // Duplicate detection in pre-save hook
 bidSchema.index({ carId: 1, user: 1, createdAt: -1 });
 
-const Bid =
-  mongoose.models.Bid || mongoose.model("Bid", bidSchema);
+const Bid = mongoose.models.Bid || mongoose.model("Bid", bidSchema);
 
 export default Bid;

@@ -89,10 +89,7 @@ describe("SMS Bidding Routes", () => {
     });
 
     it("returns SMS bidding profile", async () => {
-      const res = await request(app)
-        .get("/api/sms-bidding/my")
-        .set("Authorization", `Bearer ${userToken}`)
-        .expect(200);
+      const res = await request(app).get("/api/sms-bidding/my").set("Authorization", `Bearer ${userToken}`).expect(200);
       expect(res.body.success).toBe(true);
       expect(res.body.smsBidder).toBeDefined();
     });

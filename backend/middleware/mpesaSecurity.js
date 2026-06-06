@@ -30,7 +30,7 @@ const SAFARICOM_SANDBOX_IPS = [
   "196.201.214.200",
   "196.201.214.206",
   "196.201.213.114",
-  "::1",         // localhost for local dev
+  "::1", // localhost for local dev
   "127.0.0.1",
 ];
 
@@ -58,10 +58,7 @@ export const mpesaIpWhitelist = (req, res, next) => {
     return next();
   }
 
-  const allowedIps =
-    process.env.MPESA_ENV === "production"
-      ? SAFARICOM_PRODUCTION_IPS
-      : SAFARICOM_SANDBOX_IPS;
+  const allowedIps = process.env.MPESA_ENV === "production" ? SAFARICOM_PRODUCTION_IPS : SAFARICOM_SANDBOX_IPS;
 
   // Add any custom IPs from env (comma-separated)
   const extraIps = (process.env.MPESA_EXTRA_IPS || "").split(",").filter(Boolean);
@@ -70,7 +67,7 @@ export const mpesaIpWhitelist = (req, res, next) => {
   const clientIp = getClientIp(req);
 
   const allowed = allAllowed.some((allowed) =>
-    allowed.includes("/") ? ipInCidr(clientIp, allowed) : clientIp === allowed
+    allowed.includes("/") ? ipInCidr(clientIp, allowed) : clientIp === allowed,
   );
 
   if (!allowed) {

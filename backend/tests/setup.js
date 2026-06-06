@@ -145,7 +145,11 @@ export async function clearTestDB() {
     // Fallback to registered model collections (e.g. mock mode)
     const collections = mongoose.connection.collections;
     for (const key in collections) {
-      try { await collections[key].deleteMany({}); } catch { /* ignore */ }
+      try {
+        await collections[key].deleteMany({});
+      } catch {
+        /* ignore */
+      }
     }
   }
 }

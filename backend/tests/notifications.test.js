@@ -44,10 +44,7 @@ describe("Notification Routes", () => {
   });
 
   it("GET /api/notifications — returns notifications", async () => {
-    const res = await request(app)
-      .get("/api/notifications")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/notifications").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.notifications ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);
@@ -81,10 +78,7 @@ describe("Notification Routes", () => {
   });
 
   it("GET /api/notifications — returns empty after deletion", async () => {
-    const res = await request(app)
-      .get("/api/notifications")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/notifications").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 });

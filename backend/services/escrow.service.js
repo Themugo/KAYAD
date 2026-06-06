@@ -21,8 +21,7 @@ export const createEscrow = async (data) => {
   session.startTransaction();
 
   try {
-    const { commission, sellerAmount } =
-      calculateCommission(data.amount);
+    const { commission, sellerAmount } = calculateCommission(data.amount);
 
     const escrow = await Escrow.create(
       [
@@ -39,7 +38,7 @@ export const createEscrow = async (data) => {
           ],
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -58,17 +57,12 @@ export const createEscrow = async (data) => {
 // =============================
 // 💸 RELEASE ESCROW (SAFE)
 // =============================
-export const releaseEscrow = async (
-  escrowId,
-  { idempotencyKey }
-) => {
+export const releaseEscrow = async (escrowId, { idempotencyKey }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const escrow = await Escrow.findById(escrowId).session(
-      session
-    );
+    const escrow = await Escrow.findById(escrowId).session(session);
 
     if (!escrow) throw new Error("Escrow not found");
 
@@ -77,10 +71,7 @@ export const releaseEscrow = async (
     }
 
     // 🛡 Idempotency check
-    if (
-      escrow.lastActionKey &&
-      escrow.lastActionKey === idempotencyKey
-    ) {
+    if (escrow.lastActionKey && escrow.lastActionKey === idempotencyKey) {
       return escrow;
     }
 
@@ -96,9 +87,7 @@ export const releaseEscrow = async (
     await escrow.save({ session });
 
     // 🔥 Trigger payout (MPESA B2C later)
-    console.log(
-      `💸 Paying seller ${escrow.seller} KES ${escrow.sellerAmount}`
-    );
+    console.log(`💸 Paying seller ${escrow.seller} KES ${escrow.sellerAmount}`);
 
     await session.commitTransaction();
     session.endSession();
@@ -116,17 +105,12 @@ export const releaseEscrow = async (
 // =============================
 // 🔄 REFUND ESCROW (SAFE)
 // =============================
-export const refundEscrow = async (
-  escrowId,
-  { idempotencyKey }
-) => {
+export const refundEscrow = async (escrowId, { idempotencyKey }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const escrow = await Escrow.findById(escrowId).session(
-      session
-    );
+    const escrow = await Escrow.findById(escrowId).session(session);
 
     if (!escrow) throw new Error("Escrow not found");
 
@@ -134,10 +118,7 @@ export const refundEscrow = async (
       throw new Error("Cannot refund processed escrow");
     }
 
-    if (
-      escrow.lastActionKey &&
-      escrow.lastActionKey === idempotencyKey
-    ) {
+    if (escrow.lastActionKey && escrow.lastActionKey === idempotencyKey) {
       return escrow;
     }
 
@@ -152,9 +133,7 @@ export const refundEscrow = async (
     await escrow.save({ session });
 
     // 🔥 Trigger refund (MPESA reversal later)
-    console.log(
-      `↩️ Refunding buyer ${escrow.buyer} KES ${escrow.amount}`
-    );
+    console.log(`↩️ Refunding buyer ${escrow.buyer} KES ${escrow.amount}`);
 
     await session.commitTransaction();
     session.endSession();

@@ -15,17 +15,45 @@ const devFallback = (pw) => {
 };
 
 const departments = [
-  { name: "Marketing",    email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("SEED_MARKET_PW"), role: "marketing" },
-  { name: "Tech Support", email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"), role: "technical_support" },
-  { name: "HR",           email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("SEED_HR_PW"), role: "hr" },
-  { name: "Accounts",     email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW|| devFallback("SEED_ACCOUNTS_PW"), role: "accounts" },
-  { name: "Escrow",       email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW  || devFallback("SEED_ESCROW_PW"), role: "escrow_officer" },
-  { name: "Ad Manager",   email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("SEED_ADS_PW"), role: "ad_manager" },
+  {
+    name: "Marketing",
+    email: "marketing@kayad.space",
+    password: process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"),
+    role: "marketing",
+  },
+  {
+    name: "Tech Support",
+    email: "support@kayad.space",
+    password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"),
+    role: "technical_support",
+  },
+  { name: "HR", email: "hr@kayad.space", password: process.env.SEED_HR_PW || devFallback("SEED_HR_PW"), role: "hr" },
+  {
+    name: "Accounts",
+    email: "accounts@kayad.space",
+    password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"),
+    role: "accounts",
+  },
+  {
+    name: "Escrow",
+    email: "escrow@kayad.space",
+    password: process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"),
+    role: "escrow_officer",
+  },
+  {
+    name: "Ad Manager",
+    email: "ads@kayad.space",
+    password: process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"),
+    role: "ad_manager",
+  },
 ];
 
 async function run() {
   const uri = process.env.MONGO_URI;
-  if (!uri) { console.error("MONGO_URI not set in .env"); process.exit(1); }
+  if (!uri) {
+    console.error("MONGO_URI not set in .env");
+    process.exit(1);
+  }
 
   await mongoose.connect(uri);
   console.log("Connected to MongoDB");
@@ -46,4 +74,7 @@ async function run() {
   console.log("\nDone! Staff accounts provisioned.");
 }
 
-run().catch(err => { console.error(err); process.exit(1); });
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

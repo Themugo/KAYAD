@@ -14,12 +14,16 @@ export const paymentCallbackSchema = z.object({
       CheckoutRequestID: z.string(),
       ResultCode: z.number(),
       ResultDesc: z.string().optional(),
-      CallbackMetadata: z.object({
-        Item: z.array(z.object({
-          Name: z.string(),
-          Value: z.union([z.string(), z.number()]).optional(),
-        })),
-      }).optional(),
+      CallbackMetadata: z
+        .object({
+          Item: z.array(
+            z.object({
+              Name: z.string(),
+              Value: z.union([z.string(), z.number()]).optional(),
+            }),
+          ),
+        })
+        .optional(),
     }),
   }),
 });

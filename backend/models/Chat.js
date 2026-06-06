@@ -21,14 +21,12 @@ const messageSchema = new mongoose.Schema(
     ],
     seenBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const chatSchema = new mongoose.Schema(
   {
-    participants: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    ],
+    participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
     car: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Car",
@@ -42,7 +40,7 @@ const chatSchema = new mongoose.Schema(
       createdAt: Date,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 chatSchema.index({ participants: 1 });
@@ -68,7 +66,6 @@ chatSchema.methods.markAsSeen = function (userId) {
   return this.save();
 };
 
-const Chat =
-  mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+const Chat = mongoose.models.Chat || mongoose.model("Chat", chatSchema);
 
 export default Chat;

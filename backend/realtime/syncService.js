@@ -69,11 +69,7 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
     // =============================
     // 🥇 MARK WINNER (CLEAN)
     // =============================
-    await Bid.updateMany(
-      { carId: roomId },
-      { isWinningBid: false },
-      { session }
-    );
+    await Bid.updateMany({ carId: roomId }, { isWinningBid: false }, { session });
 
     winningBid.isWinningBid = true;
     await winningBid.save({ session });
@@ -100,7 +96,7 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
             status: "pending",
           },
         ],
-        { session }
+        { session },
       );
 
       payment = payment[0];
@@ -121,7 +117,7 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
           status: "pending",
         },
       ],
-      { session }
+      { session },
     );
 
     // link escrow to payment
@@ -142,7 +138,6 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
       winner: userId,
       amount: bid,
     };
-
   } catch (err) {
     await session.abortTransaction();
     session.endSession();

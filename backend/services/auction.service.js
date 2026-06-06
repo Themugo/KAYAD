@@ -10,8 +10,7 @@ const locks = new Set(); // 🔒 simple in-memory lock
 // =============================
 const now = () => Date.now();
 
-const generateBidderTag = () =>
-  `Bidder-${Math.floor(1000 + Math.random() * 9000)}`;
+const generateBidderTag = () => `Bidder-${Math.floor(1000 + Math.random() * 9000)}`;
 
 const getMinIncrement = (price) => {
   if (price < 100000) return 1000;
@@ -68,24 +67,17 @@ export const endAuction = (id) => {
     winner: auction.highestBidder,
     amount: auction.highestBid,
     totalBids: auction.bids.length,
-    reserveMet:
-      !auction.reservePrice ||
-      auction.highestBid >= auction.reservePrice,
+    reserveMet: !auction.reservePrice || auction.highestBid >= auction.reservePrice,
   };
 };
 
 // =============================
 // ⚡ PLACE BID (SAFE VERSION)
 // =============================
-export const placeBid = async ({
-  auctionId,
-  amount,
-  userId,
-}) => {
+export const placeBid = async ({ auctionId, amount, userId }) => {
   const auction = auctions[auctionId];
 
-  if (!auction)
-    return { success: false, message: "Auction not found" };
+  if (!auction) return { success: false, message: "Auction not found" };
 
   if (locks.has(auctionId)) {
     return { success: false, message: "Try again (busy)" };
@@ -123,19 +115,14 @@ export const placeBid = async ({
     if (amount < auction.highestBid + minIncrement) {
       return {
         success: false,
-        message: `Minimum bid is ${
-          auction.highestBid + minIncrement
-        }`,
+        message: `Minimum bid is ${auction.highestBid + minIncrement}`,
       };
     }
 
     // =============================
     // ⚡ BUY NOW (INSTANT WIN)
     // =============================
-    if (
-      auction.buyNowPrice &&
-      amount >= auction.buyNowPrice
-    ) {
+    if (auction.buyNowPrice && amount >= auction.buyNowPrice) {
       auction.highestBid = auction.buyNowPrice;
       auction.highestBidder = {
         userId,
@@ -199,8 +186,7 @@ export const getAuction = (id) => {
 // =============================
 // 📊 GET ALL AUCTIONS
 // =============================
-export const getAllAuctions = () =>
-  Object.values(auctions);
+export const getAllAuctions = () => Object.values(auctions);
 
 // =============================
 // 🧹 CLEANUP

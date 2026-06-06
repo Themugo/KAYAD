@@ -12,21 +12,17 @@ router.get(
     if (req.query.placement) filter.placement = req.query.placement;
     const ads = await Ad.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, ads });
-  })
+  }),
 );
 
 // Public: track ad click
 router.post(
   "/:id/click",
   asyncHandler(async (req, res) => {
-    const ad = await Ad.findByIdAndUpdate(
-      req.params.id,
-      { $inc: { clickCount: 1 } },
-      { new: false }
-    );
+    const ad = await Ad.findByIdAndUpdate(req.params.id, { $inc: { clickCount: 1 } }, { new: false });
     if (!ad) return res.status(404).json({ success: false, message: "Ad not found" });
     res.json({ success: true });
-  })
+  }),
 );
 
 export default router;

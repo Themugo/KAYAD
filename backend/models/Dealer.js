@@ -96,7 +96,7 @@ const dealerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -152,7 +152,6 @@ dealerSchema.methods.suspendDealer = function (reason) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const Dealer =
-  mongoose.models.Dealer || mongoose.model("Dealer", dealerSchema);
+const Dealer = mongoose.models.Dealer || mongoose.model("Dealer", dealerSchema);
 
 export default Dealer;

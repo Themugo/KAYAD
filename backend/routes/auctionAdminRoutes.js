@@ -9,11 +9,7 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import Bid from "../models/Bid.js";
 
-import {
-  startAuction,
-  endAuction,
-  getBidHistory,
-} from "../realtime/auctionEngine.js";
+import { startAuction, endAuction, getBidHistory } from "../realtime/auctionEngine.js";
 
 import { syncAuctionResult } from "../realtime/syncService.js";
 
@@ -37,24 +33,17 @@ router.post(
 
     const car = await Car.findById(req.params.carId);
 
-      if (!car) {
-        return res.status(404).json({ success: false, message: "Car not found" });
+    if (!car) {
+      return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     // 🚫 Listing lock check — block if dealer has outstanding commission
-    const dealer = await User.findById(car.dealer).select(
-      "commissionBalance listingsLocked"
-    );
+    const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
 
-    if (
-      dealer &&
-      dealer.listingsLocked &&
-      dealer.commissionBalance > 0
-    ) {
+    if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
       return res.status(403).json({
         success: false,
-        message:
-          "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
+        message: "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
       });
     }
 
@@ -82,7 +71,7 @@ router.post(
       message: "Auction started",
       endTime: result.endTime,
     });
-  })
+  }),
 );
 
 // =============================
@@ -113,7 +102,7 @@ router.post(
       success: true,
       result,
     });
-  })
+  }),
 );
 
 // =============================
@@ -128,7 +117,8 @@ router.post(
 
     if (!extraMs) {
       return res.status(400).json({
-        success: false, message: "extraMs required",
+        success: false,
+        message: "extraMs required",
       });
     }
 
@@ -136,14 +126,13 @@ router.post(
 
     if (!car) {
       return res.status(404).json({
-        success: false, message: "Car not found",
+        success: false,
+        message: "Car not found",
       });
     }
 
     const currentEnd = new Date(car.auctionEnd).getTime();
-    car.auctionEnd = new Date(
-      Math.max(currentEnd, Date.now()) + extraMs
-    );
+    car.auctionEnd = new Date(Math.max(currentEnd, Date.now()) + extraMs);
 
     await car.save();
 
@@ -151,7 +140,7 @@ router.post(
       success: true,
       newEndTime: car.auctionEnd,
     });
-  })
+  }),
 );
 
 // =============================
@@ -162,10 +151,7 @@ router.get(
   validateObjectId,
   asyncHandler(async (req, res) => {
     const [dbBids, redisBids] = await Promise.all([
-      Bid.find({ carId: req.params.carId })
-        .sort({ createdAt: -1 })
-        .limit(100)
-        .lean(),
+      Bid.find({ carId: req.params.carId }).sort({ createdAt: -1 }).limit(100).lean(),
 
       getBidHistory(req.params.carId),
     ]);
@@ -175,7 +161,7 @@ router.get(
       dbBids,
       redisBids,
     });
-  })
+  }),
 );
 
 // =============================
@@ -190,7 +176,8 @@ router.post(
 
     if (!bidId) {
       return res.status(400).json({
-        success: false, message: "bidId required",
+        success: false,
+        message: "bidId required",
       });
     }
 
@@ -198,7 +185,8 @@ router.post(
 
     if (!bid) {
       return res.status(404).json({
-        success: false, message: "Bid not found",
+        success: false,
+        message: "Bid not found",
       });
     }
 
@@ -218,7 +206,7 @@ router.post(
       success: true,
       message: "Winner manually set",
     });
-  })
+  }),
 );
 
 export default router;

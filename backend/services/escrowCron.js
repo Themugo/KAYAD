@@ -8,12 +8,12 @@
 //   ESCROW_CRON_ENABLED=true     (default: true)
 // ─────────────────────────────────────────────────────────────
 
-import Escrow       from "../models/Escrow.js";
+import Escrow from "../models/Escrow.js";
 import Notification from "../models/Notification.js";
 import { getIO } from "../utils/io.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
-const ENABLED      = process.env.ESCROW_CRON_ENABLED !== "false";
+const ENABLED = process.env.ESCROW_CRON_ENABLED !== "false";
 
 // ── NOTIFY HELPER ─────────────────────────────────────────────
 const notify = async (userId, title, message, type = "escrow") => {
@@ -30,7 +30,7 @@ const runAutoRelease = async () => {
   const cutoff = new Date(Date.now() - RELEASE_DAYS * 86_400_000);
 
   const stale = await Escrow.find({
-    status:    "held",
+    status: "held",
     createdAt: { $lte: cutoff },
   }).populate("buyer seller car");
 
@@ -41,7 +41,7 @@ const runAutoRelease = async () => {
   for (const escrow of stale) {
     try {
       // Mark as released
-      escrow.status    = "released";
+      escrow.status = "released";
       escrow.releasedAt = new Date();
       escrow.autoReleased = true;
       await escrow.save();
@@ -54,7 +54,7 @@ const runAutoRelease = async () => {
           escrow.seller._id,
           "💰 Escrow Released",
           `Payment for ${carTitle} has been automatically released to your account after ${RELEASE_DAYS} days.`,
-          "escrow"
+          "escrow",
         );
       }
 
@@ -64,14 +64,14 @@ const runAutoRelease = async () => {
           escrow.buyer._id,
           "✅ Escrow Closed",
           `Your escrow for ${carTitle} was automatically released after ${RELEASE_DAYS} days. Deal complete.`,
-          "escrow"
+          "escrow",
         );
       }
 
       // Socket notification
       getIO()?.emit("escrowReleased", {
-        escrowId:     escrow._id,
-        amount:       escrow.amount,
+        escrowId: escrow._id,
+        amount: escrow.amount,
         autoReleased: true,
       });
 
@@ -88,7 +88,7 @@ const runDisputeWarnings = async () => {
   const warningDate = new Date(Date.now() - (RELEASE_DAYS - 2) * 86_400_000);
 
   const approaching = await Escrow.find({
-    status:    "held",
+    status: "held",
     createdAt: { $lte: warningDate },
     warningSent: { $ne: true },
   }).populate("buyer seller car");
@@ -106,16 +106,18 @@ const runDisputeWarnings = async () => {
           escrow.buyer._id,
           "⚠️ Escrow Expiring Soon",
           `Your escrow for ${carTitle} will auto-release in 2 days. Have you received the car? Contact admin if you have an issue.`,
-          "escrow"
+          "escrow",
         );
       }
 
       // Notify admin via admin room
-      getIO()?.to("admins").emit("notification", {
-        title:   "Escrow Approaching Auto-Release",
-        message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (${escrow.amount} KES) releases in 2 days.`,
-        type:    "escrow",
-      });
+      getIO()
+        ?.to("admins")
+        .emit("notification", {
+          title: "Escrow Approaching Auto-Release",
+          message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (${escrow.amount} KES) releases in 2 days.`,
+          type: "escrow",
+        });
 
       console.log(`  ⚠️ Warning sent for escrow ${escrow._id}`);
     } catch (err) {

@@ -13,10 +13,10 @@ import {
 const router = express.Router();
 router.use(protect);
 
-router.get("/",                      asyncHandler(getFavorites));
-router.post("/:carId",               asyncHandler(addFavorite));
-router.delete("/:carId",             asyncHandler(removeFavorite));
-router.post("/:carId/toggle",        asyncHandler(toggleFavorite));
-router.put("/:carId/price-alert",    asyncHandler(updateFavoritePriceAlert));
+router.get("/", asyncHandler(getFavorites));
+router.post("/:carId", asyncHandler(addFavorite));
+router.delete("/:carId", asyncHandler(removeFavorite));
+router.post("/:carId/toggle", asyncHandler(toggleFavorite));
+router.put("/:carId/price-alert", asyncHandler(updateFavoritePriceAlert));
 
 export default router;

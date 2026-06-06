@@ -54,25 +54,16 @@ describe("Admin Routes", () => {
   });
 
   it("GET /api/admin/stats — requires admin", async () => {
-    await request(app)
-      .get("/api/admin/stats")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/admin/stats").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   it("GET /api/admin/stats — admin can access stats", async () => {
-    const res = await request(app)
-      .get("/api/admin/stats")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/admin/stats").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
   it("GET /api/admin/users — admin can list users", async () => {
-    const res = await request(app)
-      .get("/api/admin/users")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/admin/users").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -85,19 +76,13 @@ describe("Admin Routes", () => {
   });
 
   it("GET /api/admin/cars — admin can list all cars", async () => {
-    const res = await request(app)
-      .get("/api/admin/cars")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/admin/cars").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.cars ?? res.body.data ?? [])).toBe(true);
   });
 
   it("GET /api/admin/config — admin can get config", async () => {
-    const res = await request(app)
-      .get("/api/admin/config")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/admin/config").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -111,10 +96,7 @@ describe("Admin Routes", () => {
   });
 
   it("GET /api/admin/audit-log — admin can view audit log", async () => {
-    const res = await request(app)
-      .get("/api/admin/audit-log")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/admin/audit-log").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -127,24 +109,15 @@ describe("Admin Routes", () => {
   });
 
   it("GET /api/admin/audit-log — rejects non-admin", async () => {
-    await request(app)
-      .get("/api/admin/audit-log")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/admin/audit-log").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   it("GET /api/admin/cars — rejects non-admin", async () => {
-    await request(app)
-      .get("/api/admin/cars")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/admin/cars").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   it("GET /api/escrow — rejects non-admin", async () => {
-    await request(app)
-      .get("/api/escrow")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/escrow").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   it("GET /api/admin/stats — rejects no auth", async () => {

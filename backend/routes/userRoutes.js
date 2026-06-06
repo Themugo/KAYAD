@@ -31,7 +31,7 @@ router.get(
     const total = await User.countDocuments(filter);
 
     res.json({ success: true, users, total });
-  })
+  }),
 );
 
 router.get(
@@ -41,7 +41,7 @@ router.get(
     const user = await User.findById(req.user.id).select("-password").lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     res.json({ success: true, user });
-  })
+  }),
 );
 
 router.put(
@@ -66,11 +66,9 @@ router.put(
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ success: false, message: "No valid settings provided" });
     }
-    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true })
-      .select("-password")
-      .lean();
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true }).select("-password").lean();
     res.json({ success: true, user });
-  })
+  }),
 );
 
 router.get(
@@ -83,7 +81,7 @@ router.get(
       .lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     res.json({ success: true, user });
-  })
+  }),
 );
 
 // =============================
@@ -108,10 +106,10 @@ router.post(
         "bankPreApproval.verifiedAt": null,
         "bankPreApproval.verifiedBy": null,
       },
-      { new: true }
+      { new: true },
     ).select("-password");
     res.json({ success: true, message: "Pre-approval documents submitted for admin verification", user });
-  })
+  }),
 );
 
 // =============================
@@ -127,10 +125,10 @@ router.delete(
         verifiedBuyer: false,
         bankPreApproval: { documentUrl: "", bankName: "", approvedAmount: 0, expiresAt: null },
       },
-      { new: true }
+      { new: true },
     ).select("-password");
     res.json({ success: true, user });
-  })
+  }),
 );
 
 router.use((req, res) => {

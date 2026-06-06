@@ -52,10 +52,7 @@ describe("Dealer Routes", () => {
   });
 
   it("GET /api/dealer/quick-stats — requires dealer role", async () => {
-    await request(app)
-      .get("/api/dealer/quick-stats")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/dealer/quick-stats").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   it("GET /api/dealer/quick-stats — returns stats for dealer", async () => {
@@ -67,27 +64,18 @@ describe("Dealer Routes", () => {
   });
 
   it("GET /api/dealer/summary — returns dealer summary", async () => {
-    const res = await request(app)
-      .get("/api/dealer/summary")
-      .set("Authorization", `Bearer ${dealerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/dealer/summary").set("Authorization", `Bearer ${dealerToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
   it("GET /api/dealer/cars — returns dealer's cars", async () => {
-    const res = await request(app)
-      .get("/api/dealer/cars")
-      .set("Authorization", `Bearer ${dealerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/dealer/cars").set("Authorization", `Bearer ${dealerToken}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.cars ?? res.body.data ?? [])).toBe(true);
   });
 
   it("GET /api/dealer/bids — returns dealer bids", async () => {
-    const res = await request(app)
-      .get("/api/dealer/bids")
-      .set("Authorization", `Bearer ${dealerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/dealer/bids").set("Authorization", `Bearer ${dealerToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -112,10 +100,7 @@ describe("Dealer Routes", () => {
   });
 
   it("GET /api/dealer/team — returns team list", async () => {
-    const res = await request(app)
-      .get("/api/dealer/team")
-      .set("Authorization", `Bearer ${dealerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/dealer/team").set("Authorization", `Bearer ${dealerToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 

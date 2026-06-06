@@ -37,10 +37,7 @@ describe("Review Routes", () => {
   });
 
   it("POST /api/reviews — requires auth", async () => {
-    await request(app)
-      .post("/api/reviews")
-      .send({ dealerId: dealerId, rating: 5, comment: "Great!" })
-      .expect(401);
+    await request(app).post("/api/reviews").send({ dealerId: dealerId, rating: 5, comment: "Great!" }).expect(401);
   });
 
   it("POST /api/reviews — creates a review", async () => {
@@ -54,28 +51,21 @@ describe("Review Routes", () => {
   });
 
   it("GET /api/reviews/my — returns my reviews", async () => {
-    const res = await request(app)
-      .get("/api/reviews/my")
-      .set("Authorization", `Bearer ${buyerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/reviews/my").set("Authorization", `Bearer ${buyerToken}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.reviews ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);
   });
 
   it("GET /api/reviews/dealer/:id — returns dealer reviews", async () => {
-    const res = await request(app)
-      .get(`/api/reviews/dealer/${dealerId}`)
-      .expect(200);
+    const res = await request(app).get(`/api/reviews/dealer/${dealerId}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.reviews ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);
   });
 
   it("DELETE /api/reviews/:id — deletes own review", async () => {
-    const myRes = await request(app)
-      .get("/api/reviews/my")
-      .set("Authorization", `Bearer ${buyerToken}`);
+    const myRes = await request(app).get("/api/reviews/my").set("Authorization", `Bearer ${buyerToken}`);
     const list = myRes.body.reviews ?? myRes.body.data ?? [];
     if (list.length > 0) {
       const res = await request(app)

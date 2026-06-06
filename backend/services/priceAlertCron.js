@@ -39,10 +39,7 @@ async function run() {
           phone: fav.user?.phone,
         });
 
-        await Favorite.updateOne(
-          { _id: fav._id },
-          { $set: { "carSnapshot.price": newPrice } }
-        );
+        await Favorite.updateOne({ _id: fav._id }, { $set: { "carSnapshot.price": newPrice } });
       }
     }
   } catch (err) {

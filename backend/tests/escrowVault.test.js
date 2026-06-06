@@ -57,10 +57,7 @@ describe("Escrow Vault Routes", () => {
   });
 
   it("GET /api/escrow-vault/my — returns user vaults", async () => {
-    const res = await request(app)
-      .get("/api/escrow-vault/my")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/escrow-vault/my").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.vaults ?? res.body.data ?? [])).toBe(true);
   });

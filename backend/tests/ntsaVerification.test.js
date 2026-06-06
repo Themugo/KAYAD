@@ -111,7 +111,10 @@ describe("NTSA Verification Routes", () => {
 
   describe("POST /api/ntsa-verification/:id/documents", () => {
     it("requires auth", async () => {
-      await request(app).post(`/api/ntsa-verification/${requestId}/documents`).send({ url: "http://example.com/doc.pdf" }).expect(401);
+      await request(app)
+        .post(`/api/ntsa-verification/${requestId}/documents`)
+        .send({ url: "http://example.com/doc.pdf" })
+        .expect(401);
     });
 
     it("rejects missing url", async () => {
@@ -200,10 +203,7 @@ describe("NTSA Verification Routes", () => {
 
   describe("GET /api/ntsa-verification/ (admin list)", () => {
     it("requires admin", async () => {
-      await request(app)
-        .get("/api/ntsa-verification/")
-        .set("Authorization", `Bearer ${ownerToken}`)
-        .expect(403);
+      await request(app).get("/api/ntsa-verification/").set("Authorization", `Bearer ${ownerToken}`).expect(403);
     });
 
     it("lists all requests for admin", async () => {
@@ -221,7 +221,7 @@ describe("NTSA Verification Routes", () => {
         .set("Authorization", `Bearer ${adminToken}`)
         .expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.requests.every(r => r.status === "passed")).toBe(true);
+      expect(res.body.requests.every((r) => r.status === "passed")).toBe(true);
     });
   });
 });

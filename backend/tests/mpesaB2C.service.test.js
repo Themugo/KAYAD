@@ -49,7 +49,12 @@ describe("mpesaB2C.service", () => {
     it("throws when live mode is selected but OAuth fails", async () => {
       mockAxios.get.mockRejectedValue(new Error("OAuth failed"));
       mockAxios.post.mockResolvedValue({
-        data: { ConversationID: "C-1", OriginatorConversationID: "O-1", ResponseCode: "0", ResponseDescription: "Success" },
+        data: {
+          ConversationID: "C-1",
+          OriginatorConversationID: "O-1",
+          ResponseCode: "0",
+          ResponseDescription: "Success",
+        },
       });
 
       await expect(

@@ -67,8 +67,8 @@ const runReminders = async () => {
         for (const userId of activeBidders) {
           const user = await User.findById(userId).select("email name notifications");
           if (user?.email && user?.notifications?.email !== false && typeof sendAuctionEndingSoonEmail === "function") {
-            sendAuctionEndingSoonEmail(user, car, threshold.minutes).catch(e =>
-              console.warn("⚠️ Auction reminder email failed:", e.message)
+            sendAuctionEndingSoonEmail(user, car, threshold.minutes).catch((e) =>
+              console.warn("⚠️ Auction reminder email failed:", e.message),
             );
           }
 
@@ -76,7 +76,7 @@ const runReminders = async () => {
             userId,
             `⏰ Auction ending in ${threshold.minutes} min`,
             `The auction for ${car.title || "a vehicle"} ends in ${threshold.minutes} minutes. Current bid: KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}.`,
-            "auction"
+            "auction",
           );
         }
 
@@ -84,7 +84,9 @@ const runReminders = async () => {
           [`reminderSent_${threshold.label}min`]: true,
         });
 
-        console.log(`  ✅ Reminder sent (${threshold.minutes}min) for car ${car._id} (${activeBidders.length} bidders)`);
+        console.log(
+          `  ✅ Reminder sent (${threshold.minutes}min) for car ${car._id} (${activeBidders.length} bidders)`,
+        );
       } catch (err) {
         console.error(`  ❌ Reminder failed for ${car._id}:`, err.message);
       }

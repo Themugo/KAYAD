@@ -40,11 +40,7 @@ export const listContacts = async (req, res) => {
 
 export const markRead = async (req, res) => {
   try {
-    const contact = await Contact.findByIdAndUpdate(
-      req.params.id,
-      { read: true },
-      { new: true }
-    );
+    const contact = await Contact.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
     if (!contact) return res.status(404).json({ success: false, message: "Contact not found" });
     res.json({ success: true, contact });
   } catch (err) {

@@ -42,9 +42,7 @@ export const globalLimiter = rateLimit({
       user: req.user?.id || "guest",
     });
 
-    res.status(429).json(
-      rateLimitMessage("Too many requests, try again later")
-    );
+    res.status(429).json(rateLimitMessage("Too many requests, try again later"));
   },
 });
 
@@ -60,9 +58,7 @@ export const authLimiter = rateLimit({
       ip: req.ip,
     });
 
-    res.status(429).json(
-      rateLimitMessage("Too many login attempts. Try again later")
-    );
+    res.status(429).json(rateLimitMessage("Too many login attempts. Try again later"));
   },
 });
 
@@ -79,9 +75,7 @@ export const bidLimiter = rateLimit({
       carId: req.params?.id,
     });
 
-    res.status(429).json(
-      rateLimitMessage("Too many bids. Slow down")
-    );
+    res.status(429).json(rateLimitMessage("Too many bids. Slow down"));
   },
 });
 
@@ -97,9 +91,7 @@ export const paymentLimiter = rateLimit({
       user: req.user?.id,
     });
 
-    res.status(429).json(
-      rateLimitMessage("Too many payment attempts")
-    );
+    res.status(429).json(rateLimitMessage("Too many payment attempts"));
   },
 });
 
@@ -214,9 +206,7 @@ export const socketRateLimit = (userId) => {
     userHits.set(userId, []);
   }
 
-  const timestamps = userHits.get(userId).filter(
-    (t) => now - t < WINDOW
-  );
+  const timestamps = userHits.get(userId).filter((t) => now - t < WINDOW);
 
   if (timestamps.length >= LIMIT) {
     return false;

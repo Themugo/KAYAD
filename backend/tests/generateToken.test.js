@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeAll } from "@jest/globals";
 import jwt from "jsonwebtoken";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyToken,
-} from "../utils/generateToken.js";
+import { generateAccessToken, generateRefreshToken, verifyToken } from "../utils/generateToken.js";
 
 const TEST_SECRET = "test-jwt-secret-at-least-32-chars!!";
 beforeAll(() => {

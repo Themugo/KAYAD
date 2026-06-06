@@ -23,14 +23,24 @@ const toNumber = (val, def) => {
 export const getCars = async (req, res) => {
   try {
     const {
-      keyword, brand, city,
-      minPrice, maxPrice,
-      yearMin, yearMax,
-      body, fuel, transmission, color, condition,
-      mileageMin, mileageMax,
+      keyword,
+      brand,
+      city,
+      minPrice,
+      maxPrice,
+      yearMin,
+      yearMax,
+      body,
+      fuel,
+      transmission,
+      color,
+      condition,
+      mileageMin,
+      mileageMax,
       category,
       sort,
-      page = 1, limit = 12,
+      page = 1,
+      limit = 12,
     } = req.query;
 
     const pageNum = Math.max(toNumber(page, 1), 1);
@@ -48,10 +58,7 @@ export const getCars = async (req, res) => {
       } else {
         // Short queries: fall back to regex (text index needs full tokens)
         const safe = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        query.$or = [
-          { title: { $regex: safe, $options: "i" } },
-          { brand: { $regex: safe, $options: "i" } },
-        ];
+        query.$or = [{ title: { $regex: safe, $options: "i" } }, { brand: { $regex: safe, $options: "i" } }];
       }
     }
 
@@ -73,7 +80,10 @@ export const getCars = async (req, res) => {
       if (yearMax) query.year.$lte = toNumber(yearMax, 9999);
     }
 
-    const exactText = (value) => ({ $regex: `^${String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" });
+    const exactText = (value) => ({
+      $regex: `^${String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+      $options: "i",
+    });
     if (body) query.bodyType = exactText(body);
     if (fuel) query.fuel = exactText(fuel);
     if (transmission) query.transmission = exactText(transmission);
@@ -112,26 +122,46 @@ export const getCars = async (req, res) => {
     if (query.$text) {
       findQuery = findQuery.select({
         score: { $meta: "textScore" },
-        title: 1, price: 1, images: 1, brand: 1, year: 1, model: 1,
-        location: 1, fuel: 1, transmission: 1, mileage: 1, bodyType: 1,
-        color: 1, condition: 1, description: 1, allowBid: 1, allowBuy: 1,
-        auctionStatus: 1, currentBid: 1, bidsCount: 1, views: 1,
-        trustScore: 1, dealRating: 1, createdAt: 1, dealerPhone: 1,
-        isVerifiedDealer: 1, ntsaVerified: 1, dutyStatus: 1,
-        isPromoted: 1, isDemo: 1, demoEditedAt: 1, demoEditedBy: 1,
+        title: 1,
+        price: 1,
+        images: 1,
+        brand: 1,
+        year: 1,
+        model: 1,
+        location: 1,
+        fuel: 1,
+        transmission: 1,
+        mileage: 1,
+        bodyType: 1,
+        color: 1,
+        condition: 1,
+        description: 1,
+        allowBid: 1,
+        allowBuy: 1,
+        auctionStatus: 1,
+        currentBid: 1,
+        bidsCount: 1,
+        views: 1,
+        trustScore: 1,
+        dealRating: 1,
+        createdAt: 1,
+        dealerPhone: 1,
+        isVerifiedDealer: 1,
+        ntsaVerified: 1,
+        dutyStatus: 1,
+        isPromoted: 1,
+        isDemo: 1,
+        demoEditedAt: 1,
+        demoEditedBy: 1,
       });
     } else {
       findQuery = findQuery.select(
-        "title price images brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy"
+        "title price images brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
       );
     }
 
     const [cars, total] = await Promise.all([
-      findQuery
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
+      findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
 
       Car.countDocuments(query),
     ]);
@@ -146,7 +176,6 @@ export const getCars = async (req, res) => {
         pages: Math.ceil(total / limitNum),
       },
     });
-
   } catch (err) {
     console.error("❌ FETCH ERROR:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
@@ -159,7 +188,7 @@ export const getCars = async (req, res) => {
 export const createCar = async (req, res) => {
   try {
     const seller = await User.findById(req.user.id).select(
-      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved isDemo"
+      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved isDemo",
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
@@ -168,8 +197,8 @@ export const createCar = async (req, res) => {
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
     const config = await (await import("../models/PlatformConfig.js")).default.findOne().lean();
-    const pkgs   = config?.packages || [];
-    const pkg    = pkgs.find(p => p.id === seller.dealerPackage) || null;
+    const pkgs = config?.packages || [];
+    const pkg = pkgs.find((p) => p.id === seller.dealerPackage) || null;
 
     // Monetisation master switch (admin-controlled, no code change to flip):
     // free unless an admin has explicitly turned freeMarket OFF. Absent config
@@ -178,9 +207,7 @@ export const createCar = async (req, res) => {
 
     const isDealer = seller.role === "dealer";
     const isSeller = seller.role === "broker" || seller.role === "individual_seller";
-    const currentListingCount = isDemoSeller
-      ? 0
-      : await Car.countDocuments({ dealer: req.user.id });
+    const currentListingCount = isDemoSeller ? 0 : await Car.countDocuments({ dealer: req.user.id });
 
     // Determine if user is allowed to create a listing (without incrementing yet)
     let shouldIncrementListingCount = false;
@@ -193,7 +220,7 @@ export const createCar = async (req, res) => {
 
       if (pkg.isFree && pkg.trialDays > 0) {
         const trialStart = seller.trialStartedAt || now;
-        const trialEnd   = new Date(trialStart.getTime() + pkg.trialDays * 86400000);
+        const trialEnd = new Date(trialStart.getTime() + pkg.trialDays * 86400000);
 
         if (now > trialEnd) {
           return res.status(402).json({
@@ -218,7 +245,6 @@ export const createCar = async (req, res) => {
         if (!seller.trialStartedAt) {
           await User.findByIdAndUpdate(req.user.id, { trialStartedAt: now });
         }
-
       } else if (!pkg.isFree) {
         if (seller.packageExpiresAt && now > new Date(seller.packageExpiresAt)) {
           return res.status(402).json({
@@ -239,7 +265,7 @@ export const createCar = async (req, res) => {
     }
 
     if (!monetisationOff && !isDemoSeller && isSeller) {
-      const sellerPkg = pkgs.find(p => p.id === seller.dealerPackage) || null;
+      const sellerPkg = pkgs.find((p) => p.id === seller.dealerPackage) || null;
 
       if (!seller.firstVehicleUsed || currentListingCount === 0) {
         shouldIncrementListingCount = true;
@@ -286,21 +312,22 @@ export const createCar = async (req, res) => {
     delete body.address;
 
     // ── PROCESS UPLOADED IMAGES (Issue #3: non-blocking) ──────
-    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+    const cloudinaryConfigured =
+      process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
     let pendingFiles = null; // Track files for background upload
     if (req.files && req.files.length > 0) {
       if (cloudinaryConfigured) {
         // Save placeholder thumbs immediately; full upload happens after response
-        body.images = req.files.map(f => ({
+        body.images = req.files.map((f) => ({
           url: `/uploads/${path.basename(f.path)}`,
           thumb: `/uploads/${path.basename(f.path)}`,
           public_id: null,
-          _pending: true,  // Flag for background processing
+          _pending: true, // Flag for background processing
         }));
         pendingFiles = req.files;
       } else {
-        body.images = req.files.map(f => ({
+        body.images = req.files.map((f) => ({
           url: `/uploads/${path.basename(f.path)}`,
           thumb: `/uploads/${path.basename(f.path)}`,
           public_id: null,
@@ -311,9 +338,8 @@ export const createCar = async (req, res) => {
     // Set coverImage: use user selection if valid, otherwise default to 0
     const totalImages = (body.images || []).length;
     const requestedCover = Number(body.coverImage);
-    body.coverImage = (!isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages)
-      ? requestedCover
-      : 0;
+    body.coverImage =
+      !isNaN(requestedCover) && requestedCover >= 0 && requestedCover < totalImages ? requestedCover : 0;
 
     // ── CREATE CAR (before incrementing listing count for atomicity) ──
     const car = await Car.create(body);
@@ -333,7 +359,9 @@ export const createCar = async (req, res) => {
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "create_car", {
-      target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
+      target: car._id,
+      targetModel: "Car",
+      details: { title: car.title, price: car.price },
     });
 
     res.status(201).json({ success: true, data: car });
@@ -387,7 +415,7 @@ export const updateCar = async (req, res) => {
 
     // Preserve existing coverImage if caller didn't explicitly send one
     const incomingCover = req.body.coverImage;
-    const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== '';
+    const hadExplicitCover = incomingCover !== undefined && incomingCover !== null && incomingCover !== "";
 
     // Track price change
     const newPrice = Number(req.body.price);
@@ -407,8 +435,8 @@ export const updateCar = async (req, res) => {
     const findFirstValidIdx = (images) => {
       for (let i = 0; i < images.length; i++) {
         const img = images[i];
-        const url = typeof img === 'string' ? img : img?.url;
-        if (url && url.startsWith('http')) return i;
+        const url = typeof img === "string" ? img : img?.url;
+        if (url && url.startsWith("http")) return i;
       }
       return 0; // fallback to index 0
     };
@@ -425,14 +453,16 @@ export const updateCar = async (req, res) => {
     } else {
       // Explicit cover sent — validate it's in range
       const idx = Number(incomingCover);
-      car.coverImage = (!isNaN(idx) && idx >= 0 && idx < totalImages) ? idx : findFirstValidIdx(car.images);
+      car.coverImage = !isNaN(idx) && idx >= 0 && idx < totalImages ? idx : findFirstValidIdx(car.images);
     }
 
     await car.save();
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "update_car", {
-      target: car._id, targetModel: "Car", details: { title: car.title, price: car.price },
+      target: car._id,
+      targetModel: "Car",
+      details: { title: car.title, price: car.price },
     });
 
     res.json({ success: true, data: car });
@@ -476,14 +506,15 @@ export const deleteCar = async (req, res) => {
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "delete_car", {
-      target: req.params.id, targetModel: "Car", details: { title: car.title },
+      target: req.params.id,
+      targetModel: "Car",
+      details: { title: car.title },
     });
 
     res.json({
       success: true,
       message: "Deleted",
     });
-
   } catch (err) {
     console.error("❌ DELETE ERROR:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
@@ -534,7 +565,8 @@ export const deleteCarImage = async (req, res) => {
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "delete_car_image", {
-      target: car._id, targetModel: "Car",
+      target: car._id,
+      targetModel: "Car",
       details: { imageIndex, removedPublicId: removedImage?.public_id },
     });
 
@@ -569,17 +601,23 @@ export const addCarImages = async (req, res) => {
     const currentCount = (car.images || []).length;
     if (currentCount + req.files.length > maxImages) {
       cleanupFiles(req.files);
-      return res.status(400).json({ success: false, message: `Maximum ${maxImages} images allowed. You have ${currentCount}, trying to add ${req.files.length}.` });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: `Maximum ${maxImages} images allowed. You have ${currentCount}, trying to add ${req.files.length}.`,
+        });
     }
 
-    const cloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
+    const cloudinaryConfigured =
+      process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
     let newImages;
     if (cloudinaryConfigured) {
       newImages = await uploadMultiple(req.files, "kayad/cars");
       cleanupFiles(req.files);
     } else {
-      newImages = req.files.map(f => ({
+      newImages = req.files.map((f) => ({
         url: `/uploads/${path.basename(f.path)}`,
         thumb: `/uploads/${path.basename(f.path)}`,
         public_id: null,
@@ -591,7 +629,8 @@ export const addCarImages = async (req, res) => {
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "add_car_images", {
-      target: car._id, targetModel: "Car",
+      target: car._id,
+      targetModel: "Car",
       details: { addedCount: newImages.length, totalImages: car.images.length },
     });
 
@@ -623,10 +662,19 @@ export const getCar = async (req, res) => {
 
     if (car.dealer?.visibility) {
       const vis = car.dealer.visibility;
-      if (!vis.showPhone)   { car.dealerPhone = undefined; if (car.dealer) car.dealer.phone = undefined; }
-      if (!vis.showEmail)   { if (car.dealer) car.dealer.email = undefined; }
-      if (!vis.showLocation) { if (car.dealer) car.dealer.location = undefined; }
-      if (!vis.chatEnabled) { car.chatDisabled = true; }
+      if (!vis.showPhone) {
+        car.dealerPhone = undefined;
+        if (car.dealer) car.dealer.phone = undefined;
+      }
+      if (!vis.showEmail) {
+        if (car.dealer) car.dealer.email = undefined;
+      }
+      if (!vis.showLocation) {
+        if (car.dealer) car.dealer.location = undefined;
+      }
+      if (!vis.chatEnabled) {
+        car.chatDisabled = true;
+      }
       delete car.dealer?.visibility;
     }
 
@@ -647,7 +695,6 @@ export const getCar = async (req, res) => {
     }
 
     res.json({ success: true, data: car });
-
   } catch (err) {
     console.error("❌ GET ONE ERROR:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch car" });
@@ -680,7 +727,8 @@ export const placeBid = async (req, res) => {
     await car.save();
 
     await logActionFromReq(req, "place_bid", {
-      target: car._id, targetModel: "Car",
+      target: car._id,
+      targetModel: "Car",
       details: { amount: Number(amount), bidsCount: car.bidsCount },
     });
 
@@ -691,7 +739,6 @@ export const placeBid = async (req, res) => {
         bidsCount: car.bidsCount,
       },
     });
-
   } catch (err) {
     console.error("❌ BID ERROR:", err.message);
     res.status(500).json({ success: false, message: "Bid failed" });
@@ -710,7 +757,7 @@ export const getDemoCars = async (req, res) => {
     const cars = await Car.find({ isDemo: true })
       .populate("dealer", "name email businessName")
       .sort({ createdAt: -1 })
-      .limit(100)  // Cap at 100 to prevent unbounded memory (Issue #11)
+      .limit(100) // Cap at 100 to prevent unbounded memory (Issue #11)
       .lean();
 
     res.json({ success: true, data: cars });

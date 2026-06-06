@@ -43,7 +43,11 @@ describe("RBAC effective permissions", () => {
   });
 
   it("superadmin always has every permission regardless of revokes", () => {
-    const su = { role: "superadmin", grantedPermissions: [], revokedPermissions: [PERM.MANAGE_FINANCE, PERM.MANAGE_CARS] };
+    const su = {
+      role: "superadmin",
+      grantedPermissions: [],
+      revokedPermissions: [PERM.MANAGE_FINANCE, PERM.MANAGE_CARS],
+    };
     expect(userHasPermission(su, PERM.MANAGE_FINANCE)).toBe(true);
     expect(userHasPermission(su, PERM.MANAGE_PLATFORM)).toBe(true);
     expect(getEffectivePermissions(su).length).toBe(Object.values(PERM).length);

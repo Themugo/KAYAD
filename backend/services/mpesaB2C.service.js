@@ -26,16 +26,18 @@ import https from "https";
 
 // ── CONFIG ────────────────────────────────────────────────────
 const MPESA_ENV = process.env.MPESA_ENV || "sandbox";
-const MPESA_BASE = MPESA_ENV === "production"
-  ? "https://api.safaricom.co.ke"
-  : "https://sandbox.safaricom.co.ke";
+const MPESA_BASE = MPESA_ENV === "production" ? "https://api.safaricom.co.ke" : "https://sandbox.safaricom.co.ke";
 
 const B2C_SHORTCODE = process.env.MPESA_B2C_SHORTCODE || process.env.MPESA_SHORTCODE;
 const B2C_INITIATOR = process.env.MPESA_B2C_INITIATOR;
-const B2C_CALLBACK  = process.env.MPESA_B2C_CALLBACK_URL || `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/callback`;
-const B2C_TIMEOUT   = process.env.MPESA_B2C_TIMEOUT_URL  || `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/timeout`;
-const B2C_REMARKS   = process.env.MPESA_B2C_REMARKS || "Kayad seller payout";
-const B2C_OCCASION  = process.env.MPESA_B2C_OCCASION || "Vehicle sale payout";
+const B2C_CALLBACK =
+  process.env.MPESA_B2C_CALLBACK_URL ||
+  `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/callback`;
+const B2C_TIMEOUT =
+  process.env.MPESA_B2C_TIMEOUT_URL ||
+  `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/timeout`;
+const B2C_REMARKS = process.env.MPESA_B2C_REMARKS || "Kayad seller payout";
+const B2C_OCCASION = process.env.MPESA_B2C_OCCASION || "Vehicle sale payout";
 
 // ── OAUTH TOKEN ───────────────────────────────────────────────
 let _oauthToken = null;
@@ -44,9 +46,7 @@ let _tokenExpiry = 0;
 const getOAuthToken = async () => {
   if (_oauthToken && Date.now() < _tokenExpiry) return _oauthToken;
 
-  const auth = Buffer.from(
-    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
-  ).toString("base64");
+  const auth = Buffer.from(`${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`).toString("base64");
 
   const res = await axios.get(`${MPESA_BASE}/oauth/v1/generate?grant_type=client_credentials`, {
     headers: { Authorization: `Basic ${auth}` },
@@ -60,10 +60,10 @@ const getOAuthToken = async () => {
 
 // ── B2C DISBURSEMENT ─────────────────────────────────────────
 export const disburseB2C = async ({
-  phone,        // recipient M-Pesa number (2547XXXXXXXX)
-  amount,       // KES amount
-  escrowId,     // reference
-  sellerName,   // recipient name
+  phone, // recipient M-Pesa number (2547XXXXXXXX)
+  amount, // KES amount
+  escrowId, // reference
+  sellerName, // recipient name
 }) => {
   // ── MOCK MODE ─────────────────────────────────────────────
   if (MPESA_ENV === "sandbox" && !process.env.MPESA_B2C_INITIATOR) {

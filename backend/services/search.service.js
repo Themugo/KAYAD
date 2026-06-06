@@ -20,10 +20,7 @@ export const searchCars = async ({
 
   if (keyword) {
     const safe = escapeRegex(keyword);
-    filter.$or = [
-      { title: { $regex: safe, $options: "i" } },
-      { brand: { $regex: safe, $options: "i" } },
-    ];
+    filter.$or = [{ title: { $regex: safe, $options: "i" } }, { brand: { $regex: safe, $options: "i" } }];
   }
 
   // =============================
@@ -73,11 +70,7 @@ export const searchCars = async ({
   const skip = (page - 1) * limit;
 
   const [cars, total] = await Promise.all([
-    Car.find(filter)
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
+    Car.find(filter).sort(sortOption).skip(skip).limit(limit).lean(),
 
     Car.countDocuments(filter),
   ]);

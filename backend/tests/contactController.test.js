@@ -55,7 +55,12 @@ describe("contactController", () => {
       const req = { body: { name: "John", email: "john@test.com", subject: "Help", message: "Need help" } };
       const res = mockRes();
       await controller.submitContact(req, res);
-      expect(mockContactCreate).toHaveBeenCalledWith({ name: "John", email: "john@test.com", subject: "Help", message: "Need help" });
+      expect(mockContactCreate).toHaveBeenCalledWith({
+        name: "John",
+        email: "john@test.com",
+        subject: "Help",
+        message: "Need help",
+      });
       expect(mockSendEmail).toHaveBeenCalledWith(expect.objectContaining({ to: "admin@test.com" }));
       expect(res.json).toHaveBeenCalledWith({ success: true, message: expect.any(String) });
     });

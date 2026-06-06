@@ -53,19 +53,14 @@ export const protect = async (req, res, next) => {
 
       return res.status(401).json({
         success: false,
-        message:
-          err.name === "TokenExpiredError"
-            ? "Session expired, please login again"
-            : "Invalid token",
+        message: err.name === "TokenExpiredError" ? "Session expired, please login again" : "Invalid token",
       });
     }
 
     // =============================
     // 🔍 FETCH USER (LEAN 🔥)
     // =============================
-    const user = await User.findById(decoded.id)
-      .select("-password +tokenVersion")
-      .lean();
+    const user = await User.findById(decoded.id).select("-password +tokenVersion").lean();
 
     if (!user) {
       return res.status(401).json({
@@ -113,7 +108,9 @@ export const protect = async (req, res, next) => {
     // ✅ ATTACH USER (WITH OWNER BYPASS)
     // =============================
     // 🔄 Update lastActive (fire-and-forget)
-    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch((e) => console.warn("⚠️ lastActive update failed:", e.message));
+    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch((e) =>
+      console.warn("⚠️ lastActive update failed:", e.message),
+    );
 
     const isOwner = isOwnerEmail(user.email);
     req.user = {
@@ -127,7 +124,6 @@ export const protect = async (req, res, next) => {
     };
 
     next();
-
   } catch (err) {
     console.error("❌ AUTH ERROR:", err);
 
@@ -200,9 +196,7 @@ export const optionalAuth = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id)
-      .select("-password")
-      .lean();
+    const user = await User.findById(decoded.id).select("-password").lean();
 
     // 🚫 Don't attach banned/deactivated users on public routes
     if (user && !user.isBanned && !user.deactivatedAt) {
@@ -214,7 +208,6 @@ export const optionalAuth = async (req, res, next) => {
     }
 
     next();
-
   } catch {
     next(); // 🔥 ignore errors (public route)
   }

@@ -12,16 +12,12 @@ import { isValidId } from "../utils/validateId.js";
 // =============================
 export const getAllEscrows = async (req, res) => {
   try {
-    const escrows = await Escrow.find()
-      .sort({ createdAt: -1 })
-      .populate("car buyer seller payment")
-      .lean();
+    const escrows = await Escrow.find().sort({ createdAt: -1 }).populate("car buyer seller payment").lean();
 
     res.json({
       success: true,
       escrows,
     });
-
   } catch (err) {
     console.error("❌ GET ESCROWS ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
@@ -46,7 +42,6 @@ export const getUserEscrows = async (req, res) => {
       success: true,
       escrows,
     });
-
   } catch (err) {
     console.error("❌ USER ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
@@ -59,8 +54,7 @@ export const getUserEscrows = async (req, res) => {
 export const getEscrowById = async (req, res) => {
   try {
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
-    const escrow = await Escrow.findById(req.params.id)
-      .populate("car buyer seller payment");
+    const escrow = await Escrow.findById(req.params.id).populate("car buyer seller payment");
 
     if (!escrow) {
       return res.status(404).json({
@@ -71,11 +65,7 @@ export const getEscrowById = async (req, res) => {
 
     // 🔒 ACCESS CONTROL
     const userId = req.user.id;
-    if (
-      escrow.buyer.toString() !== userId &&
-      escrow.seller.toString() !== userId &&
-      req.user.role !== "admin"
-    ) {
+    if (escrow.buyer.toString() !== userId && escrow.seller.toString() !== userId && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized",
@@ -86,7 +76,6 @@ export const getEscrowById = async (req, res) => {
       success: true,
       escrow,
     });
-
   } catch (err) {
     console.error("❌ GET ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
@@ -117,12 +106,17 @@ export const confirmDelivery = async (req, res) => {
       const UserModel = (await import("../models/User.js")).default;
       const seller = await UserModel.findById(escrow.seller).select("phone notifications");
       if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(seller.phone, `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+        sendSMS(
+          seller.phone,
+          `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`,
+        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     } catch (_) {}
 
     logActionFromReq(req, "escrow.delivery_confirmed", {
-      target: escrow._id, targetModel: "Escrow", resourceId: req.params.id,
+      target: escrow._id,
+      targetModel: "Escrow",
+      resourceId: req.params.id,
       details: { carId: escrow.car, amount: escrow.amount },
       severity: "info",
     });
@@ -186,23 +180,29 @@ export const notifyEscrowReleased = async (escrow) => {
     if (populated?.seller?._id) {
       const seller = await UserModel.findById(populated.seller._id).select("phone notifications");
       if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(seller.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+        sendSMS(
+          seller.phone,
+          `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`,
+        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
     // 📱 SMS to buyer (if phone known)
     if (populated?.buyer) {
       const buyer = await UserModel.findById(populated.buyer).select("phone notifications");
       if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(buyer.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+        sendSMS(
+          buyer.phone,
+          `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`,
+        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
     getIO()?.to(`user_${populated?.seller?._id}`).emit("escrowReleased", {
       escrowId: populated?._id,
-      amount:   populated?.amount,
+      amount: populated?.amount,
     });
     getIO()?.to(`user_${populated?.buyer}`).emit("escrowReleased", {
       escrowId: populated?._id,
-      amount:   populated?.amount,
+      amount: populated?.amount,
     });
   } catch (e) {
     console.error("notifyEscrowReleased error:", e.message);
@@ -225,12 +225,15 @@ export const notifyEscrowRefunded = async (escrow) => {
     if (populated?.buyer?._id) {
       const buyer = await UserModel.findById(populated.buyer._id).select("phone notifications");
       if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(buyer.phone, `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+        sendSMS(
+          buyer.phone,
+          `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`,
+        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
       }
     }
     getIO()?.to(`user_${populated?.buyer?._id}`).emit("escrowRefunded", {
       escrowId: populated?._id,
-      amount:   populated?.amount,
+      amount: populated?.amount,
     });
   } catch (e) {
     console.error("notifyEscrowRefunded error:", e.message);
@@ -247,9 +250,7 @@ export const releaseEscrow = async (req, res) => {
     session.startTransaction();
 
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
-    const escrow = await Escrow.findById(req.params.id)
-      .populate("car seller payment")
-      .session(session);
+    const escrow = await Escrow.findById(req.params.id).populate("car seller payment").session(session);
 
     if (!escrow) {
       throw new Error("Escrow not found");
@@ -318,9 +319,7 @@ export const releaseEscrow = async (req, res) => {
     }
 
     // 📧 Email notification (fire-and-forget)
-    notifyEscrowReleased(escrow._id).catch(e =>
-      console.warn("⚠️ Escrow released email failed:", e.message)
-    );
+    notifyEscrowReleased(escrow._id).catch((e) => console.warn("⚠️ Escrow released email failed:", e.message));
 
     // =============================
     // 🔥 FUTURE PAYOUT (MPESA B2C)
@@ -328,7 +327,8 @@ export const releaseEscrow = async (req, res) => {
     console.log("💸 Pay seller:", sellerAmount);
 
     logActionFromReq(req, "escrow.released", {
-      target: escrow._id, targetModel: "Escrow",
+      target: escrow._id,
+      targetModel: "Escrow",
       resourceId: req.params.id,
       details: { carId: escrow.car?._id, sellerAmount, commission },
       severity: "info",
@@ -339,7 +339,6 @@ export const releaseEscrow = async (req, res) => {
       message: "Escrow released",
       data: { sellerAmount, commission },
     });
-
   } catch (err) {
     await session.abortTransaction();
     console.error("❌ RELEASE ERROR:", err);
@@ -348,7 +347,6 @@ export const releaseEscrow = async (req, res) => {
       success: false,
       message: err.message || "Release failed",
     });
-
   } finally {
     session.endSession();
   }
@@ -363,9 +361,7 @@ export const refundEscrow = async (req, res) => {
   try {
     session.startTransaction();
 
-    const escrow = await Escrow.findById(req.params.id)
-      .populate("payment car")
-      .session(session);
+    const escrow = await Escrow.findById(req.params.id).populate("payment car").session(session);
 
     if (!escrow) {
       throw new Error("Escrow not found");
@@ -420,12 +416,11 @@ export const refundEscrow = async (req, res) => {
     }
 
     // 📧 Email notification (fire-and-forget)
-    notifyEscrowRefunded(escrow._id).catch(e =>
-      console.warn("⚠️ Escrow refunded email failed:", e.message)
-    );
+    notifyEscrowRefunded(escrow._id).catch((e) => console.warn("⚠️ Escrow refunded email failed:", e.message));
 
     logActionFromReq(req, "escrow.refunded", {
-      target: escrow._id, targetModel: "Escrow",
+      target: escrow._id,
+      targetModel: "Escrow",
       resourceId: req.params.id,
       details: { carId: escrow.car, amount: escrow.amount },
       severity: "warning",
@@ -435,9 +430,7 @@ export const refundEscrow = async (req, res) => {
       success: true,
       message: "Escrow refunded",
     });
-
   } catch (err) {
-
     await session.abortTransaction();
     console.error("❌ REFUND ERROR:", err);
 
@@ -445,7 +438,6 @@ export const refundEscrow = async (req, res) => {
       success: false,
       message: err.message || "Refund failed",
     });
-
   } finally {
     session.endSession();
   }

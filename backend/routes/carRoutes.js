@@ -1,17 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
-import {
-  protect,
-  dealerOnly,
-  adminOnly,
-  optionalAuth,
-} from "../middleware/auth.js";
+import { protect, dealerOnly, adminOnly, optionalAuth } from "../middleware/auth.js";
 
 import asyncHandler from "../middleware/asyncHandler.js";
-import {
-  validateObjectId,
-  validateCar,
-} from "../middleware/validate.js";
+import { validateObjectId, validateCar } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
@@ -46,9 +38,7 @@ router.get(
   dealerOnly,
   asyncHandler(async (req, res) => {
     const cars = await Car.find({ dealer: req.user.id })
-      .select(
-        "title price images views clicks bidsCount createdAt status auctionStatus"
-      )
+      .select("title price images views clicks bidsCount createdAt status auctionStatus")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -56,7 +46,7 @@ router.get(
       success: true,
       data: cars,
     });
-  })
+  }),
 );
 
 // =============================
@@ -87,17 +77,13 @@ router.get(
       success: true,
       data: stats || {},
     });
-  })
+  }),
 );
 
 // =============================
 // 🧪 DEMO CARS (demo dealer only)
 // =============================
-router.get(
-  "/demo/all",
-  protect,
-  asyncHandler(getDemoCars)
-);
+router.get("/demo/all", protect, asyncHandler(getDemoCars));
 
 // =============================
 // 🚗 PUBLIC ROUTES
@@ -111,8 +97,8 @@ router.get(
   "/:id",
   optionalAuth,
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, req => `cache:GET:/api/cars/${req.params.id}`),
-  asyncHandler(getCar)
+  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}`),
+  asyncHandler(getCar),
 );
 
 // =============================
@@ -124,13 +110,10 @@ router.post(
   "/:id/click",
   validateObjectId,
   asyncHandler(async (req, res) => {
-    await Car.updateOne(
-      { _id: req.params.id },
-      { $inc: { clicks: 1 } }
-    );
+    await Car.updateOne({ _id: req.params.id }, { $inc: { clicks: 1 } });
 
     res.json({ success: true });
-  })
+  }),
 );
 
 // ❤️ TRACK FAVORITE (NEW 🔥)
@@ -138,13 +121,10 @@ router.post(
   "/:id/favorite",
   validateObjectId,
   asyncHandler(async (req, res) => {
-    await Car.updateOne(
-      { _id: req.params.id },
-      { $inc: { favoritesCount: 1 } }
-    );
+    await Car.updateOne({ _id: req.params.id }, { $inc: { favoritesCount: 1 } });
 
     res.json({ success: true });
-  })
+  }),
 );
 
 // =============================
@@ -160,36 +140,17 @@ router.post(
   upload.array("images", 10),
   handleUploadError,
   validateCar,
-  asyncHandler(createCar)
+  asyncHandler(createCar),
 );
 
 // ✏️ UPDATE CAR
-router.put(
-  "/:id",
-  protect,
-  dealerOnly,
-  validateObjectId,
-  validateCar,
-  asyncHandler(updateCar)
-);
+router.put("/:id", protect, dealerOnly, validateObjectId, validateCar, asyncHandler(updateCar));
 
 // ❌ DELETE CAR
-router.delete(
-  "/:id",
-  protect,
-  dealerOnly,
-  validateObjectId,
-  asyncHandler(deleteCar)
-);
+router.delete("/:id", protect, dealerOnly, validateObjectId, asyncHandler(deleteCar));
 
 // 🖼 DELETE IMAGE FROM CAR
-router.delete(
-  "/:id/images/:imageIndex",
-  protect,
-  dealerOnly,
-  validateObjectId,
-  asyncHandler(deleteCarImage)
-);
+router.delete("/:id/images/:imageIndex", protect, dealerOnly, validateObjectId, asyncHandler(deleteCarImage));
 
 // 📤 ADD IMAGES TO CAR
 router.post(
@@ -199,18 +160,13 @@ router.post(
   uploadLimiter,
   upload.array("images", 10),
   handleUploadError,
-  asyncHandler(addCarImages)
+  asyncHandler(addCarImages),
 );
 
 // =============================
 // ⚡ BIDDING SYSTEM
 // =============================
-router.post(
-  "/:id/bid",
-  protect,
-  validateObjectId,
-  asyncHandler(placeBid)
-);
+router.post("/:id/bid", protect, validateObjectId, asyncHandler(placeBid));
 
 // =============================
 // 📈 PRICE HISTORY
@@ -218,15 +174,13 @@ router.post(
 router.get(
   "/:id/price-history",
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, req => `cache:GET:/api/cars/${req.params.id}/price-history`),
+  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/price-history`),
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id)
-      .select("price priceHistory")
-      .lean();
+    const car = await Car.findById(req.params.id).select("price priceHistory").lean();
 
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const history = (car.priceHistory || []).map(h => ({
+    const history = (car.priceHistory || []).map((h) => ({
       price: h.price,
       date: h.date,
     }));
@@ -235,7 +189,7 @@ router.get(
     history.push({ price: car.price, date: new Date() });
 
     res.json({ success: true, history });
-  })
+  }),
 );
 
 // =============================
@@ -244,7 +198,7 @@ router.get(
 router.get(
   "/:id/insights",
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, req => `cache:GET:/api/cars/${req.params.id}/insights`),
+  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/insights`),
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id).lean();
 
@@ -262,9 +216,7 @@ router.get(
       .select("price")
       .limit(20);
 
-    const avg =
-      similar.reduce((sum, c) => sum + c.price, 0) /
-      (similar.length || 1);
+    const avg = similar.reduce((sum, c) => sum + c.price, 0) / (similar.length || 1);
 
     let rating = "fair";
 
@@ -279,7 +231,7 @@ router.get(
         dealRating: rating,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -287,12 +239,10 @@ router.get(
 // =============================
 router.get(
   "/:id/valuation",
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, req => `cache:GET:/api/cars/${req.params.id}/valuation`),
+  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/valuation`),
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id).lean();
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
-
-    
 
     const [fromPlatform, fromMarketData] = await Promise.all([
       Car.find({
@@ -316,10 +266,10 @@ router.get(
         .lean(),
     ]);
 
-    const allPrices = fromPlatform.map(c => c.price).filter(Boolean);
+    const allPrices = fromPlatform.map((c) => c.price).filter(Boolean);
     const prices = [...allPrices];
     if (fromMarketData.length > 0) {
-      fromMarketData.forEach(m => {
+      fromMarketData.forEach((m) => {
         if (m.lowPrice) prices.push(m.lowPrice);
         if (m.avgPrice) prices.push(m.avgPrice);
         if (m.highPrice) prices.push(m.highPrice);
@@ -328,14 +278,16 @@ router.get(
 
     const low = prices.length > 0 ? Math.min(...prices) : car.price * 0.85;
     const high = prices.length > 0 ? Math.max(...prices) : car.price * 1.15;
-    const avg = prices.length > 0
-      ? prices.reduce((s, p) => s + p, 0) / prices.length
-      : car.price;
+    const avg = prices.length > 0 ? prices.reduce((s, p) => s + p, 0) / prices.length : car.price;
 
-    const dealRating = car.price < avg * 0.85 ? "great"
-      : car.price < avg * 0.97 ? "good"
-      : car.price > avg * 1.15 ? "overpriced"
-      : "fair";
+    const dealRating =
+      car.price < avg * 0.85
+        ? "great"
+        : car.price < avg * 0.97
+          ? "good"
+          : car.price > avg * 1.15
+            ? "overpriced"
+            : "fair";
 
     const percentile = avg > 0 ? Math.round(((high - car.price) / (high - low)) * 100) : 50;
 
@@ -353,7 +305,7 @@ router.get(
         historicalRange: { low, avg, high },
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -377,15 +329,10 @@ router.get(
       success: true,
       data: {
         fraudScore: score,
-        riskLevel:
-          score > 60
-            ? "high"
-            : score > 30
-            ? "medium"
-            : "low",
+        riskLevel: score > 60 ? "high" : score > 30 ? "medium" : "low",
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -409,19 +356,12 @@ router.post(
     }
 
     // 🚫 Listing lock check — block if dealer has outstanding commission
-    const dealer = await User.findById(car.dealer).select(
-      "commissionBalance listingsLocked"
-    );
+    const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
 
-    if (
-      dealer &&
-      dealer.listingsLocked &&
-      dealer.commissionBalance > 0
-    ) {
+    if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
       return res.status(403).json({
         success: false,
-        message:
-          "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
+        message: "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
       });
     }
 
@@ -431,7 +371,7 @@ router.post(
     await car.save();
 
     res.json({ success: true, data: car });
-  })
+  }),
 );
 
 // ⛔ END AUCTION
@@ -454,7 +394,7 @@ router.post(
     await car.save();
 
     res.json({ success: true, data: car });
-  })
+  }),
 );
 
 // =============================
@@ -471,14 +411,14 @@ router.post(
       .populate("dealer", "name dealerRating")
       .lean();
     res.json({ success: true, cars });
-  })
+  }),
 );
 
 // =============================
 // 🧹 CACHE INVALIDATION (auto-clear on mutations)
 // =============================
 router.use((req, res, next) => {
-  if (["POST","PUT","PATCH","DELETE"].includes(req.method)) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
     res.on("finish", () => {
       if (res.statusCode < 400) {
         cacheDelPattern("cache:GET:/api/cars*").catch((e) => console.warn("⚠️ Cache clear failed:", e.message));
@@ -507,7 +447,7 @@ router.patch(
     await car.save();
 
     res.json({ success: true, data: car });
-  })
+  }),
 );
 
 export default router;

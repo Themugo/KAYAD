@@ -78,9 +78,7 @@ describe("favoriteController", () => {
 
   describe("getFavorites", () => {
     it("returns paginated favorites", async () => {
-      mockLean.mockResolvedValue([
-        { _id: "fav1", car: { title: "Car1", price: 100000 }, notifyOnPriceDrop: true },
-      ]);
+      mockLean.mockResolvedValue([{ _id: "fav1", car: { title: "Car1", price: 100000 }, notifyOnPriceDrop: true }]);
       mockFavoriteCountDocuments.mockResolvedValue(1);
 
       const res = mockRes();
@@ -107,7 +105,13 @@ describe("favoriteController", () => {
 
   describe("addFavorite", () => {
     it("adds favorite and increments count", async () => {
-      mockLean.mockResolvedValue({ _id: "car1", title: "Car", price: 100000, brand: "Toyota", images: [{ url: "img.jpg" }] });
+      mockLean.mockResolvedValue({
+        _id: "car1",
+        title: "Car",
+        price: 100000,
+        brand: "Toyota",
+        images: [{ url: "img.jpg" }],
+      });
       mockFavoriteFindOneAndUpdate.mockResolvedValue({ _id: "fav1" });
 
       const res = mockRes();
@@ -115,7 +119,12 @@ describe("favoriteController", () => {
 
       expect(mockCarFindById).toHaveBeenCalledWith("car1");
       expect(mockCarFindByIdAndUpdate).toHaveBeenCalledWith("car1", { $inc: { favoritesCount: 1 } });
-      expect(res.json).toHaveBeenCalledWith({ success: true, favorited: true, notifyOnPriceDrop: false, message: expect.any(String) });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        favorited: true,
+        notifyOnPriceDrop: false,
+        message: expect.any(String),
+      });
     });
 
     it("returns 404 if car not found", async () => {
@@ -187,7 +196,13 @@ describe("favoriteController", () => {
     });
 
     it("adds if not favorited", async () => {
-      mockLean.mockResolvedValue({ _id: "car1", title: "Car", price: 100000, brand: "Toyota", images: [{ url: "img.jpg" }] });
+      mockLean.mockResolvedValue({
+        _id: "car1",
+        title: "Car",
+        price: 100000,
+        brand: "Toyota",
+        images: [{ url: "img.jpg" }],
+      });
       mockFavoriteFindOne.mockResolvedValue(null);
       mockFavoriteCreate.mockResolvedValue({ _id: "fav1" });
 
@@ -196,7 +211,12 @@ describe("favoriteController", () => {
 
       expect(mockFavoriteCreate).toHaveBeenCalled();
       expect(mockCarFindByIdAndUpdate).toHaveBeenCalledWith("car1", { $inc: { favoritesCount: 1 } });
-      expect(res.json).toHaveBeenCalledWith({ success: true, favorited: true, notifyOnPriceDrop: false, message: expect.any(String) });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        favorited: true,
+        notifyOnPriceDrop: false,
+        message: expect.any(String),
+      });
     });
 
     it("returns 404 if car not found", async () => {
@@ -245,10 +265,7 @@ describe("favoriteController", () => {
     it("returns 500 on error", async () => {
       mockFavoriteFindOne.mockRejectedValue(new Error("fail"));
       const res = mockRes();
-      await ctrl.updateFavoritePriceAlert(
-        mockReq({ params: { carId: "car1" } }),
-        res,
-      );
+      await ctrl.updateFavoritePriceAlert(mockReq({ params: { carId: "car1" } }), res);
       expect(res.status).toHaveBeenCalledWith(500);
     });
   });

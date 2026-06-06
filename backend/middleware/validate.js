@@ -10,24 +10,60 @@ import {
 } from "../validation/auth.schema.js";
 import { createCarSchema, updateCarSchema } from "../validation/car.schema.js";
 import { initiatePaymentSchema, paymentCallbackSchema } from "../validation/payment.schema.js";
-import { createEscrowSchema, escrowActionSchema, releaseEscrowSchema, escrowVaultWebhookSchema, releaseOtpSchema } from "../validation/escrow.schema.js";
+import {
+  createEscrowSchema,
+  escrowActionSchema,
+  releaseEscrowSchema,
+  escrowVaultWebhookSchema,
+  releaseOtpSchema,
+} from "../validation/escrow.schema.js";
 import { createChatSchema, sendMessageSchema } from "../validation/chat.schema.js";
-import { orderInspectionSchema, confirmPaymentSchema, assignInspectorSchema, submitInspectionSchema } from "../validation/inspection.schema.js";
-import { queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema } from "../validation/ntsa.schema.js";
+import {
+  orderInspectionSchema,
+  confirmPaymentSchema,
+  assignInspectorSchema,
+  submitInspectionSchema,
+} from "../validation/inspection.schema.js";
+import {
+  queueNtsaVerificationSchema,
+  processNtsaVerificationSchema,
+  addNtsaDocumentSchema,
+} from "../validation/ntsa.schema.js";
 import { createSavedSearchSchema, updateSavedSearchSchema } from "../validation/savedSearch.schema.js";
 import {
-  dealerApprovalSchema, platformConfigSchema, createStaffSchema,
-  updateStaffSchema, assignPackageSchema, moderateCarSchema, verifyCarSchema,
-  verifyDealerSchema, systemKillSwitchSchema, systemRecoverSchema, creditReferralSchema,
-  createMarketDataSchema, updateMarketDataSchema, bulkMarketDataSchema,
-  updateSellerSettingsSchema, createAdSchema, updateAdSchema, reseedSchema,
+  dealerApprovalSchema,
+  platformConfigSchema,
+  createStaffSchema,
+  updateStaffSchema,
+  assignPackageSchema,
+  moderateCarSchema,
+  verifyCarSchema,
+  verifyDealerSchema,
+  systemKillSwitchSchema,
+  systemRecoverSchema,
+  creditReferralSchema,
+  createMarketDataSchema,
+  updateMarketDataSchema,
+  bulkMarketDataSchema,
+  updateSellerSettingsSchema,
+  createAdSchema,
+  updateAdSchema,
+  reseedSchema,
 } from "../validation/admin.schema.js";
 import {
-  teamInviteSchema, updateTeamMemberSchema, markSoldSchema, acceptBidSchema,
-  bulkStatusSchema, auctionStartSchema, auctionExtendSchema, settlementSchema,
+  teamInviteSchema,
+  updateTeamMemberSchema,
+  markSoldSchema,
+  acceptBidSchema,
+  bulkStatusSchema,
+  auctionStartSchema,
+  auctionExtendSchema,
+  settlementSchema,
 } from "../validation/dealer.schema.js";
 import {
-  submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema,
+  submitApplicationSchema,
+  approveApplicationSchema,
+  rejectApplicationSchema,
 } from "../validation/inspectorApplication.schema.js";
 import { createReviewSchema } from "../validation/platform.schema.js";
 
@@ -77,9 +113,7 @@ export const validateParams = (schema) => (req, res, next) => {
 const OBJECT_ID_KEYS = ["id", "chatId", "carId", "bidId", "userId", "reviewId"];
 
 export const validateObjectId = (req, res, next) => {
-  const id =
-    req.params.id ||
-    OBJECT_ID_KEYS.map((k) => req.params[k]).find(Boolean);
+  const id = req.params.id || OBJECT_ID_KEYS.map((k) => req.params[k]).find(Boolean);
   if (!id || !/^[0-9a-f]{24}$/i.test(id)) {
     return error(res, "Invalid ID format", 400);
   }
@@ -144,34 +178,71 @@ export const validateCar = (req, res, next) => {
 // ─── Re-export all schemas for direct use in routes ────────────
 export {
   // Auth
-  registerSchema, loginSchema, changePasswordSchema,
-  forgotPasswordSchema, resetPasswordSchema, updateProfileSchema,
+  registerSchema,
+  loginSchema,
+  changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  updateProfileSchema,
   // Cars
-  createCarSchema, updateCarSchema,
+  createCarSchema,
+  updateCarSchema,
   // Payments
-  initiatePaymentSchema, paymentCallbackSchema,
+  initiatePaymentSchema,
+  paymentCallbackSchema,
   // Escrow
-  createEscrowSchema, escrowActionSchema, releaseEscrowSchema,
-  escrowVaultWebhookSchema, releaseOtpSchema,
+  createEscrowSchema,
+  escrowActionSchema,
+  releaseEscrowSchema,
+  escrowVaultWebhookSchema,
+  releaseOtpSchema,
   // Chat
-  createChatSchema, sendMessageSchema,
+  createChatSchema,
+  sendMessageSchema,
   // Inspections
-  orderInspectionSchema, confirmPaymentSchema, assignInspectorSchema, submitInspectionSchema,
+  orderInspectionSchema,
+  confirmPaymentSchema,
+  assignInspectorSchema,
+  submitInspectionSchema,
   // NTSA
-  queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema,
+  queueNtsaVerificationSchema,
+  processNtsaVerificationSchema,
+  addNtsaDocumentSchema,
   // Saved Searches
-  createSavedSearchSchema, updateSavedSearchSchema,
+  createSavedSearchSchema,
+  updateSavedSearchSchema,
   // Admin
-  dealerApprovalSchema, platformConfigSchema, createStaffSchema,
-  updateStaffSchema, assignPackageSchema, moderateCarSchema, verifyCarSchema,
-  verifyDealerSchema, systemKillSwitchSchema, systemRecoverSchema, creditReferralSchema,
-  createMarketDataSchema, updateMarketDataSchema, bulkMarketDataSchema,
-  updateSellerSettingsSchema, createAdSchema, updateAdSchema, reseedSchema,
+  dealerApprovalSchema,
+  platformConfigSchema,
+  createStaffSchema,
+  updateStaffSchema,
+  assignPackageSchema,
+  moderateCarSchema,
+  verifyCarSchema,
+  verifyDealerSchema,
+  systemKillSwitchSchema,
+  systemRecoverSchema,
+  creditReferralSchema,
+  createMarketDataSchema,
+  updateMarketDataSchema,
+  bulkMarketDataSchema,
+  updateSellerSettingsSchema,
+  createAdSchema,
+  updateAdSchema,
+  reseedSchema,
   // Dealer
-  teamInviteSchema, updateTeamMemberSchema, markSoldSchema, acceptBidSchema,
-  bulkStatusSchema, auctionStartSchema, auctionExtendSchema, settlementSchema,
+  teamInviteSchema,
+  updateTeamMemberSchema,
+  markSoldSchema,
+  acceptBidSchema,
+  bulkStatusSchema,
+  auctionStartSchema,
+  auctionExtendSchema,
+  settlementSchema,
   // Inspector Applications
-  submitApplicationSchema, approveApplicationSchema, rejectApplicationSchema,
+  submitApplicationSchema,
+  approveApplicationSchema,
+  rejectApplicationSchema,
   // Reviews
   createReviewSchema,
 };

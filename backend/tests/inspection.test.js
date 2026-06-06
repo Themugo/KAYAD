@@ -122,7 +122,7 @@ describe("Inspection Routes", () => {
         .expect(200);
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.inspectors)).toBe(true);
-      expect(res.body.inspectors.some(i => i._id === inspectorId)).toBe(true);
+      expect(res.body.inspectors.some((i) => i._id === inspectorId)).toBe(true);
     });
   });
 
@@ -276,26 +276,17 @@ describe("Inspection Routes", () => {
 
     it("returns 404 for non-existent id", async () => {
       const fakeId = new mongoose.Types.ObjectId().toString();
-      await request(app)
-        .get(`/api/inspections/${fakeId}`)
-        .set("Authorization", `Bearer ${adminToken}`)
-        .expect(404);
+      await request(app).get(`/api/inspections/${fakeId}`).set("Authorization", `Bearer ${adminToken}`).expect(404);
     });
   });
 
   describe("GET /api/inspections/ (admin list)", () => {
     it("requires admin", async () => {
-      await request(app)
-        .get("/api/inspections/")
-        .set("Authorization", `Bearer ${buyerToken}`)
-        .expect(403);
+      await request(app).get("/api/inspections/").set("Authorization", `Bearer ${buyerToken}`).expect(403);
     });
 
     it("lists all orders for admin", async () => {
-      const res = await request(app)
-        .get("/api/inspections/")
-        .set("Authorization", `Bearer ${adminToken}`)
-        .expect(200);
+      const res = await request(app).get("/api/inspections/").set("Authorization", `Bearer ${adminToken}`).expect(200);
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.orders)).toBe(true);
     });
@@ -306,7 +297,7 @@ describe("Inspection Routes", () => {
         .set("Authorization", `Bearer ${adminToken}`)
         .expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.orders.every(o => o.status === "completed")).toBe(true);
+      expect(res.body.orders.every((o) => o.status === "completed")).toBe(true);
     });
   });
 

@@ -34,15 +34,7 @@ const paymentSchema = new mongoose.Schema(
     // =============================
     type: {
       type: String,
-      enum: [
-        "bid",
-        "auction_win",
-        "buy",
-        "listing",
-        "subscription",
-        "escrow",
-        "inspection",
-      ],
+      enum: ["bid", "auction_win", "buy", "listing", "subscription", "escrow", "inspection"],
       required: true,
       index: true,
     },
@@ -149,7 +141,7 @@ const paymentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -216,9 +208,7 @@ paymentSchema.statics.findByCheckoutId = function (id) {
 
 // get user payments
 paymentSchema.statics.getUserPayments = function (userId) {
-  return this.find({ user: userId })
-    .sort({ createdAt: -1 })
-    .populate("referenceId");
+  return this.find({ user: userId }).sort({ createdAt: -1 }).populate("referenceId");
 };
 
 // 🔥 get pending (for retries / cron jobs)
@@ -243,8 +233,6 @@ paymentSchema.pre("save", function (next) {
 // =============================
 // 🚀 EXPORT
 // =============================
-const Payment =
-  mongoose.models.Payment ||
-  mongoose.model("Payment", paymentSchema);
+const Payment = mongoose.models.Payment || mongoose.model("Payment", paymentSchema);
 
 export default Payment;

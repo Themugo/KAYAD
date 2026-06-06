@@ -80,15 +80,9 @@ export const runAutoBidEngine = async (roomId) => {
     // ⚔️ COMPETITION LOGIC
     // =============================
     if (second) {
-      nextBid = Math.min(
-        top.maxBid,
-        second.maxBid + BID_INCREMENT
-      );
+      nextBid = Math.min(top.maxBid, second.maxBid + BID_INCREMENT);
     } else {
-      nextBid = Math.min(
-        top.maxBid,
-        currentBid + BID_INCREMENT
-      );
+      nextBid = Math.min(top.maxBid, currentBid + BID_INCREMENT);
     }
 
     if (nextBid <= currentBid) return;
@@ -108,7 +102,7 @@ export const runAutoBidEngine = async (roomId) => {
         bid: nextBid,
         time: now,
         auto: true,
-      })
+      }),
     );
 
     // =============================
@@ -126,7 +120,6 @@ export const runAutoBidEngine = async (roomId) => {
     // =============================
     // keeps bidding until stable winner
     return await runAutoBidEngine(roomId);
-
   } catch (err) {
     console.error("❌ AUTO BID ENGINE ERROR:", err);
   }

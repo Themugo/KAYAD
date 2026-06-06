@@ -45,20 +45,14 @@ describe("Favorites Routes", () => {
   });
 
   it("GET /api/favorites — returns empty list initially", async () => {
-    const res = await request(app)
-      .get("/api/favorites")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/favorites").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.favorites ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);
   });
 
   it("POST /api/favorites/:carId — adds a favorite", async () => {
-    const res = await request(app)
-      .post(`/api/favorites/${carId}`)
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).post(`/api/favorites/${carId}`).set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -71,10 +65,7 @@ describe("Favorites Routes", () => {
   });
 
   it("POST /api/favorites/:carId — re-adds after toggle", async () => {
-    const res = await request(app)
-      .post(`/api/favorites/${carId}`)
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).post(`/api/favorites/${carId}`).set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -87,18 +78,13 @@ describe("Favorites Routes", () => {
   });
 
   it("GET /api/favorites — returns empty after removal", async () => {
-    const res = await request(app)
-      .get("/api/favorites")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/favorites").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
   it("PUT /api/favorites/:carId/price-alert — sets price alert", async () => {
     // First re-add the favorite since we just removed it
-    await request(app)
-      .post(`/api/favorites/${carId}`)
-      .set("Authorization", `Bearer ${token}`);
+    await request(app).post(`/api/favorites/${carId}`).set("Authorization", `Bearer ${token}`);
     const res = await request(app)
       .put(`/api/favorites/${carId}/price-alert`)
       .set("Authorization", `Bearer ${token}`)

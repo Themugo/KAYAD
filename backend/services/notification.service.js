@@ -5,29 +5,36 @@ import { sendSMS } from "../utils/sms.js";
 import { withRetry } from "../utils/retry.js";
 import { getIO } from "../utils/io.js";
 
-const VALID_TYPES = new Set(["bid", "auction", "payment", "escrow", "chat", "system", "info", "referral", "price_alert"]);
+const VALID_TYPES = new Set([
+  "bid",
+  "auction",
+  "payment",
+  "escrow",
+  "chat",
+  "system",
+  "info",
+  "referral",
+  "price_alert",
+]);
 
-export const sendNotification = async ({
-  userId,
-  title,
-  message,
-  type = "info",
-  email,
-  phone,
-}) => {
+export const sendNotification = async ({ userId, title, message, type = "info", email, phone }) => {
   try {
     const normalizedType = VALID_TYPES.has(type) ? type : "info";
     const hasUserTarget = mongoose.isValidObjectId(userId);
     let notification = null;
 
     if (hasUserTarget) {
-      notification = await withRetry(() => Notification.create({
-        user: userId,
-        title,
-        message,
-        type: normalizedType,
-        read: false,
-      }), { retries: 1, baseDelayMs: 200 });
+      notification = await withRetry(
+        () =>
+          Notification.create({
+            user: userId,
+            title,
+            message,
+            type: normalizedType,
+            read: false,
+          }),
+        { retries: 1, baseDelayMs: 200 },
+      );
     } else if (!email && !phone) {
       return null;
     }
@@ -44,7 +51,9 @@ export const sendNotification = async ({
     }
 
     if (email) {
-      sendEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) => console.warn("⚠️ Notification email failed:", e.message));
+      sendEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) =>
+        console.warn("⚠️ Notification email failed:", e.message),
+      );
     }
 
     if (phone) {

@@ -5,16 +5,12 @@ import { getIO } from "../utils/io.js";
 // GET /api/notifications
 export const getNotifications = async (req, res) => {
   try {
-    const page  = Math.max(Number(req.query.page)  || 1, 1);
+    const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     const [notifications, total, unread] = await Promise.all([
-      Notification.find({ user: req.user.id })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Notification.find({ user: req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Notification.countDocuments({ user: req.user.id }),
       Notification.countDocuments({ user: req.user.id, read: false }),
     ]);
@@ -34,10 +30,7 @@ export const getNotifications = async (req, res) => {
 // POST /api/notifications/:id/read
 export const markAsRead = async (req, res) => {
   try {
-    await Notification.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      { read: true, readAt: new Date() }
-    );
+    await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { read: true, readAt: new Date() });
     res.json({ success: true, message: "Marked as read" });
   } catch (err) {
     console.error("❌ markAsRead error:", err.message);
@@ -48,10 +41,7 @@ export const markAsRead = async (req, res) => {
 // POST /api/notifications/read-all
 export const markAllAsRead = async (req, res) => {
   try {
-    await Notification.updateMany(
-      { user: req.user.id, read: false },
-      { read: true, readAt: new Date() }
-    );
+    await Notification.updateMany({ user: req.user.id, read: false }, { read: true, readAt: new Date() });
     res.json({ success: true, message: "All notifications marked as read" });
   } catch (err) {
     console.error("❌ markAllAsRead error:", err.message);

@@ -1,9 +1,7 @@
 import Bid from "../models/Bid.js";
 
 export const detectAbuse = async (userId, auctionId) => {
-  const recentBids = await Bid.find({ user: userId, auction: auctionId })
-    .sort({ createdAt: -1 })
-    .limit(20);
+  const recentBids = await Bid.find({ user: userId, auction: auctionId }).sort({ createdAt: -1 }).limit(20);
 
   if (recentBids.length < 5) {
     return { flagged: false };
@@ -15,9 +13,7 @@ export const detectAbuse = async (userId, auctionId) => {
   // 🔹 1. Rapid bidding detection
   let rapidCount = 0;
   for (let i = 1; i < recentBids.length; i++) {
-    const diff =
-      new Date(recentBids[i - 1].createdAt) -
-      new Date(recentBids[i].createdAt);
+    const diff = new Date(recentBids[i - 1].createdAt) - new Date(recentBids[i].createdAt);
 
     if (diff < 2000) rapidCount++;
   }
@@ -51,9 +47,7 @@ export const detectAbuse = async (userId, auctionId) => {
 
   // 🔹 4. Self-outbidding pattern
   const selfOutbids = recentBids.filter(
-    (b, i, arr) =>
-      i > 0 &&
-      b.user.toString() === arr[i - 1].user.toString()
+    (b, i, arr) => i > 0 && b.user.toString() === arr[i - 1].user.toString(),
   ).length;
 
   if (selfOutbids > 5) {

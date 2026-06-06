@@ -28,7 +28,7 @@ const platformRevenueSchema = new mongoose.Schema(
         "boost",
         "subscription",
         "bid_fee",
-        "commission",   // 🔥 from escrow release
+        "commission", // 🔥 from escrow release
         "penalty",
         "other",
       ],
@@ -88,7 +88,7 @@ const platformRevenueSchema = new mongoose.Schema(
       default: {},
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // =============================
@@ -119,9 +119,7 @@ platformRevenueSchema.index({ escrowId: 1 });
 
 // ✅ TOTAL REVENUE
 platformRevenueSchema.statics.getTotalRevenue = function () {
-  return this.aggregate([
-    { $group: { _id: null, total: { $sum: "$amount" } } },
-  ]);
+  return this.aggregate([{ $group: { _id: null, total: { $sum: "$amount" } } }]);
 };
 
 // ✅ DAILY REVENUE
@@ -165,8 +163,6 @@ platformRevenueSchema.statics.record = function (data) {
 // =============================
 // 🚀 EXPORT
 // =============================
-const PlatformRevenue =
-  mongoose.models.PlatformRevenue ||
-  mongoose.model("PlatformRevenue", platformRevenueSchema);
+const PlatformRevenue = mongoose.models.PlatformRevenue || mongoose.model("PlatformRevenue", platformRevenueSchema);
 
 export default PlatformRevenue;

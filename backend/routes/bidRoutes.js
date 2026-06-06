@@ -3,17 +3,9 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateBid } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
-import {
-  mpesaIpWhitelist,
-  validateMpesaCallback,
-} from "../middleware/mpesaSecurity.js";
+import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
 
-import {
-  placeBid,
-  getAuctionBids,
-  confirmBidPayment,
-  endAuction,
-} from "../controllers/bidController.js";
+import { placeBid, getAuctionBids, confirmBidPayment, endAuction } from "../controllers/bidController.js";
 
 import Bid from "../models/Bid.js";
 
@@ -36,41 +28,26 @@ const getPagination = (req) => {
 router.post(
   "/:id/bid",
   protect,
-  bidLimiter,   // 🚦 max 10 bids/min per user
+  bidLimiter, // 🚦 max 10 bids/min per user
   validateObjectId,
   validateBid,
-  asyncHandler(placeBid)
+  asyncHandler(placeBid),
 );
 
 // =============================
 // 📊 GET BIDS FOR A CAR
 // =============================
-router.get(
-  "/:id/bids",
-  validateObjectId,
-  asyncHandler(getAuctionBids)
-);
+router.get("/:id/bids", validateObjectId, asyncHandler(getAuctionBids));
 
 // =============================
 // 📲 MPESA CALLBACK (SAFE ENTRY)
 // =============================
-router.post(
-  "/mpesa/callback",
-  mpesaIpWhitelist,
-  validateMpesaCallback,
-  asyncHandler(confirmBidPayment)
-);
+router.post("/mpesa/callback", mpesaIpWhitelist, validateMpesaCallback, asyncHandler(confirmBidPayment));
 
 // =============================
 // 🏁 END AUCTION (ADMIN)
 // =============================
-router.post(
-  "/:id/end",
-  protect,
-  adminOnly,
-  validateObjectId,
-  asyncHandler(endAuction)
-);
+router.post("/:id/end", protect, adminOnly, validateObjectId, asyncHandler(endAuction));
 
 // =============================
 // 🧠 ADMIN: ALL BIDS (PAGINATED + FILTERS)
@@ -118,7 +95,7 @@ router.get(
         pages: Math.ceil(total / limit),
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -140,7 +117,7 @@ router.get(
       success: true,
       bids,
     });
-  })
+  }),
 );
 
 // =============================
@@ -165,7 +142,7 @@ router.post(
       success: true,
       bid,
     });
-  })
+  }),
 );
 
 export default router;

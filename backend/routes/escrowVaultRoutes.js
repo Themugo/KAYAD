@@ -3,10 +3,7 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId } from "../middleware/validate.js";
 import { otpLimiter, webhookLimiter } from "../middleware/rateLimiter.js";
-import {
-  escrowVaultWebhookSchema,
-  releaseOtpSchema,
-} from "../validation/platform.schema.js";
+import { escrowVaultWebhookSchema, releaseOtpSchema } from "../validation/platform.schema.js";
 import {
   initEscrowVault,
   webhookFundsReceived,
@@ -23,7 +20,12 @@ import {
 
 const router = Router();
 
-router.post("/webhook/:id/funded", webhookLimiter, validate(escrowVaultWebhookSchema), asyncHandler(webhookFundsReceived));
+router.post(
+  "/webhook/:id/funded",
+  webhookLimiter,
+  validate(escrowVaultWebhookSchema),
+  asyncHandler(webhookFundsReceived),
+);
 
 router.post("/:id/init", protect, asyncHandler(initEscrowVault));
 router.get("/my", protect, asyncHandler(getUserVaults));

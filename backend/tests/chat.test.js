@@ -61,17 +61,12 @@ describe("Chat Routes", () => {
   });
 
   it("GET /api/chat — returns inbox", async () => {
-    const res = await request(app)
-      .get("/api/chat")
-      .set("Authorization", `Bearer ${tokenA}`)
-      .expect(200);
+    const res = await request(app).get("/api/chat").set("Authorization", `Bearer ${tokenA}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
   it("POST /api/chat/:chatId/message — sends a message", async () => {
-    const inbox = await request(app)
-      .get("/api/chat")
-      .set("Authorization", `Bearer ${tokenA}`);
+    const inbox = await request(app).get("/api/chat").set("Authorization", `Bearer ${tokenA}`);
     const chatId = inbox.body.chats?.[0]?._id;
     if (!chatId) return; // skip if no chat
 
@@ -85,9 +80,7 @@ describe("Chat Routes", () => {
   });
 
   it("GET /api/chat/:chatId/messages — gets messages", async () => {
-    const inbox = await request(app)
-      .get("/api/chat")
-      .set("Authorization", `Bearer ${tokenA}`);
+    const inbox = await request(app).get("/api/chat").set("Authorization", `Bearer ${tokenA}`);
     const chatId = inbox.body.chats?.[0]?._id;
     if (!chatId) return;
 
@@ -100,9 +93,7 @@ describe("Chat Routes", () => {
   });
 
   it("POST /api/chat/:chatId/seen — marks messages as seen", async () => {
-    const inbox = await request(app)
-      .get("/api/chat")
-      .set("Authorization", `Bearer ${tokenB}`);
+    const inbox = await request(app).get("/api/chat").set("Authorization", `Bearer ${tokenB}`);
     const chatId = inbox.body.chats?.[0]?._id;
     if (!chatId) return;
 
@@ -114,16 +105,11 @@ describe("Chat Routes", () => {
   });
 
   it("DELETE /api/chat/:chatId — leaves/deletes chat", async () => {
-    const inbox = await request(app)
-      .get("/api/chat")
-      .set("Authorization", `Bearer ${tokenA}`);
+    const inbox = await request(app).get("/api/chat").set("Authorization", `Bearer ${tokenA}`);
     const chatId = inbox.body.chats?.[0]?._id;
     if (!chatId) return;
 
-    const res = await request(app)
-      .delete(`/api/chat/${chatId}`)
-      .set("Authorization", `Bearer ${tokenA}`)
-      .expect(200);
+    const res = await request(app).delete(`/api/chat/${chatId}`).set("Authorization", `Bearer ${tokenA}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 });

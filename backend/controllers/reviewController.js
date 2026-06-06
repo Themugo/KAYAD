@@ -1,6 +1,6 @@
 // backend/controllers/reviewController.js
 import Review from "../models/Review.js";
-import User   from "../models/User.js";
+import User from "../models/User.js";
 
 // POST /api/reviews
 export const createReview = async (req, res) => {
@@ -41,13 +41,9 @@ export const createReview = async (req, res) => {
 // GET /api/reviews/dealer/:dealerId
 export const getDealerReviews = async (req, res) => {
   try {
-    const reviews = await Review.find({ dealer: req.params.dealerId })
-      .populate("user", "name")
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find({ dealer: req.params.dealerId }).populate("user", "name").sort({ createdAt: -1 });
 
-    const avg = reviews.length
-      ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
-      : 0;
+    const avg = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
 
     res.json({ success: true, reviews, averageRating: Math.round(avg * 10) / 10, total: reviews.length });
   } catch (err) {
@@ -89,7 +85,10 @@ export const deleteReview = async (req, res) => {
     const remaining = await Review.find({ dealer: dealerId });
     if (remaining.length > 0) {
       const avg = remaining.reduce((s, r) => s + r.rating, 0) / remaining.length;
-      await User.findByIdAndUpdate(dealerId, { dealerRating: Math.round(avg * 10) / 10, reviewCount: remaining.length });
+      await User.findByIdAndUpdate(dealerId, {
+        dealerRating: Math.round(avg * 10) / 10,
+        reviewCount: remaining.length,
+      });
     } else {
       await User.findByIdAndUpdate(dealerId, { dealerRating: 0, reviewCount: 0 });
     }

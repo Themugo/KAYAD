@@ -23,11 +23,7 @@ const router = express.Router();
 // =============================
 // 📄 USER ESCROWS (BUYER / SELLER)
 // =============================
-router.get(
-  "/my",
-  protect,
-  asyncHandler(getUserEscrows)
-);
+router.get("/my", protect, asyncHandler(getUserEscrows));
 
 // =============================
 // 🧠 ADMIN: ALL ESCROWS (PAGINATED + FILTER)
@@ -41,18 +37,13 @@ router.get(
     req.query.limit = Number(req.query.limit) || 20;
 
     return getAllEscrows(req, res);
-  })
+  }),
 );
 
 // =============================
 // 🔍 GET SINGLE ESCROW
 // =============================
-router.get(
-  "/:id",
-  protect,
-  validateObjectId,
-  asyncHandler(getEscrowById)
-);
+router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
 
 // =============================
 // 💰 RELEASE ESCROW (ADMIN)
@@ -66,7 +57,7 @@ router.post(
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail
     return releaseEscrow(req, res);
-  })
+  }),
 );
 
 // =============================
@@ -81,7 +72,7 @@ router.post(
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail
     return refundEscrow(req, res);
-  })
+  }),
 );
 
 // =============================
@@ -118,7 +109,7 @@ router.post(
     }
 
     res.json({ success: true, message: "Dispute raised", escrow });
-  })
+  }),
 );
 
 // =============================
@@ -130,7 +121,7 @@ router.post(
   validateObjectId,
   asyncHandler(async (req, res) => {
     return confirmDelivery(req, res);
-  })
+  }),
 );
 
 // =============================
@@ -142,7 +133,7 @@ router.post(
   validateObjectId,
   asyncHandler(async (req, res) => {
     return requestRelease(req, res);
-  })
+  }),
 );
 
 // =============================

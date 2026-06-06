@@ -9,8 +9,7 @@ export const estimatePrice = async (car) => {
 
   if (!similar.length) return null;
 
-  const avg =
-    similar.reduce((sum, c) => sum + c.price, 0) / similar.length;
+  const avg = similar.reduce((sum, c) => sum + c.price, 0) / similar.length;
 
   let rating = "fair";
 

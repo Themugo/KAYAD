@@ -3,7 +3,10 @@ import { z } from "zod";
 export const orderInspectionSchema = z.object({
   carId: z.string().min(1, "Car ID is required"),
   inspectorId: z.string().optional(),
-  phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Kenyan number").optional(),
+  phone: z
+    .string()
+    .regex(/^2547\d{8}$/, "Phone must be a valid Kenyan number")
+    .optional(),
 });
 
 export const confirmPaymentSchema = z.object({

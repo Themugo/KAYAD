@@ -2,9 +2,9 @@ import nodemailer from "nodemailer";
 import { withRetry } from "../utils/retry.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
-const APP_URL  = process.env.FRONTEND_URL || "https://www.kayad.space";
-const FROM     = process.env.EMAIL_FROM || `noreply@kayad.space`;
-const ENABLED  = !!process.env.EMAIL_HOST;
+const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
+const FROM = process.env.EMAIL_FROM || `noreply@kayad.space`;
+const ENABLED = !!process.env.EMAIL_HOST;
 
 let transporter = null;
 
@@ -13,8 +13,8 @@ const getTransporter = () => {
   if (!ENABLED) return null;
 
   transporter = nodemailer.createTransport({
-    host:   process.env.EMAIL_HOST,
-    port:   parseInt(process.env.EMAIL_PORT || "587"),
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || "587"),
     secure: process.env.EMAIL_PORT === "465",
     auth: {
       user: process.env.EMAIL_USER,
@@ -70,11 +70,9 @@ const layout = (content, title = APP_NAME) => `
 </body>
 </html>`;
 
-const heading = (text) =>
-  `<h2 style="margin:0 0 20px;font-size:24px;color:#E2DDD5;font-weight:600;">${text}</h2>`;
+const heading = (text) => `<h2 style="margin:0 0 20px;font-size:24px;color:#E2DDD5;font-weight:600;">${text}</h2>`;
 
-const para = (text) =>
-  `<p style="margin:0 0 16px;color:#7A8599;font-size:15px;line-height:1.7;">${text}</p>`;
+const para = (text) => `<p style="margin:0 0 16px;color:#7A8599;font-size:15px;line-height:1.7;">${text}</p>`;
 
 const highlight = (label, value, gold = false) => `
   <div style="background:#0a0d12;border:1px solid #252E3D;border-radius:10px;padding:16px 20px;margin:16px 0;">
@@ -99,20 +97,25 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     return { success: true, disabled: true };
   }
   try {
-    const info = await withRetry(() => t.sendMail({
-      from: `"${APP_NAME}" <${FROM}>`,
-      to, subject,
-      text: text || subject,
-      html,
-    }), {
-      retries: 2,
-      baseDelayMs: 1000,
-      circuitBreaker: true,
-      key: "email",
-      circuitThreshold: 3,
-      circuitResetMs: 60000,
-      onRetry: (err, attempt) => console.warn(`📧 Email send retry ${attempt}: ${err.message}`),
-    });
+    const info = await withRetry(
+      () =>
+        t.sendMail({
+          from: `"${APP_NAME}" <${FROM}>`,
+          to,
+          subject,
+          text: text || subject,
+          html,
+        }),
+      {
+        retries: 2,
+        baseDelayMs: 1000,
+        circuitBreaker: true,
+        key: "email",
+        circuitThreshold: 3,
+        circuitResetMs: 60000,
+        onRetry: (err, attempt) => console.warn(`📧 Email send retry ${attempt}: ${err.message}`),
+      },
+    );
     console.log(`📧 Email sent: ${subject} → ${to} (${info.messageId})`);
     return { success: true, id: info.messageId };
   } catch (err) {
@@ -125,34 +128,41 @@ export const sendWelcomeEmail = (user) =>
   sendEmail({
     to: user.email,
     subject: `Welcome to ${APP_NAME} 🚗`,
-    html: layout(`
+    html: layout(
+      `
       ${heading(`Welcome, ${user.name}!`)}
       ${para("Your account has been created. You can now browse cars, place bids, and buy with M-Pesa escrow protection.")}
       ${user.role === "dealer" ? para("<strong style='color:#E8B84B'>Your dealer account is pending approval.</strong> Our team will review and approve your account within 24 hours.") : ""}
       ${btn("Browse Cars Now", `${APP_URL}/cars`)}
       ${divider()}
       ${para(`Need help? Reply to this email or visit <a href="${APP_URL}" style="color:#C8962A;">${APP_URL}</a>`)}
-    `, `Welcome to ${APP_NAME}`),
+    `,
+      `Welcome to ${APP_NAME}`,
+    ),
   });
 
 export const sendDealerApprovedEmail = (user) =>
   sendEmail({
     to: user.email,
     subject: `✅ Your dealer account is approved — ${APP_NAME}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("You're approved!")}
       ${para(`Congratulations ${user.name}, your dealer account has been verified. You can now list cars, run live auctions, and accept M-Pesa payments.`)}
       ${btn("Start Listing →", `${APP_URL}/dealer/add-car`)}
       ${divider()}
       ${para("Questions? Contact us at <a href='mailto:dealers@kayad.space' style='color:#C8962A;'>dealers@kayad.space</a>")}
-    `, "Dealer Approved"),
+    `,
+      "Dealer Approved",
+    ),
   });
 
 export const sendBidConfirmationEmail = (user, bid, car) =>
   sendEmail({
     to: user.email,
     subject: `⚡ Bid placed — ${car.title}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Your bid is in!")}
       ${para(`You've successfully placed a bid on <strong style="color:#E2DDD5">${car.title}</strong>.`)}
       ${highlight("Your Bid Amount", `KES ${Number(bid.amount).toLocaleString("en-KE")}`, true)}
@@ -162,27 +172,33 @@ export const sendBidConfirmationEmail = (user, bid, car) =>
       ${btn("Watch Live Auction →", `${APP_URL}/auction/${car._id}`)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>If you win, the 5% commitment is credited toward your payment. If you don't win, you'll be refunded.</em>")}
-    `, "Bid Placed"),
+    `,
+      "Bid Placed",
+    ),
   });
 
 export const sendOutbidEmail = (user, newBid, car) =>
   sendEmail({
     to: user.email,
     subject: `⚠️ You've been outbid — ${car.title}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Someone outbid you!")}
       ${para(`A higher bid has been placed on <strong style="color:#E2DDD5">${car.title}</strong>.`)}
       ${highlight("New Highest Bid", `KES ${Number(newBid).toLocaleString("en-KE")}`, true)}
       ${para("Act fast — place a higher bid to stay in the running.")}
       ${btn("Bid Again →", `${APP_URL}/auction/${car._id}`)}
-    `, "Outbid Alert"),
+    `,
+      "Outbid Alert",
+    ),
   });
 
 export const sendAuctionWonEmail = (user, car, amount) =>
   sendEmail({
     to: user.email,
     subject: `🏆 You won the auction — ${car.title}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Congratulations, you won!")}
       ${para(`You are the highest bidder on <strong style="color:#E2DDD5">${car.title}</strong>. Complete your payment to secure the car.`)}
       ${highlight("Winning Bid", `KES ${Number(amount).toLocaleString("en-KE")}`, true)}
@@ -190,14 +206,17 @@ export const sendAuctionWonEmail = (user, car, amount) =>
       ${btn("Complete Payment →", `${APP_URL}/escrow`)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>Payment is held in escrow until you confirm receipt of the vehicle. Your money is safe.</em>")}
-    `, "Auction Won"),
+    `,
+      "Auction Won",
+    ),
   });
 
 export const sendPaymentConfirmedEmail = (user, payment, car) =>
   sendEmail({
     to: user.email,
     subject: `✅ Payment confirmed — ${car?.title || "Kayad"}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("M-Pesa Payment Confirmed")}
       ${para("Your payment has been received and is now held in secure escrow.")}
       ${highlight("Amount Paid", `KES ${Number(payment.amount).toLocaleString("en-KE")}`, true)}
@@ -205,72 +224,89 @@ export const sendPaymentConfirmedEmail = (user, payment, car) =>
       ${highlight("Status", "🔒 In Escrow")}
       ${para("Funds will be released to the seller after you confirm receipt of the vehicle. Contact admin if you have any issues.")}
       ${btn("View Escrow →", `${APP_URL}/escrow`)}
-    `, "Payment Confirmed"),
+    `,
+      "Payment Confirmed",
+    ),
   });
 
 export const sendEscrowReleasedEmail = (seller, escrow, car) =>
   sendEmail({
     to: seller.email,
     subject: `💰 Payment released — ${car?.title || "Vehicle sale"}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Funds Released to You!")}
       ${para("The escrow for your vehicle sale has been released. Funds should reflect in your M-Pesa within minutes.")}
       ${highlight("Amount Released", `KES ${Number(escrow.amount).toLocaleString("en-KE")}`, true)}
       ${car?.title ? highlight("Vehicle", car.title) : ""}
       ${para("Thank you for selling on Kayad. List more vehicles to keep growing your business.")}
       ${btn("List Another Car →", `${APP_URL}/dealer/add-car`)}
-    `, "Funds Released"),
+    `,
+      "Funds Released",
+    ),
   });
 
 export const sendEscrowRefundedEmail = (buyer, escrow, car) =>
   sendEmail({
     to: buyer.email,
     subject: `↩️ Refund processed — ${car?.title || "Vehicle purchase"}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Your Refund Is Processed")}
       ${para("The escrow for your purchase has been refunded. Funds should reflect in your M-Pesa within minutes.")}
       ${highlight("Amount Refunded", `KES ${Number(escrow.amount).toLocaleString("en-KE")}`, true)}
       ${para("We're sorry the deal didn't go through. Browse our marketplace for other great cars.")}
       ${btn("Browse Cars →", `${APP_URL}/cars`)}
-    `, "Refund Processed"),
+    `,
+      "Refund Processed",
+    ),
   });
 
 export const sendPasswordResetEmail = (user, resetToken) =>
   sendEmail({
     to: user.email,
     subject: `🔑 Password reset — ${APP_NAME}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Reset Your Password")}
       ${para("We received a request to reset your password. Click the button below. This link expires in 1 hour.")}
       ${btn("Reset Password →", `${APP_URL}/reset-password?token=${resetToken}`)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>If you didn't request this, ignore this email. Your password won't change.</em>")}
-    `, "Password Reset"),
+    `,
+      "Password Reset",
+    ),
   });
 
 export const sendNewMessageEmail = (user, fromName, carTitle) =>
   sendEmail({
     to: user.email,
     subject: `💬 New message from ${fromName} — ${APP_NAME}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading(`Message from ${fromName}`)}
       ${para(`You have a new message about <strong style="color:#E2DDD5">${carTitle || "a vehicle"}</strong>.`)}
       ${btn("View Message →", `${APP_URL}/chat`)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>Reply within 24 hours to keep the conversation going.</em>")}
-    `, "New Message"),
+    `,
+      "New Message",
+    ),
   });
 
 export const sendAuctionEndingSoonEmail = (user, car, minutesLeft) =>
   sendEmail({
     to: user.email,
     subject: `⏰ Auction ending in ${minutesLeft} minutes — ${car.title}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading("Auction Ending Soon!")}
       ${para(`The auction for <strong style="color:#E2DDD5">${car.title}</strong> is ending in <strong style="color:#E8B84B">${minutesLeft} minutes</strong>.`)}
       ${highlight("Current Bid", `KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}`, true)}
       ${btn("Bid Now →", `${APP_URL}/auction/${car._id}`)}
-    `, "Auction Ending Soon"),
+    `,
+      "Auction Ending Soon",
+    ),
   });
 
 export const sendVerificationEmail = (email, name, token) => {
@@ -278,14 +314,17 @@ export const sendVerificationEmail = (email, name, token) => {
   return sendEmail({
     to: email,
     subject: "✅ Verify your Kayad email address",
-    html: layout(`
+    html: layout(
+      `
       ${heading("Verify Your Email")}
       ${para(`Hi <strong style="color:#E2DDD5">${name || "there"}</strong>, welcome to Kayad!`)}
       ${para("Please verify your email address to unlock all features including bidding and escrow payments.")}
       ${btn("Verify Email →", verifyUrl)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>This link expires in 24 hours. If you didn't create a Kayad account, you can safely ignore this email.</em>")}
-    `, "Email Verification"),
+    `,
+      "Email Verification",
+    ),
   });
 };
 
@@ -293,14 +332,17 @@ export const sendTeamInviteEmail = (inviteeEmail, dealerName, role, token) =>
   sendEmail({
     to: inviteeEmail,
     subject: `🤝 You've been invited to join ${dealerName}'s team — ${APP_NAME}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading(`Team Invitation from ${dealerName}`)}
       ${para(`You've been invited to join <strong style="color:#E2DDD5">${dealerName}</strong>'s dealership team as a <strong style="color:#E8B84B">${role.replace(/_/g, " ")}</strong>.`)}
       ${para("Click below to accept the invitation and set up your account.")}
       ${btn("Accept Invitation →", `${APP_URL}/dealer/setup?invite=${token}`)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>This invitation expires in 7 days. If you don't have a Kayad account yet, you'll create one when accepting.</em>")}
-    `, "Team Invitation"),
+    `,
+      "Team Invitation",
+    ),
   });
 
 export const sendVerificationReminderEmail = (email, name, token) => {
@@ -308,31 +350,41 @@ export const sendVerificationReminderEmail = (email, name, token) => {
   return sendEmail({
     to: email,
     subject: "📧 New verification link — Kayad",
-    html: layout(`
+    html: layout(
+      `
       ${heading("New Verification Link")}
       ${para(`Hi <strong style="color:#E2DDD5">${name || "there"}</strong>,`)}
       ${para("Here is your new email verification link. The previous one has been invalidated.")}
       ${btn("Verify Email →", verifyUrl)}
       ${divider()}
       ${para("<em style='color:#4A5568;font-size:13px;'>This link expires in 24 hours.</em>")}
-    `, "Email Verification"),
+    `,
+      "Email Verification",
+    ),
   });
 };
 
 export const sendSavedSearchAlertEmail = (user, search, matchedCars, totalCount) => {
-  const carList = matchedCars.slice(0, 5).map(c => {
-    const title = c.title || `${c.brand || ""} ${c.year || ""}`.trim() || "Vehicle";
-    const price = c.price ? `KES ${Number(c.price).toLocaleString("en-KE")}` : "";
-    return `<a href="${APP_URL}/cars/${c._id}" style="display:block;padding:10px 14px;margin:6px 0;background:#0a0d12;border:1px solid #252E3D;border-radius:10px;color:#E2DDD5;text-decoration:none;">
+  const carList = matchedCars
+    .slice(0, 5)
+    .map((c) => {
+      const title = c.title || `${c.brand || ""} ${c.year || ""}`.trim() || "Vehicle";
+      const price = c.price ? `KES ${Number(c.price).toLocaleString("en-KE")}` : "";
+      return `<a href="${APP_URL}/cars/${c._id}" style="display:block;padding:10px 14px;margin:6px 0;background:#0a0d12;border:1px solid #252E3D;border-radius:10px;color:#E2DDD5;text-decoration:none;">
       <strong>${title}</strong>${price ? `<span style="float:right;color:#E8B84B;font-weight:600;">${price}</span>` : ""}
     </a>`;
-  }).join("");
-  const rest = totalCount > 5 ? `<p style="color:#4A5568;font-size:13px;margin:8px 0 0;">+ ${totalCount - 5} more vehicle${totalCount - 5 > 1 ? "s" : ""}</p>` : "";
+    })
+    .join("");
+  const rest =
+    totalCount > 5
+      ? `<p style="color:#4A5568;font-size:13px;margin:8px 0 0;">+ ${totalCount - 5} more vehicle${totalCount - 5 > 1 ? "s" : ""}</p>`
+      : "";
 
   return sendEmail({
     to: user.email,
     subject: `📢 ${totalCount} new vehicle${totalCount > 1 ? "s" : ""} matching "${search.name}" — ${APP_NAME}`,
-    html: layout(`
+    html: layout(
+      `
       ${heading(`New Vehicles: "${search.name}"`)}
       ${para(`Hi <strong style="color:#E2DDD5">${user.name || "there"}</strong>,`)}
       ${para(`${totalCount} new vehicle${totalCount > 1 ? "s" : ""} matching your saved search <strong style="color:#E8B84B">"${search.name}"</strong> ${totalCount > 1 ? "have" : "has"} been listed on ${APP_NAME}.`)}
@@ -341,6 +393,8 @@ export const sendSavedSearchAlertEmail = (user, search, matchedCars, totalCount)
       ${btn("View All Results →", `${APP_URL}/saved-searches`)}
       ${divider()}
       ${para(`<em style="color:#4A5568;font-size:13px;">You're receiving this because saved search alerts are enabled. <a href="${APP_URL}/settings" style="color:#E8B84B;">Manage preferences</a></em>`)}
-    `, "Saved Search Alert"),
+    `,
+      "Saved Search Alert",
+    ),
   });
 };

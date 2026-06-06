@@ -63,17 +63,14 @@ const reviewSchema = new mongoose.Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // =============================
 // 🚫 PREVENT DUPLICATES (FIXED 🔥)
 // =============================
 // user can review dealer once per car
-reviewSchema.index(
-  { user: 1, dealer: 1, car: 1 },
-  { unique: true }
-);
+reviewSchema.index({ user: 1, dealer: 1, car: 1 }, { unique: true });
 
 // =============================
 // 🔥 INDEXES (PERFORMANCE)
@@ -191,7 +188,6 @@ reviewSchema.post("findOneAndDelete", async function (doc) {
 // =============================
 // 🚀 SAFE EXPORT
 // =============================
-const Review =
-  mongoose.models.Review || mongoose.model("Review", reviewSchema);
+const Review = mongoose.models.Review || mongoose.model("Review", reviewSchema);
 
 export default Review;

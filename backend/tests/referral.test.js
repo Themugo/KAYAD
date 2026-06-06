@@ -32,10 +32,7 @@ describe("Referral Routes", () => {
   });
 
   it("GET /api/referral/stats — returns referral stats", async () => {
-    const res = await request(app)
-      .get("/api/referral/stats")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/referral/stats").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -44,10 +41,7 @@ describe("Referral Routes", () => {
   });
 
   it("GET /api/referral/code — returns referral code", async () => {
-    const res = await request(app)
-      .get("/api/referral/code")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/referral/code").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(res.body.code ?? res.body.referralCode).toBeTruthy();
   });

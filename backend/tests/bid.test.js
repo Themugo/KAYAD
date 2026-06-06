@@ -61,18 +61,13 @@ describe("Bidding System", () => {
   });
 
   it("GET /api/bids/:id/bids — returns empty list for car with no bids", async () => {
-    const res = await request(app)
-      .get(`/api/bids/${carId}/bids`)
-      .expect(200);
+    const res = await request(app).get(`/api/bids/${carId}/bids`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.bids)).toBe(true);
   });
 
   it("POST /api/bids/:id/bid — requires auth", async () => {
-    await request(app)
-      .post(`/api/bids/${carId}/bid`)
-      .send({ amount: 510000, phone: "254712345678" })
-      .expect(401);
+    await request(app).post(`/api/bids/${carId}/bid`).send({ amount: 510000, phone: "254712345678" }).expect(401);
   });
 
   it("POST /api/bids/:id/bid — rejects zero amount", async () => {
@@ -113,18 +108,13 @@ describe("Bidding System", () => {
   });
 
   it("GET /api/bids/:id/bids — returns bid after placement", async () => {
-    const res = await request(app)
-      .get(`/api/bids/${carId}/bids`)
-      .expect(200);
+    const res = await request(app).get(`/api/bids/${carId}/bids`).expect(200);
     expect(res.body.success).toBe(true);
     expect(res.body.bids.length).toBeGreaterThanOrEqual(1);
   });
 
   it("POST /api/bids/:id/end — requires admin", async () => {
-    await request(app)
-      .post(`/api/bids/${carId}/end`)
-      .set("Authorization", `Bearer ${buyerToken}`)
-      .expect(403);
+    await request(app).post(`/api/bids/${carId}/end`).set("Authorization", `Bearer ${buyerToken}`).expect(403);
   });
 
   it("POST /api/bids/:id/end — admin can end auction", async () => {
@@ -136,17 +126,11 @@ describe("Bidding System", () => {
   });
 
   it("GET /api/bids/admin/all — requires admin", async () => {
-    await request(app)
-      .get("/api/bids/admin/all")
-      .set("Authorization", `Bearer ${buyerToken}`)
-      .expect(403);
+    await request(app).get("/api/bids/admin/all").set("Authorization", `Bearer ${buyerToken}`).expect(403);
   });
 
   it("GET /api/bids/admin/all — admin can list all bids", async () => {
-    const res = await request(app)
-      .get("/api/bids/admin/all")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/bids/admin/all").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.bids)).toBe(true);
   });

@@ -6,16 +6,16 @@
 // Reliability: escrow auto-release cron + graceful shutdown
 // =============================================
 
-import express      from "express";
-import http         from "http";
-import mongoose     from "mongoose";
-import cors         from "cors";
-import dotenv       from "dotenv";
-import helmet       from "helmet";
-import morgan       from "morgan";
+import express from "express";
+import http from "http";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import helmet from "helmet";
+import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import { Server }   from "socket.io";
-import jwt          from "jsonwebtoken";
+import { Server } from "socket.io";
+import jwt from "jsonwebtoken";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
@@ -23,17 +23,8 @@ import { fileURLToPath } from "url";
 import { globalLimiter, authLimiter, adminLimiter, socketRateLimit } from "./middleware/rateLimiter.js";
 
 // ─── Security Middleware ───────────────────────────────────────
-import {
-  mongoSanitize,
-  xssProtection,
-  paginationCap,
-  extraHeaders,
-  bodyGuard,
-} from "./middleware/security.js";
-import {
-  mpesaIpWhitelist,
-  validateMpesaCallback,
-} from "./middleware/mpesaSecurity.js";
+import { mongoSanitize, xssProtection, paginationCap, extraHeaders, bodyGuard } from "./middleware/security.js";
+import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection } from "./middleware/csrf.js";
 import { protect, adminOnly } from "./middleware/auth.js";
@@ -42,21 +33,21 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 
 // ─── Routes ───────────────────────────────────────────────────
-import authRoutes         from "./routes/authRoutes.js";
-import carRoutes          from "./routes/carRoutes.js";
-import bidRoutes          from "./routes/bidRoutes.js";
-import dealerRoutes       from "./routes/dealerRoutes.js";
-import adminRoutes        from "./routes/adminRoutes.js";
-import paymentRoutes      from "./routes/paymentRoutes.js";
-import escrowRoutes       from "./routes/escrowRoutes.js";
-import chatRoutes         from "./routes/chatRoutes.js";
-import favoriteRoutes     from "./routes/favoriteRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import carRoutes from "./routes/carRoutes.js";
+import bidRoutes from "./routes/bidRoutes.js";
+import dealerRoutes from "./routes/dealerRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import escrowRoutes from "./routes/escrowRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import favoriteRoutes from "./routes/favoriteRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
-import reviewRoutes       from "./routes/reviewRoutes.js";
-import transactionRoutes  from "./routes/transactionRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 import auctionAdminRoutes from "./routes/auctionAdminRoutes.js";
-import adRoutes          from "./routes/adRoutes.js";
-import userRoutes        from "./routes/userRoutes.js";
+import adRoutes from "./routes/adRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import savedSearchRoutes from "./routes/savedSearchRoutes.js";
 import ntsaVerificationRoutes from "./routes/ntsaVerificationRoutes.js";
 import inspectionRoutes from "./routes/inspectionRoutes.js";
@@ -69,34 +60,34 @@ import contactRoutes from "./routes/contactRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
-import notFound     from "./middleware/notFound.js";
+import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 // ─── Services & Utils ─────────────────────────────────────────
-import requestLogger      from "./middleware/logger.js";
-import { startAuctionEngine }  from "./realtime/auctionEngine.js";
-import { startAuctionTimer }   from "./utils/auctionTimer.js";
-import { startEscrowCron }     from "./services/escrowCron.js";
+import requestLogger from "./middleware/logger.js";
+import { startAuctionEngine } from "./realtime/auctionEngine.js";
+import { startAuctionTimer } from "./utils/auctionTimer.js";
+import { startEscrowCron } from "./services/escrowCron.js";
 import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
 import { startSavedSearchCron } from "./services/savedSearchCron.js";
 import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { initPostHog } from "./utils/posthog.js";
-import { initCache }           from "./utils/cache.js";
+import { initCache } from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
-import { isRedisConnected }    from "./utils/cache.js";
-import redisClient              from "./config/redis.js";
+import { isRedisConnected } from "./utils/cache.js";
+import redisClient from "./config/redis.js";
 const getRedisClient = () => redisClient;
-import { setIO }               from "./utils/io.js";
+import { setIO } from "./utils/io.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, "../.env") });
 dotenv.config({ path: resolve(__dirname, ".env") });
 
 // ─── CONFIG ───────────────────────────────────────────────────
-const app      = express();
-const server   = http.createServer(app);
-const PORT     = process.env.PORT     || 5000;
+const app = express();
+const server = http.createServer(app);
+const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || "development";
 const FRONTEND = process.env.FRONTEND_URL || "http://localhost:3000";
 const parseOriginHostname = (origin) => {
@@ -115,33 +106,35 @@ await initPostHog();
 app.set("trust proxy", 1);
 
 // ─── SECURITY HEADERS ─────────────────────────────────────────
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
-      connectSrc: [
-        "'self'",
-        FRONTEND,
-        ...(FRONTEND_HOSTNAME ? [`wss://${FRONTEND_HOSTNAME}`] : []),
-        "https://us.i.posthog.com",
-        "https://app.posthog.com",
-      ],
-      fontSrc: ["'self'", "data:"],
-      frameAncestors: ["'none'"],
-      baseUri: ["'self'"],
-      formAction: ["'self'"],
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
+        connectSrc: [
+          "'self'",
+          FRONTEND,
+          ...(FRONTEND_HOSTNAME ? [`wss://${FRONTEND_HOSTNAME}`] : []),
+          "https://us.i.posthog.com",
+          "https://app.posthog.com",
+        ],
+        fontSrc: ["'self'", "data:"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
     },
-  },
-  hsts: {
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true,
-  },
-}));
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+  }),
+);
 
 // Permissions-Policy — restrict browser features
 app.use((req, res, next) => {
@@ -157,9 +150,11 @@ app.use(requestLogger);
 // ─── HTTP LOGGING ────────────────────────────────────────────
 if (NODE_ENV === "development") app.use(morgan("dev"));
 if (NODE_ENV === "production") {
-  app.use(morgan("combined", {
-    skip: (req) => req.url === "/health" || req.url === "/health/deep",
-  }));
+  app.use(
+    morgan("combined", {
+      skip: (req) => req.url === "/health" || req.url === "/health/deep",
+    }),
+  );
 }
 
 // ─── RATE LIMITING ────────────────────────────────────────────
@@ -169,24 +164,29 @@ app.use(globalLimiter);
 const allowedOrigins = [
   FRONTEND,
   ...(FRONTEND_HOSTNAME ? [`https://${FRONTEND_HOSTNAME}`, `https://www.${FRONTEND_HOSTNAME}`] : []),
-  ...(process.env.EXTRA_CORS_ORIGINS || "").split(",").map((v) => v.trim()).filter(Boolean),
+  ...(process.env.EXTRA_CORS_ORIGINS || "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean),
 ];
 
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || NODE_ENV === "development") return cb(null, true);
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    // Only allow YOUR Vercel deployments — not all *.vercel.app
-    if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
-    if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
-    console.warn("⚠️ CORS blocked:", origin, "— set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render");
-    cb(new Error(`CORS blocked: ${origin}`));
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-By", "X-CSRF-Token", "X-XSRF-Token"],
-  maxAge: 86400, // Cache preflight for 24 hours
-}));
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin || NODE_ENV === "development") return cb(null, true);
+      if (allowedOrigins.includes(origin)) return cb(null, true);
+      // Only allow YOUR Vercel deployments — not all *.vercel.app
+      if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
+      console.warn("⚠️ CORS blocked:", origin, "— set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render");
+      cb(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-By", "X-CSRF-Token", "X-XSRF-Token"],
+    maxAge: 86400, // Cache preflight for 24 hours
+  }),
+);
 
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
@@ -199,22 +199,26 @@ app.use((req, res, next) => {
   next();
 });
 // Serve uploaded files with strict headers to prevent script execution
-app.use("/uploads", (req, res, next) => {
-  const ext = req.path.split(".").pop()?.toLowerCase();
-  const allowedExts = ["jpg", "jpeg", "png", "webp"];
-  if (!allowedExts.includes(ext)) {
-    return res.status(403).json({ success: false, message: "Forbidden" });
-  }
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Content-Disposition", "inline"); // prevent download-as-script attacks
-  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-  next();
-}, express.static("uploads"));
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    const ext = req.path.split(".").pop()?.toLowerCase();
+    const allowedExts = ["jpg", "jpeg", "png", "webp"];
+    if (!allowedExts.includes(ext)) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Disposition", "inline"); // prevent download-as-script attacks
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    next();
+  },
+  express.static("uploads"),
+);
 
 // ─── SECURITY SANITIZATION ───────────────────────────────────
-app.use(mongoSanitize());    // Block NoSQL injection
-app.use(xssProtection());    // Sanitize XSS in inputs
-app.use(paginationCap());    // Cap ?limit and ?page params
+app.use(mongoSanitize()); // Block NoSQL injection
+app.use(xssProtection()); // Sanitize XSS in inputs
+app.use(paginationCap()); // Cap ?limit and ?page params
 
 // ─── HEALTH CHECKS (before other routes, no auth) ────────────
 registerHealthRoutes(app);
@@ -247,16 +251,26 @@ app.get("/metrics", protect, adminOnly, (req, res) => {
 // ─── API DOCS ─────────────────────────────────────────────────
 if (NODE_ENV !== "production") {
   // Open access in development
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "KAYAD API Docs",
-  }));
+  app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCss: ".swagger-ui .topbar { display: none }",
+      customSiteTitle: "KAYAD API Docs",
+    }),
+  );
 } else {
   // Require admin auth in production
-  app.use("/api-docs", protect, adminOnly, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    customCss: ".swagger-ui .topbar { display: none }",
-    customSiteTitle: "KAYAD API Docs",
-  }));
+  app.use(
+    "/api-docs",
+    protect,
+    adminOnly,
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCss: ".swagger-ui .topbar { display: none }",
+      customSiteTitle: "KAYAD API Docs",
+    }),
+  );
 }
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
@@ -271,7 +285,7 @@ const io = new Server(server, {
     },
     credentials: true,
   },
-  pingTimeout:  60000,
+  pingTimeout: 60000,
   pingInterval: 25000,
   transports: ["websocket", "polling"],
 });
@@ -312,18 +326,33 @@ io.on("connection", (socket) => {
 
   socket.on("joinAuction", (carId) => {
     if (isRateLimited("joinAuction")) return;
-    if (isValidId(carId)) { socket.join(String(carId)); socket.join(`car_${carId}`); }
+    if (isValidId(carId)) {
+      socket.join(String(carId));
+      socket.join(`car_${carId}`);
+    }
   });
 
-  socket.on("joinChat",     (chatId) => { if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`); });
-  socket.on("leaveChat",    (chatId) => { if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`); });
-  socket.on("typing",       ({ chatId, userId, name }) => {
+  socket.on("joinChat", (chatId) => {
+    if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`);
+  });
+  socket.on("leaveChat", (chatId) => {
+    if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`);
+  });
+  socket.on("typing", ({ chatId, userId, name }) => {
     if (!isRateLimited("typing") && chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
   });
-  socket.on("joinAdmin",    ()       => { if (socket.user?.role === "admin") socket.join("admins"); });
-  socket.on("joinShowroom", ()       => { if (!isRateLimited("joinShowroom")) socket.join("showroom"); });
-  socket.on("leaveShowroom",()       => { socket.leave("showroom"); });
-  socket.on("disconnect",   ()       => { eventBuckets.clear(); });
+  socket.on("joinAdmin", () => {
+    if (socket.user?.role === "admin") socket.join("admins");
+  });
+  socket.on("joinShowroom", () => {
+    if (!isRateLimited("joinShowroom")) socket.join("showroom");
+  });
+  socket.on("leaveShowroom", () => {
+    socket.leave("showroom");
+  });
+  socket.on("disconnect", () => {
+    eventBuckets.clear();
+  });
 });
 
 // ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
@@ -333,26 +362,26 @@ app.use(responseWrapper);
 app.use("/api", checkSystemStatus);
 
 // ─── API ROUTES ───────────────────────────────────────────────
-app.use("/api/auth/refresh",  csrfProtection);  // CSRF for cookie-based refresh
-app.use("/api/auth",          authLimiter, authRoutes);
-app.use("/api/cars",          carRoutes);
-app.use("/api/bids",          bidRoutes);
-app.use("/api/dealer",        dealerRoutes);
-app.use("/api/admin",         adminLimiter, adminRoutes);
+app.use("/api/auth/refresh", csrfProtection); // CSRF for cookie-based refresh
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/cars", carRoutes);
+app.use("/api/bids", bidRoutes);
+app.use("/api/dealer", dealerRoutes);
+app.use("/api/admin", adminLimiter, adminRoutes);
 
 // M-Pesa callback gets IP whitelist before routes mount
-app.use("/api/payments/callback",   mpesaIpWhitelist, validateMpesaCallback);
-app.use("/api/payments",      paymentRoutes);
+app.use("/api/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
+app.use("/api/payments", paymentRoutes);
 
-app.use("/api/escrow",        escrowRoutes);
-app.use("/api/chat",          chatRoutes);
-app.use("/api/favorites",     favoriteRoutes);
+app.use("/api/escrow", escrowRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/favorites", favoriteRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/reviews",       reviewRoutes);
-app.use("/api/transactions",  transactionRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/transactions", transactionRoutes);
 app.use("/api/auction-admin", auctionAdminRoutes);
-app.use("/api/ads",          adRoutes);
-app.use("/api/users",        userRoutes);
+app.use("/api/ads", adRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/saved-searches", savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
@@ -389,7 +418,9 @@ const connectDB = async (retries = 5, delay = 2000) => {
     } catch (err) {
       if (attempt === retries) throw err;
       const backoff = delay * Math.pow(2, attempt - 1);
-      console.warn(`⚠️  MongoDB connection attempt ${attempt}/${retries} failed: ${err.message}. Retrying in ${backoff}ms...`);
+      console.warn(
+        `⚠️  MongoDB connection attempt ${attempt}/${retries} failed: ${err.message}. Retrying in ${backoff}ms...`,
+      );
       await new Promise((r) => setTimeout(r, backoff));
     }
   }
@@ -397,7 +428,7 @@ const connectDB = async (retries = 5, delay = 2000) => {
 
 // ── Mongoose connection monitoring ──────────────────────────
 mongoose.connection.on("disconnected", () => console.warn("⚠️ MongoDB disconnected"));
-mongoose.connection.on("reconnected",  () => console.log("✅ MongoDB reconnected"));
+mongoose.connection.on("reconnected", () => console.log("✅ MongoDB reconnected"));
 mongoose.connection.on("error", (err) => console.error("🔥 MongoDB error:", err.message));
 
 // ─── ENV VALIDATION ───────────────────────────────────────────
@@ -408,7 +439,7 @@ const bootstrap = async () => {
   try {
     validateEnv();
     await connectDB();
-    await initCache();                  // Redis (optional)
+    await initCache(); // Redis (optional)
 
     // Auto-seed if no superadmin accounts exist (fresh DB)
     try {
@@ -417,7 +448,9 @@ const bootstrap = async () => {
       if (existing === 0) {
         const { reseed } = await import("./seed.js");
         const result = await reseed();
-        console.log(`  🌱 Auto-seeded: ${result.webhost.length} webhost, ${result.admin.length} admin, ${result.demos.length} demos, ${result.cars} cars`);
+        console.log(
+          `  🌱 Auto-seeded: ${result.webhost.length} webhost, ${result.admin.length} admin, ${result.demos.length} demos, ${result.cars} cars`,
+        );
       }
     } catch (seedErr) {
       console.warn("  ⚠️  Auto-seed skipped:", seedErr.message);
@@ -432,7 +465,7 @@ const bootstrap = async () => {
       console.log(`  ├─ Routes:   16 + v1 (versioned)`);
       console.log(`  ├─ Security: mongoSanitize + XSS + IP whitelist + pagination cap`);
       console.log(`  ├─ PostHog:  ${process.env.POSTHOG_API_KEY ? "connected" : "disabled"}`);
-      console.log(`  ├─ Redis:    ${process.env.REDIS_URL   ? "connecting..." : "in-memory fallback"}`);
+      console.log(`  ├─ Redis:    ${process.env.REDIS_URL ? "connecting..." : "in-memory fallback"}`);
       console.log(`  └─ Socket:   ready`);
       console.log("");
     });
@@ -462,7 +495,7 @@ const bootstrap = async () => {
           if (ids.length === 0) return;
 
           const Car = (await import("./models/Car.js")).default;
-          const bulkOps = ids.map(id => ({
+          const bulkOps = ids.map((id) => ({
             updateOne: {
               filter: { _id: id },
               update: { $inc: { views: parseInt(counts[id], 10) || 0 } },
@@ -499,13 +532,16 @@ const shutdown = async (signal) => {
 };
 
 if (NODE_ENV !== "test") {
-  process.on("SIGTERM",            () => shutdown("SIGTERM"));
-  process.on("SIGINT",             () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("unhandledRejection", (err) => {
     console.error("❌ Unhandled rejection:", err?.message || err);
     shutdown("unhandledRejection");
   });
-  process.on("uncaughtException",  (err) => { console.error("❌ Uncaught exception:", err.message); process.exit(1); });
+  process.on("uncaughtException", (err) => {
+    console.error("❌ Uncaught exception:", err.message);
+    process.exit(1);
+  });
 }
 
 if (NODE_ENV === "test") {

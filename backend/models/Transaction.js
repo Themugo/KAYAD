@@ -6,12 +6,12 @@ const transactionSchema = new mongoose.Schema(
     // 🔗 RELATIONS
     // =============================
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    car:  { type: mongoose.Schema.Types.ObjectId, ref: "Car", index: true },
+    car: { type: mongoose.Schema.Types.ObjectId, ref: "Car", index: true },
 
     // =============================
     // 💰 AMOUNT
     // =============================
-    amount:   { type: Number, required: true },
+    amount: { type: Number, required: true },
     currency: { type: String, default: "KES" },
 
     // =============================
@@ -19,7 +19,17 @@ const transactionSchema = new mongoose.Schema(
     // =============================
     type: {
       type: String,
-      enum: ["bid_commitment", "escrow_deposit", "escrow_release", "buy_now", "refund", "commission", "withdrawal", "deposit", "referral_bonus"],
+      enum: [
+        "bid_commitment",
+        "escrow_deposit",
+        "escrow_release",
+        "buy_now",
+        "refund",
+        "commission",
+        "withdrawal",
+        "deposit",
+        "referral_bonus",
+      ],
       required: true,
       index: true,
     },
@@ -33,17 +43,17 @@ const transactionSchema = new mongoose.Schema(
     // =============================
     // 📱 M-PESA
     // =============================
-    phone:             { type: String },
-    mpesaReceipt:      { type: String },
+    phone: { type: String },
+    mpesaReceipt: { type: String },
     checkoutRequestId: { type: String },
-    resultCode:        { type: String },
-    resultDesc:        { type: String },
-    transactionDate:   { type: Date },
+    resultCode: { type: String },
+    resultDesc: { type: String },
+    transactionDate: { type: Date },
 
     // =============================
     // 📎 REFERENCES
     // =============================
-    reference:   { type: String, index: true },
+    reference: { type: String, index: true },
     description: { type: String },
 
     // =============================
@@ -52,7 +62,7 @@ const transactionSchema = new mongoose.Schema(
     escrowId: { type: mongoose.Schema.Types.ObjectId, ref: "Escrow" },
     releasedAt: { type: Date },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 transactionSchema.index({ user: 1, createdAt: -1 });

@@ -1,11 +1,5 @@
 import { describe, it, expect, jest } from "@jest/globals";
-import {
-  success,
-  error,
-  validationError,
-  notFound,
-  unauthorized,
-} from "../utils/response.js";
+import { success, error, validationError, notFound, unauthorized } from "../utils/response.js";
 
 function mockRes() {
   return {
@@ -29,17 +23,13 @@ describe("success", () => {
   it("defaults message to Success", () => {
     const res = mockRes();
     success(res, { car: "Toyota" });
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Success" })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Success" }));
   });
 
   it("accepts meta", () => {
     const res = mockRes();
     success(res, [], "List", { page: 1, total: 10 });
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ meta: { page: 1, total: 10 } })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ meta: { page: 1, total: 10 } }));
   });
 });
 
@@ -94,9 +84,7 @@ describe("notFound", () => {
   it("defaults message", () => {
     const res = mockRes();
     notFound(res);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Resource not found" })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Resource not found" }));
   });
 });
 
