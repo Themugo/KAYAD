@@ -2,7 +2,8 @@ import axios from "axios";
 import { logInfo, logError } from "./logger.js";
 import { withRetry } from "./retry.js";
 
-const { SMS_PROVIDER = AT_API_KEY ? "africastalking" : "mock", AT_API_KEY, AT_USERNAME = "sandbox", AT_SENDER_ID } = process.env;
+const { AT_API_KEY, AT_USERNAME = "sandbox", AT_SENDER_ID } = process.env;
+const SMS_PROVIDER = process.env.SMS_PROVIDER || (AT_API_KEY ? "africastalking" : "mock");
 
 if (SMS_PROVIDER === "mock") {
   console.warn("⚠️ SMS is in MOCK mode — no real messages will be sent. Set AT_API_KEY to enable.");
