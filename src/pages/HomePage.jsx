@@ -210,11 +210,11 @@ export default function HomePage() {
             padding: '10px 28px', background: 'var(--gold)', color: '#000',
             borderRadius: 9999, fontWeight: 900, fontSize: 10,
             textTransform: 'uppercase', letterSpacing: '0.1em',
-            boxShadow: '0 4px 20px rgba(212,196,168,0.25)',
+            boxShadow: '0 4px 20px rgba(192,192,192,0.25)',
             transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
           }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(212,196,168,0.38)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,196,168,0.25)'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(192,192,192,0.38)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(192,192,192,0.25)'; }}
           >Enter The Gallery</Link>
 
           <Link to="/auctions/calendar" style={{
@@ -224,14 +224,14 @@ export default function HomePage() {
             border: '1px solid rgba(255,255,255,0.14)',
             transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
           }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.5)'; e.currentTarget.style.color = 'var(--gold)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(192,192,192,0.5)'; e.currentTarget.style.color = 'var(--gold)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
           >Live Auctions</Link>
         </div>
 
         {isAuth && (
           <div style={{ marginTop: 10, fontSize: 10, color: 'rgba(255,255,255,0.18)', zIndex: 1 }}>
-            Welcome back, <strong style={{ color: 'rgba(212,196,168,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
+            Welcome back, <strong style={{ color: 'rgba(192,192,192,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
           </div>
         )}
 
