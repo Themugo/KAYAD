@@ -5,7 +5,7 @@
 /* ============================================
    KAYAD — GLOBAL DESIGN SYSTEM v2.0
    Premium Kenyan Automotive Marketplace
-   Aesthetic: Obsidian Black + Radiant Champagne Gold
+   Aesthetic: Obsidian Black + Radiant Silver
    ============================================ */
 
 :root {
@@ -15,13 +15,13 @@
   --card:        #111111;
   --card-hover:  #1A1A1A;
   
-  /* === CHAMPAGNE GOLD SYSTEM === */
-  --gold:        #D4C4A8;
-  --gold-light:  #E8DAC4;
-  --gold-dark:   #B89E6F;
-  --gold-muted:  #A89878;
-  --gold-glow:   rgba(212, 196, 168, 0.15);
-  --gold-glow-strong: rgba(212, 196, 168, 0.35);
+  /* === SILVER SYSTEM === */
+  --gold:        #C0C0C0;
+  --gold-light:  #E8E8E8;
+  --gold-dark:   #A8A8A8;
+  --gold-muted:  #909090;
+  --gold-glow:   rgba(192, 192, 192, 0.15);
+  --gold-glow-strong: rgba(192, 192, 192, 0.35);
   
   /* Text */
   --text:        #F0EDE6;

@@ -154,21 +154,21 @@ export default function HomePage() {
         textAlign: 'center',
         padding: '0 24px 10px',
       }}>
-        {/* Radial gold glow */}
+        {/* Radial silver glow */}
         <div style={{
           position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)',
           width: 600, height: 300,
-          background: 'radial-gradient(ellipse, rgba(212,196,168,0.08) 0%, transparent 65%)',
+          background: 'radial-gradient(ellipse, rgba(192,192,192,0.08) 0%, transparent 65%)',
           pointerEvents: 'none',
         }} />
 
         {/* Top ornament */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, zIndex: 1 }}>
-          <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
+          <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, transparent, rgba(192,192,192,0.4))' }} />
           <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
             Kenya's Premium Car Marketplace
           </span>
-          <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
+          <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, rgba(192,192,192,0.4), transparent)' }} />
         </div>
 
         {/* Live Auctions badge */}
@@ -193,7 +193,7 @@ export default function HomePage() {
           marginBottom: 8, letterSpacing: '-0.01em', zIndex: 1,
         }}>
           Where Kenya{' '}
-          <span style={{ color: 'var(--gold)', textShadow: '0 0 30px rgba(212,196,168,0.28)' }}>Drives</span>
+          <span style={{ color: 'var(--gold)', textShadow: '0 0 30px rgba(192,192,192,0.28)' }}>Drives</span>
         </h1>
 
         <p style={{
