@@ -102,7 +102,7 @@ export async function reseed() {
   // ══════════════════════════════════════════════════════════
   const webhostEmail    = process.env.SEED_ADMIN_EMAIL;
   const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PASSWORD");
-  const webhostName     = process.env.SEED_ADMIN_NAME || "Jimmy Mugo (Webhost)";
+  const webhostName     = process.env.SEED_ADMIN_NAME || "Platform Owner";
 
   // Provision EVERY configured platform owner (WEBHOIST_EMAIL may be a
   // comma-separated list, e.g. the gmail owner + a kayad-domain owner). Each

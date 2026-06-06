@@ -24,9 +24,8 @@ FROM nginx:stable-alpine
 RUN addgroup -S kayad && adduser -S kayad -G kayad
 
 COPY --from=builder /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
-
-USER kayad
 
 CMD ["nginx", "-g", "daemon off;"]

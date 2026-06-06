@@ -50,8 +50,10 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: SENTRY_DSN
+      - key: POSTHOG_API_KEY
         sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
       - key: REDIS_URL
         sync: false
       - key: AT_API_KEY

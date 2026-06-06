@@ -7,12 +7,11 @@ import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
 import { authAPI, enableDemoMode } from '../api/api';
 
-// Demo accounts — passwords come from env so they never leak into source maps.
-// In development, these resolve against the in-app demo dataset (src/data/demoData.js).
+// Demo accounts — password is in demoData.js (bundled, not a real secret).
 const DEMO_ACCOUNTS = [
-  { label: 'Buyer',  email: 'buyer@demo.com',  password: import.meta.env.VITE_DEMO_BUYER_PW  || '', tint: '#3b82f6' },
-  { label: 'Dealer', email: 'dealer@demo.com', password: import.meta.env.VITE_DEMO_DEALER_PW || '', tint: 'var(--gold)' },
-  { label: 'Broker', email: 'broker@demo.com', password: import.meta.env.VITE_DEMO_BROKER_PW || '', tint: '#a855f7' },
+  { label: 'Buyer',  email: 'buyer@demo.com',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
+  { label: 'Dealer', email: 'dealer@demo.com', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
+  { label: 'Broker', email: 'broker@demo.com', password: 'Kayad@Demo2026!', tint: '#a855f7' },
 ];
 
 export function LoginPage() {
