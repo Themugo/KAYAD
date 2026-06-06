@@ -876,13 +876,27 @@ export default function Showroom() {
                   gridTemplateColumns: gridCols,
                   gap: isMobile ? 12 : 18,
                 }}>
-                  {cars.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
+                  {cars.map((car, i) => {
+                    const num = (page - 1) * 12 + i + 1;
+                    return (
+                      <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ flexShrink: 0, width: 28, textAlign: 'center', fontFamily: 'var(--font-display,serif)', fontStyle: 'italic', fontWeight: 900, fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>{num}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}><CartyGrid car={car} isMobile={isMobile} /></div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {cars.map(car => (
-                    <CartyGrid key={car._id} car={car} listView isMobile={isMobile} />
-                  ))}
+                  {cars.map((car, i) => {
+                    const num = (page - 1) * 12 + i + 1;
+                    return (
+                      <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ flexShrink: 0, width: 28, textAlign: 'center', fontFamily: 'var(--font-display,serif)', fontStyle: 'italic', fontWeight: 900, fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>{num}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}><CartyGrid car={car} listView isMobile={isMobile} /></div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
