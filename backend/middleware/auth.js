@@ -138,6 +138,8 @@ export const protect = async (req, res, next) => {
   }
 };
 
+export const authenticate = protect;
+
 // =============================
 // 👑 ADMIN ONLY (all staff roles)
 // =============================

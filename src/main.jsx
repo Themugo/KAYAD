@@ -3,12 +3,10 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { initSentry } from './utils/sentry';
+import { initPostHog } from './utils/posthog';
 import { initAnalytics } from './lib/analytics';
 
-// Initialise Sentry before anything else renders
-// Only activates if VITE_SENTRY_DSN is set in .env
-initSentry();
+initPostHog();
 initAnalytics();
 
 ReactDOM.createRoot(document.getElementById('root')).render(

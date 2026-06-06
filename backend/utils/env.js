@@ -87,8 +87,8 @@ const FEATURE_GROUPS = [
     vars: ["REDIS_URL"],
   },
   {
-    label: "Sentry (error tracking)",
-    vars: ["SENTRY_DSN"],
+    label: "PostHog (error tracking)",
+    vars: ["POSTHOG_API_KEY", "POSTHOG_HOST"],
   },
 ];
 

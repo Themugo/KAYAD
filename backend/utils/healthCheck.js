@@ -7,7 +7,7 @@
 
 import mongoose from "mongoose";
 import { isRedisConnected } from "./cache.js";
-import { isSentryEnabled }  from "./sentry.js";
+import { isPostHogEnabled } from "./posthog.js";
 
 const START_TIME = Date.now();
 
@@ -47,9 +47,9 @@ const deepHealth = async (req, res) => {
     status: isRedisConnected() ? "ok" : (process.env.REDIS_URL ? "error" : "disabled"),
   };
 
-  // Sentry
-  checks.sentry = {
-    status: isSentryEnabled() ? "ok" : (process.env.SENTRY_DSN ? "error" : "disabled"),
+  // PostHog
+  checks.posthog = {
+    status: isPostHogEnabled() ? "ok" : (process.env.POSTHOG_API_KEY ? "error" : "disabled"),
   };
 
   // Memory

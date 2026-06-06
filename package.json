@@ -22,8 +22,8 @@
     "audit:fix": "npm audit fix --omit=dev"
   },
   "dependencies": {
-    "@sentry/react": "^8.55.2",
     "axios": "^1.6.0",
+    "posthog-js": "^1.200.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.460.0",
     "react": "18.3.1",

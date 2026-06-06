@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { reportError } from '../utils/sentry';
+import { reportError } from '../utils/posthog';
 
 export class ErrorBoundary extends Component {
   constructor(props) {

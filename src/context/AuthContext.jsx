@@ -2,7 +2,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
-import { setSentryUser, clearSentryUser } from '../utils/sentry';
+import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { STAFF_ROLES, isSellerRole } from '../utils/authRoutes';
 import {
   getEffectivePermissions,
@@ -34,8 +34,8 @@ export function AuthProvider({ children }) {
 
   const setUser = (u) => {
     setUserState(u);
-    if (u) setSentryUser(u);
-    else   clearSentryUser();
+    if (u) setPostHogUser(u);
+    else   clearPostHogUser();
   };
 
   const clearAuthState = useCallback(() => {

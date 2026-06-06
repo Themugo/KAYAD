@@ -80,7 +80,7 @@ import { startEscrowCron }     from "./services/escrowCron.js";
 import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
 import { startSavedSearchCron } from "./services/savedSearchCron.js";
 import { startPriceAlertCron } from "./services/priceAlertCron.js";
-import { initSentry, sentryErrorHandler } from "./utils/sentry.js";
+import { initPostHog } from "./utils/posthog.js";
 import { initCache }           from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
@@ -108,8 +108,8 @@ const parseOriginHostname = (origin) => {
 };
 const FRONTEND_HOSTNAME = parseOriginHostname(FRONTEND);
 
-// ─── SENTRY (must be first) ───────────────────────────────────
-await initSentry(app);
+// ─── POSTHOG ──────────────────────────────────────────────────
+await initPostHog();
 
 // ─── TRUST PROXY ──────────────────────────────────────────────
 app.set("trust proxy", 1);
@@ -120,14 +120,15 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://js.sentry-cdn.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
       connectSrc: [
         "'self'",
         FRONTEND,
         ...(FRONTEND_HOSTNAME ? [`wss://${FRONTEND_HOSTNAME}`] : []),
-        "https://*.sentry.io",
+        "https://us.i.posthog.com",
+        "https://app.posthog.com",
       ],
       fontSrc: ["'self'", "data:"],
       frameAncestors: ["'none'"],
@@ -368,7 +369,6 @@ app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
 app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
-sentryErrorHandler(app);   // Sentry first
 app.use(notFound);
 app.use(errorHandler);
 
@@ -431,7 +431,7 @@ const bootstrap = async () => {
       console.log(`  ├─ CORS:     ${FRONTEND}`);
       console.log(`  ├─ Routes:   16 + v1 (versioned)`);
       console.log(`  ├─ Security: mongoSanitize + XSS + IP whitelist + pagination cap`);
-      console.log(`  ├─ Sentry:   ${process.env.SENTRY_DSN ? "✅" : "disabled"}`);
+      console.log(`  ├─ PostHog:  ${process.env.POSTHOG_API_KEY ? "connected" : "disabled"}`);
       console.log(`  ├─ Redis:    ${process.env.REDIS_URL   ? "connecting..." : "in-memory fallback"}`);
       console.log(`  └─ Socket:   ready`);
       console.log("");

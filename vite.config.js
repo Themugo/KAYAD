@@ -81,7 +81,7 @@ export default defineConfig(({ mode }) => {
 
     build: {
       outDir: 'dist',
-      sourcemap: !!env.VITE_SENTRY_DSN,
+      sourcemap: !!env.VITE_POSTHOG_API_KEY,
       target: 'esnext',
       cssCodeSplit: true,
 
@@ -102,9 +102,9 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules/socket.io')) {
               return 'vendor-socket';
             }
-            // Sentry exception tracking chunk
-            if (id.includes('node_modules/@sentry')) {
-              return 'vendor-sentry';
+            // PostHog analytics chunk
+            if (id.includes('node_modules/posthog-js')) {
+              return 'vendor-analytics';
             }
             // Lucide Icons code separation
             if (id.includes('node_modules/lucide-react')) {

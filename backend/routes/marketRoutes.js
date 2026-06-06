@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth.js";
-import { asyncHandler } from "../middleware/errorHandler.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 import { authRole } from "../middleware/authRole.js";
 import Car from "../models/Car.js";
 import { getMarketPulse, getDealerInsights } from "../services/marketIntel.service.js";
