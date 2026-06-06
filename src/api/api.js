@@ -274,6 +274,15 @@ const _carsAPI = {
   addImages: (id, formData) =>
     api.post(`/cars/${id}/images`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
   deleteImage: (id, idx) => api.delete(`/cars/${id}/images/${idx}`).then(unwrap),
+  deleteImages: async (id, indices) => {
+    const sorted = [...indices].sort((a, b) => b - a);
+    const results = [];
+    for (const idx of sorted) {
+      const res = await api.delete(`/cars/${id}/images/${idx}`).then(unwrap);
+      results.push(res);
+    }
+    return results;
+  },
   update:  (id, body) => api.put(`/cars/${id}`, body).then(unwrap),
   promote: (id, body) => api.patch(`/cars/${id}/promote`, body).then(unwrap),
   remove: (id)       => api.delete(`/cars/${id}`).then(unwrap),
