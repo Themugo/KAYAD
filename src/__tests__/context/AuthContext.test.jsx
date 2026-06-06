@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act, cleanup } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../../context/AuthContext';
 import { MemoryRouter } from 'react-router-dom';
 

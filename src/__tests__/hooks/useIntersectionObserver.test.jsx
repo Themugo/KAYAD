@@ -17,7 +17,7 @@ describe('useIntersectionObserver', () => {
   beforeEach(() => {
     observe = vi.fn();
     disconnect = vi.fn();
-    global.IntersectionObserver = vi.fn((cb) => ({
+    global.IntersectionObserver = vi.fn(() => ({
       observe, disconnect, unobserve: vi.fn(),
     }));
   });

@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   parseKES, formatPhone, displayPhone, isValidSafaricom,
-  timeAgo, formatDate, formatDateTime,
-  truncate, initials, slugify, compactNumber,
+  timeAgo, truncate, initials, slugify, compactNumber,
   nextBidOptions, bidCommitmentAmount,
   validateEmail, validatePassword, getCarImage,
   DEAL_META, AUCTION_STATUS,

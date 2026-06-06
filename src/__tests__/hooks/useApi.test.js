@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, cleanup } from '@testing-library/react';
 import {
-  useApi, useDebounce, usePagination, useLocalStorage, useWindowSize,
+  useApi, useDebounce, useLocalStorage, useWindowSize,
 } from '../../hooks/useApi';
 
 describe('useApi', () => {

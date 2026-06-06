@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
-import { Bell, ChevronRight, Menu } from 'lucide-react';
+import { ChevronRight, Menu } from 'lucide-react';
 
 const ROLE_LABELS = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
