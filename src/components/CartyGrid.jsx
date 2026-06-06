@@ -1,4 +1,3 @@
-// src/components/CartyGrid.jsx  (or rename to CarGridItem.jsx)
 import { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -33,7 +32,6 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
   const isCompared = isComparing(car._id);
 
-  // Time-aware auction status
   const now = Date.now();
   const auctionStartTime = car.auctionStartTime ? new Date(car.auctionStartTime).getTime() : 0;
   const auctionEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
@@ -44,114 +42,132 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
 
   const detailTo = `/cars/${car._id}`;
   const auctionTo = `/auction/${car._id}`;
-  const linkTo = detailTo;
   const img = firstImage(car);
   const city = car.location?.city || car.location || 'Nairobi';
   const price = Number(car.currentBid || car.price || 0);
 
-  const fuelIcon = car.fuel?.toLowerCase() === 'diesel' ? '🛢️' 
+  const fuelIcon = car.fuel?.toLowerCase() === 'diesel' ? '🛢️'
                  : car.fuel?.toLowerCase() === 'electric' ? '⚡' : '⛽';
+
+  const liveDot = <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite', marginRight: 3 }} />;
 
   // ===================== LIST VIEW =====================
   if (listView) {
     return (
-      <Link to={linkTo} className="block">
+      <Link to={detailTo} className="block group">
         <motion.div
           whileHover={{ backgroundColor: '#111' }}
-          className="flex flex-col md:flex-row bg-card border-b border-border hover:border-gold/30 transition-all duration-300 min-h-[200px]"
+          style={{
+            display: 'flex', flexDirection: isMobile ? 'column' : 'row',
+            background: '#0C0C0C', borderRadius: 14,
+            border: '1px solid rgba(255,255,255,0.06)',
+            overflow: 'hidden',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}
           onHoverStart={() => setHovered(true)}
           onHoverEnd={() => setHovered(false)}
         >
           {/* Image */}
-          <div className="md:w-[220px] h-[180px] md:h-auto flex-shrink-0 relative overflow-hidden">
+          <div style={{
+            width: isMobile ? '100%' : 300,
+            height: isMobile ? 200 : 200,
+            flexShrink: 0, position: 'relative', overflow: 'hidden',
+            background: '#0A0A0A',
+          }}>
             <LazyImage
               src={img}
               fallback={FALLBACK}
               alt={car.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'linear-gradient(to right, rgba(0,0,0,0.5), transparent)',
+              transition: 'opacity 0.3s',
+              opacity: hovered ? 0 : 1,
+            }} />
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-2">
+            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 5 }}>
               {isLiveNow && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
-                  style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
-                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+                <div style={{ display: 'flex', alignItems: 'center', padding: '3px 9px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: 'rgba(239,68,68,0.92)', color: '#fff', letterSpacing: '0.06em' }}>
+                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite', marginRight: 4 }} />
                   LIVE
                 </div>
               )}
-              {isScheduled && <div className="badge badge-gold text-xs">Upcoming</div>}
+              {isScheduled && (
+                <div style={{ padding: '3px 9px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: 'rgba(212,196,168,0.16)', color: 'var(--gold)', border: '1px solid rgba(212,196,168,0.3)', letterSpacing: '0.06em' }}>
+                  Upcoming
+                </div>
+              )}
               {car.ntsaVerified && (
-                <div className="badge badge-green text-xs">NTSA OK</div>
+                <div style={{ padding: '3px 9px', borderRadius: 20, fontSize: 9, fontWeight: 700, background: 'rgba(34,197,94,0.16)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)', letterSpacing: '0.06em' }}>
+                  NTSA OK
+                </div>
               )}
             </div>
 
             {car.isDemo && (
-              <div className="absolute top-3 right-3">
-                <span style={{
-                  fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
-                  background: 'rgba(249,115,22,0.85)', color: '#fff',
-                  padding: '2px 6px', borderRadius: 4,
-                }}>DEMO</span>
+              <div style={{ position: 'absolute', top: 10, right: 10 }}>
+                <span style={{ fontSize: 7, fontWeight: 800, letterSpacing: '0.1em', background: 'rgba(245,158,11,0.92)', color: '#1a1200', padding: '2px 7px', borderRadius: 4 }}>DEMO</span>
               </div>
             )}
           </div>
 
           {/* Content */}
-          <div className="flex-1 p-4 flex flex-col">
-            <div className="flex justify-between items-start gap-4">
-              <h3 className="text-[15px] font-semibold line-clamp-1 flex-1">
-                {car.year && <span className="text-text-muted">{car.year} </span>}
-                {car.title}
-              </h3>
-
-              <div className="text-right">
-                <div className="text-[9px] text-text-muted uppercase tracking-widest font-bold">
+          <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{ fontSize: 17, fontWeight: 600, lineHeight: 1.3, margin: 0, fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
+                  {car.year && <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>{car.year} </span>}
+                  {car.title}
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 20px', marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>
+                  {car.mileage && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Gauge size={12} /> {car.mileage.toLocaleString()} km</span>
+                  )}
+                  {car.fuel && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span>{fuelIcon}</span> {car.fuel}</span>
+                  )}
+                  {car.transmission && (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Settings size={12} /> {car.transmission}</span>
+                  )}
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {city}</span>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
                   {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
                 </div>
-                <div className="price-tag text-base font-bold text-gold-light leading-tight">
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--gold-light)', lineHeight: 1.2, fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                   KES {price.toLocaleString()}
                 </div>
               </div>
             </div>
 
-            {/* Meta */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted mt-2">
-              {car.mileage && (
-                <span className="flex items-center gap-1.5">
-                  <Gauge size={13} /> {car.mileage.toLocaleString()} km
-                </span>
-              )}
-              {car.fuel && (
-                <span className="flex items-center gap-1.5">
-                  <span>{fuelIcon}</span> {car.fuel}
-                </span>
-              )}
-              {car.transmission && (
-                <span className="flex items-center gap-1.5">
-                  <Settings size={13} /> {car.transmission}
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <MapPin size={13} /> {city}
-              </span>
-            </div>
-
-            {/* Bottom Bar */}
-            <div className="mt-auto pt-4 border-t border-border flex items-center justify-between text-sm">
-              <div className="text-text-muted text-xs">
-                {car.views && `${car.views} views • `}
-                {car.createdAt && `${timeAgo(car.createdAt)}`}
+            <div style={{ marginTop: 'auto', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>
+                {car.views && `${car.views} views`}
+                {car.views && car.createdAt && <span style={{ margin: '0 6px', opacity: 0.3 }}>·</span>}
+                {car.createdAt && <span>{timeAgo(car.createdAt)}</span>}
               </div>
-
-              <button
-                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-                title={isCompared ? 'Remove from compare' : 'Add to compare'}
-                className={`p-2 rounded-xl transition-colors ${isCompared ? 'bg-gold text-black' : 'hover:bg-surface text-text-muted'}`}
-              >
-                <BarChart3 size={16} />
-              </button>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
+                  title={isCompared ? 'Remove from compare' : 'Add to compare'}
+                  style={{
+                    padding: '6px 10px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700,
+                    background: isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.05)',
+                    color: isCompared ? '#000' : 'rgba(255,255,255,0.4)',
+                    transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 4,
+                  }}
+                  onMouseEnter={e => { if (!isCompared) { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; } }}
+                  onMouseLeave={e => { if (!isCompared) { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; } }}
+                >
+                  <BarChart3 size={13} /> Compare
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -169,37 +185,45 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
       onHoverEnd={() => setHovered(false)}
     >
       <div className="card h-full flex flex-col overflow-hidden">
-        {/* Image + core info → car details */}
+        {/* Image */}
         <Link to={detailTo} className="block">
           <div className="car-img-wrap relative">
             <LazyImage
               src={img}
               fallback={FALLBACK}
               alt={car.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full"
             />
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">
               {isLiveNow && (
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
-                  style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
+                  style={{ background: 'rgba(239,68,68,0.92)', color: '#fff', backdropFilter: 'blur(4px)' }}>
                   <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
                   LIVE
                 </div>
               )}
-              {isScheduled && <div className="badge badge-gold text-[9px]">Upcoming</div>}
+              {isScheduled && (
+                <div className="badge badge-gold text-[9px]" style={{ backdropFilter: 'blur(4px)' }}>Upcoming</div>
+              )}
               {car.isDemo && (
                 <span style={{
-                  fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
-                  background: 'rgba(249,115,22,0.85)', color: '#fff',
-                  padding: '2px 6px', borderRadius: 4, display: 'inline-block',
+                  fontSize: 7, fontWeight: 800, letterSpacing: '0.1em',
+                  background: 'rgba(245,158,11,0.92)', color: '#1a1200',
+                  padding: '2px 7px', borderRadius: 4, display: 'inline-block',
+                  backdropFilter: 'blur(4px)',
                 }}>DEMO</span>
               )}
             </div>
 
             {car.year && (
-              <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs font-bold px-2.5 py-1 rounded">
+              <div style={{
+                position: 'absolute', bottom: 10, right: 10,
+                background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)',
+                color: '#fff', fontSize: 11, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
+              }}>
                 {car.year}
               </div>
             )}
@@ -209,7 +233,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
         {/* Info */}
         <div className="p-4 flex-1 flex flex-col">
           <Link to={detailTo} className="block">
-            <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1 group-hover:text-gold transition-colors">
+            <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1 group-hover:text-gold transition-colors" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               {car.title}
             </h3>
 
@@ -225,13 +249,13 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
             </div>
           </Link>
 
-          {/* ── Split footer: price → details · segment → auction room ── */}
+          {/* Footer */}
           <div className="mt-auto pt-3 border-t border-border flex items-stretch">
             <Link to={detailTo} className="flex-1 min-w-0 block group/price">
               <div className="text-[9px] uppercase tracking-wider text-text-muted font-bold">
                 {isOnAuction ? (car.currentBid > 0 ? 'Current Bid' : 'Starting Bid') : 'Price'}
               </div>
-              <div className="price-tag text-base font-bold text-gold-light leading-tight">
+              <div className="price-tag text-base font-bold text-gold-light leading-tight" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
                 KES {price.toLocaleString()}
               </div>
             </Link>
@@ -256,7 +280,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
         </div>
       </div>
 
-      {/* Compare — subtle, appears on hover */}
+      {/* Compare button */}
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
         title={isCompared ? 'Remove from compare' : 'Add to compare'}
