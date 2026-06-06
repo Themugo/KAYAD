@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import { inspectionAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Eye, Star, ShieldCheck } from 'lucide-react';
+import { Eye, Star, ShieldCheck, Smartphone, Clock, ChevronRight } from 'lucide-react';
+import GhostCheckOrderModal from './GhostCheckOrderModal';
 
 export default function InspectionButton({ carId, location, onInspectionComplete }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [inspection, setInspection] = useState(null);
-  const [ordering, setOrdering] = useState(false);
-  const [phone, setPhone] = useState('');
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (!carId) return;
@@ -17,23 +17,6 @@ export default function InspectionButton({ carId, location, onInspectionComplete
       if (r.inspection) setInspection(r.inspection);
     }).catch(() => {});
   }, [carId]);
-
-  const handleOrder = async () => {
-    if (!phone || phone.length < 10) {
-      toast('Enter a valid M-Pesa phone number', 'error');
-      return;
-    }
-    setOrdering(true);
-    try {
-      await inspectionAPI.order({ carId, phone, location });
-      toast('Inspection ordered! Check your phone for M-Pesa prompt.', 'success');
-      setPhone('');
-      if (onInspectionComplete) onInspectionComplete();
-    } catch (e) {
-      toast(e?.message || 'Failed to order inspection', 'error');
-    }
-    finally { setOrdering(false); }
-  };
 
   if (inspection && inspection.status === 'completed') {
     const score = inspection.overallScore || 0;
@@ -52,7 +35,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
             <ShieldCheck size={20} style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Inspection Report Available</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Ghost Check Report Available</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <Star size={12} fill="currentColor" style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
               <span style={{ fontSize: 14, fontWeight: 900, color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }}>{score}/100</span>
@@ -61,48 +44,90 @@ export default function InspectionButton({ carId, location, onInspectionComplete
           </div>
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-          {inspection.inspectorNotes || `${inspection.checklist?.length || 0} inspection points checked by ${inspection.inspector?.name || 'a certified inspector'}.`}
+          {inspection.inspectorNotes || `${inspection.checklist?.length || 0} inspection points checked by ${inspection.inspector?.name || 'a certified Ghost Checker'}.`}
         </div>
       </div>
     );
   }
 
+  // Check for pending order
+  const [pendingOrder, setPendingOrder] = useState(null);
+  useEffect(() => {
+    if (!carId || !user) return;
+    inspectionAPI.myOrders().then(r => {
+      const orders = (r.orders || []).filter(o => o.car === carId || o.car?._id === carId);
+      const active = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled');
+      if (active) setPendingOrder(active);
+    }).catch(() => {});
+  }, [carId, user]);
+
   return (
-    <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: 14, padding: 16, marginTop: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-        <div>
-          <h4 style={{ color: '#34d399', fontWeight: 700, fontSize: 13, margin: 0 }}>Remote Inspection</h4>
-          <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4, lineHeight: 1.5 }}>
-            Can't travel to {location || 'the seller'}? Send a certified inspector for a 150-point vehicle assessment.
-          </p>
+    <>
+      <div style={{
+        background: pendingOrder
+          ? 'rgba(59,130,246,0.06)'
+          : 'rgba(16,185,129,0.08)',
+        border: `1px solid ${
+          pendingOrder
+            ? 'rgba(59,130,246,0.15)'
+            : 'rgba(16,185,129,0.15)'
+        }`,
+        borderRadius: 14, padding: 16, marginTop: 12,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+          <div>
+            <h4 style={{ color: pendingOrder ? '#60a5fa' : '#34d399', fontWeight: 700, fontSize: 13, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ShieldCheck size={13} /> Ghost Check
+            </h4>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4, lineHeight: 1.5 }}>
+              {pendingOrder
+                ? `Status: ${pendingOrder.status?.replace(/_/g, ' ') || 'Processing'} — an inspection is already in progress for this vehicle.`
+                : `Can't inspect ${location || 'the vehicle'} in person? Send a certified Ghost Checker for a 150-point forensic assessment.`
+              }
+            </p>
+          </div>
+          <span style={{
+            background: pendingOrder ? '#3b82f6' : '#10b981',
+            color: '#000', fontSize: 9, fontWeight: 900, padding: '3px 7px',
+            borderRadius: 4, whiteSpace: 'nowrap',
+          }}>{pendingOrder ? 'TRACKING' : '150-POINT'}</span>
         </div>
-        <span style={{ background: '#10b981', color: '#000', fontSize: 9, fontWeight: 900, padding: '3px 7px', borderRadius: 4, whiteSpace: 'nowrap' }}>150-POINT</span>
+
+        {!user ? (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Sign in to order a Ghost Check</span>
+          </div>
+        ) : (
+          <button onClick={() => setShowModal(true)}
+            style={{
+              width: '100%', padding: '10px', borderRadius: 8,
+              background: pendingOrder ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)',
+              border: `1px solid ${pendingOrder ? 'rgba(59,130,246,0.2)' : 'rgba(16,185,129,0.15)'}`,
+              color: pendingOrder ? '#60a5fa' : '#34d399',
+              fontWeight: 700, fontSize: 11, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = pendingOrder ? 'rgba(59,130,246,0.15)' : 'rgba(16,185,129,0.15)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = pendingOrder ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)'; }}
+          >
+            {pendingOrder ? (
+              <><Clock size={13} /> Track Inspection Status <ChevronRight size={12} /></>
+            ) : (
+              <><Eye size={13} /> Order Ghost Check — {formatKES(2500)}</>
+            )}
+          </button>
+        )}
       </div>
 
-      {!user ? (
-        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: 8 }}>
-          Sign in to order an inspection
-        </p>
-      ) : (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            value={phone} onChange={e => setPhone(e.target.value)}
-            placeholder="M-Pesa phone (0712345678)"
-            style={{
-              flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 8, padding: '8px 10px', color: '#fff', fontSize: 11, outline: 'none',
-            }}
-          />
-          <button onClick={handleOrder} disabled={ordering}
-            style={{
-              padding: '8px 16px', background: '#059669', color: '#fff', fontSize: 11,
-              fontWeight: 800, borderRadius: 8, border: 'none', cursor: ordering ? 'wait' : 'pointer',
-              display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap',
-            }}>
-            {ordering ? '...' : <Eye size={13} />} Inspect
-          </button>
-        </div>
+      {showModal && (
+        <GhostCheckOrderModal
+          carId={carId}
+          location={location}
+          onClose={() => setShowModal(false)}
+          onInspectionComplete={onInspectionComplete}
+        />
       )}
-    </div>
+    </>
   );
 }

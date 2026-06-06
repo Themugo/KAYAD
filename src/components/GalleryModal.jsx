@@ -103,7 +103,7 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }) {
         </>
       )}
 
-      <div onClick={e => e.stopPropagation()} style={{
+      <div onClick={e => e.stopPropagation()} className="gallery-modal-image" style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '60px 80px', width: '100%', maxHeight: 'calc(100vh - 120px)',
         cursor: 'default',

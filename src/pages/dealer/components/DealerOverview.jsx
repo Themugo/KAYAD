@@ -11,6 +11,7 @@ import {
   TrendingUp, ChevronRight, Activity, Package, ArrowUpRight,
 } from 'lucide-react';
 import { StatCard, StatusBadge, DemoBadge, MiniBarChart, timeAgo } from './DashboardWidgets';
+import DealerMarketInsights from '../../../components/DealerMarketInsights';
 
 const cardStyle = {
   background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)',
@@ -84,6 +85,9 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
         <StatCard icon="📋" label="Draft Auctions"  value={s.draftAuctions ?? s.draftCount ?? 0} color="#6b7280" trend={0} />
         <StatCard icon="📊" label="Conversion"      value={s.conversionRate ? `${(s.conversionRate * 100).toFixed(1)}%` : '—'} color="#a855f7" trend={trends?.viewsToBids} />
       </div>
+
+      {/* ── SokoAI Market Insights ── */}
+      <DealerMarketInsights />
 
       {/* ── ROW A: Performance chart + Quick actions ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 16, marginBottom: 20 }} className="overview-row">

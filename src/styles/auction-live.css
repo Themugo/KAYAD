@@ -79,8 +79,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 5;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(0,0,0,0.5);
   border: 1px solid rgba(255,255,255,0.1);
@@ -333,9 +333,9 @@
   margin-bottom: 12px;
 }
 .quick-bid-chip {
-  padding: 5px 9px;
+  padding: 8px 12px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 12px;
   cursor: pointer;
   border: 1px solid var(--border);
   background: var(--surface);

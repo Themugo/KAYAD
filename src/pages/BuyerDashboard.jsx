@@ -318,7 +318,7 @@ export default function BuyerDashboard() {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}>
+                <div className="buyer-content-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 24 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {/* ── QUICK ACTIONS ── */}
                     <div>

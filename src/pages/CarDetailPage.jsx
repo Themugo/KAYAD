@@ -12,6 +12,7 @@ import PaymentModal from '../components/PaymentModal';
 import InspectionButton from '../components/InspectionButton';
 import TcoCalculator from '../components/TcoCalculator';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
+import MarketPulse from '../components/MarketPulse';
 import PriceHistoryChart from '../components/PriceHistoryChart';
 import GalleryModal from '../components/GalleryModal';
 import { VehicleStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
@@ -860,6 +861,9 @@ export default function CarDetailPage() {
 
           {/* Inspection */}
           <InspectionButton carId={car._id} location={car.location?.city || dealer?.location} />
+          <Link to="/ghost-checker" style={{ display: 'block', fontSize: 11, color: 'var(--gold)', textDecoration: 'none', marginTop: -8, marginBottom: 8, opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}>
+            Learn about Ghost Check →
+          </Link>
 
           {/* TCO */}
           <TcoCalculator vehicle={car} />
@@ -875,6 +879,9 @@ export default function CarDetailPage() {
 
           {/* Price History */}
           <PriceHistoryChart carId={car._id} currentPrice={car.price} />
+
+          {/* Market Pulse (SokoAI) */}
+          <MarketPulse carId={car._id} carPrice={car.price || car.currentBid} carBrand={car.brand} carYear={car.year} />
 
           {/* Dealer Mini Card */}
           {dealer && (

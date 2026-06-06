@@ -163,6 +163,13 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 }
 .btn-danger:hover { background: rgba(239,68,68,0.2); }
 
+/* Button size variants */
+.btn-sm { padding: 8px 16px; font-size: 12px; min-height: 36px; }
+.btn-lg { padding: 14px 32px; font-size: 16px; }
+.btn-full { width: 100%; }
+.btn-green { background: #22C55E; color: #000; border: none; font-weight: 700; }
+.btn-green:hover { background: #1EA34D; transform: translateY(-1px); }
+
 /* ─────── CARDS ─────── */
 .card {
   background: var(--card);
@@ -446,13 +453,20 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
   table { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Buttons/links get comfortable tap targets */
-  button, a.btn, .btn, .cta-primary, .cta-secondary { min-height: 44px; }
+  button, a.btn, .btn, .cta-primary, .cta-secondary,
+  .cta-fav, .back-btn, .gallery-nav-btn, .tab-btn,
+  .compare-toggle, .mobile-nav-link, .nav-link,
+  .ntsa-request-btn, .ntsa-retry-btn, .owner-btn-edit,
+  .owner-btn-feature, .sidebar-toggle-btn, .quick-bid-chip {
+    min-height: 44px;
+  }
 }
 
 @media (max-width: 480px) {
   .container { padding-left: 13px; padding-right: 13px; }
   /* Modals go (near) full-screen so content isn't cramped */
   .modal-box { width: 94vw !important; max-width: 94vw !important; padding: 20px !important; border-radius: 16px; }
+  .gallery-modal-image { padding: 20px 10px !important; }
 }
 
 /* 3. Responsive grid utility classes — N-up on desktop, auto-collapse on phone.
@@ -477,7 +491,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 /* ─────── TABS - mobile friendly ─────── */
 .tabs {
   display: flex;
-  gap: 2px;
+  gap: 8px;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -522,4 +536,18 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 /* Admin dashboard — stack the 3-column panel row on smaller screens */
 @media (max-width: 980px) {
   .admin-3col { grid-template-columns: 1fr !important; }
+}
+
+/* Buyer dashboard — stack main content + sidebar on mobile */
+@media (max-width: 860px) {
+  .buyer-content-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Dealer listings grid — card layout on mobile */
+@media (max-width: 768px) {
+  .dealer-listing-grid { grid-template-columns: 1fr !important; }
+  .dealer-listing-row { display: flex !important; flex-direction: column !important; gap: 10px !important; padding: 14px !important; }
+  .dealer-listing-row > input[type="checkbox"] { display: none !important; }
+  .dealer-listing-row > img, .dealer-listing-row > div:first-of-type { flex-shrink: 0 !important; }
+  .dealer-listing-row > div:last-child { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
 }

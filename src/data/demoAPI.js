@@ -3,6 +3,7 @@ import {
   DEMO_NOTIFICATIONS, DEMO_REVIEWS, DEMO_CHATS, DEMO_MESSAGES,
   DEMO_DEALER_STATS, DEMO_ADMIN_STATS, DEMO_ADMIN_USERS,
   filterDemoCars, getDemoCar, addDemoCar, updateDemoCar, removeDemoCar,
+  getDemoMarketPulse, getDemoDealerInsights,
 } from './demoData';
 
 // ⚠️ ARCHITECTURAL DEBT: ~1,500 lines of mock API that duplicate
@@ -1175,6 +1176,32 @@ const demoReviews = {
   },
 };
 
+// ─── Demo Market Intelligence API ─────────────────────────────────
+const demoMarket = {
+  pulse: async (carId) => {
+    await delay();
+    const pulse = getDemoMarketPulse(carId);
+    if (!pulse) throw { response: { status: 404, data: { message: 'Car not found' } } };
+    return wrapSuccess({ data: pulse });
+  },
+
+  trends: async (params = {}) => {
+    await delay();
+    const brands = [...new Set(DEMO_CARS.map(c => c.brand))];
+    const data = brands.map(b => {
+      const bc = DEMO_CARS.filter(c => c.brand === b);
+      return { brand: b, count: bc.length, avgPrice: Math.round(bc.reduce((s, c) => s + c.price, 0) / bc.length) };
+    });
+    return wrapSuccess({ data, totalCars: DEMO_CARS.length, period: `${params.days || 90}d` });
+  },
+
+  dealerInsights: async () => {
+    await delay();
+    const insights = getDemoDealerInsights();
+    return wrapSuccess({ data: insights });
+  },
+};
+
 // ─── Demo Transactions API ────────────────────────────────────────
 const demoTransactions = {
   list: async () => {
@@ -1194,6 +1221,7 @@ const demoTransactions = {
 // ─── Export ───────────────────────────────────────────────────────
 export const demoAPI = {
   auth: demoAuth,
+  market: demoMarket,
   cars: demoCars,
   bids: demoBids,
   payments: demoPayments,

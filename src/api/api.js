@@ -671,6 +671,16 @@ export const contactAPI = {
 };
 
 // ============================================================
+//  MARKET INTELLIGENCE — routes/marketRoutes.js (/market)
+// ============================================================
+const _marketAPI = {
+  pulse:      (carId)  => api.get(`/market/pulse/${carId}`).then(unwrap),
+  trends:     (params) => api.get('/market/trends', { params }).then(unwrap),
+  dealerInsights: ()   => api.get('/market/dealer/insights').then(unwrap),
+};
+export const marketAPI = withDemo(_marketAPI, demoAPI.market);
+
+// ============================================================
 //  INSPECTOR APPLICATIONS — routes/inspectorRoutes.js
 //  (Applicant-facing — POST /apply)
 // ============================================================

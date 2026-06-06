@@ -285,6 +285,56 @@ export const DEMO_ADMIN_USERS = [
   { _id:DEMO_USERS.buyer._id, name:'James Kariuki', email:'buyer@demo.com', role:'user', isBanned:false, approved:true, createdAt:new Date(now-30*DAY).toISOString(), lastLogin:new Date(now-0.2*DAY).toISOString() },
 ];
 
+export function getDemoMarketPulse(carId) {
+  const car = getDemoCar(carId);
+  if (!car) return null;
+  const demandScores = { prado: 95, landcruiser: 98, harrier: 88, cx5: 85, xtrail: 78, forester: 80, demio: 82, vitz: 85, axio: 75, premio: 80 };
+  const lower = (car.title || "").toLowerCase();
+  let demand = 65;
+  for (const [k, v] of Object.entries(demandScores)) {
+    if (lower.includes(k)) { demand = v; break; }
+  }
+  const daysOnMarket = Math.round((Date.now() - new Date(car.createdAt || Date.now()).getTime()) / 86400000);
+  const priceRatio = 0.85 + Math.random() * 0.3;
+  const fairMin = Math.round(car.price * 0.88);
+  const fairMax = Math.round(car.price * 1.08);
+  const priceVsMarket = Math.round((1 - priceRatio) * 100);
+  const trend = priceVsMarket < -10 ? "overvalued" : priceVsMarket > 10 ? "undervalued" : "stable";
+  return {
+    predictiveScore: Math.min(100, Math.round(demand * 0.6 + (car.views > 100 ? 15 : 5) + (priceRatio < 1.1 ? 10 : 0))),
+    trend,
+    demandScore: demand,
+    fairPriceRange: { min: fairMin, max: fairMax, avg: Math.round((fairMin + fairMax) / 2) },
+    estDaysToSell: Math.max(3, Math.round(45 - demand * 0.3 + (1 - priceRatio) * 15)),
+    daysOnMarket,
+    marketAvgPrice: Math.round(car.price * priceRatio),
+    priceVsMarket,
+    sampleSize: 8 + Math.floor(Math.random() * 15),
+  };
+}
+
+export function getDemoDealerInsights() {
+  const cars = _cars.slice(0, 10);
+  const photoScore = Math.min(100, Math.round(cars.reduce((s, c) => {
+    const cnt = (c.images || []).length;
+    return s + (cnt >= 5 ? 95 : cnt >= 3 ? 75 : cnt >= 1 ? 50 : 10);
+  }, 0) / cars.length));
+  const recommendations = cars.slice(0, 5).map(c => {
+    const pulse = getDemoMarketPulse(c._id);
+    return {
+      carId: c._id,
+      title: c.title,
+      currentPrice: c.price,
+      optimalPrice: pulse?.fairPriceRange?.avg || c.price,
+      priceDiff: pulse ? Math.round(((c.price - pulse.fairPriceRange.avg) / pulse.fairPriceRange.avg) * 100) : 0,
+      photoCount: (c.images || []).length,
+      engagementScore: pulse?.predictiveScore || 50,
+      daysOnMarket: pulse?.daysOnMarket || 1,
+    };
+  });
+  return { totalCars: cars.length, photoScore, recommendations, averageScore: Math.round(recommendations.reduce((s, r) => s + r.engagementScore, 0) / recommendations.length) };
+}
+
 export function filterDemoCars(filters = {}) {
   let r = [..._cars];
   if (filters.search) {

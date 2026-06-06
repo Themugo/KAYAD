@@ -143,6 +143,10 @@ export default function Navbar({ branding }) {
               <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
             </Link>
 
+            <Link to="/ghost-checker" className={`nav-link ${isActive('/ghost-checker') ? 'active' : ''}`}>
+              Ghost Check
+            </Link>
+
             {isSellerRole(user?.role) && (
               <Link to="/dealer" className={`nav-link ${isActive('/dealer') ? 'active' : ''}`}>
                 Dealer Hub
@@ -282,8 +286,8 @@ export default function Navbar({ branding }) {
               <div className="flex flex-col h-full">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>Menu</span>
-                  <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-2 hover:bg-surface rounded-xl transition-colors" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', padding: 8 }}>
-                    <X size={22} />
+                  <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-3 hover:bg-surface rounded-xl transition-colors" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', padding: 12 }}>
+                    <X size={24} />
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
@@ -301,6 +305,9 @@ export default function Navbar({ branding }) {
                       </span>
                     )}
                     <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
+                  </Link>
+                  <Link to="/ghost-checker" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    Ghost Check
                   </Link>
                   {isSellerRole(user?.role) && (
                     <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>

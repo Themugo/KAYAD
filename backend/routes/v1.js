@@ -25,6 +25,7 @@ import smsBiddingRoutes   from "./smsBiddingRoutes.js";
 import inspectorApplicationRoutes from "./inspectorApplicationRoutes.js";
 import referralRoutes            from "./referralRoutes.js";
 import contactRoutes             from "./contactRoutes.js";
+import marketRoutes              from "./marketRoutes.js";
 
 const router = Router();
 
@@ -52,5 +53,6 @@ router.use("/sms-bidding",   smsBiddingRoutes);
 router.use("/inspector-applications", inspectorApplicationRoutes);
 router.use("/referral",              referralRoutes);
 router.use("/contact",               contactRoutes);
+router.use("/market",                marketRoutes);
 
 export default router;

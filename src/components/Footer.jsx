@@ -9,7 +9,7 @@ export default function Footer() {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 28px 0' }}>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1.5fr 1fr 1fr',
+          gridTemplateColumns: '1.5fr 1fr 1fr 1fr',
           gap: 40,
           marginBottom: 32,
         }} className="footer-grid">
@@ -31,7 +31,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Links */}
+          {/* Browse */}
           <div>
             <h4 style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>Browse</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -47,7 +47,22 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Dealers */}
+          {/* Services */}
+          <div>
+            <h4 style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>Services</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { to: '/ghost-checker', label: 'Ghost Check' },
+              ].map(l => (
+                <Link key={l.label} to={l.to} style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
+                >{l.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Sell */}
           <div>
             <h4 style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px' }}>Sell</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

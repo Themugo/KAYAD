@@ -4,6 +4,7 @@ import CartyGrid from '../components/CartyGrid';
 import { useState, useEffect, useRef } from 'react';
 import { carsAPI } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
+import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 
 const AnimatedStat = ({ value, label }) => {
@@ -82,6 +83,7 @@ const LiveTicker = ({ count }) => {
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
   const { isAuth, user } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [featured,    setFeatured]    = useState([]);
   const [recent,      setRecent]      = useState([]);
   const [liveAuctions, setLiveAuctions] = useState([]);
@@ -316,7 +318,7 @@ export default function HomePage() {
                         {timeStr}
                       </span>
                     </div>
-                    <CartyGrid car={car} />
+                    <CartyGrid car={car} isMobile={isMobile} />
                   </div>
                 );
               })}
@@ -373,7 +375,7 @@ export default function HomePage() {
             </div>
           ) : cars.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-              {cars.map(car => <CartyGrid key={car._id} car={car} />)}
+              {cars.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
             </div>
           ) : (
             <div style={{ textAlign: 'center', padding: '48px 0', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
@@ -410,7 +412,7 @@ export default function HomePage() {
               >Browse All →</Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-              {recent.map(car => <CartyGrid key={car._id} car={car} />)}
+              {recent.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
             </div>
           </div>
         </section>
