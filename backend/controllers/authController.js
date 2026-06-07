@@ -64,6 +64,16 @@ const sendRefreshToken = (res, token) => {
   });
 };
 
+const sendAccessToken = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/api",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+};
+
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
@@ -73,6 +83,7 @@ const sendAuthResponse = (res, user) => {
   const safeUser = serializeUser(user);
 
   sendRefreshToken(res, refreshToken);
+  sendAccessToken(res, accessToken);
 
   return res.json({
     success: true,
@@ -382,9 +393,8 @@ export const logout = async (req, res) => {
       });
     }
 
-    res.clearCookie("refreshToken", {
-      path: "/api",
-    });
+    res.clearCookie("refreshToken", { path: "/api" });
+    res.clearCookie("token", { path: "/api" });
 
     res.json({
       success: true,

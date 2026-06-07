@@ -1,6 +1,35 @@
 import axios from "axios";
+import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { withRetry } from "../utils/retry.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Load Safaricom production public certificate for SecurityCredential generation
+const SAFARICOM_CERT_PATH = path.join(__dirname, "..", "certs", "safaricom.cer");
+let _safaricomCert = null;
+try {
+  if (fs.existsSync(SAFARICOM_CERT_PATH)) {
+    _safaricomCert = fs.readFileSync(SAFARICOM_CERT_PATH);
+  }
+} catch { /* cert not available — fall back to passkey-based Password */ }
+
+const generateSecurityCredential = (passkey) => {
+  if (!_safaricomCert) return null;
+  try {
+    const encrypted = crypto.publicEncrypt(
+      { key: _safaricomCert, padding: crypto.constants.RSA_PKCS1_PADDING },
+      Buffer.from(passkey)
+    );
+    return encrypted.toString("base64");
+  } catch {
+    console.warn("⚠️ SecurityCredential generation failed — falling back to passkey");
+    return null;
+  }
+};
 
 const mpesaTimestamp = () => {
   const d = new Date();
@@ -100,7 +129,11 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
     const token = await getAccessToken(baseUrl, cfg.consumerKey, cfg.consumerSecret);
 
     const timestamp = mpesaTimestamp();
-    const password = Buffer.from(`${cfg.shortCode}${cfg.passkey}${timestamp}`).toString("base64");
+    const isProduction = cfg.environment === "production";
+    const securityCredential = isProduction ? generateSecurityCredential(cfg.passkey) : null;
+    const password = Buffer.from(
+      `${cfg.shortCode}${securityCredential || cfg.passkey}${timestamp}`
+    ).toString("base64");
 
     const payload = {
       BusinessShortCode: cfg.shortCode,

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
@@ -7,11 +8,14 @@ import DemoModeBanner from './DemoModeBanner';
 
 export default function AppLayout({ children }) {
   const [config, setConfig] = useState(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     adminAPI.getPublicConfig().then(cfg => {
       setConfig(cfg.config || cfg);
-    }).catch(() => {});
+    }).catch(() => {
+      toast('Could not load site configuration', 'warning');
+    });
   }, []);
 
   useEffect(() => {

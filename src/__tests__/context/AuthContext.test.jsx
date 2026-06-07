@@ -48,19 +48,21 @@ describe('AuthProvider', () => {
     localStorage.clear();
   });
 
-  it('provides initial state with no user when no token', () => {
+  it('provides initial state with no user when me() returns 401', () => {
+    mockAuthAPI.me.mockRejectedValue({ response: { status: 401 } });
     const { result } = renderHook(() => useAuth(), { wrapper });
     expect(result.current.isAuth).toBe(false);
     expect(result.current.user).toBeNull();
   });
 
-  it('resolves loading to false on mount when no token', () => {
+  it('resolves loading to false after me() settles', async () => {
+    mockAuthAPI.me.mockRejectedValue({ response: { status: 401 } });
     const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(() => Promise.resolve());
     expect(result.current.loading).toBe(false);
   });
 
-  it('sets user when token exists and me() succeeds', async () => {
-    localStorage.setItem('kayad_token', 'fake-token');
+  it('sets user when me() succeeds (session cookie present)', async () => {
     mockAuthAPI.me.mockResolvedValue({ user: { _id: '1', name: 'John', email: 'a@b.com', role: 'user', emailVerified: true } });
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(() => Promise.resolve());
@@ -70,7 +72,6 @@ describe('AuthProvider', () => {
   });
 
   it('computes isAdmin correctly', async () => {
-    localStorage.setItem('kayad_token', 'admin-token');
     mockAuthAPI.me.mockResolvedValue({ user: { _id: '2', name: 'Admin', email: 'admin@kayad.com', role: 'superadmin', emailVerified: true } });
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(() => Promise.resolve());
@@ -79,7 +80,6 @@ describe('AuthProvider', () => {
   });
 
   it('computes isDealer correctly', async () => {
-    localStorage.setItem('kayad_token', 'dealer-token');
     mockAuthAPI.me.mockResolvedValue({ user: { _id: '3', name: 'Dealer', email: 'd@kayad.com', role: 'dealer', emailVerified: true, approved: true } });
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(() => Promise.resolve());
@@ -87,30 +87,39 @@ describe('AuthProvider', () => {
     expect(result.current.isSeller).toBe(true);
   });
 
-  it('login sets token and user', async () => {
-    mockAuthAPI.login.mockResolvedValue({ token: 'login-token', user: { _id: '4', name: 'LoggedIn', email: 'l@b.com', role: 'user' } });
+  it('login sets user (token stored in HttpOnly cookie by backend)', async () => {
+    mockAuthAPI.me.mockRejectedValue({ response: { status: 401 } });
+    mockAuthAPI.login.mockResolvedValue({ token: 'ignored', user: { _id: '4', name: 'LoggedIn', email: 'l@b.com', role: 'user' } });
     const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(() => Promise.resolve());
     await act(() => result.current.login({ email: 'a@b.com', password: 'x' }));
-    expect(result.current.token).toBe('login-token');
+    expect(result.current.token).toBeUndefined();
     expect(result.current.user?.name).toBe('LoggedIn');
-    expect(localStorage.getItem('kayad_token')).toBe('login-token');
+    expect(localStorage.getItem('kayad_token')).toBeNull();
   });
 
   it('logout clears auth state', async () => {
-    localStorage.setItem('kayad_token', 'tok');
     mockAuthAPI.me.mockResolvedValue({ user: { _id: '5', name: 'Temp', email: 't@b.com', role: 'user' } });
     mockAuthAPI.logout.mockResolvedValue({});
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(() => Promise.resolve());
     await act(() => result.current.logout());
-    expect(result.current.token).toBeNull();
+    expect(result.current.token).toBeUndefined();
     expect(result.current.user).toBeNull();
-    expect(localStorage.getItem('kayad_token')).toBeNull();
+  });
+
+  it('handles me() network error gracefully', async () => {
+    mockAuthAPI.me.mockRejectedValue(new Error('Network Error'));
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await act(() => Promise.resolve());
+    expect(result.current.isAuth).toBe(false);
+    expect(result.current.loading).toBe(false);
   });
 });
 
 describe('useAuth', () => {
   it('returns context within provider', () => {
+    mockAuthAPI.me.mockRejectedValue({ response: { status: 401 } });
     const { result } = renderHook(() => useAuth(), { wrapper });
     expect(result.current).toBeDefined();
     expect(result.current.isAuth).toBe(false);

@@ -277,10 +277,10 @@ if (NODE_ENV !== "production") {
 const io = new Server(server, {
   cors: {
     origin: (origin, cb) => {
-      if (!origin || NODE_ENV === "development") return cb(null, true);
+      if (!origin) return cb(null, true);
+      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
       if (allowedOrigins.includes(origin)) return cb(null, true);
       if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
-      if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
       cb(new Error(`Socket CORS blocked: ${origin}`));
     },
     credentials: true,

@@ -112,8 +112,15 @@ export const validateMpesaCallback = (req, res, next) => {
     CheckoutRequestID: cb.CheckoutRequestID,
     ResultCode: cb.ResultCode,
     ip: getClientIp(req),
+    origin: req.headers["origin"] || req.headers["referer"] || "none",
     ts: new Date().toISOString(),
   });
+
+  // Additional verification: check that the request is POST (matches Safaricom's contract)
+  if (req.method !== "POST") {
+    console.error("❌ M-Pesa callback wrong HTTP method:", req.method);
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid method" });
+  }
 
   next();
 };

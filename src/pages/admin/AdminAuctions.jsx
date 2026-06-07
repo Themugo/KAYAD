@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { CountdownDisplay } from '../../hooks/useCountdown';
+import { CountdownDisplay } from '../../components/CountdownDisplay';
 
 export default function AdminAuctions() {
   const { toast } = useToast();

@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { dealerAPI, dealerAuctionAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { CountdownDisplay, useCountdown } from '../../hooks/useCountdown';
+import { useCountdown } from '../../hooks/useCountdown';
+import { CountdownDisplay } from '../../components/CountdownDisplay';
 
 const DURATIONS = [
   { label: '24 hours', value: 24 },

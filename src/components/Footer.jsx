@@ -85,10 +85,10 @@ export default function Footer() {
           padding: '16px 0',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10,
         }}>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.12)' }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
             © {new Date().getFullYear()} Kayad Ltd.
           </div>
-          <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'rgba(255,255,255,0.15)' }}>
+          <div style={{ display: 'flex', gap: 14, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
             <span>Privacy</span>
             <span>Terms</span>
           </div>

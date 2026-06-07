@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
 import { useState, useEffect, useRef } from 'react';
 import { carsAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
@@ -83,6 +84,7 @@ const LiveTicker = ({ count }) => {
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
   const { isAuth, user } = useAuth();
+  const { toast } = useToast();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [featured,    setFeatured]    = useState([]);
   const [recent,      setRecent]      = useState([]);
@@ -130,7 +132,9 @@ export default function HomePage() {
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
       });
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => {
+      toast('Could not load vehicles. Check your connection.', 'warning');
+    }).finally(() => setLoading(false));
   }, []);
 
   const cars = loading ? [] : (featured.length > 0 ? featured : recent);

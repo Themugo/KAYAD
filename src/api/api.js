@@ -66,34 +66,11 @@ export const checkBackendAvailability = async (retries = 2) => {
 // on page load; that endpoint can wake a sleeping backend and create noisy 502s
 // before the UI has asked for data.
 
-// ─── MULTI-TAB DETECTION ──────────────────────────────────────
-// localStorage is shared across all tabs. If another tab changes the token,
-// reload to pick up the new auth state.
-let _currentToken = localStorage.getItem('kayad_token');
-window.addEventListener('storage', (e) => {
-  if (e.key === 'kayad_token' && e.newValue !== _currentToken) {
-    _currentToken = e.newValue;
-    window.location.reload();
-  }
-});
-
 // ─── AXIOS INSTANCE ───────────────────────────────────────────
 const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 }); // 15s default; payment calls override to 45s
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
 const IDEMPOTENT_METHODS = new Set(['get', 'head', 'options']);
 const MAX_RETRIES = 2;
-
-// Attach JWT from localStorage on every request
-api.interceptors.request.use(cfg => {
-  cfg._retryCount = cfg._retryCount || 0;
-  const token = localStorage.getItem('kayad_token');
-  if (token) {
-    cfg.headers = cfg.headers || {};
-    cfg.headers.Authorization = `Bearer ${token}`;
-    cfg._hadToken = true; // mark that this request was made with a token
-  }
-  return cfg;
-});
 
 // Auto-refresh on 401 (token expired)
 let _refreshing = false;
@@ -120,13 +97,8 @@ api.interceptors.response.use(
       __DEMO_MODE__ = true;
       return Promise.reject(err);
     }
-    // Demo token hitting real backend → activate demo mode, don't attempt refresh
-    if (err.response?.status === 401 && isDemoToken()) {
-      __DEMO_MODE__ = true;
-      return Promise.reject(err);
-    }
+
     const requestUrl = orig?.url || "";
-    const hasStoredToken = !!localStorage.getItem('kayad_token');
     const skipRefresh =
       requestUrl.includes('/auth/login') ||
       requestUrl.includes('/auth/register') ||
@@ -134,39 +106,24 @@ api.interceptors.response.use(
       requestUrl.includes('/auth/reset-password') ||
       requestUrl.includes('/auth/refresh');
 
-    // Only attempt refresh/clear if the original request HAD a token attached.
-    // Requests made without a token (e.g. wake-up calls, public endpoints) should
-    // NOT trigger auth-expired — a 401 is expected when no token was sent.
-    if (err.response?.status === 401 && hasStoredToken && !skipRefresh && !orig._retry && orig._hadToken) {
+    if (err.response?.status === 401 && !skipRefresh && !orig._retry) {
       if (_refreshing) {
         return new Promise((res, rej) => _queue.push({ res, rej }))
-          .then(token => {
-            orig.headers = orig.headers || {};
-            orig.headers.Authorization = `Bearer ${token}`;
-            return api(orig);
-          });
+          .then(() => api(orig));
       }
       orig._retry = true;
       _refreshing = true;
       try {
-        const storedToken = localStorage.getItem('kayad_token');
-        const { data } = await axios.post(`${BASE}/auth/refresh`, {}, {
+        await axios.post(`${BASE}/auth/refresh`, {}, {
           withCredentials: true,
-          headers: {
-            'X-Requested-By': 'kayad-app',
-            ...(storedToken ? { 'Authorization': `Bearer ${storedToken}` } : {}),
-          }
+          headers: { 'X-Requested-By': 'kayad-app' },
         });
-        localStorage.setItem('kayad_token', data.token);
-        _queue.forEach(p => p.res(data.token));
+        _queue.forEach(p => p.res());
         _queue = [];
-        orig.headers = orig.headers || {};
-        orig.headers.Authorization = `Bearer ${data.token}`;
         return api(orig);
       } catch {
         _queue.forEach(p => p.rej());
         _queue = [];
-        localStorage.removeItem('kayad_token');
         window.dispatchEvent(new Event('kayad:auth-expired'));
       } finally {
         _refreshing = false;
@@ -179,15 +136,8 @@ api.interceptors.response.use(
 // ─── HELPERS ───────────────────────────────────────────────────
 const unwrap = res => res.data;
 
-// Check if the stored token is a demo token (base64-encoded JSON with @demo.com email)
-const isDemoToken = () => {
-  const t = localStorage.getItem('kayad_token');
-  if (!t) return false;
-  try {
-    const p = JSON.parse(atob(t));
-    return p.demo === true || p.email?.endsWith('@demo.com') || p.email?.endsWith('.demo') || p.superAdmin === true;
-  } catch { return false; }
-};
+// Check if demo mode is active (no localStorage token in cookie-based auth)
+const isDemoToken = () => __DEMO_MODE__;
 
 // Should we fall back to demo for this error?
 // Yes when the backend is effectively unavailable:
@@ -704,9 +654,8 @@ export const adminPaymentsAPI = {
   list: (params) => api.get('/admin/payments', { params }).then(unwrap),
 };
 
-// Utility: format KES
+// Utility: format KES (re-exported from helpers for backward compat)
 export { api };
-export const formatKES = (n) =>
-  'KES ' + Number(n || 0).toLocaleString('en-KE');
+export { formatKES } from '../utils/helpers';
 
 export default api;

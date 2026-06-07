@@ -6,7 +6,7 @@ import LoginPage from '../../pages/LoginPage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 vi.mock('../../api/api', () => ({
-  authAPI: { login: vi.fn() },
+  authAPI: { login: vi.fn(), me: vi.fn().mockRejectedValue({}) },
   isDemoMode: () => false,
 }));
 vi.mock('../../context/SocketContext', () => ({
