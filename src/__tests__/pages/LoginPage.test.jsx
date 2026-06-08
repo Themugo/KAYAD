@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../../context/AuthContext';
 import LoginPage from '../../pages/LoginPage';
 
+vi.mock('../../utils/posthog', () => ({ setPostHogUser: () => {}, clearPostHogUser: () => {} }));
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 vi.mock('../../api/api', () => ({
   authAPI: { login: vi.fn(), me: vi.fn().mockRejectedValue({}) },

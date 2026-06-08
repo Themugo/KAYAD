@@ -242,6 +242,11 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
   70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ─────── HERO & SPECIAL SECTIONS ─────── */
 .hero-gradient {
   background: radial-gradient(ellipse 80% 55% at 50% -20%, rgba(192,192,192,0.18), transparent),

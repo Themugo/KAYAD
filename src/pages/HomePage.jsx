@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
 import { useState, useEffect } from 'react';
-import { carsAPI } from '../api/api';
+import { carsAPI, enableDemoMode } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
@@ -26,9 +26,22 @@ export default function HomePage() {
   const [stats,       setStats]       = useState(null);
 
   useEffect(() => {
-    carsAPI.list({ page: 1, limit: 50, sort: '' }).then(data => {
-      const all = data.cars || data.data || [];
-      const now = Date.now();
+    let cancelled = false;
+    const fetchCars = async (attemptedDemo = false) => {
+      if (attemptedDemo) enableDemoMode();
+      try {
+        const data = await carsAPI.list({ page: 1, limit: 50, sort: '' });
+        if (cancelled) return;
+        let all = data.cars || data.data || [];
+
+        if (all.length === 0 && !attemptedDemo) {
+          enableDemoMode();
+          const retry = await carsAPI.list({ page: 1, limit: 50, sort: '' });
+          if (cancelled) return;
+          all = retry.cars || retry.data || [];
+        }
+
+        const now = Date.now();
 
       // Time-aware filtering — don't just trust the static auctionStatus field
       const live = all.filter(c => {
@@ -64,10 +77,15 @@ export default function HomePage() {
         brands:       [...new Set(all.map(c => c.brand))].length,
         avgPrice:     Math.round(all.reduce((s, c) => s + (Number(c.price) || 0), 0) / (all.length || 1)),
       });
-    }).catch(() => {
-      toast('Could not load vehicles. Check your connection.', 'warning');
-    }).finally(() => setLoading(false));
-  }, []);
+    } catch {
+      if (!cancelled) toast('Could not load vehicles. Check your connection.', 'warning');
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  };
+  fetchCars();
+  return () => { cancelled = true; };
+}, []);
 
   const cars = loading ? [] : (featured.length > 0 ? featured : recent);
   const liveCount = stats?.liveAuctions || liveAuctions.length || 0;
@@ -79,25 +97,27 @@ export default function HomePage() {
       { name: 'Home', url: '/' },
     ]} />
     <div style={{ paddingTop: '72px', background: '#050505', minHeight: '100vh' }}>
+      <div style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.5s ease' }}>
       <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
+      </div>
       <HomeLiveTicker count={liveCount} />
 
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <section style={{ borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)', opacity: loading ? 0.4 : 1, transition: 'opacity 0.6s ease' }}>
         <div style={{
           maxWidth: 1400, margin: '0 auto', padding: '0 28px',
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
           gap: 1, background: 'rgba(255,255,255,0.03)',
         }}>
-          <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '0'} />
-          <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '0'} />
-          <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '0'} />
-          <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '0'} />
+          <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
+          <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
+          <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />
+          <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
         </div>
       </section>
 
       {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 
-      <section style={{ padding: liveAuctions.length > 0 ? '24px 0' : '32px 0 24px' }}>
+      <section style={{ padding: liveAuctions.length > 0 ? '24px 0' : '32px 0 24px', opacity: loading ? 0.4 : 1, transition: 'opacity 0.6s ease' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
           <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
             <div>
@@ -153,7 +173,7 @@ export default function HomePage() {
       </section>
 
       {!loading && recent.length > 0 && (
-        <section style={{ padding: '0 0 48px' }}>
+        <section style={{ padding: '0 0 48px', animation: 'fadeIn 0.6s ease' }}>
           <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>

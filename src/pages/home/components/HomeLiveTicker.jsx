@@ -1,17 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
 
 export default function HomeLiveTicker({ count }) {
-  const [scrollPos, setScrollPos] = useState(0);
-  const tickerRef = useRef(null);
+  const scrollRef = useRef(null);
+  const rafRef = useRef(null);
+  const posRef = useRef(0);
+
   useEffect(() => {
-    if (!count) return;
-    const iv = setInterval(() => {
-      setScrollPos(prev => (prev + 0.5) % 2000);
-    }, 30);
-    return () => clearInterval(iv);
+    const el = scrollRef.current;
+    if (!el) return;
+    const speed = 0.4;
+    let last = performance.now();
+
+    const tick = (now) => {
+      const dt = now - last;
+      last = now;
+      posRef.current += speed * (dt / 16);
+      const half = el.scrollWidth / 2;
+      if (posRef.current >= half) posRef.current = 0;
+      el.style.transform = `translateX(${-posRef.current}px)`;
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [count]);
 
-  if (!count) return null;
+  const label = count > 0
+    ? `🔴 ${count} ${count === 1 ? 'CAR' : 'CARS'} LIVE NOW — BIDDING OPEN`
+    : 'PREVIEW — SAMPLE DATA — BROWSE THE GALLERY BELOW';
 
   return (
     <div style={{
@@ -23,19 +39,29 @@ export default function HomeLiveTicker({ count }) {
       position: 'relative',
       zIndex: 1,
     }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 24, whiteSpace: 'nowrap',
-        transform: `translateX(${-scrollPos}px)`,
-      }} ref={tickerRef}>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.06em' }}>
-              🔴 {count} {count === 1 ? 'CAR' : 'CARS'} LIVE NOW — BIDDING OPEN
-            </span>
-            <span style={{ color: 'rgba(255,255,255,0.15)' }}>◆</span>
-          </div>
-        ))}
+      <div style={{ display: 'flex', whiteSpace: 'nowrap' }}>
+        <div ref={scrollRef} style={{ display: 'flex', alignItems: 'center', gap: 24, willChange: 'transform' }}>
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.06em' }}>
+                {label}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.15)' }}>&#9670;</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }} aria-hidden="true">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div key={`dup-${i}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', fontWeight: 700, letterSpacing: '0.06em' }}>
+                {label}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.15)' }}>&#9670;</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
