@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
+import { setSentryUser, clearSentryUser } from '../utils/sentry';
 import { STAFF_ROLES, isSellerRole } from '../utils/authRoutes';
 import {
   getEffectivePermissions,
@@ -26,8 +27,13 @@ export function AuthProvider({ children }) {
 
   const setUser = (u) => {
     setUserState(u);
-    if (u) setPostHogUser(u);
-    else   clearPostHogUser();
+    if (u) {
+      setPostHogUser(u);
+      setSentryUser(u);
+    } else {
+      clearPostHogUser();
+      clearSentryUser();
+    }
   };
 
   // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
@@ -104,14 +110,6 @@ export function RequireAuth({ children }) {
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isAuth) return <Navigate to="/login" state={{ from: loc }} replace />;
-  return children;
-}
-
-export function RequireDealer({ children }) {
-  const { isDealer, isAdmin, user, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
-  if (!user?.approved) return <Navigate to="/register" replace />;
   return children;
 }
 

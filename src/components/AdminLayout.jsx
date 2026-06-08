@@ -3,6 +3,7 @@ import AdminSidebar from './AdminSidebar';
 import { useAuth } from '../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
 import { ChevronRight, Menu } from 'lucide-react';
+import { STAFF_ROLES } from '../utils/authRoutes';
 
 const ROLE_LABELS = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
@@ -27,7 +28,6 @@ export default function AdminLayout({ children }) {
     return <Navigate to="/login" state={{ from: loc }} replace />;
   }
 
-  const STAFF_ROLES = ['admin', 'superadmin', 'moderator', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'ghost_checker'];
   const isStaff = STAFF_ROLES.includes(user?.role);
   if (!isStaff) {
     return <Navigate to="/" replace />;

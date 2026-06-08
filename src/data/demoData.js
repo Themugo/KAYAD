@@ -23,7 +23,7 @@ function saveCars() {
       localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
       console.warn('[Demo] localStorage quota near limit — kept only cover images');
       return;
-    } catch {}
+    } catch (e2) { console.warn('[Demo] Failed to trim demo car images:', e2.message); }
 
     try {
       const trimmed = _cars.map(c => {
@@ -32,7 +32,7 @@ function saveCars() {
       });
       localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
       console.warn('[Demo] localStorage quota exceeded — base64 image data stripped');
-    } catch {}
+    } catch (e3) { console.warn('[Demo] Final fallback for demo car storage failed:', e3.message); }
   }
 }
 
@@ -40,7 +40,7 @@ function loadCars() {
   try {
     const raw = localStorage.getItem(DEMO_CARS_KEY);
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch (e) { console.warn('[Demo] Failed to load cached demo cars:', e.message); }
   return null;
 }
 
