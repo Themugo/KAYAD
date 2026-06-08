@@ -1,60 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { carsAPI, dealerAPI, dealerAuctionAPI, formatKES } from '../../api/api';
+import { useParams, useNavigate } from 'react-router-dom';
+import { carsAPI, dealerAPI, dealerAuctionAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import BackButton from '../../components/BackButton';
-import { Save, Trash2, Star, Zap, Image, Settings, Pin, Upload, Plus, Copy } from 'lucide-react';
+import { Save, Trash2, Star, Zap, Image, Settings, Copy } from 'lucide-react';
+import EditCarDetailsTab from './components/EditCarDetailsTab';
+import EditCarPhotosTab from './components/EditCarPhotosTab';
+import EditCarAuctionTab from './components/EditCarAuctionTab';
+import EditCarPromoteTab from './components/EditCarPromoteTab';
 
-const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai','Porsche','Land Rover','Jaguar'];
-const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hybrid','CNG'];
-const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
-const BODIES = ['SUV','Sedan','Hatchback','Station Wagon','Pickup','Minivan','Coupe','Convertible','Crossover'];
-const COLORS = ['Black','White','Silver','Gray','Blue','Red','Green','Brown','Beige','Gold','Burgundy','Orange','Purple','Yellow','Maroon','Pearl','Navy'];
 const STATUS_STYLE = {
   active:  { label: 'Active',  color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: 'rgba(34,197,94,0.2)' },
   sold:    { label: 'Sold',    color: '#3b82f6', bg: 'rgba(59,130,246,0.1)', border: 'rgba(59,130,246,0.2)' },
   pending: { label: 'Pending', color: '#f97316', bg: 'rgba(249,115,22,0.1)', border: 'rgba(249,115,22,0.2)' },
   rejected:{ label: 'Rejected',color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)' },
 };
-
-const CONDITIONS = ['Foreign Used','Local Used','Brand New'];
-
-function FieldGroup({ label, children }) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <label style={{ display: 'block', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: 'rgba(255,255,255,0.4)', marginBottom: 8 }}>{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function SI({ value, onChange, placeholder, type }) {
-  const typeAttr = type || 'text';
-  const [f, setF] = useState(false);
-  return (
-    <input
-      type={typeAttr} value={value} onChange={onChange} placeholder={placeholder}
-      style={{
-        width: '100%', padding: '10px 14px', borderRadius: 9,
-        border: f ? '1px solid rgba(212,196,168,0.4)' : '1px solid rgba(255,255,255,0.09)',
-        background: f ? 'rgba(212,196,168,0.03)' : 'rgba(255,255,255,0.04)',
-        color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s'
-      }}
-      onFocus={() => setF(true)} onBlur={() => setF(false)}
-    />
-  );
-}
-
-function SS({ value, onChange, options }) {
-  return (
-    <select value={value} onChange={onChange}
-      style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a0a0a', color: value ? '#fff' : 'rgba(255,255,255,0.35)', fontSize: 13, outline: 'none' }}>
-      <option value="">-- Select --</option>
-      {options.map(o => <option key={o} value={o} style={{ background: '#111' }}>{o}</option>)}
-    </select>
-  );
-}
 
 export default function EditCarPage() {
   const { id }    = useParams();
@@ -301,201 +262,27 @@ export default function EditCarPage() {
         </div>
       </div>
       <div style={{ maxWidth: 980, margin: '0 auto', padding: '28px 28px 60px' }}>
-      {/* DETAILS TAB */}
-        {tab === 'details' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-            <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Basic Info</div>
-              <FieldGroup label="Listing Title"><SI value={form.title} onChange={e => set('title', e.target.value)} placeholder="e.g. 2020 Toyota Land Cruiser V8" /></FieldGroup>
-              <FieldGroup label="Brand"><SS value={form.brand} onChange={e => set('brand', e.target.value)} options={BRANDS} /></FieldGroup>
-              <FieldGroup label="Model"><SI value={form.model} onChange={e => set('model', e.target.value)} placeholder="e.g. Land Cruiser" /></FieldGroup>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FieldGroup label="Year"><SI type="number" value={form.year} onChange={e => set('year', e.target.value)} placeholder="2020" /></FieldGroup>
-                <FieldGroup label="Mileage (km)"><SI type="number" value={form.mileage} onChange={e => set('mileage', e.target.value)} placeholder="45000" /></FieldGroup>
-              </div>
-              <FieldGroup label="Asking Price (KES)">
-                <SI type="number" value={form.price} onChange={e => set('price', e.target.value)} placeholder="4500000" />
-              </FieldGroup>
-            </div>
-            <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Specifications</div>
-              <FieldGroup label="Fuel Type"><SS value={form.fuel} onChange={e => set('fuel', e.target.value)} options={FUELS} /></FieldGroup>
-              <FieldGroup label="Transmission"><SS value={form.transmission} onChange={e => set('transmission', e.target.value)} options={TRANSMISSIONS} /></FieldGroup>
-              <FieldGroup label="Body Type"><SS value={form.bodyType} onChange={e => set('bodyType', e.target.value)} options={BODIES} /></FieldGroup>
-              <FieldGroup label="Colour"><SS value={form.color} onChange={e => set('color', e.target.value)} options={COLORS} /></FieldGroup>
-              <FieldGroup label="Condition"><SS value={form.condition} onChange={e => set('condition', e.target.value)} options={CONDITIONS} /></FieldGroup>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <FieldGroup label="Engine"><SI value={form.engine} onChange={e => set('engine', e.target.value)} placeholder="4.5L V8" /></FieldGroup>
-                <FieldGroup label="Drivetrain"><SI value={form.drivetrain} onChange={e => set('drivetrain', e.target.value)} placeholder="4WD" /></FieldGroup>
-              </div>
-            </div>
-            <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px', gridColumn: '1/-1' }}>
-              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Description and Location</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16 }}>
-                <FieldGroup label="Description">
-                  <textarea value={form.description} onChange={e => set('description', e.target.value)} placeholder="Describe this vehicle in detail" rows={5}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.65 }} />
-                </FieldGroup>
-                <div>
-                  <FieldGroup label="City / Location"><SI value={form.city} onChange={e => set('city', e.target.value)} placeholder="Nairobi" /></FieldGroup>
-                  <FieldGroup label="Listing Options">
-                    {[
-                      { key: 'allowBuy', label: 'Allow Direct Buy' },
-                      { key: 'allowBid', label: 'Allow Bidding' },
-                    ].map(opt => (
-                      <button key={opt.key} onClick={() => set(opt.key, !form[opt.key])} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 8, borderRadius: 9, border: form[opt.key] ? '1px solid rgba(212,196,168,0.3)' : '1px solid rgba(255,255,255,0.07)', background: form[opt.key] ? 'rgba(212,196,168,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        <div style={{ width: 18, height: 18, borderRadius: 5, border: form[opt.key] ? '1.5px solid var(--gold)' : '1.5px solid rgba(255,255,255,0.2)', background: form[opt.key] ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {form[opt.key] && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>x</span>}
-                        </div>
-                        <span style={{ fontSize: 13, color: form[opt.key] ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: form[opt.key] ? 600 : 400 }}>{opt.label}</span>
-                      </button>
-                    ))}
-                    {form.allowBuy && (
-                      <button onClick={() => set('escrowEnabled', !form.escrowEnabled)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', borderRadius: 9, border: form.escrowEnabled ? '1px solid rgba(212,196,168,0.3)' : '1px solid rgba(255,255,255,0.07)', background: form.escrowEnabled ? 'rgba(212,196,168,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        <div style={{ width: 18, height: 18, borderRadius: 5, border: form.escrowEnabled ? '1.5px solid var(--gold)' : '1.5px solid rgba(255,255,255,0.2)', background: form.escrowEnabled ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {form.escrowEnabled && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>x</span>}
-                        </div>
-                        <span style={{ fontSize: 13, color: form.escrowEnabled ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: form.escrowEnabled ? 600 : 400 }}>Escrow Protection</span>
-                      </button>
-                    )}
-                  </FieldGroup>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* PHOTOS TAB */}
+        {tab === 'details' && <EditCarDetailsTab form={form} set={set} />}
         {tab === 'photos' && (
-          <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-              <div>
-                <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 4 }}>Photo Management</div>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: 0 }}>Tap to select, click pin to set cover, or delete selected.</p>
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                {selectedSet.size > 0 && (
-                  <button onClick={handleDeleteSelected} disabled={deletingIdx === -1} style={{ padding: '8px 14px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: deletingIdx === -1 ? 'pointer' : 'wait', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <Trash2 size={14} /> {deletingIdx === -1 ? `Delete (${selectedSet.size})` : 'Deleting...'}
-                  </button>
-                )}
-                <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: uploading ? 'rgba(212,196,168,0.1)' : 'rgba(212,196,168,0.15)', border: '1px solid rgba(212,196,168,0.25)', borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--gold)', transition: 'all 0.2s' }}>
-                  <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Photos'}
-                  <input type="file" multiple accept="image/*" onChange={handleUploadImages} style={{ display: 'none' }} disabled={uploading} />
-                </label>
-              </div>
-            </div>
-            {images.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '48px', border: '2px dashed rgba(255,255,255,0.08)', borderRadius: 12, marginTop: 16 }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>no image</div>
-                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, marginBottom: 16 }}>No photos yet. Click "Upload Photos" to add images.</div>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 12, marginTop: 16 }}>
-                {images.map((img, i) => {
-                  const src = typeof img === 'string' ? img : img?.url;
-                  const isCover = i === coverImage;
-                  const isDeleting = deletingIdx === i || deletingIdx === -1;
-                  const isSelected = selectedSet.has(i);
-                  return (
-                    <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: isCover ? '2px solid var(--gold)' : isSelected ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.07)', aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s', opacity: isDeleting ? 0.5 : 1 }}>
-                      {src && <img src={src} alt={isCover ? `Cover image ${i + 1}` : `Image ${i + 1}`} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => toggleSelect(i)} />}
-                      <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : isSelected ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s' }} onClick={() => toggleSelect(i)} />
-                      {/* Pin button (set cover) */}
-                      <div aria-label={isCover ? "Cover image" : "Set as cover"} style={{ position: 'absolute', top: 6, left: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                        onClick={(e) => { e.stopPropagation(); handleSetCover(i); }}>
-                        <Pin size={13} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.6)' }} />
-                      </div>
-                      {/* Single delete button */}
-                      <div aria-label="Delete image" style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: 'rgba(239,68,68,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                        onClick={(e) => { e.stopPropagation(); handleDeleteImage(i); }}>
-                        <Trash2 size={13} style={{ color: '#fff' }} />
-                      </div>
-                      {/* Selection checkbox (bottom-right) */}
-                      <div style={{ position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: isSelected ? '#3b82f6' : 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.2)' }}
-                        onClick={(e) => { e.stopPropagation(); toggleSelect(i); }}>
-                        {isSelected ? <span style={{ color: '#fff', fontSize: 14, fontWeight: 900 }}>x</span> : <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10 }}>{i + 1}</span>}
-                      </div>
-                      {isCover && (
-                        <div style={{ position: 'absolute', bottom: 6, left: 6, background: 'var(--gold)', color: '#000', fontSize: 8, fontWeight: 900, borderRadius: 4, padding: '2px 7px', letterSpacing: '0.08em' }}>COVER</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <EditCarPhotosTab
+            images={images} coverImage={coverImage}
+            handleSetCover={handleSetCover} handleDeleteImage={handleDeleteImage}
+            handleUploadImages={handleUploadImages} handleDeleteSelected={handleDeleteSelected}
+            selectedSet={selectedSet} toggleSelect={toggleSelect}
+            deletingIdx={deletingIdx} uploading={uploading}
+          />
         )}
-        {/* AUCTION TAB */}
         {tab === 'auction' && (
-          <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Auction Controls</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-              <div>
-                <FieldGroup label="Auction End Date and Time">
-                  <input type="datetime-local" value={form.auctionEnd} onChange={e => set('auctionEnd', e.target.value)}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-                </FieldGroup>
-              </div>
-              <div>
-                <FieldGroup label="Extend by (hours)">
-                  <input type="number" value={extendHours} onChange={e => setExtendHours(Number(e.target.value))} min={1} max={48}
-                    style={{ width: '100%', padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-                </FieldGroup>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              {!isLive ? (
-                <button onClick={handleAuctionStart} disabled={!!auctionAction || !form.auctionEnd} style={{ padding: '12px 24px', background: form.auctionEnd ? 'rgba(239,68,68,0.9)' : 'rgba(255,255,255,0.05)', border: 'none', borderRadius: 10, color: form.auctionEnd ? '#fff' : 'rgba(255,255,255,0.25)', fontSize: 13, fontWeight: 900, cursor: form.auctionEnd ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Zap size={14} /> {auctionAction === 'starting' ? 'Starting...' : 'Start Live Auction'}
-                </button>
-              ) : (
-                <>
-                  <button onClick={handleAuctionEnd} disabled={!!auctionAction} style={{ padding: '12px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                    {auctionAction === 'ending' ? 'Ending...' : 'End Auction'}
-                  </button>
-                  <button onClick={async () => { setAuctionAction('extending'); try { await dealerAuctionAPI.extend(id, extendHours); toast('Extended by ' + extendHours + 'h', 'success'); } catch { toast('Failed', 'error'); } finally { setAuctionAction(null); } }} disabled={!!auctionAction}
-                    style={{ padding: '12px 24px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 10, color: '#3b82f6', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-                    {auctionAction === 'extending' ? 'Extending...' : '+ Extend ' + extendHours + 'h'}
-                  </button>
-                </>
-              )}
-            </div>
-            {car.bidsCount > 0 && (
-              <div style={{ marginTop: 20, padding: '14px 18px', background: 'rgba(212,196,168,0.05)', border: '1px solid rgba(212,196,168,0.12)', borderRadius: 10 }}>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-                  <strong style={{ color: 'var(--gold)' }}>{car.bidsCount}</strong> bid{car.bidsCount !== 1 ? 's' : ''} placed -
-                  Current: <strong style={{ color: '#fff' }}>KES {Number(car.currentBid || 0).toLocaleString()}</strong>
-                </div>
-              </div>
-            )}
-          </div>
+          <EditCarAuctionTab
+            form={form} set={set} isLive={isLive} car={car}
+            auctionAction={auctionAction} setAuctionAction={setAuctionAction}
+            extendHours={extendHours} setExtendHours={setExtendHours}
+            handleAuctionStart={handleAuctionStart} handleAuctionEnd={handleAuctionEnd}
+            toast={toast} dealerAuctionAPI={dealerAuctionAPI} id={id}
+          />
         )}
-        {/* PROMOTION TAB */}
         {tab === 'promote' && (
-          <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '24px' }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.3)', marginBottom: 18 }}>Homepage Promotion</div>
-            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 8 }}>
-                  {car.isPromoted ? 'Currently featured on the homepage' : 'Feature on the homepage gallery'}
-                </div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.65, marginBottom: 20 }}>
-                  {car.isPromoted
-                    ? 'This vehicle is pinned to the homepage gallery, giving it maximum visibility to all visitors.'
-                    : 'Pin this vehicle to the homepage to increase visibility. Featured cars appear in the Elite Selection section on the front page.'}
-                </div>
-                <button onClick={handlePromote} style={{ padding: '11px 24px', background: car.isPromoted ? 'rgba(239,68,68,0.1)' : 'rgba(212,196,168,0.12)', border: car.isPromoted ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(212,196,168,0.25)', borderRadius: 10, color: car.isPromoted ? '#ef4444' : 'var(--gold)', fontSize: 13, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <Star size={14} fill={car.isPromoted ? '#ef4444' : 'none'} />
-                  {car.isPromoted ? 'Remove from Homepage' : 'Feature on Homepage'}
-                </button>
-              </div>
-              <div style={{ width: 180, height: 120, borderRadius: 12, overflow: 'hidden', background: '#111', flexShrink: 0 }}>
-                {images[coverImage] && (
-                  <img src={typeof images[coverImage] === 'string' ? images[coverImage] : images[coverImage]?.url} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                )}
-              </div>
-            </div>
-          </div>
+          <EditCarPromoteTab car={car} images={images} coverImage={coverImage} handlePromote={handlePromote} />
         )}
         {/* Bottom save bar */}
         {tab === 'details' && (

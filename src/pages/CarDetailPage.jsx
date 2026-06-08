@@ -29,6 +29,7 @@ import {
 
 // Extracted sub-components
 import { firstImage, GalleryImage, SpecItem, CompareToggle } from './car/components/CarDetailWidgets';
+import CarDetailReviews from './car/components/CarDetailReviews';
 
 export default function CarDetailPage() {
   const { id } = useParams();
@@ -49,8 +50,6 @@ export default function CarDetailPage() {
   const [payType, setPayType] = useState('escrow');
   const [isFav, setIsFav] = useState(false);
   const [priceAlertOn, setPriceAlertOn] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
-  const [submittingReview, setSubmittingReview] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
   const [promoting, setPromoting] = useState(false);
   const [ntsaStatus, setNtsaStatus] = useState(null);
@@ -211,19 +210,6 @@ export default function CarDetailPage() {
     try { const d = await chatAPI.start({ carId: id, participantId: car.dealer?._id }); navigate(`/chat/${d.chat?._id || d._id}`); }
     catch { toast('Could not start chat', 'error'); }
     finally { setStartingChat(false); }
-  };
-
-  const handleReview = async (e) => {
-    e.preventDefault();
-    if (!isAuth) { navigate('/login'); return; }
-    setSubmittingReview(true);
-    try {
-      await reviewsAPI.create({ ...reviewForm, dealer: car.dealer?._id, carId: id });
-      toast('Review submitted!', 'success');
-      setReviewForm({ rating: 5, comment: '' });
-      if (car?.dealer?._id) reviewsAPI.forDealer(car.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
-    } catch { toast('Failed to submit', 'error'); }
-    finally { setSubmittingReview(false); }
   };
 
   const handleSetCover = async (idx) => {
@@ -451,45 +437,17 @@ export default function CarDetailPage() {
             </div>
           )}
 
-          {/* Reviews */}
-          <div className="detail-card">
-            <div className="detail-section-label">
-              Dealer Reviews {reviews.length > 0 && `(${reviews.length})`}
-            </div>
-            {reviews.length === 0 ? (
-              <div className="reviews-empty">No reviews yet. Be the first to review this dealer.</div>
-            ) : reviews.slice(0, 4).map(r => (
-              <div key={r._id} className="review-item">
-                <div className="review-header">
-                  <span className="review-author">{r.reviewer?.name || 'Anonymous'}</span>
-                  <span className="review-stars">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
-                </div>
-                <p className="review-comment">{r.comment}</p>
-              </div>
-            ))}
-
-            {isAuth && !isOwner && (
-              <form onSubmit={handleReview} className="review-form">
-                <div className="review-field">
-                  <label className="review-label">Rating</label>
-                  <select value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: Number(e.target.value) }))}
-                    className="review-select">
-                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{'★'.repeat(n)} — {n} star{n !== 1 ? 's' : ''}</option>)}
-                  </select>
-                </div>
-                <div className="review-field">
-                  <label className="review-label">Comment</label>
-                  <textarea rows={3} placeholder="Share your experience with this dealer…" value={reviewForm.comment}
-                    onChange={e => setReviewForm(p => ({ ...p, comment: e.target.value }))}
-                    className="review-textarea" />
-                </div>
-                <button type="submit" disabled={submittingReview || !reviewForm.comment}
-                  className={`review-submit ${reviewForm.comment ? 'review-submit-active' : ''}`}>
-                  {submittingReview ? 'Submitting…' : 'Submit Review'}
-                </button>
-              </form>
-            )}
-          </div>
+          <CarDetailReviews
+            dealerId={car.dealer?._id}
+            carId={id}
+            reviews={reviews}
+            isAuth={isAuth}
+            isOwner={isOwner}
+            onReviewSubmitted={() => {
+              if (car?.dealer?._id)
+                reviewsAPI.forDealer(car.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
+            }}
+          />
         </div>
 
         {/* ═══════ RIGHT COLUMN (Sticky Sidebar) ═══════ */}
