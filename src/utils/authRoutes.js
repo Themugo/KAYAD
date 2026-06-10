@@ -36,6 +36,7 @@ export function getPostAuthPath(user, fallback = '/') {
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
     if (user?.status !== 'approved') return safeFallback;
+    if (user?.role === 'broker') return '/dealer'; // Broker uses same dashboard as dealer
     return '/dealer';
   }
   if (user?.role === 'user') {
