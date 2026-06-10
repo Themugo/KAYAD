@@ -36,7 +36,7 @@ export default function AppLayout({ children }) {
         Skip to main content
       </a>
       <DemoModeBanner />
-      <Navbar branding={config?.branding} />
+      <Navbar />
       <main id="app-main-content" className="app-main" role="main" tabIndex={-1}>
         {children}
       </main>

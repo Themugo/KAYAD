@@ -34,6 +34,7 @@ import { ToastProvider } from './context/ToastContext';
 import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { CompareProvider } from './context/CompareContext';
+import { BrandingProvider } from './context/BrandingContext';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingPage } from './components/LoadingPage';
@@ -190,108 +191,110 @@ export default function App() {
     <ErrorBoundary>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastProvider>
-          <AuthProvider>
-            <SocketProvider>
-              <NotificationProvider>
-                <CompareProvider>
-                  <AppInstallPrompt />
-                  <SWUpdateBanner />
-                  <ScrollToTop />
-                  <SwipeBackHandler />
-                  <Suspense fallback={<LoadingPage />}>
-                    <Routes>
-                      {/* ── Public ──────────────────────────────────────────── */}
-                      <Route path="/"                    element={<Public><HomePage /></Public>} />
-                      <Route path="/showroom"            element={<Public><Showroom /></Public>} />
-                      <Route path="/cars"                element={<Navigate to="/showroom" replace />} />
-                      <Route path="/cars/:id"            element={<Public><CarDetailPage /></Public>} />
-                      <Route path="/car/:id"             element={<Public><CarDetailPage /></Public>} />
-                      <Route path="/compare"             element={<Public><ComparePage /></Public>} />
-                      <Route path="/auctions"            element={<Public><AuctionCalendar /></Public>} />
-                      <Route path="/auctions/calendar"   element={<Public><AuctionCalendar /></Public>} />
-                      <Route path="/auction/:id"         element={<Public><AuctionLivePage /></Public>} />
-                      <Route path="/auctions/live/:id"   element={<Public><AuctionLivePage /></Public>} />
-                      <Route path="/escrow-vault"        element={<Public><EscrowVaultPortal /></Public>} />
-                      <Route path="/escrow-vault/:id"   element={<Public><EscrowVaultPortal /></Public>} />
-                      <Route path="/terms"             element={<Public><TermsPage /></Public>} />
-                      <Route path="/privacy"           element={<Public><PrivacyPage /></Public>} />
-                      <Route path="/contact"           element={<Public><ContactPage /></Public>} />
-                      <Route path="/about"             element={<Public><AboutPage /></Public>} />
-                      <Route path="/ghost-checker"   element={<Public><GhostCheckerInfo /></Public>} />
+          <BrandingProvider>
+            <AuthProvider>
+              <SocketProvider>
+                <NotificationProvider>
+                  <CompareProvider>
+                    <AppInstallPrompt />
+                    <SWUpdateBanner />
+                    <ScrollToTop />
+                    <SwipeBackHandler />
+                    <Suspense fallback={<LoadingPage />}>
+                      <Routes>
+                        {/* ── Public ──────────────────────────────────────────── */}
+                        <Route path="/"                    element={<Public><HomePage /></Public>} />
+                        <Route path="/showroom"            element={<Public><Showroom /></Public>} />
+                        <Route path="/cars"                element={<Navigate to="/showroom" replace />} />
+                        <Route path="/cars/:id"            element={<Public><CarDetailPage /></Public>} />
+                        <Route path="/car/:id"             element={<Public><CarDetailPage /></Public>} />
+                        <Route path="/compare"             element={<Public><ComparePage /></Public>} />
+                        <Route path="/auctions"            element={<Public><AuctionCalendar /></Public>} />
+                        <Route path="/auctions/calendar"   element={<Public><AuctionCalendar /></Public>} />
+                        <Route path="/auction/:id"         element={<Public><AuctionLivePage /></Public>} />
+                        <Route path="/auctions/live/:id"   element={<Public><AuctionLivePage /></Public>} />
+                        <Route path="/escrow-vault"        element={<Public><EscrowVaultPortal /></Public>} />
+                        <Route path="/escrow-vault/:id"   element={<Public><EscrowVaultPortal /></Public>} />
+                        <Route path="/terms"             element={<Public><TermsPage /></Public>} />
+                        <Route path="/privacy"           element={<Public><PrivacyPage /></Public>} />
+                        <Route path="/contact"           element={<Public><ContactPage /></Public>} />
+                        <Route path="/about"             element={<Public><AboutPage /></Public>} />
+                        <Route path="/ghost-checker"   element={<Public><GhostCheckerInfo /></Public>} />
 
-                      {/* ── Auth ────────────────────────────────────────────── */}
-                      <Route path="/login"               element={<Public><LoginPage /></Public>} />
-                      <Route path="/register"            element={<Public><RegisterPage /></Public>} />
-                      <Route path="/forgot-password"     element={<Public><ForgotPasswordPage /></Public>} />
-                      <Route path="/reset-password"      element={<Public><ResetPasswordPage /></Public>} />
-                      <Route path="/verify-email"        element={<Public><VerifyEmail /></Public>} />
-                      <Route path="/force-password-change" element={<Authed><ForcePasswordChange /></Authed>} />
+                        {/* ── Auth ────────────────────────────────────────────── */}
+                        <Route path="/login"               element={<Public><LoginPage /></Public>} />
+                        <Route path="/register"            element={<Public><RegisterPage /></Public>} />
+                        <Route path="/forgot-password"     element={<Public><ForgotPasswordPage /></Public>} />
+                        <Route path="/reset-password"      element={<Public><ResetPasswordPage /></Public>} />
+                        <Route path="/verify-email"        element={<Public><VerifyEmail /></Public>} />
+                        <Route path="/force-password-change" element={<Authed><ForcePasswordChange /></Authed>} />
 
-                      {/* ── User (logged-in buyer) ─────────────────────────── */}
-                      <Route path="/dashboard"           element={<User><BuyerDashboard /></User>} />
-                      <Route path="/profile"             element={<User><ProfilePage /></User>} />
-                      <Route path="/payments"            element={<User><PaymentsPage /></User>} />
-                      <Route path="/chat"                element={<User><ChatPage /></User>} />
-                      <Route path="/chat/:threadId"      element={<User><ChatPage /></User>} />
-                      <Route path="/notifications"       element={<Authed><NotificationsPage /></Authed>} />
-                      <Route path="/favorites"           element={<User><FavoritesPage /></User>} />
-                      <Route path="/escrow/:id"          element={<User><EscrowPage /></User>} />
+                        {/* ── User (logged-in buyer) ─────────────────────────── */}
+                        <Route path="/dashboard"           element={<User><BuyerDashboard /></User>} />
+                        <Route path="/profile"             element={<User><ProfilePage /></User>} />
+                        <Route path="/payments"            element={<User><PaymentsPage /></User>} />
+                        <Route path="/chat"                element={<User><ChatPage /></User>} />
+                        <Route path="/chat/:threadId"      element={<User><ChatPage /></User>} />
+                        <Route path="/notifications"       element={<Authed><NotificationsPage /></Authed>} />
+                        <Route path="/favorites"           element={<User><FavoritesPage /></User>} />
+                        <Route path="/escrow/:id"          element={<User><EscrowPage /></User>} />
 
-                      {/* ── Inspector ─────────────────────────────────────── */}
-                      <Route path="/inspector/apply"     element={<Authed><InspectorApply /></Authed>} />
-                      <Route path="/inspector"           element={<User><InspectorDashboard /></User>} />
-                      <Route path="/inspector/dashboard" element={<User><InspectorDashboard /></User>} />
+                        {/* ── Inspector ─────────────────────────────────────── */}
+                        <Route path="/inspector/apply"     element={<Authed><InspectorApply /></Authed>} />
+                        <Route path="/inspector"           element={<User><InspectorDashboard /></User>} />
+                        <Route path="/inspector/dashboard" element={<User><InspectorDashboard /></User>} />
 
-                      {/* ── Dealer / Seller ─────────────────────────────────── */}
-                      <Route path="/dealer"              element={<Dealer><DealerDashboard /></Dealer>} />
-                      <Route path="/dealer/onboarding"   element={<RequireAuth><AppLayout><DealerOnboarding /></AppLayout></RequireAuth>} />
-                      <Route path="/dealer/setup"        element={<Dealer><DealerSetup /></Dealer>} />
-                      <Route path="/dealer/add-car"      element={<Dealer><AddCarPage /></Dealer>} />
-                      <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
-                      <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
-                      <Route path="/dealer/auction-setup"      element={<Dealer><DealerAuctionSetup /></Dealer>} />
-                      <Route path="/dealer/auctions"     element={<Dealer><DealerAuctionSetup /></Dealer>} />
-                      <Route path="/dealer/analytics"    element={<Dealer><DealerAnalytics /></Dealer>} />
-                      <Route path="/dealer/settlement"   element={<Dealer><DealerSettlement /></Dealer>} />
-                      <Route path="/dealer/team"         element={<Dealer><DealerTeam /></Dealer>} />
-                      <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
-                      <Route path="/dealer/settings"     element={<Dealer><DealerSettings /></Dealer>} />
+                        {/* ── Dealer / Seller ─────────────────────────────────── */}
+                        <Route path="/dealer"              element={<Dealer><DealerDashboard /></Dealer>} />
+                        <Route path="/dealer/onboarding"   element={<RequireAuth><AppLayout><DealerOnboarding /></AppLayout></RequireAuth>} />
+                        <Route path="/dealer/setup"        element={<Dealer><DealerSetup /></Dealer>} />
+                        <Route path="/dealer/add-car"      element={<Dealer><AddCarPage /></Dealer>} />
+                        <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
+                        <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
+                        <Route path="/dealer/auction-setup"      element={<Dealer><DealerAuctionSetup /></Dealer>} />
+                        <Route path="/dealer/auctions"     element={<Dealer><DealerAuctionSetup /></Dealer>} />
+                        <Route path="/dealer/analytics"    element={<Dealer><DealerAnalytics /></Dealer>} />
+                        <Route path="/dealer/settlement"   element={<Dealer><DealerSettlement /></Dealer>} />
+                        <Route path="/dealer/team"         element={<Dealer><DealerTeam /></Dealer>} />
+                        <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
+                        <Route path="/dealer/settings"     element={<Dealer><DealerSettings /></Dealer>} />
 
-                      {/* ── Admin / Staff ─────────────────────────────────── */}
-                      <Route path="/admin"                          element={<Admin><AdminDashboard /></Admin>} />
-                      <Route path="/admin/users"                    element={<SecureAdmin><AdminUsers /></SecureAdmin>} />
-                      <Route path="/admin/sellers"                  element={<SecureAdmin><AdminSellers /></SecureAdmin>} />
-                      <Route path="/admin/cars"                     element={<SecureAdmin><AdminCars /></SecureAdmin>} />
-                      <Route path="/admin/moderation"               element={<SecureAdmin><AdminCarModeration /></SecureAdmin>} />
-                      <Route path="/admin/auctions"                 element={<SecureAdmin><AdminAuctions /></SecureAdmin>} />
-                      <Route path="/admin/bids"                     element={<SecureAdmin><AdminBids /></SecureAdmin>} />
-                      <Route path="/admin/escrows"                  element={<SecureAdmin><AdminEscrows /></SecureAdmin>} />
-                      <Route path="/admin/escrow-vault"             element={<SecureAdmin><AdminEscrowVault /></SecureAdmin>} />
-                      <Route path="/admin/reviews"                  element={<SecureAdmin><AdminReviews /></SecureAdmin>} />
-                      <Route path="/admin/referrals"                element={<SecureAdmin><AdminReferrals /></SecureAdmin>} />
-                      <Route path="/admin/chats"                    element={<SecureAdmin><AdminChatModeration /></SecureAdmin>} />
-                      <Route path="/admin/market-data"              element={<SecureAdmin><AdminMarketData /></SecureAdmin>} />
-                      <Route path="/admin/transactions"             element={<SecureAdmin><AdminTransactions /></SecureAdmin>} />
-                      <Route path="/admin/ntsa-queue"               element={<SecureAdmin><AdminNtsaQueue /></SecureAdmin>} />
-                      <Route path="/admin/inspections"              element={<SecureAdmin><AdminInspections /></SecureAdmin>} />
-                      <Route path="/admin/inspector-applications"   element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
-                      <Route path="/admin/security-log"             element={<SecureAdmin><AdminSecurityLog /></SecureAdmin>} />
-                      <Route path="/admin/ads"                      element={<SecureAdmin><AdManager /></SecureAdmin>} />
-                      <Route path="/admin/settings"                 element={<SecureAdmin><AdminSettings /></SecureAdmin>} />
-                      <Route path="/admin/staff"                    element={<SecureAdmin><AdminStaff /></SecureAdmin>} />
-                      <Route path="/admin/staff-permissions"        element={<SecureAdmin><AdminStaffPermissions /></SecureAdmin>} />
-                      <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
-                      <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
-                      <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
+                        {/* ── Admin / Staff ─────────────────────────────────── */}
+                        <Route path="/admin"                          element={<Admin><AdminDashboard /></Admin>} />
+                        <Route path="/admin/users"                    element={<SecureAdmin><AdminUsers /></SecureAdmin>} />
+                        <Route path="/admin/sellers"                  element={<SecureAdmin><AdminSellers /></SecureAdmin>} />
+                        <Route path="/admin/cars"                     element={<SecureAdmin><AdminCars /></SecureAdmin>} />
+                        <Route path="/admin/moderation"               element={<SecureAdmin><AdminCarModeration /></SecureAdmin>} />
+                        <Route path="/admin/auctions"                 element={<SecureAdmin><AdminAuctions /></SecureAdmin>} />
+                        <Route path="/admin/bids"                     element={<SecureAdmin><AdminBids /></SecureAdmin>} />
+                        <Route path="/admin/escrows"                  element={<SecureAdmin><AdminEscrows /></SecureAdmin>} />
+                        <Route path="/admin/escrow-vault"             element={<SecureAdmin><AdminEscrowVault /></SecureAdmin>} />
+                        <Route path="/admin/reviews"                  element={<SecureAdmin><AdminReviews /></SecureAdmin>} />
+                        <Route path="/admin/referrals"                element={<SecureAdmin><AdminReferrals /></SecureAdmin>} />
+                        <Route path="/admin/chats"                    element={<SecureAdmin><AdminChatModeration /></SecureAdmin>} />
+                        <Route path="/admin/market-data"              element={<SecureAdmin><AdminMarketData /></SecureAdmin>} />
+                        <Route path="/admin/transactions"             element={<SecureAdmin><AdminTransactions /></SecureAdmin>} />
+                        <Route path="/admin/ntsa-queue"               element={<SecureAdmin><AdminNtsaQueue /></SecureAdmin>} />
+                        <Route path="/admin/inspections"              element={<SecureAdmin><AdminInspections /></SecureAdmin>} />
+                        <Route path="/admin/inspector-applications"   element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
+                        <Route path="/admin/security-log"             element={<SecureAdmin><AdminSecurityLog /></SecureAdmin>} />
+                        <Route path="/admin/ads"                      element={<SecureAdmin><AdManager /></SecureAdmin>} />
+                        <Route path="/admin/settings"                 element={<SecureAdmin><AdminSettings /></SecureAdmin>} />
+                        <Route path="/admin/staff"                    element={<SecureAdmin><AdminStaff /></SecureAdmin>} />
+                        <Route path="/admin/staff-permissions"        element={<SecureAdmin><AdminStaffPermissions /></SecureAdmin>} />
+                        <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
+                        <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
+                        <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
 
-                      {/* ── 404 ─────────────────────────────────────────────── */}
-                      <Route path="*" element={<Public><NotFoundPage /></Public>} />
-                    </Routes>
-                  </Suspense>
-                </CompareProvider>
-              </NotificationProvider>
-            </SocketProvider>
-          </AuthProvider>
+                        {/* ── 404 ─────────────────────────────────────────────── */}
+                        <Route path="*" element={<Public><NotFoundPage /></Public>} />
+                      </Routes>
+                    </Suspense>
+                  </CompareProvider>
+                </NotificationProvider>
+              </SocketProvider>
+            </AuthProvider>
+          </BrandingProvider>
         </ToastProvider>
       </BrowserRouter>
     </ErrorBoundary>

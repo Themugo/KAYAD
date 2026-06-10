@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useBranding } from '../context/BrandingContext';
 import NotificationCenter from './NotificationCenter';
 import { carsAPI } from '../api/api';
 import { initials } from '../utils/helpers';
@@ -10,9 +11,10 @@ import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Menu, X, LogOut } from 'lucide-react';
 
-export default function Navbar({ branding }) {
+export default function Navbar() {
   const { user, isAuth, isAdmin, logout } = useAuth();
   const { unreadCount } = useNotifications();
+  const { branding } = useBranding();
 
   const loc = useLocation();
   const navigate = useNavigate();
