@@ -34,6 +34,24 @@ const escrowSchema = new mongoose.Schema(
     refundedAt: Date,
     disputedAt: Date,
 
+    // =============================
+    // 📊 TIMELINE STAGES
+    // =============================
+    timeline: {
+      depositReceived: { type: Boolean, default: false },
+      depositReceivedAt: Date,
+      inspectionScheduled: { type: Boolean, default: false },
+      inspectionScheduledAt: Date,
+      inspectionCompleted: { type: Boolean, default: false },
+      inspectionCompletedAt: Date,
+      transferSubmitted: { type: Boolean, default: false },
+      transferSubmittedAt: Date,
+      transferApproved: { type: Boolean, default: false },
+      transferApprovedAt: Date,
+      fundsReleased: { type: Boolean, default: false },
+      fundsReleasedAt: Date,
+    },
+
     notes: String,
     disputeReason: String,
 
@@ -66,6 +84,8 @@ escrowSchema.methods.markFunded = function () {
   this.status = "held";
   this.fundedAt = new Date();
   this.autoReleaseEligibleAt = new Date(Date.now() + this.releaseWindowDays * 86400000);
+  this.timeline.depositReceived = true;
+  this.timeline.depositReceivedAt = new Date();
   this.addHistory(`Funded — KES ${this.amount.toLocaleString("en-KE")} held`);
   return this.save();
 };
@@ -74,7 +94,30 @@ escrowSchema.methods.confirmDelivery = function (userId) {
   if (this.status !== "held") throw new Error("Escrow not in delivery state");
   this.deliveryConfirmed = true;
   this.deliveryConfirmedAt = new Date();
+  this.timeline.inspectionCompleted = true;
+  this.timeline.inspectionCompletedAt = new Date();
   this.addHistory("Buyer confirmed delivery", userId);
+  return this.save();
+};
+
+escrowSchema.methods.scheduleInspection = function (userId) {
+  this.timeline.inspectionScheduled = true;
+  this.timeline.inspectionScheduledAt = new Date();
+  this.addHistory("Inspection scheduled", userId);
+  return this.save();
+};
+
+escrowSchema.methods.submitTransfer = function (userId) {
+  this.timeline.transferSubmitted = true;
+  this.timeline.transferSubmittedAt = new Date();
+  this.addHistory("Transfer submitted for approval", userId);
+  return this.save();
+};
+
+escrowSchema.methods.approveTransfer = function (userId) {
+  this.timeline.transferApproved = true;
+  this.timeline.transferApprovedAt = new Date();
+  this.addHistory("Transfer approved", userId);
   return this.save();
 };
 
@@ -86,6 +129,8 @@ escrowSchema.methods.releaseFunds = function (adminId) {
   this.status = "released";
   this.releasedAt = new Date();
   this.releasedBy = adminId;
+  this.timeline.fundsReleased = true;
+  this.timeline.fundsReleasedAt = new Date();
   this.addHistory(`Released to seller — KES ${this.sellerAmount.toLocaleString("en-KE")}`, adminId);
   return this.save();
 };

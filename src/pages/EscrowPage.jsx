@@ -7,6 +7,7 @@ import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { timeAgo, formatDate } from '../utils/helpers';
 import { ShieldCheck, X } from 'lucide-react';
+import EscrowTimeline from '../components/EscrowTimeline';
 
 const STATUS_META = {
   pending:  { label: 'Pending',  badge: 'badge-orange', icon: '⏳', desc: 'Awaiting payment confirmation.' },
@@ -268,6 +269,9 @@ export default function EscrowPage() {
 
             {/* Timeline Stepper */}
             <Stepper escrow={selected} />
+
+            {/* Detailed Timeline */}
+            <EscrowTimeline escrow={selected} />
 
             {/* Amount & status */}
             <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 20, textAlign: 'center', marginBottom: 16 }}>
