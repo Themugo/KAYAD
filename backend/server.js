@@ -57,6 +57,7 @@ import securityLogRoutes from "./routes/securityLogRoutes.js";
 import smsBiddingRoutes from "./routes/smsBiddingRoutes.js";
 import inspectorApplicationRoutes from "./routes/inspectorApplicationRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import conversionFunnelRoutes from "./routes/conversionFunnelRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -391,6 +392,7 @@ app.use("/api/security-logs", securityLogRoutes);
 app.use("/api/sms-bidding", smsBiddingRoutes);
 app.use("/api/inspector-applications", inspectorApplicationRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/funnel", conversionFunnelRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above
