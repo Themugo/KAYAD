@@ -701,7 +701,7 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 router.post(
   "/cars/:id/auction/start",
   asyncHandler(async (req, res) => {
-    const { durationMs, startingBid, reservePrice } = req.body;
+    const { durationMs, startingBid, reservePrice, reserveMode } = req.body;
     if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
 
     // ⏱ Minimum 24h auction duration
@@ -751,6 +751,7 @@ router.post(
     car.startingBid = startingBidVal;
     car.currentBid = startingBidVal;
     car.reservePrice = reserveVal;
+    car.reserveMode = reserveMode || 'none';
     car.auctionStartTime = new Date();
     car.auctionEnd = new Date(Date.now() + durationMs);
     await car.save();

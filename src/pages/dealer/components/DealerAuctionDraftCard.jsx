@@ -13,6 +13,12 @@ const DURATIONS = [
   { label: '7 days', value: 168 },
 ];
 
+const RESERVE_MODES = [
+  { label: 'No Reserve', value: 'none', hint: 'Auction sells to highest bidder regardless of price' },
+  { label: 'Hidden Reserve', value: 'hidden', hint: 'Reserve price exists but is not shown to buyers' },
+  { label: 'Visible Reserve', value: 'visible', hint: 'Reserve price is displayed to all buyers' },
+];
+
 const currencyInputStyle = {
   width: '100%',
   padding: '11px 12px',
@@ -83,6 +89,15 @@ export default function DealerAuctionDraftCard({ car, expanded, isLoading, onTog
               <input type="number" min={1000} value={car._startingBid}
                 onChange={(e) => onChange('_startingBid', e.target.value)}
                 placeholder="1000" style={currencyInputStyle} />
+            </DealerAuctionField>
+            <DealerAuctionField label="Reserve mode" hint="Choose how reserve price is displayed to buyers.">
+              <select value={car._reserveMode || 'none'}
+                onChange={(e) => onChange('_reserveMode', e.target.value)}
+                style={currencyInputStyle}>
+                {RESERVE_MODES.map((mode) => (
+                  <option key={mode.value} value={mode.value} style={{ background: '#111' }}>{mode.label}</option>
+                ))}
+              </select>
             </DealerAuctionField>
             <DealerAuctionField label="Reserve price" hint="Optional. Must be at least the starting bid when provided.">
               <input type="number" min={0} value={car._reservePrice}

@@ -625,7 +625,7 @@ export default function AuctionLivePage() {
           <div className="auction-live-bid-panel">
 
               {/* Reserve Indicator */}
-              {car.reservePrice > 0 && (
+              {car.reservePrice > 0 && car.reserveMode === 'visible' && (
                 <div style={{
                   marginBottom: 12, padding: '8px 14px', borderRadius: 8,
                   background: reserveMet ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
@@ -640,6 +640,19 @@ export default function AuctionLivePage() {
                     animation: reserveMet ? 'pulse 1.5s infinite' : 'none',
                   }}>{reserveMet ? '✅' : '🔒'}</span>
                   <span>{reserveMet ? 'Reserve Met' : 'Reserve Not Yet Met'}</span>
+                </div>
+              )}
+              {car.reservePrice > 0 && car.reserveMode === 'hidden' && !reserveMet && (
+                <div style={{
+                  marginBottom: 12, padding: '8px 14px', borderRadius: 8,
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.2)',
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  fontSize: 12, fontWeight: 600,
+                  color: '#ef4444',
+                }}>
+                  <span>🔒</span>
+                  <span>Reserve Not Yet Met</span>
                 </div>
               )}
 

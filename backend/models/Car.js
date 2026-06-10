@@ -89,6 +89,11 @@ const carSchema = new mongoose.Schema(
     startingBid: { type: Number, default: 0 },
     reservePrice: { type: Number, default: null },
     reserveMet: { type: Boolean, default: false },
+    reserveMode: { 
+      type: String, 
+      enum: ["none", "hidden", "visible"], 
+      default: "none" 
+    },
     extensionCount: { type: Number, default: 0 },
 
     bids: [
