@@ -82,7 +82,7 @@ export default function HomePage() {
     <>
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
-      <div className="min-h-screen" style={{ paddingTop: '72px', background: 'var(--bg)' }}>
+      <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
         <div className="transition-opacity duration-500" style={{ opacity: loading ? 0.6 : 1 }}>
           <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
         </div>
