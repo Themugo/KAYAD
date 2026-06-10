@@ -10,6 +10,9 @@ import {
   detectChargeback,
   detectDuplicateListing,
   detectVinReuse,
+  detectPriceManipulation,
+  detectAccountFarms,
+  detectDuplicatePhotos,
   runFraudCheck,
 } from "../services/fraudDetectionService.js";
 
@@ -203,6 +206,75 @@ export const checkDealerFraud = async (req, res) => {
   } catch (error) {
     console.error("Error checking dealer fraud:", error);
     res.status(500).json({ success: false, message: "Failed to check dealer fraud" });
+  }
+};
+
+// =============================
+// 💰 PRICE MANIPULATION CHECK
+// =============================
+
+export const checkPriceManipulation = async (req, res) => {
+  try {
+    const { carId } = req.params;
+
+    const priceManipulation = await detectPriceManipulation(carId);
+
+    res.json({
+      success: true,
+      fraudDetected: !!priceManipulation,
+      results: {
+        priceManipulation,
+      },
+    });
+  } catch (error) {
+    console.error("Error checking price manipulation:", error);
+    res.status(500).json({ success: false, message: "Failed to check price manipulation" });
+  }
+};
+
+// =============================
+// 👥 ACCOUNT FARMS CHECK
+// =============================
+
+export const checkAccountFarms = async (req, res) => {
+  try {
+    const { dealerId } = req.params;
+
+    const accountFarms = await detectAccountFarms(dealerId);
+
+    res.json({
+      success: true,
+      fraudDetected: !!accountFarms,
+      results: {
+        accountFarms,
+      },
+    });
+  } catch (error) {
+    console.error("Error checking account farms:", error);
+    res.status(500).json({ success: false, message: "Failed to check account farms" });
+  }
+};
+
+// =============================
+// 🖼️ DUPLICATE PHOTOS CHECK
+// =============================
+
+export const checkDuplicatePhotos = async (req, res) => {
+  try {
+    const { carId } = req.params;
+
+    const duplicatePhotos = await detectDuplicatePhotos(carId);
+
+    res.json({
+      success: true,
+      fraudDetected: !!duplicatePhotos,
+      results: {
+        duplicatePhotos,
+      },
+    });
+  } catch (error) {
+    console.error("Error checking duplicate photos:", error);
+    res.status(500).json({ success: false, message: "Failed to check duplicate photos" });
   }
 };
 

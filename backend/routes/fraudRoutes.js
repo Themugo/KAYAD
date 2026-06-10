@@ -8,6 +8,9 @@ import {
   checkAuctionFraud,
   checkEscrowFraud,
   checkDealerFraud,
+  checkPriceManipulation,
+  checkAccountFarms,
+  checkDuplicatePhotos,
   updateFraudStatus,
   getAllFraudDetections,
 } from "../controllers/fraudController.js";
@@ -42,6 +45,15 @@ router.get("/check/escrow/:escrowId", protect, adminOnly, asyncHandler(checkEscr
 
 // Check dealer for fraud
 router.get("/check/dealer/:dealerId", protect, adminOnly, asyncHandler(checkDealerFraud));
+
+// Check for price manipulation
+router.get("/check/price-manipulation/:carId", protect, adminOnly, asyncHandler(checkPriceManipulation));
+
+// Check for account farms
+router.get("/check/account-farms/:dealerId", protect, adminOnly, asyncHandler(checkAccountFarms));
+
+// Check for duplicate photos
+router.get("/check/duplicate-photos/:carId", protect, adminOnly, asyncHandler(checkDuplicatePhotos));
 
 // =============================
 // ⚖️ FRAUD MANAGEMENT
