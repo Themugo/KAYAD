@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Funnel, TrendingUp, Clock, Users, DollarSign } from 'lucide-react';
+import { Filter, TrendingUp, Users, DollarSign, Shield } from 'lucide-react';
 
 const widgetStyle = {
   background: 'var(--card)',
@@ -53,7 +53,7 @@ const conversionRateStyle = {
 
 const STAGES = [
   { key: 'views', label: 'Views', icon: Users, color: '#3b82f6' },
-  { key: 'favorited', label: 'Favorites', icon: Funnel, color: '#a855f7' },
+  { key: 'favorited', label: 'Favorites', icon: Filter, color: '#a855f7' },
   { key: 'chatted', label: 'Chats', icon: Users, color: '#22c55e' },
   { key: 'offered', label: 'Offers', icon: DollarSign, color: '#f97316' },
   { key: 'escrowInitiated', label: 'Escrow', icon: Shield, color: '#ef4444' },
@@ -90,7 +90,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
     return (
       <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <Funnel size={16} style={{ color: 'var(--gold)' }} />
+          <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Loading analytics...</div>
@@ -102,7 +102,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
     return (
       <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <Funnel size={16} style={{ color: 'var(--gold)' }} />
+          <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No analytics data available</div>
@@ -119,7 +119,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
   return (
     <div style={widgetStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <Funnel size={16} style={{ color: 'var(--gold)' }} />
+        <Filter size={16} style={{ color: 'var(--gold)' }} />
         <span style={widgetHeader}>Conversion Funnel</span>
       </div>
 
