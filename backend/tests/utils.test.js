@@ -46,8 +46,12 @@ describe("Utils", () => {
     it("returns correct pagination metadata", () => {
       const result = buildPagination({ total: 100, page: 1, limit: 20 });
       expect(result).toMatchObject({
-        page: 1, limit: 20, total: 100, pages: 5,
-        hasNext: true, hasPrev: false,
+        page: 1,
+        limit: 20,
+        total: 100,
+        pages: 5,
+        hasNext: true,
+        hasPrev: false,
       });
     });
 

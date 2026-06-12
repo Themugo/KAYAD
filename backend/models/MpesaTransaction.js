@@ -59,7 +59,7 @@ const mpesaTransactionSchema = new mongoose.Schema(
       ref: "Bid",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // =============================
@@ -84,8 +84,6 @@ mpesaTransactionSchema.methods.markFailed = function () {
 // =============================
 // 🚀 SAFE EXPORT
 // =============================
-const MpesaTransaction =
-  mongoose.models.MpesaTransaction ||
-  mongoose.model("MpesaTransaction", mpesaTransactionSchema);
+const MpesaTransaction = mongoose.models.MpesaTransaction || mongoose.model("MpesaTransaction", mpesaTransactionSchema);
 
 export default MpesaTransaction;

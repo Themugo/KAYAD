@@ -3,12 +3,7 @@
 // =============================
 // ✅ SUCCESS RESPONSE
 // =============================
-export const success = (
-  res,
-  data = null,
-  message = "Success",
-  meta = {}
-) => {
+export const success = (res, data = null, message = "Success", meta = {}) => {
   return res.status(200).json({
     success: true,
     message,
@@ -20,12 +15,7 @@ export const success = (
 // =============================
 // ❌ ERROR RESPONSE
 // =============================
-export const error = (
-  res,
-  message = "Error",
-  code = 500,
-  details = null
-) => {
+export const error = (res, message = "Error", code = 500, details = null) => {
   return res.status(code).json({
     success: false,
     message,

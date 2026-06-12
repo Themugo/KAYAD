@@ -69,23 +69,20 @@ export const handleMpesaCallback = async (callbackData) => {
           checkoutID: checkoutId,
           reason: payment.resultDesc,
         });
-        if (payment.car) io.to(String(payment.car)).emit("paymentFailed", {
-          checkoutID: checkoutId,
-          reason: payment.resultDesc,
-        });
+        if (payment.car)
+          io.to(String(payment.car)).emit("paymentFailed", {
+            checkoutID: checkoutId,
+            reason: payment.resultDesc,
+          });
       }
       return;
     }
 
     const metadata = stk.CallbackMetadata?.Item || [];
 
-    const receipt = metadata.find(
-      (i) => i.Name === "MpesaReceiptNumber"
-    )?.Value;
+    const receipt = metadata.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
 
-    const amount = metadata.find(
-      (i) => i.Name === "Amount"
-    )?.Value;
+    const amount = metadata.find((i) => i.Name === "Amount")?.Value;
 
     if (!receipt || !amount) {
       throw new Error("Incomplete M-Pesa metadata");
@@ -102,7 +99,9 @@ export const handleMpesaCallback = async (callbackData) => {
     await payment.save({ session });
 
     let userDoc = null;
-    try { userDoc = await User.findById(payment.user).select("email name phone").lean(); } catch (_) {}
+    try {
+      userDoc = await User.findById(payment.user).select("email name phone").lean();
+    } catch (_) {}
     sendDigitalReceipt({
       amount: payment.amount,
       carTitle: payment.car?.toString() || "Vehicle",
@@ -178,7 +177,6 @@ export const handleMpesaCallback = async (callbackData) => {
     }
 
     return payment;
-
   } catch (err) {
     await session.abortTransaction();
     session.endSession();

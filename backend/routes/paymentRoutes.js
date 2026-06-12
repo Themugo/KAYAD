@@ -6,10 +6,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
 import { paymentLimiter } from "../middleware/rateLimiter.js";
 import { initiatePaymentSchema } from "../validation/platform.schema.js";
-import {
-  mpesaIpWhitelist,
-  validateMpesaCallback,
-} from "../middleware/mpesaSecurity.js";
+import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
 
 import {
   initiatePayment,
@@ -20,37 +17,18 @@ import {
 
 const router = express.Router();
 
-router.post(
-  "/initiate",
-  protect,
-  paymentLimiter,
-  validate(initiatePaymentSchema),
-  asyncHandler(initiatePayment)
-);
+router.post("/initiate", protect, paymentLimiter, validate(initiatePaymentSchema), asyncHandler(initiatePayment));
 
 // 🔍 CHECK PAYMENT STATUS
-router.get(
-  "/status/:id",
-  protect,
-  asyncHandler(checkPaymentStatus)
-);
+router.get("/status/:id", protect, asyncHandler(checkPaymentStatus));
 
 // 📜 USER PAYMENT HISTORY
-router.get(
-  "/my",
-  protect,
-  asyncHandler(getUserPayments)
-);
+router.get("/my", protect, asyncHandler(getUserPayments));
 
 // =============================
 // 📥 MPESA CALLBACK (PUBLIC — protected by IP whitelist + payload validation)
 // =============================
-router.post(
-  "/callback",
-  mpesaIpWhitelist,
-  validateMpesaCallback,
-  asyncHandler(mpesaCallback)
-);
+router.post("/callback", mpesaIpWhitelist, validateMpesaCallback, asyncHandler(mpesaCallback));
 
 // =============================
 // 🧪 DEBUG: CHECK BY CHECKOUT ID (scoped to own user)
@@ -59,8 +37,6 @@ router.get(
   "/checkout/:checkoutRequestId",
   protect,
   asyncHandler(async (req, res) => {
-    
-
     const payment = await Payment.findOne({
       checkoutRequestId: req.params.checkoutRequestId,
       user: req.user.id,
@@ -77,7 +53,7 @@ router.get(
       success: true,
       payment,
     });
-  })
+  }),
 );
 
 // =============================

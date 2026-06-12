@@ -81,10 +81,7 @@ describe("Payments", () => {
   });
 
   it("GET /api/payments/my — returns empty list", async () => {
-    const res = await request(app)
-      .get("/api/payments/my")
-      .set("Authorization", `Bearer ${buyerToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/payments/my").set("Authorization", `Bearer ${buyerToken}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.payments ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);

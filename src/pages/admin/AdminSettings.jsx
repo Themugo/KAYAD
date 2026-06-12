@@ -6,16 +6,9 @@ import AdminSettingsGeneral from './AdminSettingsGeneral';
 import AdminSettingsBranding from './AdminSettingsBranding';
 import AdminSettingsPayments from './AdminSettingsPayments';
 import AdminSettingsPackages from './AdminSettingsPackages';
-
-const Field = ({ label, hint, children }) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-    <label style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>
-      {label}
-      {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
-    </label>
-    {children}
-  </div>
-);
+import AdminSettingsFees from './components/AdminSettingsFees';
+import AdminSettingsReconciliation from './components/AdminSettingsReconciliation';
+import AdminSettingsAuditLog from './components/AdminSettingsAuditLog';
 
 const DEFAULTS = {
   platformName: 'Kayad',
@@ -249,189 +242,13 @@ export default function AdminSettings() {
 
         {tab === 'payments' && <AdminSettingsPayments {...{ daraja, setDaraja, bank, setBank, saveConfig, saving, testPhone, setTestPhone, testAmount, setTestAmount, testingMpesa, testMpesa }} />}
 
-        {/* ═══ FEES & PROMOS ═══ */}
-        {tab === 'fees' && (
-          <div style={{ display: 'grid', gap: 24 }}>
-            <section style={{ background: '#111', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 24 }}>Fee Structure</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-                {[
-                  { key: 'listingFee', label: 'Standard Listing (KES)', def: 1000 },
-                  { key: 'auctionRegistrationFee', label: 'Auction Entry (KES)', def: 2000 },
-                  { key: 'ghostCheckFee', label: 'Ghost Check (KES)', def: 2500 },
-                  { key: 'commissionPercentage', label: 'Hammer Commission (%)', def: 2 },
-                  { key: 'platformVat', label: 'VAT (%)', def: 16 },
-                  { key: 'buyerPremiumPct', label: 'Buyer Premium (%)', def: 0 },
-                ].map(f => (
-                  <div key={f.key} className="input-group">
-                    <label className="input-label" style={{ fontSize: 10, textTransform: 'uppercase' }}>{f.label}</label>
-                    <input className="input" type="number" min={0}
-                      value={config[f.key] ?? f.def}
-                      onChange={e => setConfig(p => ({ ...p, [f.key]: Number(e.target.value) }))} />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section style={{ background: '#111', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Discount Codes</h4>
-                <button style={{ background: 'var(--gold)', color: 'black', fontSize: 10, padding: '6px 16px', borderRadius: 8, fontWeight: 700, border: 'none', cursor: 'pointer' }}
-                  onClick={() => {
-                    const code = prompt('Enter promo code:');
-                    const pct = prompt('Discount percentage:');
-                    if (code && pct) {
-                      setConfig(prev => ({
-                        ...prev,
-                        activePromos: [...(prev.activePromos || []), { code: code.toUpperCase(), discountPercent: Number(pct), expiryDate: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0] }]
-                      }));
-                    }
-                  }}>
-                  CREATE NEW
-                </button>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {(config.activePromos || []).length === 0 ? (
-                  <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No active promo codes</p>
-                ) : (config.activePromos || []).map((promo, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'black', padding: 16, borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div>
-                      <p style={{ fontFamily: 'monospace', color: 'var(--gold)', fontWeight: 700 }}>{promo.code}</p>
-                      <p style={{ fontSize: 10, color: 'var(--text-muted)' }}>{promo.discountPercent}% Off Listings • Expiry: {promo.expiryDate ? new Date(promo.expiryDate).toLocaleDateString('en-KE') : 'N/A'}</p>
-                    </div>
-                    <button style={{ color: '#f43f5e', fontSize: 12, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}
-                      onClick={() => setConfig(prev => ({ ...prev, activePromos: (prev.activePromos || []).filter((_, j) => j !== i) }))}>
-                      DELETE
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <button className="btn btn-gold" onClick={() => saveConfig('fees')} disabled={saving} style={{ width: '100%' }}>
-              {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 SAVE GLOBAL CONFIGURATION'}
-            </button>
-          </div>
-        )}
-
+        {tab === 'fees' && <AdminSettingsFees {...{ config, setConfig, saveConfig, saving }} />}
 
         {tab === 'packages' && <AdminSettingsPackages {...{ packages, setPackages, saving, setSaving }} />}
 
-        {/* ═══ RECONCILIATION ═══ */}
-        {tab === 'reconciliation' && (
-          <div className="card" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 20 }}>🔄 Auto-Reconciliation</h3>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-              Automatically match M-Pesa and bank deposits to platform transactions.
-            </p>
-            <div style={{ display: 'grid', gap: 20, maxWidth: 700 }}>
-              <Field label="Auto-Reconciliation">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={reconcile.autoReconcile}
-                    onChange={e => setReconcile(p => ({ ...p, autoReconcile: e.target.checked }))}
-                    style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
-                  <span style={{ fontSize: 13 }}>Enabled</span>
-                </label>
-              </Field>
+        {tab === 'reconciliation' && <AdminSettingsReconciliation {...{ reconcile, setReconcile, saveConfig, saving }} />}
 
-              <Field label="Match Threshold (minutes)" hint="Max time diff to match payment to transaction">
-                <input className="input" type="number" min={60} max={10080} value={reconcile.matchThresholdMins}
-                  onChange={e => setReconcile(p => ({ ...p, matchThresholdMins: Number(e.target.value) }))}
-                  style={{ width: 120, height: 38 }} />
-              </Field>
-
-              <Field label="Schedule">
-                <select className="input" value={reconcile.schedule}
-                  onChange={e => setReconcile(p => ({ ...p, schedule: e.target.value }))}
-                  style={{ width: 180, height: 38 }}>
-                  <option value="every hour">Every hour</option>
-                  <option value="every 6 hours">Every 6 hours</option>
-                  <option value="every 12 hours">Every 12 hours</option>
-                  <option value="daily">Daily</option>
-                </select>
-              </Field>
-
-              <Field label="Default Narration" hint="Narration to match in bank statements">
-                <input className="input" type="text" value={reconcile.defaultNarration}
-                  onChange={e => setReconcile(p => ({ ...p, defaultNarration: e.target.value }))}
-                  style={{ width: 280, height: 38 }} />
-              </Field>
-
-              <Field label="Notify on Mismatch">
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={reconcile.notifyOnMismatch}
-                    onChange={e => setReconcile(p => ({ ...p, notifyOnMismatch: e.target.checked }))}
-                    style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
-                  <span style={{ fontSize: 13 }}>Send email alert</span>
-                </label>
-              </Field>
-            </div>
-            <div style={{ marginTop: 20 }}>
-              <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving}>
-                {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Reconciliation Settings'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ═══ AUDIT LOG ═══ */}
-        {tab === 'audit' && isSuperAdmin && (
-          <div>
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ fontSize: '1rem' }}>Immutable Audit Log</h3>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{auditLog.length} entries</span>
-              </div>
-              <div style={{ maxHeight: 500, overflowY: 'auto' }}>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Action</th>
-                      <th>Admin</th>
-                      <th>Timestamp</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {auditLog.length === 0 ? (
-                      <tr><td colSpan={4} style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No audit entries yet</td></tr>
-                    ) : auditLog.map((entry, i) => (
-                      <tr key={entry._id || i}>
-                        <td style={{ color: 'var(--text-dim)', fontFamily: 'monospace', fontSize: 12 }}>{auditLog.length - i}</td>
-                        <td style={{ fontSize: 13 }}>{entry.action}</td>
-                        <td style={{ fontSize: 13, color: 'var(--text-muted)' }}>{entry.admin}</td>
-                        <td style={{ fontSize: 12, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
-                          {entry.createdAt ? new Date(entry.createdAt).toLocaleString('en-KE') : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <div className="card" style={{ marginTop: 20 }}>
-              <h3 style={{ fontSize: '1rem', marginBottom: 12 }}>System Tools</h3>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={async () => {
-                  if (!window.confirm('This will re-seed the database and may take 10-15 seconds. Continue?')) return;
-                  setLoading(true);
-                  try {
-                    const res = await adminAPI.reseed();
-                    toast.success(`Reseeded: ${res.result.webhost.length} webhost, ${res.result.admin.length} admin, ${res.result.demos.length} demos, ${res.result.cars} cars`);
-                  } catch (e) {
-                    toast.error(e?.response?.data?.message || e.message);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-              >
-                Reseed Database
-              </button>
-            </div>
-          </div>
-        )}
+        {tab === 'audit' && isSuperAdmin && <AdminSettingsAuditLog {...{ auditLog, loading, setLoading }} />}
       </div>
     </div>
   );

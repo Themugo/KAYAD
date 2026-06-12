@@ -6,12 +6,9 @@ const options = {
     info: {
       title: "KAYAD API",
       version: "2.0.0",
-      description:
-        "KAYAD Car Marketplace — Live Auctions, M-Pesa Payments, Escrow, Dealer Management",
+      description: "KAYAD Car Marketplace — Live Auctions, M-Pesa Payments, Escrow, Dealer Management",
     },
-    servers: [
-      { url: "/api", description: "API base path" },
-    ],
+    servers: [{ url: "/api", description: "API base path" }],
     components: {
       securitySchemes: {
         bearerAuth: {

@@ -30,9 +30,7 @@ const sanitizeFileName = (name) => {
 // =============================
 const generateFileName = (originalName) => {
   const ext = path.extname(originalName).toLowerCase();
-  const baseName = sanitizeFileName(
-    path.basename(originalName, ext)
-  );
+  const baseName = sanitizeFileName(path.basename(originalName, ext));
   const unique = crypto.randomBytes(6).toString("hex");
 
   return `${Date.now()}-${unique}-${baseName}${ext}`;
@@ -60,8 +58,8 @@ export const memoryStorage = multer.memoryStorage();
 
 // Map of allowed MIME types → magic byte signatures
 const MAGIC_BYTES = {
-  "image/jpeg": [Buffer.from([0xFF, 0xD8, 0xFF])],
-  "image/png":  [Buffer.from([0x89, 0x50, 0x4E, 0x47])],
+  "image/jpeg": [Buffer.from([0xff, 0xd8, 0xff])],
+  "image/png": [Buffer.from([0x89, 0x50, 0x4e, 0x47])],
   "image/webp": [Buffer.from([0x52, 0x49, 0x46, 0x46])], // RIFF header
 };
 

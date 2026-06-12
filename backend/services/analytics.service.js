@@ -15,18 +15,14 @@ export const getPlatformAnalytics = async () => {
   // =============================
   // 💰 AVERAGE BID
   // =============================
-  const avgBidResult = await Bid.aggregate([
-    { $group: { _id: null, avg: { $avg: "$amount" } } },
-  ]);
+  const avgBidResult = await Bid.aggregate([{ $group: { _id: null, avg: { $avg: "$amount" } } }]);
 
   const avgBid = avgBidResult[0]?.avg || 0;
 
   // =============================
   // 💰 TOTAL BID VALUE (MARKET SIZE)
   // =============================
-  const totalValueResult = await Bid.aggregate([
-    { $group: { _id: null, total: { $sum: "$amount" } } },
-  ]);
+  const totalValueResult = await Bid.aggregate([{ $group: { _id: null, total: { $sum: "$amount" } } }]);
 
   const totalBidValue = totalValueResult[0]?.total || 0;
 

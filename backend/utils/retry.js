@@ -1,4 +1,4 @@
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const circuitStore = new Map();
 
@@ -13,14 +13,19 @@ const defaultOptions = {
 };
 
 export async function withRetry(fn, opts = {}) {
-  const { retries, baseDelayMs, maxDelayMs, circuitBreaker, circuitThreshold, circuitResetMs, onRetry } = { ...defaultOptions, ...opts };
+  const { retries, baseDelayMs, maxDelayMs, circuitBreaker, circuitThreshold, circuitResetMs, onRetry } = {
+    ...defaultOptions,
+    ...opts,
+  };
 
   if (circuitBreaker) {
     const key = opts.key || fn.name || "default";
     const state = circuitStore.get(key) || { failures: 0, openUntil: 0 };
 
     if (state.openUntil > Date.now()) {
-      throw new Error(`Circuit breaker open for ${key} — reset in ${Math.ceil((state.openUntil - Date.now()) / 1000)}s`);
+      throw new Error(
+        `Circuit breaker open for ${key} — reset in ${Math.ceil((state.openUntil - Date.now()) / 1000)}s`,
+      );
     }
 
     try {

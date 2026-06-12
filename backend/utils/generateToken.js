@@ -22,7 +22,7 @@ export const generateAccessToken = (user) => {
       tokenVersion: user.tokenVersion || 0,
     },
     getAccess(),
-    { expiresIn: ACCESS_EXPIRES }
+    { expiresIn: ACCESS_EXPIRES },
   );
 };
 
@@ -36,7 +36,7 @@ export const generateRefreshToken = (user) => {
       tokenVersion: user.tokenVersion || 0,
     },
     getRefresh(),
-    { expiresIn: REFRESH_EXPIRES }
+    { expiresIn: REFRESH_EXPIRES },
   );
 };
 

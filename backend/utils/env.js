@@ -3,14 +3,7 @@
 // =============================
 // 🧠 CORE GETTER
 // =============================
-export const getEnv = (
-  key,
-  {
-    required = true,
-    defaultValue = null,
-    type = "string",
-  } = {}
-) => {
+export const getEnv = (key, { required = true, defaultValue = null, type = "string" } = {}) => {
   let value = process.env[key];
 
   if (!value) {
@@ -48,27 +41,16 @@ const PRODUCTION_REQUIRED_VARS = [
   { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret (separate from JWT_SECRET)" },
 ];
 
-const PRODUCTION_VARS = [
-  { key: "FRONTEND_URL", desc: "Production frontend URL for CORS" },
-];
+const PRODUCTION_VARS = [{ key: "FRONTEND_URL", desc: "Production frontend URL for CORS" }];
 
 const FEATURE_GROUPS = [
   {
     label: "M-Pesa (Safaricom Daraja)",
-    vars: [
-      "MPESA_CONSUMER_KEY",
-      "MPESA_CONSUMER_SECRET",
-      "MPESA_SHORTCODE",
-      "MPESA_PASSKEY",
-    ],
+    vars: ["MPESA_CONSUMER_KEY", "MPESA_CONSUMER_SECRET", "MPESA_SHORTCODE", "MPESA_PASSKEY"],
   },
   {
     label: "Cloudinary (image hosting)",
-    vars: [
-      "CLOUDINARY_CLOUD_NAME",
-      "CLOUDINARY_API_KEY",
-      "CLOUDINARY_API_SECRET",
-    ],
+    vars: ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"],
   },
   {
     label: "Africa's Talking (SMS/OTP)",

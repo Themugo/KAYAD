@@ -46,10 +46,7 @@ describe("Saved Search Routes", () => {
   });
 
   it("GET /api/saved-searches — lists saved searches", async () => {
-    const res = await request(app)
-      .get("/api/saved-searches")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/saved-searches").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.searches ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);

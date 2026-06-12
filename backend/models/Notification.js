@@ -20,14 +20,12 @@ const notificationSchema = new mongoose.Schema(
     readAt: { type: Date },
     data: { type: mongoose.Schema.Types.Mixed, default: {} },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 notificationSchema.index({ user: 1, createdAt: -1 });
 notificationSchema.index({ user: 1, read: 1 });
 
-const Notification =
-  mongoose.models.Notification ||
-  mongoose.model("Notification", notificationSchema);
+const Notification = mongoose.models.Notification || mongoose.model("Notification", notificationSchema);
 
 export default Notification;

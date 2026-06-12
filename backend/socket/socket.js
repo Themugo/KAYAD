@@ -13,7 +13,6 @@ const emit = (room, event, data) => {
     }
 
     getIO().to(room).emit(event, data);
-
   } catch (err) {
     console.error("❌ SOCKET EMIT ERROR:", err.message);
   }
@@ -66,7 +65,9 @@ export const emitTimerUpdate = (roomId, timeLeft) => {
 export const emitListingUpdate = (carId, data) => {
   try {
     if (!getIO()) return;
-    getIO().to("showroom").emit("listingUpdate", { carId, ...data });
+    getIO()
+      .to("showroom")
+      .emit("listingUpdate", { carId, ...data });
   } catch (err) {
     console.error("❌ LISTING UPDATE EMIT ERROR:", err.message);
   }

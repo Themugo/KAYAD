@@ -53,11 +53,7 @@ describe("media.service", () => {
     expect(mockUpload).toHaveBeenCalledWith("/tmp/car.jpg", {
       folder: "kayad/cars",
       resource_type: "image",
-      transformation: [
-        { width: 1200, height: 800, crop: "limit" },
-        { quality: "auto" },
-        { fetch_format: "auto" },
-      ],
+      transformation: [{ width: 1200, height: 800, crop: "limit" }, { quality: "auto" }, { fetch_format: "auto" }],
     });
   });
 

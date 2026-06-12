@@ -10,9 +10,18 @@ const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"
 export const submitApplication = async (req, res) => {
   try {
     const {
-      fullName, email, phone, idNumber, location,
-      yearsOfExperience, specialties, certifications,
-      toolsAvailable, preferredRegions, cvUrl, certificationDocs,
+      fullName,
+      email,
+      phone,
+      idNumber,
+      location,
+      yearsOfExperience,
+      specialties,
+      certifications,
+      toolsAvailable,
+      preferredRegions,
+      cvUrl,
+      certificationDocs,
     } = req.body;
 
     if (!fullName || !email || !phone || !idNumber || !location || yearsOfExperience === undefined) {
@@ -26,22 +35,35 @@ export const submitApplication = async (req, res) => {
 
     const application = await InspectorApplication.create({
       user: req.user?.id || null,
-      fullName, email: email.toLowerCase().trim(), phone, idNumber, location,
-      yearsOfExperience, specialties: specialties || [], certifications: certifications || [],
-      toolsAvailable, preferredRegions: preferredRegions || [], cvUrl, certificationDocs: certificationDocs || [],
+      fullName,
+      email: email.toLowerCase().trim(),
+      phone,
+      idNumber,
+      location,
+      yearsOfExperience,
+      specialties: specialties || [],
+      certifications: certifications || [],
+      toolsAvailable,
+      preferredRegions: preferredRegions || [],
+      cvUrl,
+      certificationDocs: certificationDocs || [],
     });
 
     const reviewers = await User.find({ role: { $in: INSPECTOR_REVIEW_ROLES } })
       .select("_id email")
       .lean();
 
-    await Promise.all(reviewers.map((reviewer) => sendNotification({
-      userId: reviewer._id,
-      type: "system",
-      title: "New Inspector Application",
-      message: `${fullName} (${email}) has applied as an inspector. ${yearsOfExperience} years, ${location}.`,
-      email: reviewer.email,
-    })));
+    await Promise.all(
+      reviewers.map((reviewer) =>
+        sendNotification({
+          userId: reviewer._id,
+          type: "system",
+          title: "New Inspector Application",
+          message: `${fullName} (${email}) has applied as an inspector. ${yearsOfExperience} years, ${location}.`,
+          email: reviewer.email,
+        }),
+      ),
+    );
 
     res.json({ success: true, application });
   } catch (err) {
@@ -80,7 +102,8 @@ export const approveApplication = async (req, res) => {
         name: application.fullName,
         email: application.email,
         phone: application.phone,
-        password: process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
+        password:
+          process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
         role: "ghost_checker",
       });
     } else {
@@ -163,7 +186,12 @@ export const listApplications = async (req, res) => {
     res.json({
       success: true,
       applications,
-      pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) },
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 50),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 50)),
+      },
     });
   } catch (err) {
     console.error("❌ LIST INSPECTOR APPS ERROR:", err);

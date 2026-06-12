@@ -13,7 +13,9 @@ const sendWhatsApp = async (to, message) => {
         body: message,
       });
       return;
-    } catch (err) { console.error("WhatsApp error:", err.message); }
+    } catch (err) {
+      console.error("WhatsApp error:", err.message);
+    }
   }
   console.log(`[WA] ${to}: ${message}`);
 };
@@ -39,21 +41,25 @@ export const sendDigitalReceipt = async (transaction) => {
 
   const tasks = [];
   if (transaction.user?.email) {
-    tasks.push(sendEmail({
-      to: transaction.user.email,
-      subject: "KAYAD Payment Receipt",
-      html: emailHtml,
-    }));
+    tasks.push(
+      sendEmail({
+        to: transaction.user.email,
+        subject: "KAYAD Payment Receipt",
+        html: emailHtml,
+      }),
+    );
   }
   if (transaction.user?.phone) {
     tasks.push(sendSMS(transaction.user.phone, smsText));
     tasks.push(sendWhatsApp(transaction.user.phone, smsText));
   }
-  tasks.push(Notification.create({
-    user: transaction.user?.id || transaction.user,
-    message: `Payment Verified: KES ${receiptData.amount} for ${receiptData.car}`,
-    type: "payment",
-  }));
+  tasks.push(
+    Notification.create({
+      user: transaction.user?.id || transaction.user,
+      message: `Payment Verified: KES ${receiptData.amount} for ${receiptData.car}`,
+      type: "payment",
+    }),
+  );
 
   await Promise.allSettled(tasks);
   console.log(`Receipt sent for ${receiptData.ref}`);

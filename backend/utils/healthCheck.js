@@ -36,7 +36,7 @@ const deepHealth = async (req, res) => {
     const state = mongoose.connection.readyState;
     checks.mongodb = {
       status: state === 1 ? "ok" : "degraded",
-      state: ["disconnected","connected","connecting","disconnecting"][state] || "unknown",
+      state: ["disconnected", "connected", "connecting", "disconnecting"][state] || "unknown",
     };
   } catch {
     checks.mongodb = { status: "error" };
@@ -44,12 +44,12 @@ const deepHealth = async (req, res) => {
 
   // Redis (optional)
   checks.redis = {
-    status: isRedisConnected() ? "ok" : (process.env.REDIS_URL ? "error" : "disabled"),
+    status: isRedisConnected() ? "ok" : process.env.REDIS_URL ? "error" : "disabled",
   };
 
   // PostHog
   checks.posthog = {
-    status: isPostHogEnabled() ? "ok" : (process.env.POSTHOG_API_KEY ? "error" : "disabled"),
+    status: isPostHogEnabled() ? "ok" : process.env.POSTHOG_API_KEY ? "error" : "disabled",
   };
 
   // Memory
@@ -60,7 +60,7 @@ const deepHealth = async (req, res) => {
     heapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
   };
 
-  const allOk = Object.values(checks).every(c => ["ok","disabled"].includes(c.status));
+  const allOk = Object.values(checks).every((c) => ["ok", "disabled"].includes(c.status));
   const statusCode = allOk ? 200 : 503;
 
   res.status(statusCode).json({

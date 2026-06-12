@@ -43,16 +43,13 @@ const favoriteSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
 // 🔥 UNIQUE INDEX (NO DUPLICATES)
 // =============================
-favoriteSchema.index(
-  { user: 1, car: 1 },
-  { unique: true }
-);
+favoriteSchema.index({ user: 1, car: 1 }, { unique: true });
 
 // =============================
 // ⚡ PERFORMANCE INDEXES
@@ -63,10 +60,7 @@ favoriteSchema.index({ car: 1, createdAt: -1 });
 // =============================
 // ⚡ STATIC: TOGGLE FAVORITE
 // =============================
-favoriteSchema.statics.toggleFavorite = async function (
-  userId,
-  car
-) {
+favoriteSchema.statics.toggleFavorite = async function (userId, car) {
   const existing = await this.findOne({
     user: userId,
     car: car._id,
@@ -136,8 +130,6 @@ favoriteSchema.pre("save", function (next) {
 // =============================
 // ✅ SAFE MODEL EXPORT
 // =============================
-const Favorite =
-  mongoose.models.Favorite ||
-  mongoose.model("Favorite", favoriteSchema);
+const Favorite = mongoose.models.Favorite || mongoose.model("Favorite", favoriteSchema);
 
 export default Favorite;

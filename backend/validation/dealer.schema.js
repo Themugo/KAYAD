@@ -42,5 +42,8 @@ export const settlementSchema = z.object({
   accountName: z.string().max(200).optional(),
   accountNumber: z.string().max(50).optional(),
   paybillNumber: z.string().max(50).optional(),
-  mpesaPhone: z.string().regex(/^2547\d{8}$/).optional(),
+  mpesaPhone: z
+    .string()
+    .regex(/^2547\d{8}$/)
+    .optional(),
 });

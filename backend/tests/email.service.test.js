@@ -71,7 +71,7 @@ describe("email.service", () => {
     await sendBidConfirmationEmail(
       { name: "Bidder", email: "bidder@test.com" },
       { amount: 500000 },
-      { title: "Toyota Prado", _id: "car123", auctionEnd: new Date().toISOString() }
+      { title: "Toyota Prado", _id: "car123", auctionEnd: new Date().toISOString() },
     );
     const call = mockSendMail.mock.calls[0][0];
     expect(call.html).toContain("Toyota Prado");
@@ -81,11 +81,7 @@ describe("email.service", () => {
   it("sendOutbidEmail alerts the user", async () => {
     mockSendMail.mockResolvedValue({ messageId: "abc" });
     const { sendOutbidEmail } = await import("../services/email.service.js");
-    await sendOutbidEmail(
-      { name: "User", email: "u@test.com" },
-      600000,
-      { title: "BMW X5", _id: "car2" }
-    );
+    await sendOutbidEmail({ name: "User", email: "u@test.com" }, 600000, { title: "BMW X5", _id: "car2" });
     const call = mockSendMail.mock.calls[0][0];
     expect(call.html).toContain("outbid");
     expect(call.html).toContain("600,000");

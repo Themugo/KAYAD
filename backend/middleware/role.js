@@ -1,4 +1,12 @@
-export { requirePermission, requireRole, requireAtLeast, hasPermission, getPermissions, PERMISSIONS, isWebhoist } from "./rbac.js";
+export {
+  requirePermission,
+  requireRole,
+  requireAtLeast,
+  hasPermission,
+  getPermissions,
+  PERMISSIONS,
+  isWebhoist,
+} from "./rbac.js";
 
 export const authorize = (...roles) => {
   return (req, res, next) => {
@@ -13,7 +21,10 @@ export const authorize = (...roles) => {
 
       if (!roles.includes(req.user.role)) {
         console.warn("ACCESS DENIED:", {
-          user: req.user.id, role: req.user.role, allowed: roles, path: req.originalUrl,
+          user: req.user.id,
+          role: req.user.role,
+          allowed: roles,
+          path: req.originalUrl,
         });
         return res.status(403).json({ success: false, message: `Access denied for role: ${req.user.role}` });
       }

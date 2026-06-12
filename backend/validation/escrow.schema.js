@@ -11,7 +11,10 @@ export const escrowActionSchema = z.object({
 });
 
 export const releaseEscrowSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d{6}$/, "OTP must contain only digits"),
+  otp: z
+    .string()
+    .length(6, "OTP must be 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only digits"),
 });
 
 export const escrowVaultWebhookSchema = z.object({
@@ -21,5 +24,8 @@ export const escrowVaultWebhookSchema = z.object({
 });
 
 export const releaseOtpSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d{6}$/, "OTP must contain only digits"),
+  otp: z
+    .string()
+    .length(6, "OTP must be 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only digits"),
 });

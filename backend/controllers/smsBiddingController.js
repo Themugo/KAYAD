@@ -41,16 +41,17 @@ export const handleInboundSms = async (req, res) => {
     }
 
     // Look up registered SMS bidder
-    const smsBidder = await SmsBidder.findOne({ phone: cleanedPhone, active: true }).populate("subscriptions.car", "title brand model year auctionStatus currentBid auctionEnd");
+    const smsBidder = await SmsBidder.findOne({ phone: cleanedPhone, active: true }).populate(
+      "subscriptions.car",
+      "title brand model year auctionStatus currentBid auctionEnd",
+    );
     if (!smsBidder || smsBidder.subscriptions.length === 0) {
       await sendSMS(cleanedPhone, "You are not registered for SMS bidding. Visit KAYAD to link your phone.");
       return res.json({ success: true, message: "Unregistered phone" });
     }
 
     // Find which subscribed car the bid is for — use the most recently active auction
-    const activeSub = smsBidder.subscriptions.find(s =>
-      s.car && s.car.auctionStatus === "live" && s.car.allowBid
-    );
+    const activeSub = smsBidder.subscriptions.find((s) => s.car && s.car.auctionStatus === "live" && s.car.allowBid);
     if (!activeSub) {
       await sendSMS(cleanedPhone, "No active auctions found on your subscribed cars.");
       return res.json({ success: true, message: "No active auctions" });
@@ -70,7 +71,10 @@ export const handleInboundSms = async (req, res) => {
     const highest = await Bid.getHighestBid(car._id);
     const currentBid = highest?.amount || car.currentBid || car.price;
     if (amount <= currentBid) {
-      await sendSMS(cleanedPhone, `Bid too low. Current bid is KES ${currentBid.toLocaleString("en-KE")}. Reply with a higher amount.`);
+      await sendSMS(
+        cleanedPhone,
+        `Bid too low. Current bid is KES ${currentBid.toLocaleString("en-KE")}. Reply with a higher amount.`,
+      );
       return res.json({ success: true, message: "Bid too low" });
     }
 
@@ -115,13 +119,19 @@ export const handleInboundSms = async (req, res) => {
     emitListingUpdate(car._id.toString(), { currentBid: amount, bidsCount: car.bidsCount });
 
     // Notify bidder
-    await sendSMS(cleanedPhone, `✅ Bid of KES ${amount.toLocaleString("en-KE")} placed on ${car.title || "vehicle"}. Track it live on KAYAD.`);
+    await sendSMS(
+      cleanedPhone,
+      `✅ Bid of KES ${amount.toLocaleString("en-KE")} placed on ${car.title || "vehicle"}. Track it live on KAYAD.`,
+    );
 
     // Notify outbid user
     if (previousHighestBidder && String(previousHighestBidder) !== String(smsBidder.user)) {
       const prevUser = await User.findById(previousHighestBidder).select("phone name");
       if (prevUser?.phone) {
-        await sendSMS(prevUser.phone, `You've been outbid on ${car.title || "vehicle"} — KES ${amount.toLocaleString("en-KE")}. Bid higher now on KAYAD.`);
+        await sendSMS(
+          prevUser.phone,
+          `You've been outbid on ${car.title || "vehicle"} — KES ${amount.toLocaleString("en-KE")}. Bid higher now on KAYAD.`,
+        );
       }
     }
 
@@ -178,13 +188,14 @@ export const subscribeToCar = async (req, res) => {
 
     // Verify car exists and is an auction
     const car = await Car.findById(carId);
-    if (!car || !car.allowBid) return res.status(400).json({ success: false, message: "Car not available for bidding" });
+    if (!car || !car.allowBid)
+      return res.status(400).json({ success: false, message: "Car not available for bidding" });
 
     const smsBidder = await SmsBidder.findOne({ user: userId });
     if (!smsBidder) return res.status(400).json({ success: false, message: "Register your phone first" });
 
     // Check if already subscribed
-    const existing = smsBidder.subscriptions.find(s => s.car?.toString() === carId);
+    const existing = smsBidder.subscriptions.find((s) => s.car?.toString() === carId);
     if (existing) {
       existing.notifyOnOutbid = notifyOnOutbid ?? existing.notifyOnOutbid;
       existing.autoBid = autoBid ?? existing.autoBid;
@@ -212,7 +223,7 @@ export const unsubscribeFromCar = async (req, res) => {
     const smsBidder = await SmsBidder.findOne({ user: userId });
     if (!smsBidder) return res.status(404).json({ success: false, message: "Not registered" });
 
-    smsBidder.subscriptions = smsBidder.subscriptions.filter(s => s.car?.toString() !== carId);
+    smsBidder.subscriptions = smsBidder.subscriptions.filter((s) => s.car?.toString() !== carId);
     await smsBidder.save();
     res.json({ success: true, subscriptions: smsBidder.subscriptions });
   } catch (err) {
@@ -227,7 +238,10 @@ export const unsubscribeFromCar = async (req, res) => {
 export const getMySmsProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const smsBidder = await SmsBidder.findOne({ user: userId }).populate("subscriptions.car", "title brand model year auctionStatus currentBid");
+    const smsBidder = await SmsBidder.findOne({ user: userId }).populate(
+      "subscriptions.car",
+      "title brand model year auctionStatus currentBid",
+    );
     res.json({ success: true, smsBidder: smsBidder || { phone: "", active: false, subscriptions: [] } });
   } catch (err) {
     console.error("❌ GET SMS PROFILE ERROR:", err);

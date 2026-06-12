@@ -1,12 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
-import {
-  ASSIGNABLE_PERMISSIONS,
-  PERM_LABELS,
-  ROLE_PERMISSIONS,
-  getEffectivePermissions,
-} from "../config/roles.js";
+import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
@@ -42,7 +37,17 @@ try {
 const adminOrSuper = authorize("admin", "superadmin");
 
 // All staff roles (departmental admins)
-const staffRole = authorize("admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator");
+const staffRole = authorize(
+  "admin",
+  "superadmin",
+  "marketing",
+  "technical_support",
+  "hr",
+  "accounts",
+  "escrow_officer",
+  "ad_manager",
+  "moderator",
+);
 
 const router = express.Router();
 
@@ -60,7 +65,9 @@ router.get(
   "/public/config",
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne()
-      .select("platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing")
+      .select(
+        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing",
+      )
       .lean();
 
     if (!config) {
@@ -69,7 +76,7 @@ router.get(
     }
 
     res.json({ success: true, config });
-  })
+  }),
 );
 
 // =============================
@@ -87,7 +94,7 @@ router.post(
     }
     const result = await reseed();
     res.json({ success: true, message: "Database re-seeded", result });
-  })
+  }),
 );
 
 // =============================
@@ -151,10 +158,7 @@ router.get(
       Car.countDocuments({ status: "pending" }),
       Escrow.countDocuments({ status: "held" }),
       Escrow.countDocuments({ status: "disputed" }),
-      Escrow.aggregate([
-        { $match: { status: "released" } },
-        { $group: { _id: null, total: { $sum: "$commission" } } },
-      ]),
+      Escrow.aggregate([{ $match: { status: "released" } }, { $group: { _id: null, total: { $sum: "$commission" } } }]),
       Bid.countDocuments(),
       Car.aggregate([{ $group: { _id: null, total: { $sum: "$favoritesCount" } } }]),
       Bid.countDocuments({ status: "pending" }),
@@ -194,7 +198,7 @@ router.get(
         carsSold,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -217,25 +221,29 @@ router.get(
       filter.role = { $in: ["dealer", "broker", "individual_seller"] };
       filter.approved = false;
     }
+    // FIX: Added broker-specific filter so admins can view pending brokers independently
+    if (req.query.pendingBroker === "true") {
+      filter.role = "broker";
+      filter.approved = false;
+    }
+    if (req.query.pendingIndividual === "true") {
+      filter.role = "individual_seller";
+      filter.approved = false;
+    }
+    if (req.query.verificationStatus) {
+      filter.verificationStatus = req.query.verificationStatus; // pending | verified | rejected
+    }
     if (req.query.isDemo === "true") filter.isDemo = true;
     if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 
     // 🔎 SEARCH (name/email)
     if (req.query.search) {
       const search = req.query.search.trim();
-      filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-      ];
+      filter.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }];
     }
 
     const [users, total] = await Promise.all([
-      User.find(filter)
-        .select("-password")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      User.find(filter).select("-password").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
 
       User.countDocuments(filter),
     ]);
@@ -250,7 +258,7 @@ router.get(
         pages: Math.ceil(total / limit),
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -286,11 +294,15 @@ router.post(
       success: true,
       message: user.isBanned ? "User banned" : "User unbanned",
     });
-  })
+  }),
 );
 
 // =============================
-// 🧑‍💼 APPROVE DEALER
+// 🧑‍💼 APPROVE SELLER (dealer / broker / individual_seller)
+// FIX: This was a duplicate of verify-dealer below. Now unified into a single
+// endpoint at POST /users/:id/verify-dealer which handles approve/reject + audit
+// log + email + notification for ALL seller roles (dealer, broker, individual_seller).
+// This route is kept as a compatibility shim and delegates to verify-dealer logic.
 // =============================
 router.post(
   "/users/:id/approve-dealer",
@@ -298,38 +310,36 @@ router.post(
   validateObjectId,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
+    const sellerRoles = ["dealer", "broker", "individual_seller"];
+    if (!sellerRoles.includes(user.role)) {
+      return res.status(400).json({ success: false, message: "User is not a seller (dealer/broker/individual_seller)" });
     }
 
     user.approved = true;
     user.verificationStatus = "verified";
-
     await user.save();
+
+    await AuditLog.create({
+      action: `Seller approved (compat shim → verify-dealer): ${user.email} [${user.role}]`,
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+    });
 
     const { sendDealerApprovedEmail } = adminEmailService;
     if (typeof sendDealerApprovedEmail === "function") {
-      sendDealerApprovedEmail(user).catch(e =>
-        console.warn("⚠️  Dealer approval email failed:", e.message)
-      );
+      sendDealerApprovedEmail(user).catch((e) => console.warn("⚠️  Seller approval email failed:", e.message));
     }
-
     sendNotification({
       userId: user._id,
       title: "Seller Account Approved",
-      message: "Your seller account has been approved. You can now list vehicles and access seller features.",
+      message: `Your ${user.role} account has been approved. You can now list vehicles and access seller features.`,
       type: "info",
-    }).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
+    }).catch((e) => console.warn("⚠️ Approval notification failed:", e.message));
 
-    res.json({
-      success: true,
-      message: "Seller approved",
-    });
-  })
+    res.json({ success: true, message: "Seller approved" });
+  }),
 );
 
 // =============================
@@ -381,7 +391,7 @@ router.put(
         dealerRating: user.dealerRating,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -407,12 +417,7 @@ router.get(
     }
 
     const [cars, total] = await Promise.all([
-      Car.find(filter)
-        .populate("dealer", "name email")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Car.find(filter).populate("dealer", "name email").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
 
       Car.countDocuments(filter),
     ]);
@@ -427,7 +432,7 @@ router.get(
         pages: Math.ceil(total / limit),
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -452,24 +457,21 @@ router.delete(
       await User.findByIdAndUpdate(car.dealer, {
         $inc: { listingCount: -1, trialListingsUsed: -1 },
       });
-      await User.updateOne(
-        { _id: car.dealer },
-        [
-          {
-            $set: {
-              listingCount: { $max: ["$listingCount", 0] },
-              trialListingsUsed: { $max: ["$trialListingsUsed", 0] },
-            },
+      await User.updateOne({ _id: car.dealer }, [
+        {
+          $set: {
+            listingCount: { $max: ["$listingCount", 0] },
+            trialListingsUsed: { $max: ["$trialListingsUsed", 0] },
           },
-        ]
-      ).catch((e) => console.warn("⚠️ Dealer listing count update failed:", e.message));
+        },
+      ]).catch((e) => console.warn("⚠️ Dealer listing count update failed:", e.message));
     }
 
     res.json({
       success: true,
       message: "Car deleted",
     });
-  })
+  }),
 );
 
 // =============================
@@ -489,7 +491,7 @@ router.post(
     if (req.body.ntsaVerified || req.body.logbookVerified) car.verifiedBy = req.user.id;
     await car.save();
     res.json({ success: true, car });
-  })
+  }),
 );
 
 // =============================
@@ -545,7 +547,7 @@ router.post(
     });
 
     res.json({ success: true, message: `Listing ${action}d successfully.`, car });
-  })
+  }),
 );
 
 // =============================
@@ -561,7 +563,7 @@ router.get(
       config = await PlatformConfig.create({});
     }
     res.json({ success: true, config });
-  })
+  }),
 );
 
 // UPDATE CONFIG
@@ -573,15 +575,35 @@ router.put(
     if (!config) config = new PlatformConfig();
 
     const allowed = [
-      "platformName", "supportEmail", "supportPhone",
-      "galleryTitle", "gallerySubtitle",
-      "dealerCommission", "bidCommitmentPct", "escrowReleaseDays", "maxListingImages",
-      "allowGuestBrowsing", "requireDealerApproval", "dealerTrialDays",
-      "waivePayments", "freeMarket",
-      "fontDisplay", "fontBody", "fontSizePct", "baseFontSize", "lineHeight",
-      "listingFee", "auctionRegistrationFee", "ghostCheckFee", "commissionPercentage",
-      "platformVat", "buyerPremiumPct", "activePromos",
-      "daraja", "bank", "reconciliation",
+      "platformName",
+      "supportEmail",
+      "supportPhone",
+      "galleryTitle",
+      "gallerySubtitle",
+      "dealerCommission",
+      "bidCommitmentPct",
+      "escrowReleaseDays",
+      "maxListingImages",
+      "allowGuestBrowsing",
+      "requireDealerApproval",
+      "dealerTrialDays",
+      "waivePayments",
+      "freeMarket",
+      "fontDisplay",
+      "fontBody",
+      "fontSizePct",
+      "baseFontSize",
+      "lineHeight",
+      "listingFee",
+      "auctionRegistrationFee",
+      "ghostCheckFee",
+      "commissionPercentage",
+      "platformVat",
+      "buyerPremiumPct",
+      "activePromos",
+      "daraja",
+      "bank",
+      "reconciliation",
       "branding",
     ];
 
@@ -604,7 +626,7 @@ router.put(
     });
 
     res.json({ success: true, config });
-  })
+  }),
 );
 
 // UPDATE PACKAGES (admin edits pricing/limits without code changes)
@@ -628,10 +650,8 @@ router.put(
     });
 
     res.json({ success: true, config });
-  })
+  }),
 );
-
-
 
 // =============================
 // 📋 AUDIT LOG
@@ -655,7 +675,7 @@ router.get(
       entries,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
-  })
+  }),
 );
 
 // APPEND AUDIT LOG ENTRY
@@ -677,7 +697,7 @@ router.post(
     });
 
     res.json({ success: true, entry });
-  })
+  }),
 );
 
 // =============================
@@ -688,7 +708,7 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
-    
+
     let settings = await GlobalSettings.findOne();
     if (!settings) settings = await GlobalSettings.create({});
 
@@ -713,7 +733,7 @@ router.post(
     });
 
     res.json({ success: true, message: `${type} disabled globally` });
-  })
+  }),
 );
 
 // =============================
@@ -724,7 +744,7 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
-    
+
     let settings = await GlobalSettings.findOne();
     if (!settings) settings = await GlobalSettings.create({});
 
@@ -752,7 +772,7 @@ router.post(
     });
 
     res.json({ success: true, message: `${type} re-enabled globally` });
-  })
+  }),
 );
 
 // =============================
@@ -779,40 +799,76 @@ router.put(
     });
 
     res.json({ success: true, message: `Subdomain ${subdomain}.kayad.space is now live!` });
-  })
+  }),
 );
 
 // =============================
-// ✅ DEALER VERIFICATION (approve/reject)
+// ✅ SELLER VERIFICATION (approve/reject) — canonical endpoint
+// FIX: Extended to cover dealer, broker, and individual_seller roles.
+// Handles audit log, email notification, and in-app notification in one place.
 // =============================
 router.post(
   "/users/:id/verify-dealer",
   adminOrSuper,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const { action } = req.body; // 'approve' or 'reject'
+    const { action, reason } = req.body; // action: 'approve' | 'reject'
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
+    const sellerRoles = ["dealer", "broker", "individual_seller"];
+    if (!sellerRoles.includes(user.role)) {
+      return res.status(400).json({ success: false, message: "User is not a seller (dealer/broker/individual_seller)" });
+    }
+
     if (action === "approve") {
-      user.role = "dealer";
       user.verificationStatus = "verified";
       user.approved = true;
+      // Only force role to 'dealer' if it's not already a broker or individual_seller
+      if (user.role !== "broker" && user.role !== "individual_seller") {
+        user.role = "dealer";
+      }
     } else if (action === "reject") {
       user.verificationStatus = "rejected";
+      user.approved = false;
     } else {
       return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
     }
 
     await user.save();
+
     await AuditLog.create({
-      action: `Dealer verification: ${action} for ${user.email}`,
+      action: `Seller verification: ${action} for ${user.email} [role: ${user.role}]`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
+      details: { userId: user._id, role: user.role, reason: reason || null },
     });
 
-    res.json({ success: true, message: `Dealer ${action}d successfully.` });
-  })
+    // Send email notification
+    if (action === "approve") {
+      const { sendDealerApprovedEmail } = adminEmailService;
+      if (typeof sendDealerApprovedEmail === "function") {
+        sendDealerApprovedEmail(user).catch((e) => console.warn("⚠️  Seller approval email failed:", e.message));
+      }
+      sendNotification({
+        userId: user._id,
+        title: "Seller Account Approved",
+        message: `Your ${user.role} account has been approved. You can now list vehicles and access seller features.`,
+        type: "info",
+      }).catch((e) => console.warn("⚠️ Approval notification failed:", e.message));
+    } else {
+      sendNotification({
+        userId: user._id,
+        title: "Seller Application Rejected",
+        message: reason
+          ? `Your seller application was rejected: ${reason}`
+          : "Your seller application was not approved at this time. Please contact support for more information.",
+        type: "warning",
+      }).catch((e) => console.warn("⚠️ Rejection notification failed:", e.message));
+    }
+
+    res.json({ success: true, message: `Seller ${action}d successfully.`, role: user.role });
+  }),
 );
 
 // =============================
@@ -845,7 +901,7 @@ router.post(
       message: "STK push sent",
       checkoutRequestID: result?.CheckoutRequestID,
     });
-  })
+  }),
 );
 
 // =============================
@@ -859,13 +915,15 @@ router.delete(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
-    if (user._id.toString() === req.user.id) return res.status(400).json({ success: false, message: "Cannot delete yourself" });
+    if (user.role === "superadmin")
+      return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
+    if (user._id.toString() === req.user.id)
+      return res.status(400).json({ success: false, message: "Cannot delete yourself" });
 
     // Soft-delete user's cars
     await Car.softDelete(
-      (await Car.find({ dealer: user._id }, { _id: 1 })).map(c => c._id),
-      req.user.id
+      (await Car.find({ dealer: user._id }, { _id: 1 })).map((c) => c._id),
+      req.user.id,
     );
     await user.deleteOne();
 
@@ -876,7 +934,7 @@ router.delete(
     });
 
     res.json({ success: true, message: "User and all associated data deleted" });
-  })
+  }),
 );
 
 // =============================
@@ -890,7 +948,8 @@ router.put(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot deactivate superadmin" });
+    if (user.role === "superadmin")
+      return res.status(400).json({ success: false, message: "Cannot deactivate superadmin" });
 
     user.deactivatedAt = user.deactivatedAt ? null : new Date();
     await user.save();
@@ -912,7 +971,7 @@ router.put(
         deactivatedAt,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -943,7 +1002,7 @@ router.get(
         demoEscrows,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -968,7 +1027,7 @@ router.delete(
             trialListingsUsed: 0,
             firstVehicleUsed: false,
           },
-        }
+        },
       ),
     ]);
 
@@ -990,7 +1049,7 @@ router.delete(
         escrows: escrowsDeleted.deletedCount,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -1002,19 +1061,29 @@ router.get(
   "/staff",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
-    const staffRoles = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
+    const staffRoles = [
+      "admin",
+      "superadmin",
+      "marketing",
+      "technical_support",
+      "hr",
+      "accounts",
+      "escrow_officer",
+      "ad_manager",
+      "moderator",
+    ];
     const staff = await User.find({ role: { $in: staffRoles } })
       .select("name email role isBanned lastLogin createdAt grantedPermissions revokedPermissions permissionsUpdatedAt")
       .sort({ createdAt: -1 })
       .lean();
     // Attach computed effective permissions for the UI
-    const enriched = staff.map(s => ({
+    const enriched = staff.map((s) => ({
       ...s,
       effectivePermissions: getEffectivePermissions(s),
       rolePermissions: ROLE_PERMISSIONS[s.role] || [],
     }));
     res.json({ success: true, staff: enriched });
-  })
+  }),
 );
 
 // GET PERMISSION CATALOG (assignable permissions + labels) — for the assignment UI
@@ -1022,14 +1091,14 @@ router.get(
   "/staff/permissions/catalog",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
-    const catalog = ASSIGNABLE_PERMISSIONS.map(p => ({
+    const catalog = ASSIGNABLE_PERMISSIONS.map((p) => ({
       key: p,
       label: PERM_LABELS[p]?.label || p,
       desc: PERM_LABELS[p]?.desc || "",
       group: PERM_LABELS[p]?.group || "Other",
     }));
     res.json({ success: true, catalog });
-  })
+  }),
 );
 
 // GET ONE STAFF MEMBER'S EFFECTIVE PERMISSIONS
@@ -1053,7 +1122,7 @@ router.get(
         updatedAt: user.permissionsUpdatedAt,
       },
     });
-  })
+  }),
 );
 
 // UPDATE A STAFF MEMBER'S ASSIGNED PERMISSIONS (superadmin only)
@@ -1068,11 +1137,11 @@ router.put(
 
     // Validate against the assignable catalog — reject unknown/forbidden keys
     const allowed = new Set(ASSIGNABLE_PERMISSIONS);
-    grantedPermissions = [...new Set(grantedPermissions)].filter(p => allowed.has(p));
-    revokedPermissions = [...new Set(revokedPermissions)].filter(p => allowed.has(p));
+    grantedPermissions = [...new Set(grantedPermissions)].filter((p) => allowed.has(p));
+    revokedPermissions = [...new Set(revokedPermissions)].filter((p) => allowed.has(p));
 
     // A permission can't be both granted and revoked — grant wins, drop from revoked
-    revokedPermissions = revokedPermissions.filter(p => !grantedPermissions.includes(p));
+    revokedPermissions = revokedPermissions.filter((p) => !grantedPermissions.includes(p));
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -1097,7 +1166,7 @@ router.put(
         effectivePermissions: getEffectivePermissions(user),
       },
     });
-  })
+  }),
 );
 
 // CREATE STAFF ACCOUNT
@@ -1106,20 +1175,50 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body;
-    const staffRoles = ["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
+    const staffRoles = [
+      "admin",
+      "marketing",
+      "technical_support",
+      "hr",
+      "accounts",
+      "escrow_officer",
+      "ad_manager",
+      "moderator",
+    ];
     if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "name, email, password, role required" });
     }
+    // FIX: Enforce minimum password length (was missing — 1-char passwords were accepted)
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
+    }
     if (!staffRoles.includes(role)) {
-      return res.status(400).json({ success: false, message: `Invalid staff role. Must be one of: ${staffRoles.join(", ")}` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Invalid staff role. Must be one of: ${staffRoles.join(", ")}` });
     }
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    const user = await User.create({ name, email, password, role });
-    res.json({ success: true, message: `Staff account created: ${email}`, user: { name: user.name, email: user.email, role: user.role } });
-  })
+    // FIX: Set emailVerified=true and approved=true for admin-created staff.
+    // Without this, REQUIRE_EMAIL_VERIFICATION=true blocks them from ever logging in,
+    // and the approved=false schema default would block seller-guarded routes.
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role,
+      emailVerified: true,
+      approved: true,
+      mustChangePassword: true, // force them to set their own password on first login
+    });
+    res.json({
+      success: true,
+      message: `Staff account created: ${email}`,
+      user: { name: user.name, email: user.email, role: user.role },
+    });
+  }),
 );
 
 // UPDATE STAFF ROLE
@@ -1135,8 +1234,12 @@ router.put(
     if (req.body.name) user.name = req.body.name;
     if (req.body.isBanned !== undefined) user.isBanned = req.body.isBanned;
     await user.save();
-    res.json({ success: true, message: "Staff updated", user: { name: user.name, email: user.email, role: user.role, isBanned: user.isBanned } });
-  })
+    res.json({
+      success: true,
+      message: "Staff updated",
+      user: { name: user.name, email: user.email, role: user.role, isBanned: user.isBanned },
+    });
+  }),
 );
 
 // DELETE STAFF ACCOUNT
@@ -1148,10 +1251,11 @@ router.delete(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "superadmin") return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
+    if (user.role === "superadmin")
+      return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
     await User.softDelete(req.params.id, req.user.id);
     res.json({ success: true, message: "Staff account deleted" });
-  })
+  }),
 );
 
 // =============================
@@ -1169,12 +1273,42 @@ router.post(
       return pw;
     };
     const departments = [
-      { name: "Marketing",    email: "marketing@kayad.space", password: process.env.SEED_MARKET_PW  || devFallback("SEED_MARKET_PW"), role: "marketing" },
-      { name: "Tech Support", email: "support@kayad.space",   password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"), role: "technical_support" },
-      { name: "HR",           email: "hr@kayad.space",        password: process.env.SEED_HR_PW      || devFallback("SEED_HR_PW"), role: "hr" },
-      { name: "Accounts",     email: "accounts@kayad.space",  password: process.env.SEED_ACCOUNTS_PW|| devFallback("SEED_ACCOUNTS_PW"), role: "accounts" },
-      { name: "Escrow",       email: "escrow@kayad.space",    password: process.env.SEED_ESCROW_PW  || devFallback("SEED_ESCROW_PW"), role: "escrow_officer" },
-      { name: "Ad Manager",   email: "ads@kayad.space",       password: process.env.SEED_ADS_PW     || devFallback("SEED_ADS_PW"), role: "ad_manager" },
+      {
+        name: "Marketing",
+        email: "marketing@kayad.space",
+        password: process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"),
+        role: "marketing",
+      },
+      {
+        name: "Tech Support",
+        email: "support@kayad.space",
+        password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"),
+        role: "technical_support",
+      },
+      {
+        name: "HR",
+        email: "hr@kayad.space",
+        password: process.env.SEED_HR_PW || devFallback("SEED_HR_PW"),
+        role: "hr",
+      },
+      {
+        name: "Accounts",
+        email: "accounts@kayad.space",
+        password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"),
+        role: "accounts",
+      },
+      {
+        name: "Escrow",
+        email: "escrow@kayad.space",
+        password: process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"),
+        role: "escrow_officer",
+      },
+      {
+        name: "Ad Manager",
+        email: "ads@kayad.space",
+        password: process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"),
+        role: "ad_manager",
+      },
     ];
     const created = [];
     for (const dept of departments) {
@@ -1187,7 +1321,7 @@ router.post(
       }
     }
     res.json({ success: true, message: "Department accounts provisioned", accounts: created });
-  })
+  }),
 );
 
 // =============================
@@ -1200,7 +1334,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const ads = await Ad.find().sort({ createdAt: -1 }).lean();
     res.json({ success: true, ads });
-  })
+  }),
 );
 
 // CREATE AD
@@ -1210,7 +1344,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const ad = await Ad.create(req.body);
     res.json({ success: true, ad });
-  })
+  }),
 );
 
 // UPDATE AD
@@ -1225,7 +1359,7 @@ router.put(
     });
     if (!ad) return res.status(404).json({ success: false, message: "Ad not found" });
     res.json({ success: true, ad });
-  })
+  }),
 );
 
 // DELETE AD
@@ -1237,7 +1371,7 @@ router.delete(
     const ad = await Ad.findByIdAndDelete(req.params.id);
     if (!ad) return res.status(404).json({ success: false, message: "Ad not found" });
     res.json({ success: true, message: "Ad deleted" });
-  })
+  }),
 );
 
 // =============================
@@ -1246,7 +1380,6 @@ router.delete(
 router.get(
   "/payments",
   asyncHandler(async (req, res) => {
-    
     const { page, limit, skip } = getPagination(req);
 
     const filter = {};
@@ -1278,7 +1411,7 @@ router.get(
         totalTransactions: totalRevenue[0]?.count || 0,
       },
     });
-  })
+  }),
 );
 
 // =============================
@@ -1291,29 +1424,31 @@ router.patch(
   asyncHandler(async (req, res) => {
     const { dealerPackage, packageListingMax, packageFeatures, durationDays, packageAutoRenew } = req.body;
     const PACKAGES = {
-      starter:    { listingMax: 10,  features: [] },
-      growth:     { listingMax: 30,  features: ["priority_search"] },
-      elite:      { listingMax: 100, features: ["priority_search", "featured_homepage"] },
-      enterprise: { listingMax: 0,   features: ["priority_search", "featured_homepage", "dedicated_support"] },
-      none:       { listingMax: 0,   features: [] },
+      starter: { listingMax: 10, features: [] },
+      growth: { listingMax: 30, features: ["priority_search"] },
+      elite: { listingMax: 100, features: ["priority_search", "featured_homepage"] },
+      enterprise: { listingMax: 0, features: ["priority_search", "featured_homepage", "dedicated_support"] },
+      none: { listingMax: 0, features: [] },
     };
     const pkg = PACKAGES[dealerPackage] || PACKAGES.none;
-    const expiry = durationDays
-      ? new Date(Date.now() + Number(durationDays) * 86400000)
-      : null;
+    const expiry = durationDays ? new Date(Date.now() + Number(durationDays) * 86400000) : null;
 
-    const user = await User.findByIdAndUpdate(req.params.id, {
-      dealerPackage,
-      packageListingMax: packageListingMax ?? pkg.listingMax,
-      packageFeatures:   packageFeatures   ?? pkg.features,
-      packageExpiresAt:  expiry,
-      packageAutoRenew:  packageAutoRenew  ?? false,
-      subscriptionStatus: dealerPackage === "none" ? "none" : "active",
-    }, { new: true }).select("-password");
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        dealerPackage,
+        packageListingMax: packageListingMax ?? pkg.listingMax,
+        packageFeatures: packageFeatures ?? pkg.features,
+        packageExpiresAt: expiry,
+        packageAutoRenew: packageAutoRenew ?? false,
+        subscriptionStatus: dealerPackage === "none" ? "none" : "active",
+      },
+      { new: true },
+    ).select("-password");
 
     if (!user) return res.status(404).json({ success: false, message: "Dealer not found" });
     res.json({ success: true, user });
-  })
+  }),
 );
 
 // =============================
@@ -1324,12 +1459,12 @@ router.post(
   protect,
   adminOnly,
   asyncHandler(async (req, res) => {
-    
     const { dealerIds, durationDays = 90, listingMax = 50 } = req.body;
 
-    const filter = dealerIds?.length > 0
-      ? { _id: { $in: dealerIds }, role: { $in: ["dealer", "broker", "individual_seller"] } }
-      : { role: { $in: ["dealer", "broker", "individual_seller"] }, approved: true };
+    const filter =
+      dealerIds?.length > 0
+        ? { _id: { $in: dealerIds }, role: { $in: ["dealer", "broker", "individual_seller"] } }
+        : { role: { $in: ["dealer", "broker", "individual_seller"] }, approved: true };
 
     const result = await User.updateMany(filter, {
       $set: {
@@ -1345,7 +1480,7 @@ router.post(
     });
 
     res.json({ success: true, modifiedCount: result.modifiedCount, matchedCount: result.matchedCount });
-  })
+  }),
 );
 
 // =============================
@@ -1366,406 +1501,630 @@ router.post(
     config.branding.logoUrl = url;
     await config.save();
     res.json({ success: true, url });
-  })
+  }),
 );
 
 // =============================
 // ⭐ REVIEW MODERATION
 // =============================
-router.get("/reviews", staffRole, asyncHandler(async (req, res) => {
-  const { status, dealerId, page = 1, limit = 20 } = req.query;
-  const filter = {};
-  if (dealerId) filter.dealer = dealerId;
+router.get(
+  "/reviews",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const { status, dealerId, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (dealerId) filter.dealer = dealerId;
 
-  const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
-  const [reviews, total] = await Promise.all([
-    Review.find(filter)
-      .populate("user", "name email")
-      .populate("dealer", "name email")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Math.min(Number(limit), 50))
-      .lean(),
-    Review.countDocuments(filter),
-  ]);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    const [reviews, total] = await Promise.all([
+      Review.find(filter)
+        .populate("user", "name email")
+        .populate("dealer", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 50))
+        .lean(),
+      Review.countDocuments(filter),
+    ]);
 
-  res.json({ success: true, reviews, pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) } });
-}));
+    res.json({
+      success: true,
+      reviews,
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 50),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 50)),
+      },
+    });
+  }),
+);
 
-router.delete("/reviews/:id", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const review = await Review.findByIdAndDelete(req.params.id);
-  if (!review) return res.status(404).json({ success: false, message: "Review not found" });
-  res.json({ success: true, message: "Review deleted" });
-}));
+router.delete(
+  "/reviews/:id",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const review = await Review.findByIdAndDelete(req.params.id);
+    if (!review) return res.status(404).json({ success: false, message: "Review not found" });
+    res.json({ success: true, message: "Review deleted" });
+  }),
+);
 
 // =============================
 // 👥 REFERRAL MANAGEMENT
 // =============================
 
-router.get("/referrals/stats", adminOrSuper, cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/referrals/stats"), asyncHandler(async (req, res) => {
-  
-  
+router.get(
+  "/referrals/stats",
+  adminOrSuper,
+  cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/referrals/stats"),
+  asyncHandler(async (req, res) => {
+    const [totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus] = await Promise.all([
+      Referral.countDocuments(),
+      Referral.countDocuments({ status: "pending" }),
+      Referral.countDocuments({ status: "credited" }),
+      Referral.countDocuments({ status: "expired" }),
+      Transaction.aggregate([
+        { $match: { type: "referral_bonus", status: "success" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+      ]).then((r) => r[0]?.total || 0),
+    ]);
 
-  const [totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus] = await Promise.all([
-    Referral.countDocuments(),
-    Referral.countDocuments({ status: "pending" }),
-    Referral.countDocuments({ status: "credited" }),
-    Referral.countDocuments({ status: "expired" }),
-    Transaction.aggregate([
-      { $match: { type: "referral_bonus", status: "success" } },
-      { $group: { _id: null, total: { $sum: "$amount" } } },
-    ]).then(r => (r[0]?.total || 0)),
-  ]);
+    res.json({ success: true, stats: { totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus } });
+  }),
+);
 
-  res.json({ success: true, stats: { totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus } });
-}));
+router.get(
+  "/referrals",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const { status, referrer, referee, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (referrer) filter.referrer = referrer;
+    if (referee) filter.referee = referee;
 
-router.get("/referrals", staffRole, asyncHandler(async (req, res) => {
-  const { status, referrer, referee, page = 1, limit = 20 } = req.query;
-  const filter = {};
-  if (status) filter.status = status;
-  if (referrer) filter.referrer = referrer;
-  if (referee) filter.referee = referee;
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    const [referrals, total] = await Promise.all([
+      Referral.find(filter)
+        .populate("referrer", "name email referralCode")
+        .populate("referee", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 50))
+        .lean(),
+      Referral.countDocuments(filter),
+    ]);
 
-  
-  const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
-  const [referrals, total] = await Promise.all([
-    Referral.find(filter)
-      .populate("referrer", "name email referralCode")
+    res.json({
+      success: true,
+      referrals,
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 50),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 50)),
+      },
+    });
+  }),
+);
+
+router.get(
+  "/referrals/:id",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const referral = await Referral.findById(req.params.id)
+      .populate("referrer", "name email referralCode credits referralEarnings referralCount")
       .populate("referee", "name email")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(Math.min(Number(limit), 50))
-      .lean(),
-    Referral.countDocuments(filter),
-  ]);
+      .lean();
+    if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
+    res.json({ success: true, referral });
+  }),
+);
 
-  res.json({ success: true, referrals, pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) } });
-}));
+router.post(
+  "/referrals/:id/credit",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const { amount } = req.body;
+    if (!amount || amount <= 0)
+      return res.status(400).json({ success: false, message: "Valid bonus amount is required" });
 
-router.get("/referrals/:id", staffRole, asyncHandler(async (req, res) => {
-  
-  const referral = await Referral.findById(req.params.id)
-    .populate("referrer", "name email referralCode credits referralEarnings referralCount")
-    .populate("referee", "name email")
-    .lean();
-  if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
-  res.json({ success: true, referral });
-}));
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
+    if (referral.status !== "pending")
+      return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
-router.post("/referrals/:id/credit", adminOrSuper, asyncHandler(async (req, res) => {
-  const { amount } = req.body;
-  if (!amount || amount <= 0) return res.status(400).json({ success: false, message: "Valid bonus amount is required" });
+    referral.status = "credited";
+    referral.bonusAmount = amount;
+    referral.creditedAt = new Date();
+    await referral.save();
 
-  
-  
+    await User.findByIdAndUpdate(referral.referrer, {
+      $inc: { credits: amount, referralEarnings: amount, referralCount: 1 },
+    });
 
-  const referral = await Referral.findById(req.params.id);
-  if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
-  if (referral.status !== "pending") return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
+    await Transaction.create({
+      user: referral.referrer,
+      type: "referral_bonus",
+      amount,
+      status: "success",
+      reference: `REF-${referral._id}`,
+      description: `Referral bonus for ${referral.referee}`,
+    });
 
-  
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Credit Referral",
+      target: `Referral ${referral._id}`,
+      details: `Credited KES ${amount} to referrer`,
+    });
 
-  referral.status = "credited";
-  referral.bonusAmount = amount;
-  referral.creditedAt = new Date();
-  await referral.save();
+    res.json({ success: true, message: "Referral credited successfully", referral });
+  }),
+);
 
-  await User.findByIdAndUpdate(referral.referrer, {
-    $inc: { credits: amount, referralEarnings: amount, referralCount: 1 },
-  });
+router.post(
+  "/referrals/:id/expire",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
+    if (referral.status !== "pending")
+      return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
-  await Transaction.create({
-    user: referral.referrer,
-    type: "referral_bonus",
-    amount,
-    status: "success",
-    reference: `REF-${referral._id}`,
-    description: `Referral bonus for ${referral.referee}`,
-  });
+    referral.status = "expired";
+    await referral.save();
 
-  await AuditLog.create({ admin: req.user._id, action: "Credit Referral", target: `Referral ${referral._id}`, details: `Credited KES ${amount} to referrer` });
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Expire Referral",
+      target: `Referral ${referral._id}`,
+      details: "Expired pending referral",
+    });
 
-  res.json({ success: true, message: "Referral credited successfully", referral });
-}));
+    res.json({ success: true, message: "Referral expired", referral });
+  }),
+);
 
-router.post("/referrals/:id/expire", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const referral = await Referral.findById(req.params.id);
-  if (!referral) return res.status(404).json({ success: false, message: "Referral not found" });
-  if (referral.status !== "pending") return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
+router.get(
+  "/users/:id/referrals",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id)
+      .select("name email referralCode referralEarnings referralCount credits")
+      .lean();
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-  referral.status = "expired";
-  await referral.save();
+    const [referred, referredBy] = await Promise.all([
+      Referral.find({ referrer: req.params.id })
+        .populate("referee", "name email createdAt")
+        .sort({ createdAt: -1 })
+        .lean(),
+      Referral.findOne({ referee: req.params.id }).populate("referrer", "name email referralCode").lean(),
+    ]);
 
-  await AuditLog.create({ admin: req.user._id, action: "Expire Referral", target: `Referral ${referral._id}`, details: "Expired pending referral" });
-
-  res.json({ success: true, message: "Referral expired", referral });
-}));
-
-router.get("/users/:id/referrals", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  
-
-  const user = await User.findById(req.params.id).select("name email referralCode referralEarnings referralCount credits").lean();
-  if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-  const [referred, referredBy] = await Promise.all([
-    Referral.find({ referrer: req.params.id }).populate("referee", "name email createdAt").sort({ createdAt: -1 }).lean(),
-    Referral.findOne({ referee: req.params.id }).populate("referrer", "name email referralCode").lean(),
-  ]);
-
-  res.json({ success: true, user, referred, referredBy });
-}));
+    res.json({ success: true, user, referred, referredBy });
+  }),
+);
 
 // =============================
 // 💬 CHAT MODERATION
 // =============================
 
-router.get("/chats", staffRole, asyncHandler(async (req, res) => {
-  const { page = 1, limit = 20, search, isBlocked } = req.query;
-  const filter = {};
-  if (isBlocked !== undefined) filter.isBlocked = isBlocked === "true";
+router.get(
+  "/chats",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const { page = 1, limit = 20, search, isBlocked } = req.query;
+    const filter = {};
+    if (isBlocked !== undefined) filter.isBlocked = isBlocked === "true";
 
-  
-  const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
 
-  let query = Chat.find(filter)
-    .populate("participants", "name email")
-    .populate("car", "title brand model")
-    .sort({ updatedAt: -1 })
-    .skip(skip)
-    .limit(Math.min(Number(limit), 50))
-    .lean();
-
-  if (search) {
-    const users = await User.find({
-      $or: [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }],
-    }).select("_id").lean();
-    const userIds = users.map(u => u._id);
-    query = Chat.find({ participants: { $in: userIds }, ...filter })
+    let query = Chat.find(filter)
       .populate("participants", "name email")
       .populate("car", "title brand model")
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(Math.min(Number(limit), 50))
       .lean();
-  }
 
-  const [chats, total] = await Promise.all([
-    query,
-    Chat.countDocuments(search ? { participants: { $in: userIds || [] }, ...filter } : filter),
-  ]);
+    if (search) {
+      const users = await User.find({
+        $or: [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }],
+      })
+        .select("_id")
+        .lean();
+      const userIds = users.map((u) => u._id);
+      query = Chat.find({ participants: { $in: userIds }, ...filter })
+        .populate("participants", "name email")
+        .populate("car", "title brand model")
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 50))
+        .lean();
+    }
 
-  res.json({ success: true, chats, pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) } });
-}));
+    const [chats, total] = await Promise.all([
+      query,
+      Chat.countDocuments(search ? { participants: { $in: userIds || [] }, ...filter } : filter),
+    ]);
 
-router.get("/chats/:chatId/messages", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const chat = await Chat.findById(req.params.chatId)
-    .populate("participants", "name email")
-    .populate("messages.sender", "name email")
-    .lean();
-  if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+    res.json({
+      success: true,
+      chats,
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 50),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 50)),
+      },
+    });
+  }),
+);
 
-  res.json({ success: true, chat: { _id: chat._id, participants: chat.participants, isBlocked: chat.isBlocked, car: chat.car, messages: chat.messages || [] } });
-}));
+router.get(
+  "/chats/:chatId/messages",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const chat = await Chat.findById(req.params.chatId)
+      .populate("participants", "name email")
+      .populate("messages.sender", "name email")
+      .lean();
+    if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
-router.delete("/chats/:chatId/messages/:messageId", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const chat = await Chat.findById(req.params.chatId);
-  if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+    res.json({
+      success: true,
+      chat: {
+        _id: chat._id,
+        participants: chat.participants,
+        isBlocked: chat.isBlocked,
+        car: chat.car,
+        messages: chat.messages || [],
+      },
+    });
+  }),
+);
 
-  const msg = chat.messages.id(req.params.messageId);
-  if (!msg) return res.status(404).json({ success: false, message: "Message not found" });
+router.delete(
+  "/chats/:chatId/messages/:messageId",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const chat = await Chat.findById(req.params.chatId);
+    if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
-  msg.text = "[deleted by admin]";
-  msg.attachments = [];
-  await chat.save();
+    const msg = chat.messages.id(req.params.messageId);
+    if (!msg) return res.status(404).json({ success: false, message: "Message not found" });
 
-  await AuditLog.create({ admin: req.user._id, action: "Delete Chat Message", target: `Message ${req.params.messageId} in Chat ${req.params.chatId}`, details: "Message deleted by admin" });
+    msg.text = "[deleted by admin]";
+    msg.attachments = [];
+    await chat.save();
 
-  res.json({ success: true, message: "Message deleted" });
-}));
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Delete Chat Message",
+      target: `Message ${req.params.messageId} in Chat ${req.params.chatId}`,
+      details: "Message deleted by admin",
+    });
 
-router.post("/chats/:chatId/block", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
-  if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+    res.json({ success: true, message: "Message deleted" });
+  }),
+);
 
-  await AuditLog.create({ admin: req.user._id, action: "Block Chat", target: `Chat ${chat._id}`, details: "Chat blocked by admin" });
-  res.json({ success: true, message: "Chat blocked", chat });
-}));
+router.post(
+  "/chats/:chatId/block",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
+    if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
 
-router.post("/chats/:chatId/unblock", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
-  if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Block Chat",
+      target: `Chat ${chat._id}`,
+      details: "Chat blocked by admin",
+    });
+    res.json({ success: true, message: "Chat blocked", chat });
+  }),
+);
 
-  await AuditLog.create({ admin: req.user._id, action: "Unblock Chat", target: `Chat ${chat._id}`, details: "Chat unblocked by admin" });
-  res.json({ success: true, message: "Chat unblocked", chat });
-}));
+router.post(
+  "/chats/:chatId/unblock",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
+    if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Unblock Chat",
+      target: `Chat ${chat._id}`,
+      details: "Chat unblocked by admin",
+    });
+    res.json({ success: true, message: "Chat unblocked", chat });
+  }),
+);
 
 // =============================
 // 📊 MARKET DATA MANAGEMENT
 // =============================
 
-router.get("/market-data", staffRole, asyncHandler(async (req, res) => {
-  const { brand, model, year, page = 1, limit = 20 } = req.query;
-  const filter = {};
-  if (brand) filter.brand = { $regex: brand, $options: "i" };
-  if (model) filter.model = { $regex: model, $options: "i" };
-  if (year) filter.year = Number(year);
+router.get(
+  "/market-data",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const { brand, model, year, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (brand) filter.brand = { $regex: brand, $options: "i" };
+    if (model) filter.model = { $regex: model, $options: "i" };
+    if (year) filter.year = Number(year);
 
-  
-  const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
-  const [entries, total] = await Promise.all([
-    MarketData.find(filter).sort({ brand: 1, model: 1, year: -1 }).skip(skip).limit(Math.min(Number(limit), 50)).lean(),
-    MarketData.countDocuments(filter),
-  ]);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    const [entries, total] = await Promise.all([
+      MarketData.find(filter)
+        .sort({ brand: 1, model: 1, year: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 50))
+        .lean(),
+      MarketData.countDocuments(filter),
+    ]);
 
-  res.json({ success: true, entries, pagination: { page: Number(page), limit: Math.min(Number(limit), 50), total, pages: Math.ceil(total / Math.min(Number(limit), 50)) } });
-}));
+    res.json({
+      success: true,
+      entries,
+      pagination: {
+        page: Number(page),
+        limit: Math.min(Number(limit), 50),
+        total,
+        pages: Math.ceil(total / Math.min(Number(limit), 50)),
+      },
+    });
+  }),
+);
 
-router.get("/market-data/:id", staffRole, asyncHandler(async (req, res) => {
-  
-  const entry = await MarketData.findById(req.params.id).lean();
-  if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
-  res.json({ success: true, entry });
-}));
+router.get(
+  "/market-data/:id",
+  staffRole,
+  asyncHandler(async (req, res) => {
+    const entry = await MarketData.findById(req.params.id).lean();
+    if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
+    res.json({ success: true, entry });
+  }),
+);
 
-router.post("/market-data", adminOrSuper, asyncHandler(async (req, res) => {
-  const { brand, model, year, bodyType, fuel, transmission, engineCC, lowPrice, avgPrice, highPrice, sampleSize, source } = req.body;
-  if (!brand || !model || !year || lowPrice == null || avgPrice == null || highPrice == null) {
-    return res.status(400).json({ success: false, message: "brand, model, year, lowPrice, avgPrice, highPrice are required" });
-  }
-
-  
-  const entry = await MarketData.create({ brand, model, year, bodyType, fuel, transmission, engineCC, lowPrice, avgPrice, highPrice, sampleSize, source });
-
-  await AuditLog.create({ admin: req.user._id, action: "Create Market Data", target: `MarketData ${entry._id}`, details: `Created ${brand} ${model} ${year}` });
-  res.status(201).json({ success: true, entry });
-}));
-
-router.put("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
-  const allowed = ["brand", "model", "year", "bodyType", "fuel", "transmission", "engineCC", "lowPrice", "avgPrice", "highPrice", "sampleSize", "source"];
-  const updates = {};
-  for (const field of allowed) {
-    if (req.body[field] !== undefined) updates[field] = req.body[field];
-  }
-  updates.lastUpdated = new Date();
-
-  
-  const entry = await MarketData.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
-  if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
-
-  await AuditLog.create({ admin: req.user._id, action: "Update Market Data", target: `MarketData ${entry._id}`, details: `Updated ${entry.brand} ${entry.model} ${entry.year}` });
-  res.json({ success: true, entry });
-}));
-
-router.delete("/market-data/:id", adminOrSuper, asyncHandler(async (req, res) => {
-  
-  const entry = await MarketData.findByIdAndDelete(req.params.id);
-  if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
-
-  await AuditLog.create({ admin: req.user._id, action: "Delete Market Data", target: `MarketData ${req.params.id}`, details: `Deleted ${entry.brand} ${entry.model} ${entry.year}` });
-  res.json({ success: true, message: "Market data entry deleted" });
-}));
-
-router.post("/market-data/bulk", adminOrSuper, asyncHandler(async (req, res) => {
-  const { entries } = req.body;
-  if (!Array.isArray(entries) || entries.length === 0) {
-    return res.status(400).json({ success: false, message: "entries array is required" });
-  }
-
-  
-  let created = 0;
-  const errors = [];
-
-  for (let i = 0; i < entries.length; i++) {
-    const entry = entries[i];
-    if (!entry.brand || !entry.model || !entry.year || entry.lowPrice == null || entry.avgPrice == null || entry.highPrice == null) {
-      errors.push({ index: i, message: "Missing required fields (brand, model, year, lowPrice, avgPrice, highPrice)" });
-      continue;
+router.post(
+  "/market-data",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const {
+      brand,
+      model,
+      year,
+      bodyType,
+      fuel,
+      transmission,
+      engineCC,
+      lowPrice,
+      avgPrice,
+      highPrice,
+      sampleSize,
+      source,
+    } = req.body;
+    if (!brand || !model || !year || lowPrice == null || avgPrice == null || highPrice == null) {
+      return res
+        .status(400)
+        .json({ success: false, message: "brand, model, year, lowPrice, avgPrice, highPrice are required" });
     }
-    try {
-      await MarketData.create({ ...entry, source: entry.source || "bulk_import" });
-      created++;
-    } catch (err) {
-      errors.push({ index: i, message: err.message });
-    }
-  }
 
-  await AuditLog.create({ admin: req.user._id, action: "Bulk Import Market Data", target: "MarketData", details: `${created} created, ${errors.length} errors` });
-  res.json({ success: true, created, errors, total: entries.length });
-}));
+    const entry = await MarketData.create({
+      brand,
+      model,
+      year,
+      bodyType,
+      fuel,
+      transmission,
+      engineCC,
+      lowPrice,
+      avgPrice,
+      highPrice,
+      sampleSize,
+      source,
+    });
+
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Create Market Data",
+      target: `MarketData ${entry._id}`,
+      details: `Created ${brand} ${model} ${year}`,
+    });
+    res.status(201).json({ success: true, entry });
+  }),
+);
+
+router.put(
+  "/market-data/:id",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const allowed = [
+      "brand",
+      "model",
+      "year",
+      "bodyType",
+      "fuel",
+      "transmission",
+      "engineCC",
+      "lowPrice",
+      "avgPrice",
+      "highPrice",
+      "sampleSize",
+      "source",
+    ];
+    const updates = {};
+    for (const field of allowed) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+    updates.lastUpdated = new Date();
+
+    const entry = await MarketData.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
+    if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
+
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Update Market Data",
+      target: `MarketData ${entry._id}`,
+      details: `Updated ${entry.brand} ${entry.model} ${entry.year}`,
+    });
+    res.json({ success: true, entry });
+  }),
+);
+
+router.delete(
+  "/market-data/:id",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const entry = await MarketData.findByIdAndDelete(req.params.id);
+    if (!entry) return res.status(404).json({ success: false, message: "Market data entry not found" });
+
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Delete Market Data",
+      target: `MarketData ${req.params.id}`,
+      details: `Deleted ${entry.brand} ${entry.model} ${entry.year}`,
+    });
+    res.json({ success: true, message: "Market data entry deleted" });
+  }),
+);
+
+router.post(
+  "/market-data/bulk",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const { entries } = req.body;
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return res.status(400).json({ success: false, message: "entries array is required" });
+    }
+
+    let created = 0;
+    const errors = [];
+
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      if (
+        !entry.brand ||
+        !entry.model ||
+        !entry.year ||
+        entry.lowPrice == null ||
+        entry.avgPrice == null ||
+        entry.highPrice == null
+      ) {
+        errors.push({
+          index: i,
+          message: "Missing required fields (brand, model, year, lowPrice, avgPrice, highPrice)",
+        });
+        continue;
+      }
+      try {
+        await MarketData.create({ ...entry, source: entry.source || "bulk_import" });
+        created++;
+      } catch (err) {
+        errors.push({ index: i, message: err.message });
+      }
+    }
+
+    await AuditLog.create({
+      admin: req.user._id,
+      action: "Bulk Import Market Data",
+      target: "MarketData",
+      details: `${created} created, ${errors.length} errors`,
+    });
+    res.json({ success: true, created, errors, total: entries.length });
+  }),
+);
 
 // =============================
 // 🔔 GET ADMIN ALERTS
 // =============================
-router.get("/alerts", asyncHandler(async (req, res) => {
-  const { limit = 20, severity, read } = req.query;
-  const filter = {};
-  if (severity) filter.severity = severity;
-  if (read === "false") filter.read = false;
-  if (read === "true") filter.read = true;
+router.get(
+  "/alerts",
+  asyncHandler(async (req, res) => {
+    const { limit = 20, severity, read } = req.query;
+    const filter = {};
+    if (severity) filter.severity = severity;
+    if (read === "false") filter.read = false;
+    if (read === "true") filter.read = true;
 
-  const [alerts, unreadCount] = await Promise.all([
-    AdminAlert.find(filter).sort({ createdAt: -1 }).limit(Number(limit)).lean(),
-    AdminAlert.countDocuments({ read: false }),
-  ]);
+    const [alerts, unreadCount] = await Promise.all([
+      AdminAlert.find(filter).sort({ createdAt: -1 }).limit(Number(limit)).lean(),
+      AdminAlert.countDocuments({ read: false }),
+    ]);
 
-  res.json({ success: true, alerts, unreadCount });
-}));
+    res.json({ success: true, alerts, unreadCount });
+  }),
+);
 
 // =============================
 // ✅ MARK ALERT READ
 // =============================
-router.post("/alerts/:id/read", validateObjectId, asyncHandler(async (req, res) => {
-  const alert = await AdminAlert.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
-  if (!alert) return res.status(404).json({ success: false, message: "Alert not found" });
-  res.json({ success: true, alert });
-}));
+router.post(
+  "/alerts/:id/read",
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const alert = await AdminAlert.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
+    if (!alert) return res.status(404).json({ success: false, message: "Alert not found" });
+    res.json({ success: true, alert });
+  }),
+);
 
 // =============================
 // ✅ MARK ALL ALERTS READ
 // =============================
-router.post("/alerts/read-all", asyncHandler(async (req, res) => {
-  await AdminAlert.updateMany({ read: false }, { read: true });
-  res.json({ success: true, message: "All alerts marked read" });
-}));
+router.post(
+  "/alerts/read-all",
+  asyncHandler(async (req, res) => {
+    await AdminAlert.updateMany({ read: false }, { read: true });
+    res.json({ success: true, message: "All alerts marked read" });
+  }),
+);
 
 // =============================
 // 🖥 GET SYSTEM HEALTH
 // =============================
-router.get("/system/health", asyncHandler(async (req, res) => {
-  const [userCount, carCount, liveAuctions, pendingEscrows, heldEscrows, pendingModeration, recentErrors] = await Promise.all([
-    User.countDocuments(),
-    Car.countDocuments(),
-    Car.countDocuments({ auctionStatus: "live" }),
-    Escrow.countDocuments({ status: "pending" }),
-    Escrow.countDocuments({ status: "held" }),
-    Car.countDocuments({ status: "pending" }),
-    AdminAlert.countDocuments({ severity: "critical", read: false, createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } }),
-  ]);
+router.get(
+  "/system/health",
+  asyncHandler(async (req, res) => {
+    const [userCount, carCount, liveAuctions, pendingEscrows, heldEscrows, pendingModeration, recentErrors] =
+      await Promise.all([
+        User.countDocuments(),
+        Car.countDocuments(),
+        Car.countDocuments({ auctionStatus: "live" }),
+        Escrow.countDocuments({ status: "pending" }),
+        Escrow.countDocuments({ status: "held" }),
+        Car.countDocuments({ status: "pending" }),
+        AdminAlert.countDocuments({
+          severity: "critical",
+          read: false,
+          createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+        }),
+      ]);
 
-  const status = recentErrors > 0 ? "warning" : "healthy";
+    const status = recentErrors > 0 ? "warning" : "healthy";
 
-  res.json({
-    success: true,
-    health: {
-      status,
-      users: userCount,
-      listings: carCount,
-      liveAuctions,
-      pendingEscrows,
-      heldEscrows,
-      pendingModeration,
-      criticalAlerts24h: recentErrors,
-      timestamp: new Date().toISOString(),
-    },
-  });
-}));
+    res.json({
+      success: true,
+      health: {
+        status,
+        users: userCount,
+        listings: carCount,
+        liveAuctions,
+        pendingEscrows,
+        heldEscrows,
+        pendingModeration,
+        criticalAlerts24h: recentErrors,
+        timestamp: new Date().toISOString(),
+      },
+    });
+  }),
+);
 
 export default router;

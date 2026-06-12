@@ -54,8 +54,12 @@ const xssClean = (obj, depth = 0) => {
 
 // Fields that should NOT be XSS-escaped (passwords, tokens — NOT user content)
 const XSS_SKIP_FIELDS = new Set([
-  "password", "currentPassword", "newPassword",
-  "token", "refreshToken", "checkoutRequestID",
+  "password",
+  "currentPassword",
+  "newPassword",
+  "token",
+  "refreshToken",
+  "checkoutRequestID",
 ]);
 
 // Fields that allow limited HTML (bold, italic, links) — sanitized, not skipped
@@ -63,19 +67,24 @@ const RICH_TEXT_FIELDS = new Set(["content", "description", "bio"]);
 
 // Strip dangerous tags/attributes but allow safe formatting
 const sanitizeRichText = (str) => {
-  return str
-    // Remove script/style/iframe/object/embed tags and their content
-    .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi, "")
-    .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*\/?>/gi, "")
-    // Remove event handlers (onclick, onerror, onload, etc.)
-    .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/\s+on\w+\s*=\s*\S+/gi, "")
-    // Remove javascript: and data: URIs in href/src attributes
-    .replace(/(href|src|action)\s*=\s*["']\s*(javascript|data|vbscript)\s*:/gi, '$1="')
-    // Remove style attributes (can be used for CSS injection/exfil)
-    .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
-    // Strip null bytes
-    .replace(/\0/g, "");
+  return (
+    str
+      // Remove script/style/iframe/object/embed tags and their content
+      .replace(
+        /<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi,
+        "",
+      )
+      .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*\/?>/gi, "")
+      // Remove event handlers (onclick, onerror, onload, etc.)
+      .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
+      .replace(/\s+on\w+\s*=\s*\S+/gi, "")
+      // Remove javascript: and data: URIs in href/src attributes
+      .replace(/(href|src|action)\s*=\s*["']\s*(javascript|data|vbscript)\s*:/gi, '$1="')
+      // Remove style attributes (can be used for CSS injection/exfil)
+      .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
+      // Strip null bytes
+      .replace(/\0/g, "")
+  );
 };
 
 export const xssProtection = () => (req, res, next) => {
@@ -97,15 +106,13 @@ export const xssProtection = () => (req, res, next) => {
 // ── 3. PAGINATION CAP ─────────────────────────────────────────
 // Enforces max limit on all list queries
 // Prevents: ?limit=999999 DoS attacks
-const MAX_LIMIT   = parseInt(process.env.MAX_QUERY_LIMIT || "100");
+const MAX_LIMIT = parseInt(process.env.MAX_QUERY_LIMIT || "100");
 const DEFAULT_LIM = parseInt(process.env.DEFAULT_QUERY_LIMIT || "20");
 
 export const paginationCap = () => (req, res, next) => {
   if (req.query.limit !== undefined) {
     const raw = parseInt(req.query.limit);
-    req.query.limit = String(
-      isNaN(raw) || raw < 1 ? DEFAULT_LIM : Math.min(raw, MAX_LIMIT)
-    );
+    req.query.limit = String(isNaN(raw) || raw < 1 ? DEFAULT_LIM : Math.min(raw, MAX_LIMIT));
   }
   if (req.query.page !== undefined) {
     const raw = parseInt(req.query.page);

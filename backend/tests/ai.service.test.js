@@ -100,7 +100,13 @@ describe("ai.service", () => {
 
   describe("analyzeCarPrice", () => {
     it("returns full analysis with difference and percentage", () => {
-      const result = analyzeCarPrice({ title: "Toyota Prado", year: 2023, mileage: 10000, price: 3000000, condition: "good" });
+      const result = analyzeCarPrice({
+        title: "Toyota Prado",
+        year: 2023,
+        mileage: 10000,
+        price: 3000000,
+        condition: "good",
+      });
       // estimatedPrice from estimatePrice test above is 3329000
       // ratio = 3000000/3329000 ≈ 0.901, which is between 0.65 and 1.35 → Fair Price
       expect(result.estimatedPrice).toBe(3329000);

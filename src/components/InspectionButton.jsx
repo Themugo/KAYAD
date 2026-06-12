@@ -10,6 +10,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
   const { toast } = useToast();
   const [inspection, setInspection] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [pendingOrder, setPendingOrder] = useState(null);
 
   useEffect(() => {
     if (!carId) return;
@@ -17,6 +18,15 @@ export default function InspectionButton({ carId, location, onInspectionComplete
       if (r.inspection) setInspection(r.inspection);
     }).catch(() => {});
   }, [carId]);
+
+  useEffect(() => {
+    if (!carId || !user) return;
+    inspectionAPI.myOrders().then(r => {
+      const orders = (r.orders || []).filter(o => o.car === carId || o.car?._id === carId);
+      const active = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled');
+      if (active) setPendingOrder(active);
+    }).catch(() => {});
+  }, [carId, user]);
 
   if (inspection && inspection.status === 'completed') {
     const score = inspection.overallScore || 0;
@@ -49,17 +59,6 @@ export default function InspectionButton({ carId, location, onInspectionComplete
       </div>
     );
   }
-
-  // Check for pending order
-  const [pendingOrder, setPendingOrder] = useState(null);
-  useEffect(() => {
-    if (!carId || !user) return;
-    inspectionAPI.myOrders().then(r => {
-      const orders = (r.orders || []).filter(o => o.car === carId || o.car?._id === carId);
-      const active = orders.find(o => o.status !== 'completed' && o.status !== 'cancelled');
-      if (active) setPendingOrder(active);
-    }).catch(() => {});
-  }, [carId, user]);
 
   return (
     <>

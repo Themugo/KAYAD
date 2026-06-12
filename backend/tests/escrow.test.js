@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
-process.env.NODE_ENV   = "test";
+process.env.NODE_ENV = "test";
 
 import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
 import mongoose from "mongoose";
@@ -69,33 +69,22 @@ describe("Escrow System", () => {
   });
 
   test("GET /api/escrow/my — requires auth", async () => {
-    await request(app)
-      .get("/api/escrow/my")
-      .expect(401);
+    await request(app).get("/api/escrow/my").expect(401);
   });
 
   test("GET /api/escrow/my — authenticated user gets list", async () => {
-    const res = await request(app)
-      .get("/api/escrow/my")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/escrow/my").set("Authorization", `Bearer ${userToken}`).expect(200);
     expect(res.body.success).toBe(true);
     const list = res.body.escrows ?? res.body.data ?? [];
     expect(Array.isArray(list)).toBe(true);
   });
 
   test("GET /api/escrow — admin only", async () => {
-    await request(app)
-      .get("/api/escrow")
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).get("/api/escrow").set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   test("GET /api/escrow — admin can access all escrows", async () => {
-    const res = await request(app)
-      .get("/api/escrow")
-      .set("Authorization", `Bearer ${adminToken}`)
-      .expect(200);
+    const res = await request(app).get("/api/escrow").set("Authorization", `Bearer ${adminToken}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 
@@ -109,17 +98,11 @@ describe("Escrow System", () => {
   });
 
   test("POST /api/escrow/:id/release — rejects non-admin", async () => {
-    await request(app)
-      .post(`/api/escrow/${escrowId}/release`)
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).post(`/api/escrow/${escrowId}/release`).set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   test("POST /api/escrow/:id/refund — rejects non-admin", async () => {
-    await request(app)
-      .post(`/api/escrow/${escrowId}/refund`)
-      .set("Authorization", `Bearer ${userToken}`)
-      .expect(403);
+    await request(app).post(`/api/escrow/${escrowId}/refund`).set("Authorization", `Bearer ${userToken}`).expect(403);
   });
 
   test("POST /api/escrow/:id/dispute — requires auth", async () => {

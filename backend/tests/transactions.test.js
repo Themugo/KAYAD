@@ -32,10 +32,7 @@ describe("Transaction Routes", () => {
   });
 
   it("GET /api/transactions — returns transaction list", async () => {
-    const res = await request(app)
-      .get("/api/transactions")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/transactions").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.transactions ?? res.body.data ?? [])).toBe(true);
   });
@@ -45,10 +42,7 @@ describe("Transaction Routes", () => {
   });
 
   it("GET /api/transactions/summary — returns summary", async () => {
-    const res = await request(app)
-      .get("/api/transactions/summary")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
+    const res = await request(app).get("/api/transactions/summary").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body.success).toBe(true);
   });
 });

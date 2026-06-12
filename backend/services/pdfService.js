@@ -19,7 +19,11 @@ export function generateReceipt({ title, buyerName, sellerName, amount, transact
       doc.moveDown(1);
 
       // ── Title ──
-      doc.fontSize(18).font("Helvetica-Bold").fillColor(dark).text(title || "Purchase Intent Receipt", { align: "center" });
+      doc
+        .fontSize(18)
+        .font("Helvetica-Bold")
+        .fillColor(dark)
+        .text(title || "Purchase Intent Receipt", { align: "center" });
       doc.moveDown(1.5);
 
       // ── Details ──
@@ -29,12 +33,20 @@ export function generateReceipt({ title, buyerName, sellerName, amount, transact
 
       const field = (label, value, x, y) => {
         doc.fontSize(9).font("Helvetica-Bold").fillColor("#333").text(label, x, y);
-        doc.font("Helvetica").fillColor("#000").text(value || "—", x + 120, y);
+        doc
+          .font("Helvetica")
+          .fillColor("#000")
+          .text(value || "—", x + 120, y);
       };
       let y = doc.y;
 
       field("Transaction ID:", transactionId || "N/A", leftX, y);
-      field("Date:", date ? new Date(date).toLocaleDateString("en-KE") : new Date().toLocaleDateString("en-KE"), rightX, y);
+      field(
+        "Date:",
+        date ? new Date(date).toLocaleDateString("en-KE") : new Date().toLocaleDateString("en-KE"),
+        rightX,
+        y,
+      );
       y += rowH;
 
       field("Buyer:", buyerName || "N/A", leftX, y);
@@ -59,7 +71,9 @@ export function generateReceipt({ title, buyerName, sellerName, amount, transact
 
       // ── Terms ──
       doc.fontSize(8).font("Helvetica").fillColor("#999");
-      doc.text("This document confirms intent to purchase. Payment must be completed within 48 hours.", leftX, y, { align: "center" });
+      doc.text("This document confirms intent to purchase. Payment must be completed within 48 hours.", leftX, y, {
+        align: "center",
+      });
       y += 15;
       doc.text("For any inquiries, contact support@kayad.space", { align: "center" });
 

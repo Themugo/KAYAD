@@ -3,12 +3,7 @@ import Auction from "../models/Auction.js";
 // =============================
 // 🔁 SYNC BID TO MONGO
 // =============================
-export const syncBidToMongo = async ({
-  roomId,
-  userId,
-  bid,
-  time,
-}) => {
+export const syncBidToMongo = async ({ roomId, userId, bid, time }) => {
   try {
     await Auction.findOneAndUpdate(
       { roomId },
@@ -22,9 +17,8 @@ export const syncBidToMongo = async ({
           },
         },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
-
   } catch (err) {
     console.error("❌ SYNC BID ERROR:", err.message);
   }
@@ -33,12 +27,7 @@ export const syncBidToMongo = async ({
 // =============================
 // 🏁 SYNC AUCTION END
 // =============================
-export const syncAuctionEnd = async ({
-  roomId,
-  highestBid,
-  winner,
-  endTime,
-}) => {
+export const syncAuctionEnd = async ({ roomId, highestBid, winner, endTime }) => {
   try {
     await Auction.findOneAndUpdate(
       { roomId },
@@ -49,9 +38,8 @@ export const syncAuctionEnd = async ({
         endTime: new Date(endTime),
         paymentDeadline: new Date(Date.now() + 10 * 60 * 1000),
       },
-      { new: true }
+      { new: true },
     );
-
   } catch (err) {
     console.error("❌ SYNC END ERROR:", err.message);
   }
@@ -60,10 +48,7 @@ export const syncAuctionEnd = async ({
 // =============================
 // 🔄 RECOVER AUCTION FROM MONGO → REDIS
 // =============================
-export const restoreAuctionToRedis = async (
-  roomId,
-  redis
-) => {
+export const restoreAuctionToRedis = async (roomId, redis) => {
   try {
     const auction = await Auction.findOne({ roomId }).lean();
 
@@ -76,23 +61,15 @@ export const restoreAuctionToRedis = async (
     const bidsKey = `auction:${roomId}:bids`;
 
     for (const bid of auction.bidHistory) {
-      await redis.zadd(
-        bidsKey,
-        new Date(bid.time).getTime(),
-        JSON.stringify(bid)
-      );
+      await redis.zadd(bidsKey, new Date(bid.time).getTime(), JSON.stringify(bid));
     }
 
     // 🔁 Restore end time
     if (auction.endTime) {
-      await redis.set(
-        `auction:${roomId}:end`,
-        new Date(auction.endTime).getTime()
-      );
+      await redis.set(`auction:${roomId}:end`, new Date(auction.endTime).getTime());
     }
 
     console.log(`♻️ Auction restored: ${roomId}`);
-
   } catch (err) {
     console.error("❌ RESTORE ERROR:", err.message);
   }

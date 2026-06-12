@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../../context/AuthContext';
 import LoginPage from '../../pages/LoginPage';
 
+vi.mock('../../utils/posthog', () => ({ setPostHogUser: () => {}, clearPostHogUser: () => {} }));
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 vi.mock('../../api/api', () => ({
-  authAPI: { login: vi.fn() },
+  authAPI: { login: vi.fn(), me: vi.fn().mockRejectedValue({}) },
   isDemoMode: () => false,
 }));
 vi.mock('../../context/SocketContext', () => ({

@@ -1,3 +1,25 @@
+/**
+ * @deprecated AUDIT FIX-05 (June 2026)
+ *
+ * This model is NOT imported or used anywhere in the codebase.
+ * All dealer data (businessName, approved, rating, totalSales, isSuspended, etc.)
+ * is currently stored directly on the User model.
+ *
+ * Two options going forward — pick one and commit:
+ *
+ * OPTION A — Delete this file:
+ *   Accept the User model as the single source of dealer data.
+ *   Remove this file and update the models/ index if one exists.
+ *
+ * OPTION B — Migrate to this model properly:
+ *   1. Write a one-time migration script that creates a Dealer document
+ *      for every User with role='dealer'|'broker'|'individual_seller'.
+ *   2. Import and use Dealer in all routes/controllers that currently
+ *      read/write dealer fields from the User model.
+ *   3. Remove the duplicated dealer fields from userSchema.
+ *
+ * Until the migration is complete, DO NOT add new imports of this model.
+ */
 import mongoose from "mongoose";
 
 const dealerSchema = new mongoose.Schema(
@@ -96,7 +118,7 @@ const dealerSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -152,7 +174,6 @@ dealerSchema.methods.suspendDealer = function (reason) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const Dealer =
-  mongoose.models.Dealer || mongoose.model("Dealer", dealerSchema);
+const Dealer = mongoose.models.Dealer || mongoose.model("Dealer", dealerSchema);
 
 export default Dealer;

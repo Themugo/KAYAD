@@ -20,9 +20,7 @@ describe("Security", () => {
     const payload = { email: "ratelimit@test.ke", password: "wrongpass12345" };
     let lastStatus = 200;
     for (let i = 0; i < 5; i++) {
-      const res = await request(app)
-        .post("/api/auth/login")
-        .send(payload);
+      const res = await request(app).post("/api/auth/login").send(payload);
       lastStatus = res.status;
     }
     expect(lastStatus === 401 || lastStatus === 429).toBe(true);

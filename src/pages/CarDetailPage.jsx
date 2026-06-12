@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/car-detail.css';
-import { CountdownDisplay } from '../hooks/useCountdown';
 import BackButton from '../components/BackButton';
+import DetailSkeleton from './car/components/DetailSkeleton';
+import AuctionAnnouncement from './car/components/AuctionAnnouncement';
+import InlineBidding from './car/components/InlineBidding';
+import NtsaStatusCard from './car/components/NtsaStatusCard';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
 import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
@@ -26,6 +29,7 @@ import {
 
 // Extracted sub-components
 import { firstImage, GalleryImage, SpecItem, CompareToggle } from './car/components/CarDetailWidgets';
+import CarDetailReviews from './car/components/CarDetailReviews';
 
 export default function CarDetailPage() {
   const { id } = useParams();
@@ -46,8 +50,6 @@ export default function CarDetailPage() {
   const [payType, setPayType] = useState('escrow');
   const [isFav, setIsFav] = useState(false);
   const [priceAlertOn, setPriceAlertOn] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
-  const [submittingReview, setSubmittingReview] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
   const [promoting, setPromoting] = useState(false);
   const [ntsaStatus, setNtsaStatus] = useState(null);
@@ -210,19 +212,6 @@ export default function CarDetailPage() {
     finally { setStartingChat(false); }
   };
 
-  const handleReview = async (e) => {
-    e.preventDefault();
-    if (!isAuth) { navigate('/login'); return; }
-    setSubmittingReview(true);
-    try {
-      await reviewsAPI.create({ ...reviewForm, dealer: car.dealer?._id, carId: id });
-      toast('Review submitted!', 'success');
-      setReviewForm({ rating: 5, comment: '' });
-      if (car?.dealer?._id) reviewsAPI.forDealer(car.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
-    } catch { toast('Failed to submit', 'error'); }
-    finally { setSubmittingReview(false); }
-  };
-
   const handleSetCover = async (idx) => {
     setImgIdx(idx);
     try { await carsAPI.promote(id, { coverImage: idx }); setCar(p => ({ ...p, coverImage: idx })); toast('Cover image updated', 'success'); }
@@ -240,24 +229,7 @@ export default function CarDetailPage() {
     finally { setPromoting(false); }
   };
 
-  if (loading) return (
-    <div className="car-detail-page">
-      <div className="detail-breadcrumb">
-        <div style={{ width: 120, height: 14, borderRadius: 4, background: 'var(--card)', opacity: 0.4 }} />
-      </div>
-      <div className="detail-grid">
-        <div className="detail-left">
-          <div style={{ width: '100%', aspectRatio: '16/9', borderRadius: 'var(--radius-lg)', background: 'var(--card)', opacity: 0.3, animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, var(--card) 0%, var(--card-hover) 50%, var(--card) 100%)' }} />
-          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-            {[1,2,3,4].map(i => <div key={i} style={{ width: 88, height: 60, borderRadius: 8, background: 'var(--card)', opacity: 0.3, animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, var(--card) 0%, var(--card-hover) 50%, var(--card) 100%)' }} />)}
-          </div>
-        </div>
-        <div>
-          <div style={{ width: '100%', height: 300, borderRadius: 'var(--radius-lg)', background: 'var(--card)', opacity: 0.3, animation: 'shimmer 1.5s infinite', backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, var(--card) 0%, var(--card-hover) 50%, var(--card) 100%)' }} />
-        </div>
-      </div>
-    </div>
-  );
+  if (loading) return <DetailSkeleton />;
 
   if (!car) return (
     <div className="page-notfound">
@@ -272,18 +244,6 @@ export default function CarDetailPage() {
 
   const isScheduled = car?.auctionStatus === 'scheduled';
   const showAuctionCard = isLive || isScheduled;
-
-  // Format auction date/time for display
-  const fmtAuctionDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('en-KE', {
-        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
-        hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi',
-      });
-    } catch { return dateStr; }
-  };
 
   return (
     <div className="car-detail-page">
@@ -477,149 +437,23 @@ export default function CarDetailPage() {
             </div>
           )}
 
-          {/* Reviews */}
-          <div className="detail-card">
-            <div className="detail-section-label">
-              Dealer Reviews {reviews.length > 0 && `(${reviews.length})`}
-            </div>
-            {reviews.length === 0 ? (
-              <div className="reviews-empty">No reviews yet. Be the first to review this dealer.</div>
-            ) : reviews.slice(0, 4).map(r => (
-              <div key={r._id} className="review-item">
-                <div className="review-header">
-                  <span className="review-author">{r.reviewer?.name || 'Anonymous'}</span>
-                  <span className="review-stars">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
-                </div>
-                <p className="review-comment">{r.comment}</p>
-              </div>
-            ))}
-
-            {isAuth && !isOwner && (
-              <form onSubmit={handleReview} className="review-form">
-                <div className="review-field">
-                  <label className="review-label">Rating</label>
-                  <select value={reviewForm.rating} onChange={e => setReviewForm(p => ({ ...p, rating: Number(e.target.value) }))}
-                    className="review-select">
-                    {[5,4,3,2,1].map(n => <option key={n} value={n}>{'★'.repeat(n)} — {n} star{n !== 1 ? 's' : ''}</option>)}
-                  </select>
-                </div>
-                <div className="review-field">
-                  <label className="review-label">Comment</label>
-                  <textarea rows={3} placeholder="Share your experience with this dealer…" value={reviewForm.comment}
-                    onChange={e => setReviewForm(p => ({ ...p, comment: e.target.value }))}
-                    className="review-textarea" />
-                </div>
-                <button type="submit" disabled={submittingReview || !reviewForm.comment}
-                  className={`review-submit ${reviewForm.comment ? 'review-submit-active' : ''}`}>
-                  {submittingReview ? 'Submitting…' : 'Submit Review'}
-                </button>
-              </form>
-            )}
-          </div>
+          <CarDetailReviews
+            dealerId={car.dealer?._id}
+            carId={id}
+            reviews={reviews}
+            isAuth={isAuth}
+            isOwner={isOwner}
+            onReviewSubmitted={() => {
+              if (car?.dealer?._id)
+                reviewsAPI.forDealer(car.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
+            }}
+          />
         </div>
 
         {/* ═══════ RIGHT COLUMN (Sticky Sidebar) ═══════ */}
         <div className="detail-sidebar">
 
-          {/* ═══ AUCTION ANNOUNCEMENT ═══ */}
-          {showAuctionCard ? (
-            <div style={{
-              background: 'var(--card)', borderRadius: 'var(--radius-lg)',
-              border: '1px solid rgba(212,196,168,0.3)', overflow: 'hidden',
-              marginBottom: 14,
-            }}>
-              <div style={{
-                height: 3,
-                background: isLive
-                  ? 'linear-gradient(90deg, #ef4444, var(--gold))'
-                  : 'linear-gradient(90deg, var(--gold-dark), var(--gold-muted))',
-              }} />
-              <div style={{ padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                  <span style={{ fontSize: 18 }}>🔔</span>
-                  <div>
-                    <div style={{ fontSize: 10, color: isLive ? '#ef4444' : '#f59e0b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      {isLive ? '🔴 Live Auction' : '⏳ Upcoming Auction'}
-                    </div>
-                    <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>Bid live from anywhere in Kenya</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14, fontSize: 12, color: 'var(--text-muted)' }}>
-                  {car.dealer?.name && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>🏛️</span>
-                      <span>Hosted by <strong style={{ color: 'var(--text)' }}>{car.dealer.name}</strong></span>
-                    </div>
-                  )}
-                  {car.auctionEnd && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>📅</span>
-                      <span>{isLive ? 'Ends' : 'Auction date'}: <strong style={{ color: 'var(--text)' }}>{fmtAuctionDate(car.auctionEnd)}</strong></span>
-                    </div>
-                  )}
-                  {isLive && car.auctionEnd && (
-                    <div style={{ marginTop: 4 }}>
-                      <CountdownDisplay endTime={car.auctionEnd} size="sm" />
-                    </div>
-                  )}
-                  {car.bidsCount > 0 && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span>👥</span>
-                      <span><strong style={{ color: 'var(--text)' }}>{car.bidsCount}</strong> bid{car.bidsCount !== 1 ? 's' : ''} placed</span>
-                    </div>
-                  )}
-                </div>
-                <Link to={`/auction/${car._id}`} style={{
-                  display: 'block', textAlign: 'center', padding: '10px 0',
-                  borderRadius: 8, fontWeight: 800, fontSize: 13,
-                  background: isLive
-                    ? 'linear-gradient(135deg, var(--gold), var(--gold-muted))'
-                    : 'var(--surface)',
-                  color: isLive ? '#0A1628' : 'var(--gold)',
-                  border: isLive ? 'none' : '1px solid rgba(212,196,168,0.2)',
-                  textDecoration: 'none', transition: 'all 0.2s',
-                  letterSpacing: '0.03em',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
-                  onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}>
-                  {isLive ? '⚡ Enter Auction Room →' : '📋 View Auction Details →'}
-                </Link>
-                <Link to="/auctions/calendar" style={{
-                  display: 'block', textAlign: 'center', fontSize: 10,
-                  color: 'var(--text-muted)', marginTop: 8, textDecoration: 'none',
-                }}>
-                  See all auctions in Auction House →
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div style={{
-              background: 'var(--card)', borderRadius: 'var(--radius-lg)',
-              border: '1px solid var(--border)', padding: 14, marginBottom: 14,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <span style={{ fontSize: 16 }}>🔔</span>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>Auction House</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Live online car auctions — new to Kenya</div>
-                </div>
-              </div>
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>
-                Kayad brings live auctions to Kenya. Watch, bid, and win premium vehicles in real time from your phone.
-              </p>
-              <Link to="/auctions/calendar" style={{
-                display: 'block', textAlign: 'center', padding: '9px 0',
-                borderRadius: 8, fontWeight: 700, fontSize: 12,
-                background: 'var(--surface)', color: 'var(--gold)',
-                border: '1px solid rgba(212,196,168,0.2)',
-                textDecoration: 'none', transition: 'all 0.2s',
-              }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.4)'; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}>
-                🏛️ Browse Auction House →
-              </Link>
-            </div>
-          )}
+          <AuctionAnnouncement car={car} />
 
           {/* Price Card */}
           <div className="price-card">
@@ -685,49 +519,18 @@ export default function CarDetailPage() {
                 </Link>
               ) : (
                 <>
-                  {/* ─── INLINE BIDDING ─── */}
                   {isLive && (
-                  <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 16, marginBottom: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                        <span className="live-dot" /> Live Auction
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-display)' }}>
-                        {countdown || '—'}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ position: 'relative', flex: 1 }}>
-                        <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: 'var(--gold)', fontWeight: 700, pointerEvents: 'none' }}>KES</span>
-                        <input type="number" value={bidAmount} onChange={e => setBidAmount(Number(e.target.value))}
-                          min={(car.currentBid || car.startingBid || 0) + 1000}
-                          step={1000}
-                          style={{ width: '100%', padding: '10px 10px 10px 42px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, fontWeight: 700, outline: 'none' }}
-                          onFocus={e => e.currentTarget.style.borderColor = 'var(--gold)'}
-                          onBlur={e => e.currentTarget.style.borderColor = 'var(--border)'} />
-                      </div>
-                      <button onClick={handlePlaceBid} disabled={bidPlacing}
-                        style={{ padding: '10px 22px', borderRadius: 8, background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', color: '#000', fontWeight: 900, fontSize: 13, border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: bidPlacing ? 0.6 : 1, whiteSpace: 'nowrap' }}>
-                        {bidPlacing ? 'Placing…' : 'Place Bid'}
-                      </button>
-                    </div>
-                    {bidError && <div style={{ fontSize: 11, color: 'var(--red)', marginTop: 6 }}>{bidError}</div>}
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>Min: KES {((car.currentBid || car.startingBid || 0) + 1000).toLocaleString()} · Last bid by you outbids others</div>
-                    {bidHistory.length > 0 && (
-                      <div style={{ marginTop: 10, maxHeight: 120, overflowY: 'auto', borderTop: '1px solid var(--border)', paddingTop: 8 }}>
-                        {bidHistory.slice(-5).reverse().map((b, i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: 11, borderBottom: '1px solid var(--border)', animation: 'fadeInDown 0.3s ease' }}>
-                            <span style={{ color: 'var(--text-muted)' }}>{b.user?.name || b.bidderTag || `Bidder #${i + 1}`}</span>
-                            <span style={{ fontWeight: 700, color: 'var(--gold)' }}>KES {Number(b.amount || 0).toLocaleString()}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <Link to={`/auction/${car._id}`} style={{ display: 'block', textAlign: 'center', fontSize: 11, color: 'var(--gold)', marginTop: 10, textDecoration: 'none', fontWeight: 600 }}>
-                      Full Auction Room →
-                    </Link>
-                  </div>
-                )}
+                    <InlineBidding
+                      car={car}
+                      bidAmount={bidAmount}
+                      onBidAmountChange={v => setBidAmount(v)}
+                      onPlaceBid={handlePlaceBid}
+                      bidPlacing={bidPlacing}
+                      bidError={bidError}
+                      bidHistory={bidHistory}
+                      countdown={countdown}
+                    />
+                  )}
 
                 <div className="cta-group">
                   {car.allowBuy && (isP2P || isDealerSeller) ? (
@@ -809,52 +612,13 @@ export default function CarDetailPage() {
             </div>
           </div>
 
-          {/* NTSA Verification Status */}
-          <div className="ntsa-status-card">
-            <div className="ntsa-status-header">
-              <ShieldCheck size={13} className="ntsa-status-icon" />
-              <span className="ntsa-status-label">NTSA Verification</span>
-            </div>
-            {ntsaLoading ? (
-              <div style={{ padding: '12px 0', textAlign: 'center' }}>
-                <div className="spinner" style={{ width: 20, height: 20, margin: '0 auto' }} />
-              </div>
-            ) : car.ntsaVerified ? (
-              <div className="ntsa-status-passed">
-                <span className="ntsa-badge-passed">Verified</span>
-                <span className="ntsa-status-sub">Logbook & chassis verified by Kayad</span>
-              </div>
-            ) : ntsaStatus?.status === 'pending' ? (
-              <div className="ntsa-status-pending">
-                <span className="ntsa-badge-pending">Pending Review</span>
-                <span className="ntsa-status-sub">Queued for NTSA verification</span>
-              </div>
-            ) : ntsaStatus?.status === 'in_review' ? (
-              <div className="ntsa-status-review">
-                <span className="ntsa-badge-review">In Review</span>
-                <span className="ntsa-status-sub">Under review by Kayad team</span>
-              </div>
-            ) : ntsaStatus?.status === 'failed' ? (
-              <div className="ntsa-status-failed">
-                <span className="ntsa-badge-failed">Not Verified</span>
-                {ntsaStatus?.request?.adminNotes && (
-                  <span className="ntsa-status-sub">{ntsaStatus.request.adminNotes}</span>
-                )}
-                <button onClick={handleRequestNtsa} className="ntsa-retry-btn">Request Re-verification</button>
-              </div>
-            ) : canManage ? (
-              <div className="ntsa-status-none">
-                <span className="ntsa-status-sub">Not yet verified</span>
-                <button onClick={handleRequestNtsa} disabled={ntsaLoading} className="ntsa-request-btn">
-                  {ntsaLoading ? 'Requesting…' : 'Request NTSA Check'}
-                </button>
-              </div>
-            ) : (
-              <div className="ntsa-status-none">
-                <span className="ntsa-status-sub">Verification not yet completed</span>
-              </div>
-            )}
-          </div>
+          <NtsaStatusCard
+            car={car}
+            ntsaStatus={ntsaStatus}
+            ntsaLoading={ntsaLoading}
+            canManage={canManage}
+            onRequestNtsa={handleRequestNtsa}
+          />
 
           {/* Compare */}
           <CompareToggle car={car} />

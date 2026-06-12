@@ -24,14 +24,12 @@ const adminAlertSchema = new mongoose.Schema(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 adminAlertSchema.index({ createdAt: -1 });
 adminAlertSchema.index({ severity: 1, read: 1 });
 
-const AdminAlert =
-  mongoose.models.AdminAlert ||
-  mongoose.model("AdminAlert", adminAlertSchema);
+const AdminAlert = mongoose.models.AdminAlert || mongoose.model("AdminAlert", adminAlertSchema);
 
 export default AdminAlert;

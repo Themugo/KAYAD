@@ -14,11 +14,14 @@ const router = Router();
 
 router.post("/apply", asyncHandler(submitApplication));
 
-router.get("/my", protect, asyncHandler(async (req, res) => {
-  
-  const apps = await InspectorApplication.find({ user: req.user.id }).sort({ createdAt: -1 }).lean();
-  res.json({ success: true, applications: apps });
-}));
+router.get(
+  "/my",
+  protect,
+  asyncHandler(async (req, res) => {
+    const apps = await InspectorApplication.find({ user: req.user.id }).sort({ createdAt: -1 }).lean();
+    res.json({ success: true, applications: apps });
+  }),
+);
 
 router.get("/", protect, adminOnly, asyncHandler(listApplications));
 router.get("/:id", protect, adminOnly, asyncHandler(getApplication));

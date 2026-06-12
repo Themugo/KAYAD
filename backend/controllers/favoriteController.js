@@ -1,14 +1,14 @@
 // backend/controllers/favoriteController.js
 // Uses the Favorite collection (separate model — no embedded User.favorites needed)
 import Favorite from "../models/Favorite.js";
-import Car      from "../models/Car.js";
+import Car from "../models/Car.js";
 
 // GET /api/favorites
 export const getFavorites = async (req, res) => {
   try {
-    const page  = Math.max(Number(req.query.page)  || 1, 1);
+    const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 20, 50);
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     const [favorites, total] = await Promise.all([
       Favorite.find({ user: req.user.id })
@@ -17,17 +17,20 @@ export const getFavorites = async (req, res) => {
         .limit(limit)
         .populate({
           path: "car",
-          select: "title price images brand model year fuel transmission mileage location auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
+          select:
+            "title price images brand model year fuel transmission mileage location auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
         })
         .lean(),
       Favorite.countDocuments({ user: req.user.id }),
     ]);
 
-    const items = favorites.map(f => ({
-      ...(f.car || {}),
-      _favoriteId: f._id,
-      notifyOnPriceDrop: f.notifyOnPriceDrop,
-    })).filter(Boolean);
+    const items = favorites
+      .map((f) => ({
+        ...(f.car || {}),
+        _favoriteId: f._id,
+        notifyOnPriceDrop: f.notifyOnPriceDrop,
+      }))
+      .filter(Boolean);
     res.json({
       success: true,
       favorites: items,
@@ -50,10 +53,16 @@ export const addFavorite = async (req, res) => {
     await Favorite.findOneAndUpdate(
       { user: req.user.id, car: carId },
       {
-        user: req.user.id, car: carId,
-        carSnapshot: { title: car.title, price: car.price, brand: car.brand, image: car.images?.[0]?.url || car.images?.[0] || null },
+        user: req.user.id,
+        car: carId,
+        carSnapshot: {
+          title: car.title,
+          price: car.price,
+          brand: car.brand,
+          image: car.images?.[0]?.url || car.images?.[0] || null,
+        },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
 
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
@@ -113,8 +122,14 @@ export const toggleFavorite = async (req, res) => {
     }
 
     await Favorite.create({
-      user: req.user.id, car: carId,
-      carSnapshot: { title: car.title, price: car.price, brand: car.brand, image: car.images?.[0]?.url || car.images?.[0] || null },
+      user: req.user.id,
+      car: carId,
+      carSnapshot: {
+        title: car.title,
+        price: car.price,
+        brand: car.brand,
+        image: car.images?.[0]?.url || car.images?.[0] || null,
+      },
     });
     await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
     return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });

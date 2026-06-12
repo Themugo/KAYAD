@@ -7,6 +7,8 @@ import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+// FIX: use the single canonical owner-email source instead of duplicating it here
+import { isOwnerEmail } from "../config/owners.js";
 
 // Email service — imported once at module level. Functions are no-ops
 // if the email transport isn't configured (EMAIL_HOST not set).
@@ -17,12 +19,18 @@ try {
   console.warn("⚠️  Email service unavailable:", e.message);
 }
 
-const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
-const STAFF_ROLES = ["admin", "superadmin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"];
+const STAFF_ROLES = [
+  "admin",
+  "superadmin",
+  "marketing",
+  "technical_support",
+  "hr",
+  "accounts",
+  "escrow_officer",
+  "ad_manager",
+  "moderator",
+];
 const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
-
-const isOwnerEmail = (email) => OWNER_EMAILS.includes(String(email || "").toLowerCase().trim());
 
 const serializeUser = (user) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
@@ -49,6 +57,21 @@ const sendRefreshToken = (res, token) => {
   });
 };
 
+const sendAccessToken = (res, token) => {
+  // FIX: Access token cookie maxAge was 7 days — identical to the refresh token.
+  // This meant the access token never effectively expired in the browser even though
+  // the JWT payload had a 1h expiry, widening the token-theft window.
+  // Now set to 1 hour to match ACCESS_EXPIRES in generateToken.js.
+  const ACCESS_COOKIE_MS = parseInt(process.env.ACCESS_COOKIE_MS || "") || 60 * 60 * 1000; // default 1h
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/api",
+    maxAge: ACCESS_COOKIE_MS,
+  });
+};
+
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
@@ -58,6 +81,7 @@ const sendAuthResponse = (res, user) => {
   const safeUser = serializeUser(user);
 
   sendRefreshToken(res, refreshToken);
+  sendAccessToken(res, accessToken);
 
   return res.json({
     success: true,
@@ -72,13 +96,17 @@ const notifyAdminsOfPendingSeller = async (seller) => {
       .select("_id email")
       .lean();
 
-    await Promise.all(admins.map(admin => sendNotification({
-      userId: admin._id,
-      title: "New seller approval pending",
-      message: `${seller.businessName || seller.name} (${seller.email}) registered as a ${seller.role} and is awaiting approval.`,
-      type: "system",
-      email: admin.email,
-    })));
+    await Promise.all(
+      admins.map((admin) =>
+        sendNotification({
+          userId: admin._id,
+          title: "New seller approval pending",
+          message: `${seller.businessName || seller.name} (${seller.email}) registered as a ${seller.role} and is awaiting approval.`,
+          type: "system",
+          email: admin.email,
+        }),
+      ),
+    );
   } catch (err) {
     console.warn("⚠️  Pending seller admin notification failed:", err.message);
   }
@@ -106,18 +134,22 @@ export const register = async (req, res) => {
       return R.error(res, "User already exists", 400);
     }
     const { role: requestedRole, dealerPackage } = req.body;
-    const allowedSelfRoles = process.env.NODE_ENV === "test"
-      ? ["dealer", "broker", "individual_seller", "admin"]
-      : ["dealer", "broker", "individual_seller"];
+    const allowedSelfRoles =
+      process.env.NODE_ENV === "test"
+        ? ["dealer", "broker", "individual_seller", "admin"]
+        : ["dealer", "broker", "individual_seller"];
     const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
     const isSeller = SELLER_ROLES.includes(role);
-    const config = await PlatformConfig.findOne().lean().catch(() => null);
+    const config = await PlatformConfig.findOne()
+      .lean()
+      .catch(() => null);
     // Auto-approve sellers/dealers unless an admin has explicitly turned
     // requireDealerApproval ON. Absent config (fresh DB) = auto-approve.
     const needsApproval = isSeller && config?.requireDealerApproval === true;
-    const selectedPackage = isSeller && dealerPackage
-      ? (config?.packages || []).find(pkg => pkg.id === dealerPackage && pkg.isActive)
-      : null;
+    const selectedPackage =
+      isSeller && dealerPackage
+        ? (config?.packages || []).find((pkg) => pkg.id === dealerPackage && pkg.isActive)
+        : null;
     const extra = isSeller
       ? {
           approved: !needsApproval,
@@ -130,14 +162,25 @@ export const register = async (req, res) => {
           packageExpiresAt: selectedPackage?.durationDays
             ? new Date(Date.now() + Number(selectedPackage.durationDays) * 86400000)
             : null,
-          subscriptionStatus: selectedPackage && (selectedPackage.isFree || selectedPackage.priceMonthly === 0) ? "active" : "none",
+          subscriptionStatus:
+            selectedPackage && (selectedPackage.isFree || selectedPackage.priceMonthly === 0) ? "active" : "none",
           trialStartedAt: selectedPackage?.trialDays ? new Date() : null,
         }
-      : {};
+      : {
+          // FIX: schema default for `approved` is now false. Non-seller accounts
+          // (regular users) don't go through an approval gate, so set true explicitly.
+          approved: true,
+        };
 
-    // Validate phone if provided (Kenyan format)
+    // FIX: Validate phone strictly — reject if provided but not a valid Kenyan number
     const rawPhone = req.body.phone || "";
-    const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
+    let validPhone = "";
+    if (rawPhone) {
+      validPhone = formatPhone(rawPhone);
+      if (!validPhone) {
+        return R.error(res, "Invalid phone number. Please use a valid Kenyan phone number (e.g. 07XXXXXXXX or +254XXXXXXXXX).", 400);
+      }
+    }
 
     // Referral: look up referrer by code (guard: cannot self-refer)
     let referredBy = null;
@@ -168,7 +211,9 @@ export const register = async (req, res) => {
         await User.findByIdAndUpdate(referredBy, {
           $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
         });
-        await (await import("../models/Referral.js")).default.create({
+        await (
+          await import("../models/Referral.js")
+        ).default.create({
           referrer: referredBy,
           referee: user._id,
           status: "credited",
@@ -190,7 +235,7 @@ export const register = async (req, res) => {
     // 📧 Generate email verification token
     try {
       const verifyToken = crypto.randomBytes(32).toString("hex");
-      user.emailVerifyToken  = verifyToken;
+      user.emailVerifyToken = verifyToken;
       user.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
       await user.save();
 
@@ -198,13 +243,11 @@ export const register = async (req, res) => {
       const { sendVerificationEmail, sendWelcomeEmail } = emailService;
       if (typeof sendVerificationEmail === "function") {
         sendVerificationEmail(user.email, user.name, verifyToken).catch((e) =>
-          console.warn("⚠️  Verification email failed:", e.message)
+          console.warn("⚠️  Verification email failed:", e.message),
         );
       }
       if (typeof sendWelcomeEmail === "function") {
-        sendWelcomeEmail(user).catch((e) =>
-          console.warn("⚠️  Welcome email failed:", e.message)
-        );
+        sendWelcomeEmail(user).catch((e) => console.warn("⚠️  Welcome email failed:", e.message));
       }
     } catch (emailErr) {
       console.warn("⚠️  Could not generate verify token:", emailErr.message);
@@ -214,8 +257,26 @@ export const register = async (req, res) => {
       notifyAdminsOfPendingSeller(user).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
     }
 
-    return sendAuthResponse(res.status(201), user);
+    // FIX: Do NOT issue tokens immediately after registration.
+    // The email verification gate at login will block unverified users.
+    // If email is not configured (no SMTP), allow direct login as before.
+    const emailConfiguredForReg = !!process.env.EMAIL_HOST;
+    const requireVerificationForReg = process.env.REQUIRE_EMAIL_VERIFICATION
+      ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+      : emailConfiguredForReg;
 
+    if (requireVerificationForReg) {
+      return res.status(201).json({
+        success: true,
+        requiresVerification: true,
+        message: needsApproval
+          ? "Registration successful. Your account is pending admin approval. You will be notified once approved."
+          : "Registration successful. Please check your email and verify your account before logging in.",
+      });
+    }
+
+    // SMTP not configured — issue tokens immediately so development/staging works
+    return sendAuthResponse(res.status(201), user);
   } catch (err) {
     console.error("❌ REGISTER ERROR:", err);
     R.error(res, "Registration failed", 500);
@@ -282,14 +343,17 @@ export const login = async (req, res) => {
       ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
       : emailConfigured;
     if (requireVerification && !user.emailVerified && !user.isDemo) {
-      return R.error(res, "Please verify your email before logging in. Check your inbox or request a new verification link.", 403);
+      return R.error(
+        res,
+        "Please verify your email before logging in. Check your inbox or request a new verification link.",
+        403,
+      );
     }
 
     user.lastLogin = new Date();
     await user.save();
 
     return sendAuthResponse(res, user);
-
   } catch (err) {
     console.error("❌ LOGIN ERROR:", err);
     R.error(res, "Login failed", 500);
@@ -321,7 +385,8 @@ export const refreshToken = async (req, res) => {
       decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
     } catch (err) {
       // Expired or invalid refresh tokens are rejected — no fallback
-      const msg = err.name === "TokenExpiredError" ? "Refresh token expired — please login again" : "Invalid refresh token";
+      const msg =
+        err.name === "TokenExpiredError" ? "Refresh token expired — please login again" : "Invalid refresh token";
       return R.error(res, msg, 403);
     }
 
@@ -337,7 +402,6 @@ export const refreshToken = async (req, res) => {
 
     // Issue new tokens without bumping tokenVersion (only password change/logout does that)
     return sendAuthResponse(res, user);
-
   } catch (err) {
     console.error("❌ REFRESH ERROR:", err);
     R.error(res, "Refresh failed", 500);
@@ -356,15 +420,13 @@ export const logout = async (req, res) => {
       });
     }
 
-    res.clearCookie("refreshToken", {
-      path: "/api",
-    });
+    res.clearCookie("refreshToken", { path: "/api" });
+    res.clearCookie("token", { path: "/api" });
 
     res.json({
       success: true,
       message: "Logged out",
     });
-
   } catch (err) {
     console.error("❌ LOGOUT ERROR:", err);
     R.error(res, "Logout failed", 500);
@@ -383,7 +445,6 @@ export const getProfile = async (req, res) => {
     }
 
     res.json({ success: true, user: serializeUser(user) });
-
   } catch (err) {
     console.error("❌ PROFILE ERROR:", err);
     R.error(res, "Failed to fetch profile", 500);
@@ -394,27 +455,44 @@ export const getProfile = async (req, res) => {
 // ============================================================
 export const updateProfile = async (req, res) => {
   try {
-    const { name, phone, location, businessName, bio, visibility, mpesaBusiness, mpesaBusinessName, bankName, bankAccount, bankBranch, notifications, paymentDetails, onboardingComplete, avatar } = req.body;
+    const {
+      name,
+      phone,
+      location,
+      businessName,
+      bio,
+      visibility,
+      mpesaBusiness,
+      mpesaBusinessName,
+      bankName,
+      bankAccount,
+      bankBranch,
+      notifications,
+      paymentDetails,
+      onboardingComplete,
+      avatar,
+    } = req.body;
 
     const updates = {};
-    if (name !== undefined)              updates.name = String(name).trim();
-    if (phone !== undefined)             updates.phone = formatPhone(phone) || String(phone).trim();
-    if (location !== undefined)          updates.location = String(location).trim();
-    if (businessName !== undefined)      updates.businessName = String(businessName).trim();
-    if (bio !== undefined)               updates.bio = String(bio).trim();
+    if (name !== undefined) updates.name = String(name).trim();
+    if (phone !== undefined) updates.phone = formatPhone(phone) || String(phone).trim();
+    if (location !== undefined) updates.location = String(location).trim();
+    if (businessName !== undefined) updates.businessName = String(businessName).trim();
+    if (bio !== undefined) updates.bio = String(bio).trim();
     if (visibility && typeof visibility === "object") updates.visibility = visibility;
-    if (mpesaBusiness !== undefined)     updates.mpesaBusiness = String(mpesaBusiness).trim();
+    if (mpesaBusiness !== undefined) updates.mpesaBusiness = String(mpesaBusiness).trim();
     if (mpesaBusinessName !== undefined) updates.mpesaBusinessName = String(mpesaBusinessName).trim();
-    if (bankName !== undefined)          updates.bankName = String(bankName).trim();
-    if (bankAccount !== undefined)       updates.bankAccount = String(bankAccount).trim();
-    if (bankBranch !== undefined)        updates.bankBranch = String(bankBranch).trim();
-    if (notifications)                   updates.notifications = { sms: notifications.sms };
-    if (paymentDetails)                  updates.paymentDetails = paymentDetails;
+    if (bankName !== undefined) updates.bankName = String(bankName).trim();
+    if (bankAccount !== undefined) updates.bankAccount = String(bankAccount).trim();
+    if (bankBranch !== undefined) updates.bankBranch = String(bankBranch).trim();
+    if (notifications) updates.notifications = { sms: notifications.sms };
+    if (paymentDetails) updates.paymentDetails = paymentDetails;
     if (onboardingComplete !== undefined) updates.onboardingComplete = Boolean(onboardingComplete);
-    if (avatar !== undefined)            updates.avatar = String(avatar);
+    if (avatar !== undefined) updates.avatar = String(avatar);
 
-    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true })
-      .select("-password");
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true }).select(
+      "-password",
+    );
 
     if (!user) return R.notFound(res, "User not found");
 
@@ -491,8 +569,9 @@ export const resendVerification = async (req, res) => {
     const { email } = req.body;
     if (!email) return R.error(res, "Email required", 400);
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() })
-      .select("+emailVerifyToken +emailVerifyExpire");
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(
+      "+emailVerifyToken +emailVerifyExpire",
+    );
 
     // Always return 200 to avoid user enumeration
     if (!user || user.emailVerified) {
@@ -509,7 +588,7 @@ export const resendVerification = async (req, res) => {
     const { sendVerificationReminderEmail } = emailService;
     if (typeof sendVerificationReminderEmail === "function") {
       sendVerificationReminderEmail(user.email, user.name, verifyToken).catch((e) =>
-        console.warn("⚠️  Resend verification email failed:", e.message)
+        console.warn("⚠️  Resend verification email failed:", e.message),
       );
     }
 
@@ -538,7 +617,7 @@ export const forgotPassword = async (req, res) => {
 
     const { sendPasswordResetEmail } = emailService;
     if (typeof sendPasswordResetEmail === "function") {
-      sendPasswordResetEmail(user, token).catch(e => console.warn("⚠️  Reset email failed:", e.message));
+      sendPasswordResetEmail(user, token).catch((e) => console.warn("⚠️  Reset email failed:", e.message));
     }
 
     res.json({ success: true, message: "If that email is registered, a reset link has been sent." });

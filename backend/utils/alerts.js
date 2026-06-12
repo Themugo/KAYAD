@@ -13,11 +13,7 @@ const CRITICAL_TYPES = ["fraud", "payment_failure"];
 // =============================
 // 🚨 GENERIC ALERT EMITTER
 // =============================
-export const triggerAdminAlert = async (
-  type,
-  data = {},
-  options = {}
-) => {
+export const triggerAdminAlert = async (type, data = {}, options = {}) => {
   try {
     const payload = {
       type,
@@ -39,26 +35,24 @@ export const triggerAdminAlert = async (
     // ⚡ REAL-TIME (SOCKET)
     // =============================
     if (getIO()) {
-      getIO().to("admins").emit("adminAlert", {
-        id: alert._id,
-        ...payload,
-      });
+      getIO()
+        .to("admins")
+        .emit("adminAlert", {
+          id: alert._id,
+          ...payload,
+        });
     }
 
     // =============================
     // 🚨 ESCALATION (CRITICAL)
     // =============================
-    if (
-      payload.severity === "critical" ||
-      CRITICAL_TYPES.includes(type)
-    ) {
+    if (payload.severity === "critical" || CRITICAL_TYPES.includes(type)) {
       await escalateAlert(type, data);
     }
 
     console.log("🚨 Admin Alert:", payload);
 
     return alert;
-
   } catch (err) {
     console.error("❌ ALERT ERROR:", err.message);
     return null;
@@ -70,9 +64,7 @@ export const triggerAdminAlert = async (
 // =============================
 const escalateAlert = async (type, data) => {
   try {
-    const message = `🚨 ${type.toUpperCase()} ALERT: ${JSON.stringify(
-      data
-    )}`;
+    const message = `🚨 ${type.toUpperCase()} ALERT: ${JSON.stringify(data)}`;
 
     // 📧 Email admin
     await sendEmail({
@@ -85,7 +77,6 @@ const escalateAlert = async (type, data) => {
     if (process.env.ADMIN_PHONE) {
       await sendSMS(process.env.ADMIN_PHONE, message);
     }
-
   } catch (err) {
     console.error("❌ ESCALATION ERROR:", err.message);
   }

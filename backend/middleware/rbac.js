@@ -1,33 +1,28 @@
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
-import {
-  PERM,
-  ROLE_PERMISSIONS as CENTRAL_PERMISSIONS,
-  WEBHOIST,
-  getEffectivePermissions,
-} from "../config/roles.js";
+import { PERM, ROLE_PERMISSIONS as CENTRAL_PERMISSIONS, WEBHOIST, getEffectivePermissions, ROLE_HIERARCHY } from "../config/roles.js";
 import { isOwnerUser } from "../config/owners.js";
 
 // Backward-compatible re-exports
 export const PERMISSIONS = Object.freeze({
-  MANAGE_USERS:        PERM.MANAGE_USERS,
-  MANAGE_CARS:         PERM.MANAGE_CARS,
-  MANAGE_AUCTIONS:     PERM.MANAGE_AUCTIONS,
-  MANAGE_BIDS:         PERM.MANAGE_AUCTIONS,
-  MANAGE_ESCROWS:      PERM.MANAGE_ESCROW,
-  MANAGE_PAYMENTS:     PERM.MANAGE_FINANCE,
-  MANAGE_REVIEWS:      PERM.MANAGE_MODERATION,
-  MANAGE_ADS:          PERM.MANAGE_ADS,
-  MANAGE_SETTINGS:     PERM.MANAGE_PLATFORM,
-  VIEW_ANALYTICS:      PERM.VIEW_ANALYTICS,
-  ISSUE_REFUND:        PERM.MANAGE_FINANCE,
-  KILL_SWITCH:         PERM.MANAGE_PLATFORM,
-  VERIFY_DEALER:       PERM.MANAGE_USERS,
-  MANAGE_DEALERS:      PERM.MANAGE_STAFF,
-  VIEW_AUDIT_LOG:      PERM.VIEW_LOGS,
-  ESCROW_OPERATIONS:   PERM.MANAGE_ESCROW,
-  MODERATE_CONTENT:    PERM.MANAGE_MODERATION,
-  GHOST_CHECK:         PERM.MANAGE_INSPECTIONS,
+  MANAGE_USERS: PERM.MANAGE_USERS,
+  MANAGE_CARS: PERM.MANAGE_CARS,
+  MANAGE_AUCTIONS: PERM.MANAGE_AUCTIONS,
+  MANAGE_BIDS: PERM.MANAGE_AUCTIONS,
+  MANAGE_ESCROWS: PERM.MANAGE_ESCROW,
+  MANAGE_PAYMENTS: PERM.MANAGE_FINANCE,
+  MANAGE_REVIEWS: PERM.MANAGE_MODERATION,
+  MANAGE_ADS: PERM.MANAGE_ADS,
+  MANAGE_SETTINGS: PERM.MANAGE_PLATFORM,
+  VIEW_ANALYTICS: PERM.VIEW_ANALYTICS,
+  ISSUE_REFUND: PERM.MANAGE_FINANCE,
+  KILL_SWITCH: PERM.MANAGE_PLATFORM,
+  VERIFY_DEALER: PERM.MANAGE_USERS,
+  MANAGE_DEALERS: PERM.MANAGE_STAFF,
+  VIEW_AUDIT_LOG: PERM.VIEW_LOGS,
+  ESCROW_OPERATIONS: PERM.MANAGE_ESCROW,
+  MODERATE_CONTENT: PERM.MANAGE_MODERATION,
+  GHOST_CHECK: PERM.MANAGE_INSPECTIONS,
 });
 
 // Merge centralized permissions into rbac's expected format,
@@ -93,7 +88,7 @@ export function requirePermission(...permissions) {
             requiredRole: Object.entries(ROLE_PERMISSIONS)
               .filter(([, perms]) => perms.includes(perm))
               .map(([role]) => role)
-              .filter(r => r !== "superadmin"),
+              .filter((r) => r !== "superadmin"),
           });
         }
       }
@@ -131,18 +126,21 @@ export function requireRole(...roles) {
 }
 
 export function requireAtLeast(minRole) {
-  const hierarchy = ["user", "dealer", "broker", "ghost_checker", "moderator", "ad_manager", "escrow_officer", "admin", "superadmin"];
+  // FIX: use the single canonical hierarchy from config/roles.js.
+  // The old local array was missing: individual_seller, marketing, hr,
+  // accounts, technical_support, ghost_checker — causing those roles to
+  // always get indexOf() === -1 and be permanently blocked.
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (req.user.role === "superadmin") {
+    if (req.user.role === "superadmin" || req.user.effectiveRole === "webhoist") {
       return next();
     }
 
-    const userLevel = hierarchy.indexOf(req.user.role);
-    const minLevel = hierarchy.indexOf(minRole);
+    const userLevel = ROLE_HIERARCHY.indexOf(req.user.role);
+    const minLevel = ROLE_HIERARCHY.indexOf(minRole);
 
     if (userLevel === -1 || userLevel < minLevel) {
       return res.status(403).json({

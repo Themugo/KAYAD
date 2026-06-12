@@ -13,9 +13,9 @@ import {
 const router = express.Router();
 router.use(protect);
 
-router.get("/",              asyncHandler(getNotifications));
-router.post("/read-all",     asyncHandler(markAllAsRead));
-router.post("/:id/read",     asyncHandler(markAsRead));
-router.delete("/:id",        asyncHandler(deleteNotification));
+router.get("/", asyncHandler(getNotifications));
+router.post("/read-all", asyncHandler(markAllAsRead));
+router.post("/:id/read", asyncHandler(markAsRead));
+router.delete("/:id", asyncHandler(deleteNotification));
 
 export default router;

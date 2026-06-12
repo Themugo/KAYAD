@@ -2,9 +2,7 @@
 
 import Payment from "../models/Payment.js";
 import { isValidId } from "../utils/validateId.js";
-import {
-  initiatePayment as initiate,
-} from "../services/paymentService.js";
+import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 
 // =============================
@@ -70,7 +68,6 @@ export const initiatePayment = async (req, res) => {
       success: true,
       ...result,
     });
-
   } catch (err) {
     console.error("INITIATE ERROR:", err);
 
@@ -86,8 +83,7 @@ export const initiatePayment = async (req, res) => {
 // =============================
 export const mpesaCallback = async (req, res) => {
   try {
-    const callback =
-      req.body?.Body?.stkCallback || req.body?.stkCallback;
+    const callback = req.body?.Body?.stkCallback || req.body?.stkCallback;
 
     if (!callback) {
       throw new Error("Invalid callback format");
@@ -104,7 +100,6 @@ export const mpesaCallback = async (req, res) => {
     await handleMpesaCallback(req.body);
 
     res.json({ success: true });
-
   } catch (err) {
     console.error("CALLBACK ERROR:", err);
 
@@ -129,12 +124,7 @@ export const checkPaymentStatus = async (req, res) => {
     }
 
     // 🔒 SECURITY CHECK
-    if (
-      req.user &&
-      payment.user &&
-      payment.user.toString() !== req.user.id &&
-      req.user.role !== "admin"
-    ) {
+    if (req.user && payment.user && payment.user.toString() !== req.user.id && req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         message: "Not authorized",
@@ -146,7 +136,6 @@ export const checkPaymentStatus = async (req, res) => {
       status: payment.status,
       payment,
     });
-
   } catch (err) {
     console.error("STATUS ERROR:", err);
 
@@ -167,11 +156,7 @@ export const getUserPayments = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [payments, total] = await Promise.all([
-      Payment.find({ user: req.user.id })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Payment.find({ user: req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Payment.countDocuments({ user: req.user.id }),
     ]);
 
@@ -180,7 +165,6 @@ export const getUserPayments = async (req, res) => {
       payments,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
-
   } catch (err) {
     console.error("USER PAYMENTS ERROR:", err);
 
@@ -207,11 +191,7 @@ export const getAllPayments = async (req, res) => {
     if (req.query.type && VALID_TYPES.includes(req.query.type)) filter.type = req.query.type;
 
     const [payments, total] = await Promise.all([
-      Payment.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Payment.countDocuments(filter),
     ]);
 
@@ -220,7 +200,6 @@ export const getAllPayments = async (req, res) => {
       payments,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
-
   } catch (err) {
     console.error("ALL PAYMENTS ERROR:", err);
 
@@ -251,12 +230,7 @@ export const getPaymentById = async (req, res) => {
 
     // 🔒 SECURITY CHECK — only owner or admin can view
     const STAFF = ["admin", "superadmin", "escrow_officer", "accounts"];
-    if (
-      req.user &&
-      payment.user &&
-      payment.user.toString() !== req.user.id &&
-      !STAFF.includes(req.user.role)
-    ) {
+    if (req.user && payment.user && payment.user.toString() !== req.user.id && !STAFF.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to view this payment",
@@ -267,7 +241,6 @@ export const getPaymentById = async (req, res) => {
       success: true,
       payment,
     });
-
   } catch (err) {
     console.error("GET PAYMENT ERROR:", err);
 

@@ -18,7 +18,7 @@ router.get(
     }
     const pulse = await getMarketPulse(req.params.carId, car);
     res.json({ success: true, data: pulse });
-  })
+  }),
 );
 
 router.get(
@@ -41,7 +41,7 @@ router.get(
       avgPrice: Math.round(d.totalPrice / d.count),
     }));
     res.json({ success: true, data: trends, totalCars: cars.length, period: `${days}d` });
-  })
+  }),
 );
 
 router.get(
@@ -49,12 +49,11 @@ router.get(
   authenticate,
   authRole(["dealer", "admin", "superadmin"]),
   asyncHandler(async (req, res) => {
-    const dealerId = req.user.role === "admin" || req.user.role === "superadmin"
-      ? req.query.dealerId || req.user._id
-      : req.user._id;
+    const dealerId =
+      req.user.role === "admin" || req.user.role === "superadmin" ? req.query.dealerId || req.user._id : req.user._id;
     const insights = await getDealerInsights(dealerId);
     res.json({ success: true, data: insights });
-  })
+  }),
 );
 
 export default router;

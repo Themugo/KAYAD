@@ -54,20 +54,14 @@ describe("Inspector Application Routes", () => {
     });
 
     it("creates a new application", async () => {
-      const res = await request(app)
-        .post("/api/inspector-applications/apply")
-        .send(validApp)
-        .expect(200);
+      const res = await request(app).post("/api/inspector-applications/apply").send(validApp).expect(200);
       expect(res.body.success).toBe(true);
       expect(res.body.application.status).toBe("pending");
       applicationId = res.body.application._id;
     });
 
     it("rejects duplicate pending application for same email", async () => {
-      const res = await request(app)
-        .post("/api/inspector-applications/apply")
-        .send(validApp)
-        .expect(400);
+      const res = await request(app).post("/api/inspector-applications/apply").send(validApp).expect(400);
       expect(res.body.success).toBe(false);
     });
 
@@ -97,10 +91,7 @@ describe("Inspector Application Routes", () => {
 
   describe("GET /api/inspector-applications/ (admin)", () => {
     it("requires admin", async () => {
-      await request(app)
-        .get("/api/inspector-applications/")
-        .set("Authorization", `Bearer ${userToken}`)
-        .expect(403);
+      await request(app).get("/api/inspector-applications/").set("Authorization", `Bearer ${userToken}`).expect(403);
     });
 
     it("lists all applications for admin", async () => {
@@ -118,7 +109,7 @@ describe("Inspector Application Routes", () => {
         .set("Authorization", `Bearer ${adminToken}`)
         .expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.applications.every(a => a.status === "pending")).toBe(true);
+      expect(res.body.applications.every((a) => a.status === "pending")).toBe(true);
     });
   });
 

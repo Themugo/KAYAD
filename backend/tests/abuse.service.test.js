@@ -27,9 +27,7 @@ describe("abuse.service", () => {
   });
 
   it("returns not flagged when fewer than 5 bids", async () => {
-    mockLimit.mockResolvedValue([
-      { amount: 100, createdAt: new Date(), user: { toString: () => "u1" } },
-    ]);
+    mockLimit.mockResolvedValue([{ amount: 100, createdAt: new Date(), user: { toString: () => "u1" } }]);
     const result = await detectAbuse("user1", "auction1");
     expect(result).toEqual({ flagged: false });
   });

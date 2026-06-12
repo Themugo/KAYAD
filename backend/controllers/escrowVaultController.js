@@ -85,7 +85,9 @@ export const webhookFundsReceived = async (req, res) => {
 
     logSecurityAction({
       action: "escrow_vault.funded",
-      target: vault._id, targetModel: "EscrowVault", resourceId: id,
+      target: vault._id,
+      targetModel: "EscrowVault",
+      resourceId: id,
       details: { carId: vault.car?._id, amount: vault.amount, bankRef },
       severity: "info",
     });
@@ -178,7 +180,9 @@ export const markInspectionComplete = async (req, res) => {
     }
 
     if (vault.status !== "escrow_locked" && vault.status !== "inspection_pending") {
-      return res.status(400).json({ success: false, message: `Cannot mark inspection — current status: ${vault.status}` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Cannot mark inspection — current status: ${vault.status}` });
     }
 
     vault.status = "inspection_complete";
@@ -213,7 +217,9 @@ export const requestReleaseOtp = async (req, res) => {
     }
 
     if (vault.status !== "inspection_complete") {
-      return res.status(400).json({ success: false, message: "Inspection must be completed before requesting release OTP" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Inspection must be completed before requesting release OTP" });
     }
 
     if (vault.otpAttempts >= 5) {
@@ -295,7 +301,9 @@ export const releaseWithOtp = async (req, res) => {
 
     logSecurityAction({
       action: "escrow_vault.released",
-      target: vault._id, targetModel: "EscrowVault", resourceId: id,
+      target: vault._id,
+      targetModel: "EscrowVault",
+      resourceId: id,
       details: { carId: vault.car?._id, amount: vault.amount },
       severity: "info",
     });
@@ -353,7 +361,9 @@ export const adminRefund = async (req, res) => {
     await vault.save();
 
     logActionFromReq(req, "escrow_vault.refunded", {
-      target: vault._id, targetModel: "EscrowVault", resourceId: id,
+      target: vault._id,
+      targetModel: "EscrowVault",
+      resourceId: id,
       details: { carId: vault.car?._id, amount: vault.amount },
       severity: "warning",
     });
@@ -453,7 +463,9 @@ export const getVaultForCar = async (req, res) => {
     const vault = await EscrowVault.findOne({
       car: carId,
       status: { $nin: ["released", "refunded"] },
-    }).populate("buyer", "name").populate("seller", "name");
+    })
+      .populate("buyer", "name")
+      .populate("seller", "name");
     if (!vault) return res.json({ success: true, vault: null });
     const userId = req.user.id;
     if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && req.user.role !== "admin") {

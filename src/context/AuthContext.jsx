@@ -1,8 +1,9 @@
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
+import { setSentryUser, clearSentryUser } from '../utils/sentry';
 import { STAFF_ROLES, isSellerRole } from '../utils/authRoutes';
 import {
   getEffectivePermissions,
@@ -13,12 +14,6 @@ import {
 
 const AuthCtx = createContext(null);
 
-// Decode JWT payload (no validate — just read the claims)
-const decodeToken = (t) => {
-  try { return JSON.parse(atob(t.split('.')[1])); }
-  catch { return null; }
-};
-
 // Normalize user object to always have both _id and id fields
 const normalizeUser = (u) => {
   if (!u) return null;
@@ -28,86 +23,34 @@ const normalizeUser = (u) => {
 
 export function AuthProvider({ children }) {
   const [user, setUserState]  = useState(null);
-  const [token, setToken]     = useState(() => localStorage.getItem('kayad_token'));
   const [loading, setLoading] = useState(true);
-  const refreshTimer = useRef(null);
 
   const setUser = (u) => {
     setUserState(u);
-    if (u) setPostHogUser(u);
-    else   clearPostHogUser();
+    if (u) {
+      setPostHogUser(u);
+      setSentryUser(u);
+    } else {
+      clearPostHogUser();
+      clearSentryUser();
+    }
   };
 
-  const clearAuthState = useCallback(() => {
-    localStorage.removeItem('kayad_token');
-    if (refreshTimer.current) clearTimeout(refreshTimer.current);
-    setToken(null);
-    setUser(null);
-    setLoading(false);
-  }, []);
-
-  // Proactive token refresh — decode exp and refresh before it expires
-  const scheduleRefresh = useCallback((t) => {
-    if (refreshTimer.current) clearTimeout(refreshTimer.current);
-    const payload = decodeToken(t);
-    if (!payload?.exp) return;
-    const expiresInMs = payload.exp * 1000 - Date.now();
-    const refreshAt = Math.max(expiresInMs - 5 * 60 * 1000, 10000);
-    refreshTimer.current = setTimeout(async () => {
-      try {
-        const data = await authAPI.refresh();
-        if (data?.token) {
-          localStorage.setItem('kayad_token', data.token);
-          setToken(data.token);
-        }
-      } catch { /* refresh will be retried via Axios interceptor on next 401 */ }
-    }, refreshAt);
-  }, []);
-
-  // On mount: validate token and fetch user profile
-  const initialLoadDone = useRef(false);
+  // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
   useEffect(() => {
-    if (initialLoadDone.current) return;
-    const handleAuthExpired = () => clearAuthState();
+    const handleAuthExpired = () => { setUser(null); setLoading(false); };
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
 
-    if (token) {
-      authAPI.me()
-        .then(data => setUser(normalizeUser(data.user)))
-        .catch((err) => {
-          // Only clear auth on actual auth failures (401/403), not network errors
-          const status = err.response?.status;
-          if (status === 401 || status === 403) {
-            clearAuthState();
-          } else {
-            // Network error or server error — keep the token, user will be fetched on retry
-            setUser(null);
-            setLoading(false);
-          }
-        })
-        .finally(() => {
-          if (loading) setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-    initialLoadDone.current = true;
+    authAPI.me()
+      .then(data => setUser(normalizeUser(data.user)))
+      .catch(() => { /* not authenticated — user stays null */ })
+      .finally(() => setLoading(false));
 
-    return () => {
-      window.removeEventListener('kayad:auth-expired', handleAuthExpired);
-      if (refreshTimer.current) clearTimeout(refreshTimer.current);
-    };
-  }, [clearAuthState, token, loading]);
-
-  // Watch token changes to schedule proactive refresh
-  useEffect(() => {
-    if (token) scheduleRefresh(token);
-  }, [token, scheduleRefresh]);
+    return () => window.removeEventListener('kayad:auth-expired', handleAuthExpired);
+  }, []);
 
   const login = useCallback(async ({ email, password }) => {
     const data = await authAPI.login({ email, password });
-    localStorage.setItem('kayad_token', data.token);
-    setToken(data.token);
     setUser(normalizeUser(data.user));
     setLoading(false);
     return data;
@@ -115,8 +58,6 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (body) => {
     const data = await authAPI.register(body);
-    localStorage.setItem('kayad_token', data.token);
-    setToken(data.token);
     setUser(normalizeUser(data.user));
     setLoading(false);
     return data;
@@ -124,8 +65,9 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try { await authAPI.logout(); } catch { /* ignore */ }
-    clearAuthState();
-  }, [clearAuthState]);
+    setUser(null);
+    setLoading(false);
+  }, []);
 
   const isAdmin       = STAFF_ROLES.includes(user?.role);
   const isDealer      = user?.role === 'dealer';
@@ -146,13 +88,13 @@ export function AuthProvider({ children }) {
   const can = useCallback((perm) => userHasPermission(user, perm), [user]);
 
   const value = useMemo(() => ({
-    user, token, loading,
+    user, loading,
     isAuth, isEmailVerified,
     isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
     login, register, logout, setUser,
-  }), [user, token, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>
@@ -168,14 +110,6 @@ export function RequireAuth({ children }) {
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isAuth) return <Navigate to="/login" state={{ from: loc }} replace />;
-  return children;
-}
-
-export function RequireDealer({ children }) {
-  const { isDealer, isAdmin, user, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
-  if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
-  if (!user?.approved) return <Navigate to="/register" replace />;
   return children;
 }
 

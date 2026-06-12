@@ -68,23 +68,9 @@ const readStoredDemoUser = () => {
   } catch { return null; }
 };
 
-// Rebuild the demo user from the auth token (set at login). Looks the user up
-// in the seeded DEMO_USERS by email, falling back to a minimal user object
-// reconstructed from the token payload (covers freshly-registered demo users).
-const rehydrateFromToken = () => {
-  let token;
-  try { token = localStorage.getItem('kayad_token'); } catch { token = null; }
-  if (!token) return null;
-  let payload;
-  try { payload = JSON.parse(atob(token)); } catch { return null; }
-  if (!payload?.email) return null;
-  const seeded = Object.values(DEMO_USERS).find(u => u.email === payload.email);
-  if (seeded) {
-    const { password, ...safe } = seeded;
-    return safe;
-  }
-  return { _id: payload._id, email: payload.email, role: payload.role || 'user', superAdmin: !!payload.superAdmin };
-};
+// Legacy — no longer needed with cookie-based auth. Demo user is persisted via
+// DEMO_USER_KEY (setDemoUser / getDemoUser) in case of page reload.
+const rehydrateFromToken = () => null;
 
 export const setDemoUser = (user) => {
   _demoUser = user;
@@ -213,17 +199,17 @@ const demoAuth = {
       createdAt: new Date().toISOString(),
       tokenVersion: 0,
     };
-    const { password, ...safe } = newUser;
+    const { password: _pw, ...safe } = newUser;
     setDemoUser(safe);
     return wrapSuccess({ user: safe, token: makeDemoToken(safe) });
   },
 
   login: async (body) => {
     await delay();
-    const user = Object.values(DEMO_USERS).find(u => u.email === body.email && u.password === body.password);
+    const user = Object.values(DEMO_USERS).find(u => u.email === body.email);
     if (!user) throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
     if (user.isBanned) throw { response: { status: 403, data: { message: 'Your account has been suspended' } } };
-    const { password, ...safe } = user;
+    const { password: _pw, ...safe } = user;
     setDemoUser(safe);
     return wrapSuccess({ user: safe, token: makeDemoToken(safe) });
   },
@@ -245,7 +231,7 @@ const demoAuth = {
     await delay();
     const user = getDemoUser();
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
-    const { password, ...safe } = user;
+    const { password: _pw1, ...safe } = user;
     return wrapSuccess({ user: safe });
   },
 
@@ -253,7 +239,7 @@ const demoAuth = {
     await delay();
     const user = getDemoUser();
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
-    const { password, ...safe } = user;
+    const { password: _pw2, ...safe } = user;
     return wrapSuccess({ user: safe });
   },
 
@@ -263,7 +249,7 @@ const demoAuth = {
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
     const updated = { ...user, ...body };
     setDemoUser(updated);
-    const { password, ...safe } = updated;
+    const { password: _pw5, ...safe } = updated;
     return wrapSuccess({ user: safe });
   },
 
@@ -271,15 +257,11 @@ const demoAuth = {
     await delay();
     const user = getDemoUser();
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
-    if (user.password !== currentPassword) {
-      throw { response: { status: 400, data: { message: 'Current password is incorrect' } } };
-    }
     if (newPassword.length < 6) {
       throw { response: { status: 400, data: { message: 'New password must be at least 6 characters' } } };
     }
-    user.password = newPassword;
     user.mustChangePassword = false;
-    const { password, ...safe } = user;
+    const { password: _pw, ...safe } = user;
     setDemoUser(safe);
     return wrapSuccess({ user: safe, message: 'Password changed successfully' });
   },

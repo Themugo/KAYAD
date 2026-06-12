@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'virtual:pwa-register/react': path.resolve(__dirname, 'src/__tests__/mocks/pwa-register.js'),
+      'posthog-js': path.resolve(__dirname, 'src/__tests__/mocks/posthog-js.js'),
     },
   },
   test: {

@@ -24,18 +24,16 @@ const parse = (raw) =>
 
 // Accept WEBHOIST_EMAIL (comma-separated) plus optional WEBHOIST_EMAILS alias.
 export const OWNER_EMAILS = Array.from(
-  new Set([...parse(process.env.WEBHOIST_EMAIL), ...parse(process.env.WEBHOIST_EMAILS)])
+  new Set([...parse(process.env.WEBHOIST_EMAIL), ...parse(process.env.WEBHOIST_EMAILS)]),
 );
 
 // The first listed owner is the "main" / primary owner — the one that is
 // protected most strictly and shown as the platform principal.
 export const MAIN_OWNER_EMAIL = OWNER_EMAILS[0] || "";
 
-export const isOwnerEmail = (email) =>
-  !!email && OWNER_EMAILS.includes(String(email).toLowerCase().trim());
+export const isOwnerEmail = (email) => !!email && OWNER_EMAILS.includes(String(email).toLowerCase().trim());
 
-export const isMainOwnerEmail = (email) =>
-  !!email && String(email).toLowerCase().trim() === MAIN_OWNER_EMAIL;
+export const isMainOwnerEmail = (email) => !!email && String(email).toLowerCase().trim() === MAIN_OWNER_EMAIL;
 
 // A user object is an owner if its email matches an owner email.
 export const isOwnerUser = (user) => isOwnerEmail(user?.email);

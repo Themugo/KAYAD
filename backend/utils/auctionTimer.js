@@ -30,7 +30,7 @@ export const startAuctionTimer = (io) => {
           {
             auctionStatus: "ended",
           },
-          { new: true }
+          { new: true },
         );
 
         if (!updated) continue; // already ended elsewhere
@@ -77,7 +77,6 @@ export const startAuctionTimer = (io) => {
           });
         }
       }
-
     } catch (err) {
       console.error("❌ AUCTION TIMER ERROR:", err);
     }

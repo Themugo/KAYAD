@@ -92,7 +92,7 @@ const messageSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -112,9 +112,7 @@ messageSchema.index({ sender: 1, createdAt: -1 });
 // ⚡ METHOD: MARK AS SEEN
 // =============================
 messageSchema.methods.markAsSeen = function (userId) {
-  const alreadySeen = this.seenBy.some(
-    (id) => id.toString() === userId.toString()
-  );
+  const alreadySeen = this.seenBy.some((id) => id.toString() === userId.toString());
 
   if (!alreadySeen) {
     this.seenBy.push(userId);
@@ -151,9 +149,7 @@ messageSchema.methods.softDelete = function () {
 // ⚡ STATIC: GET CHAT MESSAGES
 // =============================
 messageSchema.statics.getChatMessages = function (chatId) {
-  return this.find({ chatId, isDeleted: false })
-    .sort({ createdAt: 1 })
-    .populate("sender", "name email");
+  return this.find({ chatId, isDeleted: false }).sort({ createdAt: 1 }).populate("sender", "name email");
 };
 
 // =============================
@@ -169,8 +165,6 @@ messageSchema.statics.getUnreadCount = function (userId) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const Message =
-  mongoose.models.Message ||
-  mongoose.model("Message", messageSchema);
+const Message = mongoose.models.Message || mongoose.model("Message", messageSchema);
 
 export default Message;

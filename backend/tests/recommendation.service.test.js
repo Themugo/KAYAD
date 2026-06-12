@@ -69,9 +69,7 @@ describe("recommendation.service", () => {
   });
 
   it("handles cars with missing views/currentBid using defaults", async () => {
-    mockLean.mockResolvedValue([
-      { _id: "no-stats", title: "No Stats", createdAt: new Date() },
-    ]);
+    mockLean.mockResolvedValue([{ _id: "no-stats", title: "No Stats", createdAt: new Date() }]);
     const result = await getRecommendedCars();
     expect(result).toHaveLength(1);
     expect(result[0].score).toBeDefined();

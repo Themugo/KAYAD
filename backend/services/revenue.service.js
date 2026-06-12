@@ -1,9 +1,6 @@
 import Payment from "../models/Payment.js";
 
-export const calculateRevenue = async ({
-  startDate,
-  endDate,
-} = {}) => {
+export const calculateRevenue = async ({ startDate, endDate } = {}) => {
   const match = {
     status: "success",
   };

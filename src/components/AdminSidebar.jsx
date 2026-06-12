@@ -68,7 +68,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }) {
 
   return (
     <>
-    {mobileOpen && <div className="admin-sidebar-backdrop" onClick={onToggle} />}
+    {mobileOpen && <div className="admin-sidebar-backdrop" onClick={onToggle} role="button" tabIndex={0} onKeyPress={onToggle} />}
     <div className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} style={{
       width: collapsed ? 52 : 220,
       transition: 'width 0.25s ease, transform 0.3s ease',

@@ -13,11 +13,7 @@ cloudinary.config({
 // =============================
 // ⚡ BASE OPTIMIZATION
 // =============================
-const BASE = [
-  { fetch_format: "auto" },
-  { quality: "auto:eco" },
-  { dpr: "auto" },
-];
+const BASE = [{ fetch_format: "auto" }, { quality: "auto:eco" }, { dpr: "auto" }];
 
 // =============================
 // 🎯 TRANSFORMS
@@ -25,15 +21,9 @@ const BASE = [
 const T = {
   full: [{ width: 1400, height: 900, crop: "limit" }, ...BASE],
 
-  card: [
-    { width: 600, height: 400, crop: "fill", gravity: "auto" },
-    ...BASE,
-  ],
+  card: [{ width: 600, height: 400, crop: "fill", gravity: "auto" }, ...BASE],
 
-  thumb: [
-    { width: 300, height: 200, crop: "fill", gravity: "auto" },
-    ...BASE,
-  ],
+  thumb: [{ width: 300, height: 200, crop: "fill", gravity: "auto" }, ...BASE],
 
   blur: [
     { width: 40, height: 30, crop: "fill" },
@@ -74,10 +64,7 @@ export const uploadImage = async (file, folder = "kayad/cars") => {
       });
     } else {
       // diskStorage (file.path)
-      result = await cloudinary.uploader.upload(
-        file.path,
-        uploadOptions
-      );
+      result = await cloudinary.uploader.upload(file.path, uploadOptions);
     }
 
     const publicId = result.public_id;

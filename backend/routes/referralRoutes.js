@@ -35,7 +35,7 @@ router.get(
         referralEarnings: user?.referralEarnings || 0,
         referralCount: user?.referralCount || 0,
         totalBonus: totalEarned[0]?.total || 0,
-        recentReferrals: recentReferrals.map(r => ({
+        recentReferrals: recentReferrals.map((r) => ({
           _id: r._id,
           name: r.referee?.name || "User",
           joined: r.referee?.createdAt,
@@ -45,7 +45,7 @@ router.get(
         })),
       },
     });
-  })
+  }),
 );
 
 router.get(
@@ -54,7 +54,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select("referralCode");
     res.json({ success: true, referralCode: user?.referralCode || "" });
-  })
+  }),
 );
 
 export default router;

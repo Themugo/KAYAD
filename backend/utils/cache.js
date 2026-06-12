@@ -7,10 +7,10 @@
 
 import Redis from "ioredis";
 
-let client    = null;
+let client = null;
 let connected = false;
 const memCache = new Map();
-const memTTL   = new Map();
+const memTTL = new Map();
 
 export const initCache = async () => {
   const url = process.env.REDIS_URL || process.env.REDIS_URI;
@@ -55,12 +55,16 @@ export const cacheGet = async (key) => {
     }
     if (memCache.has(key)) {
       if (Date.now() > (memTTL.get(key) || 0)) {
-        memCache.delete(key); memTTL.delete(key); return null;
+        memCache.delete(key);
+        memTTL.delete(key);
+        return null;
       }
       return memCache.get(key);
     }
     return null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 };
 
 export const cacheSet = async (key, value, ttlSeconds = 60) => {
@@ -79,7 +83,10 @@ export const cacheDel = async (...keys) => {
     if (client && connected) {
       await client.del(keys);
     } else {
-      keys.forEach(k => { memCache.delete(k); memTTL.delete(k); });
+      keys.forEach((k) => {
+        memCache.delete(k);
+        memTTL.delete(k);
+      });
     }
   } catch {}
 };
@@ -91,7 +98,12 @@ export const cacheDelPattern = async (pattern) => {
       if (keys.length) await client.del(keys);
     } else {
       const regex = new RegExp(pattern.replace("*", ".*"));
-      for (const k of memCache.keys()) { if (regex.test(k)) { memCache.delete(k); memTTL.delete(k); } }
+      for (const k of memCache.keys()) {
+        if (regex.test(k)) {
+          memCache.delete(k);
+          memTTL.delete(k);
+        }
+      }
     }
   } catch {}
 };
@@ -100,9 +112,7 @@ export const cacheMiddleware = (ttlSeconds = 60, keyFn = null) => {
   return async (req, res, next) => {
     if (req.headers.authorization) return next();
 
-    const key = keyFn
-      ? keyFn(req)
-      : `cache:${req.method}:${req.originalUrl}`;
+    const key = keyFn ? keyFn(req) : `cache:${req.method}:${req.originalUrl}`;
 
     const cached = await cacheGet(key);
     if (cached) {
@@ -126,9 +136,9 @@ export const cacheMiddleware = (ttlSeconds = 60, keyFn = null) => {
 export const isRedisConnected = () => connected;
 
 export const CACHE_TTL = {
-  CARS_LIST:    60,
-  CAR_DETAIL:   30,
-  STATS:        300,
-  DEALER_SUMM:  120,
-  SEARCH:       45,
+  CARS_LIST: 60,
+  CAR_DETAIL: 30,
+  STATS: 300,
+  DEALER_SUMM: 120,
+  SEARCH: 45,
 };

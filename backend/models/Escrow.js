@@ -37,13 +37,19 @@ const escrowSchema = new mongoose.Schema(
     notes: String,
     disputeReason: String,
 
-    history: [{ action: String, by: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, at: { type: Date, default: Date.now } }],
+    history: [
+      {
+        action: String,
+        by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        at: { type: Date, default: Date.now },
+      },
+    ],
     lastActionKey: String,
 
     autoReleased: { type: Boolean, default: false },
     warningSent: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 escrowSchema.index({ car: 1 });

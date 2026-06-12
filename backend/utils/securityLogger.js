@@ -14,8 +14,16 @@ export const logSecurityAction = async ({
 }) => {
   try {
     await SecurityLog.create({
-      action, actor, actorRole, target, targetModel,
-      resourceId, details, ip, userAgent, severity,
+      action,
+      actor,
+      actorRole,
+      target,
+      targetModel,
+      resourceId,
+      details,
+      ip,
+      userAgent,
+      severity,
     });
   } catch (err) {
     console.error("❌ SECURITY LOG FAILED:", err.message);

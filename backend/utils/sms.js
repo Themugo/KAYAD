@@ -20,13 +20,16 @@ const formatPhone = (phone) => {
 
 const doSend = async (phone, message) => {
   const to = formatPhone(phone);
-  if (!to) { logError("SMS: invalid phone", { phone }); return false; }
+  if (!to) {
+    logError("SMS: invalid phone", { phone });
+    return false;
+  }
 
   if (SMS_PROVIDER === "africastalking") {
     const res = await axios.post(
       "https://api.africastalking.com/version1/messaging",
       new URLSearchParams({ username: AT_USERNAME, to, message, from: AT_SENDER_ID || "" }),
-      { headers: { apiKey: AT_API_KEY, "Content-Type": "application/x-www-form-urlencoded" } }
+      { headers: { apiKey: AT_API_KEY, "Content-Type": "application/x-www-form-urlencoded" } },
     );
     return res.data?.SMSMessageData?.Recipients?.[0]?.status === "Success";
   }
@@ -38,7 +41,10 @@ const doSend = async (phone, message) => {
 export const sendSMS = async (phone, message) => {
   try {
     const to = formatPhone(phone);
-    if (!to) { logError("SMS: invalid phone", { phone }); return false; }
+    if (!to) {
+      logError("SMS: invalid phone", { phone });
+      return false;
+    }
 
     if (SMS_PROVIDER === "mock") {
       logInfo("📱 MOCK SMS", { to, message });

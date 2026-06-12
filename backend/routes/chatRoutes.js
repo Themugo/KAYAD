@@ -21,7 +21,14 @@ router.get("/", protect, asyncHandler(getUserChats));
 
 router.get("/:chatId/messages", protect, validateObjectId, asyncHandler(getMessages));
 
-router.post("/:chatId/message", protect, chatLimiter, validateObjectId, validate(sendMessageSchema), asyncHandler(sendMessage));
+router.post(
+  "/:chatId/message",
+  protect,
+  chatLimiter,
+  validateObjectId,
+  validate(sendMessageSchema),
+  asyncHandler(sendMessage),
+);
 
 router.post("/:chatId/seen", protect, validateObjectId, asyncHandler(markAsSeen));
 

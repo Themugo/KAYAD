@@ -39,34 +39,26 @@ describe("User Routes", () => {
 
   describe("GET /api/users/search", () => {
     it("searches users by name", async () => {
-      const res = await request(app)
-        .get("/api/users/search?q=Test")
-        .expect(200);
+      const res = await request(app).get("/api/users/search?q=Test").expect(200);
       expect(res.body.success).toBe(true);
       expect(Array.isArray(res.body.users)).toBe(true);
       expect(res.body.total).toBeGreaterThanOrEqual(1);
     });
 
     it("filters by role", async () => {
-      const res = await request(app)
-        .get("/api/users/search?role=dealer")
-        .expect(200);
+      const res = await request(app).get("/api/users/search?role=dealer").expect(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.users.every(u => u.role === "dealer")).toBe(true);
+      expect(res.body.users.every((u) => u.role === "dealer")).toBe(true);
     });
 
     it("paginates results", async () => {
-      const res = await request(app)
-        .get("/api/users/search?limit=1")
-        .expect(200);
+      const res = await request(app).get("/api/users/search?limit=1").expect(200);
       expect(res.body.success).toBe(true);
       expect(res.body.users.length).toBeLessThanOrEqual(1);
     });
 
     it("returns empty when no match", async () => {
-      const res = await request(app)
-        .get("/api/users/search?q=zzzzzzzzzz")
-        .expect(200);
+      const res = await request(app).get("/api/users/search?q=zzzzzzzzzz").expect(200);
       expect(res.body.users.length).toBe(0);
       expect(res.body.total).toBe(0);
     });
@@ -78,10 +70,7 @@ describe("User Routes", () => {
     });
 
     it("returns current user profile", async () => {
-      const res = await request(app)
-        .get("/api/users/me")
-        .set("Authorization", `Bearer ${userToken}`)
-        .expect(200);
+      const res = await request(app).get("/api/users/me").set("Authorization", `Bearer ${userToken}`).expect(200);
       expect(res.body.success).toBe(true);
       expect(res.body.user.email).toMatch("@test.ke");
       expect(res.body.user.password).toBeUndefined();
@@ -115,29 +104,28 @@ describe("User Routes", () => {
 
   describe("GET /api/users/:id", () => {
     it("returns public user profile", async () => {
-      const res = await request(app)
-        .get(`/api/users/${userId}`)
-        .expect(200);
+      const res = await request(app).get(`/api/users/${userId}`).expect(200);
       expect(res.body.success).toBe(true);
       expect(res.body.user.name).toBe("Test User");
     });
 
     it("returns 404 for non-existent id", async () => {
       const fakeId = new mongoose.Types.ObjectId().toString();
-      const res = await request(app)
-        .get(`/api/users/${fakeId}`)
-        .expect(404);
+      const res = await request(app).get(`/api/users/${fakeId}`).expect(404);
       expect(res.body.success).toBe(false);
     });
   });
 
   describe("POST /api/users/bank-pre-approval", () => {
     it("requires auth", async () => {
-      await request(app).post("/api/users/bank-pre-approval").send({
-        documentUrl: "http://example.com/approval.pdf",
-        bankName: "KCB",
-        approvedAmount: 5000000,
-      }).expect(401);
+      await request(app)
+        .post("/api/users/bank-pre-approval")
+        .send({
+          documentUrl: "http://example.com/approval.pdf",
+          bankName: "KCB",
+          approvedAmount: 5000000,
+        })
+        .expect(401);
     });
 
     it("rejects missing fields", async () => {
@@ -182,9 +170,7 @@ describe("User Routes", () => {
 
   describe("404 fallback", () => {
     it("returns 404 for unknown user routes", async () => {
-      const res = await request(app)
-        .get("/api/users/nonexistent-route")
-        .expect(400);
+      const res = await request(app).get("/api/users/nonexistent-route").expect(400);
       expect(res.body.success).toBe(false);
     });
   });

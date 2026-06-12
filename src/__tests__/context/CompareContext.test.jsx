@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, renderHook, act, cleanup, screen } from '@testing-library/react';
 import { CompareProvider, useCompare } from '../../context/CompareContext';
 

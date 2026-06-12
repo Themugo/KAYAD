@@ -7,8 +7,7 @@ const isDev = process.env.NODE_ENV !== "production";
 // =============================
 // 🧠 GENERATE REQUEST ID
 // =============================
-export const generateRequestId = () =>
-  crypto.randomBytes(6).toString("hex");
+export const generateRequestId = () => crypto.randomBytes(6).toString("hex");
 
 // =============================
 // 🧾 BASE LOGGER

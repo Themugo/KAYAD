@@ -1,27 +1,22 @@
 import { z } from "zod";
 
-const numberField = (schema) => z.preprocess(
-  (value) => (value === "" || value === null || value === undefined ? undefined : value),
-  schema.optional()
-);
+const numberField = (schema) =>
+  z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    schema.optional(),
+  );
 
-const optionalBoolean = z.preprocess(
-  (value) => {
-    if (value === "" || value === null || value === undefined) return undefined;
-    if (value === "true") return true;
-    if (value === "false") return false;
-    return value;
-  },
-  z.coerce.boolean()
-);
+const optionalBoolean = z.preprocess((value) => {
+  if (value === "" || value === null || value === undefined) return undefined;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return value;
+}, z.coerce.boolean());
 
-const featuresSchema = z.preprocess(
-  (value) => {
-    if (value === "" || value === null || value === undefined) return undefined;
-    return Array.isArray(value) ? value : [value];
-  },
-  z.array(z.string()).optional()
-);
+const featuresSchema = z.preprocess((value) => {
+  if (value === "" || value === null || value === undefined) return undefined;
+  return Array.isArray(value) ? value : [value];
+}, z.array(z.string()).optional());
 
 export const createCarSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters").max(200),

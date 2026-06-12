@@ -6,7 +6,7 @@ import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
-import { CountdownDisplay } from '../hooks/useCountdown';
+import { CountdownDisplay } from '../components/CountdownDisplay';
 import BackButton from '../components/BackButton';
 import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';

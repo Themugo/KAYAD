@@ -1,16 +1,16 @@
 // backend/services/paymentService.js — FIXED: emits socket events on confirmation
-import Payment         from "../models/Payment.js";
+import Payment from "../models/Payment.js";
 import MpesaTransaction from "../models/MpesaTransaction.js";
-import { stkPush }     from "./mpesaService.js";
+import { stkPush } from "./mpesaService.js";
 import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
 
 const formatPhone = (phone) => {
   if (!phone) return null;
   phone = phone.toString().trim();
-  if (phone.startsWith("0"))    return "254" + phone.slice(1);
+  if (phone.startsWith("0")) return "254" + phone.slice(1);
   if (phone.startsWith("+254")) return phone.slice(1);
-  if (phone.startsWith("254"))  return phone;
+  if (phone.startsWith("254")) return phone;
   return null;
 };
 
@@ -21,7 +21,8 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
 
   // Prevent duplicate pending payments for same car
   const existing = await Payment.findOne({
-    user: userId, car: carId,
+    user: userId,
+    car: carId,
     status: "pending",
     type,
   });
@@ -46,7 +47,10 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   }
 
   const payment = await Payment.create({
-    user: userId, car: carId, type, amount,
+    user: userId,
+    car: carId,
+    type,
+    amount,
     referenceId: carId,
     referenceModel: "Car",
     phone: formattedPhone,
@@ -58,12 +62,16 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
 
   await MpesaTransaction.create({
     checkoutRequestID: checkoutID,
-    phone: formattedPhone, amount,
-    status: payment.status, carId,
+    phone: formattedPhone,
+    amount,
+    status: payment.status,
+    carId,
   }).catch((e) => console.warn("⚠️ Payment notification failed:", e.message));
 
   return {
-    success: true, mode, checkoutID,
+    success: true,
+    mode,
+    checkoutID,
     checkoutRequestID: checkoutID,
     payment,
     message: mode === "mpesa" ? "STK push sent, check your phone" : "Mock payment initiated",
@@ -81,16 +89,15 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     throw new Error(`Amount mismatch: expected ${payment.amount}, got ${amount}`);
   }
 
-  payment.status            = "success";
+  payment.status = "success";
   payment.mpesaReceiptNumber = receipt;
-  payment.mpesaReceipt      = receipt;
-  payment.paidAt            = new Date();
+  payment.mpesaReceipt = receipt;
+  payment.paidAt = new Date();
   await payment.save();
 
-  await MpesaTransaction.findOneAndUpdate(
-    { checkoutRequestID },
-    { status: "success", mpesaReceipt: receipt }
-  ).catch((e) => console.warn("⚠️ Payment service notification failed:", e.message));
+  await MpesaTransaction.findOneAndUpdate({ checkoutRequestID }, { status: "success", mpesaReceipt: receipt }).catch(
+    (e) => console.warn("⚠️ Payment service notification failed:", e.message),
+  );
 
   // 📧 Payment confirmed email (fire-and-forget)
   try {
@@ -104,8 +111,8 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
         const carDoc = await Car.findById(payment.car).select("title");
         carTitle = carDoc?.title || null;
       }
-      sendPaymentConfirmedEmail(user, payment, { title: carTitle }).catch(e =>
-        console.warn("⚠️ Payment confirmed email failed:", e.message)
+      sendPaymentConfirmedEmail(user, payment, { title: carTitle }).catch((e) =>
+        console.warn("⚠️ Payment confirmed email failed:", e.message),
       );
     }
   } catch (_) {}
@@ -169,14 +176,13 @@ export const failPayment = async (checkoutRequestID, resultDesc = "") => {
 
   if (!payment || payment.status === "success") return;
 
-  payment.status    = "failed";
+  payment.status = "failed";
   payment.resultDesc = resultDesc;
   await payment.save();
 
-  await MpesaTransaction.findOneAndUpdate(
-    { checkoutRequestID },
-    { status: "failed" }
-  ).catch((e) => console.warn("⚠️ Payment service notification failed:", e.message));
+  await MpesaTransaction.findOneAndUpdate({ checkoutRequestID }, { status: "failed" }).catch((e) =>
+    console.warn("⚠️ Payment service notification failed:", e.message),
+  );
 
   // ── EMIT failure ────────────────────────────────────────────
   const io = getIO();

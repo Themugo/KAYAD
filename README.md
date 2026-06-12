@@ -1,92 +1,195 @@
-# Kayad
+# KAYAD — Where Kenya Drives
 
-Kenya's premium car marketplace for live vehicle auctions, dealer listings, M-Pesa payments, escrow workflows, inspections, and admin operations.
+> East Africa's most sophisticated automotive marketplace.  
+> Live auctions · Verified dealers · M-Pesa secured escrow · Ghost Check
 
-## What Kayad Includes
+---
 
-- Buyer marketplace with showroom search, vehicle detail pages, favorites, comparisons, payments, chat, notifications, and buyer dashboard flows.
-- Live auction experience with countdowns, bid tracking, winner handling, auction calendar, dealer auction setup, and auction administration.
-- Dealer workspace for onboarding, listing management, auction controls, analytics, settlements, team access, and audit logs.
-- Admin console for users, dealers, cars, auctions, bids, transactions, reviews, referrals, inspections, NTSA queue, security logs, ads, and platform settings.
-- Backend API with Express, MongoDB, Socket.IO, M-Pesa integrations, escrow services, notifications, fraud/abuse controls, and operational monitoring hooks.
-- Production deployment assets for Vercel/static frontend, Node backend hosting, Docker, Nginx, PM2, and Render-style environments.
+## Project Structure
+
+```
+KAYAD/
+├── backend/                   Node.js / Express / MongoDB API
+├── frontend/                  TanStack Start / React 19 / Tailwind v4 / Supabase
+├── setup-windows.bat          One-click Windows setup (run this first)
+├── start-all.bat              Start both backend + frontend on Windows
+├── start-backend.bat          Start backend only
+├── start-frontend.bat         Start frontend only
+└── CHANGES.md                 16 security & architecture audit fixes
+```
+
+---
+
+## Quick Start — Windows (CMD / PowerShell)
+
+### Step 1 — Run the setup script (once)
+```
+setup-windows.bat
+```
+This copies `.env.development` → `.env` in both `backend/` and `frontend/`,
+then runs `npm install` in both folders.
+
+### Step 2 — Configure MongoDB (backend)
+
+Open `backend\.env` in Notepad and set `MONGO_URI`:
+
+**Option A — You have MongoDB installed locally:**
+```
+MONGO_URI=mongodb://127.0.0.1:27017/kayad
+```
+
+**Option B — You want MongoDB Atlas (cloud, free tier):**
+1. Go to https://cloud.mongodb.com → create free cluster
+2. Click Connect → Drivers → copy the connection string
+3. Replace `<password>` with your DB user password
+```
+MONGO_URI=mongodb+srv://youruser:yourpassword@cluster0.abc123.mongodb.net/kayad?retryWrites=true&w=majority
+```
+
+**Don't have MongoDB at all?** Install it:
+→ https://www.mongodb.com/try/download/community  (Community Server, Windows msi)
+
+### Step 3 — Configure Supabase (frontend)
+
+Open `frontend\.env` in Notepad and set:
+```
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+Get these from: https://supabase.com → your project → Settings → API
+
+### Step 4 — Start the app
+
+**Both at once (opens two CMD windows):**
+```
+start-all.bat
+```
+
+**Or separately in two CMD windows:**
+```
+Window 1:   start-backend.bat
+Window 2:   start-frontend.bat
+```
+
+**Or manually:**
+```cmd
+:: Window 1 — Backend
+cd backend
+npm run dev
+
+:: Window 2 — Frontend
+cd frontend
+npm run dev
+```
+
+The app will be at:
+- Frontend → http://localhost:3000
+- Backend API → http://localhost:5000/api
+- API Health → http://localhost:5000/health
+
+---
+
+## Quick Start — Mac / Linux (bash)
+
+```bash
+# One-time setup
+cd backend  && cp .env.development .env  && npm install && cd ..
+cd frontend && cp .env.development .env  && npm install && cd ..
+
+# Edit backend/.env — set MONGO_URI
+# Edit frontend/.env — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+
+# Run both (requires concurrently: npm install -g concurrently)
+npm run dev
+
+# Or separately
+cd backend  && npm run dev   # terminal 1
+cd frontend && npm run dev   # terminal 2
+```
+
+---
+
+## Environment Variables
+
+### backend/.env (most important)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGO_URI` | ✅ Yes | MongoDB connection string |
+| `JWT_SECRET` | ✅ Yes | Secret for access tokens (32+ chars) |
+| `REFRESH_TOKEN_SECRET` | ✅ Yes | Secret for refresh tokens (32+ chars) |
+| `WEBHOIST_EMAIL` | ✅ Yes | Your email — becomes permanent superadmin |
+| `FRONTEND_URL` | ✅ Yes | Frontend origin for CORS |
+| `MPESA_CONSUMER_KEY` | Optional | M-Pesa Daraja API key |
+| `CLOUDINARY_CLOUD_NAME` | Optional | For car image uploads |
+| `EMAIL_HOST` | Optional | SMTP — leave blank to disable email |
+| `REDIS_URL` | Optional | Leave blank for in-memory fallback |
+
+### frontend/.env
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_SUPABASE_URL` | ✅ Yes | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | ✅ Yes | Your Supabase anon/public key |
+
+---
 
 ## Tech Stack
 
-- Frontend: React 18, Vite, React Router, Tailwind CSS, lucide-react, framer-motion, Socket.IO client, Vitest.
-- Backend: Node.js 20, Express, MongoDB/Mongoose, Socket.IO, Jest, Zod, Helmet, Redis/ioredis, Cloudinary, SendGrid, Twilio, M-Pesa services.
-- Quality: ESLint, Vitest, Jest, Playwright critical-flow tests, deployment smoke scripts, production monitoring docs.
+### Backend
+| Tool | Purpose |
+|------|---------|
+| Node.js 20+ | Runtime |
+| Express 4 | API framework |
+| MongoDB + Mongoose | Primary database |
+| Socket.io | Real-time auction engine |
+| Redis (optional) | Cache + pub/sub |
+| JWT | Auth tokens |
+| Cloudinary | Image storage |
+| M-Pesa Daraja | Mobile payments |
 
-## Project Layout
+### Frontend
+| Tool | Purpose |
+|------|---------|
+| React 19 | UI framework |
+| TanStack Router + Start | File-based routing + SSR |
+| Tailwind CSS v4 | Styling (oklch design tokens) |
+| shadcn/ui + Radix | 35 component library |
+| Supabase | Auth + Postgres |
+| Sonner | Toast notifications |
+| Zod | Schema validation |
 
-```text
-.
-├── src/                  # React frontend
-├── backend/              # Express API, models, routes, services, tests
-├── e2e/                  # Playwright critical flow tests
-├── public/               # PWA and static assets
-├── dist/                 # Production frontend build output
-├── DEPLOY.md             # Deployment runbook
-├── GO-LIVE.md            # Launch checklist
-├── MONITORING.md         # Observability and incident guidance
-└── INTEGRATION.md        # Integration notes
-```
+---
 
-## Local Development
+## Routes
 
-Install frontend dependencies from the repo root:
+| URL | Page |
+|-----|------|
+| `/` | Landing page |
+| `/gallery` | Browse all vehicles |
+| `/auctions` | Live + upcoming auctions |
+| `/ghost-check` | Vehicle history reports |
+| `/how-it-works` | 4-step process guide |
+| `/about` | About KAYAD |
+| `/auth` | Sign in / Register |
+| `/dashboard` | User dashboard |
+| `/dealer-application` | Dealer verification |
 
-```bash
-npm install
-```
+---
 
-Install backend dependencies:
+## Common Issues
 
-```bash
-cd backend
-npm install
-```
+**`'cp' is not recognized`** — Use `setup-windows.bat` instead of bash commands on Windows.
 
-Run the frontend:
+**MongoDB ETIMEOUT** — Your `MONGO_URI` points to a cloud cluster that isn't reachable.  
+Set it to `mongodb://127.0.0.1:27017/kayad` for local MongoDB.
 
-```bash
-npm run dev
-```
+**Port already in use** — Another app is on port 5000 or 3000.  
+Change `PORT=5001` in `backend/.env` or `npm run dev -- --port 3001` for frontend.
 
-Run the backend:
+**`npm warn workspaces ... no workspace folder`** — Run `npm install` inside `backend/` directly, not from the root.
 
-```bash
-cd backend
-npm run dev
-```
+---
 
-Copy `.env.example` to `.env` and fill in the required API, database, payment, email, storage, and security values before running connected flows.
-
-## Verification
-
-Frontend:
-
-```bash
-npm run lint
-npm test
-npm run build
-```
-
-Backend:
-
-```bash
-cd backend
-npm test
-```
-
-End-to-end checks:
-
-```bash
-npm run test:e2e
-```
-
-## Deployment Notes
-
-Kayad is branded for the canonical domain `www.kayad.space`. Configure `kayad.space` as a permanent redirect to `www.kayad.space` so browsers do not keep separate service-worker caches with different app shells. Keep environment URLs, CORS origins, OAuth/callback URLs, sitemap entries, and deployment host settings aligned with the canonical domain before launch.
-
-See [DEPLOY.md](DEPLOY.md), [GO-LIVE.md](GO-LIVE.md), and [MONITORING.md](MONITORING.md) for production release, smoke testing, and incident-response guidance.
+© 2025 KAYAD Limited. Made for Kenya 🇰🇪

@@ -4,6 +4,9 @@
 export const parseKES = (str) =>
   Number(String(str).replace(/[^0-9.]/g, '')) || 0;
 
+export const formatKES = (n) =>
+  'KES ' + Number(n || 0).toLocaleString('en-KE');
+
 // ─── Phone ──────────────────────────────────────────────
 export const formatPhone = (phone) => {
   const clean = String(phone).replace(/\D/g, '');

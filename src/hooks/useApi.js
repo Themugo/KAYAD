@@ -100,7 +100,8 @@ export function useLocalStorage(key, initial) {
   const set = useCallback((v) => {
     const next = typeof v === 'function' ? v(val) : v;
     setVal(next);
-    localStorage.setItem(key, JSON.stringify(next));
+    try { localStorage.setItem(key, JSON.stringify(next)); }
+    catch { /* storage quota exceeded or unavailable */ }
   }, [key, val]);
   return [val, set];
 }

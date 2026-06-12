@@ -49,13 +49,11 @@ export const startSavedSearchCron = () => {
       if (newCars.length === 0) return;
 
       for (const search of searches) {
-        const matched = newCars.filter(c => matches(c, search.filters));
+        const matched = newCars.filter((c) => matches(c, search.filters));
         if (matched.length === 0) continue;
 
-        const lastNotified = search.lastNotifiedAt
-          ? new Date(search.lastNotifiedAt).getTime()
-          : 0;
-        const fresh = matched.filter(c => new Date(c.createdAt).getTime() > lastNotified);
+        const lastNotified = search.lastNotifiedAt ? new Date(search.lastNotifiedAt).getTime() : 0;
+        const fresh = matched.filter((c) => new Date(c.createdAt).getTime() > lastNotified);
 
         if (fresh.length === 0) continue;
 
@@ -65,7 +63,10 @@ export const startSavedSearchCron = () => {
         if (!user) continue;
         const prefs = user.notifications || {};
 
-        const titles = fresh.slice(0, 3).map(c => c.title || `${c.brand || ""} ${c.year || ""}`).join(", ");
+        const titles = fresh
+          .slice(0, 3)
+          .map((c) => c.title || `${c.brand || ""} ${c.year || ""}`)
+          .join(", ");
         const rest = fresh.length > 3 ? ` and ${fresh.length - 3} more` : "";
 
         if (shouldNotify(prefs, "inApp")) {
@@ -79,8 +80,8 @@ export const startSavedSearchCron = () => {
         }
 
         if (shouldNotify(prefs, "email") && user.email) {
-          sendSavedSearchAlertEmail(user, search, fresh, fresh.length).catch(e =>
-            console.warn("⚠️ Saved search email failed:", e.message)
+          sendSavedSearchAlertEmail(user, search, fresh, fresh.length).catch((e) =>
+            console.warn("⚠️ Saved search email failed:", e.message),
           );
         }
 

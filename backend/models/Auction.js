@@ -18,7 +18,7 @@ const bidSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // =============================
@@ -39,7 +39,7 @@ const winnerSchema = new mongoose.Schema(
       default: 1,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // =============================
@@ -66,13 +66,7 @@ const auctionSchema = new mongoose.Schema(
     // =============================
     status: {
       type: String,
-      enum: [
-        "active",
-        "ended",
-        "pending_payment",
-        "completed",
-        "cancelled",
-      ],
+      enum: ["active", "ended", "pending_payment", "completed", "cancelled"],
       default: "active",
     },
 
@@ -177,7 +171,7 @@ const auctionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // =============================
@@ -197,9 +191,7 @@ auctionSchema.methods.getNextBidder = function () {
 
   const sorted = [...this.bidHistory].sort((a, b) => a.bid - b.bid);
 
-  const filtered = sorted.filter(
-    (b) => b.userId !== this.winner?.userId
-  );
+  const filtered = sorted.filter((b) => b.userId !== this.winner?.userId);
 
   return filtered.pop() || null;
 };
