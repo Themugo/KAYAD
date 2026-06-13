@@ -1,62 +1,58 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import CartyGrid from '../../../components/CartyGrid';
+
+function LiveCountdown({ endTime }) {
+  const [timeStr, setTimeStr] = useState('');
+
+  useEffect(() => {
+    const tick = () => {
+      const remaining = endTime - Date.now();
+      if (remaining <= 0) { setTimeStr('Ending soon'); return; }
+      const h = Math.floor(remaining / 3600000);
+      const m = Math.floor((remaining % 3600000) / 60000);
+      const s = Math.floor((remaining % 60000) / 1000);
+      setTimeStr(`${h}h ${m}m ${s}s`);
+    };
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, [endTime]);
+
+  return <>{timeStr}</>;
+}
 
 export default function HomeLiveAuctions({ cars, isMobile }) {
   if (!cars || cars.length === 0) return null;
 
   return (
-    <section style={{ padding: '32px 0 16px' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 16 }}>
+    <section className="py-8 md:py-10">
+      <div className="max-w-[1400px] mx-auto px-7">
+        <div className="flex items-end justify-between mb-4">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4,
-                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-                borderRadius: 9999, padding: '2px 8px',
-                fontSize: 8, color: '#ef4444', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
-              }}>
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="inline-flex items-center gap-1 bg-red-500/10 border border-red-500/20 rounded-full px-2 py-0.5 text-[8px] text-red-500 font-bold tracking-[0.12em] uppercase">
+                <span className="w-1 h-1 rounded-full bg-red-500 block animate-pulse" />
                 Live Now
               </span>
             </div>
-            <h2 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
-              fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', color: '#fff', margin: 0, lineHeight: 1,
-            }}>
-              Live <span style={{ color: 'var(--gold)' }}>Auctions</span>
+            <h2 className="font-display font-black italic text-[clamp(1.1rem,2vw,1.5rem)] text-white leading-none m-0">
+              Live <span className="text-gold">Auctions</span>
             </h2>
           </div>
-          <Link to="/auctions/calendar" style={{
-            fontSize: 11, color: 'rgba(239,68,68,0.7)', fontWeight: 700,
-            textDecoration: 'none', letterSpacing: '0.06em',
-            display: 'flex', alignItems: 'center', gap: 4,
-            transition: 'color 0.2s',
-          }}
-            onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(239,68,68,0.7)'}
+          <Link to="/auctions/calendar" className="text-[11px] text-red-500/70 font-bold no-underline tracking-[0.06em] flex items-center gap-1 transition-colors duration-200 hover:text-red-500"
           >View All Auctions →</Link>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+        <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
           {cars.map(car => {
             const endTime = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
-            const remaining = endTime - Date.now();
-            const hrs = Math.max(0, Math.floor(remaining / 3600000));
-            const mins = Math.max(0, Math.floor((remaining % 3600000) / 60000));
-            const secs = Math.max(0, Math.floor((remaining % 60000) / 1000));
-            const timeStr = remaining > 0 ? `${hrs}h ${mins}m ${secs}s` : 'Ending soon';
-
             return (
-              <div key={car._id} style={{ position: 'relative' }}>
-                <div style={{
-                  position: 'absolute', top: 8, left: 8, zIndex: 2,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  background: 'rgba(239,68,68,0.9)', borderRadius: 6, padding: '3px 10px',
-                }}>
-                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#fff', display: 'block', animation: 'pulse 1.5s infinite' }} />
-                  <span style={{ fontSize: 8, color: '#fff', fontWeight: 800, letterSpacing: '0.06em' }}>LIVE</span>
-                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.7)', fontWeight: 600, marginLeft: 2 }}>
-                    {timeStr}
+              <div key={car._id} className="relative">
+                <div className="absolute top-2 left-2 z-[2] flex items-center gap-1.5 rounded-md px-2.5 py-1" style={{ background: 'rgba(212,196,168,0.9)' }}>
+                  <span className="w-1 h-1 rounded-full bg-red-500 block animate-pulse" />
+                  <span className="text-[8px] text-black font-extrabold tracking-[0.06em]">LIVE</span>
+                  <span className="text-[8px] text-black/70 font-semibold ml-0.5">
+                    <LiveCountdown endTime={endTime} />
                   </span>
                 </div>
                 <CartyGrid car={car} isMobile={isMobile} />

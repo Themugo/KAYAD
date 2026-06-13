@@ -7,42 +7,7 @@ const IMG = buildCarImages(BRAND_KEYS);
 const DEMO_DEALER_REF = { _id: 'demo-dealer-1', name: 'Nairobi Auto Hub Ltd', role: 'dealer', dealerRating: 4.7, trustScore: 92, verified: true, tier: 'enterprise', verifications: ['email','phone','business','id','ntsa','physical'], escrowMandatory: false, memberSince: '2023', totalTransactions: 342 }; 
 const ADMIN_DEALER = DEMO_DEALER_REF;
 
-const DEMO_CARS_KEY = 'kayad_demo_cars';
 
-function saveCars() {
-  try {
-    localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(_cars));
-  } catch (e) {
-    try {
-      const trimmed = _cars.map(c => {
-        const imgs = (c.images || []).filter(im => !String(im?.url || im).startsWith('data:'));
-        const dataImages = (c.images || []).filter(im => String(im?.url || im).startsWith('data:'));
-        const kept = [...imgs, ...(dataImages.length > 0 ? [dataImages[0]] : [])];
-        return { ...c, images: kept.length ? kept : (c.images || []).slice(0, 1) };
-      });
-      localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
-      console.warn('[Demo] localStorage quota near limit — kept only cover images');
-      return;
-    } catch (e2) { console.warn('[Demo] Failed to trim demo car images:', e2.message); }
-
-    try {
-      const trimmed = _cars.map(c => {
-        const imgs = (c.images || []).filter(im => !String(im?.url || im).startsWith('data:'));
-        return { ...c, images: imgs.length ? imgs : (c.images || []).slice(0, 1) };
-      });
-      localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(trimmed));
-      console.warn('[Demo] localStorage quota exceeded — base64 image data stripped');
-    } catch (e3) { console.warn('[Demo] Final fallback for demo car storage failed:', e3.message); }
-  }
-}
-
-function loadCars() {
-  try {
-    const raw = localStorage.getItem(DEMO_CARS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) { console.warn('[Demo] Failed to load cached demo cars:', e.message); }
-  return null;
-}
 
 const now = Date.now();
 const DAY = 86400000;
@@ -90,8 +55,8 @@ export const DEMO_USERS = {
     location: 'Westlands, Nairobi',
     bio: 'Car enthusiast looking for my next ride',
     emailVerified: true,
+    status: 'approved',
     isBanned: false,
-    approved: true,
     dealerRating: 0,
     createdAt: new Date(now - 30 * DAY).toISOString(),
     tokenVersion: 0,
@@ -106,8 +71,8 @@ export const DEMO_USERS = {
     businessName: 'Nairobi Auto Hub Ltd',
     bio: 'Premium car dealer with 10+ years experience. Specializing in Japanese and German imports.',
     emailVerified: true,
+    status: 'approved',
     isBanned: false,
-    approved: true,
     dealerRating: 4.7,
     createdAt: new Date(now - 180 * DAY).toISOString(),
     reviewCount: 42,
@@ -122,8 +87,8 @@ export const DEMO_USERS = {
     location: 'Kilimani, Nairobi',
     bio: 'Individual car seller. All transactions protected by escrow.',
     emailVerified: true,
+    status: 'approved',
     isBanned: false,
-    approved: true,
     dealerRating: 4.2,
     trustScore: 78,
     verified: true,
@@ -137,40 +102,17 @@ export const DEMO_USERS = {
   },
 };
 
-let _cars;
+try { localStorage.removeItem('kayad_demo_cars'); } catch { /* ignore */ }
 
-const stored = loadCars();
-if (stored && Array.isArray(stored) && stored.length > 0) {
-  _cars = stored;
-} else {
-  _cars = [
-    ...buildDemoCars(),
-
-    { _id:'car-broker1', createdAt: new Date(now - 4 * DAY).toISOString(), title:'Mazda Demio 2019', brand:'Mazda', price:890000, year:2019, fuel:'Petrol', transmission:'Automatic', mileage:62000, bodyType:'Hatchback', color:'Silver', location:{city:'Nairobi'}, description:'Well maintained Mazda Demio — perfect first car for Nairobi traffic. Fuel efficient, economical to maintain, and easy to park. Escrow protected.', features:['AC','Bluetooth','Power Windows','Central Locking','Fuel Efficient','Easy Park'], images:IMG.maz, views:234, allowBid:true, allowBuy:true, auctionStatus:'draft', isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'demo-broker-1', name:'Grace Wanjiku', role:'broker', dealerRating:4.2, trustScore:78, verified:true, tier:'verified', verifications:['email','phone','id'], escrowMandatory:true, memberSince:'2024', totalTransactions:18} },
-    { _id:'car-broker2', createdAt: new Date(now - 2 * DAY).toISOString(), title:'Toyota Vitz 2020 Grade 5', brand:'Toyota', price:1250000, year:2020, fuel:'Petrol', transmission:'Automatic', mileage:34000, bodyType:'Hatchback', color:'Blue', location:{city:'Nairobi'}, description:'Toyota Vitz 2020 Grade 5 — clean, economical, and hugely popular in Kenya. One local owner, 34k km, and escrow protected for your peace of mind.', features:['AC','Keyless Entry','Reverse Camera','Bluetooth','Fuel Efficient','Remote Locking'], images:IMG.hon, views:567, allowBid:true, allowBuy:true, auctionStatus:'draft', isPromoted:false, isVerifiedDealer:false, dealRating:'good', dealer:{_id:'demo-broker-1', name:'Grace Wanjiku', role:'broker', dealerRating:4.2, trustScore:78, verified:true, tier:'verified', verifications:['email','phone','id'], escrowMandatory:true, memberSince:'2024', totalTransactions:18} },
-  ];
-
-  const liveEnds = [2.5, 6, 19, 44];
-  _cars.slice(0, 4).forEach((c, i) => {
-    c.auctionStatus = 'live';
-    c.allowBid = true;
-    c.auctionStartTime = new Date(Date.now() - 3600000).toISOString();
-    c.auctionEnd = new Date(Date.now() + liveEnds[i] * 3600 * 1000).toISOString();
-    c.currentBid = Math.round((c.price || 1000000) * 0.82);
-    c.bidsCount = 6 + i * 3;
-  });
-
-  saveCars();
-}
+let _cars = [];
 
 export const DEMO_CARS = _cars;
 export function addDemoCar(car) {
   if (!car.createdAt) car.createdAt = new Date().toISOString();
   _cars.unshift(car);
-  saveCars();
 }
-export function updateDemoCar(id, updates) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars[i] = { ..._cars[i], ...updates }; saveCars(); }
-export function removeDemoCar(id) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars.splice(i, 1); saveCars(); }
+export function updateDemoCar(id, updates) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars[i] = { ..._cars[i], ...updates }; }
+export function removeDemoCar(id) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars.splice(i, 1); }
 
 export const DEMO_BIDS = (() => {
   const bids = [];

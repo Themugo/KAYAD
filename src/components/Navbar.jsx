@@ -2,20 +2,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useSocket } from '../context/SocketContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useBranding } from '../context/BrandingContext';
 import NotificationCenter from './NotificationCenter';
 import { carsAPI } from '../api/api';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, User, Menu, X, LogOut } from 'lucide-react';
+import { Bell, Menu, X, LogOut } from 'lucide-react';
 
-export default function Navbar({ branding }) {
+export default function Navbar() {
   const { user, isAuth, isAdmin, logout } = useAuth();
   const { unreadCount } = useNotifications();
-  const socketCtx = useSocket();
-  const connected = socketCtx?.connected;
+  const { branding } = useBranding();
 
   const loc = useLocation();
   const navigate = useNavigate();
@@ -112,13 +111,15 @@ export default function Navbar({ branding }) {
                 decoding="async"
               />
             ) : (
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-gold-light to-gold-dark flex items-center justify-center shadow-gold text-black text-3xl font-bold transition-transform group-hover:scale-105">
-                K
-              </div>
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-gold-light to-gold-dark flex items-center justify-center shadow-gold text-black text-3xl font-bold transition-transform group-hover:scale-105">
+                  {(branding?.logoText || 'K')[0]}
+                </div>
+                <span className="font-display text-3xl font-bold tracking-tighter text-white">
+                  {branding?.logoText || 'KAYAD'}
+                </span>
+              </>
             )}
-            <span className="font-display text-3xl font-bold tracking-tighter text-white">
-              {branding?.logoText || 'KAYAD'}
-            </span>
           </Link>
 
           <div className="flex-1" />

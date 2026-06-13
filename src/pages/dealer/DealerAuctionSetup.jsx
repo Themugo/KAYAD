@@ -24,6 +24,7 @@ export default function DealerAuctionSetup() {
         ...car,
         _startingBid: car.currentBid || car.price || '',
         _reservePrice: car.reservePrice || '',
+        _reserveMode: car.reserveMode || 'none',
         _durationHours: 24,
         _extendHours: '',
         _extendCount: car.extensionCount || 0,
@@ -96,6 +97,7 @@ export default function DealerAuctionSetup() {
   const handleStartAuction = async (car) => {
     const startingBid = Number(car._startingBid);
     const reservePrice = car._reservePrice ? Number(car._reservePrice) : undefined;
+    const reserveMode = car._reserveMode || 'none';
     const durationHours = (() => { const p = Number(car._durationHours); return Number.isFinite(p) && p > 0 ? p : 24; })();
 
     if (!startingBid || startingBid < 1000) { toast('Starting bid must be at least KES 1,000', 'error'); return; }
@@ -107,6 +109,7 @@ export default function DealerAuctionSetup() {
       await dealerAuctionAPI.start(car._id, {
         durationMs: durationHours * 60 * 60 * 1000, startingBid,
         ...(reservePrice !== undefined && { reservePrice }),
+        reserveMode,
       });
       toast('Auction is live and countdown has started', 'success');
       setExpandedId(null);

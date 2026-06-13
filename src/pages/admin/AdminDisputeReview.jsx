@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, FileText, CheckCircle, XCircle, Scale, Upload, MessageSquare } from 'lucide-react';
-import { adminAPI } from '../../api/api';
-import { useToast } from '../../context/ToastContext';
 
 const cardStyle = {
   background: 'var(--card)',
@@ -52,7 +50,6 @@ const buttonStyle = {
 };
 
 export default function AdminDisputeReview({ disputeId }) {
-  const toast = useToast();
   const [dispute, setDispute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [resolution, setResolution] = useState({
@@ -65,49 +62,66 @@ export default function AdminDisputeReview({ disputeId }) {
   const [note, setNote] = useState('');
 
   useEffect(() => {
-    let ignore = false;
     const fetchDispute = async () => {
       try {
-        const data = await adminAPI.getDispute(disputeId);
+        const response = await fetch(`/api/disputes/${disputeId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
         if (data.success) {
-          if (ignore) return;
           setDispute(data.dispute);
         }
       } catch (error) {
         console.error('Failed to fetch dispute:', error);
       } finally {
-        if (ignore) return;
         setLoading(false);
       }
     };
 
     fetchDispute();
-    return () => { ignore = true; };
   }, [disputeId]);
 
   const handleResolve = async () => {
     try {
-      const data = await adminAPI.resolveDispute(disputeId, resolution);
+      const response = await fetch(`/api/disputes/${disputeId}/resolve`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(resolution),
+      });
+      const data = await response.json();
       if (data.success) {
         setDispute(data.dispute);
-        toast('Dispute resolved successfully', 'success');
+        alert('Dispute resolved successfully');
       }
     } catch (error) {
       console.error('Failed to resolve dispute:', error);
-      toast('Failed to resolve dispute', 'error');
+      alert('Failed to resolve dispute');
     }
   };
 
   const handleAddNote = async () => {
     try {
-      const data = await adminAPI.addDisputeNote(disputeId, { note });
+      const response = await fetch(`/api/disputes/${disputeId}/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ note }),
+      });
+      const data = await response.json();
       if (data.success) {
         setDispute(data.dispute);
         setNote('');
       }
     } catch (error) {
       console.error('Failed to add note:', error);
-      toast('Failed to add note', 'error');
+      alert('Failed to add note');
     }
   };
 

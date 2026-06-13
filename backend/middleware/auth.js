@@ -140,19 +140,14 @@ export const authenticate = protect;
 // 👑 ADMIN ONLY (all staff roles)
 // =============================
 export const adminOnly = (req, res, next) => {
-  // FIX: explicitly allow webhoist (effectiveRole) regardless of role field,
-  // since the protect middleware sets role='superadmin' for owner emails,
-  // but effectiveRole='webhoist'. Belt-and-suspenders check covers both paths.
-  if (!req.user) {
-    return res.status(403).json({ success: false, message: "Admin access only" });
+  if (!req.user || !STAFF_ROLES.includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access only",
+    });
   }
-  if (req.user.effectiveRole === "webhoist" || STAFF_ROLES.includes(req.user.role)) {
-    return next();
-  }
-  return res.status(403).json({
-    success: false,
-    message: "Admin access only",
-  });
+
+  next();
 };
 
 // =============================

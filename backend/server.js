@@ -57,6 +57,16 @@ import securityLogRoutes from "./routes/securityLogRoutes.js";
 import smsBiddingRoutes from "./routes/smsBiddingRoutes.js";
 import inspectorApplicationRoutes from "./routes/inspectorApplicationRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import conversionFunnelRoutes from "./routes/conversionFunnelRoutes.js";
+import disputeRoutes from "./routes/disputeRoutes.js";
+import fraudRoutes from "./routes/fraudRoutes.js";
+import operationsRoutes from "./routes/operationsRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+import executiveAnalyticsRoutes from "./routes/executiveAnalyticsRoutes.js";
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
+import listingAssistantRoutes from "./routes/listingAssistantRoutes.js";
+import recommendationRoutes from "./routes/recommendationRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -391,6 +401,16 @@ app.use("/api/security-logs", securityLogRoutes);
 app.use("/api/sms-bidding", smsBiddingRoutes);
 app.use("/api/inspector-applications", inspectorApplicationRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/funnel", conversionFunnelRoutes);
+app.use("/api/disputes", disputeRoutes);
+app.use("/api/fraud", fraudRoutes);
+app.use("/api/operations", operationsRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/executive-analytics", executiveAnalyticsRoutes);
+app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/listing-assistant", listingAssistantRoutes);
+app.use("/api/recommendations", recommendationRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above

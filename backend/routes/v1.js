@@ -29,9 +29,7 @@ import marketRoutes from "./marketRoutes.js";
 
 const router = Router();
 
-// FIX: authLimiter removed here — it is already applied per-route inside authRoutes.js.
-// Applying it at both levels halved the effective request budget unexpectedly.
-router.use("/auth", authRoutes);
+router.use("/auth", authLimiter, authRoutes);
 router.use("/cars", carRoutes);
 router.use("/bids", bidRoutes);
 router.use("/dealer", dealerRoutes);

@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
-import { PERM, ROLE_PERMISSIONS as CENTRAL_PERMISSIONS, WEBHOIST, getEffectivePermissions, ROLE_HIERARCHY } from "../config/roles.js";
+import { PERM, ROLE_PERMISSIONS as CENTRAL_PERMISSIONS, WEBHOIST, getEffectivePermissions } from "../config/roles.js";
 import { isOwnerUser } from "../config/owners.js";
 
 // Backward-compatible re-exports
@@ -126,21 +126,28 @@ export function requireRole(...roles) {
 }
 
 export function requireAtLeast(minRole) {
-  // FIX: use the single canonical hierarchy from config/roles.js.
-  // The old local array was missing: individual_seller, marketing, hr,
-  // accounts, technical_support, ghost_checker — causing those roles to
-  // always get indexOf() === -1 and be permanently blocked.
+  const hierarchy = [
+    "user",
+    "dealer",
+    "broker",
+    "ghost_checker",
+    "moderator",
+    "ad_manager",
+    "escrow_officer",
+    "admin",
+    "superadmin",
+  ];
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (req.user.role === "superadmin" || req.user.effectiveRole === "webhoist") {
+    if (req.user.role === "superadmin") {
       return next();
     }
 
-    const userLevel = ROLE_HIERARCHY.indexOf(req.user.role);
-    const minLevel = ROLE_HIERARCHY.indexOf(minRole);
+    const userLevel = hierarchy.indexOf(req.user.role);
+    const minLevel = hierarchy.indexOf(minRole);
 
     if (userLevel === -1 || userLevel < minLevel) {
       return res.status(403).json({

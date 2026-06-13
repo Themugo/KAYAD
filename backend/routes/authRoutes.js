@@ -11,6 +11,9 @@ import {
   resendVerification,
   forgotPassword,
   resetPassword,
+  getSessions,
+  revokeSession,
+  revokeAllSessions,
 } from "../controllers/authController.js";
 
 import { protect } from "../middleware/auth.js";
@@ -94,5 +97,12 @@ router.post("/resend-verification", authLimiter, asyncHandler(resendVerification
 // =============================
 router.post("/forgot-password", authLimiter, asyncHandler(forgotPassword));
 router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
+
+// =============================
+// 🔐 SESSION MANAGEMENT (DASHBOARD)
+// =============================
+router.get("/sessions", protect, asyncHandler(getSessions));
+router.delete("/sessions/:tokenId", protect, asyncHandler(revokeSession));
+router.post("/sessions/revoke-all", protect, asyncHandler(revokeAllSessions));
 
 export default router;

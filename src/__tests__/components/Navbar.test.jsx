@@ -17,6 +17,13 @@ vi.mock('../../context/SocketContext', () => ({
 vi.mock('../../context/NotificationContext', () => ({
   useNotifications: () => ({ unreadCount: 3 }),
 }));
+vi.mock('../../context/BrandingContext', () => ({
+  useBranding: () => ({
+    branding: { logoType: 'icon', logoText: 'KAYAD' },
+    loading: false,
+    hydrated: true,
+  }),
+}));
 vi.mock('../../api/api', () => ({
   carsAPI: { list: vi.fn().mockResolvedValue({ data: [] }) },
 }));
@@ -32,12 +39,12 @@ describe('Navbar', () => {
   afterEach(() => { cleanup(); });
 
   it('renders KAYAD branding', () => {
-    render(<MemoryRouter><Navbar branding={{}} /></MemoryRouter>);
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
   it('renders Gallery link', () => {
-    render(<MemoryRouter><Navbar branding={{}} /></MemoryRouter>);
+    render(<MemoryRouter><Navbar /></MemoryRouter>);
     expect(screen.getAllByText('Gallery').length).toBeGreaterThan(0);
   });
 });

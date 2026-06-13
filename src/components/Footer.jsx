@@ -15,7 +15,7 @@ export default function Footer() {
         }} className="footer-grid">
           {/* Brand */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, textDecoration: 'none' }}>
               <div style={{
                 width: 36, height: 36, borderRadius: 10,
                 background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
@@ -25,7 +25,7 @@ export default function Footer() {
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
               </div>
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#fff' }}>KAYAD</span>
-            </div>
+            </Link>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', lineHeight: 1.7, maxWidth: 280, margin: 0 }}>
               Kenya's premium automotive marketplace.
             </p>

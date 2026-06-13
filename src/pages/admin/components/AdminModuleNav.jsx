@@ -1,4 +1,4 @@
-import { NavTile } from './AdminWidgets';
+import { NavTile } from './AdminModuleWidgets';
 
 export default function AdminModuleNav({ links }) {
   return (

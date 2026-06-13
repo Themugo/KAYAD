@@ -17,11 +17,4 @@ export function initAnalytics() {
   });
 }
 
-export function trackEvent(action, category, label, value) {
-  if (!initialized) return;
-  window.gtag("event", action, {
-    event_category: category,
-    event_label: label,
-    value,
-  });
-}
+

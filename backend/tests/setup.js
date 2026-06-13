@@ -10,10 +10,14 @@ const __dirname = dirname(__filename);
 // Load environment variables for tests from backend/.env
 dotenv.config({ path: resolve(__dirname, "../.env") });
 
-// Force MONGO_URI for tests (Jest env issue)
-// Note: Using local MongoDB for testing (Atlas has DNS resolution issue from current network)
-process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
-console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
+// Set MONGO_URI for tests only if not already provided (e.g., CI supplies it)
+// Using local MongoDB when no URI is set
+if (!process.env.MONGO_URI) {
+  process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
+  console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
+} else {
+  console.log("ℹ️  MONGO_URI already set to:", process.env.MONGO_URI.replace(/:.*@/, ":***@"));
+}
 
 // Disable email verification for tests (EMAIL_HOST is configured, which enables verification)
 process.env.REQUIRE_EMAIL_VERIFICATION = "false";

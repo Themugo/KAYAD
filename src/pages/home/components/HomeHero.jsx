@@ -2,92 +2,46 @@ import { Link } from 'react-router-dom';
 
 export default function HomeHero({ liveCount, isAuth, user }) {
   return (
-    <section style={{
-      position: 'relative', overflow: 'hidden',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      textAlign: 'center',
-      padding: '0 24px 10px',
-    }}>
-      <div style={{
-        position: 'absolute', top: '-20%', left: '50%', transform: 'translateX(-50%)',
-        width: 600, height: 300,
-        background: 'radial-gradient(ellipse, rgba(192,192,192,0.08) 0%, transparent 65%)',
-        pointerEvents: 'none',
-      }} />
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, zIndex: 1 }}>
-        <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, transparent, rgba(192,192,192,0.4))' }} />
-        <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
-          Kenya's Premium Car Marketplace
-        </span>
-        <div style={{ height: 1, width: 28, background: 'linear-gradient(90deg, rgba(192,192,192,0.4), transparent)' }} />
+    <section className="relative overflow-hidden flex flex-col items-center justify-center text-center px-6 pb-4 pt-8 md:pt-12">
+      <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[600px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse, rgba(212,196,168,0.1) 0%, transparent 65%)' }} />
+      <div className="flex items-center gap-3 mb-3 z-[1]">
+        <div className="h-px w-7" style={{ background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.4))' }} />
+        <span className="text-gold text-[9px] font-extrabold tracking-[0.16em] uppercase">Kenya's Premium Car Marketplace</span>
+        <div className="h-px w-7" style={{ background: 'linear-gradient(90deg, rgba(212,196,168,0.4), transparent)' }} />
       </div>
 
       {liveCount > 0 && (
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5,
-          background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-          borderRadius: 9999, padding: '3px 10px',
-          marginBottom: 8, zIndex: 1,
-        }}>
-          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'block', animation: 'pulse 1.5s infinite' }} />
-          <span style={{ fontSize: 9, color: '#ef4444', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            {liveCount} Live Auction{liveCount !== 1 ? 's' : ''} — Bid Now
-          </span>
+        <div className="inline-flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-full px-2.5 py-1 mb-2 z-[1]">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 block animate-pulse" />
+          <span className="text-[9px] text-red-500 font-bold tracking-[0.08em] uppercase">{liveCount} Live Auction{liveCount !== 1 ? 's' : ''} — Bid Now</span>
         </div>
       )}
 
-      <h1 style={{
-        fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic',
-        fontSize: 'clamp(1.6rem, 3.8vw, 2.8rem)', lineHeight: 1,
-        textTransform: 'uppercase', color: '#fff',
-        marginBottom: 8, letterSpacing: '-0.01em', zIndex: 1,
-      }}>
+      <h1 className="font-display font-black italic text-[clamp(1.6rem,3.8vw,2.8rem)] leading-none uppercase text-white mb-2 tracking-[-0.01em] z-[1]">
         Where Kenya{' '}
-        <span style={{ color: 'var(--gold)', textShadow: '0 0 30px rgba(192,192,192,0.28)' }}>Drives</span>
+        <span className="text-gold" style={{ textShadow: '0 0 30px rgba(212,196,168,0.28)' }}>Drives</span>
       </h1>
 
-      <p style={{
-        color: 'rgba(255,255,255,0.55)', fontSize: 13, maxWidth: 460,
-        margin: '0 auto 14px', lineHeight: 1.5, zIndex: 1,
-        fontWeight: 400,
-      }}>
-        Live auctions, verified dealers, and M-Pesa secured escrow — East Africa's
-        most sophisticated automotive marketplace.
+      <p className="text-white/55 text-xs md:text-sm max-w-[460px] mx-auto mb-4 leading-relaxed z-[1] font-normal">
+        Live auctions, verified dealers, and M-Pesa secured escrow — East Africa's most sophisticated automotive marketplace.
       </p>
 
-      <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', zIndex: 1 }}>
-        <Link to="/showroom" style={{
-          padding: '10px 28px', background: 'var(--gold)', color: '#000',
-          borderRadius: 9999, fontWeight: 900, fontSize: 10,
-          textTransform: 'uppercase', letterSpacing: '0.1em',
-          boxShadow: '0 4px 20px rgba(192,192,192,0.25)',
-          transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(192,192,192,0.38)'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(192,192,192,0.25)'; }}
+      <div className="flex gap-2 justify-center flex-wrap z-[1]">
+        <Link to="/showroom" className="px-7 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.1em] text-black no-underline inline-block transition-all duration-300" style={{ background: 'var(--gold)', boxShadow: '0 4px 20px rgba(212,196,168,0.25)' }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(212,196,168,0.38)'; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,196,168,0.25)'; }}
         >Enter The Gallery</Link>
-
-        <Link to="/auctions/calendar" style={{
-          padding: '10px 28px', background: 'transparent', color: 'rgba(255,255,255,0.75)',
-          borderRadius: 9999, fontWeight: 600, fontSize: 10,
-          textTransform: 'uppercase', letterSpacing: '0.1em',
-          border: '1px solid rgba(255,255,255,0.14)',
-          transition: 'all 0.25s', display: 'inline-block', textDecoration: 'none',
-        }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(192,192,192,0.5)'; e.currentTarget.style.color = 'var(--gold)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
+        <Link to="/auctions/calendar" className="px-7 py-2.5 rounded-full font-semibold text-[10px] uppercase tracking-[0.1em] text-white/75 no-underline inline-block transition-all duration-300 border border-white/14 hover:border-gold/50 hover:text-gold"
         >Live Auctions</Link>
       </div>
 
       {isAuth && (
-        <div style={{ marginTop: 10, fontSize: 10, color: 'rgba(255,255,255,0.18)', zIndex: 1 }}>
-          Welcome back, <strong style={{ color: 'rgba(192,192,192,0.6)' }}>{user?.name?.split(' ')[0] || user?.email}</strong>
+        <div className="mt-3 text-[10px] text-white/18 z-[1]">
+          Welcome back, <strong className="text-white/60">{user?.name?.split(' ')[0] || user?.email}</strong>
         </div>
       )}
 
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(transparent, #050505)', pointerEvents: 'none' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none" style={{ background: 'linear-gradient(transparent, var(--bg))' }} />
     </section>
   );
 }

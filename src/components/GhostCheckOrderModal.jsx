@@ -313,7 +313,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>
             Powered by Kayad Ghost Check
           </span>
-          <Link to="/ghost-checker-info" style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>Learn more →</Link>
+          <Link to="/ghost-checker" style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>Learn more →</Link>
         </div>
       </div>
     </div>

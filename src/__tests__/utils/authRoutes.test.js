@@ -54,14 +54,14 @@ describe('getPostAuthPath', () => {
   it('redirects dealers to /dealer', () => {
     expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: true })).toBe('/dealer');
   });
-  it('redirects unapproved dealers to /register', () => {
-    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: false })).toBe('/register');
+  it('redirects unapproved dealers to fallback', () => {
+    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: false })).toBe('/');
   });
   it('redirects regular users to /dashboard', () => {
     expect(getPostAuthPath({ role: 'user', emailVerified: true })).toBe('/dashboard');
   });
-  it('redirects unverified regular users to /register', () => {
-    expect(getPostAuthPath({ role: 'user', emailVerified: false })).toBe('/register');
+  it('redirects unverified regular users to /login?verify=required', () => {
+    expect(getPostAuthPath({ role: 'user', emailVerified: false })).toBe('/login?verify=required');
   });
   it('uses fallback for unknown roles', () => {
     expect(getPostAuthPath({ role: 'unknown', emailVerified: true }, '/custom')).toBe('/custom');

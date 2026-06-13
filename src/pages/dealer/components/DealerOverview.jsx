@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { StatCard, StatusBadge, DemoBadge, MiniBarChart, timeAgo } from './DashboardWidgets';
 import DealerMarketInsights from '../../../components/DealerMarketInsights';
+import { DealerKPIRow } from './DealerKPIWidgets';
+import ConversionFunnelDashboard from './ConversionFunnelDashboard';
 
 const cardStyle = {
   background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)',
@@ -72,6 +74,9 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
 
   return (
     <>
+      {/* ── KPI ROW ── */}
+      <DealerKPIRow cars={cars} earnings={[]} escrows={[]} />
+
       {/* ── STAT CARDS ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 16, marginBottom: 20 }}>
         <StatCard icon="🚗" label="Listings"       value={s.totalCars || cars.length}        color="var(--gold)" trend={trends?.viewsToBids} />
@@ -88,6 +93,9 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
 
       {/* ── SokoAI Market Insights ── */}
       <DealerMarketInsights />
+
+      {/* ── Conversion Funnel Dashboard ── */}
+      <ConversionFunnelDashboard dealerId={summary?.dealer} />
 
       {/* ── ROW A: Performance chart + Quick actions ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 16, marginBottom: 20 }} className="overview-row">

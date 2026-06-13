@@ -25,9 +25,9 @@ export default function HomeAnimatedStat({ value, label }) {
     return () => obs.disconnect();
   }, [value]);
   return (
-    <div ref={ref} style={{ textAlign: 'center', padding: '14px 10px', background: '#050505' }}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 900, fontStyle: 'italic', color: 'var(--gold)', lineHeight: 1 }}>{display}</div>
-      <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginTop: 4 }}>{label}</div>
+    <div ref={ref} className="text-center py-3.5 px-2.5" style={{ background: 'var(--bg)' }}>
+      <div className="font-display text-[1.35rem] font-black italic leading-none text-gold">{display}</div>
+      <div className="text-[8px] text-white/25 font-bold uppercase tracking-[0.14em] mt-1">{label}</div>
     </div>
   );
 }

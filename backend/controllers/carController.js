@@ -1,6 +1,5 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
-import DealerTeam from "../models/DealerTeam.js";
 import { cacheDelPattern } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
@@ -189,34 +188,11 @@ export const getCars = async (req, res) => {
 export const createCar = async (req, res) => {
   try {
     const seller = await User.findById(req.user.id).select(
-      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role approved isDemo",
+      "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role status isDemo",
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
-    if (!seller.approved) return res.status(403).json({ success: false, message: "Account not yet approved" });
-
-    // FIX: If this user is a DealerTeam member, verify their parent dealer is also approved
-    // and that they have canListCars permission. Without this check, a team member of a
-    // suspended/unapproved dealer could still create listings.
-    const teamMembership = await DealerTeam.findOne({ member: req.user.id }).lean();
-    if (teamMembership) {
-      if (teamMembership.status !== "active") {
-        return res.status(403).json({ success: false, message: "Your team membership is not yet active" });
-      }
-      if (!teamMembership.permissions?.canListCars) {
-        return res.status(403).json({ success: false, message: "You do not have permission to list cars for this dealer" });
-      }
-      const parentDealer = await User.findById(teamMembership.dealer).select("approved isBanned listingsLocked").lean();
-      if (!parentDealer || !parentDealer.approved) {
-        return res.status(403).json({ success: false, message: "The dealer account you represent is not yet approved" });
-      }
-      if (parentDealer.isBanned) {
-        return res.status(403).json({ success: false, message: "The dealer account you represent has been suspended" });
-      }
-      if (parentDealer.listingsLocked) {
-        return res.status(403).json({ success: false, message: "The dealer account you represent has listings locked" });
-      }
-    }
+    if (seller.status !== 'approved') return res.status(403).json({ success: false, message: "Account not yet approved" });
     const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
@@ -447,15 +423,7 @@ export const updateCar = async (req, res) => {
       car.priceHistory.push({ price: car.price || 0, date: new Date() });
     }
 
-    const allowed = [
-      "title", "brand", "model", "year", "price", "mileage", "fuel", "transmission",
-      "bodyType", "condition", "color", "engineSize", "doors", "seats",
-      "description", "features", "location", "city", "phone", "whatsapp",
-      "negotiable", "coverImage", "vin", "registration", "images",
-    ];
-    for (const field of allowed) {
-      if (field in req.body) car[field] = req.body[field];
-    }
+    Object.assign(car, req.body);
     if (car.isDemo && isDealer) {
       car.isDemo = true;
       car.demoEditedAt = new Date();

@@ -58,8 +58,8 @@ export default function AdminUsers() {
     setActionId(u._id + '-approve');
     try {
       await adminAPI.approveDealer(u._id);
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true } : x));
-      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, approved: true } : prev);
+      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, status: 'approved' } : x));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, status: 'approved' } : prev);
       toast('✅ Dealer approved!', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
@@ -95,7 +95,7 @@ export default function AdminUsers() {
   };
 
   const totalPages = Math.ceil(total / 20);
-  const pendingCount = users.filter(u => SELLER_ROLES.includes(u.role) && !u.approved).length;
+  const pendingCount = users.filter(u => SELLER_ROLES.includes(u.role) && u.status !== 'approved').length;
 
   return (
     <div className="page">
@@ -178,15 +178,15 @@ export default function AdminUsers() {
                           {u.isBanned && <span className="badge badge-red">🚫 Banned</span>}
                           {u.isDemo && <span className="badge badge-blue">🧪 Demo</span>}
                           {u.deactivatedAt && <span className="badge badge-orange">⛔ Deactivated</span>}
-                          {SELLER_ROLES.includes(u.role) && !u.approved && <span className="badge badge-orange">⏳ Pending</span>}
-                          {SELLER_ROLES.includes(u.role) &&  u.approved && <span className="badge badge-green">✓ Approved</span>}
-                          {!u.isBanned && !u.deactivatedAt && (!SELLER_ROLES.includes(u.role) || u.approved) && <span className="badge badge-green">Active</span>}
+                          {SELLER_ROLES.includes(u.role) && u.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
+                          {SELLER_ROLES.includes(u.role) && u.status === 'approved' && <span className="badge badge-green">✓ Approved</span>}
+                          {!u.isBanned && !u.deactivatedAt && (!SELLER_ROLES.includes(u.role) || u.status === 'approved') && <span className="badge badge-green">Active</span>}
                         </div>
                       </td>
                       <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{u.createdAt ? timeAgo(u.createdAt) : '—'}</td>
                       <td onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 120 }}>
-                          {SELLER_ROLES.includes(u.role) && !u.approved && (
+                          {SELLER_ROLES.includes(u.role) && u.status !== 'approved' && (
                             <button className="btn btn-gold btn-sm" disabled={actionId === u._id + '-approve'}
                               onClick={() => handleApprove(u)}>
                               {actionId === u._id + '-approve' ? '...' : '✅ Approve'}
@@ -260,7 +260,7 @@ export default function AdminUsers() {
                 { label: 'Business',      val: selected.businessName || '—' },
                 { label: 'Joined',        val: selected.createdAt ? formatDate(selected.createdAt) : '—' },
                 { label: 'User ID',       val: `#${selected._id?.slice(-10)}`, mono: true },
-                { label: 'Seller Status', val: SELLER_ROLES.includes(selected.role) ? (selected.approved ? '✅ Approved' : '⏳ Pending') : 'N/A' },
+                { label: 'Seller Status', val: SELLER_ROLES.includes(selected.role) ? (selected.status === 'approved' ? '✅ Approved' : '⏳ Pending') : 'N/A' },
                 { label: 'Account Type', val: selected.isDemo ? '🧪 Demo Account' : '👤 Real User' },
               ].map(r => (
                 <div key={r.label}>
@@ -271,7 +271,7 @@ export default function AdminUsers() {
             </div>
 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {SELLER_ROLES.includes(selected.role) && !selected.approved && (
+              {SELLER_ROLES.includes(selected.role) && selected.status !== 'approved' && (
                 <button className="btn btn-gold" style={{ flex: 1 }}
                   onClick={() => handleApprove(selected)} disabled={actionId === selected._id + '-approve'}>
                   {actionId === selected._id + '-approve' ? '...' : '✅ Approve Dealer'}

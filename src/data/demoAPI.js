@@ -68,10 +68,6 @@ const readStoredDemoUser = () => {
   } catch { return null; }
 };
 
-// Legacy — no longer needed with cookie-based auth. Demo user is persisted via
-// DEMO_USER_KEY (setDemoUser / getDemoUser) in case of page reload.
-const rehydrateFromToken = () => null;
-
 export const setDemoUser = (user) => {
   _demoUser = user;
   try {
@@ -82,8 +78,7 @@ export const setDemoUser = (user) => {
 
 export const getDemoUser = () => {
   if (_demoUser) return _demoUser;
-  // Memory empty (e.g. after a page reload) — rehydrate from storage, then token.
-  _demoUser = readStoredDemoUser() || rehydrateFromToken();
+  _demoUser = readStoredDemoUser();
   if (_demoUser) {
     try { localStorage.setItem(DEMO_USER_KEY, JSON.stringify(_demoUser)); } catch { /* ignore */ }
   }
@@ -129,12 +124,6 @@ export const makeDemoToken = (user) =>
     superAdmin: !!user.superAdmin,
     demo: true,
   }));
-
-const withUser = (fn) => (...args) => {
-  const user = getDemoUser();
-  if (!user) return Promise.reject({ response: { status: 401, data: { message: 'Unauthorized' } } });
-  return fn(user, ...args);
-};
 
 const wrapSuccess = (data) => ({ success: true, ...data });
 
@@ -805,7 +794,7 @@ const demoAdmin = {
       users = users.filter(u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
     }
     if (params.pendingApproval === true || params.pendingApproval === 'true') {
-      users = users.filter(u => u.role === 'dealer' && !u.approved);
+      users = users.filter(u => u.role === 'dealer' && u.status !== 'approved');
     }
     if (params.banned === true || params.banned === 'true') {
       users = users.filter(u => u.isBanned);
@@ -866,7 +855,7 @@ const demoAdmin = {
   approveDealer: async (id) => {
     await delay();
     const u = _adminUsers().find(x => x._id === id);
-    if (u) u.approved = true;
+    if (u) u.status = 'approved';
     return wrapSuccess({ message: 'Dealer approved' });
   },
 

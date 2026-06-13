@@ -38,7 +38,7 @@ export default function RegisterPage() {
   const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker' || roleParam === 'individual_seller';
 
   // If already logged in and unapproved dealer → show waiting room
-  if (isAuth && isSellerRole(user?.role) && !user?.approved) {
+  if (isAuth && isSellerRole(user?.role) && user?.status !== 'approved') {
     return <WaitingRoom user={user} onLogout={() => { logout(); navigate('/'); }} />;
   }
   // Already logged in and approved → redirect away
@@ -94,7 +94,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
       const data = await register(body);
       const newUser = data.user || data;
       toast('Account created! Welcome to Kayad 🎉', 'success');
-      if (role === 'dealer' && !newUser?.approved) {
+      if (role === 'dealer' && newUser?.status !== 'approved') {
         // Dealer awaiting admin approval → waiting room
         setDone(newUser);
       } else if (isDealer || isSeller) {

@@ -100,8 +100,8 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
               <h2 style={{ fontSize: '1.4rem' }}>{user?.name}</h2>
               <span className={`badge ${roleColor[user?.role] || 'badge-muted'}`}>{user?.role}</span>
-              {(user?.role === 'dealer' || user?.role === 'broker') && user?.approved && <span className="badge badge-green">✓ Verified</span>}
-              {(user?.role === 'dealer' || user?.role === 'broker') && !user?.approved && <span className="badge badge-orange">⏳ Pending</span>}
+              {(user?.role === 'dealer' || user?.role === 'broker') && user?.status === 'approved' && <span className="badge badge-green">✓ Verified</span>}
+              {(user?.role === 'dealer' || user?.role === 'broker') && user?.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 6 }}>{user?.email}</div>
             <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>

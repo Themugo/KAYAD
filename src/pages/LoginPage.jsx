@@ -9,9 +9,9 @@ import { authAPI, enableDemoMode } from '../api/api';
 
 // Demo accounts — password is in demoData.js (bundled, not a real secret).
 const DEMO_ACCOUNTS = [
-  { label: 'Buyer',  email: 'buyer@demo.com',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
-  { label: 'Dealer', email: 'dealer@demo.com', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
-  { label: 'Broker', email: 'broker@demo.com', password: 'Kayad@Demo2026!', tint: '#a855f7' },
+  { label: 'Buyer',  email: 'buyer@kayad.space',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
+  { label: 'Dealer', email: 'dealer@kayad.space', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
+  { label: 'Broker', email: 'seller@kayad.space', password: 'Kayad@Demo2026!', tint: '#a855f7' },
 ];
 
 export function LoginPage() {
@@ -173,7 +173,7 @@ export function LoginPage() {
                 </span>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <div className="rgrid rgrid-3" style={{ gap: 8 }}>
                 {DEMO_ACCOUNTS.map(acct => (
                   <button
                     key={acct.email}

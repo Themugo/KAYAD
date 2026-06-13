@@ -1,6 +1,5 @@
 import { Component } from 'react';
-import { reportError as reportToPosthog } from '../utils/posthog';
-import { reportError as reportToSentry } from '../utils/sentry';
+import { reportError } from '../utils/posthog';
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -14,8 +13,7 @@ export class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     console.error('[Kayad] Uncaught error:', error, info);
-    reportToPosthog(error, { componentStack: info?.componentStack });
-    reportToSentry(error, { componentStack: info?.componentStack });
+    reportError(error, { componentStack: info?.componentStack });
   }
 
   handleRetry = () => {

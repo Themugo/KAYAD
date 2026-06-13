@@ -14,7 +14,7 @@ function getTypeIcon(type) {
 function getNotifLink(n) {
   if (n.type === 'bid' || n.type === 'auction') return n.data?.carId ? `/auction/${n.data.carId}` : '/showroom?filter=auction';
   if (n.type === 'chat') return n.data?.chatId ? `/chat/${n.data.chatId}` : '/chat';
-  if (n.type === 'escrow') return '/escrow';
+  if (n.type === 'escrow') return n.data?.carId ? `/escrow/${n.data.carId}` : '/dashboard';
   if (n.type === 'payment' || n.type === 'ntsa') return n.data?.carId ? `/cars/${n.data.carId}` : '/dashboard';
   if (n.type === 'inspection') return n.data?.carId ? `/cars/${n.data.carId}` : '/dashboard';
   return null;

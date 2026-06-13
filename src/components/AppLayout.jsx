@@ -28,16 +28,6 @@ export default function AppLayout({ children }) {
     if (config.fontSizePct) root.style.setProperty('--font-size-pct', String(config.fontSizePct));
     if (config.baseFontSize) root.style.setProperty('--base-font-size', `${config.baseFontSize}px`);
     if (config.lineHeight) root.style.setProperty('--body-line-height', String(config.lineHeight));
-
-    const b = config.branding;
-    if (b) {
-      if (b.primaryColor) root.style.setProperty('--gold', b.primaryColor);
-      if (b.accentColor) root.style.setProperty('--gold-light', b.accentColor);
-      if (b.bgColor) root.style.setProperty('--bg', b.bgColor);
-      if (b.surfaceColor) root.style.setProperty('--surface', b.surfaceColor);
-      if (b.cardColor) root.style.setProperty('--card', b.cardColor);
-      if (b.textColor) root.style.setProperty('--text', b.textColor);
-    }
   }, [config]);
 
   return (
@@ -46,7 +36,7 @@ export default function AppLayout({ children }) {
         Skip to main content
       </a>
       <DemoModeBanner />
-      <Navbar branding={config?.branding} />
+      <Navbar />
       <main id="app-main-content" className="app-main" role="main" tabIndex={-1}>
         {children}
       </main>

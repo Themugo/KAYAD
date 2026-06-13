@@ -112,7 +112,7 @@ export const approveApplication = async (req, res) => {
     user.isInspector = true;
     user.inspectionSpecialty = application.assignedSpecialty;
     user.locationCity = application.assignedRegion;
-    user.verificationStatus = "verified";
+    user.status = "approved";
     await user.save();
 
     await sendNotification({

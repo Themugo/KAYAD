@@ -26,7 +26,7 @@ export default function AdminSellers() {
         name: u.name,
         email: u.email,
         phone: u.phone || '—',
-        status: u.isBanned ? 'suspended' : u.approved ? 'approved' : 'pending',
+        status: u.isBanned ? 'suspended' : u.status === 'approved' ? 'approved' : 'pending',
         commission: u.commission ?? 5,
         waiver: u.waiver ?? 0,
         discount: u.discount ?? 0,

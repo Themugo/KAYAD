@@ -5,7 +5,7 @@
 /* ============================================
    KAYAD — GLOBAL DESIGN SYSTEM v2.0
    Premium Kenyan Automotive Marketplace
-   Aesthetic: Obsidian Black + Radiant Silver
+   Aesthetic: Obsidian Black + Warm Gold
    ============================================ */
 
 :root {
@@ -15,13 +15,20 @@
   --card:        #111111;
   --card-hover:  #1A1A1A;
   
-  /* === SILVER SYSTEM === */
-  --gold:        #C0C0C0;
-  --gold-light:  #E8E8E8;
-  --gold-dark:   #A8A8A8;
-  --gold-muted:  #909090;
-  --gold-glow:   rgba(192, 192, 192, 0.15);
-  --gold-glow-strong: rgba(192, 192, 192, 0.35);
+  /* === GOLD / ACCENT SYSTEM === */
+  --gold:        #D4C4A8;
+  --gold-light:  #E3D5C0;
+  --gold-dark:   #BFA88A;
+  --gold-muted:  #A89278;
+  --gold-glow:   rgba(212, 196, 168, 0.15);
+  --gold-glow-strong: rgba(212, 196, 168, 0.35);
+  /* Legacy `--silver-*` aliases — kept for backward compat */
+  --silver:        var(--gold);
+  --silver-light:  var(--gold-light);
+  --silver-dark:   var(--gold-dark);
+  --silver-muted:  var(--gold-muted);
+  --silver-glow:   var(--gold-glow);
+  --silver-glow-strong: var(--gold-glow-strong);
   
   /* Text */
   --text:        #F0EDE6;
@@ -33,6 +40,11 @@
   --danger:      #EF4444;
   --warning:     #F59E0B;
   --info:        #60A5FA;
+  /* Shorthand aliases used inline throughout the UI */
+  --green:       var(--success);
+  --red:         var(--danger);
+  --orange:      #F97316;
+  --blue:        var(--info);
   
   /* Borders & Glass */
   --border:      #222222;
@@ -160,6 +172,11 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
   background: var(--gold-glow);
 }
 
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+}
 .btn-ghost:hover { color: var(--text); }
 
 .btn-danger {
@@ -245,6 +262,26 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes bidGlow {
+  0%, 100% { box-shadow: 0 0 4px rgba(212,196,168,0.2); }
+  50%      { box-shadow: 0 0 18px rgba(212,196,168,0.5); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
 }
 
 /* ─────── HERO & SPECIAL SECTIONS ─────── */
@@ -467,7 +504,7 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
    ============================================================= */
 
 /* 1. Never allow horizontal scroll / overflow on the document */
-html, body { max-width: 100%; overflow-x: hidden; }
+body { overflow-x: hidden; }
 *, *::before, *::after { min-width: 0; }            /* let flex/grid children shrink */
 img, video, canvas, svg { max-width: 100%; height: auto; }
 
@@ -477,6 +514,9 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 @media (max-width: 768px) {
   /* Containers breathe but stay edge-safe */
   .container { padding-left: 16px; padding-right: 16px; }
+
+  /* Footer grid collapses to 2 columns on tablet, 1 column on phone */
+  .footer-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 28px !important; }
 
   /* Fluid display headings so hero/section titles don't overflow */
   h1 { font-size: clamp(1.6rem, 7vw, 2.4rem); line-height: 1.12; }
@@ -497,6 +537,7 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 
 @media (max-width: 480px) {
   .container { padding-left: 13px; padding-right: 13px; }
+  .footer-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
   /* Modals go (near) full-screen so content isn't cramped */
   .modal-box { width: 94vw !important; max-width: 94vw !important; padding: 20px !important; border-radius: 16px; }
   .gallery-modal-image { padding: 20px 10px !important; }

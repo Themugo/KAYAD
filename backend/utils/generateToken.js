@@ -19,6 +19,7 @@ export const generateAccessToken = (user) => {
     {
       id: user._id || user.id,
       role: user.role || "user",
+      status: user.status || "approved",
       tokenVersion: user.tokenVersion || 0,
     },
     getAccess(),

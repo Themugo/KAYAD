@@ -188,7 +188,7 @@ export default function DealerSettings() {
                   <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{profile.name || user?.email}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{user?.email}</div>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    {user?.role} · {user?.approved ? '✓ Approved' : '⏳ Pending'}
+                    {user?.role} · {user?.status === 'approved' ? '✓ Approved' : '⏳ Pending'}
                   </div>
                 </div>
               </div>

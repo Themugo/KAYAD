@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import RefreshToken from "../models/RefreshToken.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -7,8 +8,6 @@ import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
-// FIX: use the single canonical owner-email source instead of duplicating it here
-import { isOwnerEmail } from "../config/owners.js";
 
 // Email service — imported once at module level. Functions are no-ops
 // if the email transport isn't configured (EMAIL_HOST not set).
@@ -19,6 +18,8 @@ try {
   console.warn("⚠️  Email service unavailable:", e.message);
 }
 
+const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
+const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
 const STAFF_ROLES = [
   "admin",
   "superadmin",
@@ -31,6 +32,13 @@ const STAFF_ROLES = [
   "moderator",
 ];
 const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
+
+const isOwnerEmail = (email) =>
+  OWNER_EMAILS.includes(
+    String(email || "")
+      .toLowerCase()
+      .trim(),
+  );
 
 const serializeUser = (user) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
@@ -58,29 +66,42 @@ const sendRefreshToken = (res, token) => {
 };
 
 const sendAccessToken = (res, token) => {
-  // FIX: Access token cookie maxAge was 7 days — identical to the refresh token.
-  // This meant the access token never effectively expired in the browser even though
-  // the JWT payload had a 1h expiry, widening the token-theft window.
-  // Now set to 1 hour to match ACCESS_EXPIRES in generateToken.js.
-  const ACCESS_COOKIE_MS = parseInt(process.env.ACCESS_COOKIE_MS || "") || 60 * 60 * 1000; // default 1h
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     path: "/api",
-    maxAge: ACCESS_COOKIE_MS,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
-const sendAuthResponse = (res, user) => {
+const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null) => {
   const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken(user);
+  const newRefreshToken = generateRefreshToken(user);
   const safeUser = serializeUser(user);
 
-  sendRefreshToken(res, refreshToken);
+  // Store new refresh token in database with rotation
+  const refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+  await RefreshToken.create({
+    user: user._id,
+    token: newRefreshToken,
+    tokenVersion: user.tokenVersion || 0,
+    deviceId: req?.body?.deviceId || req?.headers['x-device-id'] || 'unknown',
+    userAgent: req?.headers['user-agent'] || '',
+    ipAddress: req?.ip || req?.connection?.remoteAddress || '',
+    expiresAt: refreshTokenExpiresAt,
+  });
+
+  // Revoke old refresh token if provided (rotation)
+  if (oldRefreshToken) {
+    await RefreshToken.revokeToken(oldRefreshToken, user._id);
+  }
+
+  sendRefreshToken(res, newRefreshToken);
   sendAccessToken(res, accessToken);
 
   return res.json({
@@ -152,8 +173,7 @@ export const register = async (req, res) => {
         : null;
     const extra = isSeller
       ? {
-          approved: !needsApproval,
-          verificationStatus: needsApproval ? "pending" : "verified",
+          status: needsApproval ? "pending" : "approved",
           businessName: req.body.businessName || "",
           location: req.body.location || "",
           dealerPackage: selectedPackage?.id || "none",
@@ -166,21 +186,11 @@ export const register = async (req, res) => {
             selectedPackage && (selectedPackage.isFree || selectedPackage.priceMonthly === 0) ? "active" : "none",
           trialStartedAt: selectedPackage?.trialDays ? new Date() : null,
         }
-      : {
-          // FIX: schema default for `approved` is now false. Non-seller accounts
-          // (regular users) don't go through an approval gate, so set true explicitly.
-          approved: true,
-        };
+      : {};
 
-    // FIX: Validate phone strictly — reject if provided but not a valid Kenyan number
+    // Validate phone if provided (Kenyan format)
     const rawPhone = req.body.phone || "";
-    let validPhone = "";
-    if (rawPhone) {
-      validPhone = formatPhone(rawPhone);
-      if (!validPhone) {
-        return R.error(res, "Invalid phone number. Please use a valid Kenyan phone number (e.g. 07XXXXXXXX or +254XXXXXXXXX).", 400);
-      }
-    }
+    const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
 
     // Referral: look up referrer by code (guard: cannot self-refer)
     let referredBy = null;
@@ -257,25 +267,6 @@ export const register = async (req, res) => {
       notifyAdminsOfPendingSeller(user).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
     }
 
-    // FIX: Do NOT issue tokens immediately after registration.
-    // The email verification gate at login will block unverified users.
-    // If email is not configured (no SMTP), allow direct login as before.
-    const emailConfiguredForReg = !!process.env.EMAIL_HOST;
-    const requireVerificationForReg = process.env.REQUIRE_EMAIL_VERIFICATION
-      ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
-      : emailConfiguredForReg;
-
-    if (requireVerificationForReg) {
-      return res.status(201).json({
-        success: true,
-        requiresVerification: true,
-        message: needsApproval
-          ? "Registration successful. Your account is pending admin approval. You will be notified once approved."
-          : "Registration successful. Please check your email and verify your account before logging in.",
-      });
-    }
-
-    // SMTP not configured — issue tokens immediately so development/staging works
     return sendAuthResponse(res.status(201), user);
   } catch (err) {
     console.error("❌ REGISTER ERROR:", err);
@@ -353,7 +344,7 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     await user.save();
 
-    return sendAuthResponse(res, user);
+    return await sendAuthResponse(res, user, null, req);
   } catch (err) {
     console.error("❌ LOGIN ERROR:", err);
     R.error(res, "Login failed", 500);
@@ -390,6 +381,12 @@ export const refreshToken = async (req, res) => {
       return R.error(res, msg, 403);
     }
 
+    // Check if token exists in database and is not revoked
+    const storedToken = await RefreshToken.findOne({ token, isRevoked: false });
+    if (!storedToken) {
+      return R.error(res, "Refresh token not found or revoked", 403);
+    }
+
     const user = await User.findById(decoded.id).select("+tokenVersion");
 
     if (!user) {
@@ -400,8 +397,12 @@ export const refreshToken = async (req, res) => {
       return R.error(res, "Session invalidated — please login again", 403);
     }
 
-    // Issue new tokens without bumping tokenVersion (only password change/logout does that)
-    return sendAuthResponse(res, user);
+    // Update last used timestamp
+    storedToken.lastUsedAt = new Date();
+    await storedToken.save();
+
+    // Issue new tokens with rotation (old token is revoked in sendAuthResponse)
+    return await sendAuthResponse(res, user, token, req);
   } catch (err) {
     console.error("❌ REFRESH ERROR:", err);
     R.error(res, "Refresh failed", 500);
@@ -414,7 +415,10 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
   try {
     if (req.user?.id) {
-      // 🔥 invalidate all refresh tokens
+      // 🔥 Revoke all refresh tokens for this user
+      await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
+      
+      // 🔥 Also increment tokenVersion to invalidate any existing tokens
       await User.findByIdAndUpdate(req.user.id, {
         $inc: { tokenVersion: 1 },
       });
@@ -425,7 +429,7 @@ export const logout = async (req, res) => {
 
     res.json({
       success: true,
-      message: "Logged out",
+      message: "Logged out from all devices",
     });
   } catch (err) {
     console.error("❌ LOGOUT ERROR:", err);
@@ -448,6 +452,52 @@ export const getProfile = async (req, res) => {
   } catch (err) {
     console.error("❌ PROFILE ERROR:", err);
     R.error(res, "Failed to fetch profile", 500);
+  }
+};
+
+// =============================
+// 🔐 SESSIONS (DASHBOARD)
+// =============================
+export const getSessions = async (req, res) => {
+  try {
+    const sessions = await RefreshToken.getActiveSessions(req.user.id);
+    res.json({ success: true, sessions, data: sessions });
+  } catch (err) {
+    console.error("❌ SESSIONS ERROR:", err);
+    R.error(res, "Failed to fetch sessions", 500);
+  }
+};
+
+export const revokeSession = async (req, res) => {
+  try {
+    const { tokenId } = req.params;
+    const session = await RefreshToken.findOne({ _id: tokenId, user: req.user.id, isRevoked: false });
+    
+    if (!session) {
+      return R.notFound(res, "Session not found");
+    }
+
+    await RefreshToken.revokeToken(session.token, req.user.id);
+    res.json({ success: true, message: "Session revoked" });
+  } catch (err) {
+    console.error("❌ REVOKE SESSION ERROR:", err);
+    R.error(res, "Failed to revoke session", 500);
+  }
+};
+
+export const revokeAllSessions = async (req, res) => {
+  try {
+    await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
+    
+    // Also increment tokenVersion to invalidate any existing tokens
+    await User.findByIdAndUpdate(req.user.id, {
+      $inc: { tokenVersion: 1 },
+    });
+    
+    res.json({ success: true, message: "All sessions revoked" });
+  } catch (err) {
+    console.error("❌ REVOKE ALL SESSIONS ERROR:", err);
+    R.error(res, "Failed to revoke all sessions", 500);
   }
 };
 // ============================================================

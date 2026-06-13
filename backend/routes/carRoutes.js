@@ -7,7 +7,7 @@ import { validateObjectId, validateCar } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
-import { uploadLimiter, bidLimiter, createLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter } from "../middleware/rateLimiter.js";
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES } from "../config/roles.js";
@@ -144,10 +144,10 @@ router.post(
 );
 
 // ✏️ UPDATE CAR
-router.put("/:id", protect, dealerOnly, createLimiter, validateObjectId, validateCar, asyncHandler(updateCar));
+router.put("/:id", protect, dealerOnly, validateObjectId, validateCar, asyncHandler(updateCar));
 
 // ❌ DELETE CAR
-router.delete("/:id", protect, dealerOnly, createLimiter, validateObjectId, asyncHandler(deleteCar));
+router.delete("/:id", protect, dealerOnly, validateObjectId, asyncHandler(deleteCar));
 
 // 🖼 DELETE IMAGE FROM CAR
 router.delete("/:id/images/:imageIndex", protect, dealerOnly, validateObjectId, asyncHandler(deleteCarImage));
@@ -166,7 +166,7 @@ router.post(
 // =============================
 // ⚡ BIDDING SYSTEM
 // =============================
-router.post("/:id/bid", protect, bidLimiter, validateObjectId, asyncHandler(placeBid));
+router.post("/:id/bid", protect, validateObjectId, asyncHandler(placeBid));
 
 // =============================
 // 📈 PRICE HISTORY

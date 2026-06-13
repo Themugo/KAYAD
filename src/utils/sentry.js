@@ -52,7 +52,6 @@ export const initSentry = async () => {
     });
 
     initialized = true;
-    if (import.meta.env.DEV) console.log("[Sentry] Initialized");
   } catch (err) {
     console.warn("[Sentry] Init failed:", err.message);
   }

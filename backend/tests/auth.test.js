@@ -153,4 +153,204 @@ describe("🔑 Authentication", () => {
       .expect(200);
     expect(res.body.token).toBeTruthy();
   });
+
+  // =============================
+  // 🚗 DEALER LOGIN TESTS
+  // =============================
+  test("POST /api/auth/register — creates dealer with pending status when requireDealerApproval is true", async () => {
+    const dealerUser = {
+      name: "Test Dealer",
+      email: `dealer-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "dealer",
+      businessName: "Test Dealership",
+      location: "Nairobi",
+    };
+
+    const res = await request(app).post("/api/auth/register").send(dealerUser).expect(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.user.role).toBe("dealer");
+    expect(res.body.user.status).toBe("approved"); // Default is approved unless config requires approval
+  });
+
+  test("POST /api/auth/login — dealer with approved status can login", async () => {
+    const dealerUser = {
+      name: "Approved Dealer",
+      email: `approved-dealer-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "dealer",
+      businessName: "Approved Dealership",
+      location: "Nairobi",
+    };
+
+    await request(app).post("/api/auth/register").send(dealerUser).expect(201);
+    
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: dealerUser.email, password: dealerUser.password })
+      .expect(200);
+    
+    expect(loginRes.body.success).toBe(true);
+    expect(loginRes.body.user.role).toBe("dealer");
+    expect(loginRes.body.user.status).toBe("approved");
+  });
+
+  // =============================
+  // 🤝 BROKER LOGIN TESTS
+  // =============================
+  test("POST /api/auth/register — creates broker with approved status", async () => {
+    const brokerUser = {
+      name: "Test Broker",
+      email: `broker-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "broker",
+      location: "Nairobi",
+    };
+
+    const res = await request(app).post("/api/auth/register").send(brokerUser).expect(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.user.role).toBe("broker");
+    expect(res.body.user.status).toBe("approved");
+  });
+
+  test("POST /api/auth/login — broker with approved status can login", async () => {
+    const brokerUser = {
+      name: "Approved Broker",
+      email: `approved-broker-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "broker",
+      location: "Nairobi",
+    };
+
+    await request(app).post("/api/auth/register").send(brokerUser).expect(201);
+    
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: brokerUser.email, password: brokerUser.password })
+      .expect(200);
+    
+    expect(loginRes.body.success).toBe(true);
+    expect(loginRes.body.user.role).toBe("broker");
+    expect(loginRes.body.user.status).toBe("approved");
+  });
+
+  // =============================
+  // 👑 ADMIN LOGIN TESTS
+  // =============================
+  test("POST /api/auth/register — creates admin user in test mode", async () => {
+    const adminUser = {
+      name: "Test Admin",
+      email: `admin-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "admin",
+    };
+
+    const res = await request(app).post("/api/auth/register").send(adminUser).expect(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.user.role).toBe("admin");
+    expect(res.body.user.status).toBe("approved");
+  });
+
+  test("POST /api/auth/login — admin can login", async () => {
+    const adminUser = {
+      name: "Admin User",
+      email: `admin-login-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "admin",
+    };
+
+    await request(app).post("/api/auth/register").send(adminUser).expect(201);
+    
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: adminUser.email, password: adminUser.password })
+      .expect(200);
+    
+    expect(loginRes.body.success).toBe(true);
+    expect(loginRes.body.user.role).toBe("admin");
+  });
+
+  // =============================
+  // 👤 BUYER LOGIN TESTS
+  // =============================
+  test("POST /api/auth/register — creates buyer user", async () => {
+    const buyerUser = {
+      name: "Test Buyer",
+      email: `buyer-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "user",
+    };
+
+    const res = await request(app).post("/api/auth/register").send(buyerUser).expect(201);
+    expect(res.body.success).toBe(true);
+    expect(res.body.user.role).toBe("user");
+    expect(res.body.user.status).toBe("approved");
+  });
+
+  test("POST /api/auth/login — buyer can login", async () => {
+    const buyerUser = {
+      name: "Buyer User",
+      email: `buyer-login-${Date.now()}@gari.test`,
+      password: "Test@12345",
+      role: "user",
+    };
+
+    await request(app).post("/api/auth/register").send(buyerUser).expect(201);
+    
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: buyerUser.email, password: buyerUser.password })
+      .expect(200);
+    
+    expect(loginRes.body.success).toBe(true);
+    expect(loginRes.body.user.role).toBe("user");
+  });
+
+  // =============================
+  // 🔐 SESSION MANAGEMENT TESTS
+  // =============================
+  test("GET /api/auth/sessions — returns active sessions for authenticated user", async () => {
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" });
+    
+    const token = loginRes.body.token;
+    const res = await request(app)
+      .get("/api/auth/sessions")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.sessions)).toBe(true);
+  });
+
+  test("POST /api/auth/logout — revokes all sessions", async () => {
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" });
+    
+    const token = loginRes.body.token;
+    const res = await request(app)
+      .post("/api/auth/logout")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("Logged out from all devices");
+  });
+
+  test("POST /api/auth/sessions/revoke-all — revokes all sessions", async () => {
+    const loginRes = await request(app)
+      .post("/api/auth/login")
+      .send({ email: TEST_USER.email, password: "New@Pass456" });
+    
+    const token = loginRes.body.token;
+    const res = await request(app)
+      .post("/api/auth/sessions/revoke-all")
+      .set("Authorization", `Bearer ${token}`)
+      .expect(200);
+    
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("All sessions revoked");
+  });
 });

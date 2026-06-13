@@ -315,7 +315,7 @@ export default function Showroom() {
         { name: 'Showroom', url: '/showroom' },
       ]} />
 
-      <div style={{ minHeight: 'calc(100vh - 100px)', background: 'var(--bg, #050505)' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)' }}>
         {/* ── Editorial hero ─────────────────────────────────────────── */}
         <section style={{
           position: 'relative',

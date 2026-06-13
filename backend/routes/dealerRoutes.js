@@ -520,42 +520,12 @@ router.delete(
 
 // =============================
 // 🔄 DUPLICATE LISTING
-// FIX: Was bypassing the listing package quota entirely.
-// Now checks packageListingMax / listingCount / listingsLocked before creating.
 // =============================
 router.post(
   "/cars/:id/duplicate",
   asyncHandler(async (req, res) => {
     const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
-
-    // --- QUOTA CHECK (same logic as carController.createCar) ---
-    const seller = await User.findById(req.user.id).select(
-      "approved listingsLocked listingCount packageListingMax dealerPackage packageExpiresAt role",
-    );
-    if (!seller) return res.status(404).json({ success: false, message: "Seller account not found" });
-    if (!seller.approved) {
-      return res.status(403).json({ success: false, message: "Your account is pending approval" });
-    }
-    if (seller.listingsLocked) {
-      return res.status(403).json({ success: false, message: "Your listings have been locked by an admin" });
-    }
-
-    const packageExpired =
-      seller.packageExpiresAt && new Date(seller.packageExpiresAt) < new Date();
-    if (packageExpired) {
-      return res.status(403).json({ success: false, message: "Your listing package has expired. Please renew to add more listings." });
-    }
-
-    const max = seller.packageListingMax || 0;
-    const current = seller.listingCount || 0;
-    if (max > 0 && current >= max) {
-      return res.status(403).json({
-        success: false,
-        message: `Listing limit reached (${current}/${max}). Upgrade your package to add more.`,
-      });
-    }
-    // --- END QUOTA CHECK ---
 
     const dup = await Car.create({
       ...car.toObject(),
@@ -575,9 +545,6 @@ router.post(
       createdAt: undefined,
       updatedAt: undefined,
     });
-
-    // Increment the listing counter on the seller account
-    await User.findByIdAndUpdate(req.user.id, { $inc: { listingCount: 1 } });
 
     await logActionFromReq(req, "duplicate_listing", {
       target: dup._id,
@@ -734,7 +701,7 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 router.post(
   "/cars/:id/auction/start",
   asyncHandler(async (req, res) => {
-    const { durationMs, startingBid, reservePrice } = req.body;
+    const { durationMs, startingBid, reservePrice, reserveMode } = req.body;
     if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
 
     // ⏱ Minimum 24h auction duration
@@ -784,6 +751,7 @@ router.post(
     car.startingBid = startingBidVal;
     car.currentBid = startingBidVal;
     car.reservePrice = reserveVal;
+    car.reserveMode = reserveMode || 'none';
     car.auctionStartTime = new Date();
     car.auctionEnd = new Date(Date.now() + durationMs);
     await car.save();

@@ -11,12 +11,10 @@ export default function CompareDrawer() {
   const [cars, setCars] = useState([]);
 
   useEffect(() => {
-    let ignore = false;
     if (compareIds.length === 0) { setCars([]); return; }
     carsAPI.list({ ids: compareIds.join(',') })
-      .then(r => { if (ignore) return; setCars(r.cars || r.data || []); })
-      .catch(() => { if (ignore) return; setCars([]); });
-    return () => { ignore = true; };
+      .then(r => setCars(r.cars || r.data || []))
+      .catch(() => setCars([]));
   }, [compareIds]);
 
   if (compareIds.length === 0) return null;

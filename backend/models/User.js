@@ -91,10 +91,11 @@ const userSchema = new mongoose.Schema(
     revokedPermissions: { type: [String], default: [] },
     permissionsUpdatedAt: { type: Date },
     permissionsUpdatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    verificationStatus: {
+    status: {
       type: String,
-      enum: ["unverified", "pending", "verified", "rejected"],
-      default: "unverified",
+      enum: ["pending", "approved", "suspended", "rejected"],
+      default: "approved",
+      index: true,
     },
     dealerDocuments: {
       businessLicenseUrl: { type: String, default: "" },
@@ -154,32 +155,12 @@ const userSchema = new mongoose.Schema(
 
     // =============================
     // 💳 PAYMENT SETTINGS
-    // FIX: Top-level bank fields (bankName/bankAccount/bankBranch/mpesaBusiness)
-    // were duplicated inside paymentDetails subdocument below. Retaining them
-    // here as @deprecated aliases for backwards-compat with existing data,
-    // but all new writes should go through paymentDetails exclusively.
-    // These will be removed in a future migration once all code is updated.
     // =============================
-    /** @deprecated use paymentDetails.bankName */
     mpesaBusiness: { type: String, trim: true, default: "" },
-    /** @deprecated use paymentDetails.paybillNumber */
     mpesaBusinessName: { type: String, trim: true, default: "" },
-    /** @deprecated use paymentDetails.bankName */
     bankName: { type: String, trim: true, default: "" },
-    /** @deprecated use paymentDetails.accountNumber */
     bankAccount: { type: String, trim: true, default: "" },
-    /** @deprecated use paymentDetails.bankName */
     bankBranch: { type: String, trim: true, default: "" },
-
-    // FIX: Default to false — approved must be explicitly set to true during
-    // registration (for non-sellers it is set true by register controller),
-    // or by an admin. The old default of true caused seeded / staff-created
-    // accounts to skip the approval gate entirely.
-    approved: {
-      type: Boolean,
-      default: false,
-      index: true,
-    },
 
     dealerRating: {
       type: Number,

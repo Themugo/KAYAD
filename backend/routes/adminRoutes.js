@@ -221,18 +221,6 @@ router.get(
       filter.role = { $in: ["dealer", "broker", "individual_seller"] };
       filter.approved = false;
     }
-    // FIX: Added broker-specific filter so admins can view pending brokers independently
-    if (req.query.pendingBroker === "true") {
-      filter.role = "broker";
-      filter.approved = false;
-    }
-    if (req.query.pendingIndividual === "true") {
-      filter.role = "individual_seller";
-      filter.approved = false;
-    }
-    if (req.query.verificationStatus) {
-      filter.verificationStatus = req.query.verificationStatus; // pending | verified | rejected
-    }
     if (req.query.isDemo === "true") filter.isDemo = true;
     if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 
@@ -298,11 +286,7 @@ router.post(
 );
 
 // =============================
-// 🧑‍💼 APPROVE SELLER (dealer / broker / individual_seller)
-// FIX: This was a duplicate of verify-dealer below. Now unified into a single
-// endpoint at POST /users/:id/verify-dealer which handles approve/reject + audit
-// log + email + notification for ALL seller roles (dealer, broker, individual_seller).
-// This route is kept as a compatibility shim and delegates to verify-dealer logic.
+// 🧑‍💼 APPROVE DEALER
 // =============================
 router.post(
   "/users/:id/approve-dealer",
@@ -310,35 +294,35 @@ router.post(
   validateObjectId,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    const sellerRoles = ["dealer", "broker", "individual_seller"];
-    if (!sellerRoles.includes(user.role)) {
-      return res.status(400).json({ success: false, message: "User is not a seller (dealer/broker/individual_seller)" });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     user.approved = true;
     user.verificationStatus = "verified";
-    await user.save();
 
-    await AuditLog.create({
-      action: `Seller approved (compat shim → verify-dealer): ${user.email} [${user.role}]`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
+    await user.save();
 
     const { sendDealerApprovedEmail } = adminEmailService;
     if (typeof sendDealerApprovedEmail === "function") {
-      sendDealerApprovedEmail(user).catch((e) => console.warn("⚠️  Seller approval email failed:", e.message));
+      sendDealerApprovedEmail(user).catch((e) => console.warn("⚠️  Dealer approval email failed:", e.message));
     }
+
     sendNotification({
       userId: user._id,
       title: "Seller Account Approved",
-      message: `Your ${user.role} account has been approved. You can now list vehicles and access seller features.`,
+      message: "Your seller account has been approved. You can now list vehicles and access seller features.",
       type: "info",
-    }).catch((e) => console.warn("⚠️ Approval notification failed:", e.message));
+    }).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
 
-    res.json({ success: true, message: "Seller approved" });
+    res.json({
+      success: true,
+      message: "Seller approved",
+    });
   }),
 );
 
@@ -803,71 +787,35 @@ router.put(
 );
 
 // =============================
-// ✅ SELLER VERIFICATION (approve/reject) — canonical endpoint
-// FIX: Extended to cover dealer, broker, and individual_seller roles.
-// Handles audit log, email notification, and in-app notification in one place.
+// ✅ DEALER VERIFICATION (approve/reject)
 // =============================
 router.post(
   "/users/:id/verify-dealer",
   adminOrSuper,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const { action, reason } = req.body; // action: 'approve' | 'reject'
+    const { action } = req.body; // 'approve' or 'reject'
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    const sellerRoles = ["dealer", "broker", "individual_seller"];
-    if (!sellerRoles.includes(user.role)) {
-      return res.status(400).json({ success: false, message: "User is not a seller (dealer/broker/individual_seller)" });
-    }
-
     if (action === "approve") {
+      user.role = "dealer";
       user.verificationStatus = "verified";
       user.approved = true;
-      // Only force role to 'dealer' if it's not already a broker or individual_seller
-      if (user.role !== "broker" && user.role !== "individual_seller") {
-        user.role = "dealer";
-      }
     } else if (action === "reject") {
       user.verificationStatus = "rejected";
-      user.approved = false;
     } else {
       return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
     }
 
     await user.save();
-
     await AuditLog.create({
-      action: `Seller verification: ${action} for ${user.email} [role: ${user.role}]`,
+      action: `Dealer verification: ${action} for ${user.email}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { userId: user._id, role: user.role, reason: reason || null },
     });
 
-    // Send email notification
-    if (action === "approve") {
-      const { sendDealerApprovedEmail } = adminEmailService;
-      if (typeof sendDealerApprovedEmail === "function") {
-        sendDealerApprovedEmail(user).catch((e) => console.warn("⚠️  Seller approval email failed:", e.message));
-      }
-      sendNotification({
-        userId: user._id,
-        title: "Seller Account Approved",
-        message: `Your ${user.role} account has been approved. You can now list vehicles and access seller features.`,
-        type: "info",
-      }).catch((e) => console.warn("⚠️ Approval notification failed:", e.message));
-    } else {
-      sendNotification({
-        userId: user._id,
-        title: "Seller Application Rejected",
-        message: reason
-          ? `Your seller application was rejected: ${reason}`
-          : "Your seller application was not approved at this time. Please contact support for more information.",
-        type: "warning",
-      }).catch((e) => console.warn("⚠️ Rejection notification failed:", e.message));
-    }
-
-    res.json({ success: true, message: `Seller ${action}d successfully.`, role: user.role });
+    res.json({ success: true, message: `Dealer ${action}d successfully.` });
   }),
 );
 
@@ -1188,10 +1136,6 @@ router.post(
     if (!name || !email || !password || !role) {
       return res.status(400).json({ success: false, message: "name, email, password, role required" });
     }
-    // FIX: Enforce minimum password length (was missing — 1-char passwords were accepted)
-    if (password.length < 8) {
-      return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
-    }
     if (!staffRoles.includes(role)) {
       return res
         .status(400)
@@ -1201,18 +1145,7 @@ router.post(
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    // FIX: Set emailVerified=true and approved=true for admin-created staff.
-    // Without this, REQUIRE_EMAIL_VERIFICATION=true blocks them from ever logging in,
-    // and the approved=false schema default would block seller-guarded routes.
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role,
-      emailVerified: true,
-      approved: true,
-      mustChangePassword: true, // force them to set their own password on first login
-    });
+    const user = await User.create({ name, email, password, role });
     res.json({
       success: true,
       message: `Staff account created: ${email}`,

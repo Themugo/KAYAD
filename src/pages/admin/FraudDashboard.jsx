@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Shield, Users, Car, Lock, DollarSign, TrendingUp, Activity, Filter } from 'lucide-react';
-import { adminAPI } from '../../api/api';
 
 const cardStyle = {
   background: 'var(--card)',
@@ -64,24 +63,25 @@ export default function FraudDashboard() {
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    let ignore = false;
     const fetchFraudData = async () => {
       try {
-        const data = await adminAPI.fraudAnalytics();
+        const response = await fetch('/api/admin/fraud/analytics', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
         if (data.success) {
-          if (ignore) return;
           setFraudData(data.analytics);
         }
       } catch (error) {
         console.error('Failed to fetch fraud data:', error);
       } finally {
-        if (ignore) return;
         setLoading(false);
       }
     };
 
     fetchFraudData();
-    return () => { ignore = true; };
   }, []);
 
   const getSeverityColor = (severity) => {

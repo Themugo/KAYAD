@@ -13,6 +13,7 @@ import DealerBidsTab from './components/DealerBidsTab';
 import DealerEscrowsTab from './components/DealerEscrowsTab';
 import DealerEarningsTab from './components/DealerEarningsTab';
 import DealerPackageTab from './components/DealerPackageTab';
+import { DealerKPIRow } from './components/DealerKPIWidgets';
 import { TABS_CONFIG } from './components/DashboardWidgets';
 
 const TABS = TABS_CONFIG.map(t => ({
@@ -96,7 +97,7 @@ export default function DealerDashboard() {
     catch { toast('Delete failed', 'error'); }
   };
 
-  if (!user?.approved && user?.role === 'dealer') {
+  if (user?.status !== 'approved' && user?.role === 'dealer') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
@@ -221,6 +222,8 @@ export default function DealerDashboard() {
                 cars={cars}
                 totalRevenue={totalRevenue}
                 trends={trends}
+                earnings={earnings}
+                escrows={escrows}
                 onDelete={handleDelete}
                 goToTab={setTab}
               />

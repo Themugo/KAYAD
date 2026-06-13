@@ -32,7 +32,6 @@ export default function BuyerDashboard() {
   }, [isDealer, isBroker, isAdmin, navigate]);
 
   useEffect(() => {
-    let ignore = false;
     let hadError = false;
     const withFallback = (p, fallback) => {
       return p.catch(() => { hadError = true; return fallback; });
@@ -44,44 +43,36 @@ export default function BuyerDashboard() {
       withFallback(chatAPI.inbox(), { chats: [] }),
       withFallback(savedSearchAPI.list(), { searches: [] }),
     ]).then(([fav, esc, pay, chatRes, searchRes]) => {
-      if (ignore) return;
       setFavorites(fav.favorites || []);
       setEscrows(esc.escrows || []);
       setPayments(pay.payments || []);
       setChats(chatRes.chats || []);
       setWatchlist(searchRes.searches || []);
       if (hadError) toast('Some data failed to load', 'warning');
-    }).finally(() => { if (ignore) return; setLoading(false); });
-    return () => { ignore = true; };
+    }).finally(() => setLoading(false));
   }, []);
 
   // Fetch trending cars
   useEffect(() => {
-    let ignore = false;
     carsAPI.list({ sort: 'views', limit: 6 })
-      .then(data => { if (ignore) return; setTrending(data.cars || []); })
-      .catch(() => { if (ignore) return; setTrending([]); })
-      .finally(() => { if (ignore) return; setTrendingLoading(false); });
-    return () => { ignore = true; };
+      .then(data => setTrending(data.cars || []))
+      .catch(() => setTrending([]))
+      .finally(() => setTrendingLoading(false));
   }, []);
 
   // Attempt to fetch user's bids — fall back gracefully if no endpoint exists
   useEffect(() => {
-    let ignore = false;
     const tryFetchBids = async () => {
       try {
         const res = await fetch('/api/bids/my', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          if (ignore) return;
           setMyBids(data.bids || data || []);
         }
       } catch { /* no dedicated my-bids endpoint */ }
-      if (ignore) return;
       setBidLoading(false);
     };
     tryFetchBids();
-    return () => { ignore = true; };
   }, []);
 
   if (isDealer || isBroker || isAdmin) return null;

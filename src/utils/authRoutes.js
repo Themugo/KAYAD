@@ -32,13 +32,16 @@ export function safeRedirectPath(path, fallback = '/') {
 export function getPostAuthPath(user, fallback = '/') {
   const safeFallback = safeRedirectPath(fallback, '/');
   if (user?.mustChangePassword) return '/force-password-change';
-  if (!user?.emailVerified && user?.role === 'user') return '/register';
   if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
-    if (!user?.approved) return '/register';
+    if (user?.status !== 'approved') return safeFallback;
+    if (user?.role === 'broker') return '/dealer'; // Broker uses same dashboard as dealer
     return '/dealer';
   }
-  if (user?.role === 'user') return '/dashboard';
+  if (user?.role === 'user') {
+    if (!user?.emailVerified) return '/login?verify=required';
+    return '/dashboard';
+  }
   return safeFallback;
 }
