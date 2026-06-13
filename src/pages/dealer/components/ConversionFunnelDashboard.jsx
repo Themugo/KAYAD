@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Filter, TrendingUp, Users, DollarSign, Shield } from 'lucide-react';
+import api from '../../../api/api';
 
 const widgetStyle = {
   background: 'var(--card)',
@@ -65,25 +66,22 @@ export default function ConversionFunnelDashboard({ dealerId }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let ignore = false;
     const fetchAnalytics = async () => {
       try {
-        const response = await fetch('/api/funnel/dealer/analytics', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setAnalytics(data.analytics);
+        const res = await api.get('/funnel/dealer/analytics');
+        if (!ignore && res.data?.success) {
+          setAnalytics(res.data.analytics);
         }
       } catch (error) {
         console.error('Failed to fetch funnel analytics:', error);
       } finally {
-        setLoading(false);
+        if (!ignore) setLoading(false);
       }
     };
 
     fetchAnalytics();
+    return () => { ignore = true; };
   }, [dealerId]);
 
   if (loading) {

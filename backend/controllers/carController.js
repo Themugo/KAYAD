@@ -423,7 +423,22 @@ export const updateCar = async (req, res) => {
       car.priceHistory.push({ price: car.price || 0, date: new Date() });
     }
 
-    Object.assign(car, req.body);
+    const allowedFields = [
+      'title','brand','model','year','price',
+      'location.city','location.address',
+      'fuel','transmission','mileage','bodyType','color','condition','description','features',
+      'images','coverImage',
+      'status','allowBuy','allowBid','escrowEnabled',
+      'auctionStartTime','auctionEnd','startingBid','reservePrice','reserveMode',
+      'isPromoted','promotionExpiresAt',
+      'dealerPhone',
+      'ntsaVerified','dutyStatus','logbookVerified',
+    ];
+    for (const key of Object.keys(req.body)) {
+      if (allowedFields.includes(key)) {
+        car.set(key, req.body[key]);
+      }
+    }
     if (car.isDemo && isDealer) {
       car.isDemo = true;
       car.demoEditedAt = new Date();
