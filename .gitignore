@@ -13,7 +13,11 @@ backend/.env.local
 .DS_Store
 .vercel/
 ACCOUNTS.md
+backend/.env.development
 backend/.env.test
+frontend/.env
+frontend/.env.development
+frontend/.env.test
 backend/coverage/
 backend/uploads/
 coverage/
