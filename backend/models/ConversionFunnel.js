@@ -74,7 +74,7 @@ const conversionFunnelSchema = new mongoose.Schema(
 
 // Index for efficient funnel queries
 conversionFunnelSchema.index({ car: 1, user: 1 }, { unique: true });
-conversionFunnelSchema.index({ dealer: 1, currentStage });
-conversionFunnelSchema.index({ car: 1, currentStage });
+conversionFunnelSchema.index({ dealer: 1, currentStage: 1 });
+conversionFunnelSchema.index({ car: 1, currentStage: 1 });
 
 export default mongoose.model("ConversionFunnel", conversionFunnelSchema);
