@@ -1,1 +1,0 @@
-import{e as r,u,j as e}from"./vendor-react-BH3MjzXe.js";import{a as k}from"./vendor-icons-C1otAw2u.js";function m({fallback:n="/",label:t="Back",className:s="back-btn",style:i}){const a=r(),o=u(),c=()=>{o.key&&o.key!=="default"?a(-1):a(n)};return e.jsxs("button",{type:"button",onClick:c,className:s,style:i,"aria-label":t,children:[e.jsx(k,{size:14})," ",t]})}export{m as B};

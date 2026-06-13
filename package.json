@@ -17,6 +17,16 @@
     "format": "cd frontend && npm run format"
   },
   "devDependencies": {
-    "concurrently": "^9.0.0"
+    "@tailwindcss/postcss": "^4.3.1",
+    "@vitejs/plugin-react": "^6.0.2",
+    "autoprefixer": "^10.5.0",
+    "concurrently": "^9.0.0",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "vite": "^8.0.16",
+    "vite-plugin-pwa": "^1.3.0"
+  },
+  "dependencies": {
+    "framer-motion": "^12.40.0",
+    "react-router-dom": "^7.17.0"
   }
 }

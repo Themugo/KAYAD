@@ -33,20 +33,26 @@ export default function ChatPage() {
 
   // Load inbox
   useEffect(() => {
+    let ignore = false;
     chatAPI.inbox().then(d => {
+      if (ignore) return;
       setChats(d.chats || d.data || []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(() => {}).finally(() => { if (ignore) return; setLoading(false); });
+    return () => { ignore = true; };
   }, []);
 
   // Load messages when active chat changes
   useEffect(() => {
     if (!active) return;
+    let ignore = false;
     chatAPI.messages(active).then(d => {
+      if (ignore) return;
       const msgs = d.messages || d.data || [];
       setMessages(msgs);
       chatAPI.seen(active).catch(() => {});
     }).catch(() => {});
     setTypingUsers(prev => { const n = { ...prev }; delete n[active]; return n; });
+    return () => { ignore = true; };
   }, [active]);
 
   // Scroll to bottom

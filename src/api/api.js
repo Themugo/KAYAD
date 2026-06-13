@@ -461,6 +461,14 @@ const _adminAPI = {
 
   // Branding / upload logo
   uploadLogo: (formData) => api.post('/admin/upload-logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
+
+  // Disputes
+  getDispute:       (id)       => api.get(`/disputes/${id}`).then(unwrap),
+  resolveDispute:   (id, body) => api.post(`/disputes/${id}/resolve`, body).then(unwrap),
+  addDisputeNote:   (id, body) => api.post(`/disputes/${id}/notes`, body).then(unwrap),
+
+  // Fraud analytics
+  fraudAnalytics:   ()         => api.get('/admin/fraud/analytics').then(unwrap),
 };
 // Admin & webhost are real-backend only — there is no demo admin/webhost.
 // Falling back to demo data here would show a real administrator fabricated

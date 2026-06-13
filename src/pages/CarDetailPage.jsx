@@ -57,35 +57,45 @@ export default function CarDetailPage() {
   const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
+    let ignore = false;
     window.scrollTo(0, 0);
     setLoading(true);
     carsAPI.get(id)
       .then(data => {
+        if (ignore) return;
         let c = data?.car || data?.data || data;
         if (!c || !c._id) c = getMockCar(id);
         setCar(c);
         if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick?.(id).catch(() => {}); }
-        if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
+        if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => { if (ignore) return; setReviews(d.reviews || []); }).catch(() => {});
       })
-      .catch(() => { const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
-      .finally(() => setLoading(false));
+      .catch(() => { if (ignore) return; const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
+      .finally(() => { if (ignore) return; setLoading(false); });
     if (isAuth) {
       favoritesAPI.list().then(d => {
+        if (ignore) return;
         const favs = d.favorites || d.cars || d.data || [];
         const match = favs.find(f => (f._id === id || f?.car?._id === id));
         setIsFav(!!match);
         setPriceAlertOn(match?.notifyOnPriceDrop === true);
       }).catch(() => {});
     }
+    return () => { ignore = true; };
   }, [id]);
 
   // Load NTSA verification status
   useEffect(() => {
     if (!car?._id) return;
+    let ignore = false;
     setNtsaLoading(true);
     ntsaAPI.status(car._id).then(d => {
+      if (ignore) return;
       setNtsaStatus(d);
-    }).catch(() => {}).finally(() => setNtsaLoading(false));
+    }).catch(() => {}).finally(() => {
+      if (ignore) return;
+      setNtsaLoading(false);
+    });
+    return () => { ignore = true; };
   }, [car?._id]);
 
   const handleRequestNtsa = async () => {
@@ -138,12 +148,13 @@ export default function CarDetailPage() {
 
   useEffect(() => {
     if (!car?._id || !isLive) return;
+    let ignore = false;
     const fetchBids = () => {
-      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch(() => {});
+      bidsAPI.getForCar(car._id).then(d => { if (ignore) return; setBidHistory(d?.bids || []); }).catch(() => {});
     };
     fetchBids();
     const iv = setInterval(fetchBids, 8000);
-    return () => clearInterval(iv);
+    return () => { ignore = true; clearInterval(iv); };
   }, [car?._id, isLive]);
 
   useEffect(() => {

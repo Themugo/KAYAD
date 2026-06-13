@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { adminAPI } from '../../api/api';
+import { useToast } from '../../context/ToastContext';
 
 const Field = ({ label, hint, children }) => (
   <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:16 }}>
@@ -12,6 +13,7 @@ const Field = ({ label, hint, children }) => (
 );
 
 export default function AdminSettingsBranding({ branding, setBranding, config, setConfig, saveConfig, saving }) {
+  const toast = useToast();
   return (
     <div style={{ display:'grid', gap:20 }}>
       <div className="card" style={{ padding:24 }}>
@@ -51,7 +53,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
                   try {
                     const res = await adminAPI.uploadLogo(form);
                     if (res?.url) setBranding(p => ({...p, logoUrl:res.url}));
-                  } catch { alert('Upload failed'); }
+                  } catch { toast('Upload failed', 'error'); }
                 }} style={{ fontSize:13, color:'rgba(255,255,255,0.6)' }} />
               </div>
             </div>

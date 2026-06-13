@@ -23,7 +23,7 @@ export const initPostHog = async () => {
     });
 
     initialized = true;
-    console.log("[PostHog] Initialized");
+    if (import.meta.env.DEV) console.log("[PostHog] Initialized");
   } catch (err) {
     console.warn("[PostHog] Init failed:", err.message);
   }
