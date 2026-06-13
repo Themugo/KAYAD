@@ -5,7 +5,7 @@ import { validateObjectId, validateBid } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
 
-import { placeBid, getAuctionBids, confirmBidPayment, endAuction } from "../controllers/bidController.js";
+import { placeBid, getAuctionBids, confirmBidPayment, endAuction, getMyBids } from "../controllers/bidController.js";
 
 import Bid from "../models/Bid.js";
 
@@ -21,6 +21,11 @@ const getPagination = (req) => {
 
   return { page, limit, skip };
 };
+
+// =============================
+// 👤 MY BIDS (USER)
+// =============================
+router.get("/my", protect, asyncHandler(getMyBids));
 
 // =============================
 // ⚡ PLACE BID (USER)

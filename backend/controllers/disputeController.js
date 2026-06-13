@@ -1,6 +1,6 @@
 import Dispute from "../models/Dispute.js";
 import Escrow from "../models/Escrow.js";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 
 // =============================
 // 📋 CREATE DISPUTE

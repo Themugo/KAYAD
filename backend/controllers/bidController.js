@@ -458,6 +458,23 @@ export const confirmBidPayment = async (req, res) => {
 };
 
 // =============================
+// 👤 GET MY BIDS
+// =============================
+export const getMyBids = async (req, res) => {
+  try {
+    const bids = await Bid.find({ user: req.user.id })
+      .populate("car", "title images price brand model year")
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    res.json({ success: true, bids });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Failed to fetch your bids" });
+  }
+};
+
+// =============================
 // 🏁 END AUCTION
 // =============================
 export const endAuction = async (req, res) => {

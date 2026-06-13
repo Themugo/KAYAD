@@ -67,6 +67,7 @@ import executiveAnalyticsRoutes from "./routes/executiveAnalyticsRoutes.js";
 import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import listingAssistantRoutes from "./routes/listingAssistantRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
+import marketRoutes from "./routes/marketRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -411,6 +412,7 @@ app.use("/api/executive-analytics", executiveAnalyticsRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/listing-assistant", listingAssistantRoutes);
 app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/market", marketRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above

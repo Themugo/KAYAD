@@ -1,6 +1,6 @@
 import Escrow from "../models/Escrow.js";
 import Car from "../models/Car.js";
-import Inspection from "../models/Inspection.js";
+import InspectionOrder from "../models/InspectionOrder.js";
 import User from "../models/User.js";
 import Dispute from "../models/Dispute.js";
 import Payment from "../models/Payment.js";
@@ -33,10 +33,10 @@ export const getOperationsDashboard = async (req, res) => {
     // 🔍 INSPECTION QUEUE
     // =============================
     const [inspectionRequested, inspectionAssigned, inspectionCompleted, inspectionOverdue] = await Promise.all([
-      Inspection.countDocuments({ status: "requested", createdAt: { $gte: today } }),
-      Inspection.countDocuments({ status: "assigned", createdAt: { $gte: today } }),
-      Inspection.countDocuments({ status: "completed", createdAt: { $gte: today } }),
-      Inspection.countDocuments({
+      InspectionOrder.countDocuments({ status: "requested", createdAt: { $gte: today } }),
+      InspectionOrder.countDocuments({ status: "assigned", createdAt: { $gte: today } }),
+      InspectionOrder.countDocuments({ status: "completed", createdAt: { $gte: today } }),
+      InspectionOrder.countDocuments({
         status: { $in: ["requested", "assigned"] },
         scheduledDate: { $lt: today },
       }),
@@ -173,7 +173,7 @@ export const getInspectionQueue = async (req, res) => {
     const { status } = req.query;
     const filter = status ? { status } : {};
 
-    const inspections = await Inspection.find(filter)
+    const inspections = await InspectionOrder.find(filter)
       .populate("car", "title price")
       .populate("inspector", "name email")
       .populate("requestedBy", "name email")

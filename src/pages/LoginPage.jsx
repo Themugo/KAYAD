@@ -14,7 +14,7 @@ const DEMO_ACCOUNTS = [
   { label: 'Broker', email: 'seller@kayad.space', password: 'Kayad@Demo2026!', tint: '#a855f7' },
 ];
 
-export function LoginPage() {
+function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
   const { login, user, isAuth } = useAuth();
   const { toast } = useToast();

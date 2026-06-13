@@ -6,7 +6,7 @@ import { useAuth } from './AuthContext';
 const SocketCtx = createContext(null);
 
 export function SocketProvider({ children }) {
-  const { token, isAuth } = useAuth();
+  const { isAuth } = useAuth();
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
@@ -16,7 +16,6 @@ export function SocketProvider({ children }) {
     const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '/';
 
     const socket = io(SOCKET_URL, {
-      auth: { token },
       transports: ['websocket', 'polling'],
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
@@ -66,6 +65,7 @@ export function SocketProvider({ children }) {
 
   const value = useMemo(() => ({
     connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit,
+    socket: socketRef,
   }), [connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit]);
 
   return (

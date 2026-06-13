@@ -1,5 +1,5 @@
 import express from "express";
-import { asyncHandler } from "../middleware/asyncHandler.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 import { protect } from "../middleware/auth.js";
 import {
   track,

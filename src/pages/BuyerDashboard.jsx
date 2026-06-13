@@ -69,7 +69,7 @@ export default function BuyerDashboard() {
           const data = await res.json();
           setMyBids(data.bids || data || []);
         }
-      } catch { /* no dedicated my-bids endpoint */ }
+      } catch { /* fallback */ }
       setBidLoading(false);
     };
     tryFetchBids();

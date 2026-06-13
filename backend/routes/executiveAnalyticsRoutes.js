@@ -1,5 +1,5 @@
 import express from "express";
-import { asyncHandler } from "../middleware/asyncHandler.js";
+import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import {
   getExecutiveDashboard,
