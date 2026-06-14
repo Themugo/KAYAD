@@ -9,9 +9,9 @@ import { authAPI, enableDemoMode } from '../api/api';
 
 // Demo accounts — password is in demoData.js (bundled, not a real secret).
 const DEMO_ACCOUNTS = [
-  { label: 'Buyer',  email: 'buyer@kayad.space',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
-  { label: 'Dealer', email: 'dealer@kayad.space', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
-  { label: 'Broker', email: 'seller@kayad.space', password: 'Kayad@Demo2026!', tint: '#a855f7' },
+  { label: 'Buyer',  email: 'buyer@demo.com',  password: 'Kayad@Demo2026!', tint: '#3b82f6' },
+  { label: 'Dealer', email: 'dealer@demo.com', password: 'Kayad@Demo2026!', tint: 'var(--gold)' },
+  { label: 'Broker', email: 'broker@demo.com', password: 'Kayad@Demo2026!', tint: '#a855f7' },
 ];
 
 function LoginPage() {
