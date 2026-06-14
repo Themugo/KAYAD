@@ -6,6 +6,7 @@ import { cleanupFiles } from "../middleware/upload.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
+import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -363,6 +364,32 @@ export const createCar = async (req, res) => {
       target: car._id,
       targetModel: "Car",
       details: { title: car.title, price: car.price },
+    });
+
+    // ── DUPLICATE DETECTION (Non-blocking) ──
+    setImmediate(async () => {
+      try {
+        const detectionData = await detectDuplicates(
+          {
+            vin: car.vin,
+            chassisNumber: car.chassisNumber,
+            registrationNumber: car.registrationNumber,
+            brand: car.brand,
+            model: car.model,
+            year: car.year,
+            price: car.price,
+            mileage: car.mileage,
+          },
+          req.user.id,
+        );
+
+        if (detectionData.hasDuplicates) {
+          await flagDuplicate(car._id, detectionData, req.user.id);
+        }
+      } catch (err) {
+        // Duplicate detection failure should not affect listing creation
+        console.warn("⚠️ Duplicate detection failed:", err.message);
+      }
     });
 
     res.status(201).json({ success: true, data: car });

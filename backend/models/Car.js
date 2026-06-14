@@ -176,6 +176,57 @@ const carSchema = new mongoose.Schema(
     trustScore: { type: Number, default: 100 },
 
     // =============================
+    // 🚗 VEHICLE IDENTIFICATION (Duplicate Detection)
+    // =============================
+    vin: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
+    chassisNumber: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
+    registrationNumber: {
+      type: String,
+      trim: true,
+      index: true,
+      sparse: true,
+    },
+
+    // =============================
+    // 🔍 DUPLICATE DETECTION
+    // =============================
+    isFlaggedDuplicate: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    duplicateStatus: {
+      type: String,
+      enum: ["none", "flagged", "under_review", "confirmed_duplicate", "false_positive"],
+      default: "none",
+      index: true,
+    },
+    duplicateLog: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DuplicateVehicleLog",
+    },
+    originalListing: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Car",
+    },
+    duplicateListings: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Car",
+      },
+    ],
+
+    // =============================
     // 🏆 AUCTION / SALE STATE
     // =============================
     highestBidder: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
@@ -284,5 +335,12 @@ carSchema.index({
 
 // GEO SEARCH
 carSchema.index({ "location.coordinates": "2dsphere" });
+
+// DUPLICATE DETECTION INDEXES
+carSchema.index({ vin: 1 }, { sparse: true });
+carSchema.index({ chassisNumber: 1 }, { sparse: true });
+carSchema.index({ registrationNumber: 1 }, { sparse: true });
+carSchema.index({ isFlaggedDuplicate: 1, duplicateStatus: 1 });
+carSchema.index({ dealer: 1, isFlaggedDuplicate: 1 });
 
 export default mongoose.model("Car", carSchema);
