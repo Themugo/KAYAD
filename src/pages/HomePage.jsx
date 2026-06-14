@@ -27,34 +27,38 @@ export default function HomePage() {
 
   useEffect(() => {
     let cancelled = false;
-    const fetchCars = async (attemptedDemo = false) => {
-      if (attemptedDemo) enableDemoMode();
+    const fetchCars = async () => {
       try {
         const data = await carsAPI.list({ page: 1, limit: 50, sort: '' });
         if (cancelled) return;
         let all = data.cars || data.data || [];
-        if (all.length === 0 && !attemptedDemo) {
+        
+        if (all.length === 0) {
           enableDemoMode();
           const retry = await carsAPI.list({ page: 1, limit: 50, sort: '' });
           if (cancelled) return;
           all = retry.cars || retry.data || [];
         }
+        
         const now = Date.now();
         const live = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           const e = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
           return s > 0 && e > 0 && s <= now && e > now;
         });
+        
         const upcoming = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           return s > now;
         }).sort((a, b) => new Date(a.auctionStartTime) - new Date(b.auctionStartTime));
+        
         const nonAuction = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           const e = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
           const isLive = s > 0 && e > 0 && s <= now && e > now;
           return !isLive && !(s > now);
         });
+        
         setLiveAuctions(live.slice(0, 4));
         setFeatured([...nonAuction.filter(c => c.isPromoted), ...nonAuction.filter(c => !c.isPromoted)].slice(0, 4));
         setRecent(nonAuction.slice(0, 8));
@@ -90,7 +94,7 @@ export default function HomePage() {
         <HomeLiveTicker count={liveCount} />
 
         <section className="border-y border-white/4 transition-opacity duration-600" style={{ opacity: loading ? 0.4 : 1 }}>
-          <div className="max-w-[1400px] mx-auto px-7 grid gap-px" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', background: 'rgba(255,255,255,0.03)' }}>
+          <div className="max-w-[1400px] mx-auto px-7 grid gap-px home-stats-grid" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
             <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
             <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />

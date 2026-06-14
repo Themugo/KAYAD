@@ -16,10 +16,7 @@ export default function HomeCtaSection({ isAuth }) {
           Join Kenya's most trusted dealer network and reach thousands of verified buyers.
         </p>
         <Link to={isAuth ? '/dealer/add-car' : '/register?role=dealer'}
-          className="px-8 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.1em] text-black no-underline inline-block transition-all duration-300"
-          style={{ background: 'var(--gold)' }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'none'; }}
+          className="home-cta-btn px-8 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.1em] text-black no-underline inline-block transition-all duration-300"
         >List Your Vehicle</Link>
       </div>
     </section>

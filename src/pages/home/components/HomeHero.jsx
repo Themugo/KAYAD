@@ -27,11 +27,9 @@ export default function HomeHero({ liveCount, isAuth, user }) {
       </p>
 
       <div className="flex gap-2 justify-center flex-wrap z-[1]">
-        <Link to="/showroom" className="px-7 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.1em] text-black no-underline inline-block transition-all duration-300" style={{ background: 'var(--gold)', boxShadow: '0 4px 20px rgba(212,196,168,0.25)' }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(212,196,168,0.38)'; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(212,196,168,0.25)'; }}
+        <Link to="/showroom" className="home-hero-primary-btn px-7 py-2.5 rounded-full font-black text-[10px] uppercase tracking-[0.1em] text-black no-underline inline-block transition-all duration-300"
         >Enter The Gallery</Link>
-        <Link to="/auctions/calendar" className="px-7 py-2.5 rounded-full font-semibold text-[10px] uppercase tracking-[0.1em] text-white/75 no-underline inline-block transition-all duration-300 border border-white/14 hover:border-gold/50 hover:text-gold"
+        <Link to="/auctions/calendar" className="home-hero-secondary-btn px-7 py-2.5 rounded-full font-semibold text-[10px] uppercase tracking-[0.1em] text-white/75 no-underline inline-block transition-all duration-300 border border-white/14"
         >Live Auctions</Link>
       </div>
 
