@@ -23,7 +23,10 @@ export default defineConfig(({ mode }) => {
           lang: 'en-KE',
           orientation: 'portrait-primary',
           categories: ['automotive', 'marketplace', 'business'],
-          icons: [],
+          icons: [
+            { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          ],
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
