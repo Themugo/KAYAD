@@ -14,6 +14,100 @@ const CATEGORIES = [
   'Lighting', 'Safety Equipment',
 ];
 
+// 150-point inspection checklist items - 10 items per category
+const CHECKLIST_ITEMS = {
+  'Engine': [
+    'Oil level and condition', 'Coolant level and condition', 'Engine mounts condition',
+    'Timing belt/chain condition', 'Serpentine belt condition', 'Oil leaks inspection',
+    'Engine noise at idle', 'Engine noise under load', 'Check engine light status',
+    'Air filter condition'
+  ],
+  'Transmission': [
+    'Transmission fluid level', 'Transmission fluid condition', 'Gear shifting smoothness',
+    'Clutch operation (manual)', 'Transmission mounts', 'Drive shaft condition',
+    'CV joint condition', 'Differential fluid level', 'Transmission leaks',
+    'Transmission noise'
+  ],
+  'Brakes': [
+    'Brake pad thickness front', 'Brake pad thickness rear', 'Brake disc condition front',
+    'Brake disc condition rear', 'Brake fluid level', 'Brake fluid condition',
+    'Brake line condition', 'ABS warning light', 'Parking brake operation',
+    'Brake pedal feel'
+  ],
+  'Suspension': [
+    'Shock absorber condition front', 'Shock absorber condition rear', 'Strut mounts condition',
+    'Control arm bushings', 'Ball joint condition', 'Tie rod ends condition',
+    'Sway bar links', 'Spring condition', 'Suspension noise',
+    'Wheel alignment'
+  ],
+  'Steering': [
+    'Power steering fluid level', 'Power steering fluid condition', 'Steering rack condition',
+    'Steering wheel play', 'Power steering pump noise', 'Steering column condition',
+    'Universal joint condition', 'Steering alignment', 'Power steering belt',
+    'Steering effort'
+  ],
+  'Electrical': [
+    'Battery condition', 'Battery terminals condition', 'Alternator output',
+    'Starter motor operation', 'Lighting system operation', 'Dashboard warning lights',
+    'Wiring harness condition', 'Fuse box condition', 'Ground connections',
+    'ECU error codes'
+  ],
+  'Body & Paint': [
+    'Body panel alignment', 'Paint condition overall', 'Rust inspection',
+    'Dent inspection', 'Scratch inspection', 'Panel gaps',
+    'Door operation', 'Hood operation', 'Trunk operation',
+    'Window operation'
+  ],
+  'Interior': [
+    'Seat condition', 'Dashboard condition', 'Upholstery condition',
+    'Carpet condition', 'Headliner condition', 'Instrument cluster operation',
+    'Climate control operation', 'Audio system operation', 'Seat belt condition',
+    'Interior trim condition'
+  ],
+  'Tyres & Wheels': [
+    'Tire tread depth front', 'Tire tread depth rear', 'Tire pressure',
+    'Tire age', 'Wheel condition', 'Wheel bearing condition',
+    'Tire wear pattern', 'Spare tire condition', 'Tire size matching',
+    'Wheel alignment'
+  ],
+  'Air Conditioning': [
+    'AC compressor operation', 'AC refrigerant level', 'AC cooling performance',
+    'Heater operation', 'Blower motor operation', 'AC vents condition',
+    'Cabin air filter', 'AC belt condition', 'AC leaks inspection',
+    'Temperature control operation'
+  ],
+  'Cooling System': [
+    'Radiator condition', 'Radiator cap condition', 'Coolant hoses condition',
+    'Thermostat operation', 'Water pump condition', 'Cooling fan operation',
+    'Heater core condition', 'Temperature gauge operation', 'Overheating history',
+    'Coolant reservoir condition'
+  ],
+  'Exhaust': [
+    'Exhaust manifold condition', 'Catalytic converter condition', 'Muffler condition',
+    'Exhaust pipes condition', 'O2 sensor operation', 'Exhaust leaks',
+    'Emission system', 'Tailpipe condition', 'Exhaust hangers',
+    'Smoke emission'
+  ],
+  'Fuel System': [
+    'Fuel tank condition', 'Fuel pump operation', 'Fuel filter condition',
+    'Fuel injectors condition', 'Fuel lines condition', 'Fuel pressure',
+    'Fuel gauge operation', 'Fuel cap condition', 'Fuel leaks',
+    'Fuel smell'
+  ],
+  'Lighting': [
+    'Headlights operation', 'Taillights operation', 'Brake lights operation',
+    'Turn signals operation', 'Parking lights operation', 'Fog lights operation',
+    'Interior lights operation', 'License plate lights', 'Headlight alignment',
+    'Light bulb condition'
+  ],
+  'Safety Equipment': [
+    'Airbag system operation', 'Seat belt pretensioners', 'ABS system operation',
+    'Traction control operation', 'Stability control operation', 'Horn operation',
+    'Wiper condition', 'Washer operation', 'Rearview mirror condition',
+    'Side mirror condition'
+  ],
+};
+
 const ITEMS_PER_CATEGORY = 10;
 
 export default function InspectorDashboard() {
@@ -55,8 +149,10 @@ export default function InspectorDashboard() {
     setActiveTask(task);
     const initial = [];
     CATEGORIES.forEach(cat => {
+      const items = CHECKLIST_ITEMS[cat] || [];
       for (let i = 0; i < ITEMS_PER_CATEGORY; i++) {
-        initial.push({ category: cat, item: `Check ${cat.toLowerCase()} item ${i + 1}`, passed: null, notes: '' });
+        const itemText = i < items.length ? items[i] : `Check ${cat.toLowerCase()} item ${i + 1}`;
+        initial.push({ category: cat, item: itemText, passed: null, notes: '' });
       }
     });
     setChecklist(initial);
@@ -75,6 +171,12 @@ export default function InspectorDashboard() {
       const calcScore = Math.round((passedCount / total) * 100);
       const reportChecklist = checklist.filter(c => c.passed !== null || c.notes);
 
+      // Verify the inspection is assigned to this inspector
+      if (activeTask.inspector !== user._id && activeTask.inspector?._id !== user._id) {
+        toast('You are not authorized to submit this inspection', 'error');
+        return;
+      }
+
       await inspectionAPI.submit(activeTask._id, {
         checklist: reportChecklist,
         overallScore: calcScore,
@@ -86,7 +188,10 @@ export default function InspectorDashboard() {
       toast(`Ghost Check submitted! Score: ${calcScore}/100`, 'success');
       setActiveTask(null);
       loadTasks();
-    } catch { toast('Failed to submit', 'error'); }
+    } catch (error) {
+      console.error('Failed to submit inspection:', error);
+      toast(error?.response?.data?.message || 'Failed to submit', 'error');
+    }
   };
 
   if (!user || user.role !== 'ghost_checker') {

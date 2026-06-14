@@ -49,7 +49,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
     try {
       const res = await inspectionAPI.order({ carId, phone, location });
       setOrderResult(res);
-      setPaymentConfirmed(true);
+      // Do NOT set paymentConfirmed to true yet - wait for actual M-Pesa confirmation
       toast('Inspection ordered! Check M-Pesa on your phone to complete payment.', 'success');
       setStep('tracking');
       if (onInspectionComplete) onInspectionComplete();
