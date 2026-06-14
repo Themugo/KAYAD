@@ -11,6 +11,8 @@ import WinnerModal from '../components/WinnerModal';
 import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
+import SEOHead from '../components/SEOHead';
+import { generateAuctionMetadata } from '../utils/seoService';
 import { ChevronLeft, ChevronRight, Eye, Star, CheckCircle } from 'lucide-react';
 import '../styles/auction-live.css';
 
@@ -294,7 +296,9 @@ export default function AuctionLivePage() {
   if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
 
   return (
-    <div className="auction-live-page">
+    <>
+      <SEOHead metadata={seoMetadata} />
+      <div className="auction-live-page">
       {confetti && <ConfettiOverlay />}
       <div className="container" style={{ paddingTop: 24, paddingBottom: 24 }}>
 
@@ -961,5 +965,6 @@ export default function AuctionLivePage() {
         />
       )}
     </div>
+    </>
   );
 }

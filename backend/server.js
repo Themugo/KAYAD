@@ -421,6 +421,7 @@ app.use("/api/verification", verificationRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/finance", financeRoutes);
+app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above

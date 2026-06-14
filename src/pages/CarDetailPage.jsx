@@ -19,6 +19,8 @@ import MarketPulse from '../components/MarketPulse';
 import PriceHistoryChart from '../components/PriceHistoryChart';
 import GalleryModal from '../components/GalleryModal';
 import { VehicleStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
+import SEOHead from '../components/SEOHead';
+import { generateVehicleMetadata } from '../utils/seoService';
 import usePageMeta from '../hooks/usePageMeta';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
@@ -38,6 +40,15 @@ export default function CarDetailPage() {
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
+  const [seoMetadata, setSeoMetadata] = useState(null);
+
+  // Generate SEO metadata when car data is loaded
+  useEffect(() => {
+    if (car) {
+      setSeoMetadata(generateVehicleMetadata(car));
+    }
+  }, [car]);
+
   usePageMeta(
     car ? `${car.title} - ${car.brand} ${car.model} ${car.year}` : 'Car Details',
     car ? `${car.title} - ${car.brand} ${car.model} ${car.year} in ${car.location}. Price: KES ${Number(car.price).toLocaleString()}. View details on Kayad.` : 'View premium car details on Kayad Marketplace.',
@@ -246,9 +257,11 @@ export default function CarDetailPage() {
   const showAuctionCard = isLive || isScheduled;
 
   return (
-    <div className="car-detail-page">
-    <VehicleStructuredData car={car} />
-    <BreadcrumbStructuredData items={[
+    <>
+      <SEOHead metadata={seoMetadata} />
+      <div className="car-detail-page">
+      <VehicleStructuredData car={car} />
+      <BreadcrumbStructuredData items={[
       { name: 'Home', url: '/' },
       { name: 'Showroom', url: '/showroom' },
       { name: car.title || `${car.brand || ''} ${car.model || ''}`.trim() || 'Vehicle', url: `/cars/${car._id}` },
@@ -687,5 +700,6 @@ export default function CarDetailPage() {
         />
       )}
     </div>
+    </>
   );
 }
