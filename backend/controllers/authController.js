@@ -106,7 +106,6 @@ const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null) =
 
   return res.json({
     success: true,
-    token: accessToken,
     user: safeUser,
   });
 };
