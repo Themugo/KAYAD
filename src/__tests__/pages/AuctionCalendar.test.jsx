@@ -4,6 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import AuctionCalendar from '../../pages/AuctionCalendar';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
+vi.mock('../../context/ToastContext', () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}));
 
 describe('AuctionCalendar', () => {
   afterEach(() => { cleanup(); });
