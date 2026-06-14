@@ -11,7 +11,7 @@ export default function AccountFormStep({ form, set, role, selPkg, pkgList = [],
           <Link to="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '1.5rem', fontStyle: 'italic', color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>KAYAD</Link>
           <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '1.5rem', color: '#fff', margin: '10px 0 10px' }}>Create Your Account</h2>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
-            {role === 'dealer' ? '🏪 Dealer' : role === 'broker' ? '🤝 Private Seller' : '👤 Buyer'}
+            {role === 'dealer' ? '🏪 Dealer' : role === 'broker' ? '🤝 Private Seller' : role === 'individual_seller' ? '🚗 Private Seller' : '👤 Buyer'}
             {selPkg && pkgList.length > 0 && ` · ${pkgList.find(p => p.id === selPkg)?.name || ''} Plan`}
           </div>
         </div>

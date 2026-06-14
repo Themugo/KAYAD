@@ -37,7 +37,7 @@ export default function RegisterPage() {
   const roleParam   = params.get('role');
   const isDealerUrl = roleParam === 'dealer' || roleParam === 'broker' || roleParam === 'individual_seller';
 
-  // If already logged in and unapproved dealer → show waiting room
+  // If already logged in and unapproved dealer/broker/individual_seller → show waiting room
   if (isAuth && isSellerRole(user?.role) && user?.status !== 'approved') {
     return <WaitingRoom user={user} onLogout={() => { logout(); navigate('/'); }} />;
   }
@@ -57,7 +57,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
   const [params]  = useSearchParams();
 
   const [step,    setStep]   = useState(isDealerUrl ? 2 : 1);
-  const [role,    setRole]   = useState(roleParam === 'broker' ? 'broker' : isDealerUrl ? 'dealer' : 'user');
+  const [role,    setRole]   = useState(roleParam === 'broker' ? 'broker' : roleParam === 'individual_seller' ? 'individual_seller' : isDealerUrl ? 'dealer' : 'user');
   const [selPkg,  setSelPkg] = useState('');
   const [loading, setLoading]= useState(false);
   const [livePkgs,setLivePkgs]= useState(null);
@@ -77,6 +77,7 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
 
   const isDealer = role === 'dealer';
   const isSeller = role === 'broker' || role === 'individual_seller';
+  const isIndividualSeller = role === 'individual_seller';
   const needsPkg = isDealer || isSeller;
 
   const pkgList = livePkgs
@@ -96,6 +97,9 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
       toast('Account created! Welcome to Kayad 🎉', 'success');
       if (role === 'dealer' && newUser?.status !== 'approved') {
         // Dealer awaiting admin approval → waiting room
+        setDone(newUser);
+      } else if (isIndividualSeller && newUser?.status !== 'approved') {
+        // Individual seller awaiting admin approval → waiting room
         setDone(newUser);
       } else if (isDealer || isSeller) {
         // Approved seller/dealer (incl. all demo accounts) → straight to the hub
