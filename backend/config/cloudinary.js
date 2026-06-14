@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { IMAGE_VARIANTS, QUALITY_PRESETS } from "./imageProcessing.js";
 
 // =============================
 // 🔐 CONFIG
@@ -16,17 +17,62 @@ cloudinary.config({
 const BASE = [{ fetch_format: "auto" }, { quality: "auto:eco" }, { dpr: "auto" }];
 
 // =============================
-// 🎯 TRANSFORMS
+// 🎯 TRANSFORMS (ENHANCED)
 // =============================
 const T = {
-  full: [{ width: 1400, height: 900, crop: "limit" }, ...BASE],
+  // Original - no transformation
+  original: [],
 
-  card: [{ width: 600, height: 400, crop: "fill", gravity: "auto" }, ...BASE],
+  // Full view - enhanced
+  full: [
+    { width: 1400, height: 900, crop: "limit" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+    { progressive: "auto" },
+  ],
 
-  thumb: [{ width: 300, height: 200, crop: "fill", gravity: "auto" }, ...BASE],
+  // Card view - enhanced
+  card: [
+    { width: 600, height: 400, crop: "fill", gravity: "auto" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
 
+  // Thumbnail - enhanced
+  thumb: [
+    { width: 300, height: 200, crop: "fill", gravity: "auto" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
+
+  // Responsive variants
+  mobile: [
+    { width: 320, crop: "limit" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
+
+  tablet: [
+    { width: 768, crop: "limit" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
+
+  desktop: [
+    { width: 1200, crop: "limit" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
+
+  large: [
+    { width: 1920, crop: "limit" },
+    { quality: "auto:good" },
+    { fetch_format: "auto" },
+  ],
+
+  // Blur placeholder
   blur: [
-    { width: 40, height: 30, crop: "fill" },
+    { width: 20, height: 20, crop: "fill" },
     { quality: "auto:low" },
     { effect: "blur:1000" },
     { fetch_format: "auto" },
@@ -34,20 +80,35 @@ const T = {
 };
 
 // =============================
-// 📤 UPLOAD IMAGE (SAFE)
+// 📤 UPLOAD IMAGE (ENHANCED)
 // =============================
-export const uploadImage = async (file, folder = "kayad/cars") => {
+export const uploadImage = async (file, folder = "kayad/cars", options = {}) => {
   try {
+    const {
+      generateVariants = true,
+      preserveOriginal = true,
+      compress = true,
+    } = options;
+
     // 🔥 SUPPORT BOTH MEMORY + DISK
     const uploadOptions = {
       folder,
       resource_type: "image",
       transformation: T.full,
 
-      eager: [T.card, T.thumb],
+      // Generate responsive variants if enabled
+      eager: generateVariants ? [T.card, T.thumb, T.mobile, T.tablet, T.desktop] : [T.card, T.thumb],
       eager_async: true,
 
       invalidate: true,
+
+      // Preserve original if requested
+      type: preserveOriginal ? "upload" : "upload",
+
+      // Additional optimizations
+      quality: compress ? "auto:good" : "auto",
+      fetch_format: "auto",
+      progressive: "auto",
     };
 
     let result;
@@ -80,8 +141,16 @@ export const uploadImage = async (file, folder = "kayad/cars") => {
       thumb: cloudinary.url(publicId, { transformation: T.thumb }),
       blur: cloudinary.url(publicId, { transformation: T.blur }),
 
+      // 🔥 RESPONSIVE VARIANTS (NEW)
+      mobile: cloudinary.url(publicId, { transformation: T.mobile }),
+      tablet: cloudinary.url(publicId, { transformation: T.tablet }),
+      desktop: cloudinary.url(publicId, { transformation: T.desktop }),
+      large: cloudinary.url(publicId, { transformation: T.large }),
+
       width: result.width,
       height: result.height,
+      format: result.format,
+      bytes: result.bytes,
     };
   } catch (err) {
     console.error("❌ CLOUDINARY ERROR:", err);
