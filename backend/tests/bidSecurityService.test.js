@@ -32,11 +32,11 @@ describe("bidSecurityService", () => {
   });
 
   describe("initiateBidSecurity", () => {
-    it("throws if auction not found", async () => {
+    it("returns error if auction not found", async () => {
       mockAuctionPopulate.mockResolvedValue(null);
-      await expect(
-        service.initiateBidSecurity({ auctionId: "bad", userId: "u1", phone: "254700000000" }),
-      ).rejects.toThrow("Auction not found");
+      const result = await service.initiateBidSecurity({ auctionId: "bad", userId: "u1", phone: "254700000000" });
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Auction not found");
       expect(mockAuctionFindById).toHaveBeenCalledWith("bad");
     });
 
