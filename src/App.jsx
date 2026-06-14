@@ -29,7 +29,7 @@ import {
   RequireEmailVerified,
   useAuth,
 } from './context/AuthContext';
-import { getPostAuthPath } from './utils/authRoutes';
+
 import { ToastProvider } from './context/ToastContext';
 import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -121,13 +121,14 @@ const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOv
 // ─── Layout wrappers ────────────────────────────────────────────────────
 // Small composition helpers keep the <Routes> block tidy.
 
-/** Public chrome (Navbar + Footer). Used for landing, listings, and auth pages. */
+/** Public chrome (Navbar + Footer). Used for landing, listings, and auth pages.
+ *  NOTE: auth-page redirects are handled by the page component itself (LoginPage's
+ *  useEffect) so the Public wrapper never renders a <Navigate> during transitions. */
 const Public = ({ children }) => {
-  const { isAuth, user, loading } = useAuth();
+  const { isAuth, loading } = useAuth();
   const loc = useLocation();
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(loc.pathname);
   if (loading && isAuthRoute) return <AppLayout><div className="loading-center"><div className="spinner"/></div></AppLayout>;
-  if (isAuth && isAuthRoute) return <Navigate to={getPostAuthPath(user, '/')} replace />;
   return <AppLayout>{children}</AppLayout>;
 };
 
@@ -189,7 +190,7 @@ function SwipeBackHandler() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <BrowserRouter future={{ v7_relativeSplatPath: true }}>
         <ToastProvider>
           <BrandingProvider>
             <AuthProvider>
