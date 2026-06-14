@@ -420,6 +420,7 @@ app.use("/api/market", marketRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/finance", financeRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above
