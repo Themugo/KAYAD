@@ -38,7 +38,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
     if (!checkoutId) return;
 
     const offSuccess = on('paymentSuccess', (data) => {
-      if (data.checkoutID === checkoutId) {
+      if (data.checkoutID === checkoutId && stage !== 'success') {
         clearInterval(pollInterval);
         setStage('success');
         toast('Payment confirmed!', 'success');
@@ -47,7 +47,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
     });
 
     const offFailed = on('paymentFailed', (data) => {
-      if (data.checkoutID === checkoutId) {
+      if (data.checkoutID === checkoutId && stage !== 'failed') {
         clearInterval(pollInterval);
         setStage('failed');
         toast('Payment failed or cancelled.', 'error');
@@ -55,7 +55,7 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
     });
 
     return () => { offSuccess(); offFailed(); };
-  }, [checkoutId, pollInterval]);
+  }, [checkoutId, pollInterval, stage]);
 
   useEffect(() => {
     if (stage !== 'waiting' || !checkoutId) return;
@@ -63,12 +63,12 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
     const interval = setInterval(async () => {
       try {
         const data = await paymentsAPI.byCheckout(checkoutId);
-        if (data.payment?.status === 'success') {
+        if (data.payment?.status === 'success' && stage !== 'success') {
           clearInterval(interval);
           setStage('success');
           toast('Payment confirmed!', 'success');
           setTimeout(() => { onSuccess?.(); onClose(); }, 1800);
-        } else if (data.payment?.status === 'failed') {
+        } else if (data.payment?.status === 'failed' && stage !== 'failed') {
           clearInterval(interval);
           setStage('failed');
         }

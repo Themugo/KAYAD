@@ -45,6 +45,13 @@ export default function AdminBids() {
 
   const handleSetWinner = async (bid) => {
     if (!window.confirm(`Set ${bid.user?.name || 'this bidder'} (${formatKES(bid.amount)}) as winner?`)) return;
+    
+    // Verify payment is confirmed before setting winner
+    if (!bid.mpesaPaid) {
+      toast('⚠️ Cannot set winner: Bid payment not yet confirmed via M-Pesa', 'error');
+      return;
+    }
+    
     setActionId(bid._id);
     try {
       await bidsAPI.adminSetWinner(bid._id);

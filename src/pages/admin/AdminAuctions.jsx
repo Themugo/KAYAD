@@ -95,6 +95,15 @@ export default function AdminAuctions() {
 
   const handleSetWinner = async (bidId) => {
     if (!winnerModal) return;
+    const bid = winnerModal.bids.find(b => b._id === bidId);
+    if (!bid) return;
+    
+    // Verify payment is confirmed before setting winner
+    if (!bid.mpesaPaid) {
+      toast('⚠️ Cannot set winner: Bid payment not yet confirmed via M-Pesa', 'error');
+      return;
+    }
+    
     setActionId(bidId);
     try {
       await auctionAdminAPI.setWinner(winnerModal.car._id, bidId);
