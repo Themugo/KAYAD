@@ -104,7 +104,7 @@ export const DEMO_USERS = {
 
 try { localStorage.removeItem('kayad_demo_cars'); } catch { /* ignore */ }
 
-let _cars = [];
+let _cars = buildDemoCars();
 
 export const DEMO_CARS = _cars;
 export function addDemoCar(car) {

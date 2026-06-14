@@ -10,7 +10,7 @@ const userIdOf = (u) => u?.id || u?._id;
 export default function ChatPage() {
   const { chatId } = useParams();
   const { user } = useAuth();
-  const { on, emit, socket } = useSocket();
+  const { on, emit, connected: ctxConnected } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ export default function ChatPage() {
   const [search, setSearch]     = useState('');
   const [attachments, setAttachments] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState({});
-  const [connected, setConnected] = useState(false);
+  const connected = ctxConnected;
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const bottomRef = useRef(null);
   const typingTimer = useRef(null);
@@ -109,20 +109,6 @@ export default function ChatPage() {
   useEffect(() => () => clearTimeout(typingTimer.current), []);
   useEffect(() => () => clearInterval(typingEmitTimer.current), []);
 
-  // Socket connection tracking
-  useEffect(() => {
-    if (!socket.current) return;
-    const onConnect = () => setConnected(true);
-    const onDisconnect = () => setConnected(false);
-    setConnected(socket.current.connected);
-    socket.current.on('connect', onConnect);
-    socket.current.on('disconnect', onDisconnect);
-    return () => {
-      socket.current?.off('connect', onConnect);
-      socket.current?.off('disconnect', onDisconnect);
-    };
-  }, [socket]);
-
   // Auto-close sidebar on mobile when a chat is selected
   useEffect(() => {
     if (active && window.innerWidth < 768) setSidebarOpen(false);
@@ -130,21 +116,15 @@ export default function ChatPage() {
 
   // Join/leave socket room for active chat
   useEffect(() => {
-    if (active && socket.current) {
-      socket.current.emit?.('joinChat', active);
-    }
-    return () => {
-      if (active && socket.current) {
-        socket.current.emit?.('leaveChat', active);
-      }
-    };
-  }, [active, socket]);
+    if (active) emit('joinChat', active);
+    return () => { if (active) emit('leaveChat', active); };
+  }, [active, emit]);
 
   // Emit typing every 2s while user is typing
   const emitTyping = useCallback(() => {
-    if (!active || !socket.current) return;
-    socket.current.emit('typing', { chatId: active, userId: uid, name: user?.name });
-  }, [active, uid, user?.name, socket]);
+    if (!active) return;
+    emit('typing', { chatId: active, userId: uid, name: user?.name });
+  }, [active, uid, user?.name, emit]);
 
   const handleTextChange = (e) => {
     setText(e.target.value);

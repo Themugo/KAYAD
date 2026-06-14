@@ -26,12 +26,12 @@ const carSchema = new mongoose.Schema(
     // =============================
     // 🚗 SPECS
     // =============================
-    fuel: { type: String, index: true },
-    transmission: { type: String },
+    fuel: { type: String, index: true, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'LPG', 'CNG'] },
+    transmission: { type: String, enum: ['Automatic', 'Manual', 'CVT', 'DCT', 'Semi-Automatic'] },
     mileage: Number,
-    bodyType: String,
-    color: String,
-    condition: String,
+    bodyType: { type: String, enum: ['SUV', 'Sedan', 'Hatchback', 'Pickup', 'Wagon', 'Coupe', 'Convertible', 'Van', 'Truck', 'Bus', 'Motorcycle', 'Other'] },
+    color: { type: String, enum: ['White', 'Black', 'Silver', 'Grey', 'Blue', 'Red', 'Green', 'Brown', 'Beige', 'Gold', 'Orange', 'Purple', 'Yellow', 'Maroon', 'Navy', 'Other'] },
+    condition: { type: String, enum: ['New', 'Used', 'Pre-owned', 'Foreign Used', 'Locally Used', 'Reconditioned', 'Damaged'] },
     description: String,
     features: [String],
 

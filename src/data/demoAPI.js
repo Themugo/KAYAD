@@ -493,6 +493,29 @@ const demoCars = {
     return wrapSuccess({ message: 'Toggled' });
   },
 
+  priceHistory: async (carId) => {
+    await delay();
+    const car = getDemoCar(carId);
+    if (!car) return wrapSuccess({ priceHistory: [], data: [] });
+    const now = Date.now();
+    const history = Array.from({ length: 6 }, (_, i) => ({
+      price: car.price * (0.92 + i * 0.016 + Math.random() * 0.01),
+      date: new Date(now - (5 - i) * 86400000 * 7).toISOString(),
+    }));
+    return wrapSuccess({ priceHistory: history, data: history });
+  },
+
+  demoAll: async (params) => {
+    await delay();
+    return demoCars.list(params);
+  },
+
+  batch: async (ids) => {
+    await delay();
+    const cars = (ids || []).map(id => getDemoCar(id)).filter(Boolean).map(transformCar);
+    return wrapSuccess({ cars, data: cars });
+  },
+
   fraudCheck: async () => {
     await delay();
     return wrapSuccess({ risk: 'low', flags: [], score: 15 });
@@ -766,6 +789,60 @@ const demoDealer = {
     const team = readDemoTeam(user?._id).filter(m => m._id !== memberId);
     writeDemoTeam(user?._id, team);
     return wrapSuccess({ message: 'Team member removed' });
+  },
+
+  getSettlement: async () => {
+    await delay();
+    return wrapSuccess({
+      settlement: {
+        accountName: 'Nairobi Auto Hub Ltd',
+        accountNumber: '1234567890',
+        bank: 'Equity Bank',
+        bankCode: '12',
+        branch: 'Industrial Area',
+        phone: '254723456789',
+        method: 'bank_transfer',
+        autoSettlement: true,
+        settlementPeriod: 'weekly',
+      },
+      data: {
+        accountName: 'Nairobi Auto Hub Ltd',
+        accountNumber: '1234567890',
+        bank: 'Equity Bank',
+        bankCode: '12',
+        branch: 'Industrial Area',
+        phone: '254723456789',
+        method: 'bank_transfer',
+        autoSettlement: true,
+        settlementPeriod: 'weekly',
+      },
+    });
+  },
+
+  updateSettlement: async (body) => {
+    await delay(300, 600);
+    return wrapSuccess({ message: 'Settlement settings updated', data: body });
+  },
+
+  getMyActivityLog: async (params) => {
+    await delay();
+    return wrapSuccess({ logs: [], data: { logs: [], total: 0 } });
+  },
+
+  getProfile: async () => {
+    await delay();
+    const user = getDemoUser();
+    if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
+    return wrapSuccess({ dealer: user, data: user });
+  },
+
+  updateProfile: async (body) => {
+    await delay(300, 600);
+    const user = getDemoUser();
+    if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
+    const updated = { ...user, ...body };
+    setDemoUser(updated);
+    return wrapSuccess({ dealer: updated, message: 'Profile updated', data: updated });
   },
 
   quickStats: async () => {
@@ -1203,7 +1280,10 @@ export const demoAPI = {
   favorites: demoFavorites,
   chat: demoChat,
   notif: demoNotif,
-  savedSearch: { list: async () => ({ searches: [] }), create: async () => ({}), update: async () => ({}), remove: async () => ({}) },
+  savedSearch: {
+    list: async () => ({ searches: [] }), create: async () => ({}), update: async () => ({}),
+    remove: async () => ({}), delete: async () => ({}), toggleAlerts: async () => ({ message: 'Toggled' }),
+  },
   ntsa: {
     list: async () => {
       await delay();

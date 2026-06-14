@@ -57,6 +57,9 @@ export default function AuctionLivePage() {
   const bidListRef = useRef(null);
   const prevBidRef = useRef(0);
   const newBidIdsRef = useRef(new Set());
+  const bidsRef = useRef([]);
+  const carRef = useRef(null);
+  const currentBidRef = useRef(0);
 
   // Gallery navigation
   const [imgIdx, setImgIdx] = useState(0);
@@ -74,6 +77,11 @@ export default function AuctionLivePage() {
   // Spectator join state
   const [spectatorMode, setSpectatorMode] = useState(false);
   const spectatorRef = useRef(null);
+
+  // Sync refs with latest state (avoids stale closures in socket handlers)
+  useEffect(() => { bidsRef.current = bids; }, [bids]);
+  useEffect(() => { carRef.current = car; }, [car]);
+  useEffect(() => { currentBidRef.current = currentBid; }, [currentBid]);
 
   // Simulated live viewers
   const [liveViewers, setLiveViewers] = useState(0);
@@ -191,7 +199,7 @@ export default function AuctionLivePage() {
 
       // Outbid check
       if (isAuth && data.userId && data.userId !== user?._id && data.userId !== user?.id) {
-        const myBids = bids.filter(b => String(b.userId) === String(user._id));
+        const myBids = bidsRef.current.filter(b => String(b.userId) === String(user._id));
         if (myBids.length > 0) {
           setOutbidAlert(true);
           setTimeout(() => setOutbidAlert(false), 3000);
@@ -207,8 +215,8 @@ export default function AuctionLivePage() {
         setConfetti(true);
         setShowWinner({
           certificateNumber: `KAYD-${Date.now().toString(36).toUpperCase()}`,
-          vehicle: { title: car?.title || 'Vehicle' },
-          financials: { winningBid: data.highestBid || currentBid },
+          vehicle: { title: carRef.current?.title || 'Vehicle' },
+          financials: { winningBid: data.highestBid || currentBidRef.current },
         });
         toast('🏆 You won the auction! Congratulations!', 'success');
       } else {

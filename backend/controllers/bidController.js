@@ -339,9 +339,8 @@ export const placeBid = async (req, res) => {
 // 📲 MPESA CALLBACK
 // =============================
 export const confirmBidPayment = async (req, res) => {
-  const session = await mongoose.startSession();
-
   try {
+    const session = await mongoose.startSession();
     session.startTransaction();
 
     const callback = req.body?.Body?.stkCallback || req.body?.stkCallback;

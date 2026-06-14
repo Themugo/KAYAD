@@ -244,9 +244,8 @@ export const notifyEscrowRefunded = async (escrow) => {
 // 💰 RELEASE ESCROW (ADMIN 🔥)
 // =============================
 export const releaseEscrow = async (req, res) => {
-  const session = await mongoose.startSession();
-
   try {
+    const session = await mongoose.startSession();
     session.startTransaction();
 
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
@@ -356,9 +355,8 @@ export const releaseEscrow = async (req, res) => {
 // 🔁 REFUND ESCROW (ADMIN 🔥)
 // =============================
 export const refundEscrow = async (req, res) => {
-  const session = await mongoose.startSession();
-
   try {
+    const session = await mongoose.startSession();
     session.startTransaction();
 
     const escrow = await Escrow.findById(req.params.id).populate("payment car").session(session);
