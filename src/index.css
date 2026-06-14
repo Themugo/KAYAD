@@ -656,3 +656,57 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
 .home-stats-grid {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
+
+/* Showroom Empty State */
+.showroom-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.showroom-empty-label {
+  font-size: 11px;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.showroom-empty-title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(1.4rem, 3vw, 1.8rem);
+  color: #fff;
+  margin: 0 0 12px;
+}
+
+.showroom-empty-desc {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin-bottom: 22px;
+  font-family: var(--font-body);
+}
+
+.showroom-empty-btn {
+  background: var(--gold);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 22px;
+  color: #0a0a0a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+}
+
+.showroom-empty-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}

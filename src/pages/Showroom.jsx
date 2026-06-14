@@ -139,7 +139,9 @@ export default function Showroom() {
 
   // ─── Load user's saved searches once ──────────────────────────────────
   useEffect(() => {
-    savedSearchAPI.list?.().then(r => setSavedSearches(r.searches || [])).catch(() => {});
+    savedSearchAPI.list?.()
+      .then(r => setSavedSearches(r.searches || []))
+      .catch(() => setSavedSearches([]));
   }, []);
 
   // ─── URL ⇄ Filter state ───────────────────────────────────────────────
@@ -244,13 +246,15 @@ export default function Showroom() {
       setCars(prev => (replace ? newCars : [...prev, ...newCars]));
       setTotalCount(data.pagination?.total || 0);
       setHasMore(pageNum < (data.pagination?.pages || 1));
-    } catch {
+    } catch (error) {
+      console.error('Failed to load cars:', error);
       if (replace) setCars([]);
+      toast('Could not load vehicles. Please try again.', 'error');
     } finally {
       setLoading(false);
       loadingRef.current = false;
     }
-  }, [getApiParams]);
+  }, [getApiParams, toast]);
 
   useEffect(() => { setPage(1); loadCars(1, true); }, [filters, sortBy, loadCars]);
   useEffect(() => { if (page > 1) loadCars(page, false); }, [page, loadCars]);
