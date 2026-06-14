@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useBranding } from '../context/BrandingContext';
 
 export default function Footer() {
+  const { branding } = useBranding();
+
   return (
     <footer style={{
       borderTop: '1px solid rgba(255,255,255,0.04)',
@@ -16,15 +19,28 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, textDecoration: 'none' }}>
-              <div style={{
-                width: 36, height: 36, borderRadius: 10,
-                background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 16px rgba(212,196,168,0.25)',
-              }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>K</span>
-              </div>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#fff' }}>KAYAD</span>
+              {branding?.logoType === 'image' && branding?.logoUrl ? (
+                <img 
+                  src={branding.logoUrl} 
+                  alt={branding.logoText || 'KAYAD'} 
+                  style={{ width: 36, height: 36, borderRadius: 10, objectFit: 'cover' }}
+                  decoding="async"
+                />
+              ) : (
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: 'linear-gradient(135deg, #A89878 0%, #E8DAC4 40%, #C4B498 70%, #8A7A5E 100%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 16px rgba(212,196,168,0.25)',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#000', lineHeight: 1, fontStyle: 'italic' }}>
+                    {(branding?.logoText || 'KAYAD')[0]}
+                  </span>
+                </div>
+              )}
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, color: '#fff' }}>
+                {branding?.logoText || 'KAYAD'}
+              </span>
             </Link>
             <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)', lineHeight: 1.7, maxWidth: 280, margin: 0 }}>
               Kenya's premium automotive marketplace.

@@ -33,7 +33,7 @@ const DEFAULTS = {
 };
 
 const BRANDING_DEFAULTS = {
-  logoText: 'K',
+  logoText: 'KAYAD',
   logoType: 'icon',
   logoUrl: '',
   brandTagline: 'Premium Marketplace',
