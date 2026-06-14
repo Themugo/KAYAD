@@ -7,7 +7,7 @@ export function initAnalytics() {
   initialized = true;
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function(){ dataLayer.push(arguments); };
+  window.gtag = function(){ window.dataLayer.push(arguments); };
 
   const s = document.createElement("script");
   s.async = true;

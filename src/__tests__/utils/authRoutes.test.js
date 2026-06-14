@@ -52,10 +52,10 @@ describe('getPostAuthPath', () => {
     expect(getPostAuthPath({ role: 'superadmin', emailVerified: true })).toBe('/admin');
   });
   it('redirects dealers to /dealer', () => {
-    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: true })).toBe('/dealer');
+    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, status: 'approved' })).toBe('/dealer');
   });
   it('redirects unapproved dealers to fallback', () => {
-    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, approved: false })).toBe('/');
+    expect(getPostAuthPath({ role: 'dealer', emailVerified: true, status: 'pending' })).toBe('/');
   });
   it('redirects regular users to /dashboard', () => {
     expect(getPostAuthPath({ role: 'user', emailVerified: true })).toBe('/dashboard');

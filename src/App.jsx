@@ -125,7 +125,7 @@ const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOv
  *  NOTE: auth-page redirects are handled by the page component itself (LoginPage's
  *  useEffect) so the Public wrapper never renders a <Navigate> during transitions. */
 const Public = ({ children }) => {
-  const { isAuth, loading } = useAuth();
+  const { loading } = useAuth();
   const loc = useLocation();
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(loc.pathname);
   if (loading && isAuthRoute) return <AppLayout><div className="loading-center"><div className="spinner"/></div></AppLayout>;

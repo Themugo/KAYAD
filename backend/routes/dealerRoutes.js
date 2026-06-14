@@ -633,9 +633,7 @@ router.post(
 
     // Notify winner
     try {
-      if (typeof sendSaleNotification === "function") {
-        sendSaleNotification(bid.user, car.title).catch((e) => console.warn("Sale notif failed:", e.message));
-      }
+      await sendNotification({ userId: bid.user, title: "Bid Accepted!", message: `Your bid on ${car.title} has been accepted`, type: "bid" }).catch((e) => console.warn("Sale notif failed:", e.message));
     } catch {
       /* non-critical */
     }

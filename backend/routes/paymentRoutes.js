@@ -7,6 +7,7 @@ import { validate } from "../middleware/validate.js";
 import { paymentLimiter } from "../middleware/rateLimiter.js";
 import { initiatePaymentSchema } from "../validation/platform.schema.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
+import Payment from "../models/Payment.js";
 
 import {
   initiatePayment,
