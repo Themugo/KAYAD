@@ -703,6 +703,7 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 // 🚀 Start auction on dealer's own car
 router.post(
   "/cars/:id/auction/start",
+  requireDealerVerification,
   asyncHandler(async (req, res) => {
     const { durationMs, startingBid, reservePrice, reserveMode } = req.body;
     if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });

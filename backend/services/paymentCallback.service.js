@@ -6,6 +6,8 @@ import { createEscrow } from "../services/escrow.service.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import User from "../models/User.js";
+import Dealer from "../models/Dealer.js";
+import DealerVerification from "../models/DealerVerification.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
@@ -152,10 +154,40 @@ export const handleMpesaCallback = async (callbackData) => {
 
     if (payment.type === "purchase") {
       const escrowCar = await Car.findById(payment.car).session(session).lean();
+      const sellerId = escrowCar?.dealer || payment.user;
+
+      // Check seller verification status
+      const dealer = await Dealer.findOne({ user: sellerId }).session(session);
+      if (dealer) {
+        // Check legacy approval
+        if (dealer.approved !== true) {
+          const verification = await DealerVerification.findOne({ user: sellerId }).session(session);
+          if (!verification || verification.verificationStatus !== "approved") {
+            logWarn("Escrow creation blocked: seller not verified", {
+              sellerId,
+              verificationStatus: verification?.verificationStatus || "none",
+              paymentId: payment._id,
+            });
+            // Refund payment since seller is not verified
+            payment.status = "failed";
+            payment.resultDesc = "Seller verification required for escrow";
+            await payment.save({ session });
+            await session.commitTransaction();
+            await sendNotification({
+              userId: payment.user,
+              title: "Payment Refunded",
+              message: "Your payment was refunded because the seller is not verified. Please contact support.",
+              type: "payment",
+            });
+            return payment;
+          }
+        }
+      }
+
       await createEscrow({
         car: payment.car,
         buyer: payment.user,
-        seller: escrowCar?.dealer || payment.user,
+        seller: sellerId,
         amount: payment.amount,
         paymentId: payment._id,
       });

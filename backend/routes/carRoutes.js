@@ -11,6 +11,7 @@ import { uploadLimiter, bidLimiter, createLimiter } from "../middleware/rateLimi
 import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES } from "../config/roles.js";
+import { requireDealerVerification } from "../middleware/dealerVerification.js";
 
 import {
   getCars,
@@ -136,6 +137,7 @@ router.post(
   "/",
   protect,
   dealerOnly,
+  requireDealerVerification,
   uploadLimiter,
   upload.array("images", 10),
   handleUploadError,
