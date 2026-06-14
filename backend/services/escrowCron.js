@@ -12,13 +12,28 @@ import Escrow from "../models/Escrow.js";
 import Notification from "../models/Notification.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { addNotificationJob } from "../queues/notificationQueue.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
 const ENABLED = process.env.ESCROW_CRON_ENABLED !== "false";
+const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 // ── NOTIFY HELPER ─────────────────────────────────────────────
 const notify = async (userId, title, message, type = "escrow") => {
   try {
+    // Use queue if enabled
+    if (QUEUE_MODE) {
+      await addNotificationJob({
+        userId,
+        title,
+        message,
+        type,
+        channels: ["push"],
+      });
+      return;
+    }
+
+    // Synchronous fallback
     const notif = await Notification.create({ user: userId, title, message, type });
     getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {

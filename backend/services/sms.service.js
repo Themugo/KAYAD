@@ -1,11 +1,21 @@
 import { sendSMS as _sendSMS } from "../utils/sms.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { addSMSJob } from "../queues/smsQueue.js";
+
+const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 export { sendSMS } from "../utils/sms.js";
 
 const formatKES = (n) => "KES " + Number(n || 0).toLocaleString("en-KE");
 
-const sms = async (phone, message, context = {}) => {
+const sms = async (phone, message, context = {}, useQueue = QUEUE_MODE) => {
+  // Use queue if enabled
+  if (useQueue) {
+    await addSMSJob({ phone, message, context });
+    return true;
+  }
+
+  // Synchronous fallback
   const ok = await _sendSMS(phone, message);
   if (ok) logInfo("SMS sent", { phone, context });
   else logError("SMS failed", { phone, context });

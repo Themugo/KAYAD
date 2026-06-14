@@ -12,6 +12,8 @@ import Bid from "../models/Bid.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
+import { addNotificationJob } from "../queues/notificationQueue.js";
+import { addEmailJob } from "../queues/emailQueue.js";
 
 let cronEmailService = {};
 try {
@@ -21,9 +23,23 @@ try {
 }
 
 const ENABLED = process.env.AUCTION_REMINDER_ENABLED !== "false";
+const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 const notify = async (userId, title, message, type = "auction") => {
   try {
+    // Use queue if enabled
+    if (QUEUE_MODE) {
+      await addNotificationJob({
+        userId,
+        title,
+        message,
+        type,
+        channels: ["push"],
+      });
+      return;
+    }
+
+    // Synchronous fallback
     const notif = await Notification.create({ user: userId, title, message, type });
     getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {
@@ -67,9 +83,19 @@ const runReminders = async () => {
         for (const userId of activeBidders) {
           const user = await User.findById(userId).select("email name notifications");
           if (user?.email && user?.notifications?.email !== false && typeof sendAuctionEndingSoonEmail === "function") {
-            sendAuctionEndingSoonEmail(user, car, threshold.minutes).catch((e) =>
-              console.warn("⚠️ Auction reminder email failed:", e.message),
-            );
+            // Use queue if enabled
+            if (QUEUE_MODE) {
+              await addEmailJob({
+                to: user.email,
+                subject: `Auction ending in ${threshold.minutes} minutes`,
+                html: `<p>The auction for ${car.title || "a vehicle"} ends in ${threshold.minutes} minutes. Current bid: KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}.</p>`,
+                text: `The auction for ${car.title || "a vehicle"} ends in ${threshold.minutes} minutes. Current bid: KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}.`,
+              });
+            } else {
+              sendAuctionEndingSoonEmail(user, car, threshold.minutes).catch((e) =>
+                console.warn("⚠️ Auction reminder email failed:", e.message),
+              );
+            }
           }
 
           await notify(

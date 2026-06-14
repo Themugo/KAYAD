@@ -1,5 +1,9 @@
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
+import { addNotificationJob } from "../queues/notificationQueue.js";
+
+// Queue mode flag
+const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 // =============================
 // 📢 SEND NOTIFICATION
@@ -12,9 +16,23 @@ export const sendNotification = async ({
   type = "info",
   data = {},
   channels = ["push", "email"],
+  useQueue = QUEUE_MODE,
 }) => {
   try {
-    // Create in-app notification
+    // Use queue if enabled
+    if (useQueue) {
+      await addNotificationJob({
+        userId,
+        title,
+        message,
+        type,
+        data,
+        channels,
+      });
+      return { queued: true, userId, title };
+    }
+
+    // Synchronous fallback
     const notification = await Notification.create({
       user: userId,
       title,

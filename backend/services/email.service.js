@@ -1,10 +1,12 @@
 import nodemailer from "nodemailer";
 import { withRetry } from "../utils/retry.js";
+import { addEmailJob } from "../queues/emailQueue.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
 const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
 const FROM = process.env.EMAIL_FROM || `noreply@kayad.space`;
 const ENABLED = !!process.env.EMAIL_HOST;
+const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 let transporter = null;
 
@@ -90,7 +92,8 @@ const btn = (text, url) => `
 
 const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margin:24px 0;">`;
 
-export const sendEmail = async ({ to, subject, html, text }) => {
+// Export raw email function for queue worker
+export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => {
   const t = getTransporter();
   if (!t) {
     if (process.env.NODE_ENV !== "test") console.log(`📧 [Email disabled] Would send "${subject}" to ${to}`);
