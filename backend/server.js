@@ -77,6 +77,9 @@ import v1Routes from "./routes/v1.js";
 import notFound from "./middleware/notFound.js";
 import errorHandler from "./middleware/errorHandler.js";
 
+// ─── Sentry Error Handler ───────────────────────────────────────
+import * as Sentry from "@sentry/node";
+
 // ─── Services & Utils ─────────────────────────────────────────
 import requestLogger from "./middleware/logger.js";
 import { logInfo, logWarn, logError, logDebug } from "./utils/logger.js";
@@ -92,12 +95,31 @@ import { registerHealthRoutes } from "./utils/healthCheck.js";
 import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected } from "./utils/cache.js";
 import redisClient from "./config/redis.js";
+import { initSentry } from "./config/sentry.js";
+import { triggerAlert, ALERT_LEVELS } from "./config/alerting.js";
+import { recordHttpRequest, recordError } from "./config/metrics.js";
 const getRedisClient = () => redisClient;
 import { setIO } from "./utils/io.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: resolve(__dirname, "../.env") });
 dotenv.config({ path: resolve(__dirname, ".env") });
+
+// =============================
+// 🔧 ENVIRONMENT VALIDATION
+// =============================
+try {
+  validateEnv();
+  console.log("✅ Environment variables validated");
+} catch (err) {
+  console.error("❌ Environment validation failed:", err.message);
+  process.exit(1);
+}
+
+// =============================
+// 🔧 SENTRY INITIALIZATION
+// =============================
+initSentry();
 
 // ─── CONFIG ───────────────────────────────────────────────────
 const app = express();
@@ -161,6 +183,20 @@ app.use(extraHeaders());
 
 // ─── REQUEST LOGGER (assigns requestId to every request) ──────
 app.use(requestLogger);
+
+// ─── REQUEST METRICS MIDDLEWARE
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - startTime;
+    recordHttpRequest(req.method, req.path, res.statusCode, duration);
+  });
+  next();
+});
+
+// ─── SENTRY REQUEST HANDLER
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 
 // ─── HTTP LOGGING ────────────────────────────────────────────
 if (NODE_ENV === "development") app.use(morgan("dev"));
@@ -429,6 +465,7 @@ app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
 app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
+app.use(Sentry.Handlers.errorHandler());
 app.use(notFound);
 app.use(errorHandler);
 
@@ -488,7 +525,7 @@ const bootstrap = async () => {
       logWarn("Auto-seed skipped", { error: seedErr.message });
     }
 
-    server.listen(PORT, () => {
+    server.listen(PORT, async () => {
       logInfo("Kayad API started", {
         url: `http://localhost:${PORT}`,
         env: NODE_ENV,
@@ -498,7 +535,20 @@ const bootstrap = async () => {
         posthog: process.env.POSTHOG_API_KEY ? "connected" : "disabled",
         redis: process.env.REDIS_URL ? "connecting..." : "in-memory fallback",
         socket: "ready",
+        sentry: process.env.SENTRY_DSN ? "enabled" : "disabled",
+        backup: process.env.BACKUP_ENABLED === "true" ? "enabled" : "disabled",
+        cardPayment: process.env.CARD_PAYMENT_ENABLED === "true" ? "enabled" : "disabled",
       });
+
+      // Trigger startup alert
+      if (process.env.SENTRY_DSN) {
+        await triggerAlert(
+          "Server Started",
+          `KAYAD backend server started successfully on port ${PORT}`,
+          ALERT_LEVELS.LOW,
+          { port: PORT, host: "localhost", environment: NODE_ENV }
+        );
+      }
     });
 
     await startAuctionEngine();
@@ -554,6 +604,17 @@ const shutdown = async (signal) => {
   if (shutdown.inProgress) return;
   shutdown.inProgress = true;
   logInfo("Shutting down gracefully", { signal });
+
+  // Trigger shutdown alert
+  if (process.env.SENTRY_DSN) {
+    await triggerAlert(
+      "Server Shutdown",
+      `KAYAD backend server shutting down due to ${signal}`,
+      ALERT_LEVELS.MEDIUM,
+      { signal }
+    );
+  }
+
   server.close(async () => {
     await mongoose.connection.close();
     logInfo("Shutdown complete");
@@ -565,12 +626,36 @@ const shutdown = async (signal) => {
 if (NODE_ENV !== "test") {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
-  process.on("unhandledRejection", (err) => {
+  process.on("unhandledRejection", async (err) => {
     logError("Unhandled rejection", err);
+    recordError("unhandled_rejection", String(err));
+
+    // Trigger critical alert
+    if (process.env.SENTRY_DSN) {
+      await triggerAlert(
+        "Unhandled Rejection",
+        `Unhandled promise rejection: ${String(err)}`,
+        ALERT_LEVELS.CRITICAL,
+        { reason: String(err) }
+      );
+    }
+
     shutdown("unhandledRejection");
   });
-  process.on("uncaughtException", (err) => {
+  process.on("uncaughtException", async (err) => {
     logError("Uncaught exception", err);
+    recordError("uncaught_exception", err.message);
+
+    // Trigger critical alert
+    if (process.env.SENTRY_DSN) {
+      await triggerAlert(
+        "Uncaught Exception",
+        `Uncaught exception: ${err.message}`,
+        ALERT_LEVELS.CRITICAL,
+        { error: err.message, stack: err.stack }
+      );
+    }
+
     process.exit(1);
   });
 }
