@@ -6,6 +6,7 @@ import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { getIO } from "../utils/io.js";
 import { isValidId } from "../utils/validateId.js";
+import { findOrCreateLeadFromEscrow, updateLeadStage } from "../services/leadService.js";
 
 // =============================
 // 📄 GET ALL ESCROWS (ADMIN)
@@ -97,6 +98,14 @@ export const confirmDelivery = async (req, res) => {
 
     if (escrow.status !== "held") {
       return res.status(400).json({ success: false, message: "Escrow is not in active state" });
+    }
+
+    // Create or update lead from escrow
+    try {
+      const lead = await findOrCreateLeadFromEscrow(escrow._id);
+      await updateLeadStage(lead._id, "sold", req.user.id);
+    } catch (leadErr) {
+      logWarn("Failed to update lead from escrow", { error: leadErr.message });
     }
 
     await escrow.confirmDelivery(req.user.id, req);

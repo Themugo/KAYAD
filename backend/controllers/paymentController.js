@@ -60,6 +60,16 @@ export const initiatePayment = async (req, res) => {
           payment: result.payment._id,
           status: "pending",
         });
+
+        // Create or update lead from escrow
+        try {
+          const { findOrCreateLeadFromEscrow, updateLeadStage } = await import("../services/leadService.js");
+          const lead = await findOrCreateLeadFromEscrow(escrow._id);
+          await updateLeadStage(lead._id, "escrow_started", car.dealer);
+        } catch (leadErr) {
+          console.warn("⚠️ Failed to update lead from escrow:", leadErr.message);
+        }
+
         result.escrowId = escrow._id;
       }
     }

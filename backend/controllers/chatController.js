@@ -4,6 +4,7 @@ import Chat from "../models/Chat.js";
 import mongoose from "mongoose";
 import { sendSMS } from "../utils/sms.js";
 import { getIO } from "../utils/io.js";
+import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 
 // =============================
 // 💬 START / CREATE CHAT
@@ -28,6 +29,13 @@ export const startChat = async (req, res) => {
         car: carId || null,
       });
       chat = await chat.populate("participants", "name avatar");
+
+      // Create lead from chat
+      try {
+        await findOrCreateLeadFromChat(chat._id);
+      } catch (leadErr) {
+        console.warn("⚠️ Failed to create lead from chat:", leadErr.message);
+      }
     }
 
     res.status(201).json({ success: true, chat });
@@ -91,6 +99,25 @@ export const sendMessage = async (req, res) => {
     await chat.addMessage(messageData);
 
     const savedMsg = chat.messages[chat.messages.length - 1];
+
+    // Add lead activity for message sent
+    try {
+      const lead = await findOrCreateLeadFromChat(chatId);
+      await addLeadActivity(lead._id, "message_sent", req.user.id, {
+        description: "Message sent",
+        metadata: { messageId: savedMsg._id },
+      });
+
+      // Update lead stage to contacted if it's new and dealer is responding
+      if (lead.stage === "new") {
+        const dealerId = chat.participants.find(p => p.toString() !== req.user.id.toString());
+        if (dealerId && req.user.id.toString() === dealerId.toString()) {
+          await updateLeadStage(lead._id, "contacted", req.user.id);
+        }
+      }
+    } catch (leadErr) {
+      console.warn("⚠️ Failed to add lead activity:", leadErr.message);
+    }
 
     if (getIO()) {
       getIO()

@@ -10,6 +10,7 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 
 // Email service — top-level import, no-ops if unavailable
 let bidEmailService = {};
@@ -26,6 +27,22 @@ const generatePseudonym = (userId, carId) => {
   const hash = crypto.createHash("sha256").update(`${userId}-${carId}-kayad`).digest("hex");
   const shortId = parseInt(hash.substring(0, 4), 16).toString(36).toUpperCase();
   return `Bidder #${shortId}`;
+};
+
+// =============================
+// 🎯 CREATE LEAD FROM BID
+// =============================
+const createLeadFromBid = async (userId, carId) => {
+  try {
+    const lead = await findOrCreateLeadFromAuction(carId, userId);
+    await addLeadActivity(lead._id, "bid_placed", userId, {
+      description: "Bid placed on auction",
+      metadata: { carId },
+    });
+    return lead;
+  } catch (err) {
+    logWarn("Failed to create lead from bid", { error: err.message });
+  }
 };
 
 // =============================
@@ -277,6 +294,13 @@ export const placeBid = async (req, res) => {
       status: payment.mode === "mpesa" ? "pending" : "paid",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
     });
+
+    // Create lead from bid
+    try {
+      await createLeadFromBid(userId, carId);
+    } catch (leadErr) {
+      logWarn("Failed to create lead from bid", { error: leadErr.message });
+    }
 
     // =============================
     // ⚡ MOCK MODE

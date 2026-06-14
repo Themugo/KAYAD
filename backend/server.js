@@ -72,6 +72,7 @@ import verificationRoutes from "./routes/verificationRoutes.js";
 import duplicateRoutes from "./routes/duplicateRoutes.js";
 import auditRoutes from "./routes/auditRoutes.js";
 import dealerHealthScoreRoutes from "./routes/dealerHealthScoreRoutes.js";
+import leadRoutes from "./routes/leadRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -459,6 +460,7 @@ app.use("/api/verification", verificationRoutes);
 app.use("/api/duplicates", duplicateRoutes);
 app.use("/api/audit", auditRoutes);
 app.use("/api/dealer-health-score", dealerHealthScoreRoutes);
+app.use("/api/leads", leadRoutes);
 app.use("/api/finance", financeRoutes);
 app.use(seoRoutes);
 
