@@ -99,7 +99,7 @@ export const confirmDelivery = async (req, res) => {
       return res.status(400).json({ success: false, message: "Escrow is not in active state" });
     }
 
-    await escrow.confirmDelivery();
+    await escrow.confirmDelivery(req.user.id, req);
 
     // Notify seller
     try {
@@ -383,7 +383,7 @@ export const refundEscrow = async (req, res) => {
       throw new Error("A detailed refund reason (min 10 chars) is required");
     }
 
-    escrow.refundBuyer(req.user.id, reason);
+    escrow.refundBuyer(req.user.id, reason, req);
 
     await escrow.save({ session });
 

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { logEscrowAction } from "../services/escrowAuditService.js";
 
 const escrowSchema = new mongoose.Schema(
   {
@@ -79,50 +80,152 @@ escrowSchema.methods.addHistory = function (action, userId) {
   this.history.push({ action, by: userId || null, at: new Date() });
 };
 
-escrowSchema.methods.markFunded = function () {
+escrowSchema.methods.markFunded = async function (userId, req) {
   if (this.status !== "pending") return this;
+  
+  // Capture state before action
+  const previousState = this.toObject();
+  
   this.status = "held";
   this.fundedAt = new Date();
   this.autoReleaseEligibleAt = new Date(Date.now() + this.releaseWindowDays * 86400000);
   this.timeline.depositReceived = true;
   this.timeline.depositReceivedAt = new Date();
   this.addHistory(`Funded — KES ${this.amount.toLocaleString("en-KE")} held`);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously (non-blocking)
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "mark_funded", userId, req, {
+          executeAction: async () => {}, // Already executed
+          notes: "Escrow funded and held",
+        });
+      } catch (err) {
+        // Audit logging failure should not break escrow operations
+        console.warn("⚠️ Audit logging failed for mark_funded:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.confirmDelivery = function (userId) {
+escrowSchema.methods.confirmDelivery = async function (userId, req) {
   if (this.status !== "held") throw new Error("Escrow not in delivery state");
+  
+  const previousState = this.toObject();
+  
   this.deliveryConfirmed = true;
   this.deliveryConfirmedAt = new Date();
   this.timeline.inspectionCompleted = true;
   this.timeline.inspectionCompletedAt = new Date();
   this.addHistory("Buyer confirmed delivery", userId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "confirm_delivery", userId, req, {
+          executeAction: async () => {},
+          notes: "Buyer confirmed delivery",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for confirm_delivery:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.scheduleInspection = function (userId) {
+escrowSchema.methods.scheduleInspection = async function (userId, req) {
+  const previousState = this.toObject();
+  
   this.timeline.inspectionScheduled = true;
   this.timeline.inspectionScheduledAt = new Date();
   this.addHistory("Inspection scheduled", userId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "schedule_inspection", userId, req, {
+          executeAction: async () => {},
+          notes: "Inspection scheduled",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for schedule_inspection:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.submitTransfer = function (userId) {
+escrowSchema.methods.submitTransfer = async function (userId, req) {
+  const previousState = this.toObject();
+  
   this.timeline.transferSubmitted = true;
   this.timeline.transferSubmittedAt = new Date();
   this.addHistory("Transfer submitted for approval", userId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "submit_transfer", userId, req, {
+          executeAction: async () => {},
+          notes: "Transfer submitted for approval",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for submit_transfer:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.approveTransfer = function (userId) {
+escrowSchema.methods.approveTransfer = async function (userId, req) {
+  const previousState = this.toObject();
+  
   this.timeline.transferApproved = true;
   this.timeline.transferApprovedAt = new Date();
   this.addHistory("Transfer approved", userId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "approve_transfer", userId, req, {
+          executeAction: async () => {},
+          notes: "Transfer approved",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for approve_transfer:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.releaseFunds = function (adminId) {
+escrowSchema.methods.releaseFunds = async function (adminId, req) {
   if (!["held", "disputed"].includes(this.status)) throw new Error("Escrow not in releasable state");
+  
+  const previousState = this.toObject();
+  
   const commissionRate = 0.05;
   this.commission = this.amount * commissionRate;
   this.sellerAmount = this.amount - this.commission;
@@ -132,34 +235,114 @@ escrowSchema.methods.releaseFunds = function (adminId) {
   this.timeline.fundsReleased = true;
   this.timeline.fundsReleasedAt = new Date();
   this.addHistory(`Released to seller — KES ${this.sellerAmount.toLocaleString("en-KE")}`, adminId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (adminId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "release_funds", adminId, req, {
+          executeAction: async () => {},
+          notes: "Funds released to seller",
+          reason: `Commission: KES ${this.commission.toLocaleString("en-KE")}, Seller amount: KES ${this.sellerAmount.toLocaleString("en-KE")}`,
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for release_funds:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.refundBuyer = function (adminId, reason) {
+escrowSchema.methods.refundBuyer = async function (adminId, reason, req) {
   if (!["held", "disputed"].includes(this.status)) throw new Error("Cannot refund this escrow");
+  
+  const previousState = this.toObject();
+  
   this.status = "refunded";
   this.refundedAt = new Date();
   this.refundedBy = adminId;
   if (reason) this.disputeReason = reason;
   this.addHistory(`Refunded to buyer — ${reason || "No reason"}`, adminId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (adminId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "refund_buyer", adminId, req, {
+          executeAction: async () => {},
+          notes: "Refunded to buyer",
+          reason: reason || "No reason provided",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for refund_buyer:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.openDispute = function (userId, reason) {
+escrowSchema.methods.openDispute = async function (userId, reason, req) {
   if (["released", "refunded"].includes(this.status)) throw new Error("Cannot dispute finalized escrow");
+  
+  const previousState = this.toObject();
+  
   this.status = "disputed";
   this.disputeReason = reason;
   this.disputedBy = userId;
   this.disputedAt = new Date();
   this.addHistory(`Dispute opened — ${reason}`, userId);
-  return this.save();
+  
+  const result = await this.save();
+  
+  // Log audit asynchronously
+  if (userId && req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "open_dispute", userId, req, {
+          executeAction: async () => {},
+          notes: "Dispute opened",
+          reason: reason || "No reason provided",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for open_dispute:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
-escrowSchema.methods.autoRelease = function () {
+escrowSchema.methods.autoRelease = async function (req) {
   if (this.status !== "held" || !this.autoReleaseEligibleAt) return null;
   if (new Date() < this.autoReleaseEligibleAt) return null;
+  
   this.autoReleased = true;
-  return this.releaseFunds(null);
+  
+  // Call releaseFunds with null adminId (system action)
+  const result = await this.releaseFunds(null, req);
+  
+  // Log audit asynchronously for auto-release
+  if (req) {
+    setImmediate(async () => {
+      try {
+        await logEscrowAction(this._id, "auto_release", null, req, {
+          executeAction: async () => {},
+          notes: "Auto-released after delivery confirmation window",
+          source: "cron",
+        });
+      } catch (err) {
+        console.warn("⚠️ Audit logging failed for auto_release:", err.message);
+      }
+    });
+  }
+  
+  return result;
 };
 
 const Escrow = mongoose.models.Escrow || mongoose.model("Escrow", escrowSchema);
