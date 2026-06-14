@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI } from '../api/api';
-import { DEMO_CARS } from '../data/demoData';
+import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 
 export default function AuctionCalendar() {
   usePageMeta('Auction House', 'Live and upcoming car auctions in Kenya. Bid live on premium vehicles with Kayad.');
+  const { toast } = useToast();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('live');
@@ -35,9 +36,13 @@ export default function AuctionCalendar() {
 
     carsAPI.list({ limit: 100, category: 'all' })
       .then(data => { setCars(enrichWithTimeStatus(data.cars || data.data || [])); })
-      .catch(() => { setCars(enrichWithTimeStatus(DEMO_CARS)); })
+      .catch((error) => {
+        console.error('Failed to load auction calendar:', error);
+        toast('Could not load auctions. Please check your connection.', 'error');
+        setCars([]);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const getTimeStatus = (car) => {
     const start = car.auctionStartTime ? new Date(car.auctionStartTime).getTime() : 0;

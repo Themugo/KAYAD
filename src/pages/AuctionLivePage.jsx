@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, bidsAPI, smsBiddingAPI, formatKES } from '../api/api';
-import { getMockCar } from '../data/mockCars';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
@@ -125,19 +124,15 @@ export default function AuctionLivePage() {
       setBids(bs.slice(0, 30));
       const minNext = (c.currentBid || c.price || 0) + 5000;
       setBidAmount(String(minNext));
-    }).catch(() => {
-      const mock = getMockCar(id);
-      if (mock && !ignore) {
-        setCar(mock);
-        setCurrentBid(mock.currentBid || mock.price || 0);
-        setPrevBid(mock.currentBid || mock.price || 0);
-        setBidCount(mock.bidsCount || 0);
-        const minNext = (mock.currentBid || mock.price || 0) + 5000;
-        setBidAmount(String(minNext));
+    }).catch((error) => {
+      console.error('Failed to load auction data:', error);
+      if (!ignore) {
+        toast('Could not load auction data. Please try again.', 'error');
+        setCar(null);
       }
     }).finally(() => { if (!ignore) setLoading(false); });
     return () => { ignore = true; };
-  }, [id]);
+  }, [id, toast]);
 
   // Join auction socket room
   useEffect(() => {
