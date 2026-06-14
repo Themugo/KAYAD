@@ -101,19 +101,19 @@ export default function DealerMarketInsights() {
         </div>
       </div>
 
-      {data.recommendations.length > 0 && (
+      {(data.recommendations?.length ?? 0) > 0 && (
         <div style={{ padding: '14px 22px 18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
             <Lightbulb size={12} style={{ color: 'var(--gold)' }} />
             <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing Recommendations</span>
           </div>
-          {data.recommendations.slice(0, 4).map(rec => (
+          {data.recommendations?.slice(0, 4).map(rec => (
             <RecommendationCard key={rec.carId} rec={rec} />
           ))}
         </div>
       )}
 
-      {data.recommendations.length === 0 && (
+      {(data.recommendations?.length ?? 0) === 0 && (
         <div style={{ padding: '24px', textAlign: 'center', fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
           <Lightbulb size={20} style={{ color: 'var(--gold)', marginBottom: 8 }} />
           <div>List vehicles to receive AI-powered pricing insights</div>

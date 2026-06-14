@@ -5,7 +5,7 @@ import { sendNotification } from "./notification.service.js";
 
 export async function initiateBidSecurity({ auctionId, userId, phone, amount }) {
   const auction = await Auction.findById(auctionId).populate("carId");
-  if (!auction) throw new Error("Auction not found");
+  if (!auction) return { success: false, message: "Auction not found" };
 
   const securityAmount = amount || auction.bidSecurityAmount || 50000;
 

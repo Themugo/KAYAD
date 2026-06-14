@@ -339,15 +339,16 @@ export const releaseEscrow = async (req, res) => {
       data: { sellerAmount, commission },
     });
   } catch (err) {
-    await session.abortTransaction();
-    console.error("❌ RELEASE ERROR:", err);
+    if (session) {
+      try { await session.abortTransaction(); } catch { /* already aborted */ }
+      try { session.endSession(); } catch { /* already ended */ }
+    }
+    console.error("RELEASE ERROR:", err);
 
     res.status(500).json({
       success: false,
       message: err.message || "Release failed",
     });
-  } finally {
-    session.endSession();
   }
 };
 
@@ -429,14 +430,15 @@ export const refundEscrow = async (req, res) => {
       message: "Escrow refunded",
     });
   } catch (err) {
-    await session.abortTransaction();
-    console.error("❌ REFUND ERROR:", err);
+    if (session) {
+      try { await session.abortTransaction(); } catch { /* already aborted */ }
+      try { session.endSession(); } catch { /* already ended */ }
+    }
+    console.error("REFUND ERROR:", err);
 
     res.status(500).json({
       success: false,
       message: err.message || "Refund failed",
     });
-  } finally {
-    session.endSession();
   }
 };

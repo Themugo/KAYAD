@@ -178,9 +178,10 @@ export const handleMpesaCallback = async (callbackData) => {
 
     return payment;
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-
+    if (session) {
+      try { await session.abortTransaction(); } catch { /* already aborted */ }
+      try { session.endSession(); } catch { /* already ended */ }
+    }
     console.error("CALLBACK ERROR:", err.message);
     throw err;
   }

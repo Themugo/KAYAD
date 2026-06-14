@@ -17,7 +17,7 @@ const formatPhone = (phone) => {
 // ── INITIATE ─────────────────────────────────────────────────
 export const initiatePayment = async ({ userId, carId, type, amount, phone, metadata = {} }) => {
   const formattedPhone = formatPhone(phone);
-  if (!formattedPhone) throw new Error("Invalid Safaricom number");
+  if (!formattedPhone) return { success: false, message: "Invalid Safaricom number" };
 
   // Prevent duplicate pending payments for same car
   const existing = await Payment.findOne({

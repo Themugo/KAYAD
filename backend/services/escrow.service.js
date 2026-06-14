@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import Escrow from "../models/Escrow.js";
 
-// =============================
-// 🧮 COMMISSION CALCULATOR
-// =============================
 const calculateCommission = (amount) => {
   const rate = 0.05;
   const commission = Math.round(amount * rate);
@@ -13,9 +10,12 @@ const calculateCommission = (amount) => {
   };
 };
 
-// =============================
-// 🏦 CREATE ESCROW (SAFE)
-// =============================
+const guardSession = async (session) => {
+  if (!session) return;
+  try { await session.abortTransaction(); } catch { /* already aborted */ }
+  try { session.endSession(); } catch { /* already ended */ }
+};
+
 export const createEscrow = async (data) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -46,17 +46,12 @@ export const createEscrow = async (data) => {
 
     return escrow[0];
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-
-    console.error("❌ ESCROW CREATE ERROR:", err);
+    await guardSession(session);
+    console.error("ESCROW CREATE ERROR:", err);
     throw err;
   }
 };
 
-// =============================
-// 💸 RELEASE ESCROW (SAFE)
-// =============================
 export const releaseEscrow = async (escrowId, { idempotencyKey }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -70,7 +65,6 @@ export const releaseEscrow = async (escrowId, { idempotencyKey }) => {
       throw new Error("Escrow already processed");
     }
 
-    // 🛡 Idempotency check
     if (escrow.lastActionKey && escrow.lastActionKey === idempotencyKey) {
       return escrow;
     }
@@ -86,25 +80,17 @@ export const releaseEscrow = async (escrowId, { idempotencyKey }) => {
 
     await escrow.save({ session });
 
-    // 🔥 Trigger payout (MPESA B2C later)
-    console.log(`💸 Paying seller ${escrow.seller} KES ${escrow.sellerAmount}`);
-
     await session.commitTransaction();
     session.endSession();
 
     return escrow;
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-
-    console.error("❌ ESCROW RELEASE ERROR:", err);
+    await guardSession(session);
+    console.error("ESCROW RELEASE ERROR:", err);
     throw err;
   }
 };
 
-// =============================
-// 🔄 REFUND ESCROW (SAFE)
-// =============================
 export const refundEscrow = async (escrowId, { idempotencyKey }) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -132,18 +118,13 @@ export const refundEscrow = async (escrowId, { idempotencyKey }) => {
 
     await escrow.save({ session });
 
-    // 🔥 Trigger refund (MPESA reversal later)
-    console.log(`↩️ Refunding buyer ${escrow.buyer} KES ${escrow.amount}`);
-
     await session.commitTransaction();
     session.endSession();
 
     return escrow;
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
-
-    console.error("❌ ESCROW REFUND ERROR:", err);
+    await guardSession(session);
+    console.error("ESCROW REFUND ERROR:", err);
     throw err;
   }
 };

@@ -99,11 +99,10 @@ export const mpesaCallback = async (req, res) => {
 
     await handleMpesaCallback(req.body);
 
-    res.json({ success: true });
+    return res.json({ success: true });
   } catch (err) {
     console.error("CALLBACK ERROR:", err);
-
-    res.json({ success: false });
+    return res.status(500).json({ success: false, message: err.message || "Callback processing failed" });
   }
 };
 
