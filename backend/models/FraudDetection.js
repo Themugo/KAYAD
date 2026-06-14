@@ -28,18 +28,18 @@ const fraudDetectionSchema = new mongoose.Schema(
         "duplicate_phone",
         "duplicate_email",
         "suspicious_registration",
-        
+
         // Auction fraud
         "self_bidding",
         "bid_ring",
         "suspicious_bid_spike",
         "shill_bidding",
-        
+
         // Escrow fraud
         "repeated_disputes",
         "chargeback",
         "refund_abuse",
-        
+
         // Dealer fraud
         "duplicate_listing",
         "vin_reuse",
@@ -77,10 +77,12 @@ const fraudDetectionSchema = new mongoose.Schema(
       type: Object,
       default: {},
     },
-    relatedEntities: [{
-      type: mongoose.Schema.Types.ObjectId,
-      refPath: "targetType",
-    }],
+    relatedEntities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: "targetType",
+      },
+    ],
 
     // =============================
     // ⚖️ ACTION TAKEN

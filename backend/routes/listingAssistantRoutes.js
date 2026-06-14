@@ -1,11 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
-import {
-  analyzeListing,
-  batchAnalyze,
-  getDealerQualityStats,
-} from "../controllers/listingAssistantController.js";
+import { analyzeListing, batchAnalyze, getDealerQualityStats } from "../controllers/listingAssistantController.js";
 
 const router = express.Router();
 

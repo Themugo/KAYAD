@@ -23,43 +23,43 @@ const eventSchema = new mongoose.Schema(
         "search_performed",
         "filter_applied",
         "sort_applied",
-        
+
         // Vehicle events
         "vehicle_viewed",
         "vehicle_favorite_added",
         "vehicle_favorite_removed",
         "vehicle_shared",
-        
+
         // Lead events
         "lead_created",
         "offer_sent",
         "offer_accepted",
         "offer_rejected",
-        
+
         // Auction events
         "auction_joined",
         "bid_placed",
         "outbid",
         "auction_won",
         "auction_lost",
-        
+
         // Escrow events
         "escrow_started",
         "escrow_funded",
         "escrow_released",
         "escrow_refunded",
         "escrow_disputed",
-        
+
         // Chat events
         "message_sent",
         "message_received",
-        
+
         // Account events
         "account_created",
         "account_verified",
         "login",
         "logout",
-        
+
         // Support events
         "support_ticket_created",
         "support_ticket_resolved",

@@ -54,7 +54,7 @@ const refreshTokenSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Index for cleanup of expired tokens
@@ -71,19 +71,13 @@ refreshTokenSchema.statics.cleanupExpired = async function () {
 // Static method to revoke all tokens for a user
 refreshTokenSchema.statics.revokeAllForUser = async function (userId, revokedBy = null) {
   const now = new Date();
-  return this.updateMany(
-    { user: userId, isRevoked: false },
-    { isRevoked: true, revokedAt: now, revokedBy }
-  );
+  return this.updateMany({ user: userId, isRevoked: false }, { isRevoked: true, revokedAt: now, revokedBy });
 };
 
 // Static method to revoke a specific token
 refreshTokenSchema.statics.revokeToken = async function (token, revokedBy = null) {
   const now = new Date();
-  return this.findOneAndUpdate(
-    { token, isRevoked: false },
-    { isRevoked: true, revokedAt: now, revokedBy }
-  );
+  return this.findOneAndUpdate({ token, isRevoked: false }, { isRevoked: true, revokedAt: now, revokedBy });
 };
 
 // Static method to get active sessions for a user

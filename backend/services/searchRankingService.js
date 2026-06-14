@@ -29,13 +29,12 @@ export const calculateSearchRank = async (carId) => {
     const conversionScore = await calculateConversionRate(carId);
 
     // Calculate final rank score
-    const rankScore = (
-      dealerScore * 0.30 +           // 30% dealer quality
-      listingQuality * 0.25 +        // 25% listing quality
-      freshnessScore * 0.20 +         // 20% freshness
-      ctrScore * 0.15 +               // 15% CTR
-      conversionScore * 0.10          // 10% conversion rate
-    );
+    const rankScore =
+      dealerScore * 0.3 + // 30% dealer quality
+      listingQuality * 0.25 + // 25% listing quality
+      freshnessScore * 0.2 + // 20% freshness
+      ctrScore * 0.15 + // 15% CTR
+      conversionScore * 0.1; // 10% conversion rate
 
     return {
       carId,
@@ -217,15 +216,13 @@ const calculateConversionRate = async (carId) => {
 
 export const rankSearchResults = async (carIds) => {
   try {
-    const ranks = await Promise.all(
-      carIds.map(carId => calculateSearchRank(carId))
-    );
+    const ranks = await Promise.all(carIds.map((carId) => calculateSearchRank(carId)));
 
     // Filter out null results and sort by rank score
-    const validRanks = ranks.filter(r => r !== null);
+    const validRanks = ranks.filter((r) => r !== null);
     validRanks.sort((a, b) => b.rankScore - a.rankScore);
 
-    return validRanks.map(r => r.carId);
+    return validRanks.map((r) => r.carId);
   } catch (error) {
     console.error("Error ranking search results:", error);
     return carIds; // Return original order if ranking fails
@@ -242,10 +239,7 @@ export const searchWithRanking = async (filters = {}) => {
     const query = buildSearchQuery(filters);
 
     // Get matching cars
-    const cars = await Car.find(query)
-      .populate("dealer", "name businessName")
-      .sort({ createdAt: -1 })
-      .limit(100);
+    const cars = await Car.find(query).populate("dealer", "name businessName").sort({ createdAt: -1 }).limit(100);
 
     // Calculate ranks for each car
     const rankedCars = await Promise.all(
@@ -255,7 +249,7 @@ export const searchWithRanking = async (filters = {}) => {
           ...car.toObject(),
           rankScore: rank?.rankScore || 50,
         };
-      })
+      }),
     );
 
     // Sort by rank score

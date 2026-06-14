@@ -213,7 +213,7 @@ export const getEventAnalytics = async (startDate, endDate, eventType = null) =>
 
   // Group by event type
   const byEventType = {};
-  events.forEach(event => {
+  events.forEach((event) => {
     if (!byEventType[event.eventType]) {
       byEventType[event.eventType] = 0;
     }
@@ -222,7 +222,7 @@ export const getEventAnalytics = async (startDate, endDate, eventType = null) =>
 
   // Group by user
   const byUser = {};
-  events.forEach(event => {
+  events.forEach((event) => {
     if (event.user) {
       if (!byUser[event.user.toString()]) {
         byUser[event.user.toString()] = 0;

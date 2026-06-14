@@ -90,9 +90,9 @@ const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null) =
     user: user._id,
     token: newRefreshToken,
     tokenVersion: user.tokenVersion || 0,
-    deviceId: req?.body?.deviceId || req?.headers['x-device-id'] || 'unknown',
-    userAgent: req?.headers['user-agent'] || '',
-    ipAddress: req?.ip || req?.connection?.remoteAddress || '',
+    deviceId: req?.body?.deviceId || req?.headers["x-device-id"] || "unknown",
+    userAgent: req?.headers["user-agent"] || "",
+    ipAddress: req?.ip || req?.connection?.remoteAddress || "",
     expiresAt: refreshTokenExpiresAt,
   });
 
@@ -417,7 +417,7 @@ export const logout = async (req, res) => {
     if (req.user?.id) {
       // 🔥 Revoke all refresh tokens for this user
       await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
-      
+
       // 🔥 Also increment tokenVersion to invalidate any existing tokens
       await User.findByIdAndUpdate(req.user.id, {
         $inc: { tokenVersion: 1 },
@@ -472,7 +472,7 @@ export const revokeSession = async (req, res) => {
   try {
     const { tokenId } = req.params;
     const session = await RefreshToken.findOne({ _id: tokenId, user: req.user.id, isRevoked: false });
-    
+
     if (!session) {
       return R.notFound(res, "Session not found");
     }
@@ -488,12 +488,12 @@ export const revokeSession = async (req, res) => {
 export const revokeAllSessions = async (req, res) => {
   try {
     await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
-    
+
     // Also increment tokenVersion to invalidate any existing tokens
     await User.findByIdAndUpdate(req.user.id, {
       $inc: { tokenVersion: 1 },
     });
-    
+
     res.json({ success: true, message: "All sessions revoked" });
   } catch (err) {
     console.error("❌ REVOKE ALL SESSIONS ERROR:", err);

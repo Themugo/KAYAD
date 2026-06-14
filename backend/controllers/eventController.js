@@ -179,9 +179,7 @@ export const getUserEvents = async (req, res) => {
     const filter = { user: userId };
     if (eventType) filter.eventType = eventType;
 
-    const events = await Event.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit));
+    const events = await Event.find(filter).sort({ createdAt: -1 }).limit(parseInt(limit));
 
     res.json({ success: true, events });
   } catch (error) {

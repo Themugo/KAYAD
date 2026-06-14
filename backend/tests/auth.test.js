@@ -184,12 +184,12 @@ describe("🔑 Authentication", () => {
     };
 
     await request(app).post("/api/auth/register").send(dealerUser).expect(201);
-    
+
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: dealerUser.email, password: dealerUser.password })
       .expect(200);
-    
+
     expect(loginRes.body.success).toBe(true);
     expect(loginRes.body.user.role).toBe("dealer");
     expect(loginRes.body.user.status).toBe("approved");
@@ -223,12 +223,12 @@ describe("🔑 Authentication", () => {
     };
 
     await request(app).post("/api/auth/register").send(brokerUser).expect(201);
-    
+
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: brokerUser.email, password: brokerUser.password })
       .expect(200);
-    
+
     expect(loginRes.body.success).toBe(true);
     expect(loginRes.body.user.role).toBe("broker");
     expect(loginRes.body.user.status).toBe("approved");
@@ -260,12 +260,12 @@ describe("🔑 Authentication", () => {
     };
 
     await request(app).post("/api/auth/register").send(adminUser).expect(201);
-    
+
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: adminUser.email, password: adminUser.password })
       .expect(200);
-    
+
     expect(loginRes.body.success).toBe(true);
     expect(loginRes.body.user.role).toBe("admin");
   });
@@ -296,12 +296,12 @@ describe("🔑 Authentication", () => {
     };
 
     await request(app).post("/api/auth/register").send(buyerUser).expect(201);
-    
+
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: buyerUser.email, password: buyerUser.password })
       .expect(200);
-    
+
     expect(loginRes.body.success).toBe(true);
     expect(loginRes.body.user.role).toBe("user");
   });
@@ -313,13 +313,10 @@ describe("🔑 Authentication", () => {
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: TEST_USER.email, password: "New@Pass456" });
-    
+
     const token = loginRes.body.token;
-    const res = await request(app)
-      .get("/api/auth/sessions")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
-    
+    const res = await request(app).get("/api/auth/sessions").set("Authorization", `Bearer ${token}`).expect(200);
+
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.sessions)).toBe(true);
   });
@@ -328,13 +325,10 @@ describe("🔑 Authentication", () => {
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: TEST_USER.email, password: "New@Pass456" });
-    
+
     const token = loginRes.body.token;
-    const res = await request(app)
-      .post("/api/auth/logout")
-      .set("Authorization", `Bearer ${token}`)
-      .expect(200);
-    
+    const res = await request(app).post("/api/auth/logout").set("Authorization", `Bearer ${token}`).expect(200);
+
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Logged out from all devices");
   });
@@ -343,13 +337,13 @@ describe("🔑 Authentication", () => {
     const loginRes = await request(app)
       .post("/api/auth/login")
       .send({ email: TEST_USER.email, password: "New@Pass456" });
-    
+
     const token = loginRes.body.token;
     const res = await request(app)
       .post("/api/auth/sessions/revoke-all")
       .set("Authorization", `Bearer ${token}`)
       .expect(200);
-    
+
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("All sessions revoked");
   });

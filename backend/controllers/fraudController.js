@@ -52,9 +52,10 @@ export const getFraudAnalytics = async (req, res) => {
       createdAt: { $gte: previousPeriod, $lt: thirtyDaysAgo },
     });
 
-    const trendPercentage = previousPeriodCount > 0
-      ? ((currentPeriodCount - previousPeriodCount) / previousPeriodCount * 100).toFixed(1)
-      : 0;
+    const trendPercentage =
+      previousPeriodCount > 0
+        ? (((currentPeriodCount - previousPeriodCount) / previousPeriodCount) * 100).toFixed(1)
+        : 0;
 
     res.json({
       success: true,
@@ -63,17 +64,18 @@ export const getFraudAnalytics = async (req, res) => {
         criticalCount,
         underReviewCount,
         actionTakenCount,
-        recentFraud: recentFraud.map(f => ({
+        recentFraud: recentFraud.map((f) => ({
           ...f.toObject(),
-          targetName: f.target?.name || f.target?.email || 'Unknown',
+          targetName: f.target?.name || f.target?.email || "Unknown",
         })),
-        byType: byType.map(item => ({ type: item._id, count: item.count })),
+        byType: byType.map((item) => ({ type: item._id, count: item.count })),
         severityBreakdown,
-        trendDirection: currentPeriodCount > previousPeriodCount ? 'up' : 'down',
+        trendDirection: currentPeriodCount > previousPeriodCount ? "up" : "down",
         trendPercentage: Math.abs(trendPercentage),
-        trendDescription: currentPeriodCount > previousPeriodCount
-          ? `Fraud increased by ${trendPercentage}% compared to previous 30 days`
-          : `Fraud decreased by ${trendPercentage}% compared to previous 30 days`,
+        trendDescription:
+          currentPeriodCount > previousPeriodCount
+            ? `Fraud increased by ${trendPercentage}% compared to previous 30 days`
+            : `Fraud decreased by ${trendPercentage}% compared to previous 30 days`,
       },
     });
   } catch (error) {

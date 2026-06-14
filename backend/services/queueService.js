@@ -91,7 +91,7 @@ const startWorkers = (connection) => {
       // await sgMail.send({ to, from: 'noreply@kayad.co.ke', subject, html, text });
       return { success: true };
     },
-    { connection }
+    { connection },
   );
 
   emailWorker.on("completed", (job) => {
@@ -113,7 +113,7 @@ const startWorkers = (connection) => {
       await sendNotification({ userId, title, message, type, data, channels });
       return { success: true };
     },
-    { connection }
+    { connection },
   );
 
   notificationWorker.on("completed", (job) => {
@@ -136,7 +136,7 @@ const startWorkers = (connection) => {
       // This would integrate with report generation logic
       return { success: true, reportUrl: "https://example.com/report.pdf" };
     },
-    { connection }
+    { connection },
   );
 
   reportWorker.on("completed", (job) => {
@@ -159,7 +159,7 @@ const startWorkers = (connection) => {
       // This would integrate with auction logic
       return { success: true };
     },
-    { connection }
+    { connection },
   );
 
   auctionWorker.on("completed", (job) => {
@@ -182,7 +182,7 @@ const startWorkers = (connection) => {
       // This would integrate with image processing service
       return { success: true, processedUrl: imageUrl };
     },
-    { connection }
+    { connection },
   );
 
   imageProcessingWorker.on("completed", (job) => {
@@ -212,7 +212,7 @@ export const queueEmail = async (to, subject, html, text, options = {}) => {
         attempts: 3,
         backoff: { type: "exponential", delay: 2000 },
         ...options,
-      }
+      },
     );
 
     return job;
@@ -240,7 +240,7 @@ export const queueNotification = async (userId, title, message, type, data, chan
         attempts: 3,
         backoff: { type: "exponential", delay: 2000 },
         ...options,
-      }
+      },
     );
 
     return job;
@@ -268,7 +268,7 @@ export const queueReport = async (reportType, filters, userId, options = {}) => 
         attempts: 2,
         backoff: { type: "exponential", delay: 5000 },
         ...options,
-      }
+      },
     );
 
     return job;
@@ -296,7 +296,7 @@ export const queueAuctionEvent = async (eventType, carId, data, options = {}) =>
         attempts: 3,
         backoff: { type: "exponential", delay: 1000 },
         ...options,
-      }
+      },
     );
 
     return job;
@@ -324,7 +324,7 @@ export const queueImageProcessing = async (imageUrl, carId, operations, options 
         attempts: 2,
         backoff: { type: "exponential", delay: 3000 },
         ...options,
-      }
+      },
     );
 
     return job;

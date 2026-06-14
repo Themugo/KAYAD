@@ -69,7 +69,7 @@ const conversionFunnelSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Index for efficient funnel queries

@@ -36,7 +36,7 @@ export const getRedisClient = () => redisClient;
 export const setCache = async (key, value, ttl = 3600) => {
   try {
     if (!redisClient) return false;
-    
+
     const serialized = JSON.stringify(value);
     await redisClient.setEx(key, ttl, serialized);
     return true;
@@ -49,10 +49,10 @@ export const setCache = async (key, value, ttl = 3600) => {
 export const getCache = async (key) => {
   try {
     if (!redisClient) return null;
-    
+
     const value = await redisClient.get(key);
     if (!value) return null;
-    
+
     return JSON.parse(value);
   } catch (error) {
     console.error("Error getting cache:", error);
@@ -63,7 +63,7 @@ export const getCache = async (key) => {
 export const deleteCache = async (key) => {
   try {
     if (!redisClient) return false;
-    
+
     await redisClient.del(key);
     return true;
   } catch (error) {
@@ -75,10 +75,10 @@ export const deleteCache = async (key) => {
 export const deleteCachePattern = async (pattern) => {
   try {
     if (!redisClient) return false;
-    
+
     const keys = await redisClient.keys(pattern);
     if (keys.length === 0) return true;
-    
+
     await redisClient.del(keys);
     return true;
   } catch (error) {
@@ -260,11 +260,7 @@ export const invalidateAnalyticsCache = async () => {
 
 export const invalidateCacheOnCarUpdate = async (carId) => {
   try {
-    await Promise.all([
-      invalidateCarCache(carId),
-      invalidateSearchCache(),
-      deleteCache("popular:listings"),
-    ]);
+    await Promise.all([invalidateCarCache(carId), invalidateSearchCache(), deleteCache("popular:listings")]);
     return true;
   } catch (error) {
     console.error("Error invalidating cache on car update:", error);
@@ -274,10 +270,7 @@ export const invalidateCacheOnCarUpdate = async (carId) => {
 
 export const invalidateCacheOnDealerUpdate = async (dealerId) => {
   try {
-    await Promise.all([
-      invalidateDealerCache(dealerId),
-      invalidateSearchCache(),
-    ]);
+    await Promise.all([invalidateDealerCache(dealerId), invalidateSearchCache()]);
     return true;
   } catch (error) {
     console.error("Error invalidating cache on dealer update:", error);
@@ -287,9 +280,7 @@ export const invalidateCacheOnDealerUpdate = async (dealerId) => {
 
 export const invalidateCacheOnEscrowUpdate = async () => {
   try {
-    await Promise.all([
-      invalidateAnalyticsCache(),
-    ]);
+    await Promise.all([invalidateAnalyticsCache()]);
     return true;
   } catch (error) {
     console.error("Error invalidating cache on escrow update:", error);

@@ -31,8 +31,16 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
     if (car.sold) {
       console.warn("Car already sold, skipping sync");
       if (session) {
-        try { await session.abortTransaction(); } catch { /* already aborted */ }
-        try { session.endSession(); } catch { /* already ended */ }
+        try {
+          await session.abortTransaction();
+        } catch {
+          /* already aborted */
+        }
+        try {
+          session.endSession();
+        } catch {
+          /* already ended */
+        }
       }
       return;
     }
@@ -140,8 +148,16 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
     };
   } catch (err) {
     if (session) {
-      try { await session.abortTransaction(); } catch { /* already aborted */ }
-      try { session.endSession(); } catch { /* already ended */ }
+      try {
+        await session.abortTransaction();
+      } catch {
+        /* already aborted */
+      }
+      try {
+        session.endSession();
+      } catch {
+        /* already ended */
+      }
     }
 
     console.error("SYNC ERROR:", err.message);

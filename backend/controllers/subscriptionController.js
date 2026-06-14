@@ -292,9 +292,7 @@ export const getSubscriptionAnalytics = async (req, res) => {
     const [totalSubscriptions, activeSubscriptions, byPlan, revenue] = await Promise.all([
       Subscription.countDocuments(),
       Subscription.countDocuments({ status: "active" }),
-      Subscription.aggregate([
-        { $group: { _id: "$plan", count: { $sum: 1 } } },
-      ]),
+      Subscription.aggregate([{ $group: { _id: "$plan", count: { $sum: 1 } } }]),
       Subscription.aggregate([
         { $match: { status: "active" } },
         {
@@ -306,8 +304,8 @@ export const getSubscriptionAnalytics = async (req, res) => {
       ]),
     ]);
 
-    const monthlyRevenue = revenue.find(r => r._id === "monthly")?.total || 0;
-    const annualRevenue = revenue.find(r => r._id === "annual")?.total || 0;
+    const monthlyRevenue = revenue.find((r) => r._id === "monthly")?.total || 0;
+    const annualRevenue = revenue.find((r) => r._id === "annual")?.total || 0;
 
     res.json({
       success: true,
@@ -317,7 +315,7 @@ export const getSubscriptionAnalytics = async (req, res) => {
         byPlan,
         monthlyRevenue,
         annualRevenue,
-        totalMonthlyRevenue: monthlyRevenue + (annualRevenue / 12),
+        totalMonthlyRevenue: monthlyRevenue + annualRevenue / 12,
       },
     });
   } catch (error) {

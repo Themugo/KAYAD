@@ -15,14 +15,16 @@ try {
   if (fs.existsSync(SAFARICOM_CERT_PATH)) {
     _safaricomCert = fs.readFileSync(SAFARICOM_CERT_PATH);
   }
-} catch { /* cert not available — fall back to passkey-based Password */ }
+} catch {
+  /* cert not available — fall back to passkey-based Password */
+}
 
 const generateSecurityCredential = (passkey) => {
   if (!_safaricomCert) return null;
   try {
     const encrypted = crypto.publicEncrypt(
       { key: _safaricomCert, padding: crypto.constants.RSA_PKCS1_PADDING },
-      Buffer.from(passkey)
+      Buffer.from(passkey),
     );
     return encrypted.toString("base64");
   } catch {
@@ -131,9 +133,7 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
     const timestamp = mpesaTimestamp();
     const isProduction = cfg.environment === "production";
     const securityCredential = isProduction ? generateSecurityCredential(cfg.passkey) : null;
-    const password = Buffer.from(
-      `${cfg.shortCode}${securityCredential || cfg.passkey}${timestamp}`
-    ).toString("base64");
+    const password = Buffer.from(`${cfg.shortCode}${securityCredential || cfg.passkey}${timestamp}`).toString("base64");
 
     const payload = {
       BusinessShortCode: cfg.shortCode,

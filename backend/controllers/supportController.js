@@ -152,8 +152,7 @@ export const addMessage = async (req, res) => {
 
     await ticket.save();
 
-    const updatedTicket = await SupportTicket.findById(ticketId)
-      .populate("messages.sender", "name email");
+    const updatedTicket = await SupportTicket.findById(ticketId).populate("messages.sender", "name email");
 
     res.json({ success: true, ticket: updatedTicket });
   } catch (error) {

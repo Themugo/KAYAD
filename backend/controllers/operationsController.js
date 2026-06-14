@@ -126,12 +126,7 @@ export const getOperationsDashboard = async (req, res) => {
             paymentPending +
             paymentFailed +
             paymentProcessing,
-          criticalIssues:
-            escrowDisputed +
-            inspectionOverdue +
-            supportUrgent +
-            supportEscalated +
-            paymentFailed,
+          criticalIssues: escrowDisputed + inspectionOverdue + supportUrgent + supportEscalated + paymentFailed,
         },
       },
     });

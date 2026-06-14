@@ -12,7 +12,7 @@ export const DISASTER_RECOVERY_CONFIG = {
     images: "1 hour", // 1 hour for images
     overall: "15 minutes", // Overall RPO
   },
-  
+
   rto: {
     // Recovery Time Objective - Maximum acceptable downtime
     database: "30 minutes", // 30 minutes for database
@@ -143,12 +143,7 @@ export const DISASTER_RECOVERY_CONFIG = {
   testing: {
     disasterRecoveryDrills: {
       frequency: "quarterly", // Quarterly drills
-      scenarios: [
-        "database_failover",
-        "application_crash",
-        "network_partition",
-        "storage_failure",
-      ],
+      scenarios: ["database_failover", "application_crash", "network_partition", "storage_failure"],
     },
     backupVerification: {
       frequency: "weekly", // Weekly verification
@@ -221,12 +216,12 @@ export const sendAlert = async (severity, message, details = {}) => {
   try {
     // Send alert to configured channels
     console.log(`[${severity.toUpperCase()}] ${message}`, details);
-    
+
     // This would integrate with:
     // - Email service
     // - Slack webhook
     // - SMS service
-    
+
     return { success: true };
   } catch (error) {
     console.error("Error sending alert:", error);

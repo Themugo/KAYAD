@@ -16,10 +16,10 @@ export const auditAction = (action, options = {}) => {
     };
 
     // Continue with the request
-    res.on('finish', async () => {
+    res.on("finish", async () => {
       try {
         // Only log successful state-changing operations
-        if (res.statusCode >= 200 && res.statusCode < 300 && req.method !== 'GET') {
+        if (res.statusCode >= 200 && res.statusCode < 300 && req.method !== "GET") {
           const actor = req.user?.id || req.user?._id;
           const actorName = req.user?.name || req.user?.email;
           const actorEmail = req.user?.email;
@@ -38,7 +38,7 @@ export const auditAction = (action, options = {}) => {
             newValue: options.newValue,
             changes: options.changes,
             ipAddress: req.ip,
-            userAgent: req.headers?.['user-agent'],
+            userAgent: req.headers?.["user-agent"],
             requestId: req.id,
             details: {
               ...options.details,
@@ -46,11 +46,11 @@ export const auditAction = (action, options = {}) => {
               method: req.method,
               path: req.path,
             },
-            severity: options.severity || 'info',
+            severity: options.severity || "info",
           });
         }
       } catch (error) {
-        console.error('Audit logging failed:', error);
+        console.error("Audit logging failed:", error);
         // Don't block the request if audit logging fails
       }
     });
@@ -64,11 +64,11 @@ export const auditAction = (action, options = {}) => {
  */
 export const extractChanges = (oldDoc, newDoc, fields = []) => {
   const changes = [];
-  
+
   for (const field of fields) {
     const oldValue = oldDoc?.[field];
     const newValue = newDoc?.[field];
-    
+
     if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
       changes.push({
         field,
@@ -77,7 +77,7 @@ export const extractChanges = (oldDoc, newDoc, fields = []) => {
       });
     }
   }
-  
+
   return changes;
 };
 
@@ -99,22 +99,19 @@ export const auditDocumentUpdate = async ({
 }) => {
   try {
     const changes = [];
-    
+
     // Compare all fields
-    const allFields = new Set([
-      ...Object.keys(oldDoc?.toObject?.() || {}),
-      ...Object.keys(newDoc?.toObject?.() || {}),
-    ]);
-    
+    const allFields = new Set([...Object.keys(oldDoc?.toObject?.() || {}), ...Object.keys(newDoc?.toObject?.() || {})]);
+
     for (const field of allFields) {
       const oldValue = oldDoc?.[field];
       const newValue = newDoc?.[field];
-      
+
       if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
         changes.push({ field, oldValue, newValue });
       }
     }
-    
+
     await AuditLog.create({
       actor,
       actorName,
@@ -130,9 +127,9 @@ export const auditDocumentUpdate = async ({
       ipAddress,
       userAgent,
       details,
-      severity: 'info',
+      severity: "info",
     });
   } catch (error) {
-    console.error('Audit document update failed:', error);
+    console.error("Audit document update failed:", error);
   }
 };

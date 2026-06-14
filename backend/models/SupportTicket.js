@@ -79,34 +79,38 @@ const supportTicketSchema = new mongoose.Schema(
     // =============================
     // 💬 MESSAGES
     // =============================
-    messages: [{
-      sender: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: true,
+    messages: [
+      {
+        sender: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        senderRole: {
+          type: String,
+          enum: ["user", "agent", "supervisor", "admin"],
+        },
+        content: {
+          type: String,
+          required: true,
+        },
+        isInternal: {
+          type: Boolean,
+          default: false,
+        },
+        attachments: [
+          {
+            url: String,
+            type: String,
+            name: String,
+          },
+        ],
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
-      senderRole: {
-        type: String,
-        enum: ["user", "agent", "supervisor", "admin"],
-      },
-      content: {
-        type: String,
-        required: true,
-      },
-      isInternal: {
-        type: Boolean,
-        default: false,
-      },
-      attachments: [{
-        url: String,
-        type: String,
-        name: String,
-      }],
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
-    }],
+    ],
 
     // =============================
     // 📈 SLA TRACKING

@@ -56,7 +56,9 @@ const getUserActivity = async (userId) => {
       user: userId,
       eventType: "search_performed",
       createdAt: { $gte: thirtyDaysAgo },
-    }).select("data").limit(50),
+    })
+      .select("data")
+      .limit(50),
     Event.distinct("targetId", {
       user: userId,
       eventType: "offer_sent",
@@ -98,13 +100,10 @@ const getRecommendedCars = async (userId, userActivity) => {
     }
 
     // Get matching cars
-    const cars = await Car.find(query)
-      .populate("dealer", "name businessName")
-      .sort({ createdAt: -1 })
-      .limit(20);
+    const cars = await Car.find(query).populate("dealer", "name businessName").sort({ createdAt: -1 }).limit(20);
 
     // Score and rank cars
-    const scoredCars = cars.map(car => ({
+    const scoredCars = cars.map((car) => ({
       ...car.toObject(),
       recommendationScore: calculateCarScore(car, userActivity),
       recommendationReason: getRecommendationReason(car, userActivity),
@@ -139,13 +138,10 @@ const getRecommendedAuctions = async (userId, userActivity) => {
       query._id = { $nin: viewedCars };
     }
 
-    const auctions = await Car.find(query)
-      .populate("dealer", "name businessName")
-      .sort({ auctionEnd: 1 })
-      .limit(20);
+    const auctions = await Car.find(query).populate("dealer", "name businessName").sort({ auctionEnd: 1 }).limit(20);
 
     // Score and rank auctions
-    const scoredAuctions = auctions.map(auction => ({
+    const scoredAuctions = auctions.map((auction) => ({
       ...auction.toObject(),
       recommendationScore: calculateAuctionScore(auction, userActivity),
       recommendationReason: getRecommendationReason(auction, userActivity),
@@ -184,14 +180,14 @@ const getRecommendedDealers = async (userId, userActivity) => {
 
     // Get dealer details
     const dealers = await User.find({
-      _id: trustScores.map(ts => ts.dealer),
+      _id: trustScores.map((ts) => ts.dealer),
       role: "dealer",
     })
       .select("name businessName location")
       .limit(10);
 
-    return dealers.map(dealer => {
-      const trustScore = trustScores.find(ts => ts.dealer.toString() === dealer._id.toString());
+    return dealers.map((dealer) => {
+      const trustScore = trustScores.find((ts) => ts.dealer.toString() === dealer._id.toString());
       return {
         ...dealer.toObject(),
         trustScore: trustScore?.overallScore || 75,
@@ -217,7 +213,7 @@ const extractPreferences = (searchHistory) => {
     locations: [],
   };
 
-  searchHistory.forEach(search => {
+  searchHistory.forEach((search) => {
     const data = search.data || {};
     if (data.make) preferences.makes.push(data.make);
     if (data.model) preferences.models.push(data.model);
@@ -309,7 +305,8 @@ const calculateAuctionScore = (auction, userActivity) => {
 
   // Boost for auctions ending soon
   const timeToEnd = new Date(auction.auctionEnd) - new Date();
-  if (timeToEnd < 24 * 60 * 60 * 1000) score += 20; // Ending within 24 hours
+  if (timeToEnd < 24 * 60 * 60 * 1000)
+    score += 20; // Ending within 24 hours
   else if (timeToEnd < 72 * 60 * 60 * 1000) score += 10; // Ending within 72 hours
 
   // Boost for auctions user has bid on similar cars

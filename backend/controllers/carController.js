@@ -192,7 +192,8 @@ export const createCar = async (req, res) => {
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
-    if (seller.status !== 'approved') return res.status(403).json({ success: false, message: "Account not yet approved" });
+    if (seller.status !== "approved")
+      return res.status(403).json({ success: false, message: "Account not yet approved" });
     const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
@@ -424,15 +425,38 @@ export const updateCar = async (req, res) => {
     }
 
     const allowedFields = [
-      'title','brand','model','year','price',
-      'location.city','location.address',
-      'fuel','transmission','mileage','bodyType','color','condition','description','features',
-      'images','coverImage',
-      'status','allowBuy','allowBid','escrowEnabled',
-      'auctionStartTime','auctionEnd','startingBid','reservePrice','reserveMode',
-      'isPromoted','promotionExpiresAt',
-      'dealerPhone',
-      'ntsaVerified','dutyStatus','logbookVerified',
+      "title",
+      "brand",
+      "model",
+      "year",
+      "price",
+      "location.city",
+      "location.address",
+      "fuel",
+      "transmission",
+      "mileage",
+      "bodyType",
+      "color",
+      "condition",
+      "description",
+      "features",
+      "images",
+      "coverImage",
+      "status",
+      "allowBuy",
+      "allowBid",
+      "escrowEnabled",
+      "auctionStartTime",
+      "auctionEnd",
+      "startingBid",
+      "reservePrice",
+      "reserveMode",
+      "isPromoted",
+      "promotionExpiresAt",
+      "dealerPhone",
+      "ntsaVerified",
+      "dutyStatus",
+      "logbookVerified",
     ];
     for (const key of Object.keys(req.body)) {
       if (allowedFields.includes(key)) {
@@ -616,12 +640,10 @@ export const addCarImages = async (req, res) => {
     const currentCount = (car.images || []).length;
     if (currentCount + req.files.length > maxImages) {
       cleanupFiles(req.files);
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `Maximum ${maxImages} images allowed. You have ${currentCount}, trying to add ${req.files.length}.`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `Maximum ${maxImages} images allowed. You have ${currentCount}, trying to add ${req.files.length}.`,
+      });
     }
 
     const cloudinaryConfigured =

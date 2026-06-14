@@ -340,8 +340,16 @@ export const releaseEscrow = async (req, res) => {
     });
   } catch (err) {
     if (session) {
-      try { await session.abortTransaction(); } catch { /* already aborted */ }
-      try { session.endSession(); } catch { /* already ended */ }
+      try {
+        await session.abortTransaction();
+      } catch {
+        /* already aborted */
+      }
+      try {
+        session.endSession();
+      } catch {
+        /* already ended */
+      }
     }
     console.error("RELEASE ERROR:", err);
 
@@ -431,8 +439,16 @@ export const refundEscrow = async (req, res) => {
     });
   } catch (err) {
     if (session) {
-      try { await session.abortTransaction(); } catch { /* already aborted */ }
-      try { session.endSession(); } catch { /* already ended */ }
+      try {
+        await session.abortTransaction();
+      } catch {
+        /* already aborted */
+      }
+      try {
+        session.endSession();
+      } catch {
+        /* already ended */
+      }
     }
     console.error("REFUND ERROR:", err);
 

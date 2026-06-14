@@ -59,7 +59,7 @@ const sendPushNotification = async (userId, title, message, data) => {
   try {
     // This would integrate with a push notification service like Firebase Cloud Messaging (FCM)
     // or OneSignal. For now, it's a placeholder.
-    
+
     // Example implementation with FCM:
     // const user = await User.findById(userId);
     // if (user.pushTokens && user.pushTokens.length > 0) {
@@ -69,7 +69,7 @@ const sendPushNotification = async (userId, title, message, data) => {
     //     data,
     //   });
     // }
-    
+
     console.log(`Push notification sent to user ${userId}: ${title}`);
   } catch (error) {
     console.error("Error sending push notification:", error);
@@ -84,7 +84,7 @@ const sendEmailNotification = async (email, title, message, data) => {
   try {
     // This would integrate with an email service like SendGrid, Mailgun, or AWS SES
     // For now, it's a placeholder.
-    
+
     // Example implementation with SendGrid:
     // await sgMail.send({
     //   to: email,
@@ -93,7 +93,7 @@ const sendEmailNotification = async (email, title, message, data) => {
     //   text: message,
     //   html: generateEmailTemplate(title, message, data),
     // });
-    
+
     console.log(`Email notification sent to ${email}: ${title}`);
   } catch (error) {
     console.error("Error sending email notification:", error);
@@ -108,14 +108,14 @@ const sendSMSNotification = async (phone, title, message, data) => {
   try {
     // This would integrate with an SMS service like Twilio, Africa's Talking, or SMSGateway
     // For now, it's a placeholder.
-    
+
     // Example implementation with Twilio:
     // await client.messages.create({
     //   body: `${title}: ${message}`,
     //   from: process.env.TWILIO_PHONE_NUMBER,
     //   to: phone,
     // });
-    
+
     console.log(`SMS notification sent to ${phone}: ${title}`);
   } catch (error) {
     console.error("Error sending SMS notification:", error);
@@ -130,14 +130,14 @@ const sendWhatsAppNotification = async (phone, title, message, data) => {
   try {
     // This would integrate with WhatsApp Business API
     // For now, it's a placeholder.
-    
+
     // Example implementation with Twilio WhatsApp:
     // await client.messages.create({
     //   from: 'whatsapp:+14155238886',
     //   body: `${title}: ${message}`,
     //   to: `whatsapp:${phone}`,
     // });
-    
+
     console.log(`WhatsApp notification sent to ${phone}: ${title}`);
   } catch (error) {
     console.error("Error sending WhatsApp notification:", error);

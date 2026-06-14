@@ -1,6 +1,4 @@
-import {
-  getPersonalizedRecommendations,
-} from "../services/recommendationService.js";
+import { getPersonalizedRecommendations } from "../services/recommendationService.js";
 
 // =============================
 // 🎯 GET PERSONALIZED RECOMMENDATIONS

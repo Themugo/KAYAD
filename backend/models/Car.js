@@ -26,12 +26,51 @@ const carSchema = new mongoose.Schema(
     // =============================
     // 🚗 SPECS
     // =============================
-    fuel: { type: String, index: true, enum: ['Petrol', 'Diesel', 'Electric', 'Hybrid', 'LPG', 'CNG'] },
-    transmission: { type: String, enum: ['Automatic', 'Manual', 'CVT', 'DCT', 'Semi-Automatic'] },
+    fuel: { type: String, index: true, enum: ["Petrol", "Diesel", "Electric", "Hybrid", "LPG", "CNG"] },
+    transmission: { type: String, enum: ["Automatic", "Manual", "CVT", "DCT", "Semi-Automatic"] },
     mileage: Number,
-    bodyType: { type: String, enum: ['SUV', 'Sedan', 'Hatchback', 'Pickup', 'Wagon', 'Coupe', 'Convertible', 'Van', 'Truck', 'Bus', 'Motorcycle', 'Other'] },
-    color: { type: String, enum: ['White', 'Black', 'Silver', 'Grey', 'Blue', 'Red', 'Green', 'Brown', 'Beige', 'Gold', 'Orange', 'Purple', 'Yellow', 'Maroon', 'Navy', 'Other'] },
-    condition: { type: String, enum: ['New', 'Used', 'Pre-owned', 'Foreign Used', 'Locally Used', 'Reconditioned', 'Damaged'] },
+    bodyType: {
+      type: String,
+      enum: [
+        "SUV",
+        "Sedan",
+        "Hatchback",
+        "Pickup",
+        "Wagon",
+        "Coupe",
+        "Convertible",
+        "Van",
+        "Truck",
+        "Bus",
+        "Motorcycle",
+        "Other",
+      ],
+    },
+    color: {
+      type: String,
+      enum: [
+        "White",
+        "Black",
+        "Silver",
+        "Grey",
+        "Blue",
+        "Red",
+        "Green",
+        "Brown",
+        "Beige",
+        "Gold",
+        "Orange",
+        "Purple",
+        "Yellow",
+        "Maroon",
+        "Navy",
+        "Other",
+      ],
+    },
+    condition: {
+      type: String,
+      enum: ["New", "Used", "Pre-owned", "Foreign Used", "Locally Used", "Reconditioned", "Damaged"],
+    },
     description: String,
     features: [String],
 
@@ -89,10 +128,10 @@ const carSchema = new mongoose.Schema(
     startingBid: { type: Number, default: 0 },
     reservePrice: { type: Number, default: null },
     reserveMet: { type: Boolean, default: false },
-    reserveMode: { 
-      type: String, 
-      enum: ["none", "hidden", "visible"], 
-      default: "none" 
+    reserveMode: {
+      type: String,
+      enum: ["none", "hidden", "visible"],
+      default: "none",
     },
     extensionCount: { type: Number, default: 0 },
 

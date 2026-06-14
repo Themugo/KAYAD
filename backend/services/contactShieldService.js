@@ -11,20 +11,20 @@ const CONTACT_PATTERNS = [
   /\b\d{10}\b/g,
   /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
   /\+?\d{1,3}[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
-  
+
   // Email addresses
   /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-  
+
   // WhatsApp
   /whatsapp\.com\/send\?phone=\d+/gi,
   /wa\.me\/\d+/gi,
   /whatsapp:/gi,
-  
+
   // Telegram
   /t\.me\/\w+/gi,
   /telegram\.me\/\w+/gi,
   /telegram:/gi,
-  
+
   // Other messaging
   /call me/i,
   /text me/i,
@@ -166,7 +166,7 @@ export const logContactAttempt = async (buyerId, dealerId, carId, message) => {
   if (scanResult.hasContactInfo) {
     shield.contactAttempts += 1;
     shield.lastContactAttemptAt = new Date();
-    
+
     for (const blocked of scanResult.blockedMessages) {
       shield.blockedMessages.push({
         type: blocked.type,

@@ -633,7 +633,12 @@ router.post(
 
     // Notify winner
     try {
-      await sendNotification({ userId: bid.user, title: "Bid Accepted!", message: `Your bid on ${car.title} has been accepted`, type: "bid" }).catch((e) => console.warn("Sale notif failed:", e.message));
+      await sendNotification({
+        userId: bid.user,
+        title: "Bid Accepted!",
+        message: `Your bid on ${car.title} has been accepted`,
+        type: "bid",
+      }).catch((e) => console.warn("Sale notif failed:", e.message));
     } catch {
       /* non-critical */
     }
@@ -749,7 +754,7 @@ router.post(
     car.startingBid = startingBidVal;
     car.currentBid = startingBidVal;
     car.reservePrice = reserveVal;
-    car.reserveMode = reserveMode || 'none';
+    car.reserveMode = reserveMode || "none";
     car.auctionStartTime = new Date();
     car.auctionEnd = new Date(Date.now() + durationMs);
     await car.save();

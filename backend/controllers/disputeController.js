@@ -269,9 +269,7 @@ export const getDispute = async (req, res) => {
 
     // Check if user is involved or admin
     const isAdmin = req.user.role === "admin" || req.user.role === "escrow_officer";
-    const isInvolved =
-      dispute.openedBy._id.toString() === userId ||
-      dispute.openedAgainst._id.toString() === userId;
+    const isInvolved = dispute.openedBy._id.toString() === userId || dispute.openedAgainst._id.toString() === userId;
 
     if (!isAdmin && !isInvolved) {
       return res.status(403).json({ success: false, message: "Access denied" });

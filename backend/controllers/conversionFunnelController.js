@@ -72,7 +72,7 @@ export const trackFavorite = async (req, res) => {
       funnel.favorited = true;
       funnel.favoritedAt = new Date();
       funnel.currentStage = "favorited";
-      
+
       // Calculate time to favorite
       if (funnel.lastViewedAt) {
         const timeDiff = (new Date(funnel.favoritedAt) - new Date(funnel.lastViewedAt)) / (1000 * 60 * 60);
@@ -118,7 +118,7 @@ export const trackChat = async (req, res) => {
       funnel.chatInitiatedAt = funnel.chatInitiatedAt || new Date();
       funnel.messageCount += 1;
       funnel.currentStage = "chatted";
-      
+
       // Calculate time to chat
       if (!funnel.timeToChat && funnel.lastViewedAt) {
         const timeDiff = (new Date(funnel.chatInitiatedAt) - new Date(funnel.lastViewedAt)) / (1000 * 60 * 60);
@@ -165,7 +165,7 @@ export const trackOffer = async (req, res) => {
       funnel.offerMadeAt = funnel.offerMadeAt || new Date();
       funnel.offerAmount = amount;
       funnel.currentStage = "offered";
-      
+
       // Calculate time to offer
       if (!funnel.timeToOffer && funnel.lastViewedAt) {
         const timeDiff = (new Date(funnel.offerMadeAt) - new Date(funnel.lastViewedAt)) / (1000 * 60 * 60);
@@ -209,7 +209,7 @@ export const trackEscrow = async (req, res) => {
       funnel.escrowInitiated = true;
       funnel.escrowInitiatedAt = funnel.escrowInitiatedAt || new Date();
       funnel.currentStage = "escrow";
-      
+
       // Calculate time to escrow
       if (!funnel.timeToEscrow && funnel.lastViewedAt) {
         const timeDiff = (new Date(funnel.escrowInitiatedAt) - new Date(funnel.lastViewedAt)) / (1000 * 60 * 60);
@@ -256,7 +256,7 @@ export const trackSale = async (req, res) => {
       funnel.soldAt = funnel.soldAt || new Date();
       funnel.saleAmount = amount;
       funnel.currentStage = "sold";
-      
+
       // Calculate time to sale
       if (!funnel.timeToSale && funnel.lastViewedAt) {
         const timeDiff = (new Date(funnel.soldAt) - new Date(funnel.lastViewedAt)) / (1000 * 60 * 60);
@@ -290,11 +290,11 @@ export const getFunnelAnalytics = async (req, res) => {
 
     // Calculate funnel metrics
     const totalViews = funnels.length;
-    const favorited = funnels.filter(f => f.favorited).length;
-    const chatted = funnels.filter(f => f.chatInitiated).length;
-    const offered = funnels.filter(f => f.offerMade).length;
-    const escrowInitiated = funnels.filter(f => f.escrowInitiated).length;
-    const sold = funnels.filter(f => f.sold).length;
+    const favorited = funnels.filter((f) => f.favorited).length;
+    const chatted = funnels.filter((f) => f.chatInitiated).length;
+    const offered = funnels.filter((f) => f.offerMade).length;
+    const escrowInitiated = funnels.filter((f) => f.escrowInitiated).length;
+    const sold = funnels.filter((f) => f.sold).length;
 
     // Calculate conversion rates
     const toFavoriteRate = totalViews > 0 ? (favorited / totalViews) * 100 : 0;
@@ -304,18 +304,18 @@ export const getFunnelAnalytics = async (req, res) => {
     const toSaleRate = escrowInitiated > 0 ? (sold / escrowInitiated) * 100 : 0;
 
     // Calculate average time at each stage
-    const avgTimeToFavorite = funnels
-      .filter(f => f.timeToFavorite)
-      .reduce((sum, f) => sum + f.timeToFavorite, 0) / (funnels.filter(f => f.timeToFavorite).length || 1);
-    const avgTimeToChat = funnels
-      .filter(f => f.timeToChat)
-      .reduce((sum, f) => sum + f.timeToChat, 0) / (funnels.filter(f => f.timeToChat).length || 1);
-    const avgTimeToOffer = funnels
-      .filter(f => f.timeToOffer)
-      .reduce((sum, f) => sum + f.timeToOffer, 0) / (funnels.filter(f => f.timeToOffer).length || 1);
-    const avgTimeToSale = funnels
-      .filter(f => f.timeToSale)
-      .reduce((sum, f) => sum + f.timeToSale, 0) / (funnels.filter(f => f.timeToSale).length || 1);
+    const avgTimeToFavorite =
+      funnels.filter((f) => f.timeToFavorite).reduce((sum, f) => sum + f.timeToFavorite, 0) /
+      (funnels.filter((f) => f.timeToFavorite).length || 1);
+    const avgTimeToChat =
+      funnels.filter((f) => f.timeToChat).reduce((sum, f) => sum + f.timeToChat, 0) /
+      (funnels.filter((f) => f.timeToChat).length || 1);
+    const avgTimeToOffer =
+      funnels.filter((f) => f.timeToOffer).reduce((sum, f) => sum + f.timeToOffer, 0) /
+      (funnels.filter((f) => f.timeToOffer).length || 1);
+    const avgTimeToSale =
+      funnels.filter((f) => f.timeToSale).reduce((sum, f) => sum + f.timeToSale, 0) /
+      (funnels.filter((f) => f.timeToSale).length || 1);
 
     res.json({
       success: true,
@@ -362,15 +362,15 @@ export const getDealerFunnelAnalytics = async (req, res) => {
 
     // Aggregate metrics across all cars
     const totalViews = funnels.reduce((sum, f) => sum + f.viewCount, 0);
-    const favorited = funnels.filter(f => f.favorited).length;
-    const chatted = funnels.filter(f => f.chatInitiated).length;
-    const offered = funnels.filter(f => f.offerMade).length;
-    const escrowInitiated = funnels.filter(f => f.escrowInitiated).length;
-    const sold = funnels.filter(f => f.sold).length;
+    const favorited = funnels.filter((f) => f.favorited).length;
+    const chatted = funnels.filter((f) => f.chatInitiated).length;
+    const offered = funnels.filter((f) => f.offerMade).length;
+    const escrowInitiated = funnels.filter((f) => f.escrowInitiated).length;
+    const sold = funnels.filter((f) => f.sold).length;
 
     // Group by car for detailed breakdown
     const byCar = {};
-    funnels.forEach(f => {
+    funnels.forEach((f) => {
       const carId = f.car.toString();
       if (!byCar[carId]) {
         byCar[carId] = {

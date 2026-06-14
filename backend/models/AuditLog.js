@@ -12,7 +12,19 @@ const auditLogSchema = new mongoose.Schema(
     },
     actorRole: {
       type: String,
-      enum: ["admin", "dealer", "buyer", "inspector", "escrow_officer", "technical_support", "hr", "accounts", "ad_manager", "moderator", "ghost_checker"],
+      enum: [
+        "admin",
+        "dealer",
+        "buyer",
+        "inspector",
+        "escrow_officer",
+        "technical_support",
+        "hr",
+        "accounts",
+        "ad_manager",
+        "moderator",
+        "ghost_checker",
+      ],
     },
     actorName: String,
     actorEmail: String,
@@ -31,32 +43,32 @@ const auditLogSchema = new mongoose.Schema(
         "user_deleted",
         "admin_login",
         "admin_logout",
-        
+
         // Vehicle actions
         "vehicle_approved",
         "vehicle_rejected",
         "vehicle_deleted",
         "vehicle_status_changed",
-        
+
         // Auction actions
         "auction_created",
         "auction_started",
         "auction_ended",
         "auction_extended",
         "auction_cancelled",
-        
+
         // Escrow actions
         "escrow_created",
         "escrow_funded",
         "escrow_released",
         "escrow_refunded",
         "escrow_disputed",
-        
+
         // Payout actions
         "payout_sent",
         "payout_failed",
         "payout_reversed",
-        
+
         // Other critical actions
         "config_updated",
         "permission_changed",
@@ -83,11 +95,13 @@ const auditLogSchema = new mongoose.Schema(
     // =============================
     oldValue: mongoose.Schema.Types.Mixed,
     newValue: mongoose.Schema.Types.Mixed,
-    changes: [{
-      field: String,
-      oldValue: mongoose.Schema.Types.Mixed,
-      newValue: mongoose.Schema.Types.Mixed,
-    }],
+    changes: [
+      {
+        field: String,
+        oldValue: mongoose.Schema.Types.Mixed,
+        newValue: mongoose.Schema.Types.Mixed,
+      },
+    ],
 
     // =============================
     // 🌐 REQUEST INFO

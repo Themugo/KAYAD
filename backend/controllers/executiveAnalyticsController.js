@@ -45,7 +45,9 @@ export const getExecutiveDashboard = async (req, res) => {
       yesterday: gmvYesterday[0]?.total || 0,
       last30Days: gmv30Days[0]?.total || 0,
       last90Days: gmv90Days[0]?.total || 0,
-      growth: gmvYesterday[0]?.total ? ((gmvToday[0]?.total - gmvYesterday[0]?.total) / gmvYesterday[0]?.total * 100).toFixed(1) : 0,
+      growth: gmvYesterday[0]?.total
+        ? (((gmvToday[0]?.total - gmvYesterday[0]?.total) / gmvYesterday[0]?.total) * 100).toFixed(1)
+        : 0,
     };
 
     // =============================
@@ -144,7 +146,8 @@ export const getExecutiveDashboard = async (req, res) => {
       { $match: { count: { $gt: 1 } } },
       { $count: "returning" },
     ]);
-    const retentionRate = activeUsers30Days > 0 ? (returningUsers[0]?.returning / activeUsers30Days * 100).toFixed(1) : 0;
+    const retentionRate =
+      activeUsers30Days > 0 ? ((returningUsers[0]?.returning / activeUsers30Days) * 100).toFixed(1) : 0;
 
     // Conversion
     const viewsToLeads = await Event.aggregate([
@@ -155,7 +158,8 @@ export const getExecutiveDashboard = async (req, res) => {
       { $match: { eventType: "lead_created", createdAt: { $gte: thirtyDaysAgo } } },
       { $count: "leads" },
     ]);
-    const conversionRate = viewsToLeads[0]?.views > 0 ? (leads[0]?.leads / viewsToLeads[0]?.views * 100).toFixed(1) : 0;
+    const conversionRate =
+      viewsToLeads[0]?.views > 0 ? ((leads[0]?.leads / viewsToLeads[0]?.views) * 100).toFixed(1) : 0;
 
     const healthMetrics = {
       cac,
@@ -229,7 +233,7 @@ export const getRevenueBreakdown = async (req, res) => {
     const end = endDate ? new Date(endDate) : new Date();
 
     const escrows = await Escrow.find({ createdAt: { $gte: start, $lte: end } });
-    
+
     const platformFeeRate = 0.05;
     const totalGMV = escrows.reduce((sum, e) => sum + (e.amount || 0), 0);
     const totalRevenue = totalGMV * platformFeeRate;

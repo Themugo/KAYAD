@@ -48,16 +48,14 @@ export const analyzeListingQuality = async (carId) => {
       { field: "location", label: "Location" },
     ];
 
-    const missingFields = requiredFields.filter(
-      f => !car[f.field] || car[f.field] === "" || car[f.field] === 0
-    );
+    const missingFields = requiredFields.filter((f) => !car[f.field] || car[f.field] === "" || car[f.field] === 0);
 
     if (missingFields.length > 0) {
       issues.push({
         type: "missing_fields",
         severity: "critical",
         message: `${missingFields.length} required field(s) missing`,
-        missingFields: missingFields.map(f => f.label),
+        missingFields: missingFields.map((f) => f.label),
         suggestion: "Complete all required fields to improve listing quality",
       });
     }
@@ -75,13 +73,13 @@ export const analyzeListingQuality = async (carId) => {
       });
 
       if (similarCars.length >= 3) {
-        const prices = similarCars.map(c => c.price);
+        const prices = similarCars.map((c) => c.price);
         const avgPrice = prices.reduce((sum, p) => sum + p, 0) / prices.length;
         const stdDev = Math.sqrt(prices.reduce((sum, p) => sum + Math.pow(p - avgPrice, 2), 0) / prices.length);
-        
+
         // Check if price is more than 2 standard deviations from mean
         const zScore = (car.price - avgPrice) / stdDev;
-        
+
         if (zScore > 2) {
           warnings.push({
             type: "price_outlier",
@@ -111,7 +109,7 @@ export const analyzeListingQuality = async (carId) => {
     // =============================
     if (car.description) {
       const descLength = car.description.length;
-      
+
       if (descLength < 50) {
         issues.push({
           type: "weak_description",
@@ -132,7 +130,7 @@ export const analyzeListingQuality = async (carId) => {
 
       // Check for common description issues
       const descriptionIssues = [];
-      
+
       if (!car.description.toLowerCase().includes("condition")) {
         descriptionIssues.push("vehicle condition");
       }
@@ -156,11 +154,11 @@ export const analyzeListingQuality = async (carId) => {
     // 📊 OVERALL QUALITY SCORE
     // =============================
     let qualityScore = 100;
-    
+
     // Deduct points for issues
     qualityScore -= issues.length * 20; // 20 points per critical issue
     qualityScore -= warnings.length * 10; // 10 points per warning
-    
+
     // Add points for good practices
     if (car.images && car.images.length >= 10) qualityScore += 5;
     if (car.description && car.description.length >= 500) qualityScore += 5;
@@ -198,7 +196,7 @@ export const analyzeListingQuality = async (carId) => {
 
 export const batchAnalyzeListings = async (carIds) => {
   const results = [];
-  
+
   for (const carId of carIds) {
     try {
       const analysis = await analyzeListingQuality(carId);
@@ -209,7 +207,7 @@ export const batchAnalyzeListings = async (carIds) => {
       console.error(`Error analyzing car ${carId}:`, error);
     }
   }
-  
+
   return results;
 };
 
@@ -220,16 +218,15 @@ export const batchAnalyzeListings = async (carIds) => {
 export const getListingQualityStats = async (dealerId) => {
   try {
     const cars = await Car.find({ dealer: dealerId });
-    const analyses = await batchAnalyzeListings(cars.map(c => c._id));
+    const analyses = await batchAnalyzeListings(cars.map((c) => c._id));
 
-    const excellent = analyses.filter(a => a.qualityTier === "excellent").length;
-    const good = analyses.filter(a => a.qualityTier === "good").length;
-    const fair = analyses.filter(a => a.qualityTier === "fair").length;
-    const needsImprovement = analyses.filter(a => a.qualityTier === "needs_improvement").length;
+    const excellent = analyses.filter((a) => a.qualityTier === "excellent").length;
+    const good = analyses.filter((a) => a.qualityTier === "good").length;
+    const fair = analyses.filter((a) => a.qualityTier === "fair").length;
+    const needsImprovement = analyses.filter((a) => a.qualityTier === "needs_improvement").length;
 
-    const avgQualityScore = analyses.length > 0
-      ? analyses.reduce((sum, a) => sum + a.qualityScore, 0) / analyses.length
-      : 0;
+    const avgQualityScore =
+      analyses.length > 0 ? analyses.reduce((sum, a) => sum + a.qualityScore, 0) / analyses.length : 0;
 
     return {
       totalListings: analyses.length,

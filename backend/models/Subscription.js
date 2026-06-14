@@ -87,11 +87,13 @@ const subscriptionSchema = new mongoose.Schema(
     // =============================
     // 🎯 FEATURES
     // =============================
-    features: [{
-      name: String,
-      enabled: Boolean,
-      expiresAt: Date,
-    }],
+    features: [
+      {
+        name: String,
+        enabled: Boolean,
+        expiresAt: Date,
+      },
+    ],
 
     // =============================
     // 📋 METADATA

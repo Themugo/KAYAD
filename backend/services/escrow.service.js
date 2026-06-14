@@ -12,8 +12,16 @@ const calculateCommission = (amount) => {
 
 const guardSession = async (session) => {
   if (!session) return;
-  try { await session.abortTransaction(); } catch { /* already aborted */ }
-  try { session.endSession(); } catch { /* already ended */ }
+  try {
+    await session.abortTransaction();
+  } catch {
+    /* already aborted */
+  }
+  try {
+    session.endSession();
+  } catch {
+    /* already ended */
+  }
 };
 
 export const createEscrow = async (data) => {

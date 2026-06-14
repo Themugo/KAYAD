@@ -49,7 +49,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
       },
       responseTime: {
         score: { type: Number, default: 0 },
-        weight: { type: Number, default: 0.20 },
+        weight: { type: Number, default: 0.2 },
         data: {
           averageResponseTime: { type: Number, default: 0 }, // in minutes
           totalMessages: { type: Number, default: 0 },
@@ -88,12 +88,14 @@ const dealerTrustScoreSchema = new mongoose.Schema(
     // =============================
     // 📈 HISTORY
     // =============================
-    scoreHistory: [{
-      score: Number,
-      tier: String,
-      calculatedAt: Date,
-      reason: String,
-    }],
+    scoreHistory: [
+      {
+        score: Number,
+        tier: String,
+        calculatedAt: Date,
+        reason: String,
+      },
+    ],
 
     // =============================
     // 📋 METADATA

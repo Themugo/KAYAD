@@ -90,7 +90,7 @@ const calculateCompletedSalesScore = async (dealerId) => {
     };
   }
 
-  const successfulSales = cars.filter(car => !car.disputed).length;
+  const successfulSales = cars.filter((car) => !car.disputed).length;
   const successRate = (successfulSales / totalSales) * 100;
 
   // Score based on success rate and volume
@@ -132,8 +132,8 @@ const calculateEscrowSuccessScore = async (dealerId) => {
     };
   }
 
-  const successfulEscrows = escrows.filter(e => e.status === "released").length;
-  const disputedEscrows = escrows.filter(e => e.status === "disputed").length;
+  const successfulEscrows = escrows.filter((e) => e.status === "released").length;
+  const disputedEscrows = escrows.filter((e) => e.status === "disputed").length;
   const escrowSuccessRate = (successfulEscrows / totalEscrows) * 100;
 
   let score = 0;
@@ -188,7 +188,7 @@ const calculateResponseTimeScore = async (dealerId) => {
 
   return {
     score,
-    weight: 0.20,
+    weight: 0.2,
     data: { averageResponseTime, totalMessages, responseCount },
   };
 };
@@ -203,7 +203,7 @@ const calculateDisputesScore = async (dealerId) => {
   });
   const totalDisputes = disputes.length;
 
-  const resolvedDisputes = disputes.filter(d => d.status === "resolved").length;
+  const resolvedDisputes = disputes.filter((d) => d.status === "resolved").length;
   const disputeRate = totalDisputes > 0 ? (resolvedDisputes / totalDisputes) * 100 : 0;
 
   let score = 100;
@@ -244,7 +244,7 @@ const calculateVehicleAccuracyScore = async (dealerId) => {
   }
 
   // Count listings with complete information
-  const accurateListings = cars.filter(car => {
+  const accurateListings = cars.filter((car) => {
     return (
       car.title &&
       car.description &&
@@ -292,7 +292,7 @@ const determineTier = (score) => {
 
 export const getDealerTrustScore = async (dealerId) => {
   const trustScore = await DealerTrustScore.findOne({ dealer: dealerId });
-  
+
   if (!trustScore) {
     return await calculateDealerTrustScore(dealerId);
   }
@@ -311,7 +311,7 @@ export const getDealerTrustScore = async (dealerId) => {
 
 export const batchCalculateScores = async (dealerIds) => {
   const results = [];
-  
+
   for (const dealerId of dealerIds) {
     try {
       const score = await calculateDealerTrustScore(dealerId);
@@ -320,6 +320,6 @@ export const batchCalculateScores = async (dealerIds) => {
       results.push({ dealerId, success: false, error: error.message });
     }
   }
-  
+
   return results;
 };

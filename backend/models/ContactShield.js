@@ -58,12 +58,14 @@ const contactShieldSchema = new mongoose.Schema(
       default: 0,
     },
     lastContactAttemptAt: Date,
-    blockedMessages: [{
-      type: String,
-      content: String,
-      detectedAt: Date,
-      pattern: String,
-    }],
+    blockedMessages: [
+      {
+        type: String,
+        content: String,
+        detectedAt: Date,
+        pattern: String,
+      },
+    ],
 
     // =============================
     // 🎯 INCENTIVES

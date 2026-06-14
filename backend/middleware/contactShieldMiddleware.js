@@ -23,7 +23,8 @@ export const checkContactShield = async (req, res, next) => {
     if (!allowed) {
       return res.status(403).json({
         success: false,
-        message: "Contact information is protected. Please submit an offer or initiate escrow to unlock contact details.",
+        message:
+          "Contact information is protected. Please submit an offer or initiate escrow to unlock contact details.",
         shieldActive: true,
         incentives: {
           buyerProtection: "Full refund if vehicle doesn't match description",

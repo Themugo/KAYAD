@@ -449,8 +449,16 @@ export const confirmBidPayment = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     if (session) {
-      try { await session.abortTransaction(); } catch { /* already aborted */ }
-      try { session.endSession(); } catch { /* already ended */ }
+      try {
+        await session.abortTransaction();
+      } catch {
+        /* already aborted */
+      }
+      try {
+        session.endSession();
+      } catch {
+        /* already ended */
+      }
     }
     console.error("CALLBACK ERROR:", err);
     res.status(500).json({ success: false, message: "Bid callback failed" });
