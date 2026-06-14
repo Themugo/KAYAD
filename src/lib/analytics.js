@@ -6,6 +6,9 @@ export function initAnalytics() {
   if (initialized || !GA_ID) return;
   initialized = true;
 
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+
   const s = document.createElement("script");
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;

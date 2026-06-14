@@ -34,7 +34,7 @@ export function SocketProvider({ children }) {
       socketRef.current = null;
       setConnected(false);
     };
-  }, [isAuth, token]);
+  }, [isAuth]);
 
   const joinAuction = useCallback((carId) => {
     socketRef.current?.emit('joinAuction', carId);
