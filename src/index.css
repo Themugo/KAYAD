@@ -625,3 +625,34 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
   .dealer-listing-row > img, .dealer-listing-row > div:first-of-type { flex-shrink: 0 !important; }
   .dealer-listing-row > div:last-child { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
 }
+
+/* Home Page Button Styles */
+.home-hero-primary-btn {
+  background: var(--gold);
+  box-shadow: 0 4px 20px rgba(212,196,168,0.25);
+}
+
+.home-hero-primary-btn:hover {
+  box-shadow: 0 8px 30px rgba(212,196,168,0.38);
+  transform: translateY(-1px);
+}
+
+.home-hero-secondary-btn:hover {
+  border-color: rgba(212,196,168,0.5);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.home-cta-btn {
+  background: var(--gold);
+}
+
+.home-cta-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Home Stats Grid */
+.home-stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
