@@ -76,6 +76,7 @@ import errorHandler from "./middleware/errorHandler.js";
 
 // ─── Services & Utils ─────────────────────────────────────────
 import requestLogger from "./middleware/logger.js";
+import { logInfo, logWarn, logError, logDebug } from "./utils/logger.js";
 import { startAuctionEngine } from "./realtime/auctionEngine.js";
 import { startAuctionTimer } from "./utils/auctionTimer.js";
 import { startEscrowCron } from "./services/escrowCron.js";
@@ -189,7 +190,7 @@ app.use(
       // Only allow YOUR Vercel deployments — not all *.vercel.app
       if (/^https:\/\/kayad-motors(-[a-z0-9]+)?(-themugos-projects)?\.vercel\.app$/.test(origin)) return cb(null, true);
       if (/^https?:\/\/localhost(:\d+)?$/.test(origin)) return cb(null, true);
-      console.warn("⚠️ CORS blocked:", origin, "— set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render");
+      logWarn("CORS blocked", { origin, message: "Set FRONTEND_URL or EXTRA_CORS_ORIGINS on Render" });
       cb(new Error(`CORS blocked: ${origin}`));
     },
     credentials: true,
@@ -435,23 +436,21 @@ const connectDB = async (retries = 5, delay = 2000) => {
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       });
-      console.log(`✅ MongoDB: ${conn.connection.host}`);
+      logInfo("MongoDB connected", { host: conn.connection.host });
       return conn;
     } catch (err) {
       if (attempt === retries) throw err;
       const backoff = delay * Math.pow(2, attempt - 1);
-      console.warn(
-        `⚠️  MongoDB connection attempt ${attempt}/${retries} failed: ${err.message}. Retrying in ${backoff}ms...`,
-      );
+      logWarn("MongoDB connection failed", { attempt, retries, error: err.message, backoff: `${backoff}ms` });
       await new Promise((r) => setTimeout(r, backoff));
     }
   }
 };
 
 // ── Mongoose connection monitoring ──────────────────────────
-mongoose.connection.on("disconnected", () => console.warn("⚠️ MongoDB disconnected"));
-mongoose.connection.on("reconnected", () => console.log("✅ MongoDB reconnected"));
-mongoose.connection.on("error", (err) => console.error("🔥 MongoDB error:", err.message));
+mongoose.connection.on("disconnected", () => logWarn("MongoDB disconnected"));
+mongoose.connection.on("reconnected", () => logInfo("MongoDB reconnected"));
+mongoose.connection.on("error", (err) => logError("MongoDB error", err));
 
 // ─── ENV VALIDATION ───────────────────────────────────────────
 // (validateEnv is imported from ./utils/env.js)
@@ -470,26 +469,28 @@ const bootstrap = async () => {
       if (existing === 0) {
         const { reseed } = await import("./seed.js");
         const result = await reseed();
-        console.log(
-          `  🌱 Auto-seeded: ${result.webhost.length} webhost, ${result.admin.length} admin, ${result.demos.length} demos, ${result.cars} cars`,
-        );
+        logInfo("Auto-seeded database", {
+          webhost: result.webhost.length,
+          admin: result.admin.length,
+          demos: result.demos.length,
+          cars: result.cars,
+        });
       }
     } catch (seedErr) {
-      console.warn("  ⚠️  Auto-seed skipped:", seedErr.message);
+      logWarn("Auto-seed skipped", { error: seedErr.message });
     }
 
     server.listen(PORT, () => {
-      console.log("");
-      console.log("  🚗 Kayad API");
-      console.log(`  ├─ URL:      http://localhost:${PORT}`);
-      console.log(`  ├─ Env:      ${NODE_ENV}`);
-      console.log(`  ├─ CORS:     ${FRONTEND}`);
-      console.log(`  ├─ Routes:   16 + v1 (versioned)`);
-      console.log(`  ├─ Security: mongoSanitize + XSS + IP whitelist + pagination cap`);
-      console.log(`  ├─ PostHog:  ${process.env.POSTHOG_API_KEY ? "connected" : "disabled"}`);
-      console.log(`  ├─ Redis:    ${process.env.REDIS_URL ? "connecting..." : "in-memory fallback"}`);
-      console.log(`  └─ Socket:   ready`);
-      console.log("");
+      logInfo("Kayad API started", {
+        url: `http://localhost:${PORT}`,
+        env: NODE_ENV,
+        cors: FRONTEND,
+        routes: "16 + v1 (versioned)",
+        security: "mongoSanitize + XSS + IP whitelist + pagination cap",
+        posthog: process.env.POSTHOG_API_KEY ? "connected" : "disabled",
+        redis: process.env.REDIS_URL ? "connecting..." : "in-memory fallback",
+        socket: "ready",
+      });
     });
 
     await startAuctionEngine();
@@ -499,11 +500,13 @@ const bootstrap = async () => {
     startSavedSearchCron();
     startPriceAlertCron();
 
-    console.log(`  ⏰ EscrowCron: auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`);
-    console.log(`  ⏰ AuctionReminderCron: reminders active`);
-    console.log(`  ⏰ SavedSearchCron: 10-min cycle`);
-    console.log(`  ⏰ PriceAlertCron: 15-min cycle`);
-    console.log(`  ⚡ AuctionEngine: running`);
+    logInfo("Background services started", {
+      escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
+      auctionReminderCron: "reminders active",
+      savedSearchCron: "10-min cycle",
+      priceAlertCron: "15-min cycle",
+      auctionEngine: "running",
+    });
 
     // ── VIEW COUNT FLUSH (Issue #5) ─────────────────────────
     // Every 60s, drain Redis view counters into MongoDB $inc bulk write
@@ -527,15 +530,13 @@ const bootstrap = async () => {
           await Car.bulkWrite(bulkOps, { ordered: false });
           await redis.del("kayad:view_counts");
         } catch (e) {
-          console.warn("⚠️ View flush error:", e.message);
+          logWarn("View flush error", { error: e.message });
         }
       }, VIEW_FLUSH_MS);
-      console.log(`  👁️ ViewFlush: 60s interval (Redis → MongoDB)`);
+      logInfo("View flush configured", { interval: "60s", flow: "Redis → MongoDB" });
     }
-
-    console.log("");
   } catch (err) {
-    console.error("❌ Bootstrap failed:", err.message);
+    logError("Bootstrap failed", err);
     process.exit(1);
   }
 };
@@ -544,10 +545,10 @@ const bootstrap = async () => {
 const shutdown = async (signal) => {
   if (shutdown.inProgress) return;
   shutdown.inProgress = true;
-  console.log(`\n🛑 ${signal} — shutting down gracefully...`);
+  logInfo("Shutting down gracefully", { signal });
   server.close(async () => {
     await mongoose.connection.close();
-    console.log("✅ Shutdown complete");
+    logInfo("Shutdown complete");
     process.exit(0);
   });
   setTimeout(() => process.exit(1), 10_000); // force after 10s
@@ -557,11 +558,11 @@ if (NODE_ENV !== "test") {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("unhandledRejection", (err) => {
-    console.error("❌ Unhandled rejection:", err?.message || err);
+    logError("Unhandled rejection", err);
     shutdown("unhandledRejection");
   });
   process.on("uncaughtException", (err) => {
-    console.error("❌ Uncaught exception:", err.message);
+    logError("Uncaught exception", err);
     process.exit(1);
   });
 }

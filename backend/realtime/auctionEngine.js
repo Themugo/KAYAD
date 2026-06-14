@@ -9,6 +9,7 @@ import Auction from "../models/Auction.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
+import { logInfo, logWarn, logError, logDebug } from "../utils/logger.js";
 
 // =============================
 // 🔧 CONFIG
@@ -165,7 +166,7 @@ export const placeBid = async ({ roomId, bid, userId }) => {
 
     return { success: true, bid };
   } catch (err) {
-    console.error("❌ BID ERROR:", err);
+    logError("BID ERROR", err);
     return { success: false, message: "Server error" };
   } finally {
     if (lockAcquired) await releaseLock(lockKey);
@@ -185,7 +186,7 @@ export const getBidHistory = async (roomId, limit = 50) => {
     const auction = await Auction.findOne({ roomId }).lean();
     return auction?.bidHistory?.slice(-limit) || [];
   } catch (err) {
-    console.error("❌ HISTORY ERROR:", err);
+    logError("HISTORY ERROR", err);
     return [];
   }
 };
@@ -234,7 +235,7 @@ export const startAuction = async ({ roomId, carId, startingBid = 0, durationMs 
 
     return { success: true, endTime };
   } catch (err) {
-    console.error("❌ START ERROR:", err);
+    logError("START ERROR", err);
     return { success: false };
   }
 };
@@ -282,29 +283,29 @@ const isAuctionActive = async (roomId) => {
 // =============================
 export const startAuctionEngine = async () => {
   try {
-    console.log("⚡ Bootstrapping auctions...");
+    logInfo("Bootstrapping auctions...");
     const now = Date.now();
     const liveCars = await Car.find({ auctionStatus: "live", allowBid: true }).select("_id currentBid auctionEnd");
     if (!liveCars.length) {
-      console.log("⚠️ No live auctions found");
+      logWarn("No live auctions found");
       return;
     }
     for (const car of liveCars) {
       const roomId = car._id.toString();
       const endTime = new Date(car.auctionEnd).getTime();
       if (!endTime || isNaN(endTime)) {
-        console.warn(`⚠️ Invalid end time: ${roomId}`);
+        logWarn("Invalid end time", { roomId });
         continue;
       }
       const duration = endTime - now;
       if (duration <= 0) {
-        console.log(`🏁 Ending expired auction: ${roomId}`);
+        logInfo("Ending expired auction", { roomId });
         await endAuction(roomId);
         await Car.findByIdAndUpdate(roomId, { auctionStatus: "ended", allowBid: false });
         continue;
       }
       if (await isAuctionActive(roomId)) {
-        console.log(`⏭️ Already running: ${roomId}`);
+        logDebug("Already running", { roomId });
         continue;
       }
       const lockKey = `${SYNC_LOCK_PREFIX}${roomId}`;
@@ -313,16 +314,16 @@ export const startAuctionEngine = async () => {
       try {
         await startAuction({ roomId, carId: car._id, startingBid: car.currentBid || 0, durationMs: duration });
         await trackAuction(roomId);
-        console.log(`🚗 Auction synced: ${roomId}`);
+        logInfo("Auction synced", { roomId });
       } catch (err) {
-        console.error(`❌ Failed auction start: ${roomId}`, err);
+        logError("Failed auction start", err, { roomId });
       } finally {
         await releaseBootLock(lockKey);
       }
     }
-    console.log("✅ Auction engine ready");
+    logInfo("Auction engine ready");
   } catch (err) {
-    console.error("❌ AUCTION ENGINE ERROR:", err);
+    logError("AUCTION ENGINE ERROR", err);
   }
 };
 
@@ -433,7 +434,7 @@ export const endAuction = async (roomId) => {
       const carDoc = await CarModel.findById(auction.carId).select("title");
       if (winnerUser?.email && carDoc && typeof sendAuctionWonEmail === "function") {
         sendAuctionWonEmail(winnerUser, carDoc, winner.bid).catch((e) =>
-          console.warn("⚠️ Auction won email failed:", e.message),
+          logWarn("Auction won email failed", { error: e.message }),
         );
       }
     } catch (_) {}
@@ -446,7 +447,7 @@ export const endAuction = async (roomId) => {
 
     return { success: true, winner, commissionOwed };
   } catch (err) {
-    console.error("❌ END ERROR:", err);
+    logError("END ERROR", err);
     return { success: false };
   }
 };

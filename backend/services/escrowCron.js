@@ -11,6 +11,7 @@
 import Escrow from "../models/Escrow.js";
 import Notification from "../models/Notification.js";
 import { getIO } from "../utils/io.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
 const ENABLED = process.env.ESCROW_CRON_ENABLED !== "false";
@@ -21,7 +22,7 @@ const notify = async (userId, title, message, type = "escrow") => {
     const notif = await Notification.create({ user: userId, title, message, type });
     getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {
-    console.error("❌ Notify failed:", e.message);
+    logError("Notify failed", e);
   }
 };
 
@@ -36,7 +37,7 @@ const runAutoRelease = async () => {
 
   if (stale.length === 0) return;
 
-  console.log(`⏰ EscrowCron: ${stale.length} escrow(s) past ${RELEASE_DAYS}-day threshold`);
+  logInfo("EscrowCron: escrows past threshold", { count: stale.length, days: RELEASE_DAYS });
 
   for (const escrow of stale) {
     try {
@@ -75,9 +76,9 @@ const runAutoRelease = async () => {
         autoReleased: true,
       });
 
-      console.log(`  ✅ Released escrow ${escrow._id} (${escrow.amount} KES)`);
+      logInfo("Released escrow", { escrowId: escrow._id, amount: escrow.amount });
     } catch (err) {
-      console.error(`  ❌ Failed to auto-release escrow ${escrow._id}:`, err.message);
+      logError("Failed to auto-release escrow", err, { escrowId: escrow._id });
     }
   }
 };
@@ -119,9 +120,9 @@ const runDisputeWarnings = async () => {
           type: "escrow",
         });
 
-      console.log(`  ⚠️ Warning sent for escrow ${escrow._id}`);
+      logInfo("Warning sent for escrow", { escrowId: escrow._id });
     } catch (err) {
-      console.error(`  ❌ Warning failed for ${escrow._id}:`, err.message);
+      logError("Warning failed for escrow", err, { escrowId: escrow._id });
     }
   }
 };
@@ -131,7 +132,7 @@ let _cronHandle = null;
 
 export const startEscrowCron = () => {
   if (!ENABLED) {
-    console.log("⏸  EscrowCron disabled (ESCROW_CRON_ENABLED=false)");
+    logWarn("EscrowCron disabled (ESCROW_CRON_ENABLED=false)");
     return;
   }
 
@@ -142,7 +143,7 @@ export const startEscrowCron = () => {
       await runDisputeWarnings();
       await runAutoRelease();
     } catch (err) {
-      console.error("❌ EscrowCron failed:", err.message);
+      logError("EscrowCron failed", err);
     }
   };
 
@@ -150,7 +151,7 @@ export const startEscrowCron = () => {
   run();
   _cronHandle = setInterval(run, INTERVAL_MS);
 
-  console.log(`⏰ EscrowCron started — auto-release after ${RELEASE_DAYS} days`);
+  logInfo("EscrowCron started", { autoReleaseDays: RELEASE_DAYS });
   return _cronHandle;
 };
 

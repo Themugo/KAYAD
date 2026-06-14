@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import Car from "./models/Car.js";
 import User from "./models/User.js";
+import { logInfo, logWarn, logError } from "./utils/logger.js";
 
 dotenv.config();
 
@@ -377,7 +378,7 @@ const seedCars = [
 const connectDB = async () => {
   if (mongoose.connection.readyState === 1) return; // already connected
   await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
-  console.log("DB connected for seeding");
+  logInfo("DB connected for seeding");
 };
 
 export async function reseed() {
@@ -390,7 +391,7 @@ export async function reseed() {
   const devFallback = (label) => {
     if (isProd) throw new Error(`Seed password required via env var (${label}) in production`);
     const pw = randomBytes(16).toString("base64url") + "!A1";
-    console.warn(`⚠️  Generated random dev password for ${label} — set SEED_* env vars for production`);
+    logWarn(`Generated random dev password for ${label} — set SEED_* env vars for production`);
     return pw;
   };
 
@@ -631,16 +632,17 @@ const seed = async () => {
   try {
     await connectDB();
     const result = await reseed();
-    console.log(`\nWebhost: ${result.webhost.join(", ")}`);
-    console.log(`Admin: ${result.admin.join(", ")}`);
-    console.log(`Demos: ${result.demos.join(", ")}`);
-    console.log(`Staff: ${result.staff.join(", ")}`);
-    console.log(`Dealers: ${result.dealers.join(", ")}`);
-    console.log(`Cars: ${result.cars}`);
-    console.log(`\n✅ KAYAD — SEED COMPLETE`);
+    logInfo("KAYAD — SEED COMPLETE", {
+      webhost: result.webhost,
+      admin: result.admin,
+      demos: result.demos,
+      staff: result.staff,
+      dealers: result.dealers,
+      cars: result.cars,
+    });
     process.exit();
   } catch (err) {
-    console.error("Seed error:", err);
+    logError("Seed error", err);
     process.exit(1);
   }
 };

@@ -1,6 +1,7 @@
 import { Queue, Worker } from "bullmq";
 import { sendNotification } from "./notificationService.js";
 import { initRedis, getRedisClient } from "./redisCacheService.js";
+import { logInfo, logWarn, logError, logDebug } from "../utils/logger.js";
 
 // =============================
 // 📦 QUEUE ARCHITECTURE
@@ -16,7 +17,7 @@ export const initQueues = async () => {
   try {
     const redisClient = await initRedis();
     if (!redisClient) {
-      console.error("Failed to initialize queues: Redis not available");
+      logError("Failed to initialize queues: Redis not available");
       return;
     }
 
@@ -30,31 +31,31 @@ export const initQueues = async () => {
     // 📧 EMAIL QUEUE
     // =============================
     emailQueue = new Queue("emails", { connection });
-    console.log("Email queue initialized");
+    logInfo("Email queue initialized");
 
     // =============================
     // 🔔 NOTIFICATION QUEUE
     // =============================
     notificationQueue = new Queue("notifications", { connection });
-    console.log("Notification queue initialized");
+    logInfo("Notification queue initialized");
 
     // =============================
     // 📊 REPORT QUEUE
     // =============================
     reportQueue = new Queue("reports", { connection });
-    console.log("Report queue initialized");
+    logInfo("Report queue initialized");
 
     // =============================
     // 🎯 AUCTION QUEUE
     // =============================
     auctionQueue = new Queue("auctions", { connection });
-    console.log("Auction queue initialized");
+    logInfo("Auction queue initialized");
 
     // =============================
     // 🖼️ IMAGE PROCESSING QUEUE
     // =============================
     imageProcessingQueue = new Queue("image-processing", { connection });
-    console.log("Image processing queue initialized");
+    logInfo("Image processing queue initialized");
 
     // =============================
     // 👷 WORKERS
@@ -69,7 +70,7 @@ export const initQueues = async () => {
       imageProcessingQueue,
     };
   } catch (error) {
-    console.error("Error initializing queues:", error);
+    logError("Error initializing queues", error);
     return null;
   }
 };
@@ -86,7 +87,7 @@ const startWorkers = (connection) => {
     "emails",
     async (job) => {
       const { to, subject, html, text } = job.data;
-      console.log(`Sending email to ${to}: ${subject}`);
+      logDebug("Sending email", { to, subject });
       // Integrate with email service (SendGrid, Mailgun, etc.)
       // await sgMail.send({ to, from: 'noreply@kayad.co.ke', subject, html, text });
       return { success: true };
@@ -95,11 +96,11 @@ const startWorkers = (connection) => {
   );
 
   emailWorker.on("completed", (job) => {
-    console.log(`Email job ${job.id} completed`);
+    logDebug("Email job completed", { jobId: job.id });
   });
 
   emailWorker.on("failed", (job, err) => {
-    console.error(`Email job ${job?.id} failed:`, err);
+    logError("Email job failed", err, { jobId: job?.id });
   });
 
   // =============================
@@ -109,7 +110,7 @@ const startWorkers = (connection) => {
     "notifications",
     async (job) => {
       const { userId, title, message, type, data, channels } = job.data;
-      console.log(`Sending notification to user ${userId}: ${title}`);
+      logDebug("Sending notification", { userId, title });
       await sendNotification({ userId, title, message, type, data, channels });
       return { success: true };
     },
@@ -117,11 +118,11 @@ const startWorkers = (connection) => {
   );
 
   notificationWorker.on("completed", (job) => {
-    console.log(`Notification job ${job.id} completed`);
+    logDebug("Notification job completed", { jobId: job.id });
   });
 
   notificationWorker.on("failed", (job, err) => {
-    console.error(`Notification job ${job?.id} failed:`, err);
+    logError("Notification job failed", err, { jobId: job?.id });
   });
 
   // =============================
@@ -131,7 +132,7 @@ const startWorkers = (connection) => {
     "reports",
     async (job) => {
       const { reportType, filters, userId } = job.data;
-      console.log(`Generating ${reportType} report for user ${userId}`);
+      logDebug("Generating report", { reportType, userId });
       // Generate report based on type
       // This would integrate with report generation logic
       return { success: true, reportUrl: "https://example.com/report.pdf" };
@@ -140,11 +141,11 @@ const startWorkers = (connection) => {
   );
 
   reportWorker.on("completed", (job) => {
-    console.log(`Report job ${job.id} completed`);
+    logDebug("Report job completed", { jobId: job.id });
   });
 
   reportWorker.on("failed", (job, err) => {
-    console.error(`Report job ${job?.id} failed:`, err);
+    logError("Report job failed", err, { jobId: job?.id });
   });
 
   // =============================
@@ -154,7 +155,7 @@ const startWorkers = (connection) => {
     "auctions",
     async (job) => {
       const { eventType, carId, data } = job.data;
-      console.log(`Processing auction event ${eventType} for car ${carId}`);
+      logDebug("Processing auction event", { eventType, carId });
       // Process auction events (end, extend, etc.)
       // This would integrate with auction logic
       return { success: true };
@@ -163,11 +164,11 @@ const startWorkers = (connection) => {
   );
 
   auctionWorker.on("completed", (job) => {
-    console.log(`Auction job ${job.id} completed`);
+    logDebug("Auction job completed", { jobId: job.id });
   });
 
   auctionWorker.on("failed", (job, err) => {
-    console.error(`Auction job ${job?.id} failed:`, err);
+    logError("Auction job failed", err, { jobId: job?.id });
   });
 
   // =============================
@@ -177,7 +178,7 @@ const startWorkers = (connection) => {
     "image-processing",
     async (job) => {
       const { imageUrl, carId, operations } = job.data;
-      console.log(`Processing image for car ${carId}`);
+      logDebug("Processing image", { carId, imageUrl });
       // Process images (resize, compress, watermark, etc.)
       // This would integrate with image processing service
       return { success: true, processedUrl: imageUrl };
@@ -186,11 +187,11 @@ const startWorkers = (connection) => {
   );
 
   imageProcessingWorker.on("completed", (job) => {
-    console.log(`Image processing job ${job.id} completed`);
+    logDebug("Image processing job completed", { jobId: job.id });
   });
 
   imageProcessingWorker.on("failed", (job, err) => {
-    console.error(`Image processing job ${job?.id} failed:`, err);
+    logError("Image processing job failed", err, { jobId: job?.id });
   });
 };
 
@@ -201,7 +202,7 @@ const startWorkers = (connection) => {
 export const queueEmail = async (to, subject, html, text, options = {}) => {
   try {
     if (!emailQueue) {
-      console.error("Email queue not initialized");
+      logError("Email queue not initialized");
       return null;
     }
 
@@ -217,7 +218,7 @@ export const queueEmail = async (to, subject, html, text, options = {}) => {
 
     return job;
   } catch (error) {
-    console.error("Error queuing email:", error);
+    logError("Error queuing email", error);
     return null;
   }
 };
@@ -229,7 +230,7 @@ export const queueEmail = async (to, subject, html, text, options = {}) => {
 export const queueNotification = async (userId, title, message, type, data, channels, options = {}) => {
   try {
     if (!notificationQueue) {
-      console.error("Notification queue not initialized");
+      logError("Notification queue not initialized");
       return null;
     }
 
@@ -245,7 +246,7 @@ export const queueNotification = async (userId, title, message, type, data, chan
 
     return job;
   } catch (error) {
-    console.error("Error queuing notification:", error);
+    logError("Error queuing notification", error);
     return null;
   }
 };
@@ -257,7 +258,7 @@ export const queueNotification = async (userId, title, message, type, data, chan
 export const queueReport = async (reportType, filters, userId, options = {}) => {
   try {
     if (!reportQueue) {
-      console.error("Report queue not initialized");
+      logError("Report queue not initialized");
       return null;
     }
 
@@ -273,7 +274,7 @@ export const queueReport = async (reportType, filters, userId, options = {}) => 
 
     return job;
   } catch (error) {
-    console.error("Error queuing report:", error);
+    logError("Error queuing report", error);
     return null;
   }
 };
@@ -285,7 +286,7 @@ export const queueReport = async (reportType, filters, userId, options = {}) => 
 export const queueAuctionEvent = async (eventType, carId, data, options = {}) => {
   try {
     if (!auctionQueue) {
-      console.error("Auction queue not initialized");
+      logError("Auction queue not initialized");
       return null;
     }
 
@@ -301,7 +302,7 @@ export const queueAuctionEvent = async (eventType, carId, data, options = {}) =>
 
     return job;
   } catch (error) {
-    console.error("Error queuing auction event:", error);
+    logError("Error queuing auction event", error);
     return null;
   }
 };
@@ -313,7 +314,7 @@ export const queueAuctionEvent = async (eventType, carId, data, options = {}) =>
 export const queueImageProcessing = async (imageUrl, carId, operations, options = {}) => {
   try {
     if (!imageProcessingQueue) {
-      console.error("Image processing queue not initialized");
+      logError("Image processing queue not initialized");
       return null;
     }
 
@@ -329,7 +330,7 @@ export const queueImageProcessing = async (imageUrl, carId, operations, options 
 
     return job;
   } catch (error) {
-    console.error("Error queuing image processing:", error);
+    logError("Error queuing image processing", error);
     return null;
   }
 };
@@ -369,7 +370,7 @@ export const getQueueMetrics = async () => {
 
     return metrics;
   } catch (error) {
-    console.error("Error getting queue metrics:", error);
+    logError("Error getting queue metrics", error);
     return null;
   }
 };

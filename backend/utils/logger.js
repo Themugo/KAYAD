@@ -1,7 +1,16 @@
-// utils/logger.js
+// utils/logger.js - Production Hardened v2.0
+// ============================================================
+// Structured logging with Winston for production readiness
+// Replaces all console.log statements with proper logging
+// ============================================================
 
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 import crypto from "crypto";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = process.env.NODE_ENV !== "production";
 
 // =============================
@@ -10,48 +19,111 @@ const isDev = process.env.NODE_ENV !== "production";
 export const generateRequestId = () => crypto.randomBytes(6).toString("hex");
 
 // =============================
-// 🧾 BASE LOGGER
+// 📁 LOG DIRECTORY
 // =============================
-const baseLog = (level, message, meta = {}) => {
-  const log = {
-    level,
-    message,
-    time: new Date().toISOString(),
-    ...meta,
-  };
+const logDir = path.join(__dirname, "../../logs");
 
-  const output = JSON.stringify(log, null, isDev ? 2 : 0);
+// =============================
+// 🎨 CUSTOM FORMAT
+// =============================
+const customFormat = winston.format.combine(
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+  winston.format.errors({ stack: true }),
+  winston.format.splat(),
+  winston.format.json()
+);
 
-  if (level === "ERROR") console.error(output);
-  else if (level === "WARN") console.warn(output);
-  else console.log(output);
-};
+// =============================
+// 🖨️ CONSOLE FORMAT (DEV)
+// =============================
+const consoleFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp({ format: "HH:mm:ss" }),
+  winston.format.printf(({ level, message, timestamp, ...meta }) => {
+    const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : "";
+    return `${timestamp} [${level}]: ${message} ${metaStr}`;
+  })
+);
+
+// =============================
+// 📄 FILE TRANSPORTS (PRODUCTION)
+// =============================
+const transports = [];
+
+if (!isDev) {
+  // Combined log file
+  transports.push(
+    new DailyRotateFile({
+      filename: path.join(logDir, "combined-%DATE%.log"),
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "14d",
+      format: customFormat,
+    })
+  );
+
+  // Error log file
+  transports.push(
+    new DailyRotateFile({
+      filename: path.join(logDir, "error-%DATE%.log"),
+      datePattern: "YYYY-MM-DD",
+      level: "error",
+      maxSize: "20m",
+      maxFiles: "30d",
+      format: customFormat,
+    })
+  );
+} else {
+  // Console transport for development
+  transports.push(
+    new winston.transports.Console({
+      format: consoleFormat,
+    })
+  );
+}
+
+// =============================
+// 🚀 WINSTON LOGGER
+// =============================
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || (isDev ? "debug" : "info"),
+  format: customFormat,
+  transports,
+  exitOnError: false,
+});
 
 // =============================
 // 🟢 INFO
 // =============================
 export const logInfo = (message, meta = {}) => {
-  baseLog("INFO", message, meta);
+  logger.info(message, meta);
 };
 
 // =============================
 // 🟡 WARN
 // =============================
 export const logWarn = (message, meta = {}) => {
-  baseLog("WARN", message, meta);
+  logger.warn(message, meta);
 };
 
 // =============================
 // 🔴 ERROR
 // =============================
 export const logError = (message, error = null, meta = {}) => {
-  baseLog("ERROR", message, {
+  logger.error(message, {
     ...meta,
     ...(error && {
       error: error.message,
-      stack: isDev ? error.stack : undefined,
+      stack: error.stack,
     }),
   });
+};
+
+// =============================
+// 🔵 DEBUG
+// =============================
+export const logDebug = (message, meta = {}) => {
+  logger.debug(message, meta);
 };
 
 // =============================
@@ -83,3 +155,8 @@ export const logResponse = (req, res, duration) => {
     duration: `${duration}ms`,
   });
 };
+
+// =============================
+// 📤 EXPORT WINSTON INSTANCE
+// =============================
+export default logger;

@@ -9,13 +9,14 @@ import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getIO } from "../utils/io.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // Email service — top-level import, no-ops if unavailable
 let bidEmailService = {};
 try {
   bidEmailService = await import("../services/email.service.js");
 } catch (e) {
-  console.warn("⚠️ Bid email service unavailable:", e.message);
+  logWarn("Bid email service unavailable", { error: e.message });
 }
 
 // =============================
@@ -28,7 +29,7 @@ const generatePseudonym = (userId, carId) => {
 };
 
 // =============================
-// 🧠 AUTO-BIDDING ENGINE (PRO)
+// 🧠 AUTO-BIDDING ENGINE (PRO) - Bid Loop Prevention
 // =============================
 const runAutoBidding = async (carId) => {
   const autoBidders = await Bid.find({
@@ -42,12 +43,48 @@ const runAutoBidding = async (carId) => {
   let highest = autoBidders[0];
   let second = autoBidders[1];
 
+  // 🔒 BID LOOP PREVENTION: Check if same user is highest and second
+  if (highest.user.toString() === second.user.toString()) {
+    logWarn("Auto-bid skipped: same user has top 2 max bids", { carId, userId: highest.user });
+    return;
+  }
+
+  // 🔒 BID LOOP PREVENTION: Limit auto-bids per auction
+  const recentAutoBids = await Bid.countDocuments({
+    carId,
+    isAuto: true,
+    createdAt: { $gte: new Date(Date.now() - 60000) }, // Last 60 seconds
+  });
+  
+  const MAX_AUTO_BIDS_PER_MINUTE = 10;
+  if (recentAutoBids >= MAX_AUTO_BIDS_PER_MINUTE) {
+    logWarn("Auto-bid skipped: too many auto-bids in last minute", { carId, count: recentAutoBids });
+    return;
+  }
+
+  // 🔒 BID LOOP PREVENTION: Check for bid loop pattern
+  // If the same two users keep alternating bids, stop auto-bidding
+  const recentBids = await Bid.find({
+    carId,
+    status: "paid",
+  }).sort({ createdAt: -1 }).limit(6).lean();
+  
+  if (recentBids.length >= 4) {
+    const users = recentBids.slice(0, 4).map(b => b.user.toString());
+    const uniqueUsers = new Set(users);
+    if (uniqueUsers.size === 2 && users[0] === users[2] && users[1] === users[3]) {
+      logWarn("Auto-bid skipped: detected bid loop pattern", { carId, users });
+      return;
+    }
+  }
+
   const increment = 1000;
 
   let nextAmount = Math.min(highest.maxBid, second.maxBid + increment);
 
   if (nextAmount <= second.maxBid) return;
 
+  // 🔒 BID LOOP PREVENTION: Check if this exact auto-bid already exists
   const existing = await Bid.findOne({
     carId,
     user: highest.user,
@@ -55,7 +92,19 @@ const runAutoBidding = async (carId) => {
     isAuto: true,
   });
 
-  if (existing) return;
+  if (existing) {
+    logDebug("Auto-bid skipped: duplicate bid exists", { carId, userId: highest.user, amount: nextAmount });
+    return;
+  }
+
+  // 🔒 BID LOOP PREVENTION: Don't auto-bid if user is already highest bidder
+  const car = await Car.findById(carId);
+  if (!car) return;
+  
+  if (car.highestBidder && car.highestBidder.toString() === highest.user.toString()) {
+    logDebug("Auto-bid skipped: user is already highest bidder", { carId, userId: highest.user });
+    return;
+  }
 
   const carIdStr = carId.toString();
   const userIdStr = highest.user.toString();
@@ -72,9 +121,6 @@ const runAutoBidding = async (carId) => {
     status: "paid",
   });
 
-  const car = await Car.findById(carId);
-  if (!car) return;
-
   car.currentBid = nextAmount;
   car.highestBidder = highest.user;
   await car.save();
@@ -89,6 +135,8 @@ const runAutoBidding = async (carId) => {
     });
   }
   emitListingUpdate(carIdStr, { currentBid: nextAmount, bidsCount: (car.bidsCount || 0) + 1 });
+  
+  logInfo("Auto-bid placed", { carId, userId: highest.user, amount: nextAmount, maxBid: highest.maxBid });
 };
 
 // =============================
@@ -117,7 +165,7 @@ export const getAuctionBids = async (req, res) => {
       })),
     });
   } catch (err) {
-    console.error("❌ GET BIDS ERROR:", err);
+    logError("GET BIDS ERROR", err);
     res.status(500).json({ success: false, message: "Failed to fetch bids" });
   }
 };
@@ -293,14 +341,14 @@ export const placeBid = async (req, res) => {
           const bidder = await User.findById(userId).select("email name phone notifications");
           if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
             sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
-              console.warn("⚠️ Bid confirm email failed:", e.message),
+              logWarn("Bid confirm email failed", { error: e.message }),
             );
           }
           if (bidder?.phone && bidder?.notifications?.sms !== false) {
             sendSMS(
               bidder.phone,
               `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid.amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
-            ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+            ).catch((e) => logWarn("SMS send failed", { error: e.message }));
           }
         }
 
@@ -311,13 +359,13 @@ export const placeBid = async (req, res) => {
         ) {
           const prevBidder = await User.findById(previousHighestBidder).select("email name phone notifications");
           if (prevBidder?.email && typeof sendOutbidEmail === "function") {
-            sendOutbidEmail(prevBidder, amount, car).catch((e) => console.warn("⚠️ Outbid email failed:", e.message));
+            sendOutbidEmail(prevBidder, amount, car).catch((e) => logWarn("Outbid email failed", { error: e.message }));
           }
           if (prevBidder?.phone && prevBidder?.notifications?.sms !== false) {
             sendSMS(
               prevBidder.phone,
               `You've been outbid on ${car.title || "vehicle"} — KES ${Number(amount).toLocaleString("en-KE")}. Bid higher now on Kayad.`,
-            ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+            ).catch((e) => logWarn("SMS send failed", { error: e.message }));
           }
         }
       } catch (_) {}
@@ -330,7 +378,7 @@ export const placeBid = async (req, res) => {
       bid,
     });
   } catch (err) {
-    console.error("❌ PLACE BID ERROR:", err);
+    logError("PLACE BID ERROR", err);
     res.status(500).json({ success: false, message: "Bid failed" });
   }
 };
@@ -383,7 +431,7 @@ export const confirmBidPayment = async (req, res) => {
         transactionId: receipt || bid._id.toString(),
         carDetails: bid.carId?.toString() || "—",
         date: new Date(),
-      }).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+      }).catch((e) => logWarn("SMS send failed", { error: e.message }));
     } catch (_) {
       /* PDF generation non-critical */
     }
@@ -422,26 +470,26 @@ export const confirmBidPayment = async (req, res) => {
       const bidder = await User.findById(bid.user).select("email name phone notifications");
       if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
         sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
-          console.warn("⚠️ Bid confirm email failed:", e.message),
+          logWarn("Bid confirm email failed", { error: e.message }),
         );
       }
       if (bidder?.phone && bidder?.notifications?.sms !== false) {
         sendSMS(
           bidder.phone,
           `Bid confirmed on ${car?.title || "vehicle"} — KES ${Number(bid.amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
-        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+        ).catch((e) => logWarn("SMS send failed", { error: e.message }));
       }
 
       if (previousHighestBidder && String(previousHighestBidder) !== String(bid.user)) {
         const prevBidder = await User.findById(previousHighestBidder).select("email name phone notifications");
         if (prevBidder?.email && typeof sendOutbidEmail === "function") {
-          sendOutbidEmail(prevBidder, bid.amount, car).catch((e) => console.warn("⚠️ Outbid email failed:", e.message));
+          sendOutbidEmail(prevBidder, bid.amount, car).catch((e) => logWarn("Outbid email failed", { error: e.message }));
         }
         if (prevBidder?.phone && prevBidder?.notifications?.sms !== false) {
           sendSMS(
             prevBidder.phone,
             `You've been outbid on ${car?.title || "vehicle"} — KES ${Number(bid.amount).toLocaleString("en-KE")}. Bid higher now on Kayad.`,
-          ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+          ).catch((e) => logWarn("SMS send failed", { error: e.message }));
         }
       }
     } catch (_) {}
@@ -460,7 +508,7 @@ export const confirmBidPayment = async (req, res) => {
         /* already ended */
       }
     }
-    console.error("CALLBACK ERROR:", err);
+    logError("CALLBACK ERROR", err);
     res.status(500).json({ success: false, message: "Bid callback failed" });
   }
 };
@@ -477,7 +525,7 @@ export const getMyBids = async (req, res) => {
       .lean();
     res.json({ success: true, bids });
   } catch (err) {
-    console.error(err);
+    logError("Failed to fetch user bids", err);
     res.status(500).json({ success: false, message: "Failed to fetch your bids" });
   }
 };
@@ -536,7 +584,7 @@ export const endAuction = async (req, res) => {
       winner: car.winner,
     });
   } catch (err) {
-    console.error(err);
+    logError("Failed to get car bids", err);
     res.status(500).json({ success: false, message: "Failed to get car bids" });
   }
 };

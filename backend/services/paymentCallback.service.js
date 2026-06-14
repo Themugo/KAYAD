@@ -7,6 +7,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -17,7 +18,7 @@ const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
       return await fn();
     } catch (err) {
       if (attempt === retries) throw err;
-      console.warn(`Callback retry ${attempt}/${retries}: ${err.message}`);
+      logWarn("Callback retry", { attempt, retries, error: err.message });
       await new Promise((r) => setTimeout(r, delay * attempt));
     }
   }
@@ -40,7 +41,7 @@ export const handleMpesaCallback = async (callbackData) => {
     }).session(session);
 
     if (!payment) {
-      console.warn("Payment not found:", checkoutId);
+      logWarn("Payment not found", { checkoutId });
       await session.abortTransaction();
       return;
     }
@@ -59,7 +60,7 @@ export const handleMpesaCallback = async (callbackData) => {
         userId: payment.user,
         title: "Payment Failed",
         message: `KES ${payment.amount} — ${payment.resultDesc}`,
-      }).catch((e) => console.warn("⚠️ Payment callback notification failed:", e.message));
+      }).catch((e) => logWarn("Payment callback notification failed", { error: e.message }));
 
       await session.commitTransaction();
 
@@ -107,7 +108,7 @@ export const handleMpesaCallback = async (callbackData) => {
       carTitle: payment.car?.toString() || "Vehicle",
       mpesaReceipt: receipt || String(payment._id).slice(-8),
       user: userDoc || { email: null, phone: null, id: payment.user },
-    }).catch((e) => console.warn("⚠️ Digital receipt failed:", e.message));
+    }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
 
     if (payment.type === "bid") {
       await retry(async () => {
@@ -190,7 +191,7 @@ export const handleMpesaCallback = async (callbackData) => {
         /* already ended */
       }
     }
-    console.error("CALLBACK ERROR:", err.message);
+    logError("CALLBACK ERROR", err);
     throw err;
   }
 };
