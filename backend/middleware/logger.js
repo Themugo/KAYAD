@@ -1,6 +1,10 @@
-// middleware/logger.js
+// middleware/logger.js - Production Hardened v6.0
+// ============================================================
+// Request/response logging middleware using Pino
+// Migrated from console.log to structured logging
+// ============================================================
 
-import crypto from "crypto";
+import { logInfo, logRequest, logResponse, generateRequestId } from "../utils/logger.js";
 
 const SILENT = process.env.NODE_ENV === "test" || process.env.LOG_SILENT === "true";
 
@@ -10,8 +14,7 @@ const logger = (req, res, next) => {
   // =============================
   // 🧠 UNIQUE REQUEST ID
   // =============================
-  const requestId = crypto.randomUUID();
-
+  const requestId = generateRequestId();
   req.requestId = requestId;
 
   // Skip verbose request/response logging during tests (keeps CI logs readable)
@@ -20,29 +23,14 @@ const logger = (req, res, next) => {
   // =============================
   // 📡 REQUEST LOG
   // =============================
-  console.log("📡 REQUEST:", {
-    id: requestId,
-    method: req.method,
-    url: req.originalUrl,
-    ip: req.ip,
-    user: req.user?.id || "guest",
-    time: new Date().toISOString(),
-  });
+  logRequest(req);
 
   // =============================
   // 📤 RESPONSE LOG (AFTER FINISH)
   // =============================
   res.on("finish", () => {
     const duration = Date.now() - start;
-
-    console.log("📤 RESPONSE:", {
-      id: requestId,
-      method: req.method,
-      url: req.originalUrl,
-      status: res.statusCode,
-      duration: `${duration}ms`,
-      user: req.user?.id || "guest",
-    });
+    logResponse(req, res, duration);
   });
 
   next();

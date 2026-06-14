@@ -1,4 +1,5 @@
 import SecurityLog from "../models/SecurityLog.js";
+import { logError } from "./logger.js";
 
 export const logSecurityAction = async ({
   action,
@@ -26,7 +27,7 @@ export const logSecurityAction = async ({
       severity,
     });
   } catch (err) {
-    console.error("❌ SECURITY LOG FAILED:", err.message);
+    logError("Security log failed", err, { action, actor, target });
   }
 };
 
