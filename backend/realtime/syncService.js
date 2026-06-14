@@ -15,25 +15,25 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
     return;
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
+  let session;
   try {
+    session = await mongoose.startSession();
+    session.startTransaction();
+
     const { userId, bid } = winner;
 
-    // =============================
-    // 🚗 FETCH CAR
-    // =============================
     const car = await Car.findById(roomId).session(session);
 
     if (!car) {
       throw new Error("Car not found");
     }
 
-    // 🚫 prevent double processing
     if (car.sold) {
-      console.warn("⚠️ Car already sold, skipping sync");
-      await session.abortTransaction();
+      console.warn("Car already sold, skipping sync");
+      if (session) {
+        try { await session.abortTransaction(); } catch { /* already aborted */ }
+        try { session.endSession(); } catch { /* already ended */ }
+      }
       return;
     }
 
@@ -139,10 +139,12 @@ export const syncAuctionResult = async ({ roomId, winner }) => {
       amount: bid,
     };
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
+    if (session) {
+      try { await session.abortTransaction(); } catch { /* already aborted */ }
+      try { session.endSession(); } catch { /* already ended */ }
+    }
 
-    console.error("❌ SYNC ERROR:", err.message);
+    console.error("SYNC ERROR:", err.message);
 
     return {
       success: false,

@@ -27,7 +27,7 @@ const ESCROW_STEPS = [
 function Stepper({ escrow }) {
   const history = escrow.history || [];
   const doneKeys = new Set(history.map(h => h.action));
-  const currentIdx = ESCROW_STEPS.findLastIndex(s => doneKeys.has(s.key));
+  const currentIdx = (() => { for (let i = ESCROW_STEPS.length - 1; i >= 0; i--) { if (doneKeys.has(ESCROW_STEPS[i].key)) return i; } return -1; })();
 
   return (
     <div style={{ display: 'flex', gap: 0, margin: '16px 0 20px', position: 'relative' }}>

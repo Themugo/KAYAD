@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import Input from './Input';
 
-export default function AccountFormStep({ form, set, role, selPkg, pkgList, isDealer, isSeller, needsPkg, loading, onSubmit, onBack }) {
+export default function AccountFormStep({ form, set, role, selPkg, pkgList = [], isDealer, isSeller, needsPkg, loading, onSubmit, onBack }) {
   return (
     <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
       <div style={{ width: '100%', maxWidth: 480 }}>

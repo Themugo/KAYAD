@@ -184,13 +184,13 @@ export default function AdminDisputeReview({ disputeId }) {
 
       {/* Evidence */}
       <div style={sectionStyle}>
-        <div style={sectionTitleStyle}>Evidence ({dispute.evidence.length})</div>
-        {dispute.evidence.length === 0 ? (
+        <div style={sectionTitleStyle}>Evidence ({dispute.evidence?.length ?? 0})</div>
+        {(dispute.evidence?.length ?? 0) === 0 ? (
           <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
             No evidence submitted
           </div>
         ) : (
-          dispute.evidence.map((evidence, index) => (
+          (dispute.evidence ?? []).map((evidence, index) => (
             <div key={index} style={evidenceItemStyle}>
               <div style={{ background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px' }}>
                 {getEvidenceIcon(evidence.type)}

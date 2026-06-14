@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 
-export default function PackageSelectorStep({ pkgList, isDealer, selPkg, freeMode, onSelect, onBack, onContinue }) {
+export default function PackageSelectorStep({ pkgList = [], isDealer, selPkg, freeMode, onSelect, onBack, onContinue }) {
   return (
     <div style={{ background: '#050505', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '56px 20px 40px' }}>
       <div style={{ width: '100%', maxWidth: Math.min(pkgList.length * 220 + 60, 960) }}>
