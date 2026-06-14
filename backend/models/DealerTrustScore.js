@@ -30,7 +30,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
     components: {
       completedSales: {
         score: { type: Number, default: 0 },
-        weight: 0.25,
+        weight: { type: Number, default: 0.25 },
         data: {
           totalSales: { type: Number, default: 0 },
           successfulSales: { type: Number, default: 0 },
@@ -39,7 +39,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
       },
       escrowSuccess: {
         score: { type: Number, default: 0 },
-        weight: 0.25,
+        weight: { type: Number, default: 0.25 },
         data: {
           totalEscrows: { type: Number, default: 0 },
           successfulEscrows: { type: Number, default: 0 },
@@ -49,7 +49,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
       },
       responseTime: {
         score: { type: Number, default: 0 },
-        weight: 0.20,
+        weight: { type: Number, default: 0.20 },
         data: {
           averageResponseTime: { type: Number, default: 0 }, // in minutes
           totalMessages: { type: Number, default: 0 },
@@ -58,7 +58,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
       },
       disputes: {
         score: { type: Number, default: 0 },
-        weight: 0.15,
+        weight: { type: Number, default: 0.15 },
         data: {
           totalDisputes: { type: Number, default: 0 },
           resolvedDisputes: { type: Number, default: 0 },
@@ -67,7 +67,7 @@ const dealerTrustScoreSchema = new mongoose.Schema(
       },
       vehicleAccuracy: {
         score: { type: Number, default: 0 },
-        weight: 0.15,
+        weight: { type: Number, default: 0.15 },
         data: {
           totalListings: { type: Number, default: 0 },
           accurateListings: { type: Number, default: 0 },
