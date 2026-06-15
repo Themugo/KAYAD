@@ -79,6 +79,7 @@ import featureFlagRoutes from "./routes/featureFlagRoutes.js";
 import searchAnalyticsRoutes from "./routes/searchAnalyticsRoutes.js";
 import listingQualityRoutes from "./routes/listingQualityRoutes.js";
 import notificationAnalyticsRoutes from "./routes/notificationAnalyticsRoutes.js";
+import organizationRoutes from "./routes/organizationRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -475,6 +476,7 @@ app.use("/api/feature-flags", featureFlagRoutes);
 app.use("/api/search-analytics", searchAnalyticsRoutes);
 app.use("/api/listing-quality", listingQualityRoutes);
 app.use("/api/notification-analytics", notificationAnalyticsRoutes);
+app.use("/api/organizations", organizationRoutes);
 app.use("/api/finance", financeRoutes);
 app.use(seoRoutes);
 
