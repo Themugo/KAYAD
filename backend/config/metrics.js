@@ -164,6 +164,54 @@ export const recordError = (type, message) => {
   incrementCounter("errors_total", 1, { type, message });
 };
 
+// Cache metrics
+export const recordCacheHit = () => {
+  incrementCounter("cache_hits_total", 1);
+};
+
+export const recordCacheMiss = () => {
+  incrementCounter("cache_misses_total", 1);
+};
+
+export const recordCacheSet = () => {
+  incrementCounter("cache_sets_total", 1);
+};
+
+export const recordCacheDelete = () => {
+  incrementCounter("cache_deletes_total", 1);
+};
+
+export const recordCacheError = () => {
+  incrementCounter("cache_errors_total", 1);
+};
+
+// MongoDB replica set metrics
+export const recordReplicaSetStatus = (status, primary, secondaries) => {
+  setGauge("replica_set_status", status === 'healthy' ? 1 : 0);
+  setGauge("replica_set_primary_available", primary ? 1 : 0);
+  setGauge("replica_set_secondaries_count", secondaries);
+};
+
+export const recordReplicaSetLag = (lagMs) => {
+  recordHistogram("replica_set_lag_ms", lagMs);
+};
+
+// Connection pool metrics
+export const recordConnectionPoolStats = (total, available, checkedOut) => {
+  setGauge("connection_pool_total", total);
+  setGauge("connection_pool_available", available);
+  setGauge("connection_pool_checked_out", checkedOut);
+};
+
+// Load balancer metrics
+export const recordLoadBalancerRequest = (server, statusCode) => {
+  incrementCounter("load_balancer_requests_total", 1, { server, status: statusCode });
+};
+
+export const recordLoadBalancerHealth = (server, healthy) => {
+  setGauge("load_balancer_server_healthy", healthy ? 1 : 0, { server });
+};
+
 export default {
   incrementCounter,
   getCounter,
@@ -181,4 +229,14 @@ export default {
   recordEscrowOperation,
   recordAuctionEvent,
   recordError,
+  recordCacheHit,
+  recordCacheMiss,
+  recordCacheSet,
+  recordCacheDelete,
+  recordCacheError,
+  recordReplicaSetStatus,
+  recordReplicaSetLag,
+  recordConnectionPoolStats,
+  recordLoadBalancerRequest,
+  recordLoadBalancerHealth,
 };

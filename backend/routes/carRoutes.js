@@ -8,7 +8,7 @@ import { validateObjectId, validateCar } from "../middleware/validate.js";
 import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
 import { uploadLimiter, bidLimiter, createLimiter } from "../middleware/rateLimiter.js";
-import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
+import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES } from "../config/roles.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
@@ -91,14 +91,14 @@ router.get("/demo/all", protect, asyncHandler(getDemoCars));
 // =============================
 
 // 🔍 GET ALL CARS
-router.get("/", cacheMiddleware(CACHE_TTL.CARS_LIST), asyncHandler(getCars));
+router.get("/", cacheResponse(300), asyncHandler(getCars)); // 5 minutes cache
 
 // 🔎 GET SINGLE CAR
 router.get(
   "/:id",
   optionalAuth,
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}`),
+  cacheResponse(600), // 10 minutes cache
   asyncHandler(getCar),
 );
 
@@ -142,17 +142,18 @@ router.post(
   upload.array("images", 10),
   handleUploadError,
   validateCar,
+  invalidateCache("cache:*"),
   asyncHandler(createCar),
 );
 
 // ✏️ UPDATE CAR
-router.put("/:id", protect, dealerOnly, createLimiter, validateObjectId, validateCar, asyncHandler(updateCar));
+router.put("/:id", protect, dealerOnly, createLimiter, validateObjectId, validateCar, invalidateCache("cache:*"), asyncHandler(updateCar));
 
 // ❌ DELETE CAR
-router.delete("/:id", protect, dealerOnly, createLimiter, validateObjectId, asyncHandler(deleteCar));
+router.delete("/:id", protect, dealerOnly, createLimiter, validateObjectId, invalidateCache("cache:*"), asyncHandler(deleteCar));
 
 // 🖼 DELETE IMAGE FROM CAR
-router.delete("/:id/images/:imageIndex", protect, dealerOnly, validateObjectId, asyncHandler(deleteCarImage));
+router.delete("/:id/images/:imageIndex", protect, dealerOnly, validateObjectId, invalidateCache("cache:*"), asyncHandler(deleteCarImage));
 
 // 📤 ADD IMAGES TO CAR
 router.post(
@@ -162,13 +163,14 @@ router.post(
   uploadLimiter,
   upload.array("images", 10),
   handleUploadError,
+  invalidateCache("cache:*"),
   asyncHandler(addCarImages),
 );
 
 // =============================
 // ⚡ BIDDING SYSTEM
 // =============================
-router.post("/:id/bid", protect, bidLimiter, validateObjectId, asyncHandler(placeBid));
+router.post("/:id/bid", protect, bidLimiter, validateObjectId, invalidateCache("cache:*"), asyncHandler(placeBid));
 
 // =============================
 // 📈 PRICE HISTORY
@@ -176,7 +178,7 @@ router.post("/:id/bid", protect, bidLimiter, validateObjectId, asyncHandler(plac
 router.get(
   "/:id/price-history",
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/price-history`),
+  cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id).select("price priceHistory").lean();
 
@@ -200,7 +202,7 @@ router.get(
 router.get(
   "/:id/insights",
   validateObjectId,
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/insights`),
+  cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id).lean();
 
@@ -241,7 +243,7 @@ router.get(
 // =============================
 router.get(
   "/:id/valuation",
-  cacheMiddleware(CACHE_TTL.CAR_DETAIL, (req) => `cache:GET:/api/cars/${req.params.id}/valuation`),
+  cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id).lean();
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
@@ -416,25 +418,12 @@ router.post(
   }),
 );
 
-// =============================
-// 🧹 CACHE INVALIDATION (auto-clear on mutations)
-// =============================
-router.use((req, res, next) => {
-  if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
-    res.on("finish", () => {
-      if (res.statusCode < 400) {
-        cacheDelPattern("cache:GET:/api/cars*").catch((e) => console.warn("⚠️ Cache clear failed:", e.message));
-      }
-    });
-  }
-  next();
-});
-
 // 📌 PROMOTE / PIN TO FRONT PAGE (dealer owns it OR admin)
 router.patch(
   "/:id/promote",
   protect,
   validateObjectId,
+  invalidateCache("cache:*"),
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
