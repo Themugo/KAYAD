@@ -1,5 +1,5 @@
 import Notification from "../models/Notification.js";
-import { sendEmail } from "./email.service.js";
+import { sendRawEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 
 const sendWhatsApp = async (to, message) => {

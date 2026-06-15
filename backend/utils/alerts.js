@@ -1,7 +1,7 @@
 // utils/alert.js
 
 import AdminAlert from "../models/AdminAlert.js";
-import { sendEmail } from "../services/email.service.js";
+import { sendRawEmail } from "../services/email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { getIO } from "./io.js";
 

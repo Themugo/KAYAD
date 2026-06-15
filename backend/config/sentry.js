@@ -28,12 +28,9 @@ export const initSentry = () => {
     // Profiling
     profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
     
-    // Integrations
+    // Integrations - only use profiling integration, others are auto-instrumented
     integrations: [
       nodeProfilingIntegration(),
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.Express({ app: null }),
-      new Sentry.Integrations.Mongo({ tracing: true }),
     ],
     
     // Before send for error filtering

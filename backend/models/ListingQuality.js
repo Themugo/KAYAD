@@ -47,7 +47,7 @@ const listingQualitySchema = new mongoose.Schema(
     scoreBreakdown: {
       imageCount: {
         score: Number,
-        weight: 0.25,
+        weight: { type: Number, default: 0.25 },
         details: {
           imageCount: Number,
           recommendedCount: Number,
@@ -56,7 +56,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       imageQuality: {
         score: Number,
-        weight: 0.15,
+        weight: { type: Number, default: 0.15 },
         details: {
           resolution: String,
           variety: Number,
@@ -66,7 +66,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       descriptionQuality: {
         score: Number,
-        weight: 0.20,
+        weight: { type: Number, default: 0.20 },
         details: {
           wordCount: Number,
           recommendedMin: Number,
@@ -76,7 +76,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       missingAttributes: {
         score: Number,
-        weight: 0.15,
+        weight: { type: Number, default: 0.15 },
         details: {
           missingFields: [String],
           requiredFields: [String],
@@ -86,7 +86,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       inspectionReport: {
         score: Number,
-        weight: 0.15,
+        weight: { type: Number, default: 0.15 },
         details: {
           hasInspection: Boolean,
           inspectionScore: Number,
@@ -96,7 +96,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       verificationStatus: {
         score: Number,
-        weight: 0.10,
+        weight: { type: Number, default: 0.10 },
         details: {
           isVerified: Boolean,
           verificationStatus: String,

@@ -188,7 +188,7 @@ organizationSchema.index({ createdAt: -1 });
 // =============================
 
 // Add organization admin
-organizationSchemaSchema.methods.addAdmin = async function (userId) {
+organizationSchema.methods.addAdmin = async function (userId) {
   if (!this.admins.includes(userId)) {
     this.admins.push(userId);
     await this.save();

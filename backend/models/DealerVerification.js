@@ -76,7 +76,6 @@ const dealerVerificationSchema = new mongoose.Schema(
           },
           rejectionReason: String,
         },
-        required: false,
       },
 
       // KRA PIN (Tax Registration)
@@ -109,7 +108,6 @@ const dealerVerificationSchema = new mongoose.Schema(
           },
           rejectionReason: String,
         },
-        required: false,
       },
 
       // Business Registration Certificate
@@ -144,7 +142,6 @@ const dealerVerificationSchema = new mongoose.Schema(
           },
           rejectionReason: String,
         },
-        required: false,
       },
 
       // Physical Address with Proof
@@ -189,7 +186,6 @@ const dealerVerificationSchema = new mongoose.Schema(
           },
           rejectionReason: String,
         },
-        required: false,
       },
 
       // Phone Verification (OTP)
@@ -223,7 +219,6 @@ const dealerVerificationSchema = new mongoose.Schema(
           },
           lastAttemptAt: Date,
         },
-        required: false,
       },
     },
 
