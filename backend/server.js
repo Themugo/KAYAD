@@ -74,6 +74,7 @@ import auditRoutes from "./routes/auditRoutes.js";
 import dealerHealthScoreRoutes from "./routes/dealerHealthScoreRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
 import vehicleAnalyticsRoutes from "./routes/vehicleAnalyticsRoutes.js";
+import marketplaceHealthRoutes from "./routes/marketplaceHealthRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -93,6 +94,8 @@ import { startAuctionReminderCron } from "./services/auctionReminderCron.js";
 import { startSavedSearchCron } from "./services/savedSearchCron.js";
 import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { startScheduler as startHealthScoreScheduler } from "./services/dealerHealthScoreScheduler.js";
+import { startScheduler as startMarketTrendScheduler } from "./services/marketTrendScheduler.js";
+import { startScheduler as startMarketplaceHealthScheduler } from "./services/marketplaceHealthScheduler.js";
 import { initPostHog } from "./utils/posthog.js";
 import { initCache } from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
@@ -566,6 +569,7 @@ const bootstrap = async () => {
     startPriceAlertCron();
     startHealthScoreScheduler();
     startMarketTrendScheduler();
+    startMarketplaceHealthScheduler();
 
     logInfo("Background services started", {
       escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
