@@ -75,6 +75,7 @@ import dealerHealthScoreRoutes from "./routes/dealerHealthScoreRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
 import vehicleAnalyticsRoutes from "./routes/vehicleAnalyticsRoutes.js";
 import marketplaceHealthRoutes from "./routes/marketplaceHealthRoutes.js";
+import featureFlagRoutes from "./routes/featureFlagRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -466,6 +467,8 @@ app.use("/api/audit", auditRoutes);
 app.use("/api/dealer-health-score", dealerHealthScoreRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/analytics", vehicleAnalyticsRoutes);
+app.use("/api/marketplace-health", marketplaceHealthRoutes);
+app.use("/api/feature-flags", featureFlagRoutes);
 app.use("/api/finance", financeRoutes);
 app.use(seoRoutes);
 
