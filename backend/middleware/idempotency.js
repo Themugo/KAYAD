@@ -1,21 +1,52 @@
-// backend/middleware/idempotency.js
+// backend/middleware/idempotency.js - Fintech Idempotency Middleware
 // ─────────────────────────────────────────────────────────────
 // Idempotency middleware for critical operations
 // Prevents duplicate operations by using idempotency keys
+// Uses IdempotencyKey model for persistence and tracking
 // ─────────────────────────────────────────────────────────────
 
-import { isRedisConnected } from "../utils/cache.js";
+import IdempotencyKey from "../models/IdempotencyKey.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
-// In-memory fallback for when Redis is not available
+// In-memory fallback for when database is not available
 const idempotencyStore = new Map();
 const IDEMPOTENCY_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
+/**
+ * Extract operation type from request path
+ * @param {string} path - Request path
+ * @returns {string} Operation type
+ */
+const extractOperationType = (path) => {
+  if (path.includes("/payment")) return "payment";
+  if (path.includes("/callback")) return "payment_callback";
+  if (path.includes("/escrow") && path.includes("/release")) return "escrow_release";
+  if (path.includes("/escrow") && path.includes("/refund")) return "escrow_refund";
+  if (path.includes("/escrow") && path.includes("/confirm")) return "escrow_confirm_delivery";
+  if (path.includes("/bid")) return "bid";
+  if (path.includes("/auction")) return "auction_end";
+  if (path.includes("/verification")) {
+    if (path.includes("/approve")) return "verification_approve";
+    if (path.includes("/reject")) return "verification_reject";
+    if (path.includes("/suspend")) return "verification_suspend";
+    if (path.includes("/reinstate")) return "verification_reinstate";
+    if (path.includes("/submit")) return "verification_submit";
+    return "verification_submit";
+  }
+  return "notification";
+};
+
+/**
+ * Idempotency check middleware
+ * Checks if an idempotency key exists and returns cached response if found
+ * Otherwise, proceeds with the request and caches the response
+ */
 export const idempotencyCheck = async (req, res, next) => {
   const idempotencyKey = req.headers["x-idempotency-key"];
   
   if (!idempotencyKey) {
     // If no idempotency key is provided, allow the request but log a warning
-    console.warn("⚠️ No idempotency key provided for request:", {
+    logWarn("No idempotency key provided for request", {
       method: req.method,
       path: req.path,
       userId: req.user?.id,
@@ -23,63 +54,116 @@ export const idempotencyCheck = async (req, res, next) => {
     return next();
   }
   
-  const cacheKey = `idempotency:${idempotencyKey}`;
+  const operationType = extractOperationType(req.path);
   
   try {
-    if (isRedisConnected()) {
-      const redis = (await import("../utils/cache.js")).default;
-      const existingResponse = await redis.get(cacheKey);
+    // Check database for existing idempotency key
+    const cachedResponse = await IdempotencyKey.getCachedResponse(idempotencyKey);
+    
+    if (cachedResponse) {
+      logInfo("Idempotency hit", { idempotencyKey, operationType, path: req.path });
       
-      if (existingResponse) {
-        console.log("♻️ Idempotency hit:", { idempotencyKey, path: req.path });
-        return res.status(200).json(JSON.parse(existingResponse));
-      }
-      
-      // Store the idempotency key in the request for later use
-      req.idempotencyKey = idempotencyKey;
-      req.idempotencyCacheKey = cacheKey;
-      
-      // Store the original res.json to intercept the response
-      const originalJson = res.json.bind(res);
-      res.json = function(data) {
-        // Store the response in Redis for future requests with the same key
-        redis.set(cacheKey, JSON.stringify(data), "EX", 86400); // 24 hours
-        return originalJson(data);
-      };
-      
-      next();
-    } else {
-      // Fallback to in-memory store
-      const existingResponse = idempotencyStore.get(cacheKey);
-      
-      if (existingResponse) {
-        console.log("♻️ Idempotency hit (in-memory):", { idempotencyKey, path: req.path });
-        return res.status(200).json(existingResponse);
-      }
-      
-      req.idempotencyKey = idempotencyKey;
-      req.idempotencyCacheKey = cacheKey;
-      
-      const originalJson = res.json.bind(res);
-      res.json = function(data) {
-        idempotencyStore.set(cacheKey, data);
-        // Clean up old entries periodically
-        if (idempotencyStore.size > 10000) {
-          const keys = Array.from(idempotencyStore.keys());
-          keys.slice(0, 5000).forEach(key => idempotencyStore.delete(key));
-        }
-        return originalJson(data);
-      };
-      
-      next();
+      // Return cached response with original status code
+      return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
     }
+    
+    // Store the idempotency key in the request for later use
+    req.idempotencyKey = idempotencyKey;
+    req.idempotencyOperationType = operationType;
+    
+    // Store the original res.json to intercept the response
+    const originalJson = res.json.bind(res);
+    const originalStatus = res.status.bind(res);
+    
+    // Intercept response to cache it
+    res.json = function(data) {
+      // Cache the response in the database
+      IdempotencyKey.record({
+        key: idempotencyKey,
+        operationType,
+        user: req.user?.id,
+        requestParams: req.body,
+        responseData: data,
+        responseStatus: res.statusCode,
+        success: data?.success !== false,
+        errorMessage: data?.message || null,
+        resourceIds: data?.payment ? { paymentId: data.payment._id } : 
+                    data?.escrowId ? { escrowId: data.escrowId } :
+                    data?.bid ? { bidId: data.bid._id } : {},
+      }).catch((err) => {
+        logError("Failed to cache idempotency response", err, { idempotencyKey });
+      });
+      
+      return originalJson(data);
+    };
+    
+    next();
   } catch (error) {
-    console.error("❌ Idempotency check error:", error);
+    logError("Idempotency check error", error, { idempotencyKey, path: req.path });
+    
     // Fail open - allow the request if idempotency check fails
+    // But still store the key for tracking
+    req.idempotencyKey = idempotencyKey;
+    req.idempotencyOperationType = operationType;
     next();
   }
 };
 
-export const generateIdempotencyKey = () => {
-  return `idemp_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+/**
+ * Generate a unique idempotency key
+ * @param {string} prefix - Optional prefix for the key
+ * @returns {string} Unique idempotency key
+ */
+export const generateIdempotencyKey = (prefix = "idemp") => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 15);
+  return `${prefix}_${timestamp}_${random}`;
+};
+
+/**
+ * Helper function to apply idempotency to a specific operation
+ * @param {string} operationType - Type of operation
+ * @returns {Function} Middleware function
+ */
+export const withIdempotency = (operationType) => {
+  return async (req, res, next) => {
+    const idempotencyKey = req.headers["x-idempotency-key"] || generateIdempotencyKey(operationType);
+    
+    req.idempotencyKey = idempotencyKey;
+    req.idempotencyOperationType = operationType;
+    
+    try {
+      const cachedResponse = await IdempotencyKey.getCachedResponse(idempotencyKey);
+      
+      if (cachedResponse) {
+        logInfo("Idempotency hit", { idempotencyKey, operationType });
+        return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
+      }
+      
+      const originalJson = res.json.bind(res);
+      
+      res.json = function(data) {
+        IdempotencyKey.record({
+          key: idempotencyKey,
+          operationType,
+          user: req.user?.id,
+          requestParams: req.body,
+          responseData: data,
+          responseStatus: res.statusCode,
+          success: data?.success !== false,
+          errorMessage: data?.message || null,
+          resourceIds: {},
+        }).catch((err) => {
+          logError("Failed to cache idempotency response", err, { idempotencyKey });
+        });
+        
+        return originalJson(data);
+      };
+      
+      next();
+    } catch (error) {
+      logError("Idempotency check error", error, { idempotencyKey, operationType });
+      next();
+    }
+  };
 };

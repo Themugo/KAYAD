@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { idempotencyCheck } from "../middleware/idempotency.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
 import {
@@ -33,9 +34,10 @@ router.use(protect);
 // 📤 DEALER VERIFICATION ENDPOINTS
 // =============================
 
-// POST /api/verification/submit - Submit verification documents
+// POST /api/verification/submit - Submit verification documents (idempotent)
 router.post(
   "/submit",
+  idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await submitVerification(req, res);
     await logActionFromReq(req, "verification_submit", {
@@ -48,16 +50,16 @@ router.post(
 // GET /api/verification/status - Get verification status
 router.get("/status", asyncHandler(getVerificationStatus));
 
-// POST /api/verification/phone/request - Request phone verification OTP
-router.post("/phone/request", asyncHandler(async (req, res) => {
+// POST /api/verification/phone/request - Request phone verification OTP (idempotent)
+router.post("/phone/request", idempotencyCheck, asyncHandler(async (req, res) => {
   const result = await requestPhoneVerification(req, res);
   await logActionFromReq(req, "phone_verification_request", {
     details: { phoneNumber: req.body.phoneNumber },
   });
 }));
 
-// POST /api/verification/phone/verify - Verify OTP
-router.post("/phone/verify", asyncHandler(async (req, res) => {
+// POST /api/verification/phone/verify - Verify OTP (idempotent)
+router.post("/phone/verify", idempotencyCheck, asyncHandler(async (req, res) => {
   const result = await verifyOTP(req, res);
   if (result.success) {
     await logActionFromReq(req, "phone_verified", {});
@@ -82,10 +84,11 @@ router.get(
   asyncHandler(getVerificationById),
 );
 
-// POST /api/verification/admin/:id/approve - Approve verification (admin only)
+// POST /api/verification/admin/:id/approve - Approve verification (admin only, idempotent)
 router.post(
   "/admin/:id/approve",
   allowRoles("admin", "superadmin"),
+  idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await approveVerification(req, res);
     await logActionFromReq(req, "verification_approve", {
@@ -96,10 +99,11 @@ router.post(
   }),
 );
 
-// POST /api/verification/admin/:id/reject - Reject verification (admin only)
+// POST /api/verification/admin/:id/reject - Reject verification (admin only, idempotent)
 router.post(
   "/admin/:id/reject",
   allowRoles("admin", "superadmin"),
+  idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await rejectVerification(req, res);
     await logActionFromReq(req, "verification_reject", {
@@ -110,10 +114,11 @@ router.post(
   }),
 );
 
-// POST /api/verification/admin/:id/suspend - Suspend dealer (admin only)
+// POST /api/verification/admin/:id/suspend - Suspend dealer (admin only, idempotent)
 router.post(
   "/admin/:id/suspend",
   allowRoles("admin", "superadmin"),
+  idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await suspendDealer(req, res);
     await logActionFromReq(req, "dealer_suspend", {
@@ -124,10 +129,11 @@ router.post(
   }),
 );
 
-// POST /api/verification/admin/:id/reinstate - Reinstate dealer (admin only)
+// POST /api/verification/admin/:id/reinstate - Reinstate dealer (admin only, idempotent)
 router.post(
   "/admin/:id/reinstate",
   allowRoles("admin", "superadmin"),
+  idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await reinstateDealer(req, res);
     await logActionFromReq(req, "dealer_reinstate", {

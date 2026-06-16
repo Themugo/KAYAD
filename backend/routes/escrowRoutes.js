@@ -5,6 +5,7 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
+import { idempotencyCheck } from "../middleware/idempotency.js";
 
 import {
   getAllEscrows,
@@ -46,13 +47,14 @@ router.get(
 router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
 
 // =============================
-// 💰 RELEASE ESCROW (ADMIN)
+// 💰 RELEASE ESCROW (ADMIN) - Idempotent to prevent duplicate releases
 // =============================
 router.post(
   "/:id/release",
   protect,
   adminOnly,
   createLimiter,
+  idempotencyCheck,
   validateObjectId,
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail
@@ -61,13 +63,14 @@ router.post(
 );
 
 // =============================
-// 🔁 REFUND ESCROW (ADMIN)
+// 🔁 REFUND ESCROW (ADMIN) - Idempotent to prevent duplicate refunds
 // =============================
 router.post(
   "/:id/refund",
   protect,
   adminOnly,
   createLimiter,
+  idempotencyCheck,
   validateObjectId,
   asyncHandler(async (req, res) => {
     req.body.adminId = req.user.id; // 🔥 audit trail
@@ -113,11 +116,12 @@ router.post(
 );
 
 // =============================
-// ✅ CONFIRM DELIVERY (BUYER)
+// ✅ CONFIRM DELIVERY (BUYER) - Idempotent to prevent duplicate confirmations
 // =============================
 router.post(
   "/:id/confirm-delivery",
   protect,
+  idempotencyCheck,
   validateObjectId,
   asyncHandler(async (req, res) => {
     return confirmDelivery(req, res);
@@ -125,11 +129,12 @@ router.post(
 );
 
 // =============================
-// 📦 REQUEST RELEASE (BUYER CONFIRMS DELIVERY)
+// 📦 REQUEST RELEASE (BUYER CONFIRMS DELIVERY) - Idempotent to prevent duplicate requests
 // =============================
 router.post(
   "/:id/request-release",
   protect,
+  idempotencyCheck,
   validateObjectId,
   asyncHandler(async (req, res) => {
     return requestRelease(req, res);
