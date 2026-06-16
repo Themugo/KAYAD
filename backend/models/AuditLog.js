@@ -37,17 +37,21 @@ const auditLogSchema = new mongoose.Schema(
       required: true,
       enum: [
         // User actions
+        "user_created",
         "user_approved",
         "user_rejected",
         "user_suspended",
         "user_deleted",
         "admin_login",
         "admin_logout",
+        "role_changed",
 
         // Vehicle actions
+        "vehicle_created",
+        "vehicle_edited",
+        "vehicle_deleted",
         "vehicle_approved",
         "vehicle_rejected",
-        "vehicle_deleted",
         "vehicle_status_changed",
 
         // Auction actions
@@ -56,6 +60,9 @@ const auditLogSchema = new mongoose.Schema(
         "auction_ended",
         "auction_extended",
         "auction_cancelled",
+        "auction_bid_placed",
+        "auction_bid_retracted",
+        "auction_bid_won",
 
         // Escrow actions
         "escrow_created",
@@ -64,7 +71,23 @@ const auditLogSchema = new mongoose.Schema(
         "escrow_refunded",
         "escrow_disputed",
 
-        // Payout actions
+        // Dealer verification actions
+        "dealer_verification_submitted",
+        "dealer_verification_approved",
+        "dealer_verification_rejected",
+        "dealer_verification_document_added",
+
+        // Dispute actions
+        "dispute_created",
+        "dispute_resolved",
+        "dispute_escalated",
+        "dispute_closed",
+
+        // Payment actions
+        "payment_initiated",
+        "payment_completed",
+        "payment_failed",
+        "payment_refunded",
         "payout_sent",
         "payout_failed",
         "payout_reversed",
@@ -72,7 +95,6 @@ const auditLogSchema = new mongoose.Schema(
         // Other critical actions
         "config_updated",
         "permission_changed",
-        "role_changed",
       ],
       index: true,
     },
@@ -112,6 +134,10 @@ const auditLogSchema = new mongoose.Schema(
     },
     userAgent: String,
     requestId: String,
+    sessionId: {
+      type: String,
+      index: true,
+    },
 
     // =============================
     // 📝 DETAILS
@@ -146,6 +172,54 @@ auditLogSchema.index({ action: 1, createdAt: -1 });
 auditLogSchema.index({ target: 1, createdAt: -1 });
 auditLogSchema.index({ ipAddress: 1, createdAt: -1 });
 auditLogSchema.index({ severity: 1, createdAt: -1 });
+auditLogSchema.index({ sessionId: 1, createdAt: -1 });
+
+// =============================
+// 🔒 IMMUTABILITY CONSTRAINTS
+// =============================
+// Prevent updates to audit log entries after creation
+auditLogSchema.pre("save", function (next) {
+  if (this.isNew) {
+    // Allow creation
+    return next();
+  }
+  // Prevent updates - audit logs must be immutable
+  const err = new Error("Audit logs are immutable and cannot be modified after creation");
+  err.name = "ImmutableError";
+  return next(err);
+});
+
+// Prevent findOneAndUpdate and updateMany operations
+auditLogSchema.pre("findOneAndUpdate", function (next) {
+  const err = new Error("Audit logs are immutable and cannot be modified after creation");
+  err.name = "ImmutableError";
+  return next(err);
+});
+
+auditLogSchema.pre("updateMany", function (next) {
+  const err = new Error("Audit logs are immutable and cannot be modified after creation");
+  err.name = "ImmutableError";
+  return next(err);
+});
+
+auditLogSchema.pre("updateOne", function (next) {
+  const err = new Error("Audit logs are immutable and cannot be modified after creation");
+  err.name = "ImmutableError";
+  return next(err);
+});
+
+// Prevent delete operations (only allow soft delete if needed, but for now hard prevent)
+auditLogSchema.pre("deleteOne", function (next) {
+  const err = new Error("Audit logs cannot be deleted");
+  err.name = "ImmutableError";
+  return next(err);
+});
+
+auditLogSchema.pre("deleteMany", function (next) {
+  const err = new Error("Audit logs cannot be deleted");
+  err.name = "ImmutableError";
+  return next(err);
+});
 
 const AuditLog = mongoose.models.AuditLog || mongoose.model("AuditLog", auditLogSchema);
 

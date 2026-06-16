@@ -1,6 +1,6 @@
-// backend/routes/auditRoutes.js - Production Hardened v4.0
+// backend/routes/auditRoutes.js - Production Hardened v5.0
 // ─────────────────────────────────────────────────────────────
-// Admin audit viewer routes for escrow compliance
+// Admin audit viewer routes for escrow compliance and general audit trail
 // Provides audit trail viewing and export functionality
 // ─────────────────────────────────────────────────────────────
 
@@ -18,6 +18,13 @@ import {
   exportEscrowAudit,
   getAuditStats,
   getAuditById,
+  getAllAuditLogs,
+  getAuditLogById,
+  getAuditLogsByAction,
+  getAuditLogsByActor,
+  getAuditLogsByTarget,
+  getAuditLogStatistics,
+  exportAuditLogs,
 } from "../controllers/auditController.js";
 
 const router = express.Router();
@@ -64,7 +71,37 @@ router.get("/statistics", asyncHandler(getAuditStats));
 router.get("/:id", asyncHandler(getAuditById));
 
 // =============================
-// 🚨 FALLBACK
+// � GENERAL AUDIT LOG ENDPOINTS
+// =============================
+
+// GET /api/audit/logs - Get all general audit logs (admin only)
+router.get("/logs", asyncHandler(getAllAuditLogs));
+
+// GET /api/audit/logs/:id - Get single audit log by ID (admin only)
+router.get("/logs/:id", asyncHandler(getAuditLogById));
+
+// GET /api/audit/logs/action/:action - Get audit logs by action (admin only)
+router.get("/logs/action/:action", asyncHandler(getAuditLogsByAction));
+
+// GET /api/audit/logs/actor/:actorId - Get audit logs by actor (admin only)
+router.get("/logs/actor/:actorId", asyncHandler(getAuditLogsByActor));
+
+// GET /api/audit/logs/target/:targetId/:targetModel - Get audit logs by target (admin only)
+router.get("/logs/target/:targetId/:targetModel", asyncHandler(getAuditLogsByTarget));
+
+// GET /api/audit/logs/statistics - Get audit log statistics (admin only)
+router.get("/logs/statistics", asyncHandler(getAuditLogStatistics));
+
+// GET /api/audit/logs/export - Export audit logs (admin only)
+router.get("/logs/export", asyncHandler(async (req, res) => {
+  const result = await exportAuditLogs(req, res);
+  await logActionFromReq(req, "audit_logs_export", {
+    details: { exportedBy: req.user.id },
+  });
+}));
+
+// =============================
+// �🚨 FALLBACK
 // =============================
 router.use((req, res) => {
   res.status(404).json({

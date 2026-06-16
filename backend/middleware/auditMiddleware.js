@@ -40,6 +40,7 @@ export const auditAction = (action, options = {}) => {
             ipAddress: req.ip,
             userAgent: req.headers?.["user-agent"],
             requestId: req.id,
+            sessionId: req.sessionID || req.session?.id,
             details: {
               ...options.details,
               responseData,
@@ -95,6 +96,7 @@ export const auditDocumentUpdate = async ({
   targetModel,
   ipAddress,
   userAgent,
+  sessionId,
   details = {},
 }) => {
   try {
@@ -126,6 +128,7 @@ export const auditDocumentUpdate = async ({
       changes,
       ipAddress,
       userAgent,
+      sessionId,
       details,
       severity: "info",
     });
