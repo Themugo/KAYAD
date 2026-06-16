@@ -55,6 +55,11 @@ export const recordHistogram = (name, value, tags = {}) => {
   metrics.histograms[key].push(value);
 };
 
+export const recordMetric = (name, value, tags = {}) => {
+  // Alias for recordHistogram for backward compatibility
+  return recordHistogram(name, value, tags);
+};
+
 export const getHistogram = (name, tags = {}) => {
   const key = `${name}:${JSON.stringify(tags)}`;
   const values = metrics.histograms[key] || [];
@@ -212,12 +217,84 @@ export const recordLoadBalancerHealth = (server, healthy) => {
   setGauge("load_balancer_server_healthy", healthy ? 1 : 0, { server });
 };
 
+// =============================
+// 🌐 EXTERNAL SERVICE METRICS
+// =============================
+
+// M-Pesa metrics
+export const recordMpesaTokenFetch = (duration, success) => {
+  recordHistogram("mpesa_token_fetch_duration", duration);
+  incrementCounter("mpesa_token_fetch_total", success ? 1 : 0, { status: success ? "success" : "failure" });
+};
+
+export const recordMpesaStkPush = (duration, success, errorType = null) => {
+  recordHistogram("mpesa_stk_push_duration", duration);
+  incrementCounter("mpesa_stk_push_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+};
+
+// Email metrics
+export const recordEmailSend = (duration, success, errorType = null) => {
+  recordHistogram("email_send_duration", duration);
+  incrementCounter("email_send_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+};
+
+// SMS metrics
+export const recordSmsSend = (duration, success, errorType = null) => {
+  recordHistogram("sms_send_duration", duration);
+  incrementCounter("sms_send_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+};
+
+// Redis metrics
+export const recordRedisOperation = (operation, duration, success) => {
+  recordHistogram("redis_operation_duration", duration, { operation });
+  incrementCounter("redis_operations_total", success ? 1 : 0, { operation, status: success ? "success" : "failure" });
+};
+
+// Sentry metrics
+export const recordSentryCapture = (duration, success, errorType = null) => {
+  recordHistogram("sentry_capture_duration", duration);
+  incrementCounter("sentry_capture_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+};
+
+// Socket.IO metrics
+export const recordSocketEmit = (event, duration, success) => {
+  recordHistogram("socket_emit_duration", duration, { event });
+  incrementCounter("socket_emit_total", success ? 1 : 0, { event, status: success ? "success" : "failure" });
+};
+
+// Circuit breaker metrics
+export const recordCircuitBreakerState = (service, state) => {
+  setGauge("circuit_breaker_state", state === "open" ? 1 : 0, { service });
+  incrementCounter("circuit_breaker_state_change", 1, { service, state });
+};
+
+// Fallback metrics
+export const recordFallbackActivation = (service) => {
+  incrementCounter("fallback_activation_total", 1, { service });
+};
+
+// Timeout metrics
+export const recordTimeout = (service, operation) => {
+  incrementCounter("timeout_total", 1, { service, operation });
+};
+
+// Queue metrics
+export const recordQueueDepth = (queue, depth) => {
+  setGauge("queue_depth", depth, { queue });
+};
+
+export const recordQueueProcessing = (queue, duration, success) => {
+  recordHistogram("queue_processing_duration", duration, { queue });
+  incrementCounter("queue_processing_total", success ? 1 : 0, { queue, status: success ? "success" : "failure" });
+};
+
 export default {
   incrementCounter,
   getCounter,
   setGauge,
   getGauge,
   recordHistogram,
+  recordMetric,
   getHistogram,
   startTimer,
   stopTimer,
@@ -239,4 +316,16 @@ export default {
   recordConnectionPoolStats,
   recordLoadBalancerRequest,
   recordLoadBalancerHealth,
+  recordMpesaTokenFetch,
+  recordMpesaStkPush,
+  recordEmailSend,
+  recordSmsSend,
+  recordRedisOperation,
+  recordSentryCapture,
+  recordSocketEmit,
+  recordCircuitBreakerState,
+  recordFallbackActivation,
+  recordTimeout,
+  recordQueueDepth,
+  recordQueueProcessing,
 };
