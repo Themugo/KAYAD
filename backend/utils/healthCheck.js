@@ -8,6 +8,7 @@
 import mongoose from "mongoose";
 import { isRedisConnected } from "./cache.js";
 import { isPostHogEnabled } from "./posthog.js";
+import { getQueueMetrics, connection as queueConnection } from "../config/queue.js";
 
 const START_TIME = Date.now();
 
@@ -59,6 +60,47 @@ const deepHealth = async (req, res) => {
     heapUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
     heapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
   };
+
+  // Queue System (BullMQ)
+  try {
+    const queueStatus = queueConnection.status === "ready" ? "ok" : "degraded";
+    const queueNames = ["notification", "email", "sms", "fraud", "image", "seo"];
+    const queueDetails = {};
+
+    for (const name of queueNames) {
+      try {
+        const metrics = await getQueueMetrics(name);
+        const totalJobs = metrics.waiting + metrics.active + metrics.delayed;
+        const queueHealth = totalJobs > 1000 ? "warn" : "ok";
+        
+        queueDetails[name] = {
+          status: queueHealth,
+          waiting: metrics.waiting,
+          active: metrics.active,
+          completed: metrics.completed,
+          failed: metrics.failed,
+          delayed: metrics.delayed,
+          total: totalJobs,
+        };
+      } catch (err) {
+        queueDetails[name] = {
+          status: "error",
+          error: err.message,
+        };
+      }
+    }
+
+    checks.queue = {
+      status: queueStatus,
+      connection: queueConnection.status,
+      queues: queueDetails,
+    };
+  } catch (err) {
+    checks.queue = {
+      status: "error",
+      error: err.message,
+    };
+  }
 
   const allOk = Object.values(checks).every((c) => ["ok", "disabled"].includes(c.status));
   const statusCode = allOk ? 200 : 503;

@@ -13,6 +13,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
@@ -27,6 +28,7 @@ import { mongoSanitize, xssProtection, paginationCap, extraHeaders, bodyGuard } 
 import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection } from "./middleware/csrf.js";
+import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import swaggerUi from "swagger-ui-express";
@@ -253,16 +255,21 @@ app.use(
   }),
 );
 
+// ─── RESPONSE COMPRESSION ─────────────────────────────────────
+app.use(compression());
+
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
 app.use(bodyGuard());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
-app.use((req, res, next) => {
-  req.setTimeout(65_000);
-  res.setTimeout(65_000);
-  next();
-});
+
+// ─── REQUEST TIMEOUTS ───────────────────────────────────────────
+// Import operation-specific timeout middleware
+import { mediumTimeout, fastTimeout, externalTimeout, uploadTimeout } from "./middleware/timeout.js";
+
+// Apply default medium timeout to all routes (can be overridden per route)
+app.use(mediumTimeout);
 // Serve uploaded files with strict headers to prevent script execution
 app.use(
   "/uploads",
@@ -430,15 +437,15 @@ app.use("/api", checkSystemStatus);
 app.use("/api/auth/refresh", csrfProtection); // CSRF for cookie-based refresh
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/cars", carRoutes);
-app.use("/api/bids", bidRoutes);
+app.use("/api/bids", idempotencyCheck, csrfProtection, bidRoutes); // Idempotency + CSRF for state-changing bid operations
 app.use("/api/dealer", dealerRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);
 
 // M-Pesa callback gets IP whitelist before routes mount
 app.use("/api/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
-app.use("/api/payments", paymentRoutes);
+app.use("/api/payments", idempotencyCheck, csrfProtection, externalTimeout, paymentRoutes); // Idempotency + CSRF for payment operations
 
-app.use("/api/escrow", escrowRoutes);
+app.use("/api/escrow", idempotencyCheck, csrfProtection, escrowRoutes); // Idempotency + CSRF for escrow operations
 app.use("/api/chat", chatRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/notifications", notificationRoutes);
@@ -480,8 +487,8 @@ app.use("/api/listing-quality", listingQualityRoutes);
 app.use("/api/notification-analytics", notificationAnalyticsRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/finance", financeRoutes);
-app.use("/health", healthRoutes);
-app.use("/metrics", metricsRoutes);
+app.use("/health", fastTimeout, healthRoutes);
+app.use("/metrics", fastTimeout, metricsRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -643,12 +650,54 @@ const shutdown = async (signal) => {
     );
   }
 
+  // Stop accepting new HTTP requests
   server.close(async () => {
-    await mongoose.connection.close();
-    logInfo("Shutdown complete");
-    process.exit(0);
+    logInfo("HTTP server closed");
+    
+    try {
+      // Close Socket.IO connections
+      if (io) {
+        io.close();
+        logInfo("Socket.IO connections closed");
+      }
+      
+      // Close queue workers
+      const { closeWorkers } = await import("./config/queue.js");
+      await closeWorkers();
+      logInfo("Queue workers closed");
+      
+      // Close dead letter queues
+      const { closeDeadLetterQueues } = await import("./config/queue.js");
+      await closeDeadLetterQueues();
+      logInfo("Dead letter queues closed");
+      
+      // Close queues
+      const { closeQueues } = await import("./config/queue.js");
+      await closeQueues();
+      logInfo("Queues closed");
+      
+      // Close Redis connection
+      const { closeConnection } = await import("./config/queue.js");
+      await closeConnection();
+      logInfo("Redis connection closed");
+      
+      // Close MongoDB connection
+      await mongoose.connection.close();
+      logInfo("MongoDB connection closed");
+      
+      logInfo("Shutdown complete");
+      process.exit(0);
+    } catch (err) {
+      logError("Error during shutdown", err);
+      process.exit(1);
+    }
   });
-  setTimeout(() => process.exit(1), 10_000); // force after 10s
+  
+  // Force shutdown after 30 seconds
+  setTimeout(() => {
+    logError("Forced shutdown after timeout");
+    process.exit(1);
+  }, 30_000);
 };
 
 if (NODE_ENV !== "test") {
