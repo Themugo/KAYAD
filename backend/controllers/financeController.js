@@ -6,7 +6,7 @@
 
 import ReconciliationReport from "../models/ReconciliationReport.js";
 import { triggerManualReconciliation, getReconciliationCronStatus } from "../services/reconciliationCron.js";
-import { resolveIssue } from "../services/reconciliationService.js";
+import { resolveIssue as resolveReconciliationIssue } from "../services/reconciliationService.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
@@ -140,7 +140,7 @@ export const resolveIssue = async (req, res) => {
     const { reportId, issueIndex } = req.params;
     const { notes, action } = req.body;
 
-    const report = await resolveIssue(reportId, parseInt(issueIndex), {
+    const report = await resolveReconciliationIssue(reportId, parseInt(issueIndex), {
       notes,
       action,
     }, req.user.id);

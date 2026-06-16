@@ -80,6 +80,7 @@ import searchAnalyticsRoutes from "./routes/searchAnalyticsRoutes.js";
 import listingQualityRoutes from "./routes/listingQualityRoutes.js";
 import notificationAnalyticsRoutes from "./routes/notificationAnalyticsRoutes.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
+import financeRoutes from "./routes/financeRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import metricsRoutes from "./routes/metricsRoutes.js";
 import v1Routes from "./routes/v1.js";
@@ -539,10 +540,10 @@ const bootstrap = async () => {
     await connectDB();
     console.log("✅ Database connected");
     
-    // Temporarily skip Redis to isolate the crash
-    console.log("⚠️ Skipping Redis initialization for debugging...");
-    await initCache(); // Redis (optional)
-    console.log("✅ Cache initialized");
+    // Temporarily disable Redis to isolate the crash
+    console.log("⚠️ Disabling Redis initialization for debugging...");
+    // await initCache(); // Redis (optional)
+    console.log("✅ Redis initialization disabled");
 
     // Auto-seed if no superadmin accounts exist (fresh DB)
     try {
