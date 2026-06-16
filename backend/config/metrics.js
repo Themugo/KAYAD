@@ -288,6 +288,40 @@ export const recordQueueProcessing = (queue, duration, success) => {
   incrementCounter("queue_processing_total", success ? 1 : 0, { queue, status: success ? "success" : "failure" });
 };
 
+// =============================
+// 🔐 IDEMPOTENCY METRICS
+// =============================
+
+export const recordIdempotencyCheck = (operationType, hit, duration) => {
+  recordHistogram("idempotency_check_duration_ms", duration, { operation_type: operationType });
+  incrementCounter("idempotency_checks_total", 1, { operation_type: operationType, hit: hit ? "hit" : "miss" });
+};
+
+export const recordIdempotencyHit = (operationType) => {
+  incrementCounter("idempotency_hits_total", 1, { operation_type: operationType });
+};
+
+export const recordIdempotencyMiss = (operationType) => {
+  incrementCounter("idempotency_misses_total", 1, { operation_type: operationType });
+};
+
+export const recordIdempotencyCache = (operationType, success) => {
+  incrementCounter("idempotency_cache_total", success ? 1 : 0, { operation_type: operationType, status: success ? "success" : "failure" });
+};
+
+export const recordIdempotencyError = (operationType, errorType) => {
+  incrementCounter("idempotency_errors_total", 1, { operation_type: operationType, error_type: errorType });
+};
+
+export const recordIdempotencyKeyExpiration = (operationType) => {
+  incrementCounter("idempotency_key_expirations_total", 1, { operation_type: operationType });
+};
+
+export const recordIdempotencyKeyCleanup = (count) => {
+  setGauge("idempotency_keys_cleaned", count);
+  incrementCounter("idempotency_key_cleanup_total", count);
+};
+
 export default {
   incrementCounter,
   getCounter,
@@ -328,4 +362,11 @@ export default {
   recordTimeout,
   recordQueueDepth,
   recordQueueProcessing,
+  recordIdempotencyCheck,
+  recordIdempotencyHit,
+  recordIdempotencyMiss,
+  recordIdempotencyCache,
+  recordIdempotencyError,
+  recordIdempotencyKeyExpiration,
+  recordIdempotencyKeyCleanup,
 };

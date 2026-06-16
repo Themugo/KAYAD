@@ -7,6 +7,13 @@
 
 import IdempotencyKey from "../models/IdempotencyKey.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import {
+  recordIdempotencyCheck,
+  recordIdempotencyHit,
+  recordIdempotencyMiss,
+  recordIdempotencyCache,
+  recordIdempotencyError,
+} from "../config/metrics.js";
 
 // In-memory fallback for when database is not available
 const idempotencyStore = new Map();
@@ -55,17 +62,28 @@ export const idempotencyCheck = async (req, res, next) => {
   }
   
   const operationType = extractOperationType(req.path);
+  const startTime = Date.now();
   
   try {
     // Check database for existing idempotency key
     const cachedResponse = await IdempotencyKey.getCachedResponse(idempotencyKey);
     
+    const duration = Date.now() - startTime;
+    
     if (cachedResponse) {
       logInfo("Idempotency hit", { idempotencyKey, operationType, path: req.path });
+      
+      // Record metrics
+      recordIdempotencyCheck(operationType, true, duration);
+      recordIdempotencyHit(operationType);
       
       // Return cached response with original status code
       return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
     }
+    
+    // Record metrics for miss
+    recordIdempotencyCheck(operationType, false, duration);
+    recordIdempotencyMiss(operationType);
     
     // Store the idempotency key in the request for later use
     req.idempotencyKey = idempotencyKey;
@@ -90,16 +108,27 @@ export const idempotencyCheck = async (req, res, next) => {
         resourceIds: data?.payment ? { paymentId: data.payment._id } : 
                     data?.escrowId ? { escrowId: data.escrowId } :
                     data?.bid ? { bidId: data.bid._id } : {},
-      }).catch((err) => {
-        logError("Failed to cache idempotency response", err, { idempotencyKey });
-      });
+      })
+        .then(() => {
+          recordIdempotencyCache(operationType, true);
+        })
+        .catch((err) => {
+          logError("Failed to cache idempotency response", err, { idempotencyKey });
+          recordIdempotencyCache(operationType, false);
+          recordIdempotencyError(operationType, "cache_failure");
+        });
       
       return originalJson(data);
     };
     
     next();
   } catch (error) {
+    const duration = Date.now() - startTime;
     logError("Idempotency check error", error, { idempotencyKey, path: req.path });
+    
+    // Record metrics for error
+    recordIdempotencyCheck(operationType, false, duration);
+    recordIdempotencyError(operationType, error.name);
     
     // Fail open - allow the request if idempotency check fails
     // But still store the key for tracking
