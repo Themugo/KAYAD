@@ -11,6 +11,7 @@ import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
+import { logAuctionBidPlaced } from "../services/auditService.js";
 
 // Email service — top-level import, no-ops if unavailable
 let bidEmailService = {};
@@ -327,6 +328,9 @@ export const placeBid = async (req, res) => {
         details: { amount, bidId: bid._id, mode: payment.mode },
         severity: "info",
       });
+
+      // Log auction bid to audit trail
+      await logAuctionBidPlaced(car, bid, req.user, req);
 
       if (getIO()) {
         getIO().to(`car_${carId}`).emit("auctionUpdate", {
