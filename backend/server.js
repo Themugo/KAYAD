@@ -209,8 +209,13 @@ app.use((req, res, next) => {
 });
 
 // ─── SENTRY REQUEST HANDLER
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+// Note: In newer Sentry versions, handlers are auto-instrumented
+if (Sentry.Handlers && Sentry.Handlers.requestHandler) {
+  app.use(Sentry.Handlers.requestHandler());
+}
+if (Sentry.Handlers && Sentry.Handlers.tracingHandler) {
+  app.use(Sentry.Handlers.tracingHandler());
+}
 
 // ─── HTTP LOGGING ────────────────────────────────────────────
 if (NODE_ENV === "development") app.use(morgan("dev"));
@@ -536,8 +541,8 @@ const bootstrap = async () => {
     
     // Temporarily skip Redis to isolate the crash
     console.log("⚠️ Skipping Redis initialization for debugging...");
-    // await initCache(); // Redis (optional)
-    console.log("✅ Cache initialization skipped");
+    await initCache(); // Redis (optional)
+    console.log("✅ Cache initialized");
 
     // Auto-seed if no superadmin accounts exist (fresh DB)
     try {
