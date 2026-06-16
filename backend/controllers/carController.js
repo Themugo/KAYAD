@@ -7,6 +7,7 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
+import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -366,6 +367,9 @@ export const createCar = async (req, res) => {
       details: { title: car.title, price: car.price },
     });
 
+    // Log vehicle creation to audit trail
+    await logVehicleCreated(car, req.user, req);
+
     // ── DUPLICATE DETECTION (Non-blocking) ──
     setImmediate(async () => {
       try {
@@ -523,6 +527,10 @@ export const updateCar = async (req, res) => {
     }
 
     await car.save();
+    
+    // Store old data for audit logging
+    const oldData = car.toObject();
+    
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "update_car", {
@@ -530,6 +538,9 @@ export const updateCar = async (req, res) => {
       targetModel: "Car",
       details: { title: car.title, price: car.price },
     });
+
+    // Log vehicle edit to audit trail
+    await logVehicleEdited(car, oldData, req.user, req);
 
     res.json({ success: true, data: car });
   } catch (err) {
@@ -576,6 +587,9 @@ export const deleteCar = async (req, res) => {
       targetModel: "Car",
       details: { title: car.title },
     });
+
+    // Log vehicle deletion to audit trail
+    await logVehicleDeleted(car, req.user, req);
 
     res.json({
       success: true,

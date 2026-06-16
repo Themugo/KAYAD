@@ -10,6 +10,7 @@ import User from "../models/User.js";
 import { sendSMS } from "../utils/sms.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { logDealerVerificationSubmitted, logDealerVerificationApproved } from "../services/auditService.js";
 
 // =============================
 // 📤 SUBMIT VERIFICATION
@@ -94,6 +95,9 @@ export const submitVerification = async (req, res) => {
     await verification.save();
 
     logInfo("Verification submitted", { userId, dealerId: dealer._id });
+
+    // Log dealer verification submission to audit trail
+    await logDealerVerificationSubmitted(verification, req.user, req);
 
     res.json({
       success: true,
@@ -409,6 +413,9 @@ export const approveVerification = async (req, res) => {
     });
 
     logInfo("Verification approved", { verificationId: id, userId: verification.user, adminId: req.user.id });
+
+    // Log dealer verification approval to audit trail
+    await logDealerVerificationApproved(verification, req.user, req);
 
     res.json({
       success: true,

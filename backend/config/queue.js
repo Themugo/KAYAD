@@ -11,6 +11,9 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 // =============================
 // 🔴 REDIS CONNECTION
 // =============================
+// Temporarily disable Redis for debugging
+const DISABLE_REDIS = true;
+
 const redisConfig = {
   host: process.env.REDIS_HOST || "localhost",
   port: parseInt(process.env.REDIS_PORT || "6379"),
@@ -27,19 +30,23 @@ const redisConfig = {
 };
 
 // Create Redis connection
-const connection = new IORedis(redisConfig);
+const connection = DISABLE_REDIS ? null : new IORedis(redisConfig);
 
-connection.on("connect", () => {
-  logInfo("Redis connected", { host: redisConfig.host, port: redisConfig.port });
-});
+if (connection) {
+  connection.on("connect", () => {
+    logInfo("Redis connected", { host: redisConfig.host, port: redisConfig.port });
+  });
 
-connection.on("error", (err) => {
-  logError("Redis connection error", err);
-});
+  connection.on("error", (err) => {
+    logError("Redis connection error", err);
+  });
 
-connection.on("close", () => {
-  logWarn("Redis connection closed");
-});
+  connection.on("close", () => {
+    logWarn("Redis connection closed");
+  });
+} else {
+  console.log("⚠️ Queue Redis disabled for debugging");
+}
 
 // =============================
 // 📋 QUEUE OPTIONS
@@ -153,6 +160,12 @@ export const getDeadLetterQueue = (queueName) => {
 export const getQueue = (queueName) => {
   if (queues[queueName]) {
     return queues[queueName];
+  }
+
+  // Return null if Redis is disabled
+  if (!connection) {
+    console.log(`⚠️ Queue ${queueName} disabled (Redis disabled)`);
+    return null;
   }
 
   const options = queueOptions[queueName] || queueOptions.notification;

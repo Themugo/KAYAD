@@ -1,5 +1,5 @@
 import Contact from "../models/Contact.js";
-import { sendEmail } from "../services/email.service.js";
+import { sendRawEmail } from "../services/email.service.js";
 
 export const submitContact = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ export const submitContact = async (req, res) => {
     }
     const contact = await Contact.create({ name, email, subject, message });
 
-    sendEmail({
+    sendRawEmail({
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
       subject: `Contact form: ${subject}`,
       html: `<div style="font-family:sans-serif;background:#050505;color:#E2DDD5;padding:24px;max-width:500px;">

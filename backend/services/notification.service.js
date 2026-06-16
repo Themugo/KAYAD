@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Notification from "../models/Notification.js";
-import { sendEmail } from "./email.service.js";
+import { sendRawEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { withRetry } from "../utils/retry.js";
 import { getIO } from "../utils/io.js";
@@ -51,7 +51,7 @@ export const sendNotification = async ({ userId, title, message, type = "info", 
     }
 
     if (email) {
-      sendEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) =>
+      sendRawEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) =>
         console.warn("⚠️ Notification email failed:", e.message),
       );
     }

@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import { protect, dealerOnly } from "../middleware/auth.js";
+import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 

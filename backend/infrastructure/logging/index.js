@@ -101,10 +101,7 @@ export const logResponse = (req, res, duration) => {
 // =============================
 // 👶 CHILD LOGGER EXPORTS
 // =============================
-export const createChildLogger = createChildLogger;
-export const createRequestLogger = createRequestLogger;
-export const createTransactionLogger = createTransactionLogger;
-export const createFeatureLogger = createFeatureLogger;
+export { createChildLogger, createRequestLogger, createTransactionLogger, createFeatureLogger };
 
 // =============================
 // 📤 EXPORT LOGGER INSTANCE

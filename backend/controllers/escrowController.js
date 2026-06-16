@@ -7,6 +7,7 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { getIO } from "../utils/io.js";
 import { isValidId } from "../utils/validateId.js";
 import { findOrCreateLeadFromEscrow, updateLeadStage } from "../services/leadService.js";
+import { logEscrowReleased, logEscrowRefunded } from "../services/auditService.js";
 
 // =============================
 // 📄 GET ALL ESCROWS (ADMIN)
@@ -342,6 +343,9 @@ export const releaseEscrow = async (req, res) => {
       severity: "info",
     });
 
+    // Log escrow release to audit trail
+    await logEscrowReleased(escrow, req.user, req);
+
     res.json({
       success: true,
       message: "Escrow released",
@@ -441,6 +445,9 @@ export const refundEscrow = async (req, res) => {
       details: { carId: escrow.car, amount: escrow.amount },
       severity: "warning",
     });
+
+    // Log escrow refund to audit trail
+    await logEscrowRefunded(escrow, req.user, req);
 
     res.json({
       success: true,

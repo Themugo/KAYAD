@@ -82,6 +82,8 @@ import searchAnalyticsRoutes from "./routes/searchAnalyticsRoutes.js";
 import listingQualityRoutes from "./routes/listingQualityRoutes.js";
 import notificationAnalyticsRoutes from "./routes/notificationAnalyticsRoutes.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
+import financeRoutes from "./routes/financeRoutes.js";
+import seoRoutes from "./routes/seoRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import metricsRoutes from "./routes/metricsRoutes.js";
 import v1Routes from "./routes/v1.js";
@@ -211,8 +213,13 @@ app.use((req, res, next) => {
 });
 
 // ─── SENTRY REQUEST HANDLER
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
+// Note: In newer Sentry versions, handlers are auto-instrumented
+if (Sentry.Handlers && Sentry.Handlers.requestHandler) {
+  app.use(Sentry.Handlers.requestHandler());
+}
+if (Sentry.Handlers && Sentry.Handlers.tracingHandler) {
+  app.use(Sentry.Handlers.tracingHandler());
+}
 
 // ─── HTTP LOGGING ────────────────────────────────────────────
 if (NODE_ENV === "development") app.use(morgan("dev"));
@@ -497,7 +504,10 @@ app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
 app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
-app.use(Sentry.Handlers.errorHandler());
+// Note: In newer Sentry versions, handlers are auto-instrumented
+if (Sentry.Handlers && Sentry.Handlers.errorHandler) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 app.use(notFound);
 app.use(errorHandler);
 
@@ -535,15 +545,24 @@ mongoose.connection.on("error", (err) => logError("MongoDB error", err));
 // ─── BOOTSTRAP ────────────────────────────────────────────────
 const bootstrap = async () => {
   try {
+    console.log("🔧 Starting bootstrap process...");
     validateEnv();
+    console.log("✅ Environment validated");
     await connectDB();
-    await initCache(); // Redis (optional)
+    console.log("✅ Database connected");
+    
+    // Temporarily disable Redis to isolate the crash
+    console.log("⚠️ Disabling Redis initialization for debugging...");
+    // await initCache(); // Redis (optional)
+    console.log("✅ Redis initialization disabled");
 
     // Auto-seed if no superadmin accounts exist (fresh DB)
     try {
+      console.log("🌱 Checking if auto-seed is needed...");
       const User = (await import("./models/User.js")).default;
       const existing = await User.countDocuments({ role: "superadmin" });
       if (existing === 0) {
+        console.log("🌱 Auto-seeding database...");
         const { reseed } = await import("./seed.js");
         const result = await reseed();
         logInfo("Auto-seeded database", {
@@ -552,46 +571,121 @@ const bootstrap = async () => {
           demos: result.demos.length,
           cars: result.cars,
         });
+        console.log("✅ Auto-seed completed");
+      } else {
+        console.log("✅ Auto-seed not needed (superadmin exists)");
       }
     } catch (seedErr) {
       logWarn("Auto-seed skipped", { error: seedErr.message });
+      console.log("⚠️ Auto-seed skipped:", seedErr.message);
     }
 
-    server.listen(PORT, async () => {
-      logInfo("Kayad API started", {
-        url: `http://localhost:${PORT}`,
-        env: NODE_ENV,
-        cors: FRONTEND,
-        routes: "16 + v1 (versioned)",
-        security: "mongoSanitize + XSS + IP whitelist + pagination cap",
-        posthog: process.env.POSTHOG_API_KEY ? "connected" : "disabled",
-        redis: process.env.REDIS_URL ? "connecting..." : "in-memory fallback",
-        socket: "ready",
-        sentry: process.env.SENTRY_DSN ? "enabled" : "disabled",
-        backup: process.env.BACKUP_ENABLED === "true" ? "enabled" : "disabled",
-        cardPayment: process.env.CARD_PAYMENT_ENABLED === "true" ? "enabled" : "disabled",
+    try {
+      console.log("🚀 Starting server on port", PORT);
+      server.listen(PORT, async () => {
+        console.log("✅ Server listening callback triggered");
+        logInfo("Kayad API started", {
+          url: `http://localhost:${PORT}`,
+          env: NODE_ENV,
+          cors: FRONTEND,
+          routes: "16 + v1 (versioned)",
+          security: "mongoSanitize + XSS + IP whitelist + pagination cap",
+          posthog: process.env.POSTHOG_API_KEY ? "connected" : "disabled",
+          redis: process.env.REDIS_URL ? "connecting..." : "in-memory fallback",
+          socket: "ready",
+          sentry: process.env.SENTRY_DSN ? "enabled" : "disabled",
+          backup: process.env.BACKUP_ENABLED === "true" ? "enabled" : "disabled",
+          cardPayment: process.env.CARD_PAYMENT_ENABLED === "true" ? "enabled" : "disabled",
+        });
+
+        // Trigger startup alert
+        if (process.env.SENTRY_DSN) {
+          await triggerAlert(
+            "Server Started",
+            `KAYAD backend server started successfully on port ${PORT}`,
+            ALERT_LEVELS.LOW,
+            { port: PORT, host: "localhost", environment: NODE_ENV }
+          );
+        }
       });
+    } catch (listenErr) {
+      logError("Failed to start server", listenErr);
+      console.log("❌ Failed to start server:", listenErr);
+      process.exit(1);
+    }
 
-      // Trigger startup alert
-      if (process.env.SENTRY_DSN) {
-        await triggerAlert(
-          "Server Started",
-          `KAYAD backend server started successfully on port ${PORT}`,
-          ALERT_LEVELS.LOW,
-          { port: PORT, host: "localhost", environment: NODE_ENV }
-        );
-      }
-    });
-
-    await startAuctionEngine();
-    startAuctionTimer(io);
-    startEscrowCron();
-    startAuctionReminderCron();
-    startSavedSearchCron();
-    startPriceAlertCron();
-    startHealthScoreScheduler();
-    startMarketTrendScheduler();
-    startMarketplaceHealthScheduler();
+    console.log("🔧 Starting background services...");
+    try {
+      await startAuctionEngine();
+      console.log("✅ Auction engine started");
+    } catch (err) {
+      logError("Failed to start auction engine", err);
+      console.log("❌ Failed to start auction engine:", err);
+    }
+    
+    try {
+      startAuctionTimer(io);
+      console.log("✅ Auction timer started");
+    } catch (err) {
+      logError("Failed to start auction timer", err);
+      console.log("❌ Failed to start auction timer:", err);
+    }
+    
+    try {
+      startEscrowCron();
+      console.log("✅ Escrow cron started");
+    } catch (err) {
+      logError("Failed to start escrow cron", err);
+      console.log("❌ Failed to start escrow cron:", err);
+    }
+    
+    try {
+      startAuctionReminderCron();
+      console.log("✅ Auction reminder cron started");
+    } catch (err) {
+      logError("Failed to start auction reminder cron", err);
+      console.log("❌ Failed to start auction reminder cron:", err);
+    }
+    
+    try {
+      startSavedSearchCron();
+      console.log("✅ Saved search cron started");
+    } catch (err) {
+      logError("Failed to start saved search cron", err);
+      console.log("❌ Failed to start saved search cron:", err);
+    }
+    
+    try {
+      startPriceAlertCron();
+      console.log("✅ Price alert cron started");
+    } catch (err) {
+      logError("Failed to start price alert cron", err);
+      console.log("❌ Failed to start price alert cron:", err);
+    }
+    
+    try {
+      startHealthScoreScheduler();
+      console.log("✅ Health score scheduler started");
+    } catch (err) {
+      logError("Failed to start health score scheduler", err);
+      console.log("❌ Failed to start health score scheduler:", err);
+    }
+    
+    try {
+      startMarketTrendScheduler();
+      console.log("✅ Market trend scheduler started");
+    } catch (err) {
+      logError("Failed to start market trend scheduler", err);
+      console.log("❌ Failed to start market trend scheduler:", err);
+    }
+    
+    try {
+      startMarketplaceHealthScheduler();
+      console.log("✅ Marketplace health scheduler started");
+    } catch (err) {
+      logError("Failed to start marketplace health scheduler", err);
+      console.log("❌ Failed to start marketplace health scheduler:", err);
+    }
 
     logInfo("Background services started", {
       escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
