@@ -126,6 +126,12 @@ export const getQueue = (queueName) => {
     return queues[queueName];
   }
 
+  // Return null if Redis is disabled
+  if (!connection) {
+    console.log(`⚠️ Queue ${queueName} disabled (Redis disabled)`);
+    return null;
+  }
+
   const options = queueOptions[queueName] || queueOptions.notification;
   const queue = new Queue(queueName, {
     connection,

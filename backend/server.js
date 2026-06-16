@@ -81,6 +81,7 @@ import listingQualityRoutes from "./routes/listingQualityRoutes.js";
 import notificationAnalyticsRoutes from "./routes/notificationAnalyticsRoutes.js";
 import organizationRoutes from "./routes/organizationRoutes.js";
 import financeRoutes from "./routes/financeRoutes.js";
+import seoRoutes from "./routes/seoRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import metricsRoutes from "./routes/metricsRoutes.js";
 import v1Routes from "./routes/v1.js";
@@ -496,7 +497,10 @@ app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
 app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
-app.use(Sentry.Handlers.errorHandler());
+// Note: In newer Sentry versions, handlers are auto-instrumented
+if (Sentry.Handlers && Sentry.Handlers.errorHandler) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 app.use(notFound);
 app.use(errorHandler);
 
