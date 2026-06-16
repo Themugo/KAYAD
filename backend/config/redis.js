@@ -8,9 +8,12 @@ const redisUrl = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 
+// Temporarily disable Redis auto-connect for debugging
+const DISABLE_REDIS = true;
+
 let redis = null;
 
-if (redisUrl) {
+if (!DISABLE_REDIS && redisUrl) {
   redis = new Redis(redisUrl, {
     maxRetriesPerRequest: 3,
     retryStrategy: (times) => {
@@ -18,7 +21,7 @@ if (redisUrl) {
       return Math.min(times * 100, 2000);
     },
   });
-} else if (redisHost || redisPort) {
+} else if (!DISABLE_REDIS && (redisHost || redisPort)) {
   redis = new Redis({
     host: redisHost || "127.0.0.1",
     port: parseInt(redisPort, 10) || 6379,
