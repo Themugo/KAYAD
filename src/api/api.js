@@ -381,6 +381,15 @@ const _adminAPI = {
   getAuditLog:    (params)    => api.get('/admin/audit-log', { params }).then(unwrap),
   appendAuditLog: (body)      => api.post('/admin/audit-log', body).then(unwrap),
 
+  // General Audit Log (new immutable audit trail)
+  getAuditLogs:          (params) => api.get('/audit/logs', { params }).then(unwrap),
+  getAuditLogById:       (id)     => api.get(`/audit/logs/${id}`).then(unwrap),
+  getAuditLogsByAction:  (action, params) => api.get(`/audit/logs/action/${action}`, { params }).then(unwrap),
+  getAuditLogsByActor:   (actorId, params) => api.get(`/audit/logs/actor/${actorId}`, { params }).then(unwrap),
+  getAuditLogsByTarget:  (targetId, targetModel, params) => api.get(`/audit/logs/target/${targetId}/${targetModel}`, { params }).then(unwrap),
+  getAuditLogStatistics: (params) => api.get('/audit/logs/statistics', { params }).then(unwrap),
+  exportAuditLogs:       (params) => api.get('/audit/logs/export', { params }).then(unwrap),
+
   // M-Pesa Test
   testMpesa:      (body)      => api.post('/admin/daraja/test', body).then(unwrap),
 
