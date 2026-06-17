@@ -390,6 +390,17 @@ const _adminAPI = {
   getAuditLogStatistics: (params) => api.get('/audit/logs/statistics', { params }).then(unwrap),
   exportAuditLogs:       (params) => api.get('/audit/logs/export', { params }).then(unwrap),
 
+  // Reconciliation (enterprise payment reconciliation)
+  getReconciliationDashboard: (params) => api.get('/reconciliation/dashboard', { params }).then(unwrap),
+  getFinancialIntegrityScore: (params) => api.get('/reconciliation/integrity-score', { params }).then(unwrap),
+  getNegativeBalances:        (params) => api.get('/reconciliation/negative-balances', { params }).then(unwrap),
+  getUnreleasedEscrows:       (params) => api.get('/reconciliation/unreleased-escrows', { params }).then(unwrap),
+  runReconciliationReport:    (body)   => api.post('/reconciliation/run', body).then(unwrap),
+  getReconciliationReports:   (params) => api.get('/reconciliation/reports', { params }).then(unwrap),
+  getReconciliationReportById: (id)     => api.get(`/reconciliation/reports/${id}`).then(unwrap),
+  resolveReconciliationIssue: (reportId, body) => api.post(`/reconciliation/reports/${reportId}/resolve`, body).then(unwrap),
+  exportReconciliationReport: (reportId, format) => api.get(`/reconciliation/export/${reportId}/${format}`, { responseType: 'blob' }).then(unwrap),
+
   // M-Pesa Test
   testMpesa:      (body)      => api.post('/admin/daraja/test', body).then(unwrap),
 
