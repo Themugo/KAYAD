@@ -12,12 +12,14 @@ import {
   generateSitemapIndex,
 } from "../services/sitemapService.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 🔍 SEO GENERATION PROCESSOR
 // =============================
 
 const processSEOGeneration = async (job) => {
+  const startTime = Date.now();
   const { type, carId, dealerId, auctionId } = job.data;
 
   try {
@@ -52,10 +54,18 @@ const processSEOGeneration = async (job) => {
         throw new Error(`Unknown SEO generation type: ${type}`);
     }
 
-    logInfo("SEO generation processed successfully", { type });
-    return result;
+    const processingTime = Date.now() - startTime;
+    logInfo("SEO generation processed successfully", { type, processingTime });
+    return { result, processingTime };
   } catch (err) {
-    logError("Failed to process SEO generation", err, { type });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process SEO generation", err, { type, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

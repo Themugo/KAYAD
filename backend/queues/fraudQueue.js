@@ -16,10 +16,18 @@ export const addFraudCheckJob = async (data, options = {}) => {
     const job = await fraudQueue.add("fraud-check", data, {
       priority: options.priority || 10, // Highest priority for fraud checks
       delay: options.delay || 0,
-      attempts: options.attempts || 2,
+      attempts: options.attempts || 3, // Increased from 2 to 3
       backoff: {
         type: "exponential",
         delay: 1000,
+      },
+      removeOnComplete: {
+        age: 3600,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 86400,
+        count: 500,
       },
       ...options,
     });
@@ -45,10 +53,18 @@ export const addBulkFraudCheckJobs = async (jobs, options = {}) => {
         opts: {
           priority: options.priority || 10,
           delay: options.delay || 0,
-          attempts: options.attempts || 2,
+          attempts: options.attempts || 3,
           backoff: {
             type: "exponential",
             delay: 1000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

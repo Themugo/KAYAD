@@ -8,6 +8,7 @@ import * as R from "../utils/response.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
+import { invalidateUserCache } from "../middleware/auth.js";
 
 // Email service — imported once at module level. Functions are no-ops
 // if the email transport isn't configured (EMAIL_HOST not set).
@@ -55,23 +56,31 @@ const serializeUser = (user) => {
 // =============================
 // 🍪 COOKIE CONFIG
 // =============================
+// NOTE: Using sameSite: "lax" for production to work with Vercel+Render setup.
+// Vercel rewrite makes API appear same-origin, so "lax" is appropriate.
+// "none" is only needed for truly separate cross-origin domains.
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
 
 const sendAccessToken = (res, token) => {
+  // FIX: Access token cookie maxAge was 7 days — identical to the refresh token.
+  // This meant the access token never effectively expired in the browser even though
+  // the JWT payload had a 1h expiry, widening the token-theft window.
+  // Now set to 1 hour to match ACCESS_EXPIRES in generateToken.js.
+  const ACCESS_COOKIE_MS = parseInt(process.env.ACCESS_COOKIE_MS || "") || 60 * 60 * 1000; // default 1h
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: ACCESS_COOKIE_MS,
   });
 };
 
@@ -422,6 +431,9 @@ export const logout = async (req, res) => {
       await User.findByIdAndUpdate(req.user.id, {
         $inc: { tokenVersion: 1 },
       });
+
+      // 🔥 Invalidate user cache to prevent stale auth state
+      invalidateUserCache(req.user.id);
     }
 
     res.clearCookie("refreshToken", { path: "/api" });
@@ -493,6 +505,9 @@ export const revokeAllSessions = async (req, res) => {
     await User.findByIdAndUpdate(req.user.id, {
       $inc: { tokenVersion: 1 },
     });
+
+    // 🔥 Invalidate user cache to prevent stale auth state
+    invalidateUserCache(req.user.id);
 
     res.json({ success: true, message: "All sessions revoked" });
   } catch (err) {
@@ -576,6 +591,9 @@ export const changePassword = async (req, res) => {
     user.mustChangePassword = false;
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
+
+    // 🔥 Invalidate user cache to prevent stale auth state after password change
+    invalidateUserCache(req.user.id);
 
     return sendAuthResponse(res, user);
   } catch (err) {

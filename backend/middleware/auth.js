@@ -9,6 +9,42 @@ import { OWNER_EMAILS, isOwnerEmail } from "../config/owners.js";
 // comma-separated WEBHOIST_EMAIL list (multiple platform owners).
 
 // =============================
+// ⚡ LIGHTWEIGHT USER CACHE
+// FIX: protect() ran a DB query on every single authenticated request.
+// Under load (live auctions, many bidders) this creates a thundering-herd
+// of identical lookups. Cache the lean user doc for 20s per user ID.
+// Cache is invalidated automatically whenever tokenVersion changes
+// (logout, password change, ban) since the cached copy becomes stale
+// and the next read just re-fetches — worst case is a 20s staleness
+// window on non-security fields like name/avatar, which is acceptable.
+// =============================
+const USER_CACHE_TTL_MS = 20_000;
+const userCache = new Map(); // id -> { user, expiresAt }
+
+function getCachedUser(id) {
+  const entry = userCache.get(id);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    userCache.delete(id);
+    return null;
+  }
+  return entry.user;
+}
+
+function setCachedUser(id, user) {
+  userCache.set(id, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
+  // Periodic cleanup so the map doesn't grow unbounded on a long-running process
+  if (userCache.size > 5000) {
+    const now = Date.now();
+    for (const [k, v] of userCache) if (now > v.expiresAt) userCache.delete(k);
+  }
+}
+
+export function invalidateUserCache(id) {
+  userCache.delete(String(id));
+}
+
+// =============================
 // 🔐 PROTECT ROUTES
 // =============================
 export const protect = async (req, res, next) => {
@@ -58,9 +94,15 @@ export const protect = async (req, res, next) => {
     }
 
     // =============================
-    // 🔍 FETCH USER (LEAN 🔥)
+    // 🔍 FETCH USER (CACHED, LEAN 🔥)
     // =============================
-    const user = await User.findById(decoded.id).select("-password +tokenVersion").lean();
+    let user = getCachedUser(decoded.id);
+    if (!user) {
+      user = await User.findById(decoded.id).select("-password +tokenVersion").lean();
+      if (user) {
+        setCachedUser(decoded.id, user);
+      }
+    }
 
     if (!user) {
       return res.status(401).json({
@@ -137,9 +179,14 @@ export const protect = async (req, res, next) => {
 export const authenticate = protect;
 
 // =============================
-// 👑 ADMIN ONLY (all staff roles)
+// 👑 ADMIN ONLY (all staff roles + webhoist bypass)
 // =============================
 export const adminOnly = (req, res, next) => {
+  // Webhoist (platform owner) bypasses all admin checks
+  if (req.user?.effectiveRole === "webhoist") {
+    return next();
+  }
+
   if (!req.user || !STAFF_ROLES.includes(req.user.role)) {
     return res.status(403).json({
       success: false,

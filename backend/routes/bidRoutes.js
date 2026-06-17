@@ -3,6 +3,7 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateBid } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
+import { idempotencyCheck } from "../middleware/idempotency.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
 
 import { placeBid, getAuctionBids, confirmBidPayment, endAuction, getMyBids } from "../controllers/bidController.js";
@@ -28,12 +29,13 @@ const getPagination = (req) => {
 router.get("/my", protect, asyncHandler(getMyBids));
 
 // =============================
-// ⚡ PLACE BID (USER)
+// ⚡ PLACE BID (USER) - Idempotent to prevent duplicate bids
 // =============================
 router.post(
   "/:id/bid",
   protect,
   bidLimiter, // 🚦 max 10 bids/min per user
+  idempotencyCheck,
   validateObjectId,
   validateBid,
   asyncHandler(placeBid),
@@ -45,14 +47,14 @@ router.post(
 router.get("/:id/bids", validateObjectId, asyncHandler(getAuctionBids));
 
 // =============================
-// 📲 MPESA CALLBACK (SAFE ENTRY)
+// 📲 MPESA CALLBACK (SAFE ENTRY) - Idempotent to prevent duplicate callbacks
 // =============================
-router.post("/mpesa/callback", mpesaIpWhitelist, validateMpesaCallback, asyncHandler(confirmBidPayment));
+router.post("/mpesa/callback", mpesaIpWhitelist, idempotencyCheck, validateMpesaCallback, asyncHandler(confirmBidPayment));
 
 // =============================
-// 🏁 END AUCTION (ADMIN)
+// 🏁 END AUCTION (ADMIN) - Idempotent to prevent duplicate auction endings
 // =============================
-router.post("/:id/end", protect, adminOnly, validateObjectId, asyncHandler(endAuction));
+router.post("/:id/end", protect, adminOnly, idempotencyCheck, validateObjectId, asyncHandler(endAuction));
 
 // =============================
 // 🧠 ADMIN: ALL BIDS (PAGINATED + FILTERS)

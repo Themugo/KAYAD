@@ -14,12 +14,20 @@ import { logInfo, logError } from "../utils/logger.js";
 export const addNotificationJob = async (data, options = {}) => {
   try {
     const job = await notificationQueue.add("notification", data, {
-      priority: options.priority || 5, // 1-10, 10 is highest
+      priority: options.priority || 7, // Increased from 5 to 7 (higher priority)
       delay: options.delay || 0,
-      attempts: options.attempts || 3,
+      attempts: options.attempts || 5, // Increased from 3 to 5
       backoff: {
         type: "exponential",
         delay: 1000,
+      },
+      removeOnComplete: {
+        age: 3600, // Keep completed jobs for 1 hour
+        count: 1000, // Keep last 1000 completed jobs
+      },
+      removeOnFail: {
+        age: 86400, // Keep failed jobs for 24 hours
+        count: 500, // Keep last 500 failed jobs
       },
       ...options,
     });
@@ -43,12 +51,20 @@ export const addBulkNotificationJobs = async (jobs, options = {}) => {
         name: "notification",
         data,
         opts: {
-          priority: options.priority || 5,
+          priority: options.priority || 7,
           delay: options.delay || 0,
-          attempts: options.attempts || 3,
+          attempts: options.attempts || 5,
           backoff: {
             type: "exponential",
             delay: 1000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

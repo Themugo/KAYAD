@@ -69,6 +69,18 @@ const defaultJobOptions = {
   },
 };
 
+// Dead letter queue configuration
+const deadLetterQueueOptions = {
+  removeOnComplete: {
+    count: 100,
+    age: 7 * 24 * 3600, // Keep for 7 days
+  },
+  removeOnFail: {
+    count: 1000,
+    age: 30 * 24 * 3600, // Keep for 30 days
+  },
+};
+
 // Queue-specific options
 const queueOptions = {
   notification: {
@@ -120,6 +132,30 @@ const queueOptions = {
 // =============================
 
 const queues = {};
+const deadLetterQueues = {};
+
+export const getDeadLetterQueue = (queueName) => {
+  const dlqName = `${queueName}:dlq`;
+  if (deadLetterQueues[dlqName]) {
+    return deadLetterQueues[dlqName];
+  }
+
+  const dlq = new Queue(dlqName, {
+    connection,
+    defaultJobOptions: deadLetterQueueOptions,
+  });
+
+  dlq.on("error", (err) => {
+    logError(`Dead letter queue error: ${dlqName}`, err);
+  });
+
+  dlq.on("waiting", (jobId) => {
+    logInfo(`DLQ job waiting: ${dlqName}`, { jobId });
+  });
+
+  deadLetterQueues[dlqName] = dlq;
+  return dlq;
+};
 
 export const getQueue = (queueName) => {
   if (queues[queueName]) {
@@ -154,8 +190,35 @@ export const getQueue = (queueName) => {
     logInfo(`Job completed: ${queueName}`, { jobId: job.id, name: job.name });
   });
 
-  queue.on("failed", (job, err) => {
+  queue.on("failed", async (job, err) => {
     logError(`Job failed: ${queueName}`, err, { jobId: job?.id, name: job?.name });
+    
+    // Move to dead letter queue after all retries exhausted
+    if (job && job.attemptsMade >= job.opts.attempts) {
+      try {
+        const dlq = getDeadLetterQueue(queueName);
+        await dlq.add(
+          `${queueName}:${job.id}`,
+          job.data,
+          {
+            jobId: job.id,
+            attemptsMade: job.attemptsMade,
+            failedReason: err.message,
+            originalQueue: queueName,
+            timestamp: new Date().toISOString(),
+          }
+        );
+        logInfo(`Job moved to DLQ: ${queueName}`, { jobId: job.id, dlqName: `${queueName}:dlq` });
+        
+        // Alert if DLQ size exceeds threshold
+        const dlqCount = await dlq.getJobCountByTypes('waiting');
+        if (dlqCount > 100) {
+          logError(`⚠️ Dead letter queue size warning: ${dlqName}`, { count: dlqCount });
+        }
+      } catch (dlqError) {
+        logError(`Failed to move job to DLQ: ${queueName}`, dlqError, { jobId: job.id });
+      }
+    }
   });
 
   queues[queueName] = queue;
@@ -207,6 +270,13 @@ export const closeQueues = async () => {
   logInfo("All queues closed");
 };
 
+export const closeDeadLetterQueues = async () => {
+  await Promise.all(
+    Object.values(deadLetterQueues).map((dlq) => dlq.close()),
+  );
+  logInfo("All dead letter queues closed");
+};
+
 export const closeWorkers = async () => {
   await Promise.all(
     Object.values(workers).map((worker) => worker.close()),
@@ -244,8 +314,10 @@ export const getQueueMetrics = async (queueName) => {
 
 export default {
   getQueue,
+  getDeadLetterQueue,
   getWorker,
   closeQueues,
+  closeDeadLetterQueues,
   closeWorkers,
   closeConnection,
   getQueueMetrics,

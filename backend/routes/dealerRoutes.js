@@ -4,6 +4,8 @@ import { protect, dealerOnly } from "../middleware/auth.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { getPagination, withPagination } from "../middleware/apiPagination.js";
+import { cacheDealerData, cacheAnalytics, invalidateCache } from "../middleware/apiCache.js";
 
 import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";
@@ -32,22 +34,13 @@ const router = express.Router();
 router.use(protect, dealerOnly);
 
 // =============================
-// ⚙️ PAGINATION HELPER
-// =============================
-const getPagination = (req) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const skip = (page - 1) * limit;
-
-  return { page, limit, skip };
-};
-
-// =============================
-// 💰 EARNINGS (FILTERABLE)
+// 💰 EARNINGS (FILTERABLE + PAGINATED + CACHED)
 // =============================
 router.get(
   "/earnings",
+  cacheAnalytics,
   asyncHandler(async (req, res) => {
+    const { page, limit, skip } = getPagination(req);
     const filter = {
       user: req.user.id,
       status: "success",
@@ -63,8 +56,8 @@ router.get(
       filter.createdAt = { $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
     }
 
-    const [payments, monthlyAgg] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).lean(),
+    const [payments, monthlyAgg, total] = await Promise.all([
+      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Payment.aggregate([
         { $match: filter },
         {
@@ -75,6 +68,7 @@ router.get(
         },
         { $sort: { "_id.year": 1, "_id.month": 1 } },
       ]),
+      Payment.countDocuments(filter),
     ]);
 
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -84,23 +78,25 @@ router.get(
       amount: m.amount,
     }));
 
-    const total = payments.reduce((sum, p) => sum + p.dealerAmount, 0);
+    const totalAmount = payments.reduce((sum, p) => sum + p.dealerAmount, 0);
 
     res.json({
       success: true,
-      total,
+      total: totalAmount,
       monthly,
       count: payments.length,
       payments,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   }),
 );
 
 // =============================
-// 🚗 MY LISTINGS (PAGINATED)
+// 🚗 MY LISTINGS (PAGINATED + CACHED)
 // =============================
 router.get(
   "/cars",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
@@ -130,10 +126,11 @@ router.get(
 );
 
 // =============================
-// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS, CONVERSION)
+// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS, CONVERSION) + CACHED
 // =============================
 router.get(
   "/analytics",
+  cacheAnalytics,
   asyncHandler(async (req, res) => {
     const dealerId = req.user.id;
     const periodDays = parseInt(req.query.days) || 30;
@@ -176,10 +173,11 @@ router.get(
 );
 
 // =============================
-// 📦 SUMMARY (FAST DASHBOARD)
+// 📦 SUMMARY (FAST DASHBOARD) + CACHED
 // =============================
 router.get(
   "/summary",
+  cacheAnalytics,
   asyncHandler(async (req, res) => {
     const dealerId = new mongoose.Types.ObjectId(req.user.id);
 
@@ -249,10 +247,11 @@ router.get(
 );
 
 // =============================
-// ⚡ QUICK STATS (LIGHTWEIGHT)
+// ⚡ QUICK STATS (LIGHTWEIGHT) + CACHED
 // =============================
 router.get(
   "/quick-stats",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
     const [cars, sold] = await Promise.all([
       Car.countDocuments({ dealer: req.user.id }),
@@ -314,29 +313,39 @@ router.get(
 );
 
 // =============================
-// 🔒 ESCROWS WHERE DEALER IS SELLER
+// 🔒 ESCROWS WHERE DEALER IS SELLER (PAGINATED + CACHED)
 // =============================
 router.get(
   "/escrows",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
-    const escrows = await Escrow.find({ seller: req.user.id })
-      .populate("car", "title price images")
-      .populate("buyer", "name email")
-      .sort({ createdAt: -1 })
-      .lean();
+    const { page, limit, skip } = getPagination(req);
+    
+    const [escrows, total] = await Promise.all([
+      Escrow.find({ seller: req.user.id })
+        .populate("car", "title price images")
+        .populate("buyer", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Escrow.countDocuments({ seller: req.user.id }),
+    ]);
 
     res.json({
       success: true,
       escrows,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   }),
 );
 
 // =============================
-// 💳 DEALER SETTLEMENT CONFIG
+// 💳 DEALER SETTLEMENT CONFIG + CACHED
 // =============================
 router.get(
   "/settlement",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select(
       "mpesaBusiness mpesaBusinessName paymentDetails bankName bankAccount",
@@ -356,6 +365,7 @@ router.get(
 
 router.put(
   "/settlement",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { mpesaBusiness, mpesaBusinessName, paymentDetails, bankName, bankAccount } = req.body;
 
@@ -378,10 +388,11 @@ router.put(
 );
 
 // =============================
-// 👤 DEALER PROFILE
+// 👤 DEALER PROFILE + CACHED
 // =============================
 router.get(
   "/profile",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select(
       "name email phone avatar businessName businessAddress dealerRating dealerListingsCount location bio socialLinks website verifiedBuyer",
@@ -392,6 +403,7 @@ router.get(
 
 router.put(
   "/profile",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const allowed = [
       "name",
@@ -421,20 +433,35 @@ router.put(
 // ─────────────────────────────────────────────────────────────
 import crypto from "crypto";
 
-// GET  /api/dealer/team          — list all team members
+// GET  /api/dealer/team          — list all team members (PAGINATED + CACHED)
 router.get(
   "/team",
+  cacheDealerData,
   asyncHandler(async (req, res) => {
-    const members = await DealerTeam.find({ dealer: req.user.id })
-      .populate("member", "name email phone role avatar")
-      .sort({ createdAt: -1 });
-    res.json({ success: true, members });
+    const { page, limit, skip } = getPagination(req);
+    
+    const [members, total] = await Promise.all([
+      DealerTeam.find({ dealer: req.user.id })
+        .populate("member", "name email phone role avatar")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      DealerTeam.countDocuments({ dealer: req.user.id }),
+    ]);
+    
+    res.json({ 
+      success: true, 
+      members,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   }),
 );
 
 // POST /api/dealer/team/invite   — invite by email (creates invite record)
 router.post(
   "/team/invite",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { email, role = "sales_agent", permissions = {} } = req.body;
     if (!email) return res.status(400).json({ success: false, message: "Email required" });
@@ -486,6 +513,7 @@ router.post(
 // PATCH /api/dealer/team/:memberId  — update role/permissions
 router.patch(
   "/team/:memberId",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await DealerTeam.findOne({ _id: req.params.memberId, dealer: req.user.id });
     if (!record) return res.status(404).json({ success: false, message: "Team member not found" });
@@ -507,6 +535,7 @@ router.patch(
 // DELETE /api/dealer/team/:memberId — remove from team
 router.delete(
   "/team/:memberId",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await DealerTeam.findOneAndDelete({ _id: req.params.memberId, dealer: req.user.id });
     if (!record) return res.status(404).json({ success: false, message: "Not found" });
@@ -524,6 +553,7 @@ router.delete(
 // =============================
 router.post(
   "/cars/:id/duplicate",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
@@ -562,6 +592,7 @@ router.post(
 // =============================
 router.patch(
   "/cars/:id/mark-sold",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { buyerName, buyerEmail, salePrice, saleNotes } = req.body;
     const car = await Car.findOneAndUpdate(
@@ -592,6 +623,7 @@ router.patch(
 // =============================
 router.patch(
   "/cars/bulk-status",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { ids, status } = req.body;
     if (!Array.isArray(ids) || !status) {
@@ -612,6 +644,7 @@ router.patch(
 // =============================
 router.post(
   "/cars/:id/accept-bid",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { bidId } = req.body;
     if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
@@ -659,6 +692,7 @@ router.post(
 // =============================
 router.post(
   "/cars/:id/reject-bid",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { bidId } = req.body;
     if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
@@ -705,6 +739,7 @@ import { syncAuctionResult } from "../realtime/syncService.js";
 router.post(
   "/cars/:id/auction/start",
   requireDealerVerification,
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { durationMs, startingBid, reservePrice, reserveMode } = req.body;
     if (!durationMs) return res.status(400).json({ success: false, message: "durationMs required" });
@@ -774,6 +809,7 @@ router.post(
 // 🏁 End auction on dealer's own car
 router.post(
   "/cars/:id/auction/end",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
@@ -803,6 +839,7 @@ router.post(
 // ⏱ Extend auction (max 3 extensions per auction)
 router.post(
   "/cars/:id/auction/extend",
+  invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { hours } = req.body;
     if (!hours) return res.status(400).json({ success: false, message: "hours required" });

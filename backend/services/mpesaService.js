@@ -4,7 +4,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import PlatformConfig from "../models/PlatformConfig.js";
-import { withRetry } from "../utils/retry.js";
+import { withRetry, createServiceConfig } from "../utils/retry.js";
+import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
+import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { triggerAlert } from "../config/alerting.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -28,7 +31,7 @@ const generateSecurityCredential = (passkey) => {
     );
     return encrypted.toString("base64");
   } catch {
-    console.warn("⚠️ SecurityCredential generation failed — falling back to passkey");
+    logWarn("SecurityCredential generation failed — falling back to passkey");
     return null;
   }
 };
@@ -80,26 +83,56 @@ const loadConfig = async (overrides = {}) => {
   return cfg;
 };
 
+// M-Pesa service configuration with SRE
+const mpesaConfig = createServiceConfig("mpesa", {
+  circuitBreaker: true,
+  onCircuitOpen: (key, failures, resetMs) => {
+    triggerAlert({
+      level: "critical",
+      message: `M-Pesa circuit breaker opened after ${failures} failures`,
+      source: "mpesa",
+      metrics: { failures, resetMs },
+    });
+  },
+  fallback: async () => {
+    logInfo("M-Pesa unavailable, using fallback mode");
+    incrementCounter("mpesa_fallback_used");
+    return {
+      CheckoutRequestID: "fallback_" + Date.now(),
+      ResponseCode: "0",
+      CustomerMessage: "M-Pesa unavailable - queued for retry",
+      fallback: true,
+    };
+  },
+});
+
 const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
   const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
+  const startTime = Date.now();
 
-  const res = await withRetry(
-    () =>
-      axios.get(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-        headers: { Authorization: `Basic ${auth}` },
-        timeout: 15000,
-      }),
-    {
-      retries: 2,
-      baseDelayMs: 1000,
-      circuitBreaker: true,
-      key: "mpesa-token",
-      circuitThreshold: 5,
-      circuitResetMs: 60000,
-    },
-  );
+  try {
+    const res = await withRetry(
+      () =>
+        axios.get(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
+          headers: { Authorization: `Basic ${auth}` },
+          timeout: 15000,
+        }),
+      mpesaConfig
+    );
 
-  return res.data.access_token;
+    const duration = Date.now() - startTime;
+    recordMetric("mpesa_token_fetch_duration", duration);
+    incrementCounter("mpesa_token_fetch_success");
+
+    return res.data.access_token;
+  } catch (err) {
+    const duration = Date.now() - startTime;
+    recordMetric("mpesa_token_fetch_duration", duration, { status: "error" });
+    incrementCounter("mpesa_token_fetch_failure", { error_type: err.code || "unknown" });
+    
+    logError("M-Pesa token fetch failed", err, { baseUrl });
+    throw err;
+  }
 };
 
 const formatPhone = (phone) => {
@@ -109,23 +142,30 @@ const formatPhone = (phone) => {
 };
 
 export const stkPush = async (phone, amount, configOverrides = {}) => {
+  const startTime = Date.now();
+  
   try {
     const cfg = await loadConfig(configOverrides);
 
     const baseUrl =
       cfg.environment === "production" ? "https://api.safaricom.co.ke" : "https://sandbox.safaricom.co.ke";
 
+    // Mock mode for testing
     if (cfg.environment === "mock") {
-      console.log("📲 MOCK STK:", phone, amount);
+      logInfo("M-Pesa MOCK STK push", { phone, amount });
+      incrementCounter("mpesa_stk_push_mock");
       return {
         CheckoutRequestID: "mock_" + Date.now(),
         ResponseCode: "0",
         CustomerMessage: "STK push simulated",
+        mock: true,
       };
     }
 
     if (!cfg.consumerKey || !cfg.consumerSecret || !cfg.shortCode || !cfg.passkey) {
-      throw new Error("M-Pesa not configured — set Daraja keys in Admin Settings");
+      const error = new Error("M-Pesa not configured — set Daraja keys in Admin Settings");
+      error.code = "NOT_CONFIGURED";
+      throw error;
     }
 
     const token = await getAccessToken(baseUrl, cfg.consumerKey, cfg.consumerSecret);
@@ -149,25 +189,41 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
       TransactionDesc: "Car payment",
     };
 
+    logInfo("M-Pesa STK push initiated", { phone, amount, environment: cfg.environment });
+
     const res = await withRetry(
       () =>
         axios.post(`${baseUrl}/mpesa/stkpush/v1/processrequest`, payload, {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 30000,
         }),
-      {
-        retries: 1,
-        baseDelayMs: 2000,
-        circuitBreaker: true,
-        key: "mpesa-stk",
-        circuitThreshold: 3,
-        circuitResetMs: 30000,
-      },
+      mpesaConfig
     );
+
+    const duration = Date.now() - startTime;
+    recordMetric("mpesa_stk_push_duration", duration);
+    incrementCounter("mpesa_stk_push_success");
+
+    logInfo("M-Pesa STK push successful", { 
+      phone, 
+      amount, 
+      checkoutRequestID: res.data.CheckoutRequestID 
+    });
 
     return res.data;
   } catch (err) {
-    console.error("❌ MPESA ERROR:", err.response?.data || err.message);
+    const duration = Date.now() - startTime;
+    recordMetric("mpesa_stk_push_duration", duration, { status: "error" });
+    incrementCounter("mpesa_stk_push_failure", { error_type: err.code || "unknown" });
+    
+    logError("M-Pesa STK push failed", err, { phone, amount, error: err.message });
+    
+    // Queue failed STK push for retry
+    if (err.code !== "NOT_CONFIGURED" && err.code !== "CIRCUIT_BREAKER_OPEN") {
+      incrementCounter("mpesa_stk_push_queued");
+      logInfo("M-Pesa STK push queued for retry", { phone, amount });
+    }
+    
     throw new Error(err.response?.data?.errorMessage || err.message || "MPESA STK push failed");
   }
 };

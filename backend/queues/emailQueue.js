@@ -14,12 +14,20 @@ import { logInfo, logError } from "../utils/logger.js";
 export const addEmailJob = async (data, options = {}) => {
   try {
     const job = await emailQueue.add("email", data, {
-      priority: options.priority || 5, // 1-10, 10 is highest
+      priority: options.priority || 4, // Decreased from 5 to 4 (less time-sensitive)
       delay: options.delay || 0,
-      attempts: options.attempts || 5,
+      attempts: options.attempts || 7, // Increased from 5 to 7
       backoff: {
         type: "exponential",
         delay: 5000,
+      },
+      removeOnComplete: {
+        age: 3600,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 86400,
+        count: 500,
       },
       ...options,
     });
@@ -43,12 +51,20 @@ export const addBulkEmailJobs = async (jobs, options = {}) => {
         name: "email",
         data,
         opts: {
-          priority: options.priority || 5,
+          priority: options.priority || 4,
           delay: options.delay || 0,
-          attempts: options.attempts || 5,
+          attempts: options.attempts || 7,
           backoff: {
             type: "exponential",
             delay: 5000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

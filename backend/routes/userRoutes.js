@@ -2,41 +2,53 @@ import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { getPagination } from "../middleware/apiPagination.js";
+import { cacheUserData, invalidateCache } from "../middleware/apiCache.js";
+import { cacheDealerSearch, invalidateDealerSearchCache } from "../middleware/searchCache.js";
+import { trackCarSearch } from "../middleware/searchTracking.js";
+import { trackDealerSearchLatency } from "../middleware/searchLatencyTracking.js";
 import User from "../models/User.js";
 
 const router = express.Router();
 
 router.get(
   "/search",
+  cacheDealerSearch,
+  trackDealerSearchLatency,
+  trackCarSearch,
   asyncHandler(async (req, res) => {
     const { q, role, page = 1, limit = 20 } = req.query;
+    const { page: safePage, limit: safeLimit, skip } = getPagination(req);
     const filter = {};
 
     if (q) {
-      filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { businessName: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-      ];
+      // Use MongoDB text index for better performance
+      filter.$text = { $search: q };
     }
     if (role) filter.role = role;
 
-    const users = await User.find(filter)
-      .select("name email avatar businessName role location dealerRating")
-      .sort({ name: 1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
-      .lean();
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .select("name email avatar businessName role location dealerRating")
+        .sort({ name: 1 })
+        .skip(skip)
+        .limit(safeLimit)
+        .lean(),
+      User.countDocuments(filter),
+    ]);
 
-    const total = await User.countDocuments(filter);
-
-    res.json({ success: true, users, total });
+    res.json({ 
+      success: true, 
+      users, 
+      pagination: { page: safePage, limit: safeLimit, total, pages: Math.ceil(total / safeLimit) },
+    });
   }),
 );
 
 router.get(
   "/me",
   protect,
+  cacheUserData,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select("-password").lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -47,6 +59,7 @@ router.get(
 router.put(
   "/settings",
   protect,
+  invalidateCache("user"),
   asyncHandler(async (req, res) => {
     const allowed = ["notifications", "visibility", "language", "currency", "timezone"];
     const updates = {};
@@ -75,6 +88,7 @@ router.get(
   "/:id",
   validateObjectId,
   optionalAuth,
+  cacheUserData,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id)
       .select("name email avatar businessName location phone role dealerRating bio createdAt verifiedBuyer")
@@ -90,6 +104,7 @@ router.get(
 router.post(
   "/bank-pre-approval",
   protect,
+  invalidateCache("user"),
   asyncHandler(async (req, res) => {
     const { documentUrl, bankName, approvedAmount } = req.body;
     if (!documentUrl || !bankName || !approvedAmount) {
@@ -118,6 +133,7 @@ router.post(
 router.delete(
   "/bank-pre-approval",
   protect,
+  invalidateCache("user"),
   asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user.id,

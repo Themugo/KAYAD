@@ -21,6 +21,14 @@ export const addSEOGenerationJob = async (data, options = {}) => {
         type: "exponential",
         delay: 5000,
       },
+      removeOnComplete: {
+        age: 3600,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 86400,
+        count: 500,
+      },
       ...options,
     });
 
@@ -49,6 +57,14 @@ export const addBulkSEOGenerationJobs = async (jobs, options = {}) => {
           backoff: {
             type: "exponential",
             delay: 5000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

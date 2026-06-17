@@ -117,6 +117,7 @@ const AdminStaffPermissions        = lazy(() => import('./pages/admin/AdminStaff
 const ControlRoom                  = lazy(() => import('./pages/admin/ControlRoom'));
 const PanicRoom                    = lazy(() => import('./pages/admin/PanicRoom'));
 const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOverview'));
+const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsDashboard'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
 // Small composition helpers keep the <Routes> block tidy.
@@ -286,6 +287,7 @@ export default function App() {
                         <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
                         <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
                         <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
+                        <Route path="/admin/operations-dashboard"     element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
 
                         {/* ── 404 ─────────────────────────────────────────────── */}
                         <Route path="*" element={<Public><NotFoundPage /></Public>} />

@@ -94,7 +94,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["pending", "approved", "suspended", "rejected"],
-      default: "approved",
+      default: "pending",
       index: true,
     },
     dealerDocuments: {
@@ -156,6 +156,7 @@ const userSchema = new mongoose.Schema(
     // =============================
     // 💳 PAYMENT SETTINGS
     // =============================
+    // @deprecated Use paymentDetails object instead for new implementations
     mpesaBusiness: { type: String, trim: true, default: "" },
     mpesaBusinessName: { type: String, trim: true, default: "" },
     bankName: { type: String, trim: true, default: "" },
@@ -431,6 +432,22 @@ for (const op of SOFT_DELETE_OPERATIONS) {
     }
   });
 }
+
+// =============================
+// 🔥 SEARCH INDEXES (CRITICAL)
+// =============================
+
+// Text index for dealer/user search
+userSchema.index({
+  name: "text",
+  businessName: "text",
+  email: "text",
+});
+
+// Compound indexes for common search queries
+userSchema.index({ role: 1, createdAt: -1 });
+userSchema.index({ role: 1, location: 1 });
+userSchema.index({ role: 1, dealerRating: -1 });
 
 // =============================
 const User = mongoose.models.User || mongoose.model("User", userSchema);

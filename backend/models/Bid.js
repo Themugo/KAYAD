@@ -213,16 +213,8 @@ bidSchema.pre("save", async function (next) {
       this.maxBid = this.amount;
     }
 
-    // 🔥 rapid bidding detection (basic anti-bot)
-    const recentBids = await mongoose.model("Bid").countDocuments({
-      user: this.user,
-      createdAt: { $gte: new Date(Date.now() - 5000) }, // last 5 sec
-    });
-
-    if (recentBids > 5) {
-      this.isSuspicious = true;
-      this.suspiciousReason = "Rapid bidding (possible bot)";
-    }
+    // 🔥 rapid bidding detection moved to rate limiting middleware (bidLimiter in bidRoutes.js)
+    // This eliminates N+1 query pattern - rate limiting handles anti-bot protection
 
     next();
   } catch (err) {

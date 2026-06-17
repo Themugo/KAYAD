@@ -14,12 +14,20 @@ import { logInfo, logError } from "../utils/logger.js";
 export const addImageProcessingJob = async (data, options = {}) => {
   try {
     const job = await imageQueue.add("image-process", data, {
-      priority: options.priority || 5,
+      priority: options.priority || 6, // Increased from 5 to 6 (affects listing performance)
       delay: options.delay || 0,
-      attempts: options.attempts || 3,
+      attempts: options.attempts || 5, // Increased from 3 to 5
       backoff: {
         type: "exponential",
         delay: 3000,
+      },
+      removeOnComplete: {
+        age: 3600,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 86400,
+        count: 500,
       },
       ...options,
     });
@@ -43,12 +51,20 @@ export const addBulkImageProcessingJobs = async (jobs, options = {}) => {
         name: "image-process",
         data,
         opts: {
-          priority: options.priority || 5,
+          priority: options.priority || 6,
           delay: options.delay || 0,
-          attempts: options.attempts || 3,
+          attempts: options.attempts || 5,
           backoff: {
             type: "exponential",
             delay: 3000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

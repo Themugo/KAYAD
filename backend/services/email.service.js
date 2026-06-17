@@ -1,5 +1,8 @@
 import nodemailer from "nodemailer";
-import { withRetry } from "../utils/retry.js";
+import { withRetry, createServiceConfig } from "../utils/retry.js";
+import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
+import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { triggerAlert } from "../config/alerting.js";
 import { addEmailJob } from "../queues/emailQueue.js";
 
 const APP_NAME = process.env.APP_NAME || "Kayad";
@@ -9,6 +12,24 @@ const ENABLED = !!process.env.EMAIL_HOST;
 const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
 let transporter = null;
+
+// Email service configuration with SRE
+const emailConfig = createServiceConfig("email", {
+  circuitBreaker: true,
+  onCircuitOpen: (key, failures, resetMs) => {
+    triggerAlert({
+      level: "warning",
+      message: `Email circuit breaker opened after ${failures} failures`,
+      source: "email",
+      metrics: { failures, resetMs },
+    });
+  },
+  fallback: async () => {
+    logInfo("Email unavailable, using fallback mode");
+    incrementCounter("email_fallback_used");
+    return { success: false, fallback: true, error: "Email service unavailable" };
+  },
+});
 
 const getTransporter = () => {
   if (transporter) return transporter;
@@ -24,6 +45,9 @@ const getTransporter = () => {
     },
     pool: true,
     maxConnections: 5,
+    connectionTimeout: 30000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 
   return transporter;
@@ -94,11 +118,17 @@ const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margi
 
 // Export raw email function for queue worker
 export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => {
+  const startTime = Date.now();
   const t = getTransporter();
+  
   if (!t) {
-    if (process.env.NODE_ENV !== "test") console.log(`📧 [Email disabled] Would send "${subject}" to ${to}`);
+    if (process.env.NODE_ENV !== "test") {
+      logInfo("Email disabled - would send", { subject, to });
+    }
+    incrementCounter("email_disabled");
     return { success: true, disabled: true };
   }
+  
   try {
     const info = await withRetry(
       () =>
@@ -110,19 +140,40 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
           html,
         }),
       {
-        retries: 2,
-        baseDelayMs: 1000,
-        circuitBreaker: true,
-        key: "email",
-        circuitThreshold: 3,
-        circuitResetMs: 60000,
-        onRetry: (err, attempt) => console.warn(`📧 Email send retry ${attempt}: ${err.message}`),
+        ...emailConfig,
+        timeoutMs: 30000,
+        onRetry: (err, attempt) => {
+          logWarn(`Email send retry ${attempt}`, { to, subject, error: err.message });
+          incrementCounter("email_retry", { attempt });
+        },
       },
     );
-    console.log(`📧 Email sent: ${subject} → ${to} (${info.messageId})`);
+    
+    const duration = Date.now() - startTime;
+    recordMetric("email_send_duration", duration);
+    incrementCounter("email_send_success");
+    
+    logInfo(`Email sent successfully`, { subject, to, messageId: info.messageId });
     return { success: true, id: info.messageId };
   } catch (err) {
-    console.error(`❌ Email failed after retries: ${err.message}`);
+    const duration = Date.now() - startTime;
+    recordMetric("email_send_duration", duration, { status: "error" });
+    incrementCounter("email_send_failure", { error_type: err.code || "unknown" });
+    
+    logError(`Email failed after retries`, err, { to, subject, error: err.message });
+    
+    // Queue failed email for retry
+    if (QUEUE_MODE && err.code !== "CIRCUIT_BREAKER_OPEN") {
+      try {
+        await addEmailJob({ to, subject, html, text, from });
+        incrementCounter("email_queued_for_retry");
+        logInfo(`Email queued for retry`, { to, subject });
+        return { success: false, queued: true, error: err.message };
+      } catch (queueErr) {
+        logError(`Failed to queue email for retry`, queueErr);
+      }
+    }
+    
     return { success: false, error: err.message };
   }
 };

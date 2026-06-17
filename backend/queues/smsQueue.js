@@ -14,12 +14,20 @@ import { logInfo, logError } from "../utils/logger.js";
 export const addSMSJob = async (data, options = {}) => {
   try {
     const job = await smsQueue.add("sms", data, {
-      priority: options.priority || 7, // Higher priority for SMS
+      priority: options.priority || 9, // Increased from 7 to 9 (time-sensitive bidding)
       delay: options.delay || 0,
-      attempts: options.attempts || 3,
+      attempts: options.attempts || 5, // Increased from 3 to 5
       backoff: {
         type: "exponential",
         delay: 2000,
+      },
+      removeOnComplete: {
+        age: 3600,
+        count: 1000,
+      },
+      removeOnFail: {
+        age: 86400,
+        count: 500,
       },
       ...options,
     });
@@ -43,12 +51,20 @@ export const addBulkSMSJobs = async (jobs, options = {}) => {
         name: "sms",
         data,
         opts: {
-          priority: options.priority || 7,
+          priority: options.priority || 9,
           delay: options.delay || 0,
-          attempts: options.attempts || 3,
+          attempts: options.attempts || 5,
           backoff: {
             type: "exponential",
             delay: 2000,
+          },
+          removeOnComplete: {
+            age: 3600,
+            count: 1000,
+          },
+          removeOnFail: {
+            age: 86400,
+            count: 500,
           },
           ...options,
         },

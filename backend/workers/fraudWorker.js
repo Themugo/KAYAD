@@ -7,12 +7,14 @@
 import { getWorker } from "../config/queue.js";
 import { runFraudDetection } from "../services/fraudDetectionService.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 🔍 FRAUD CHECK PROCESSOR
 // =============================
 
 const processFraudCheck = async (job) => {
+  const startTime = Date.now();
   const { type, userId, carId, paymentId, amount, metadata = {} } = job.data;
 
   try {
@@ -35,10 +37,18 @@ const processFraudCheck = async (job) => {
         throw new Error(`Unknown fraud check type: ${type}`);
     }
 
-    logInfo("Fraud check processed successfully", { type, result });
-    return result;
+    const processingTime = Date.now() - startTime;
+    logInfo("Fraud check processed successfully", { type, result, processingTime });
+    return { result, processingTime };
   } catch (err) {
-    logError("Failed to process fraud check", err, { type });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process fraud check", err, { type, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

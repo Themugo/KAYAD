@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { recordConnectionPoolStats, setGauge } from "./metrics.js";
+import { triggerAlert } from "./alerting.js";
 
 const connectDB = async () => {
   try {
@@ -55,7 +57,65 @@ const connectDB = async () => {
           availableConnections: conn.connection.client.topology.s.pool.availableConnectionCount || 0,
           checkedOutConnections: conn.connection.client.topology.s.pool.checkedOutConnectionCount || 0
         };
-        console.log('📊 Connection Pool Stats:', poolStats);
+        
+        // Record to metrics system
+        recordConnectionPoolStats(
+          poolStats.totalConnections,
+          poolStats.availableConnections,
+          poolStats.checkedOutConnections
+        );
+        
+        // Calculate utilization percentage
+        const utilization = poolStats.totalConnections > 0 
+          ? (poolStats.checkedOutConnections / poolStats.totalConnections) * 100 
+          : 0;
+        
+        setGauge("connection_pool_utilization_percent", utilization);
+        
+        console.log('📊 Connection Pool Stats:', poolStats, `Utilization: ${utilization.toFixed(1)}%`);
+        
+        // Alert if pool utilization exceeds 80%
+        if (utilization > 80) {
+          console.error('⚠️ Connection Pool Exhaustion Warning:', { utilization: utilization.toFixed(1) + '%', ...poolStats });
+          
+          // Trigger alert if alerting is available
+          try {
+            triggerAlert({
+              level: 'warning',
+              message: `Database connection pool utilization at ${utilization.toFixed(1)}%`,
+              source: 'database',
+              metrics: {
+                utilization: utilization.toFixed(1) + '%',
+                totalConnections: poolStats.totalConnections,
+                availableConnections: poolStats.availableConnections,
+                checkedOutConnections: poolStats.checkedOutConnections
+              }
+            });
+          } catch (alertError) {
+            console.warn('⚠️ Failed to trigger connection pool alert:', alertError.message);
+          }
+        }
+        
+        // Critical alert if pool utilization exceeds 95%
+        if (utilization > 95) {
+          console.error('🚨 CRITICAL: Connection Pool Exhaustion:', { utilization: utilization.toFixed(1) + '%', ...poolStats });
+          
+          try {
+            triggerAlert({
+              level: 'critical',
+              message: `CRITICAL: Database connection pool utilization at ${utilization.toFixed(1)}%`,
+              source: 'database',
+              metrics: {
+                utilization: utilization.toFixed(1) + '%',
+                totalConnections: poolStats.totalConnections,
+                availableConnections: poolStats.availableConnections,
+                checkedOutConnections: poolStats.checkedOutConnections
+              }
+            });
+          } catch (alertError) {
+            console.warn('⚠️ Failed to trigger critical connection pool alert:', alertError.message);
+          }
+        }
       }
     }, 60000);
     

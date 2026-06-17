@@ -5,6 +5,7 @@ import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate } from "../middleware/validate.js";
 import { paymentLimiter } from "../middleware/rateLimiter.js";
+import { idempotencyCheck } from "../middleware/idempotency.js";
 import { initiatePaymentSchema } from "../validation/platform.schema.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
 import Payment from "../models/Payment.js";
@@ -18,7 +19,8 @@ import {
 
 const router = express.Router();
 
-router.post("/initiate", protect, paymentLimiter, validate(initiatePaymentSchema), asyncHandler(initiatePayment));
+// Payment initiation with idempotency to prevent duplicate payments
+router.post("/initiate", protect, paymentLimiter, idempotencyCheck, validate(initiatePaymentSchema), asyncHandler(initiatePayment));
 
 // 🔍 CHECK PAYMENT STATUS
 router.get("/status/:id", protect, asyncHandler(checkPaymentStatus));
@@ -27,9 +29,9 @@ router.get("/status/:id", protect, asyncHandler(checkPaymentStatus));
 router.get("/my", protect, asyncHandler(getUserPayments));
 
 // =============================
-// 📥 MPESA CALLBACK (PUBLIC — protected by IP whitelist + payload validation)
+// 📥 MPESA CALLBACK (PUBLIC — protected by IP whitelist + payload validation + idempotency)
 // =============================
-router.post("/callback", mpesaIpWhitelist, validateMpesaCallback, asyncHandler(mpesaCallback));
+router.post("/callback", mpesaIpWhitelist, idempotencyCheck, validateMpesaCallback, asyncHandler(mpesaCallback));
 
 // =============================
 // 🧪 DEBUG: CHECK BY CHECKOUT ID (scoped to own user)
