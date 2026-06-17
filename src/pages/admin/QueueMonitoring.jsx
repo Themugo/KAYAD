@@ -6,24 +6,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
   Activity,
   AlertCircle,
   CheckCircle,
@@ -148,13 +130,13 @@ const QueueMonitoring = () => {
   const getHealthBadge = (status) => {
     switch (status) {
       case "healthy":
-        return <Badge className="bg-green-500">Healthy</Badge>;
+        return <span className="px-2 py-1 bg-green-500 text-white rounded text-sm">Healthy</span>;
       case "warning":
-        return <Badge className="bg-yellow-500">Warning</Badge>;
+        return <span className="px-2 py-1 bg-yellow-500 text-white rounded text-sm">Warning</span>;
       case "critical":
-        return <Badge className="bg-red-500">Critical</Badge>;
+        return <span className="px-2 py-1 bg-red-500 text-white rounded text-sm">Critical</span>;
       default:
-        return <Badge className="bg-gray-500">Unknown</Badge>;
+        return <span className="px-2 py-1 bg-gray-500 text-white rounded text-sm">Unknown</span>;
     }
   };
 
@@ -173,49 +155,75 @@ const QueueMonitoring = () => {
           <h1 className="text-3xl font-bold">Queue Monitoring</h1>
           <p className="text-gray-600">Real-time queue health and performance metrics</p>
         </div>
-        <Button onClick={fetchQueueData} variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4 mr-2" />
+        <button onClick={fetchQueueData} className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
           Refresh
-        </Button>
+        </button>
       </div>
 
       {/* Overall Health Status */}
       {health && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
               <Activity className="h-5 w-5" />
               Overall System Health
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h2>
+          </div>
+          <div className="p-6 pt-0">
             <div className="flex items-center gap-4">
               <div className={`h-3 w-3 rounded-full ${getHealthColor(health.overallHealth)}`} />
               <span className="text-2xl font-bold capitalize">{health.overallHealth}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="queues">Queue Details</TabsTrigger>
-          <TabsTrigger value="failures">Failures</TabsTrigger>
-          <TabsTrigger value="dlq">Dead Letter Queue</TabsTrigger>
-          <TabsTrigger value="circuit-breakers">Circuit Breakers</TabsTrigger>
-        </TabsList>
+      <div className="border-b border-gray-200">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`px-4 py-2 border-b-2 ${activeTab === "overview" ? "border-blue-500 text-blue-500" : "border-transparent text-gray-600"}`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("queues")}
+            className={`px-4 py-2 border-b-2 ${activeTab === "queues" ? "border-blue-500 text-blue-500" : "border-transparent text-gray-600"}`}
+          >
+            Queue Details
+          </button>
+          <button
+            onClick={() => setActiveTab("failures")}
+            className={`px-4 py-2 border-b-2 ${activeTab === "failures" ? "border-blue-500 text-blue-500" : "border-transparent text-gray-600"}`}
+          >
+            Failures
+          </button>
+          <button
+            onClick={() => setActiveTab("dlq")}
+            className={`px-4 py-2 border-b-2 ${activeTab === "dlq" ? "border-blue-500 text-blue-500" : "border-transparent text-gray-600"}`}
+          >
+            Dead Letter Queue
+          </button>
+          <button
+            onClick={() => setActiveTab("circuit-breakers")}
+            className={`px-4 py-2 border-b-2 ${activeTab === "circuit-breakers" ? "border-blue-500 text-blue-500" : "border-transparent text-gray-600"}`}
+          >
+            Circuit Breakers
+          </button>
+        </div>
+      </div>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-4">
+      {activeTab === "overview" && (
+        <div className="space-y-4">
           {metrics && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Object.entries(metrics).map(([name, data]) => (
-                <Card key={name}>
-                  <CardHeader>
-                    <CardTitle className="text-lg">{name}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
+                <div key={name} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold">{name}</h3>
+                  </div>
+                  <div className="p-6 pt-0 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Backlog</span>
                       <span className="font-semibold">{data.backlog || 0}</span>
@@ -236,51 +244,52 @@ const QueueMonitoring = () => {
                       <span className="text-gray-600">Avg Processing</span>
                       <span className="font-semibold">{data.avgProcessingTime?.toFixed(0) || 0}ms</span>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           )}
 
           {statistics && statistics.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
                   Queue Statistics (24h)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Queue</TableHead>
-                      <TableHead>Total Failures</TableHead>
-                      <TableHead>Unresolved</TableHead>
-                      <TableHead>Failure Rate</TableHead>
-                      <TableHead>Avg Processing Time</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+                </h2>
+              </div>
+              <div className="p-6 pt-0">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2">Queue</th>
+                      <th className="text-left py-2">Total Failures</th>
+                      <th className="text-left py-2">Unresolved</th>
+                      <th className="text-left py-2">Failure Rate</th>
+                      <th className="text-left py-2">Avg Processing Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
                     {statistics.map((stat) => (
-                      <TableRow key={stat.queueName}>
-                        <TableCell className="font-medium">{stat.queueName}</TableCell>
-                        <TableCell>{stat.totalFailures}</TableCell>
-                        <TableCell>{stat.unresolvedFailures}</TableCell>
-                        <TableCell>
-                          <Badge variant={stat.failureRate > 5 ? "destructive" : "secondary"}>
+                      <tr key={stat.queueName} className="border-b">
+                        <td className="py-2 font-medium">{stat.queueName}</td>
+                        <td className="py-2">{stat.totalFailures}</td>
+                        <td className="py-2">{stat.unresolvedFailures}</td>
+                        <td className="py-2">
+                          <span className={`px-2 py-1 rounded text-sm ${stat.failureRate > 5 ? "bg-red-500 text-white" : "bg-gray-200 text-gray-800"}`}>
                             {stat.failureRate.toFixed(1)}%
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{stat.avgProcessingTime?.toFixed(0) || 0}ms</TableCell>
-                      </TableRow>
+                          </span>
+                        </td>
+                        <td className="py-2">{stat.avgProcessingTime?.toFixed(0) || 0}ms</td>
+                      </tr>
                     ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           )}
-        </TabsContent>
+        </div>
+      )}
 
         {/* Queue Details Tab */}
         <TabsContent value="queues" className="space-y-4">

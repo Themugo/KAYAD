@@ -117,7 +117,6 @@ const AdminStaffPermissions        = lazy(() => import('./pages/admin/AdminStaff
 const ControlRoom                  = lazy(() => import('./pages/admin/ControlRoom'));
 const PanicRoom                    = lazy(() => import('./pages/admin/PanicRoom'));
 const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOverview'));
-const QueueMonitoring              = lazy(() => import('./pages/admin/QueueMonitoring'));
 const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsDashboard'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
@@ -288,7 +287,6 @@ export default function App() {
                         <Route path="/admin/control-room"             element={<SecureAdmin><ControlRoom /></SecureAdmin>} />
                         <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
                         <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
-                        <Route path="/admin/queue-monitoring"          element={<SecureAdmin><QueueMonitoring /></SecureAdmin>} />
                         <Route path="/admin/operations-dashboard"     element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
 
                         {/* ── 404 ─────────────────────────────────────────────── */}
