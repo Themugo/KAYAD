@@ -9,6 +9,9 @@ import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
 import { uploadLimiter, bidLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
+import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
+import { trackCarSearch } from "../middleware/searchTracking.js";
+import { trackVehicleSearchLatency } from "../middleware/searchLatencyTracking.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES } from "../config/roles.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
@@ -91,7 +94,7 @@ router.get("/demo/all", protect, asyncHandler(getDemoCars));
 // =============================
 
 // 🔍 GET ALL CARS
-router.get("/", cacheResponse(300), asyncHandler(getCars)); // 5 minutes cache
+router.get("/", cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
 
 // 🔎 GET SINGLE CAR
 router.get(

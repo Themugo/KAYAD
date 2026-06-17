@@ -18,9 +18,12 @@ export const searchCars = async ({
     status: "active",
   };
 
+  // =============================
+  // 🔍 KEYWORD SEARCH (OPTIMIZED)
+  // =============================
   if (keyword) {
-    const safe = escapeRegex(keyword);
-    filter.$or = [{ title: { $regex: safe, $options: "i" } }, { brand: { $regex: safe, $options: "i" } }];
+    // Use MongoDB text index for better performance
+    filter.$text = { $search: keyword };
   }
 
   // =============================
@@ -63,15 +66,21 @@ export const searchCars = async ({
   if (sort === "price_asc") sortOption = { price: 1 };
   if (sort === "price_desc") sortOption = { price: -1 };
   if (sort === "popular") sortOption = { views: -1 };
+  if (keyword && sort === "latest") {
+    // When searching by keyword, sort by text score for relevance
+    sortOption = { score: { $meta: "textScore" }, createdAt: -1 };
+  }
 
   // =============================
   // 📄 PAGINATION
   // =============================
   const skip = (page - 1) * limit;
 
-  const [cars, total] = await Promise.all([
-    Car.find(filter).sort(sortOption).skip(skip).limit(limit).lean(),
+  // Add text score projection if searching by keyword
+  const projection = keyword ? { score: { $meta: "textScore" } } : {};
 
+  const [cars, total] = await Promise.all([
+    Car.find(filter, projection).sort(sortOption).skip(skip).limit(limit).lean(),
     Car.countDocuments(filter),
   ]);
 

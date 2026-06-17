@@ -326,6 +326,14 @@ carSchema.index({ allowBid: 1, auctionStatus: 1 });
 carSchema.index({ status: 1, auctionStatus: 1, allowBid: 1 });
 carSchema.index({ isDemo: 1, createdAt: -1 });
 
+// Auction-specific indexes (NEW)
+carSchema.index({ auctionStatus: 1, auctionEnd: -1 });
+carSchema.index({ auctionStatus: 1, currentBid: -1 });
+carSchema.index({ auctionStatus: 1, allowBid: 1, auctionEnd: -1 });
+carSchema.index({ status: 1, auctionStatus: 1, price: 1 });
+carSchema.index({ status: 1, auctionStatus: 1, year: 1 });
+carSchema.index({ status: 1, auctionStatus: 1, brand: 1 });
+
 // Text index for keyword search (Issue #9)
 carSchema.index({
   title: "text",

@@ -4,24 +4,26 @@ import { protect, optionalAuth } from "../middleware/auth.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { getPagination } from "../middleware/apiPagination.js";
 import { cacheUserData, invalidateCache } from "../middleware/apiCache.js";
+import { cacheDealerSearch, invalidateDealerSearchCache } from "../middleware/searchCache.js";
+import { trackCarSearch } from "../middleware/searchTracking.js";
+import { trackDealerSearchLatency } from "../middleware/searchLatencyTracking.js";
 import User from "../models/User.js";
 
 const router = express.Router();
 
 router.get(
   "/search",
-  cacheUserData,
+  cacheDealerSearch,
+  trackDealerSearchLatency,
+  trackCarSearch,
   asyncHandler(async (req, res) => {
     const { q, role, page = 1, limit = 20 } = req.query;
     const { page: safePage, limit: safeLimit, skip } = getPagination(req);
     const filter = {};
 
     if (q) {
-      filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { businessName: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-      ];
+      // Use MongoDB text index for better performance
+      filter.$text = { $search: q };
     }
     if (role) filter.role = role;
 

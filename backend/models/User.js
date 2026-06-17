@@ -433,6 +433,22 @@ for (const op of SOFT_DELETE_OPERATIONS) {
 }
 
 // =============================
+// 🔥 SEARCH INDEXES (CRITICAL)
+// =============================
+
+// Text index for dealer/user search
+userSchema.index({
+  name: "text",
+  businessName: "text",
+  email: "text",
+});
+
+// Compound indexes for common search queries
+userSchema.index({ role: 1, createdAt: -1 });
+userSchema.index({ role: 1, location: 1 });
+userSchema.index({ role: 1, dealerRating: -1 });
+
+// =============================
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

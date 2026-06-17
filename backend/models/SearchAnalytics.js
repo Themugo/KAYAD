@@ -147,6 +147,34 @@ const searchAnalyticsSchema = new mongoose.Schema(
       default: 0,
       index: true,
     },
+
+    // =============================
+    // 📊 CONVERSION TRACKING
+    // =============================
+    conversions: {
+      view: {
+        type: Number,
+        default: 0,
+      },
+      bid: {
+        type: Number,
+        default: 0,
+      },
+      purchase: {
+        type: Number,
+        default: 0,
+      },
+      favorite: {
+        type: Number,
+        default: 0,
+      },
+    },
+
+    totalConversions: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
   },
   { timestamps: true },
 );
