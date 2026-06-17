@@ -34,17 +34,6 @@ const router = express.Router();
 router.use(protect, dealerOnly);
 
 // =============================
-// ⚙️ PAGINATION HELPER
-// =============================
-const getPagination = (req) => {
-  const page = Math.max(Number(req.query.page) || 1, 1);
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const skip = (page - 1) * limit;
-
-  return { page, limit, skip };
-};
-
-// =============================
 // 💰 EARNINGS (FILTERABLE + PAGINATED + CACHED)
 // =============================
 router.get(
