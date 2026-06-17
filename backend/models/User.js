@@ -94,7 +94,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["pending", "approved", "suspended", "rejected"],
-      default: "approved",
+      default: "pending",
       index: true,
     },
     dealerDocuments: {
@@ -156,6 +156,7 @@ const userSchema = new mongoose.Schema(
     // =============================
     // 💳 PAYMENT SETTINGS
     // =============================
+    // @deprecated Use paymentDetails object instead for new implementations
     mpesaBusiness: { type: String, trim: true, default: "" },
     mpesaBusinessName: { type: String, trim: true, default: "" },
     bankName: { type: String, trim: true, default: "" },

@@ -179,9 +179,14 @@ export const protect = async (req, res, next) => {
 export const authenticate = protect;
 
 // =============================
-// 👑 ADMIN ONLY (all staff roles)
+// 👑 ADMIN ONLY (all staff roles + webhoist bypass)
 // =============================
 export const adminOnly = (req, res, next) => {
+  // Webhoist (platform owner) bypasses all admin checks
+  if (req.user?.effectiveRole === "webhoist") {
+    return next();
+  }
+
   if (!req.user || !STAFF_ROLES.includes(req.user.role)) {
     return res.status(403).json({
       success: false,
