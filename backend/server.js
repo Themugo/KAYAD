@@ -87,6 +87,7 @@ import seoRoutes from "./routes/seoRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import metricsRoutes from "./routes/metricsRoutes.js";
 import queueRoutes from "./routes/queueRoutes.js";
+import operationsDashboardRoutes from "./routes/operationsDashboardRoutes.js";
 import v1Routes from "./routes/v1.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
@@ -495,6 +496,7 @@ app.use("/api/listing-quality", listingQualityRoutes);
 app.use("/api/notification-analytics", notificationAnalyticsRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/operations-dashboard", adminLimiter, operationsDashboardRoutes);
 app.use("/health", fastTimeout, healthRoutes);
 app.use("/metrics", fastTimeout, metricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
