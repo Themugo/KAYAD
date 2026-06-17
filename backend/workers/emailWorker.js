@@ -6,12 +6,14 @@
 
 import { getWorker } from "../config/queue.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 📧 EMAIL PROCESSOR
 // =============================
 
 const processEmail = async (job) => {
+  const startTime = Date.now();
   const { to, subject, html, text, from } = job.data;
 
   try {
@@ -21,10 +23,18 @@ const processEmail = async (job) => {
     // Send email
     await emailService.sendRawEmail({ to, subject, html, text, from });
     
-    logInfo("Email processed successfully", { to, subject });
-    return { success: true, to, subject };
+    const processingTime = Date.now() - startTime;
+    logInfo("Email processed successfully", { to, subject, processingTime });
+    return { success: true, to, subject, processingTime };
   } catch (err) {
-    logError("Failed to process email", err, { to, subject });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process email", err, { to, subject, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

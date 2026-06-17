@@ -9,12 +9,14 @@ import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 📢 NOTIFICATION PROCESSOR
 // =============================
 
 const processNotification = async (job) => {
+  const startTime = Date.now();
   const { userId, title, message, type = "info", data = {}, channels = ["push"] } = job.data;
 
   try {
@@ -35,26 +37,36 @@ const processNotification = async (job) => {
     }
 
     // Send via configured channels
+    const channelResults = {};
+
     if (channels.includes("push") && user.pushEnabled !== false) {
-      await sendPushNotification(userId, title, message, data);
+      channelResults.push = await sendPushNotification(userId, title, message, data);
     }
 
     if (channels.includes("email") && user.emailEnabled !== false && user.email) {
-      await sendEmailNotification(user.email, title, message, data);
+      channelResults.email = await sendEmailNotification(user.email, title, message, data);
     }
 
     if (channels.includes("sms") && user.smsEnabled !== false && user.phone) {
-      await sendSMSNotification(user.phone, title, message, data);
+      channelResults.sms = await sendSMSNotification(user.phone, title, message, data);
     }
 
     if (channels.includes("whatsapp") && user.whatsappEnabled !== false && user.phone) {
-      await sendWhatsAppNotification(user.phone, title, message, data);
+      channelResults.whatsapp = await sendWhatsAppNotification(user.phone, title, message, data);
     }
 
-    logInfo("Notification processed successfully", { notificationId: notification._id, userId });
-    return notification;
+    const processingTime = Date.now() - startTime;
+    logInfo("Notification processed successfully", { notificationId: notification._id, userId, processingTime, channelResults });
+    return { notification, processingTime, channelResults };
   } catch (err) {
-    logError("Failed to process notification", err, { userId, title });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process notification", err, { userId, title, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

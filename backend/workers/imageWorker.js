@@ -6,13 +6,15 @@
 
 import { getWorker } from "../config/queue.js";
 import { v2 as cloudinary } from "cloudinary";
-import { logInfo, logError } from "../utils/logger.js";
+import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 🖼️ IMAGE PROCESSING PROCESSOR
 // =============================
 
 const processImage = async (job) => {
+  const startTime = Date.now();
   const { imageId, imageUrl, operations = [] } = job.data;
 
   try {
@@ -61,10 +63,18 @@ const processImage = async (job) => {
       }
     }
 
-    logInfo("Image processed successfully", { imageId, operationsCount: operations.length });
-    return result;
+    const processingTime = Date.now() - startTime;
+    logInfo("Image processed successfully", { imageId, operationsCount: operations.length, processingTime });
+    return { result, processingTime };
   } catch (err) {
-    logError("Failed to process image", err, { imageId });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process image", err, { imageId, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

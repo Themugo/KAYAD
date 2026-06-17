@@ -6,12 +6,14 @@
 
 import { getWorker } from "../config/queue.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { sendToDeadLetterQueue } from "../infrastructure/queues/deadLetterQueue.js";
 
 // =============================
 // 📱 SMS PROCESSOR
 // =============================
 
 const processSMS = async (job) => {
+  const startTime = Date.now();
   const { phone, message, context = {} } = job.data;
 
   try {
@@ -22,13 +24,21 @@ const processSMS = async (job) => {
     const success = await smsUtils.sendSMS(phone, message);
     
     if (success) {
-      logInfo("SMS processed successfully", { phone, context });
-      return { success: true, phone };
+      const processingTime = Date.now() - startTime;
+      logInfo("SMS processed successfully", { phone, context, processingTime });
+      return { success: true, phone, processingTime };
     } else {
       throw new Error("SMS sending failed");
     }
   } catch (err) {
-    logError("Failed to process SMS", err, { phone });
+    const processingTime = Date.now() - startTime;
+    logError("Failed to process SMS", err, { phone, processingTime });
+    
+    // Send to dead letter queue if max retries exceeded
+    if (job.attemptsMade >= job.opts.attempts) {
+      await sendToDeadLetterQueue(job, err);
+    }
+    
     throw err;
   }
 };

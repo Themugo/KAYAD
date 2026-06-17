@@ -140,6 +140,7 @@ leadSchema.index({ dealer: 1, stage: 1, lastActivityAt: -1 });
 leadSchema.index({ dealer: 1, source: 1 });
 leadSchema.index({ dealer: 1, isArchived: 1, lastActivityAt: -1 });
 leadSchema.index({ dealer: 1, isHot: 1, lastActivityAt: -1 });
+leadSchema.index({ dealer: 1, isArchived: 1, stage: 1 }); // Lead pipeline aggregation optimization
 
 // =============================
 // ⚡ METHOD: UPDATE STAGE
@@ -155,23 +156,35 @@ leadSchema.methods.updateStage = async function (newStage, actorId) {
     this.lostAt = new Date();
   }
 
-  await this.save();
+  // Use transaction for atomic operations
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    await this.save({ session });
 
-  // Add activity
-  const LeadActivity = mongoose.model("LeadActivity");
-  await LeadActivity.create({
-    lead: this._id,
-    type: "stage_changed",
-    actor: actorId,
-    actorType: "dealer",
-    description: `Stage changed from ${oldStage} to ${newStage}`,
-    metadata: {
-      oldStage,
-      newStage,
-    },
-  });
-
-  return this;
+    // Add activity
+    const LeadActivity = mongoose.model("LeadActivity");
+    await LeadActivity.create([{
+      lead: this._id,
+      type: "stage_changed",
+      actor: actorId,
+      actorType: "dealer",
+      description: `Stage changed from ${oldStage} to ${newStage}`,
+      metadata: {
+        oldStage,
+        newStage,
+      },
+    }], { session });
+    
+    await session.commitTransaction();
+    return this;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 // =============================
@@ -179,19 +192,32 @@ leadSchema.methods.updateStage = async function (newStage, actorId) {
 // =============================
 leadSchema.methods.addActivity = async function (type, actorId, actorType, description, metadata = {}) {
   const LeadActivity = mongoose.model("LeadActivity");
-  await LeadActivity.create({
-    lead: this._id,
-    type,
-    actor: actorId,
-    actorType,
-    description,
-    metadata,
-  });
-
-  this.lastActivityAt = new Date();
-  await this.save();
-
-  return this;
+  
+  // Use transaction for atomic operations
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    const activity = await LeadActivity.create([{
+      lead: this._id,
+      type,
+      actor: actorId,
+      actorType,
+      description,
+      metadata,
+    }], { session });
+    
+    this.lastActivityAt = new Date();
+    await this.save({ session });
+    
+    await session.commitTransaction();
+    return activity[0];
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 // =============================
@@ -211,18 +237,31 @@ leadSchema.methods.calculateResponseTime = function () {
 leadSchema.methods.archive = async function (actorId) {
   this.isArchived = true;
   this.lastActivityAt = new Date();
-  await this.save();
+  
+  // Use transaction for atomic operations
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    await this.save({ session });
 
-  const LeadActivity = mongoose.model("LeadActivity");
-  await LeadActivity.create({
-    lead: this._id,
-    type: "status_changed",
-    actor: actorId,
-    actorType: "dealer",
-    description: "Lead archived",
-  });
-
-  return this;
+    const LeadActivity = mongoose.model("LeadActivity");
+    await LeadActivity.create([{
+      lead: this._id,
+      type: "status_changed",
+      actor: actorId,
+      actorType: "dealer",
+      description: "Lead archived",
+    }], { session });
+    
+    await session.commitTransaction();
+    return this;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 // =============================
@@ -231,18 +270,31 @@ leadSchema.methods.archive = async function (actorId) {
 leadSchema.methods.markAsHot = async function (actorId) {
   this.isHot = !this.isHot;
   this.lastActivityAt = new Date();
-  await this.save();
+  
+  // Use transaction for atomic operations
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    await this.save({ session });
 
-  const LeadActivity = mongoose.model("LeadActivity");
-  await LeadActivity.create({
-    lead: this._id,
-    type: "status_changed",
-    actor: actorId,
-    actorType: "dealer",
-    description: this.isHot ? "Lead marked as hot" : "Lead unmarked as hot",
-  });
-
-  return this;
+    const LeadActivity = mongoose.model("LeadActivity");
+    await LeadActivity.create([{
+      lead: this._id,
+      type: "status_changed",
+      actor: actorId,
+      actorType: "dealer",
+      description: this.isHot ? "Lead marked as hot" : "Lead unmarked as hot",
+    }], { session });
+    
+    await session.commitTransaction();
+    return this;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
+  }
 };
 
 // =============================
