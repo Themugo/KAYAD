@@ -20,7 +20,15 @@ let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__ && DEMO_MODE_ENABLED;
 // Force demo mode on (used by the login page's demo quick-login buttons so
 // the @demo.com accounts work instantly regardless of real-backend state).
-export const enableDemoMode = () => { if (DEMO_MODE_ENABLED) __DEMO_MODE__ = true; };
+export const enableDemoMode = () => {
+  if (DEMO_MODE_ENABLED) {
+    __DEMO_MODE__ = true;
+    // Clear any existing demo user state to prevent conflicts
+    try {
+      localStorage.removeItem('kayad_demo_user');
+    } catch { /* ignore */ }
+  }
+};
 let _backendProbePromise = null;
 let _lastProbeAt = 0;
 const PROBE_COOLDOWN_MS = 20_000;

@@ -30,9 +30,13 @@ function LoginPage() {
   useEffect(() => {
     if (isAuth && user && !hasRedirected.current) {
       hasRedirected.current = true;
-      navigate(getPostAuthPath(user, from), { replace: true });
+      const targetPath = getPostAuthPath(user, from);
+      // Prevent redirect loop: don't redirect if already on the target path
+      if (targetPath !== location.pathname) {
+        navigate(targetPath, { replace: true });
+      }
     }
-  }, [isAuth, user, navigate, from]);
+  }, [isAuth, user, navigate, from, location.pathname]);
 
   const [form, setForm]       = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -46,7 +50,11 @@ function LoginPage() {
     try {
       const data = await login(form);
       toast('Welcome back!', 'success');
-      navigate(getPostAuthPath(data.user, from), { replace: true });
+      const targetPath = getPostAuthPath(data.user, from);
+      // Prevent redirect loop: don't redirect if already on the target path
+      if (targetPath !== location.pathname) {
+        navigate(targetPath, { replace: true });
+      }
     } catch (err) {
       const msg = err.response?.data?.message || 'Invalid credentials';
       if (msg.toLowerCase().includes('verify your email')) {
@@ -79,7 +87,11 @@ function LoginPage() {
       enableDemoMode();
       const data = await login({ email: acct.email, password: acct.password });
       toast(`Signed in as ${acct.label} (demo)`, 'success');
-      navigate(getPostAuthPath(data.user, from), { replace: true });
+      const targetPath = getPostAuthPath(data.user, from);
+      // Prevent redirect loop: don't redirect if already on the target path
+      if (targetPath !== location.pathname) {
+        navigate(targetPath, { replace: true });
+      }
     } catch (err) {
       toast(err.response?.data?.message || 'Demo sign-in failed', 'error');
       setLoading(false);
