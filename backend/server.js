@@ -244,6 +244,10 @@ const allowedOrigins = [
     .split(",")
     .map((v) => v.trim())
     .filter(Boolean),
+  // Add Vercel deployment URL for production
+  ...(process.env.NODE_ENV === "production" ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"] : []),
+  // Add custom domain if configured
+  ...(process.env.CUSTOM_DOMAIN ? [process.env.CUSTOM_DOMAIN, `https://www.${process.env.CUSTOM_DOMAIN.replace(/^https?:\/\//, "")}`] : []),
 ];
 
 app.use(

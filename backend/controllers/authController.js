@@ -55,11 +55,14 @@ const serializeUser = (user) => {
 // =============================
 // 🍪 COOKIE CONFIG
 // =============================
+// NOTE: Using sameSite: "lax" for production to work with Vercel+Render setup.
+// Vercel rewrite makes API appear same-origin, so "lax" is appropriate.
+// "none" is only needed for truly separate cross-origin domains.
 const sendRefreshToken = (res, token) => {
   res.cookie("refreshToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -69,7 +72,7 @@ const sendAccessToken = (res, token) => {
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    sameSite: "lax",
     path: "/api",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });

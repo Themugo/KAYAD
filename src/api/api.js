@@ -20,8 +20,9 @@ let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__ && DEMO_MODE_ENABLED;
 // Force demo mode on (used by the login page's demo quick-login buttons so
 // the @demo.com accounts work instantly regardless of real-backend state).
+// Respects VITE_ENABLE_DEMO environment variable to prevent accidental activation in production.
 export const enableDemoMode = () => {
-  if (DEMO_MODE_ENABLED) {
+  if (DEMO_MODE_ENABLED && import.meta.env?.VITE_ENABLE_DEMO !== 'false') {
     __DEMO_MODE__ = true;
     // Clear any existing demo user state to prevent conflicts
     try {
@@ -79,6 +80,44 @@ const api = axios.create({ baseURL: BASE, withCredentials: true, timeout: 15000 
 const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
 const IDEMPOTENT_METHODS = new Set(['get', 'head', 'options']);
 const MAX_RETRIES = 2;
+
+// Cookie debugging for authentication troubleshooting
+api.interceptors.request.use((config) => {
+  if (import.meta.env?.DEV || import.meta.env?.VITE_DEBUG_COOKIES === 'true') {
+    console.log('🔍 API Request:', config.url, {
+      method: config.method,
+      hasCookies: document.cookie.length > 0,
+      cookiePreview: document.cookie.substring(0, 100),
+      withCredentials: config.withCredentials,
+      demoMode: __DEMO_MODE__,
+    });
+  }
+  return config;
+}, (error) => {
+  if (import.meta.env?.DEV || import.meta.env?.VITE_DEBUG_COOKIES === 'true') {
+    console.error('🔍 API Request Error:', error);
+  }
+  return Promise.reject(error);
+});
+
+api.interceptors.response.use((response) => {
+  if (import.meta.env?.DEV || import.meta.env?.VITE_DEBUG_COOKIES === 'true') {
+    console.log('🔍 API Response:', response.config.url, {
+      status: response.status,
+      hasSetCookie: response.headers['set-cookie']?.length > 0,
+      setCookiePreview: response.headers['set-cookie']?.[0]?.substring(0, 100),
+    });
+  }
+  return response;
+}, (error) => {
+  if (import.meta.env?.DEV || import.meta.env?.VITE_DEBUG_COOKIES === 'true') {
+    console.error('🔍 API Response Error:', error.config?.url, {
+      status: error.response?.status,
+      message: error.message,
+    });
+  }
+  return Promise.reject(error);
+});
 
 // Auto-refresh on 401 (token expired)
 let _refreshing = false;
