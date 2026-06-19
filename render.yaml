@@ -10,7 +10,7 @@ services:
     buildCommand: cd backend && npm ci
     startCommand: cd backend && npm start
     healthCheckPath: /health
-    autoDeploy: true
+    autoDeploy: false
     envVars:
       - key: NODE_ENV
         value: production
