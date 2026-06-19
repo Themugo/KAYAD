@@ -178,7 +178,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </div>
 
       {/* ── CATEGORY ── */}
-      <Section title="Category">
+      <Section title="Category" count={cars.length}>
         {[
           { id: 'all',     label: 'All Vehicles',  count: cars.length,                                                               icon: '◈' },
           { id: 'auction', label: 'Live Auctions',  count: cars.filter(c=>c.auctionStatus==='live'||c.allowBid).length,              icon: '⚡' },

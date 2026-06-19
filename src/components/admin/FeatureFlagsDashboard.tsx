@@ -51,7 +51,7 @@ const FeatureFlagsDashboard = () => {
   const fetchFlags = async () => {
     try {
       setLoading(true);
-      const params = {};
+      const params: any = {};
       if (selectedCategory !== "all") {
         params.category = selectedCategory;
       }

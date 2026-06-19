@@ -20,7 +20,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
   const { user } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState('check'); // check | payment | tracking
-  const [phone, setPhone] = useState(user?.phone || '');
+  const [phone, setPhone] = useState((user as any)?.phone || '');
   const [ordering, setOrdering] = useState(false);
   const [inspection, setInspection] = useState(null);
   const [orderResult, setOrderResult] = useState(null);
