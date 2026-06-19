@@ -87,13 +87,7 @@ export const captureState = async (escrowId) => {
     }
 
     // Return a clean state object (exclude internal fields)
-    const {
-      _id,
-      __v,
-      createdAt,
-      updatedAt,
-      ...state
-    } = escrow;
+    const { _id, __v, createdAt, updatedAt, ...state } = escrow;
 
     return state;
   } catch (err) {
@@ -302,13 +296,7 @@ export const getAuditStatistics = async (options = {}) => {
     const { days = 30 } = options;
     const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const [
-      totalAudits,
-      byAction,
-      byUser,
-      bySource,
-      byIp,
-    ] = await Promise.all([
+    const [totalAudits, byAction, byUser, bySource, byIp] = await Promise.all([
       EscrowAudit.countDocuments({ timestamp: { $gte: fromDate } }),
       EscrowAudit.aggregate([
         { $match: { timestamp: { $gte: fromDate } } },

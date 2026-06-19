@@ -92,7 +92,14 @@ leadActivitySchema.index({ actor: 1, createdAt: -1 });
 // =============================
 // ⚡ STATIC: CREATE ACTIVITY
 // =============================
-leadActivitySchema.statics.createActivity = async function (leadId, type, actorId, actorType, description, metadata = {}) {
+leadActivitySchema.statics.createActivity = async function (
+  leadId,
+  type,
+  actorId,
+  actorType,
+  description,
+  metadata = {},
+) {
   return await this.create({
     lead: leadId,
     type,
@@ -107,9 +114,7 @@ leadActivitySchema.statics.createActivity = async function (leadId, type, actorI
 // ⚡ STATIC: GET LEAD TIMELINE
 // =============================
 leadActivitySchema.statics.getLeadTimeline = async function (leadId) {
-  return await this.find({ lead: leadId })
-    .populate("actor", "name email avatar")
-    .sort({ createdAt: -1 });
+  return await this.find({ lead: leadId }).populate("actor", "name email avatar").sort({ createdAt: -1 });
 };
 
 // =============================

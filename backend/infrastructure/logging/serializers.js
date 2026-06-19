@@ -9,7 +9,7 @@
 // =============================
 export const errorSerializer = (err) => {
   if (!err) return null;
-  
+
   return {
     message: err.message,
     stack: err.stack,
@@ -25,7 +25,7 @@ export const errorSerializer = (err) => {
 // =============================
 export const requestSerializer = (req) => {
   if (!req) return null;
-  
+
   return {
     method: req.method,
     url: req.originalUrl || req.url,
@@ -41,7 +41,7 @@ export const requestSerializer = (req) => {
 // =============================
 export const responseSerializer = (res) => {
   if (!res) return null;
-  
+
   return {
     statusCode: res.statusCode,
     ...(res.statusMessage && { statusMessage: res.statusMessage }),
@@ -53,17 +53,17 @@ export const responseSerializer = (res) => {
 // =============================
 export const objectSerializer = (obj) => {
   if (!obj || typeof obj !== "object") return obj;
-  
+
   // Remove sensitive fields
   const sensitiveKeys = ["password", "token", "secret", "apiKey", "apiSecret"];
   const sanitized = { ...obj };
-  
+
   for (const key of Object.keys(sanitized)) {
     if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
       sanitized[key] = "[REDACTED]";
     }
   }
-  
+
   return sanitized;
 };
 

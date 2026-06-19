@@ -94,9 +94,7 @@ describe("Queue System", () => {
       const job = await addImageProcessingJob({
         imageId: "123",
         imageUrl: "https://example.com/image.jpg",
-        operations: [
-          { type: "thumbnail", width: 200, height: 200 },
-        ],
+        operations: [{ type: "thumbnail", width: 200, height: 200 }],
       });
 
       expect(job).toBeDefined();

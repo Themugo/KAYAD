@@ -79,28 +79,28 @@ const defaultOptions = {
 export async function withRetry(fn, opts = {}) {
   // Merge service defaults with provided options
   let mergedOpts = { ...defaultOptions, ...opts };
-  
+
   if (opts.serviceName && serviceDefaults[opts.serviceName]) {
     mergedOpts = { ...serviceDefaults[opts.serviceName], ...mergedOpts };
   }
 
-  const { 
-    retries, 
-    baseDelayMs, 
-    maxDelayMs, 
+  const {
+    retries,
+    baseDelayMs,
+    maxDelayMs,
     timeoutMs,
-    circuitBreaker, 
-    circuitThreshold, 
-    circuitResetMs, 
-    onRetry, 
-    onCircuitOpen, 
+    circuitBreaker,
+    circuitThreshold,
+    circuitResetMs,
+    onRetry,
+    onCircuitOpen,
     onCircuitClose,
     onTimeout,
     onFallback,
     fallback,
     serviceName,
     enableMetrics,
-    enableLogging
+    enableLogging,
   } = mergedOpts;
 
   const key = opts.key || fn.name || "default";
@@ -112,11 +112,11 @@ export async function withRetry(fn, opts = {}) {
 
     if (state.openUntil > Date.now()) {
       const timeUntilReset = Math.ceil((state.openUntil - Date.now()) / 1000);
-      
+
       if (enableLogging) {
         logWarn(`Circuit breaker open for ${key} — reset in ${timeUntilReset}s`, { key, timeUntilReset });
       }
-      
+
       if (enableMetrics) {
         incrementCounter("circuit_breaker_rejected", { service: serviceName || key });
       }
@@ -133,9 +133,7 @@ export async function withRetry(fn, opts = {}) {
         return await fallback();
       }
 
-      const error = new Error(
-        `Circuit breaker open for ${key} — reset in ${timeUntilReset}s`,
-      );
+      const error = new Error(`Circuit breaker open for ${key} — reset in ${timeUntilReset}s`);
       error.code = "CIRCUIT_BREAKER_OPEN";
       error.key = key;
       error.resetTime = timeUntilReset;
@@ -149,7 +147,7 @@ export async function withRetry(fn, opts = {}) {
         enableMetrics,
         enableLogging,
       });
-      
+
       // Circuit was open, now closed
       if (state.wasOpen) {
         if (enableLogging) {
@@ -161,47 +159,53 @@ export async function withRetry(fn, opts = {}) {
           incrementCounter("circuit_breaker_closed", { service: serviceName || key });
         }
       }
-      
+
       state.failures = 0;
       circuitStore.set(key, state);
-      
+
       // Record success metrics
       if (enableMetrics) {
         const duration = Date.now() - startTime;
         recordMetric("external_service_duration", duration, { service: serviceName || key, status: "success" });
         incrementCounter("external_service_success", { service: serviceName || key });
       }
-      
+
       return result;
     } catch (err) {
       state.failures++;
-      
+
       // Circuit just opened
       if (state.failures >= circuitThreshold && !state.wasOpen) {
         state.openUntil = Date.now() + circuitResetMs;
         state.wasOpen = true;
-        
+
         if (enableLogging) {
-          logError(`Circuit breaker OPENED for ${key} after ${state.failures} failures`, err, { key, failures: state.failures });
+          logError(`Circuit breaker OPENED for ${key} after ${state.failures} failures`, err, {
+            key,
+            failures: state.failures,
+          });
         }
-        
+
         if (onCircuitOpen) onCircuitOpen(key, state.failures, circuitResetMs);
-        
+
         if (enableMetrics) {
           incrementCounter("circuit_breaker_opened", { service: serviceName || key });
           setGauge("circuit_breaker_failures", state.failures, { service: serviceName || key });
         }
       }
-      
+
       circuitStore.set(key, state);
-      
+
       // Record failure metrics
       if (enableMetrics) {
         const duration = Date.now() - startTime;
         recordMetric("external_service_duration", duration, { service: serviceName || key, status: "error" });
-        incrementCounter("external_service_failure", { service: serviceName || key, error_type: err.code || "unknown" });
+        incrementCounter("external_service_failure", {
+          service: serviceName || key,
+          error_type: err.code || "unknown",
+        });
       }
-      
+
       // Try fallback if available
       if (fallback) {
         if (enableLogging) {
@@ -213,7 +217,7 @@ export async function withRetry(fn, opts = {}) {
         if (onFallback) onFallback(key, err);
         return await fallback();
       }
-      
+
       throw err;
     }
   }
@@ -226,13 +230,13 @@ export async function withRetry(fn, opts = {}) {
       enableMetrics,
       enableLogging,
     });
-    
+
     if (enableMetrics) {
       const duration = Date.now() - startTime;
       recordMetric("external_service_duration", duration, { service: serviceName || key, status: "success" });
       incrementCounter("external_service_success", { service: serviceName || key });
     }
-    
+
     return result;
   } catch (err) {
     if (enableMetrics) {
@@ -240,7 +244,7 @@ export async function withRetry(fn, opts = {}) {
       recordMetric("external_service_duration", duration, { service: serviceName || key, status: "error" });
       incrementCounter("external_service_failure", { service: serviceName || key, error_type: err.code || "unknown" });
     }
-    
+
     // Try fallback if available
     if (fallback) {
       if (enableLogging) {
@@ -252,7 +256,7 @@ export async function withRetry(fn, opts = {}) {
       if (onFallback) onFallback(key, err);
       return await fallback();
     }
-    
+
     throw err;
   }
 }
@@ -260,7 +264,7 @@ export async function withRetry(fn, opts = {}) {
 async function attemptWithTimeout(fn, retries, baseDelayMs, maxDelayMs, timeoutMs, onRetry, onTimeout, context) {
   const { serviceName, key, enableMetrics, enableLogging } = context;
   let lastErr;
-  
+
   for (let i = 0; i <= retries; i++) {
     try {
       // Wrap function with timeout
@@ -273,54 +277,54 @@ async function attemptWithTimeout(fn, retries, baseDelayMs, maxDelayMs, timeoutM
             timeoutError.service = serviceName || key;
             reject(timeoutError);
           }, timeoutMs);
-        })
+        }),
       ]);
-      
+
       return result;
     } catch (err) {
       lastErr = err;
-      
+
       if (err.code === "TIMEOUT") {
         if (enableLogging) {
-          logError(`Operation timeout for ${key} (attempt ${i + 1}/${retries + 1})`, err, { 
-            serviceName, 
-            key, 
+          logError(`Operation timeout for ${key} (attempt ${i + 1}/${retries + 1})`, err, {
+            serviceName,
+            key,
             timeoutMs,
-            attempt: i + 1 
+            attempt: i + 1,
           });
         }
-        
+
         if (enableMetrics) {
           incrementCounter("external_service_timeout", { service: serviceName || key });
         }
-        
+
         if (onTimeout) onTimeout(key, i + 1, timeoutMs);
       }
-      
+
       if (i < retries) {
         // Exponential backoff with jitter
         const jitter = Math.random() * 100;
         const delay = Math.min(baseDelayMs * Math.pow(2, i) + jitter, maxDelayMs);
-        
+
         if (enableLogging) {
-          logInfo(`Retrying ${key} (attempt ${i + 2}/${retries + 1}) after ${delay}ms`, { 
-            serviceName, 
-            key, 
+          logInfo(`Retrying ${key} (attempt ${i + 2}/${retries + 1}) after ${delay}ms`, {
+            serviceName,
+            key,
             delay,
-            error: err.message 
+            error: err.message,
           });
         }
-        
+
         if (enableMetrics) {
           incrementCounter("external_service_retry", { service: serviceName || key });
         }
-        
+
         if (onRetry) onRetry(err, i + 1, retries, delay);
         await sleep(delay);
       }
     }
   }
-  
+
   throw lastErr;
 }
 
@@ -350,7 +354,7 @@ export function resetCircuit(key) {
 export function getCircuitState(key) {
   const state = circuitStore.get(key);
   if (!state) return { status: "closed", failures: 0 };
-  
+
   if (state.openUntil > Date.now()) {
     return {
       status: "open",
@@ -358,7 +362,7 @@ export function getCircuitState(key) {
       resetIn: Math.ceil((state.openUntil - Date.now()) / 1000),
     };
   }
-  
+
   return {
     status: "closed",
     failures: state.failures,

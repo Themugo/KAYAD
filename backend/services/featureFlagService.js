@@ -43,13 +43,13 @@ export const isFlagEnabled = async (key, user = null, dealer = null) => {
 export const evaluateFlag = async (key, user = null, dealer = null) => {
   try {
     const enabled = await FeatureFlag.evaluate(key, user, dealer);
-    
+
     // Increment evaluation counter
     const flag = await FeatureFlag.getByKey(key);
     if (flag) {
       await flag.incrementEvaluation();
     }
-    
+
     return enabled;
   } catch (err) {
     logError("Failed to evaluate flag", err);
@@ -65,19 +65,19 @@ export const evaluateFlag = async (key, user = null, dealer = null) => {
 export const getAllFlags = async (filters = {}) => {
   try {
     const query = {};
-    
+
     if (filters.category) {
       query.category = filters.category;
     }
-    
+
     if (filters.enabled !== undefined) {
       query.enabled = filters.enabled;
     }
-    
+
     if (filters.environment) {
       query.environments = filters.environment;
     }
-    
+
     const flags = await FeatureFlag.find(query).sort({ category: 1, key: 1 });
     return flags;
   } catch (err) {
@@ -110,7 +110,7 @@ export const createFlag = async (flagData, createdBy) => {
       ...flagData,
       createdBy,
     });
-    
+
     logInfo("Feature flag created", { key: flag.key, category: flag.category });
     return flag;
   } catch (err) {
@@ -132,13 +132,13 @@ export const updateFlag = async (key, flagData, updatedBy) => {
         updatedBy,
         updatedAt: new Date(),
       },
-      { new: true }
+      { new: true },
     );
-    
+
     if (!flag) {
       throw new Error(`Flag with key "${key}" not found`);
     }
-    
+
     logInfo("Feature flag updated", { key, category: flag.category });
     return flag;
   } catch (err) {
@@ -154,11 +154,11 @@ export const updateFlag = async (key, flagData, updatedBy) => {
 export const deleteFlag = async (key) => {
   try {
     const flag = await FeatureFlag.findOneAndDelete({ key });
-    
+
     if (!flag) {
       throw new Error(`Flag with key "${key}" not found`);
     }
-    
+
     logInfo("Feature flag deleted", { key, category: flag.category });
     return flag;
   } catch (err) {
@@ -189,11 +189,11 @@ export const toggleFlag = async (key) => {
 export const getFlagStats = async (key) => {
   try {
     const flag = await FeatureFlag.getByKey(key);
-    
+
     if (!flag) {
       throw new Error(`Flag with key "${key}" not found`);
     }
-    
+
     return {
       key: flag.key,
       name: flag.name,
@@ -262,11 +262,11 @@ export const getFlagCategories = async () => {
 export const batchEvaluateFlags = async (keys, user = null, dealer = null) => {
   try {
     const results = {};
-    
+
     for (const key of keys) {
       results[key] = await evaluateFlag(key, user, dealer);
     }
-    
+
     return results;
   } catch (err) {
     logError("Failed to batch evaluate flags", err);
@@ -282,11 +282,11 @@ export const getEnabledFlagsForUser = async (user, dealer = null) => {
   try {
     const allFlags = await FeatureFlag.getEnabledFlags();
     const enabledFlags = {};
-    
+
     for (const flag of allFlags) {
       enabledFlags[flag.key] = flag.isEnabled(user, dealer);
     }
-    
+
     return enabledFlags;
   } catch (err) {
     logError("Failed to get enabled flags for user", err);

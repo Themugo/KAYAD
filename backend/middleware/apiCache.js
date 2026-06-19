@@ -15,13 +15,13 @@ export const API_CACHE_TTL = {
   STATS: 60, // 1 minute
   METRICS: 60, // 1 minute
   QUEUE_HEALTH: 30, // 30 seconds
-  
+
   // Medium-frequency data (medium TTL)
   LISTINGS: 300, // 5 minutes
   USER_DATA: 300, // 5 minutes
   DEALER_DATA: 300, // 5 minutes
   ANALYTICS: 300, // 5 minutes
-  
+
   // Low-frequency data (long TTL)
   MARKET_DATA: 600, // 10 minutes
   CONFIG: 3600, // 1 hour

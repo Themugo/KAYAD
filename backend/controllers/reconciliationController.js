@@ -362,20 +362,23 @@ export const exportReconciliationReport = async (req, res) => {
 
     if (format === "csv") {
       // Generate CSV
-      const csvHeaders = "Type,Severity,Description,Transaction ID,Model,Amount Difference,Resolved,Resolved At,Resolved By\n";
-      const csvRows = report.issues.map((issue) => {
-        return [
-          issue.type,
-          issue.severity,
-          `"${issue.description.replace(/"/g, '""')}"`,
-          issue.transactionId || "",
-          issue.transactionModel || "",
-          issue.amountDifference || 0,
-          issue.resolved ? "Yes" : "No",
-          issue.resolvedAt || "",
-          issue.resolvedBy || "",
-        ].join(",");
-      }).join("\n");
+      const csvHeaders =
+        "Type,Severity,Description,Transaction ID,Model,Amount Difference,Resolved,Resolved At,Resolved By\n";
+      const csvRows = report.issues
+        .map((issue) => {
+          return [
+            issue.type,
+            issue.severity,
+            `"${issue.description.replace(/"/g, '""')}"`,
+            issue.transactionId || "",
+            issue.transactionModel || "",
+            issue.amountDifference || 0,
+            issue.resolved ? "Yes" : "No",
+            issue.resolvedAt || "",
+            issue.resolvedBy || "",
+          ].join(",");
+        })
+        .join("\n");
 
       const csv = csvHeaders + csvRows;
 

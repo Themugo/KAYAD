@@ -14,9 +14,9 @@ import { logInfo, logError } from "../utils/logger.js";
 const runBackup = async () => {
   try {
     logInfo("Starting database backup script");
-    
+
     const result = await createBackup();
-    
+
     if (result.success) {
       logInfo("Backup completed successfully", result);
       console.log("\n=== Backup Summary ===");
@@ -27,7 +27,7 @@ const runBackup = async () => {
       logInfo("Backup skipped", { message: result.message });
       console.log(`\nBackup skipped: ${result.message}`);
     }
-    
+
     process.exit(0);
   } catch (err) {
     logError("Backup script failed", err);
@@ -43,7 +43,7 @@ const runBackup = async () => {
 const showStatus = async () => {
   try {
     const status = await getBackupStatus();
-    
+
     console.log("\n=== Backup Status ===");
     console.log(`Enabled: ${status.enabled}`);
     console.log(`Schedule: ${status.schedule}`);
@@ -52,7 +52,7 @@ const showStatus = async () => {
     console.log(`Total Backups: ${status.totalBackups}`);
     console.log(`Total Size: ${(status.totalSize / 1024 / 1024 / 1024).toFixed(2)} GB`);
     console.log(`Latest Backup: ${status.latestBackup ? status.latestBackup.filename : "None"}`);
-    
+
     process.exit(0);
   } catch (err) {
     logError("Status check failed", err);

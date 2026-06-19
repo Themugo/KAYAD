@@ -188,7 +188,7 @@ describe("Escrow Audit Tracking System", () => {
       it("should log escrow action", async () => {
         const mockReq = {
           ip: "127.0.0.1",
-          get: (header) => header === "user-agent" ? "test-agent" : undefined,
+          get: (header) => (header === "user-agent" ? "test-agent" : undefined),
           id: "test-request-id",
         };
 
@@ -266,9 +266,7 @@ describe("Escrow Audit Tracking System", () => {
 
     describe("GET /api/audit/all", () => {
       it("should get all audit records (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/audit/all")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/audit/all").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -276,9 +274,7 @@ describe("Escrow Audit Tracking System", () => {
       });
 
       it("should deny access to non-admin", async () => {
-        const res = await request(app)
-          .get("/api/audit/all")
-          .set("Authorization", `Bearer ${buyerToken}`);
+        const res = await request(app).get("/api/audit/all").set("Authorization", `Bearer ${buyerToken}`);
 
         expect(res.status).toBe(403);
       });
@@ -299,9 +295,7 @@ describe("Escrow Audit Tracking System", () => {
 
     describe("GET /api/audit/statistics", () => {
       it("should get audit statistics (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/audit/statistics")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/audit/statistics").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -312,9 +306,7 @@ describe("Escrow Audit Tracking System", () => {
 
     describe("GET /api/audit/:id", () => {
       it("should get single audit record (admin only)", async () => {
-        const res = await request(app)
-          .get(`/api/audit/${testAudit._id}`)
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get(`/api/audit/${testAudit._id}`).set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -327,14 +319,14 @@ describe("Escrow Audit Tracking System", () => {
     it("should log audit when confirmDelivery is called", async () => {
       const mockReq = {
         ip: "127.0.0.1",
-        get: (header) => header === "user-agent" ? "test-agent" : undefined,
+        get: (header) => (header === "user-agent" ? "test-agent" : undefined),
         id: "test-request-id",
       };
 
       await testEscrow.confirmDelivery(buyerUser._id, mockReq);
 
       // Wait for async audit logging
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const audits = await EscrowAudit.find({ escrow: testEscrow._id, action: "confirm_delivery" });
       expect(audits.length).toBeGreaterThan(0);

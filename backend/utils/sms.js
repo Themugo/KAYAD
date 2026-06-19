@@ -49,7 +49,7 @@ const doSend = async (phone, message) => {
     const res = await axios.post(
       "https://api.africastalking.com/version1/messaging",
       new URLSearchParams({ username: AT_USERNAME, to, message, from: AT_SENDER_ID || "" }),
-      { 
+      {
         headers: { apiKey: AT_API_KEY, "Content-Type": "application/x-www-form-urlencoded" },
         timeout: 15000,
       },
@@ -63,7 +63,7 @@ const doSend = async (phone, message) => {
 
 export const sendSMS = async (phone, message) => {
   const startTime = Date.now();
-  
+
   try {
     const to = formatPhone(phone);
     if (!to) {
@@ -86,18 +86,18 @@ export const sendSMS = async (phone, message) => {
         incrementCounter("sms_retry", { attempt });
       },
     });
-    
+
     const duration = Date.now() - startTime;
     recordMetric("sms_send_duration", duration);
     incrementCounter("sms_send_success");
-    
+
     logInfo("SMS sent successfully", { phone, to });
     return result;
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("sms_send_duration", duration, { status: "error" });
     incrementCounter("sms_send_failure", { error_type: err.code || "unknown" });
-    
+
     logError("SMS FAILED after retries", err, { phone, error: err.message });
     return false;
   }

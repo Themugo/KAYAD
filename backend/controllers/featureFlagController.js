@@ -30,7 +30,7 @@ export const getAllFlagsHandler = async (req, res) => {
   try {
     const { category, enabled, environment } = req.query;
     const filters = {};
-    
+
     if (category) filters.category = category;
     if (enabled !== undefined) filters.enabled = enabled === "true";
     if (environment) filters.environment = environment;

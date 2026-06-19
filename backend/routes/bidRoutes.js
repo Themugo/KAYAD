@@ -49,7 +49,13 @@ router.get("/:id/bids", validateObjectId, asyncHandler(getAuctionBids));
 // =============================
 // 📲 MPESA CALLBACK (SAFE ENTRY) - Idempotent to prevent duplicate callbacks
 // =============================
-router.post("/mpesa/callback", mpesaIpWhitelist, idempotencyCheck, validateMpesaCallback, asyncHandler(confirmBidPayment));
+router.post(
+  "/mpesa/callback",
+  mpesaIpWhitelist,
+  idempotencyCheck,
+  validateMpesaCallback,
+  asyncHandler(confirmBidPayment),
+);
 
 // =============================
 // 🏁 END AUCTION (ADMIN) - Idempotent to prevent duplicate auction endings

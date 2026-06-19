@@ -11,8 +11,8 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 // =============================
 
 const CircuitState = {
-  CLOSED: "closed",      // Normal operation
-  OPEN: "open",          // Circuit is open, calls are blocked
+  CLOSED: "closed", // Normal operation
+  OPEN: "open", // Circuit is open, calls are blocked
   HALF_OPEN: "half_open", // Testing if service has recovered
 };
 
@@ -21,10 +21,10 @@ const CircuitState = {
 // =============================
 
 const defaultConfig = {
-  failureThreshold: 5,      // Number of failures before opening circuit
-  successThreshold: 2,     // Number of successes before closing circuit
-  timeout: 60000,          // Time (ms) before attempting half-open
-  resetTimeout: 300000,    // Time (ms) before resetting failure count
+  failureThreshold: 5, // Number of failures before opening circuit
+  successThreshold: 2, // Number of successes before closing circuit
+  timeout: 60000, // Time (ms) before attempting half-open
+  resetTimeout: 300000, // Time (ms) before resetting failure count
 };
 
 // =============================

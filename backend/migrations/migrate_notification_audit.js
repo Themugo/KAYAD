@@ -19,7 +19,7 @@ export const up = async () => {
 
     // Check if collection already exists
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(c => c.name === "notificationaudits");
+    const collectionExists = collections.some((c) => c.name === "notificationaudits");
 
     if (collectionExists) {
       logWarn("NotificationAudit collection already exists, skipping creation");
@@ -34,7 +34,7 @@ export const up = async () => {
     let backfillCount = 0;
     try {
       const notifications = await Notification.find({}).sort({ createdAt: -1 }).limit(500);
-      
+
       for (const notification of notifications) {
         try {
           // Create audit record for each notification
@@ -53,21 +53,24 @@ export const up = async () => {
               originalNotification: true,
             },
           });
-          
+
           backfillCount++;
-          
+
           // Log progress every 50 notifications
           if (backfillCount % 50 === 0) {
             logInfo("Backfill progress", { count: backfillCount });
           }
         } catch (err) {
-          logWarn("Failed to backfill audit for notification", { notificationId: notification._id, error: err.message });
+          logWarn("Failed to backfill audit for notification", {
+            notificationId: notification._id,
+            error: err.message,
+          });
         }
       }
-      
-      logInfo("Backfilled audit records for existing notifications", { 
-        total: notifications.length, 
-        success: backfillCount 
+
+      logInfo("Backfilled audit records for existing notifications", {
+        total: notifications.length,
+        success: backfillCount,
       });
     } catch (err) {
       logError("Failed to backfill audit records", err);
@@ -96,7 +99,7 @@ export const down = async () => {
 
     // Drop the collection
     await mongoose.connection.db.dropCollection("notificationaudits");
-    
+
     logInfo("NotificationAudit collection dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -111,12 +114,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -124,7 +128,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

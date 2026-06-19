@@ -10,7 +10,13 @@ import app from "../server.js";
 import Car from "../models/Car.js";
 import DuplicateVehicleLog from "../models/DuplicateVehicleLog.js";
 import User from "../models/User.js";
-import { detectDuplicates, checkByVIN, checkByChassis, checkByRegistration, calculateSimilarity } from "../services/duplicateVehicleService.js";
+import {
+  detectDuplicates,
+  checkByVIN,
+  checkByChassis,
+  checkByRegistration,
+  calculateSimilarity,
+} from "../services/duplicateVehicleService.js";
 
 describe("Duplicate Vehicle Detection System", () => {
   let adminToken;
@@ -32,9 +38,7 @@ describe("Duplicate Vehicle Detection System", () => {
       status: "approved",
     });
 
-    const adminRes = await request(app)
-      .post("/api/auth/login")
-      .send({ email: admin.email, password: "Admin@123456" });
+    const adminRes = await request(app).post("/api/auth/login").send({ email: admin.email, password: "Admin@123456" });
     adminToken = adminRes.body.token;
 
     // Create dealer user
@@ -322,9 +326,7 @@ describe("Duplicate Vehicle Detection System", () => {
 
     describe("GET /api/duplicates/all", () => {
       it("should get all flagged duplicates (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/duplicates/all")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/duplicates/all").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -332,9 +334,7 @@ describe("Duplicate Vehicle Detection System", () => {
       });
 
       it("should deny access to non-admin", async () => {
-        const res = await request(app)
-          .get("/api/duplicates/all")
-          .set("Authorization", `Bearer ${dealerToken}`);
+        const res = await request(app).get("/api/duplicates/all").set("Authorization", `Bearer ${dealerToken}`);
 
         expect(res.status).toBe(403);
       });
@@ -397,9 +397,7 @@ describe("Duplicate Vehicle Detection System", () => {
 
     describe("GET /api/duplicates/statistics", () => {
       it("should get duplicate statistics (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/duplicates/statistics")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/duplicates/statistics").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -412,24 +410,21 @@ describe("Duplicate Vehicle Detection System", () => {
 
   describe("Non-Blocking Behavior", () => {
     it("should allow listing creation even with duplicates", async () => {
-      const res = await request(app)
-        .post("/api/cars")
-        .set("Authorization", `Bearer ${dealerToken}`)
-        .send({
-          title: "Test Car with Duplicate VIN",
-          brand: "Toyota",
-          model: "Corolla",
-          year: 2020,
-          price: 1100000,
-          vin: "JTDKN3DU5A0123456", // Same VIN as testCar1
-          images: [],
-        });
+      const res = await request(app).post("/api/cars").set("Authorization", `Bearer ${dealerToken}`).send({
+        title: "Test Car with Duplicate VIN",
+        brand: "Toyota",
+        model: "Corolla",
+        year: 2020,
+        price: 1100000,
+        vin: "JTDKN3DU5A0123456", // Same VIN as testCar1
+        images: [],
+      });
 
       // Listing should be created (non-blocking)
-        // Note: This might fail due to image upload requirement, but should not fail due to duplicate detection
-        if (res.status !== 201 && res.status !== 400) {
-          expect(res.status).not.toBe(403);
-        }
+      // Note: This might fail due to image upload requirement, but should not fail due to duplicate detection
+      if (res.status !== 201 && res.status !== 400) {
+        expect(res.status).not.toBe(403);
+      }
     });
   });
 

@@ -49,7 +49,7 @@ describe("FeatureFlag Model", () => {
         key: "test_flag",
         name: "Test Flag 2",
         type: "boolean",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -58,7 +58,7 @@ describe("FeatureFlag Model", () => {
       FeatureFlag.create({
         key: "test_flag",
         type: "invalid_type",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -67,7 +67,7 @@ describe("FeatureFlag Model", () => {
       FeatureFlag.create({
         key: "test_flag",
         category: "invalid_category",
-      })
+      }),
     ).rejects.toThrow();
   });
 

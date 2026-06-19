@@ -418,14 +418,16 @@ describe("MileageImpact Model", () => {
         brand: "Toyota",
         bodyType: "Sedan",
       },
-      mileageRanges: [{
-        minMileage: 0,
-        maxMileage: 50000,
-        averagePrice: 1500000,
-        pricePerMile: 30,
-        depreciationFactor: 0.02,
-        sampleSize: 100,
-      }],
+      mileageRanges: [
+        {
+          minMileage: 0,
+          maxMileage: 50000,
+          averagePrice: 1500000,
+          pricePerMile: 30,
+          depreciationFactor: 0.02,
+          sampleSize: 100,
+        },
+      ],
       impact: {
         pricePer1000Miles: 30000,
         criticalMileage: 100000,
@@ -455,11 +457,13 @@ describe("MileageImpact Model", () => {
       vehicle: {
         brand: "Toyota",
       },
-      mileageRanges: [{
-        minMileage: 0,
-        maxMileage: 50000,
-        pricePerMile: 30,
-      }],
+      mileageRanges: [
+        {
+          minMileage: 0,
+          maxMileage: 50000,
+          pricePerMile: 30,
+        },
+      ],
     });
 
     const pricePerMile = mileageImpact.getPricePerMile(25000);
@@ -472,11 +476,13 @@ describe("MileageImpact Model", () => {
       vehicle: {
         brand: "Toyota",
       },
-      mileageRanges: [{
-        minMileage: 0,
-        maxMileage: 50000,
-        pricePerMile: 30,
-      }],
+      mileageRanges: [
+        {
+          minMileage: 0,
+          maxMileage: 50000,
+          pricePerMile: 30,
+        },
+      ],
     });
 
     const depreciation = mileageImpact.predictMileageDepreciation(50000, 1500000);

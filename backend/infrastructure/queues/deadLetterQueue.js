@@ -230,7 +230,7 @@ export const getDLQStatistics = async () => {
     }
 
     const counts = await deadLetterQueue.getJobCounts();
-    const jobs = await deadLetterQueue.getJobs([ "waiting", "active", "completed", "failed" ], 0, 100);
+    const jobs = await deadLetterQueue.getJobs(["waiting", "active", "completed", "failed"], 0, 100);
 
     // Group by original queue
     const byQueue = {};

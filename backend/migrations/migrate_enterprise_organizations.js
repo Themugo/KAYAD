@@ -25,8 +25,8 @@ export const up = async () => {
 
     // Check if collections already exist
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const organizationExists = collections.some(c => c.name === "organizations");
-    
+    const organizationExists = collections.some((c) => c.name === "organizations");
+
     if (organizationExists) {
       logWarn("Organization collection already exists, skipping creation");
       return { success: true, message: "Collections already exist" };
@@ -38,14 +38,14 @@ export const up = async () => {
     await Department.init();
     await Team.init();
     await Role.init();
-    
+
     logInfo("Organization indexes created");
 
     // Migrate existing dealers to organizations
     let migrationCount = 0;
     try {
       const dealers = await Dealer.find({}).populate("user").sort({ createdAt: -1 }).limit(500);
-      
+
       for (const dealer of dealers) {
         try {
           // Check if organization already exists for this dealer
@@ -57,7 +57,7 @@ export const up = async () => {
 
           // Create organization from dealer
           const organization = await Organization.createFromDealer(dealer, dealer.user);
-          
+
           // Create default branch for the organization
           const branch = await Branch.create({
             organization: organization._id,
@@ -76,7 +76,7 @@ export const up = async () => {
 
           // Migrate existing dealer team to new team structure
           const dealerTeams = await DealerTeam.find({ dealer: dealer.user._id });
-          
+
           for (const dealerTeam of dealerTeams) {
             try {
               const team = await Team.create({
@@ -105,7 +105,7 @@ export const up = async () => {
           }
 
           migrationCount++;
-          
+
           // Log progress every 50 migrations
           if (migrationCount % 50 === 0) {
             logInfo("Migration progress", { count: migrationCount });
@@ -114,10 +114,10 @@ export const up = async () => {
           logWarn("Failed to migrate dealer to organization", { dealerId: dealer._id, error: err.message });
         }
       }
-      
-      logInfo("Dealer migration completed", { 
-        total: dealers.length, 
-        success: migrationCount 
+
+      logInfo("Dealer migration completed", {
+        total: dealers.length,
+        success: migrationCount,
       });
     } catch (err) {
       logError("Failed to migrate dealers", err);
@@ -192,7 +192,11 @@ export const up = async () => {
               organization: organization._id,
             });
           } catch (err) {
-            logWarn("Failed to create system role", { organizationId: organization._id, roleName: roleData.name, error: err.message });
+            logWarn("Failed to create system role", {
+              organizationId: organization._id,
+              roleName: roleData.name,
+              error: err.message,
+            });
           }
         }
       }
@@ -229,7 +233,7 @@ export const down = async () => {
     await mongoose.connection.db.dropCollection("departments");
     await mongoose.connection.db.dropCollection("teams");
     await mongoose.connection.db.dropCollection("roles");
-    
+
     logInfo("Organization collections dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -244,12 +248,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -257,7 +262,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

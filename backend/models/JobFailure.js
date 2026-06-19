@@ -169,11 +169,7 @@ jobFailureSchema.statics.getFailuresByQueue = async function (queueName, options
     query.resolvedAt = { $exists: true };
   }
 
-  const failures = await this.find(query)
-    .sort({ failedAt: -1 })
-    .limit(limit)
-    .skip(skip)
-    .lean();
+  const failures = await this.find(query).sort({ failedAt: -1 }).limit(limit).skip(skip).lean();
 
   const total = await this.countDocuments(query);
 

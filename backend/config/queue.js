@@ -192,26 +192,22 @@ export const getQueue = (queueName) => {
 
   queue.on("failed", async (job, err) => {
     logError(`Job failed: ${queueName}`, err, { jobId: job?.id, name: job?.name });
-    
+
     // Move to dead letter queue after all retries exhausted
     if (job && job.attemptsMade >= job.opts.attempts) {
       try {
         const dlq = getDeadLetterQueue(queueName);
-        await dlq.add(
-          `${queueName}:${job.id}`,
-          job.data,
-          {
-            jobId: job.id,
-            attemptsMade: job.attemptsMade,
-            failedReason: err.message,
-            originalQueue: queueName,
-            timestamp: new Date().toISOString(),
-          }
-        );
+        await dlq.add(`${queueName}:${job.id}`, job.data, {
+          jobId: job.id,
+          attemptsMade: job.attemptsMade,
+          failedReason: err.message,
+          originalQueue: queueName,
+          timestamp: new Date().toISOString(),
+        });
         logInfo(`Job moved to DLQ: ${queueName}`, { jobId: job.id, dlqName: `${queueName}:dlq` });
-        
+
         // Alert if DLQ size exceeds threshold
-        const dlqCount = await dlq.getJobCountByTypes('waiting');
+        const dlqCount = await dlq.getJobCountByTypes("waiting");
         if (dlqCount > 100) {
           logError(`⚠️ Dead letter queue size warning: ${dlqName}`, { count: dlqCount });
         }
@@ -264,23 +260,17 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
 // =============================
 
 export const closeQueues = async () => {
-  await Promise.all(
-    Object.values(queues).map((queue) => queue.close()),
-  );
+  await Promise.all(Object.values(queues).map((queue) => queue.close()));
   logInfo("All queues closed");
 };
 
 export const closeDeadLetterQueues = async () => {
-  await Promise.all(
-    Object.values(deadLetterQueues).map((dlq) => dlq.close()),
-  );
+  await Promise.all(Object.values(deadLetterQueues).map((dlq) => dlq.close()));
   logInfo("All dead letter queues closed");
 };
 
 export const closeWorkers = async () => {
-  await Promise.all(
-    Object.values(workers).map((worker) => worker.close()),
-  );
+  await Promise.all(Object.values(workers).map((worker) => worker.close()));
   logInfo("All workers closed");
 };
 
@@ -311,6 +301,8 @@ export const getQueueMetrics = async (queueName) => {
     delayed,
   };
 };
+
+export { connection };
 
 export default {
   getQueue,

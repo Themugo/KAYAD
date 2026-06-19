@@ -34,10 +34,14 @@ router.get("/platform-stats", adminOnly, asyncHandler(getPlatformOrganizationSta
 router.post("/", adminOnly, asyncHandler(createOrganizationHandler));
 
 // Get all organizations (admin only)
-router.get("/", adminOnly, asyncHandler(async (req, res) => {
-  // This would need to be implemented in the controller
-  res.json({ success: true, data: [] });
-}));
+router.get(
+  "/",
+  adminOnly,
+  asyncHandler(async (req, res) => {
+    // This would need to be implemented in the controller
+    res.json({ success: true, data: [] });
+  }),
+);
 
 // =============================
 // 🔐 ORGANIZATION ROUTES

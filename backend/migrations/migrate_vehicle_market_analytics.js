@@ -19,7 +19,7 @@ export const up = async () => {
 
     // Check if collection already exists
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(c => c.name === "vehiclemarketanalytics");
+    const collectionExists = collections.some((c) => c.name === "vehiclemarketanalytics");
 
     if (collectionExists) {
       logWarn("VehicleMarketAnalytics collection already exists, skipping creation");
@@ -67,7 +67,10 @@ export const up = async () => {
           await generateMarketAnalytics("monthly", startDate, endDate);
           monthlyBackfillCount++;
         } catch (err) {
-          logWarn("Failed to generate monthly analytics for month", { month: startDate.toISOString(), error: err.message });
+          logWarn("Failed to generate monthly analytics for month", {
+            month: startDate.toISOString(),
+            error: err.message,
+          });
         }
       }
       logInfo("Backfilled monthly analytics", { count: monthlyBackfillCount });
@@ -106,7 +109,7 @@ export const down = async () => {
 
     // Drop the collection
     await mongoose.connection.db.dropCollection("vehiclemarketanalytics");
-    
+
     logInfo("VehicleMarketAnalytics collection dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -121,12 +124,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -134,7 +138,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

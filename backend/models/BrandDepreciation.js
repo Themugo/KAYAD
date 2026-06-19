@@ -87,21 +87,25 @@ const brandDepreciationSchema = new mongoose.Schema(
     // =============================
     // 📊 HISTORICAL DATA
     // =============================
-    historical: [{
-      year: Number,
-      averagePrice: Number,
-      depreciationRate: Number,
-      sampleSize: Number,
-    }],
+    historical: [
+      {
+        year: Number,
+        averagePrice: Number,
+        depreciationRate: Number,
+        sampleSize: Number,
+      },
+    ],
 
     // =============================
     // 📊 CATEGORY DATA
     // =============================
-    categories: [{
-      bodyType: String,
-      depreciationRate: Number,
-      averagePrice: Number,
-    }],
+    categories: [
+      {
+        bodyType: String,
+        depreciationRate: Number,
+        averagePrice: Number,
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -121,23 +125,23 @@ brandDepreciationSchema.index({ createdAt: -1 });
 // Calculate depreciation rate
 brandDepreciationSchema.methods.calculateDepreciationRate = function (prices) {
   if (prices.length < 2) return this;
-  
+
   const firstPrice = prices[0];
   const lastPrice = prices[prices.length - 1];
   const years = prices.length - 1;
-  
-  const depreciationRate = ((firstPrice - lastPrice) / firstPrice) / years;
+
+  const depreciationRate = (firstPrice - lastPrice) / firstPrice / years;
   this.depreciation.annualRate = depreciationRate;
   this.depreciation.fiveYearRate = depreciationRate * 5;
   this.depreciation.tenYearRate = depreciationRate * 10;
-  
+
   return this;
 };
 
 // Predict resale value
 brandDepreciationSchema.methods.predictResaleValue = function (currentPrice, years) {
   if (this.depreciation.annualRate === 0) return currentPrice;
-  
+
   const depreciationFactor = Math.pow(1 - this.depreciation.annualRate, years);
   return currentPrice * depreciationFactor;
 };
@@ -150,19 +154,19 @@ brandDepreciationSchema.methods.updateHistoricalData = function (year, averagePr
     depreciationRate,
     sampleSize,
   });
-  
+
   // Keep only last 20 entries
   if (this.historical.length > 20) {
     this.historical = this.historical.slice(-20);
   }
-  
+
   return this;
 };
 
 // Add category data
 brandDepreciationSchema.methods.addCategoryData = function (bodyType, depreciationRate, averagePrice) {
-  const existingCategory = this.categories.find(c => c.bodyType === bodyType);
-  
+  const existingCategory = this.categories.find((c) => c.bodyType === bodyType);
+
   if (existingCategory) {
     existingCategory.depreciationRate = depreciationRate;
     existingCategory.averagePrice = averagePrice;
@@ -173,7 +177,7 @@ brandDepreciationSchema.methods.addCategoryData = function (bodyType, depreciati
       averagePrice,
     });
   }
-  
+
   return this;
 };
 
@@ -183,74 +187,65 @@ brandDepreciationSchema.methods.addCategoryData = function (bodyType, depreciati
 
 // Get brand depreciation by brand
 brandDepreciationSchema.statics.getByBrand = async function (brand) {
-  return this.findOne({ brand })
-    .lean();
+  return this.findOne({ brand }).lean();
 };
 
 // Get all brand depreciations
 brandDepreciationSchema.statics.getAll = async function () {
-  return this.find({})
-    .sort({ "market.popularityScore": -1 })
-    .lean();
+  return this.find({}).sort({ "market.popularityScore": -1 }).lean();
 };
 
 // Get top brands by reliability
 brandDepreciationSchema.statics.getTopByReliability = async function (limit = 10) {
-  return this.find({})
-    .sort({ "market.reliabilityScore": -1 })
-    .limit(limit)
-    .lean();
+  return this.find({}).sort({ "market.reliabilityScore": -1 }).limit(limit).lean();
 };
 
 // Get top brands by popularity
 brandDepreciationSchema.statics.getTopByPopularity = async function (limit = 10) {
-  return this.find({})
-    .sort({ "market.popularityScore": -1 })
-    .limit(limit)
-    .lean();
+  return this.find({}).sort({ "market.popularityScore": -1 }).limit(limit).lean();
 };
 
 // Calculate brand depreciation from valuations
 brandDepreciationSchema.statics.calculateFromValuations = async function (brand) {
   const VehicleValuation = mongoose.model("VehicleValuation");
-  
+
   const valuations = await VehicleValuation.find({
     "vehicle.brand": brand,
     "pricing.salePrice": { $gt: 0 },
   })
     .sort({ "vehicle.year": -1 })
     .lean();
-  
+
   if (valuations.length === 0) return null;
-  
+
   // Group by year
   const yearGroups = {};
-  valuations.forEach(v => {
+  valuations.forEach((v) => {
     const year = v.vehicle.year;
     if (!yearGroups[year]) {
       yearGroups[year] = [];
     }
     yearGroups[year].push(v.pricing.salePrice);
   });
-  
+
   // Calculate average price per year
   const yearlyPrices = Object.keys(yearGroups)
     .sort((a, b) => b - a)
-    .map(year => ({
+    .map((year) => ({
       year: parseInt(year),
       averagePrice: yearGroups[year].reduce((sum, price) => sum + price, 0) / yearGroups[year].length,
       sampleSize: yearGroups[year].length,
     }));
-  
+
   if (yearlyPrices.length < 2) return null;
-  
+
   // Calculate depreciation rate
   const firstPrice = yearlyPrices[0].averagePrice;
   const lastPrice = yearlyPrices[yearlyPrices.length - 1].averagePrice;
   const years = yearlyPrices[0].year - yearlyPrices[yearlyPrices.length - 1].year;
-  
-  const depreciationRate = years > 0 ? ((firstPrice - lastPrice) / firstPrice) / years : 0;
-  
+
+  const depreciationRate = years > 0 ? (firstPrice - lastPrice) / firstPrice / years : 0;
+
   return {
     brand,
     depreciation: {
@@ -271,6 +266,7 @@ brandDepreciationSchema.statics.calculateFromValuations = async function (brand)
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const BrandDepreciation = mongoose.models.BrandDepreciation || mongoose.model("BrandDepreciation", brandDepreciationSchema);
+const BrandDepreciation =
+  mongoose.models.BrandDepreciation || mongoose.model("BrandDepreciation", brandDepreciationSchema);
 
 export default BrandDepreciation;

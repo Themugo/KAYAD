@@ -55,10 +55,12 @@ const departmentSchema = new mongoose.Schema(
       index: true,
     },
 
-    members: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     // =============================
     // 📊 METADATA
@@ -111,7 +113,7 @@ departmentSchema.methods.addMember = async function (userId) {
 
 // Remove department member
 departmentSchema.methods.removeMember = async function (userId) {
-  this.members = this.members.filter(id => id.toString() !== userId.toString());
+  this.members = this.members.filter((id) => id.toString() !== userId.toString());
   if (this.head && this.head.toString() === userId.toString()) {
     this.head = null;
   }
@@ -122,8 +124,7 @@ departmentSchema.methods.removeMember = async function (userId) {
 
 // Check if user is member
 departmentSchema.methods.isMember = function (userId) {
-  return this.head?.toString() === userId.toString() ||
-         this.members.some(id => id.toString() === userId.toString());
+  return this.head?.toString() === userId.toString() || this.members.some((id) => id.toString() === userId.toString());
 };
 
 // Check if user is head
@@ -164,30 +165,22 @@ departmentSchema.methods.decrementTeamCount = async function () {
 
 // Get departments by organization
 departmentSchema.statics.getByOrganization = async function (organizationId) {
-  return this.find({ organization: organizationId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ organization: organizationId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get departments by branch
 departmentSchema.statics.getByBranch = async function (branchId) {
-  return this.find({ branch: branchId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ branch: branchId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get departments by head
 departmentSchema.statics.getByHead = async function (headId) {
-  return this.find({ head: headId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ head: headId }).sort({ name: 1 }).lean();
 };
 
 // Get departments by member
 departmentSchema.statics.getByMember = async function (memberId) {
-  return this.find({ members: memberId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ members: memberId }).sort({ name: 1 }).lean();
 };
 
 // Check if user belongs to department
@@ -195,8 +188,10 @@ departmentSchema.statics.userBelongsToDepartment = async function (userId, depar
   const department = await this.findById(departmentId);
   if (!department) return false;
 
-  return department.head?.toString() === userId.toString() ||
-         department.members.some(id => id.toString() === userId.toString());
+  return (
+    department.head?.toString() === userId.toString() ||
+    department.members.some((id) => id.toString() === userId.toString())
+  );
 };
 
 // =============================

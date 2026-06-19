@@ -63,7 +63,7 @@ export const getListingQuality = async (carId) => {
 export const getDealerQualityStats = async (dealerId) => {
   try {
     const qualities = await ListingQuality.getByDealer(dealerId);
-    
+
     if (qualities.length === 0) {
       return {
         dealerId,
@@ -76,19 +76,19 @@ export const getDealerQualityStats = async (dealerId) => {
 
     const totalListings = qualities.length;
     const averageScore = qualities.reduce((sum, q) => sum + q.overallScore, 0) / totalListings;
-    
+
     const ratingDistribution = {
-      Excellent: qualities.filter(q => q.rating === "Excellent").length,
-      Good: qualities.filter(q => q.rating === "Good").length,
-      Average: qualities.filter(q => q.rating === "Average").length,
-      Poor: qualities.filter(q => q.rating === "Poor").length,
+      Excellent: qualities.filter((q) => q.rating === "Excellent").length,
+      Good: qualities.filter((q) => q.rating === "Good").length,
+      Average: qualities.filter((q) => q.rating === "Average").length,
+      Poor: qualities.filter((q) => q.rating === "Poor").length,
     };
 
     // Aggregate recommendations
-    const allRecommendations = qualities.flatMap(q => q.recommendations);
+    const allRecommendations = qualities.flatMap((q) => q.recommendations);
     const recommendationCounts = {};
-    
-    allRecommendations.forEach(rec => {
+
+    allRecommendations.forEach((rec) => {
       const key = `${rec.category}-${rec.message}`;
       if (!recommendationCounts[key]) {
         recommendationCounts[key] = {
@@ -126,7 +126,7 @@ export const getDealerQualityStats = async (dealerId) => {
 export const getPlatformQualityStats = async () => {
   try {
     const distribution = await ListingQuality.getQualityDistribution();
-    
+
     const stats = await ListingQuality.aggregate([
       {
         $group: {
@@ -201,8 +201,8 @@ export const getQualityTrends = async (period = 30) => {
 export const getLowQualityListings = async (threshold = 50, limit = 20) => {
   try {
     const lowQuality = await ListingQuality.getLowQuality(threshold);
-    
-    return lowQuality.slice(0, limit).map(quality => ({
+
+    return lowQuality.slice(0, limit).map((quality) => ({
       carId: quality.car._id,
       carTitle: quality.car.title,
       overallScore: quality.overallScore,
@@ -225,11 +225,11 @@ export const generateQualityReport = async (dealerId) => {
   try {
     const stats = await getDealerQualityStats(dealerId);
     const qualities = await ListingQuality.getByDealer(dealerId);
-    
+
     // Calculate improvement opportunities
     const improvementAreas = {};
-    qualities.forEach(quality => {
-      quality.recommendations.forEach(rec => {
+    qualities.forEach((quality) => {
+      quality.recommendations.forEach((rec) => {
         if (!improvementAreas[rec.category]) {
           improvementAreas[rec.category] = {
             category: rec.category,
@@ -245,8 +245,7 @@ export const generateQualityReport = async (dealerId) => {
       });
     });
 
-    const sortedImprovementAreas = Object.values(improvementAreas)
-      .sort((a, b) => b.count - a.count);
+    const sortedImprovementAreas = Object.values(improvementAreas).sort((a, b) => b.count - a.count);
 
     return {
       ...stats,
@@ -266,7 +265,7 @@ export const generateQualityReport = async (dealerId) => {
 export const bulkRecalculateDealerQuality = async (dealerId) => {
   try {
     const cars = await Car.find({ dealer: dealerId, status: "active" });
-    
+
     const results = [];
     for (const car of cars) {
       try {
@@ -285,11 +284,11 @@ export const bulkRecalculateDealerQuality = async (dealerId) => {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    logInfo("Bulk dealer quality recalculation completed", { 
-      dealerId, 
-      total: cars.length, 
-      success: successCount 
+    const successCount = results.filter((r) => r.success).length;
+    logInfo("Bulk dealer quality recalculation completed", {
+      dealerId,
+      total: cars.length,
+      success: successCount,
     });
 
     return {
@@ -312,7 +311,7 @@ export const bulkRecalculateDealerQuality = async (dealerId) => {
 export const getQualityBenchmarks = async () => {
   try {
     const platformStats = await getPlatformQualityStats();
-    
+
     return {
       platformAverage: platformStats.averageScore,
       platformMedian: platformStats.medianScore,

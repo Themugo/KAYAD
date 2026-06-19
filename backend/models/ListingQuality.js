@@ -66,7 +66,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       descriptionQuality: {
         score: Number,
-        weight: { type: Number, default: 0.20 },
+        weight: { type: Number, default: 0.2 },
         details: {
           wordCount: Number,
           recommendedMin: Number,
@@ -96,7 +96,7 @@ const listingQualitySchema = new mongoose.Schema(
 
       verificationStatus: {
         score: Number,
-        weight: { type: Number, default: 0.10 },
+        weight: { type: Number, default: 0.1 },
         details: {
           isVerified: Boolean,
           verificationStatus: String,
@@ -243,7 +243,7 @@ listingQualitySchema.methods.calculateImageQualityScore = function (car) {
 // Calculate description quality score
 listingQualitySchema.methods.calculateDescriptionQualityScore = function (car) {
   const description = car.description || "";
-  const wordCount = description.split(/\s+/).filter(word => word.length > 0).length;
+  const wordCount = description.split(/\s+/).filter((word) => word.length > 0).length;
   const recommendedMin = 50;
 
   let score;
@@ -254,15 +254,14 @@ listingQualitySchema.methods.calculateDescriptionQualityScore = function (car) {
 
   // Check for completeness (basic keywords)
   const keywords = ["condition", "history", "features", "maintenance", "service"];
-  const completeness = keywords.filter(keyword => 
-    description.toLowerCase().includes(keyword)
-  ).length / keywords.length * 100;
+  const completeness =
+    (keywords.filter((keyword) => description.toLowerCase().includes(keyword)).length / keywords.length) * 100;
 
   const finalScore = (score + completeness) / 2;
 
   return {
     score: Math.round(finalScore),
-    weight: 0.20,
+    weight: 0.2,
     details: {
       wordCount,
       recommendedMin,
@@ -273,11 +272,22 @@ listingQualitySchema.methods.calculateDescriptionQualityScore = function (car) {
 
 // Calculate missing attributes score
 listingQualitySchema.methods.calculateMissingAttributesScore = function (car) {
-  const requiredFields = ["brand", "model", "year", "price", "mileage", "fuel", "transmission", "bodyType", "color", "condition"];
+  const requiredFields = [
+    "brand",
+    "model",
+    "year",
+    "price",
+    "mileage",
+    "fuel",
+    "transmission",
+    "bodyType",
+    "color",
+    "condition",
+  ];
   const providedFields = [];
   const missingFields = [];
 
-  requiredFields.forEach(field => {
+  requiredFields.forEach((field) => {
     if (car[field] && car[field] !== "") {
       providedFields.push(field);
     } else {
@@ -339,7 +349,7 @@ listingQualitySchema.methods.calculateVerificationStatusScore = async function (
   if (!dealer) {
     return {
       score: 50,
-      weight: 0.10,
+      weight: 0.1,
       details: {
         isVerified: false,
         verificationStatus: "No dealer",
@@ -353,7 +363,7 @@ listingQualitySchema.methods.calculateVerificationStatusScore = async function (
   if (!verification) {
     return {
       score: 50,
-      weight: 0.10,
+      weight: 0.1,
       details: {
         isVerified: false,
         verificationStatus: "Not verified",
@@ -370,7 +380,7 @@ listingQualitySchema.methods.calculateVerificationStatusScore = async function (
 
   return {
     score,
-    weight: 0.10,
+    weight: 0.1,
     details: {
       isVerified: status === "approved",
       verificationStatus: status,

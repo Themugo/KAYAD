@@ -109,13 +109,20 @@ export const logVehicleCreated = async (vehicle, actor, req) => {
  */
 export const logVehicleEdited = async (vehicle, oldData, actor, req) => {
   const changes = [];
-  
+
   // Compare fields and track changes
   const fieldsToCompare = [
-    "make", "model", "year", "price", "mileage", "status", 
-    "description", "location", "condition"
+    "make",
+    "model",
+    "year",
+    "price",
+    "mileage",
+    "status",
+    "description",
+    "location",
+    "condition",
   ];
-  
+
   for (const field of fieldsToCompare) {
     if (oldData[field] !== vehicle[field]) {
       changes.push({
@@ -395,7 +402,7 @@ export const logDealerVerificationSubmitted = async (verification, actor, req) =
     sessionId: req?.sessionID,
     details: {
       dealerId: verification.dealer,
-      documentTypes: verification.documents?.map(d => d.type),
+      documentTypes: verification.documents?.map((d) => d.type),
     },
     severity: "info",
   });

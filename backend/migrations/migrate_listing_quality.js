@@ -19,7 +19,7 @@ export const up = async () => {
 
     // Check if collection already exists
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(c => c.name === "listingqualities");
+    const collectionExists = collections.some((c) => c.name === "listingqualities");
 
     if (collectionExists) {
       logWarn("ListingQuality collection already exists, skipping creation");
@@ -36,7 +36,7 @@ export const up = async () => {
 
     try {
       const cars = await Car.find({ status: "active" }).limit(1000); // Limit to 1000 for initial backfill
-      
+
       for (const car of cars) {
         try {
           const quality = await ListingQuality.create({
@@ -47,12 +47,12 @@ export const up = async () => {
             scoreBreakdown: {},
             recommendations: [],
           });
-          
+
           // Calculate quality score
           await quality.calculateScore();
-          
+
           backfillCount++;
-          
+
           // Log progress every 50 listings
           if (backfillCount % 50 === 0) {
             logInfo("Backfill progress", { count: backfillCount });
@@ -62,11 +62,11 @@ export const up = async () => {
           logWarn("Failed to backfill quality for car", { carId: car._id, error: err.message });
         }
       }
-      
-      logInfo("Backfilled quality scores for existing listings", { 
-        total: cars.length, 
-        success: backfillCount, 
-        errors: errorCount 
+
+      logInfo("Backfilled quality scores for existing listings", {
+        total: cars.length,
+        success: backfillCount,
+        errors: errorCount,
       });
     } catch (err) {
       logError("Failed to backfill quality scores", err);
@@ -95,7 +95,7 @@ export const down = async () => {
 
     // Drop the collection
     await mongoose.connection.db.dropCollection("listingqualities");
-    
+
     logInfo("ListingQuality collection dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -110,12 +110,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -123,7 +124,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

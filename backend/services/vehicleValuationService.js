@@ -301,7 +301,7 @@ export const calculateVehicleValue = async (carId) => {
 export const getHistoricalPrices = async (carId) => {
   try {
     const valuations = await VehicleValuation.getByVehicle(carId);
-    return valuations.map(v => ({
+    return valuations.map((v) => ({
       price: v.pricing.salePrice || v.pricing.listingPrice,
       date: v.valuationDate,
       source: v.source,
@@ -330,7 +330,8 @@ export const getMarketPosition = async (carId) => {
       return null;
     }
 
-    const percentDifference = ((car.price - marketPricing.pricing.averagePrice) / marketPricing.pricing.averagePrice) * 100;
+    const percentDifference =
+      ((car.price - marketPricing.pricing.averagePrice) / marketPricing.pricing.averagePrice) * 100;
 
     let position;
     if (percentDifference < -10) {
@@ -362,8 +363,7 @@ export const updateValuation = async (carId) => {
     const valuation = await calculateVehicleValue(carId);
     if (!valuation) return null;
 
-    const existingValuation = await VehicleValuation.findOne({ car: carId })
-      .sort({ valuationDate: -1 });
+    const existingValuation = await VehicleValuation.findOne({ car: carId }).sort({ valuationDate: -1 });
 
     if (existingValuation) {
       existingValuation.valuation = valuation.valuation;

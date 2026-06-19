@@ -61,10 +61,12 @@ const teamSchema = new mongoose.Schema(
       index: true,
     },
 
-    members: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     // =============================
     // 🔐 PERMISSIONS
@@ -134,7 +136,7 @@ teamSchema.methods.addMember = async function (userId) {
 
 // Remove team member
 teamSchema.methods.removeMember = async function (userId) {
-  this.members = this.members.filter(id => id.toString() !== userId.toString());
+  this.members = this.members.filter((id) => id.toString() !== userId.toString());
   if (this.lead && this.lead.toString() === userId.toString()) {
     this.lead = null;
   }
@@ -145,8 +147,7 @@ teamSchema.methods.removeMember = async function (userId) {
 
 // Check if user is member
 teamSchema.methods.isMember = function (userId) {
-  return this.lead?.toString() === userId.toString() ||
-         this.members.some(id => id.toString() === userId.toString());
+  return this.lead?.toString() === userId.toString() || this.members.some((id) => id.toString() === userId.toString());
 };
 
 // Check if user is lead
@@ -199,37 +200,27 @@ teamSchema.methods.decrementListingCount = async function () {
 
 // Get teams by organization
 teamSchema.statics.getByOrganization = async function (organizationId) {
-  return this.find({ organization: organizationId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ organization: organizationId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get teams by branch
 teamSchema.statics.getByBranch = async function (branchId) {
-  return this.find({ branch: branchId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ branch: branchId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get teams by department
 teamSchema.statics.getByDepartment = async function (departmentId) {
-  return this.find({ department: departmentId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ department: departmentId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get teams by lead
 teamSchema.statics.getByLead = async function (leadId) {
-  return this.find({ lead: leadId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ lead: leadId }).sort({ name: 1 }).lean();
 };
 
 // Get teams by member
 teamSchema.statics.getByMember = async function (memberId) {
-  return this.find({ members: memberId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ members: memberId }).sort({ name: 1 }).lean();
 };
 
 // Get team stats
@@ -250,8 +241,7 @@ teamSchema.statics.userBelongsToTeam = async function (userId, teamId) {
   const team = await this.findById(teamId);
   if (!team) return false;
 
-  return team.lead?.toString() === userId.toString() ||
-         team.members.some(id => id.toString() === userId.toString());
+  return team.lead?.toString() === userId.toString() || team.members.some((id) => id.toString() === userId.toString());
 };
 
 // =============================

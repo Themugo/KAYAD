@@ -42,14 +42,14 @@ export const calculateHealthScore = async (dealerId) => {
     // Calculate overall score
     const overallScore =
       verificationScore * 0.15 +
-      accountAgeScore * 0.10 +
-      transactionScore * 0.20 +
+      accountAgeScore * 0.1 +
+      transactionScore * 0.2 +
       escrowScore * 0.15 +
       reviewScore * 0.15 +
       fraudScore * 0.15 +
-      responseScore * 0.10 +
-      listingQualityScore * 0.10 +
-      auctionScore * 0.10;
+      responseScore * 0.1 +
+      listingQualityScore * 0.1 +
+      auctionScore * 0.1;
 
     // Clamp score to 0-100 range
     const clampedScore = Math.max(0, Math.min(100, overallScore));
@@ -94,7 +94,7 @@ export const calculateHealthScore = async (dealerId) => {
         scoreChange,
         trend,
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true },
     );
 
     logInfo("Health score calculated", { dealerId, healthScore: clampedScore, scoreCategory });
@@ -127,7 +127,7 @@ export const calculateHealthScore = async (dealerId) => {
 export const calculateVerificationScore = async (dealerId) => {
   try {
     const verification = await DealerVerification.findOne({ user: dealerId });
-    
+
     if (!verification) {
       return { score: 0, details: { completeness: 0 } };
     }
@@ -188,14 +188,14 @@ export const calculateVerificationScore = async (dealerId) => {
 export const calculateAccountAgeScore = async (dealerId) => {
   try {
     const user = await User.findById(dealerId);
-    
+
     if (!user) {
       return { score: 0, details: { accountAgeDays: 0 } };
     }
 
     const accountCreatedAt = user.createdAt || new Date();
     const accountAgeDays = Math.floor((Date.now() - accountCreatedAt.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     let score = 0;
 
     if (accountAgeDays < 30) {
@@ -230,16 +230,18 @@ export const calculateAccountAgeScore = async (dealerId) => {
 export const calculateTransactionScore = async (dealerId) => {
   try {
     const transactions = await Transaction.find({ user: dealerId, status: { $ne: "pending" } });
-    
+
     if (transactions.length === 0) {
       return { score: 50, details: { totalTransactions: 0, successRate: 100 } };
     }
 
     const totalTransactions = transactions.length;
-    const successfulTransactions = transactions.filter(t => t.status === "success").length;
-    const failedTransactions = transactions.filter(t => t.status === "failed").length;
+    const successfulTransactions = transactions.filter((t) => t.status === "success").length;
+    const failedTransactions = transactions.filter((t) => t.status === "failed").length;
     const successRate = (successfulTransactions / totalTransactions) * 100;
-    const totalRevenue = transactions.filter(t => t.status === "success").reduce((sum, t) => sum + (t.amount || 0), 0);
+    const totalRevenue = transactions
+      .filter((t) => t.status === "success")
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     // Volume score (logarithmic scale)
     let volumeScore = 0;
@@ -251,7 +253,7 @@ export const calculateTransactionScore = async (dealerId) => {
     const consistencyScore = Math.min(100, totalTransactions * 2);
 
     // Overall transaction score
-    const score = (successRate * 0.5) + (volumeScore * 0.3) + (consistencyScore * 0.2);
+    const score = successRate * 0.5 + volumeScore * 0.3 + consistencyScore * 0.2;
 
     const details = {
       totalTransactions,
@@ -277,16 +279,16 @@ export const calculateTransactionScore = async (dealerId) => {
 export const calculateEscrowScore = async (dealerId) => {
   try {
     const escrows = await Escrow.find({ seller: dealerId });
-    
+
     if (escrows.length === 0) {
       return { score: 75, details: { totalEscrows: 0, completionRate: 100 } };
     }
 
     const totalEscrows = escrows.length;
-    const releasedEscrows = escrows.filter(e => e.status === "released").length;
-    const disputedEscrows = escrows.filter(e => e.status === "disputed").length;
-    const refundedEscrows = escrows.filter(e => e.status === "refunded").length;
-    const autoReleasedEscrows = escrows.filter(e => e.autoReleased).length;
+    const releasedEscrows = escrows.filter((e) => e.status === "released").length;
+    const disputedEscrows = escrows.filter((e) => e.status === "disputed").length;
+    const refundedEscrows = escrows.filter((e) => e.status === "refunded").length;
+    const autoReleasedEscrows = escrows.filter((e) => e.autoReleased).length;
 
     const completionRate = totalEscrows > 0 ? (releasedEscrows / totalEscrows) * 100 : 100;
     const disputeRate = totalEscrows > 0 ? (disputedEscrows / totalEscrows) * 100 : 0;
@@ -319,14 +321,14 @@ export const calculateEscrowScore = async (dealerId) => {
 export const calculateReviewScore = async (dealerId) => {
   try {
     const reviews = await Review.find({ dealer: dealerId, isApproved: true });
-    
+
     if (reviews.length === 0) {
       return { score: 70, details: { totalReviews: 0, averageRating: 0 } };
     }
 
     const totalReviews = reviews.length;
     const averageRating = reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
-    const verifiedReviews = reviews.filter(r => r.isVerified).length;
+    const verifiedReviews = reviews.filter((r) => r.isVerified).length;
 
     // Rating score (normalized to 0-100)
     const ratingScore = (averageRating / 5) * 100;
@@ -363,17 +365,17 @@ export const calculateReviewScore = async (dealerId) => {
 export const calculateFraudScore = async (dealerId) => {
   try {
     const fraudFlags = await FraudDetection.find({ target: dealerId, status: { $ne: "dismissed" } });
-    
+
     if (fraudFlags.length === 0) {
       return { score: 0, details: { totalFlags: 0 } };
     }
 
     const totalFlags = fraudFlags.length;
-    const criticalFlags = fraudFlags.filter(f => f.severity === "critical").length;
-    const highFlags = fraudFlags.filter(f => f.severity === "high").length;
-    const mediumFlags = fraudFlags.filter(f => f.severity === "medium").length;
-    const lowFlags = fraudFlags.filter(f => f.severity === "low").length;
-    const confirmedFraud = fraudFlags.filter(f => f.status === "confirmed").length;
+    const criticalFlags = fraudFlags.filter((f) => f.severity === "critical").length;
+    const highFlags = fraudFlags.filter((f) => f.severity === "high").length;
+    const mediumFlags = fraudFlags.filter((f) => f.severity === "medium").length;
+    const lowFlags = fraudFlags.filter((f) => f.severity === "low").length;
+    const confirmedFraud = fraudFlags.filter((f) => f.status === "confirmed").length;
 
     // Calculate fraud score (negative)
     let score = 0;
@@ -393,7 +395,7 @@ export const calculateFraudScore = async (dealerId) => {
       mediumFlags,
       lowFlags,
       confirmedFraud,
-      dismissedFraud: fraudFlags.filter(f => f.status === "dismissed").length,
+      dismissedFraud: fraudFlags.filter((f) => f.status === "dismissed").length,
       score,
     };
 
@@ -412,7 +414,7 @@ export const calculateResponseScore = async (dealerId) => {
   try {
     // Get messages where dealer is the recipient
     const chats = await Chat.find({ participants: dealerId });
-    
+
     if (chats.length === 0) {
       return { score: 70, details: { averageResponseTime: 0 } };
     }
@@ -456,43 +458,43 @@ export const calculateResponseScore = async (dealerId) => {
 export const calculateListingQualityScore = async (dealerId) => {
   try {
     const cars = await Car.find({ dealer: dealerId, isDemo: false });
-    
+
     if (cars.length === 0) {
       return { score: 70, details: { totalListings: 0 } };
     }
 
     const totalListings = cars.length;
-    const flaggedListings = cars.filter(c => c.isFlagged).length;
-    
+    const flaggedListings = cars.filter((c) => c.isFlagged).length;
+
     // Calculate average image count
     const averageImageCount = cars.reduce((sum, c) => sum + (c.images?.length || 0), 0) / totalListings;
-    
+
     // Calculate average description length
     const averageDescriptionLength = cars.reduce((sum, c) => sum + (c.description?.length || 0), 0) / totalListings;
-    
+
     // Calculate specs completeness
     const specFields = ["brand", "model", "year", "fuel", "transmission", "mileage", "bodyType", "color", "condition"];
     let totalSpecFields = 0;
     let filledSpecFields = 0;
-    
-    cars.forEach(car => {
-      specFields.forEach(field => {
+
+    cars.forEach((car) => {
+      specFields.forEach((field) => {
         totalSpecFields++;
         if (car[field]) filledSpecFields++;
       });
     });
-    
+
     const specsCompleteness = totalSpecFields > 0 ? (filledSpecFields / totalSpecFields) * 100 : 0;
 
     // Image score
     const imageScore = Math.min(100, averageImageCount * 10);
-    
+
     // Description score
     const descriptionScore = Math.min(100, averageDescriptionLength / 5);
-    
+
     // Specs score
     const specsScore = specsCompleteness;
-    
+
     // Flag penalty
     const flagPenalty = totalListings > 0 ? (flaggedListings / totalListings) * 50 : 0;
 
@@ -522,29 +524,29 @@ export const calculateListingQualityScore = async (dealerId) => {
 export const calculateAuctionScore = async (dealerId) => {
   try {
     const cars = await Car.find({ dealer: dealerId, isAuction: true });
-    const auctionIds = cars.map(c => c._id);
-    
+    const auctionIds = cars.map((c) => c._id);
+
     if (auctionIds.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
     }
 
     const auctions = await Auction.find({ carId: { $in: auctionIds } });
-    
+
     if (auctions.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
     }
 
     const totalAuctions = auctions.length;
-    const completedAuctions = auctions.filter(a => a.status === "completed").length;
-    const totalWinners = auctions.filter(a => a.winner).length;
-    const paidWinners = auctions.filter(a => a.status === "completed").length; // Simplified
-    
+    const completedAuctions = auctions.filter((a) => a.status === "completed").length;
+    const totalWinners = auctions.filter((a) => a.winner).length;
+    const paidWinners = auctions.filter((a) => a.status === "completed").length; // Simplified
+
     // Calculate completion rate
     const completionRate = totalAuctions > 0 ? (completedAuctions / totalAuctions) * 100 : 100;
-    
+
     // Calculate payment rate
     const paymentRate = totalWinners > 0 ? (paidWinners / totalWinners) * 100 : 100;
-    
+
     // Calculate average bids per auction
     const totalBids = auctions.reduce((sum, a) => sum + (a.bidHistory?.length || 0), 0);
     const averageBidsPerAuction = totalAuctions > 0 ? totalBids / totalAuctions : 0;
@@ -577,7 +579,7 @@ export const calculateAuctionScore = async (dealerId) => {
 export const recalculateAllScores = async () => {
   try {
     const dealers = await Dealer.find({ approved: true }).select("user");
-    
+
     logInfo("Starting health score recalculation", { totalDealers: dealers.length });
 
     let successCount = 0;

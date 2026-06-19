@@ -21,46 +21,58 @@ export const startScheduler = () => {
     logInfo("Starting Marketplace Health Scheduler");
 
     // Hourly health - runs every hour
-    hourlyJob = cron.schedule("0 * * * *", async () => {
-      try {
-        logInfo("Running hourly marketplace health generation");
-        const now = new Date();
-        await generateMarketplaceHealth("hourly", now);
-        logInfo("Hourly marketplace health generated successfully");
-      } catch (err) {
-        logError("Failed to generate hourly marketplace health", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    hourlyJob = cron.schedule(
+      "0 * * * *",
+      async () => {
+        try {
+          logInfo("Running hourly marketplace health generation");
+          const now = new Date();
+          await generateMarketplaceHealth("hourly", now);
+          logInfo("Hourly marketplace health generated successfully");
+        } catch (err) {
+          logError("Failed to generate hourly marketplace health", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     // Daily health - runs at midnight every day
-    dailyJob = cron.schedule("0 0 * * *", async () => {
-      try {
-        logInfo("Running daily marketplace health generation");
-        const today = new Date();
-        await generateMarketplaceHealth("daily", today);
-        logInfo("Daily marketplace health generated successfully");
-      } catch (err) {
-        logError("Failed to generate daily marketplace health", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    dailyJob = cron.schedule(
+      "0 0 * * *",
+      async () => {
+        try {
+          logInfo("Running daily marketplace health generation");
+          const today = new Date();
+          await generateMarketplaceHealth("daily", today);
+          logInfo("Daily marketplace health generated successfully");
+        } catch (err) {
+          logError("Failed to generate daily marketplace health", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     // Weekly health - runs at midnight on Sunday
-    weeklyJob = cron.schedule("0 0 * * 0", async () => {
-      try {
-        logInfo("Running weekly marketplace health generation");
-        const today = new Date();
-        await generateMarketplaceHealth("weekly", today);
-        logInfo("Weekly marketplace health generated successfully");
-      } catch (err) {
-        logError("Failed to generate weekly marketplace health", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    weeklyJob = cron.schedule(
+      "0 0 * * 0",
+      async () => {
+        try {
+          logInfo("Running weekly marketplace health generation");
+          const today = new Date();
+          await generateMarketplaceHealth("weekly", today);
+          logInfo("Weekly marketplace health generated successfully");
+        } catch (err) {
+          logError("Failed to generate weekly marketplace health", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     logInfo("Marketplace Health Scheduler started successfully");
   } catch (err) {

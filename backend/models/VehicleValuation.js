@@ -150,22 +150,26 @@ const vehicleValuationSchema = new mongoose.Schema(
     // 📈 HISTORICAL DATA
     // =============================
     historical: {
-      previousPrices: [{
-        price: Number,
-        date: Date,
-        source: {
-          type: String,
-          enum: ["listing", "auction", "escrow", "external"],
+      previousPrices: [
+        {
+          price: Number,
+          date: Date,
+          source: {
+            type: String,
+            enum: ["listing", "auction", "escrow", "external"],
+          },
         },
-      }],
-      priceHistory: [{
-        date: Date,
-        price: Number,
-        source: {
-          type: String,
-          enum: ["listing", "auction", "escrow", "external"],
+      ],
+      priceHistory: [
+        {
+          date: Date,
+          price: Number,
+          source: {
+            type: String,
+            enum: ["listing", "auction", "escrow", "external"],
+          },
         },
-      }],
+      ],
     },
 
     // =============================
@@ -248,7 +252,7 @@ vehicleValuationSchema.methods.calculatePriceDifference = function () {
 vehicleValuationSchema.methods.updateMarketPosition = function (marketAveragePrice) {
   if (marketAveragePrice > 0) {
     const percentDifference = ((this.pricing.listingPrice - marketAveragePrice) / marketAveragePrice) * 100;
-    
+
     if (percentDifference < -10) {
       this.valuation.marketPosition.type = "below_market";
     } else if (percentDifference > 10) {
@@ -256,7 +260,7 @@ vehicleValuationSchema.methods.updateMarketPosition = function (marketAveragePri
     } else {
       this.valuation.marketPosition.type = "fair_market";
     }
-    
+
     this.valuation.marketPosition.percent = Math.abs(percentDifference);
   }
   return this;
@@ -269,13 +273,13 @@ vehicleValuationSchema.methods.addHistoricalPrice = function (price, source) {
     date: new Date(),
     source,
   });
-  
+
   this.historical.priceHistory.push({
     price,
     date: new Date(),
     source,
   });
-  
+
   // Keep only last 50 entries
   if (this.historical.previousPrices.length > 50) {
     this.historical.previousPrices = this.historical.previousPrices.slice(-50);
@@ -283,14 +287,14 @@ vehicleValuationSchema.methods.addHistoricalPrice = function (price, source) {
   if (this.historical.priceHistory.length > 50) {
     this.historical.priceHistory = this.historical.priceHistory.slice(-50);
   }
-  
+
   return this;
 };
 
 // Calculate confidence score
 vehicleValuationSchema.methods.calculateConfidence = function () {
   let confidence = 0;
-  
+
   // Data availability
   if (this.pricing.salePrice > 0) confidence += 0.3;
   if (this.historical.previousPrices.length > 0) confidence += 0.2;
@@ -298,7 +302,7 @@ vehicleValuationSchema.methods.calculateConfidence = function () {
   if (this.market.competitionLevel > 0) confidence += 0.1;
   if (this.vehicle.mileage > 0) confidence += 0.1;
   if (this.location.county) confidence += 0.1;
-  
+
   this.valuation.confidence = Math.min(confidence, 1);
   return this;
 };
@@ -306,7 +310,7 @@ vehicleValuationSchema.methods.calculateConfidence = function () {
 // Calculate price range
 vehicleValuationSchema.methods.calculatePriceRange = function (marketStdDev) {
   if (this.valuation.estimatedValue > 0) {
-    const range = marketStdDev || (this.valuation.estimatedValue * 0.15);
+    const range = marketStdDev || this.valuation.estimatedValue * 0.15;
     this.valuation.priceRange.low = this.valuation.estimatedValue - range;
     this.valuation.priceRange.high = this.valuation.estimatedValue + range;
   }
@@ -319,30 +323,22 @@ vehicleValuationSchema.methods.calculatePriceRange = function (marketStdDev) {
 
 // Get valuations by vehicle
 vehicleValuationSchema.statics.getByVehicle = async function (carId) {
-  return this.find({ car: carId })
-    .sort({ valuationDate: -1 })
-    .lean();
+  return this.find({ car: carId }).sort({ valuationDate: -1 }).lean();
 };
 
 // Get valuations by county
 vehicleValuationSchema.statics.getByCounty = async function (county) {
-  return this.find({ "location.county": county })
-    .sort({ valuationDate: -1 })
-    .lean();
+  return this.find({ "location.county": county }).sort({ valuationDate: -1 }).lean();
 };
 
 // Get valuations by brand
 vehicleValuationSchema.statics.getByBrand = async function (brand) {
-  return this.find({ "vehicle.brand": brand })
-    .sort({ valuationDate: -1 })
-    .lean();
+  return this.find({ "vehicle.brand": brand }).sort({ valuationDate: -1 }).lean();
 };
 
 // Get valuations by brand and model
 vehicleValuationSchema.statics.getByBrandModel = async function (brand, model) {
-  return this.find({ "vehicle.brand": brand, "vehicle.model": model })
-    .sort({ valuationDate: -1 })
-    .lean();
+  return this.find({ "vehicle.brand": brand, "vehicle.model": model }).sort({ valuationDate: -1 }).lean();
 };
 
 // Get valuations by year range
@@ -367,7 +363,7 @@ vehicleValuationSchema.statics.getAveragePriceByCounty = async function (county)
       },
     },
   ]);
-  
+
   return result[0] || null;
 };
 
@@ -384,23 +380,23 @@ vehicleValuationSchema.statics.getAveragePriceByBrand = async function (brand) {
       },
     },
   ]);
-  
+
   return result[0] || null;
 };
 
 // Get price trend for vehicle
 vehicleValuationSchema.statics.getPriceTrend = async function (carId) {
   const valuations = await this.getByVehicle(carId);
-  
+
   if (valuations.length < 2) return null;
-  
-  const prices = valuations.map(v => v.pricing.salePrice).filter(p => p > 0);
+
+  const prices = valuations.map((v) => v.pricing.salePrice).filter((p) => p > 0);
   if (prices.length < 2) return null;
-  
+
   const firstPrice = prices[0];
   const lastPrice = prices[prices.length - 1];
   const percentChange = ((lastPrice - firstPrice) / firstPrice) * 100;
-  
+
   return {
     direction: percentChange > 0 ? "increasing" : percentChange < 0 ? "decreasing" : "stable",
     percentChange: Math.abs(percentChange),

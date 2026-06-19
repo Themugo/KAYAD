@@ -50,7 +50,7 @@ describe("Organization Model", () => {
         name: "Test Organization",
         type: "invalid_type",
         owner: ownerId,
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -222,7 +222,7 @@ describe("Branch Model", () => {
         organization: organizationId,
         name: "Test Branch",
         type: "invalid_type",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -330,7 +330,7 @@ describe("Team Model", () => {
         organization: organizationId,
         name: "Test Team",
         type: "invalid_type",
-      })
+      }),
     ).rejects.toThrow();
   });
 

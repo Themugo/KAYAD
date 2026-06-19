@@ -31,9 +31,7 @@ describe("Dealer Verification System", () => {
       status: "approved",
     });
 
-    const adminRes = await request(app)
-      .post("/api/auth/login")
-      .send({ email: admin.email, password: "Admin@123456" });
+    const adminRes = await request(app).post("/api/auth/login").send({ email: admin.email, password: "Admin@123456" });
     adminToken = adminRes.body.token;
 
     // Create dealer user
@@ -134,9 +132,7 @@ describe("Dealer Verification System", () => {
 
   describe("GET /api/verification/status", () => {
     it("should get verification status", async () => {
-      const res = await request(app)
-        .get("/api/verification/status")
-        .set("Authorization", `Bearer ${dealerToken}`);
+      const res = await request(app).get("/api/verification/status").set("Authorization", `Bearer ${dealerToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -231,9 +227,7 @@ describe("Dealer Verification System", () => {
   describe("Admin Verification Management", () => {
     describe("GET /api/verification/admin/all", () => {
       it("should get all verifications (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/verification/admin/all")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/verification/admin/all").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -241,9 +235,7 @@ describe("Dealer Verification System", () => {
       });
 
       it("should deny access to non-admin", async () => {
-        const res = await request(app)
-          .get("/api/verification/admin/all")
-          .set("Authorization", `Bearer ${dealerToken}`);
+        const res = await request(app).get("/api/verification/admin/all").set("Authorization", `Bearer ${dealerToken}`);
 
         expect(res.status).toBe(403);
       });
@@ -366,20 +358,17 @@ describe("Dealer Verification System", () => {
         verificationStatus: "pending",
       });
 
-      const res = await request(app)
-        .post("/api/cars")
-        .set("Authorization", `Bearer ${dealerToken}`)
-        .send({
-          title: "Test Car",
-          price: 1000000,
-          brand: "Toyota",
-          model: "Corolla",
-          year: 2020,
-          mileage: 50000,
-          fuel: "Petrol",
-          transmission: "Automatic",
-          images: [],
-        });
+      const res = await request(app).post("/api/cars").set("Authorization", `Bearer ${dealerToken}`).send({
+        title: "Test Car",
+        price: 1000000,
+        brand: "Toyota",
+        model: "Corolla",
+        year: 2020,
+        mileage: 50000,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        images: [],
+      });
 
       expect(res.status).toBe(403);
       expect(res.body.success).toBe(false);
@@ -392,20 +381,17 @@ describe("Dealer Verification System", () => {
         verificationStatus: "approved",
       });
 
-      const res = await request(app)
-        .post("/api/cars")
-        .set("Authorization", `Bearer ${dealerToken}`)
-        .send({
-          title: "Test Car",
-          price: 1000000,
-          brand: "Toyota",
-          model: "Corolla",
-          year: 2020,
-          mileage: 50000,
-          fuel: "Petrol",
-          transmission: "Automatic",
-          images: [],
-        });
+      const res = await request(app).post("/api/cars").set("Authorization", `Bearer ${dealerToken}`).send({
+        title: "Test Car",
+        price: 1000000,
+        brand: "Toyota",
+        model: "Corolla",
+        year: 2020,
+        mileage: 50000,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        images: [],
+      });
 
       // Note: This might fail due to image upload requirement, but should not fail due to verification
       if (res.status !== 201 && res.status !== 400) {
@@ -438,20 +424,17 @@ describe("Dealer Verification System", () => {
         .send({ email: legacyUser.email, password: "Legacy@123456" });
 
       // Try to create a car - should succeed due to legacy approval
-      const res = await request(app)
-        .post("/api/cars")
-        .set("Authorization", `Bearer ${loginRes.body.token}`)
-        .send({
-          title: "Legacy Car",
-          price: 1000000,
-          brand: "Toyota",
-          model: "Camry",
-          year: 2021,
-          mileage: 30000,
-          fuel: "Petrol",
-          transmission: "Automatic",
-          images: [],
-        });
+      const res = await request(app).post("/api/cars").set("Authorization", `Bearer ${loginRes.body.token}`).send({
+        title: "Legacy Car",
+        price: 1000000,
+        brand: "Toyota",
+        model: "Camry",
+        year: 2021,
+        mileage: 30000,
+        fuel: "Petrol",
+        transmission: "Automatic",
+        images: [],
+      });
 
       // Should not fail due to verification (might fail for other reasons like images)
       if (res.status !== 201 && res.status !== 400) {

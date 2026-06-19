@@ -82,19 +82,19 @@ escrowSchema.methods.addHistory = function (action, userId) {
 
 escrowSchema.methods.markFunded = async function (userId, req) {
   if (this.status !== "pending") return this;
-  
+
   // Capture state before action
   const previousState = this.toObject();
-  
+
   this.status = "held";
   this.fundedAt = new Date();
   this.autoReleaseEligibleAt = new Date(Date.now() + this.releaseWindowDays * 86400000);
   this.timeline.depositReceived = true;
   this.timeline.depositReceivedAt = new Date();
   this.addHistory(`Funded — KES ${this.amount.toLocaleString("en-KE")} held`);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously (non-blocking)
   if (userId && req) {
     setImmediate(async () => {
@@ -109,23 +109,23 @@ escrowSchema.methods.markFunded = async function (userId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.confirmDelivery = async function (userId, req) {
   if (this.status !== "held") throw new Error("Escrow not in delivery state");
-  
+
   const previousState = this.toObject();
-  
+
   this.deliveryConfirmed = true;
   this.deliveryConfirmedAt = new Date();
   this.timeline.inspectionCompleted = true;
   this.timeline.inspectionCompletedAt = new Date();
   this.addHistory("Buyer confirmed delivery", userId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (userId && req) {
     setImmediate(async () => {
@@ -139,19 +139,19 @@ escrowSchema.methods.confirmDelivery = async function (userId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.scheduleInspection = async function (userId, req) {
   const previousState = this.toObject();
-  
+
   this.timeline.inspectionScheduled = true;
   this.timeline.inspectionScheduledAt = new Date();
   this.addHistory("Inspection scheduled", userId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (userId && req) {
     setImmediate(async () => {
@@ -165,19 +165,19 @@ escrowSchema.methods.scheduleInspection = async function (userId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.submitTransfer = async function (userId, req) {
   const previousState = this.toObject();
-  
+
   this.timeline.transferSubmitted = true;
   this.timeline.transferSubmittedAt = new Date();
   this.addHistory("Transfer submitted for approval", userId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (userId && req) {
     setImmediate(async () => {
@@ -191,19 +191,19 @@ escrowSchema.methods.submitTransfer = async function (userId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.approveTransfer = async function (userId, req) {
   const previousState = this.toObject();
-  
+
   this.timeline.transferApproved = true;
   this.timeline.transferApprovedAt = new Date();
   this.addHistory("Transfer approved", userId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (userId && req) {
     setImmediate(async () => {
@@ -217,15 +217,15 @@ escrowSchema.methods.approveTransfer = async function (userId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.releaseFunds = async function (adminId, req) {
   if (!["held", "disputed"].includes(this.status)) throw new Error("Escrow not in releasable state");
-  
+
   const previousState = this.toObject();
-  
+
   const commissionRate = 0.05;
   this.commission = this.amount * commissionRate;
   this.sellerAmount = this.amount - this.commission;
@@ -235,9 +235,9 @@ escrowSchema.methods.releaseFunds = async function (adminId, req) {
   this.timeline.fundsReleased = true;
   this.timeline.fundsReleasedAt = new Date();
   this.addHistory(`Released to seller — KES ${this.sellerAmount.toLocaleString("en-KE")}`, adminId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (adminId && req) {
     setImmediate(async () => {
@@ -252,23 +252,23 @@ escrowSchema.methods.releaseFunds = async function (adminId, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.refundBuyer = async function (adminId, reason, req) {
   if (!["held", "disputed"].includes(this.status)) throw new Error("Cannot refund this escrow");
-  
+
   const previousState = this.toObject();
-  
+
   this.status = "refunded";
   this.refundedAt = new Date();
   this.refundedBy = adminId;
   if (reason) this.disputeReason = reason;
   this.addHistory(`Refunded to buyer — ${reason || "No reason"}`, adminId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (adminId && req) {
     setImmediate(async () => {
@@ -283,23 +283,23 @@ escrowSchema.methods.refundBuyer = async function (adminId, reason, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.openDispute = async function (userId, reason, req) {
   if (["released", "refunded"].includes(this.status)) throw new Error("Cannot dispute finalized escrow");
-  
+
   const previousState = this.toObject();
-  
+
   this.status = "disputed";
   this.disputeReason = reason;
   this.disputedBy = userId;
   this.disputedAt = new Date();
   this.addHistory(`Dispute opened — ${reason}`, userId);
-  
+
   const result = await this.save();
-  
+
   // Log audit asynchronously
   if (userId && req) {
     setImmediate(async () => {
@@ -314,19 +314,19 @@ escrowSchema.methods.openDispute = async function (userId, reason, req) {
       }
     });
   }
-  
+
   return result;
 };
 
 escrowSchema.methods.autoRelease = async function (req) {
   if (this.status !== "held" || !this.autoReleaseEligibleAt) return null;
   if (new Date() < this.autoReleaseEligibleAt) return null;
-  
+
   this.autoReleased = true;
-  
+
   // Call releaseFunds with null adminId (system action)
   const result = await this.releaseFunds(null, req);
-  
+
   // Log audit asynchronously for auto-release
   if (req) {
     setImmediate(async () => {
@@ -341,7 +341,7 @@ escrowSchema.methods.autoRelease = async function (req) {
       }
     });
   }
-  
+
   return result;
 };
 

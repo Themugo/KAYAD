@@ -213,19 +213,19 @@ searchAnalyticsSchema.methods.calculateTrendingScore = function () {
   const now = new Date();
   const lastSearched = this.lastSearchedAt || this.createdAt;
   const hoursSinceSearch = (now - lastSearched) / (1000 * 60 * 60);
-  
+
   // Base score from search count
   let score = this.searchCount * 10;
-  
+
   // Time decay: more recent searches get higher score
   const timeDecay = Math.max(0, 100 - hoursSinceSearch * 2);
   score += timeDecay;
-  
+
   // Result penalty: no-result searches get lower score
   if (!this.hasResults) {
     score *= 0.5;
   }
-  
+
   this.trendingScore = Math.round(score);
   return this.trendingScore;
 };
@@ -252,17 +252,7 @@ searchAnalyticsSchema.methods.getSearchHash = function () {
 
 // Track a search event
 searchAnalyticsSchema.statics.trackSearch = async function (searchData) {
-  const {
-    searchTerm,
-    filters,
-    userId,
-    userRole,
-    ipAddress,
-    userAgent,
-    searchType,
-    category,
-    resultCount,
-  } = searchData;
+  const { searchTerm, filters, userId, userRole, ipAddress, userAgent, searchType, category, resultCount } = searchData;
 
   // Normalize search term
   const normalizedTerm = searchTerm ? searchTerm.toLowerCase().trim() : "";
@@ -370,7 +360,8 @@ searchAnalyticsSchema.statics.getPopularFilters = async function (period = 7) {
       filterStats.fuelType[search.filters.fuelType] = (filterStats.fuelType[search.filters.fuelType] || 0) + 1;
     }
     if (search.filters.transmission) {
-      filterStats.transmission[search.filters.transmission] = (filterStats.transmission[search.filters.transmission] || 0) + 1;
+      filterStats.transmission[search.filters.transmission] =
+        (filterStats.transmission[search.filters.transmission] || 0) + 1;
     }
     if (search.filters.price) {
       const priceKey = `${search.filters.price.min || 0}-${search.filters.price.max || "unlimited"}`;
@@ -462,10 +453,7 @@ searchAnalyticsSchema.statics.getBrandModelSearchStats = async function (period 
     {
       $match: {
         lastSearchedAt: { $gte: startDate },
-        $or: [
-          { "filters.brand": { $exists: true, $ne: null } },
-          { "filters.model": { $exists: true, $ne: null } },
-        ],
+        $or: [{ "filters.brand": { $exists: true, $ne: null } }, { "filters.model": { $exists: true, $ne: null } }],
       },
     },
     {

@@ -7,7 +7,14 @@
 import EscrowAudit from "../models/EscrowAudit.js";
 import Escrow from "../models/Escrow.js";
 import AuditLog from "../models/AuditLog.js";
-import { getAuditTrail, getAuditByUser, getAuditByAction, getAuditByDateRange, exportAuditTrail, getAuditStatistics } from "../services/escrowAuditService.js";
+import {
+  getAuditTrail,
+  getAuditByUser,
+  getAuditByAction,
+  getAuditByDateRange,
+  exportAuditTrail,
+  getAuditStatistics,
+} from "../services/escrowAuditService.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
@@ -262,17 +269,17 @@ export const getAuditById = async (req, res) => {
 // =============================
 export const getAllAuditLogs = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 50, 
-      action, 
-      actorId, 
-      targetModel, 
+    const {
+      page = 1,
+      limit = 50,
+      action,
+      actorId,
+      targetModel,
       targetId,
       severity,
-      startDate, 
+      startDate,
       endDate,
-      sessionId 
+      sessionId,
     } = req.query;
 
     const query = {};
@@ -327,10 +334,7 @@ export const getAuditLogById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const auditLog = await AuditLog.findById(id)
-      .populate("actor", "name email role")
-      .populate("target")
-      .lean();
+    const auditLog = await AuditLog.findById(id).populate("actor", "name email role").populate("target").lean();
 
     if (!auditLog) {
       return res.status(404).json({
@@ -497,13 +501,7 @@ export const getAuditLogStatistics = async (req, res) => {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - parseInt(days));
 
-    const [
-      totalLogs,
-      actionCounts,
-      actorCounts,
-      severityCounts,
-      targetModelCounts,
-    ] = await Promise.all([
+    const [totalLogs, actionCounts, actorCounts, severityCounts, targetModelCounts] = await Promise.all([
       AuditLog.countDocuments({ createdAt: { $gte: startDate } }),
       AuditLog.aggregate([
         { $match: { createdAt: { $gte: startDate } } },
@@ -552,16 +550,7 @@ export const getAuditLogStatistics = async (req, res) => {
 // =============================
 export const exportAuditLogs = async (req, res) => {
   try {
-    const { 
-      action, 
-      actorId, 
-      targetModel, 
-      targetId,
-      severity,
-      startDate, 
-      endDate,
-      format = "json"
-    } = req.query;
+    const { action, actorId, targetModel, targetId, severity, startDate, endDate, format = "json" } = req.query;
 
     const query = {};
     if (action) query.action = action;
@@ -597,7 +586,7 @@ export const exportAuditLogs = async (req, res) => {
         "Session ID",
       ];
 
-      const rows = auditLogs.map(log => [
+      const rows = auditLogs.map((log) => [
         log._id,
         log.createdAt,
         log.action,
@@ -611,7 +600,7 @@ export const exportAuditLogs = async (req, res) => {
         log.sessionId,
       ]);
 
-      const csv = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+      const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
 
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", `attachment; filename=audit-logs-${Date.now()}.csv`);
@@ -628,10 +617,10 @@ export const exportAuditLogs = async (req, res) => {
       data: auditLogs,
     });
 
-    logInfo("Audit logs exported", { 
-      exportedBy: req.user.id, 
+    logInfo("Audit logs exported", {
+      exportedBy: req.user.id,
       recordCount: auditLogs.length,
-      format 
+      format,
     });
   } catch (err) {
     logError("Export audit logs error", err);

@@ -9,12 +9,7 @@ import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import Lead from "../models/Lead.js";
 import LeadActivity from "../models/LeadActivity.js";
-import {
-  createLead,
-  updateLeadStage,
-  getLeadPipeline,
-  calculateConversionRate,
-} from "../services/leadService.js";
+import { createLead, updateLeadStage, getLeadPipeline, calculateConversionRate } from "../services/leadService.js";
 
 describe("Lead Intelligence Service", () => {
   let mongoServer;
@@ -141,8 +136,8 @@ describe("Lead Intelligence Service", () => {
       const lead2 = await createLead(testBuyerId, testDealerId, testVehicleId, "auction", null);
 
       const pipeline = await getLeadPipeline(testDealerId);
-      const newStage = pipeline.find(p => p._id === "new");
-      const contactedStage = pipeline.find(p => p._id === "contacted");
+      const newStage = pipeline.find((p) => p._id === "new");
+      const contactedStage = pipeline.find((p) => p._id === "contacted");
 
       expect(newStage).toBeDefined();
       expect(contactedStage).toBeDefined();
@@ -212,7 +207,7 @@ describe("Lead Intelligence Service", () => {
         "message_sent",
         testDealerId,
         "dealer",
-        "Test message"
+        "Test message",
       );
 
       expect(activity).toHaveProperty("lead");
@@ -303,7 +298,7 @@ describe("Lead Model", () => {
         dealer: dealer._id,
         source: "chat",
         stage: "invalid_stage",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -327,7 +322,7 @@ describe("Lead Model", () => {
         buyer: buyer._id,
         dealer: dealer._id,
         source: "invalid_source",
-      })
+      }),
     ).rejects.toThrow();
   });
 });

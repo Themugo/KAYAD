@@ -219,7 +219,8 @@ export const calculateFinancialMetrics = async (startDate, endDate) => {
       createdAt: { $gte: startDate, $lte: endDate },
     });
 
-    const paymentSuccessRate = totalTransactions > 0 ? ((totalTransactions - failedTransactions) / totalTransactions) * 100 : 0;
+    const paymentSuccessRate =
+      totalTransactions > 0 ? ((totalTransactions - failedTransactions) / totalTransactions) * 100 : 0;
 
     return { revenue, paymentSuccessRate, paymentFailures: failedTransactions };
   } catch (err) {
@@ -334,7 +335,7 @@ export const generateMarketplaceHealth = async (period, timestamp) => {
         upsert: true,
         new: true,
         setDefaultsOnInsert: true,
-      }
+      },
     );
 
     // Calculate health score

@@ -60,7 +60,7 @@ if (redis) {
     redisHealthStatus = "connected";
     setGauge("redis_connection_status", 1);
   });
-  
+
   redis.on("ready", () => {
     logInfo("Redis ready");
     redisHealthStatus = "ready";
@@ -68,13 +68,13 @@ if (redis) {
     // Reset circuit breaker when Redis is ready
     redisCircuitBreakerOpen = false;
   });
-  
+
   redis.on("error", (err) => {
     logError("Redis error", err, { message: err.message });
     redisHealthStatus = "error";
     setGauge("redis_connection_status", 0);
     incrementCounter("redis_error", { error_type: err.code || "unknown" });
-    
+
     // Open circuit breaker on repeated errors
     if (!redisCircuitBreakerOpen) {
       redisCircuitBreakerOpen = true;
@@ -86,14 +86,14 @@ if (redis) {
       });
     }
   });
-  
+
   redis.on("end", () => {
     logWarn("Redis connection closed");
     redisHealthStatus = "disconnected";
     setGauge("redis_connection_status", 0);
     incrementCounter("redis_disconnection");
   });
-  
+
   redis.on("close", () => {
     logWarn("Redis connection closed");
     redisHealthStatus = "closed";
@@ -107,13 +107,13 @@ if (redis) {
 // =============================
 const startHealthMonitoring = () => {
   if (!redis || healthCheckInterval) return;
-  
+
   healthCheckInterval = setInterval(async () => {
     try {
       const startTime = Date.now();
       await redis.ping();
       const duration = Date.now() - startTime;
-      
+
       recordMetric("redis_ping_duration", duration);
       setGauge("redis_ping_success", 1);
       redisHealthStatus = "healthy";
@@ -151,12 +151,9 @@ const executeWithSRE = async (operation) => {
     incrementCounter("redis_circuit_rejected");
     return await operation(inMemoryFallback);
   }
-  
+
   try {
-    const result = await withRetry(
-      () => operation(redis),
-      redisConfig
-    );
+    const result = await withRetry(() => operation(redis), redisConfig);
     return result;
   } catch (err) {
     logError("Redis operation failed, using fallback", err);
@@ -251,12 +248,12 @@ export const getRedisHealth = async () => {
       usingFallback: true,
     };
   }
-  
+
   try {
     const startTime = Date.now();
     await redis.ping();
     const duration = Date.now() - startTime;
-    
+
     return {
       status: "healthy",
       latency: duration,

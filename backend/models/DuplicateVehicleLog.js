@@ -218,6 +218,7 @@ duplicateVehicleLogSchema.methods.getMatchSummary = function () {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const DuplicateVehicleLog = mongoose.models.DuplicateVehicleLog || mongoose.model("DuplicateVehicleLog", duplicateVehicleLogSchema);
+const DuplicateVehicleLog =
+  mongoose.models.DuplicateVehicleLog || mongoose.model("DuplicateVehicleLog", duplicateVehicleLogSchema);
 
 export default DuplicateVehicleLog;

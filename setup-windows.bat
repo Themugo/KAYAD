@@ -7,7 +7,7 @@
 
 echo.
 echo ================================================
-echo   KAYAD — Where Kenya Drives
+echo   KAYAD — Drive Your Dream Today
 echo   Windows Setup Script
 echo ================================================
 echo.

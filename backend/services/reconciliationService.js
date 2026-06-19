@@ -313,9 +313,8 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
       }
 
       // Check amount mismatch
-      const expectedAmount = subscription.billingCycle === "annual" 
-        ? subscription.pricing.annual 
-        : subscription.pricing.monthly;
+      const expectedAmount =
+        subscription.billingCycle === "annual" ? subscription.pricing.annual : subscription.pricing.monthly;
 
       if (payment.amount !== expectedAmount) {
         await report.addIssue({
@@ -950,7 +949,7 @@ export const detectUnreleasedEscrows = async (startDate, endDate) => {
 
     for (const escrow of heldEscrows) {
       const daysHeld = (Date.now() - new Date(escrow.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-      
+
       // Flag escrows held for more than 7 days
       if (daysHeld > 7) {
         unreleasedEscrows.push({

@@ -21,7 +21,11 @@ export const retryFailedNotification = async (auditId) => {
     }
 
     if (!audit.shouldRetry()) {
-      logWarn("Notification should not be retried", { auditId, retryCount: audit.retryCount, maxRetries: audit.maxRetries });
+      logWarn("Notification should not be retried", {
+        auditId,
+        retryCount: audit.retryCount,
+        maxRetries: audit.maxRetries,
+      });
       return { success: false, message: "Max retries reached or not eligible for retry" };
     }
 
@@ -66,7 +70,7 @@ export const retryFailedNotification = async (auditId) => {
 export const bulkRetryFailedNotifications = async (channel = null, period = 24) => {
   try {
     const failedNotifications = await NotificationAudit.getFailed(channel, period);
-    
+
     const results = [];
     for (const notification of failedNotifications) {
       try {
@@ -85,10 +89,10 @@ export const bulkRetryFailedNotifications = async (channel = null, period = 24) 
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    logInfo("Bulk notification retry completed", { 
-      total: failedNotifications.length, 
-      success: successCount 
+    const successCount = results.filter((r) => r.success).length;
+    logInfo("Bulk notification retry completed", {
+      total: failedNotifications.length,
+      success: successCount,
     });
 
     return {
@@ -156,8 +160,8 @@ export const shouldRetry = async (auditId) => {
 export const getRetryQueue = async (channel = null) => {
   try {
     const pendingRetry = await NotificationAudit.getPendingRetry(channel);
-    
-    return pendingRetry.map(audit => ({
+
+    return pendingRetry.map((audit) => ({
       auditId: audit._id,
       channel: audit.channel,
       retryCount: audit.retryCount,
@@ -178,7 +182,7 @@ export const getRetryQueue = async (channel = null) => {
 export const processRetryQueue = async (channel = null) => {
   try {
     const pendingRetry = await getRetryQueue(channel);
-    
+
     const results = [];
     for (const item of pendingRetry) {
       try {
@@ -197,10 +201,10 @@ export const processRetryQueue = async (channel = null) => {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    logInfo("Retry queue processed", { 
-      total: pendingRetry.length, 
-      success: successCount 
+    const successCount = results.filter((r) => r.success).length;
+    logInfo("Retry queue processed", {
+      total: pendingRetry.length,
+      success: successCount,
     });
 
     return {

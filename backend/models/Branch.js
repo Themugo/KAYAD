@@ -81,10 +81,12 @@ const branchSchema = new mongoose.Schema(
       index: true,
     },
 
-    staff: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
+    staff: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     // =============================
     // ⚙️ SETTINGS
@@ -159,7 +161,7 @@ branchSchema.methods.addStaff = async function (userId) {
 
 // Remove staff member
 branchSchema.methods.removeStaff = async function (userId) {
-  this.staff = this.staff.filter(id => id.toString() !== userId.toString());
+  this.staff = this.staff.filter((id) => id.toString() !== userId.toString());
   if (this.manager && this.manager.toString() === userId.toString()) {
     this.manager = null;
   }
@@ -169,8 +171,7 @@ branchSchema.methods.removeStaff = async function (userId) {
 
 // Check if user is staff
 branchSchema.methods.isStaff = function (userId) {
-  return this.manager?.toString() === userId.toString() ||
-         this.staff.some(id => id.toString() === userId.toString());
+  return this.manager?.toString() === userId.toString() || this.staff.some((id) => id.toString() === userId.toString());
 };
 
 // Check if user is manager
@@ -249,30 +250,22 @@ branchSchema.methods.decrementListingCount = async function () {
 
 // Get branches by organization
 branchSchema.statics.getByOrganization = async function (organizationId) {
-  return this.find({ organization: organizationId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ organization: organizationId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get branches by organization and type
 branchSchema.statics.getByOrganizationAndType = async function (organizationId, type) {
-  return this.find({ organization: organizationId, type })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ organization: organizationId, type }).sort({ name: 1 }).lean();
 };
 
 // Get branches by manager
 branchSchema.statics.getByManager = async function (managerId) {
-  return this.find({ manager: managerId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ manager: managerId }).sort({ name: 1 }).lean();
 };
 
 // Get branches by staff
 branchSchema.statics.getByStaff = async function (staffId) {
-  return this.find({ staff: staffId })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ staff: staffId }).sort({ name: 1 }).lean();
 };
 
 // Get branch stats
@@ -295,8 +288,9 @@ branchSchema.statics.userBelongsToBranch = async function (userId, branchId) {
   const branch = await this.findById(branchId);
   if (!branch) return false;
 
-  return branch.manager?.toString() === userId.toString() ||
-         branch.staff.some(id => id.toString() === userId.toString());
+  return (
+    branch.manager?.toString() === userId.toString() || branch.staff.some((id) => id.toString() === userId.toString())
+  );
 };
 
 // =============================

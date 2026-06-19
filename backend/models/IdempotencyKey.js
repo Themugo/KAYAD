@@ -92,7 +92,7 @@ const idempotencyKeySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Index for efficient lookup by key and operation type
@@ -127,7 +127,8 @@ idempotencyKeySchema.statics.getCachedResponse = async function (key) {
 
 // Static method to create or update idempotency key
 idempotencyKeySchema.statics.record = async function (data) {
-  const { key, operationType, user, requestParams, responseData, responseStatus, success, errorMessage, resourceIds } = data;
+  const { key, operationType, user, requestParams, responseData, responseStatus, success, errorMessage, resourceIds } =
+    data;
 
   return await this.findOneAndUpdate(
     { key },
@@ -143,7 +144,7 @@ idempotencyKeySchema.statics.record = async function (data) {
       resourceIds,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
     },
-    { upsert: true, new: true }
+    { upsert: true, new: true },
   );
 };
 

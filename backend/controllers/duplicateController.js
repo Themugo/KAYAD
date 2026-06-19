@@ -164,7 +164,7 @@ export const confirmAsDuplicate = async (req, res) => {
     const car = await Car.findById(log.car);
     if (car) {
       car.duplicateStatus = "confirmed_duplicate";
-      
+
       if (action === "removed") {
         car.status = "rejected";
         car.deletedAt = new Date();
@@ -173,7 +173,7 @@ export const confirmAsDuplicate = async (req, res) => {
         // Keep listing but mark as duplicate
         car.originalListing = log.originalCar;
       }
-      
+
       await car.save();
     }
 
@@ -255,27 +255,21 @@ export const getDuplicateStatistics = async (req, res) => {
     const { days = 30 } = req.query;
     const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const [
-      totalFlagged,
-      confirmedDuplicates,
-      falsePositives,
-      underReview,
-      byMatchType,
-      byDetectionMethod,
-    ] = await Promise.all([
-      DuplicateVehicleLog.countDocuments({ createdAt: { $gte: fromDate } }),
-      DuplicateVehicleLog.countDocuments({ status: "confirmed_duplicate", createdAt: { $gte: fromDate } }),
-      DuplicateVehicleLog.countDocuments({ status: "false_positive", createdAt: { $gte: fromDate } }),
-      DuplicateVehicleLog.countDocuments({ status: "under_review", createdAt: { $gte: fromDate } }),
-      DuplicateVehicleLog.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $group: { _id: "$matchType", count: { $sum: 1 } } },
-      ]),
-      DuplicateVehicleLog.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $group: { _id: "$detectionMethod", count: { $sum: 1 } } },
-      ]),
-    ]);
+    const [totalFlagged, confirmedDuplicates, falsePositives, underReview, byMatchType, byDetectionMethod] =
+      await Promise.all([
+        DuplicateVehicleLog.countDocuments({ createdAt: { $gte: fromDate } }),
+        DuplicateVehicleLog.countDocuments({ status: "confirmed_duplicate", createdAt: { $gte: fromDate } }),
+        DuplicateVehicleLog.countDocuments({ status: "false_positive", createdAt: { $gte: fromDate } }),
+        DuplicateVehicleLog.countDocuments({ status: "under_review", createdAt: { $gte: fromDate } }),
+        DuplicateVehicleLog.aggregate([
+          { $match: { createdAt: { $gte: fromDate } } },
+          { $group: { _id: "$matchType", count: { $sum: 1 } } },
+        ]),
+        DuplicateVehicleLog.aggregate([
+          { $match: { createdAt: { $gte: fromDate } } },
+          { $group: { _id: "$detectionMethod", count: { $sum: 1 } } },
+        ]),
+      ]);
 
     const avgMatchScore = await DuplicateVehicleLog.aggregate([
       { $match: { createdAt: { $gte: fromDate } } },
@@ -322,7 +316,8 @@ export const searchDuplicates = async (req, res) => {
     const criteria = {};
     if (vin) criteria["detectionCriteria.vin"] = { $regex: vin, $options: "i" };
     if (chassisNumber) criteria["detectionCriteria.chassisNumber"] = { $regex: chassisNumber, $options: "i" };
-    if (registrationNumber) criteria["detectionCriteria.registrationNumber"] = { $regex: registrationNumber, $options: "i" };
+    if (registrationNumber)
+      criteria["detectionCriteria.registrationNumber"] = { $regex: registrationNumber, $options: "i" };
     if (dealerId) criteria.dealer = dealerId;
 
     const logs = await DuplicateVehicleLog.find(criteria)

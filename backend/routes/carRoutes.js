@@ -150,13 +150,37 @@ router.post(
 );
 
 // ✏️ UPDATE CAR
-router.put("/:id", protect, dealerOnly, createLimiter, validateObjectId, validateCar, invalidateCache("cache:*"), asyncHandler(updateCar));
+router.put(
+  "/:id",
+  protect,
+  dealerOnly,
+  createLimiter,
+  validateObjectId,
+  validateCar,
+  invalidateCache("cache:*"),
+  asyncHandler(updateCar),
+);
 
 // ❌ DELETE CAR
-router.delete("/:id", protect, dealerOnly, createLimiter, validateObjectId, invalidateCache("cache:*"), asyncHandler(deleteCar));
+router.delete(
+  "/:id",
+  protect,
+  dealerOnly,
+  createLimiter,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(deleteCar),
+);
 
 // 🖼 DELETE IMAGE FROM CAR
-router.delete("/:id/images/:imageIndex", protect, dealerOnly, validateObjectId, invalidateCache("cache:*"), asyncHandler(deleteCarImage));
+router.delete(
+  "/:id/images/:imageIndex",
+  protect,
+  dealerOnly,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(deleteCarImage),
+);
 
 // 📤 ADD IMAGES TO CAR
 router.post(

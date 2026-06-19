@@ -18,7 +18,7 @@ export const up = async () => {
 
     // Check if collection already exists
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(c => c.name === "featureflags");
+    const collectionExists = collections.some((c) => c.name === "featureflags");
 
     if (collectionExists) {
       logWarn("FeatureFlag collection already exists, skipping creation");
@@ -141,7 +141,7 @@ export const down = async () => {
 
     // Drop the collection
     await mongoose.connection.db.dropCollection("featureflags");
-    
+
     logInfo("FeatureFlag collection dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -156,12 +156,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -169,7 +170,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

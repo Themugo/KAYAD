@@ -13,33 +13,33 @@ import { logError, logWarn, logInfo } from "./logger.js";
 const REQUIRED_ENV_VARS = [
   // Database
   "MONGODB_URI",
-  
+
   // JWT
   "JWT_SECRET",
-  
+
   // Server
   "PORT",
   "NODE_ENV",
-  
+
   // Frontend
   "FRONTEND_URL",
-  
+
   // Email (optional but recommended)
   // "EMAIL_HOST",
   // "EMAIL_USER",
   // "EMAIL_PASS",
   // "EMAIL_FROM",
-  
+
   // SMS (optional but recommended)
   // "TWILIO_ACCOUNT_SID",
   // "TWILIO_AUTH_TOKEN",
   // "TWILIO_PHONE_NUMBER",
-  
+
   // Cloudinary (optional but recommended)
   // "CLOUDINARY_CLOUD_NAME",
   // "CLOUDINARY_API_KEY",
   // "CLOUDINARY_API_SECRET",
-  
+
   // M-Pesa (required for payments)
   "MPESA_CONSUMER_KEY",
   "MPESA_CONSUMER_SECRET",
@@ -81,40 +81,38 @@ const OPTIONAL_ENV_VARS = [
 export const validateEnv = () => {
   const missing = [];
   const warnings = [];
-  
+
   // Check required variables
   for (const envVar of REQUIRED_ENV_VARS) {
     if (!process.env[envVar]) {
       missing.push(envVar);
     }
   }
-  
+
   // Check optional variables
   for (const envVar of OPTIONAL_ENV_VARS) {
     if (!process.env[envVar]) {
       warnings.push(envVar);
     }
   }
-  
+
   // Log missing required variables
   if (missing.length > 0) {
     logError("Missing required environment variables", { missing });
-    throw new Error(
-      `Missing required environment variables: ${missing.join(", ")}`
-    );
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
   }
-  
+
   // Log warnings for optional variables
   if (warnings.length > 0) {
     logWarn("Optional environment variables not set", { warnings });
     console.warn(`⚠️  Optional environment variables not set: ${warnings.join(", ")}`);
   }
-  
+
   // Validate specific variable formats
   validateFormats();
-  
+
   logInfo("Environment variables validated successfully");
-  
+
   return {
     valid: true,
     missing,
@@ -128,10 +126,14 @@ export const validateEnv = () => {
 
 const validateFormats = () => {
   // Validate MongoDB URI
-  if (process.env.MONGODB_URI && !process.env.MONGODB_URI.startsWith("mongodb://") && !process.env.MONGODB_URI.startsWith("mongodb+srv://")) {
+  if (
+    process.env.MONGODB_URI &&
+    !process.env.MONGODB_URI.startsWith("mongodb://") &&
+    !process.env.MONGODB_URI.startsWith("mongodb+srv://")
+  ) {
     throw new Error("MONGODB_URI must start with mongodb:// or mongodb+srv://");
   }
-  
+
   // Validate PORT
   if (process.env.PORT) {
     const port = parseInt(process.env.PORT);
@@ -139,7 +141,7 @@ const validateFormats = () => {
       throw new Error("PORT must be a valid port number (1-65535)");
     }
   }
-  
+
   // Validate FRONTEND_URL
   if (process.env.FRONTEND_URL) {
     try {
@@ -148,12 +150,12 @@ const validateFormats = () => {
       throw new Error("FRONTEND_URL must be a valid URL");
     }
   }
-  
+
   // Validate JWT_SECRET
   if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
     logWarn("JWT_SECRET should be at least 32 characters for security");
   }
-  
+
   // Validate Redis URL if provided
   if (process.env.REDIS_URL) {
     try {
@@ -162,7 +164,7 @@ const validateFormats = () => {
       throw new Error("REDIS_URL must be a valid URL");
     }
   }
-  
+
   // Validate Sentry DSN if provided
   if (process.env.SENTRY_DSN) {
     try {

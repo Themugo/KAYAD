@@ -74,12 +74,9 @@ export const calculateChangedScores = async () => {
   try {
     // Get dealers with recent activity (last 24 hours)
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    
+
     const dealers = await Dealer.find({
-      $or: [
-        { updatedAt: { $gte: oneDayAgo } },
-        { createdAt: { $gte: oneDayAgo } },
-      ],
+      $or: [{ updatedAt: { $gte: oneDayAgo } }, { createdAt: { $gte: oneDayAgo } }],
     }).select("user");
 
     logInfo("Calculating scores for changed dealers", { count: dealers.length });
@@ -113,12 +110,12 @@ export const calculateChangedScores = async () => {
 export const updateScoreTrends = async () => {
   try {
     const healthScores = await DealerHealthScore.find({});
-    
+
     for (const healthScore of healthScores) {
       const previousScore = healthScore.previousScore || 0;
       const currentScore = healthScore.healthScore;
       const scoreChange = currentScore - previousScore;
-      
+
       const trend = scoreChange > 0 ? "up" : scoreChange < 0 ? "down" : "stable";
 
       await DealerHealthScore.findByIdAndUpdate(healthScore._id, {

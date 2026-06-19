@@ -28,11 +28,7 @@ export const getAllReports = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const [reports, total] = await Promise.all([
-      ReconciliationReport.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
+      ReconciliationReport.find(query).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
       ReconciliationReport.countDocuments(query),
     ]);
 
@@ -98,10 +94,7 @@ export const getUnresolvedIssues = async (req, res) => {
     if (severity) query["issueDetails.severity"] = severity;
     if (type) query["issueDetails.type"] = type;
 
-    const reports = await ReconciliationReport.find(query)
-      .sort({ createdAt: -1 })
-      .limit(parseInt(limit))
-      .lean();
+    const reports = await ReconciliationReport.find(query).sort({ createdAt: -1 }).limit(parseInt(limit)).lean();
 
     const issues = [];
     for (const report of reports) {
@@ -140,10 +133,15 @@ export const resolveIssue = async (req, res) => {
     const { reportId, issueIndex } = req.params;
     const { notes, action } = req.body;
 
-    const report = await resolveReconciliationIssue(reportId, parseInt(issueIndex), {
-      notes,
-      action,
-    }, req.user.id);
+    const report = await resolveReconciliationIssue(
+      reportId,
+      parseInt(issueIndex),
+      {
+        notes,
+        action,
+      },
+      req.user.id,
+    );
 
     logInfo("Issue resolved by admin", {
       reportId,

@@ -116,18 +116,18 @@ export const getMissingInventoryReport = async () => {
   try {
     // Get no-result searches
     const noResultSearches = await SearchAnalytics.getNoResultSearches(50, 30);
-    
+
     // Get current inventory
     const inventory = await Car.find({ status: "active" }).lean();
-    
+
     // Analyze gaps
     const missingInventory = [];
-    
+
     for (const search of noResultSearches) {
       const filters = search.filters;
-      
+
       // Check if inventory matches the search
-      const matchingInventory = inventory.filter(car => {
+      const matchingInventory = inventory.filter((car) => {
         if (filters.brand && car.brand !== filters.brand) return false;
         if (filters.model && car.model !== filters.model) return false;
         if (filters.year) {
@@ -144,7 +144,7 @@ export const getMissingInventoryReport = async () => {
         if (filters.transmission && car.transmission !== filters.transmission) return false;
         return true;
       });
-      
+
       // If no matching inventory, add to missing inventory report
       if (matchingInventory.length === 0) {
         missingInventory.push({
@@ -156,10 +156,10 @@ export const getMissingInventoryReport = async () => {
         });
       }
     }
-    
+
     // Sort by demand score
     missingInventory.sort((a, b) => b.demandScore - a.demandScore);
-    
+
     return missingInventory.slice(0, 20); // Return top 20
   } catch (err) {
     logError("Failed to get missing inventory report", err);
@@ -176,7 +176,7 @@ export const getSearchDemandReport = async (period = 30) => {
     const brandModelStats = await SearchAnalytics.getBrandModelSearchStats(period);
     const priceRangeStats = await SearchAnalytics.getPriceRangeSearchStats(period);
     const countyStats = await SearchAnalytics.getCountySearchStats(period);
-    
+
     return {
       brandModel: brandModelStats,
       priceRange: priceRangeStats,
@@ -204,7 +204,7 @@ export const getSearchInsights = async (period = 7) => {
       getPriceRangeSearchStats(period),
       getBrandModelSearchStats(period),
     ]);
-    
+
     return {
       trending,
       noResults,
@@ -228,20 +228,20 @@ export const getSearchInsights = async (period = 7) => {
 export const getSearchSummary = async (period = 7) => {
   try {
     const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
-    
+
     const totalSearches = await SearchAnalytics.countDocuments({
       lastSearchedAt: { $gte: startDate },
     });
-    
+
     const uniqueSearches = await SearchAnalytics.distinct("normalizedTerm", {
       lastSearchedAt: { $gte: startDate },
     });
-    
+
     const noResultCount = await SearchAnalytics.countDocuments({
       lastSearchedAt: { $gte: startDate },
       hasResults: false,
     });
-    
+
     const avgResultCount = await SearchAnalytics.aggregate([
       {
         $match: {
@@ -255,7 +255,7 @@ export const getSearchSummary = async (period = 7) => {
         },
       },
     ]);
-    
+
     return {
       totalSearches,
       uniqueSearches: uniqueSearches.length,
@@ -280,23 +280,23 @@ export const getDealerDemandInsights = async (period = 30) => {
     const brandModelStats = await SearchAnalytics.getBrandModelSearchStats(period);
     const priceRangeStats = await SearchAnalytics.getPriceRangeSearchStats(period);
     const missingInventory = await getMissingInventoryReport();
-    
+
     // Get current inventory distribution
     const inventory = await Car.find({ status: "active" }).lean();
-    
+
     const inventoryByBrand = {};
-    inventory.forEach(car => {
+    inventory.forEach((car) => {
       if (car.brand) {
         inventoryByBrand[car.brand] = (inventoryByBrand[car.brand] || 0) + 1;
       }
     });
-    
+
     // Calculate demand vs inventory gap
-    const demandGaps = brandModelStats.map(stat => {
+    const demandGaps = brandModelStats.map((stat) => {
       const inventoryCount = inventoryByBrand[stat.brand] || 0;
       const demandScore = stat.searchCount;
       const gap = demandScore - inventoryCount;
-      
+
       return {
         brand: stat.brand,
         model: stat.model,
@@ -306,10 +306,10 @@ export const getDealerDemandInsights = async (period = 30) => {
         recommendation: gap > 0 ? "Increase inventory" : gap < -10 ? "Reduce inventory" : "Maintain inventory",
       };
     });
-    
+
     // Sort by gap (descending)
     demandGaps.sort((a, b) => b.gap - a.gap);
-    
+
     return {
       demandGaps: demandGaps.slice(0, 20),
       priceRangeDemand: priceRangeStats.slice(0, 10),

@@ -20,10 +20,7 @@ export const PAGINATION = {
 
 export const getPagination = (req) => {
   const page = Math.max(Number(req.query.page) || PAGINATION.DEFAULT_PAGE, 1);
-  const limit = Math.min(
-    Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT,
-    PAGINATION.MAX_LIMIT
-  );
+  const limit = Math.min(Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
   const skip = (page - 1) * limit;
 
   return { page, limit, skip };
@@ -75,10 +72,7 @@ export const withPagination = (data, total, page, limit) => {
 // =============================
 
 export const getCursorPagination = (req) => {
-  const limit = Math.min(
-    Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT,
-    PAGINATION.MAX_LIMIT
-  );
+  const limit = Math.min(Number(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
   const cursor = req.query.cursor || null;
   const direction = req.query.direction === "prev" ? "prev" : "next";
 

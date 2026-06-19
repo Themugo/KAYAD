@@ -53,14 +53,10 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
     });
 
     // Add creation activity
-    await addTimelineEvent(
-      lead._id,
-      "lead_created",
-      buyerId,
-      "buyer",
-      `Lead created from ${source}`,
-      { source, referenceId }
-    );
+    await addTimelineEvent(lead._id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, {
+      source,
+      referenceId,
+    });
 
     logInfo("Lead created", { leadId: lead._id, buyerId, dealerId, source });
     return lead;
@@ -102,7 +98,7 @@ export const addLeadActivity = async (leadId, type, actorId, details) => {
     }
 
     await lead.addActivity(type, actorId, "dealer", details.description, details.metadata);
-    
+
     if (details.totalMessages) {
       lead.totalMessages = details.totalMessages;
       await lead.save();
@@ -348,7 +344,7 @@ export const findOrCreateLeadFromChat = async (chatId) => {
       throw new Error("Chat not found");
     }
 
-    const buyerId = chat.participants.find(p => p.toString() !== chat.car?.dealer?.toString());
+    const buyerId = chat.participants.find((p) => p.toString() !== chat.car?.dealer?.toString());
     const dealerId = chat.car?.dealer;
     const vehicleId = chat.car?._id;
 
@@ -404,7 +400,7 @@ export const findOrCreateLeadFromEscrow = async (escrowId) => {
     const vehicleId = escrow.car?._id;
 
     const lead = await createLead(buyerId, dealerId, vehicleId, "chat", null);
-    
+
     // Update lead stage to escrow_started
     await updateLeadStage(lead._id, "escrow_started", dealerId);
 

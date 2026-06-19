@@ -48,7 +48,7 @@ export const trackSearchLatency = (searchType = "general") => {
       // Store latency metric
       if (latencyMetrics[searchType]) {
         latencyMetrics[searchType].push(latency);
-        
+
         // Keep only last MAX_METRICS
         if (latencyMetrics[searchType].length > MAX_METRICS) {
           latencyMetrics[searchType].shift();
@@ -84,7 +84,7 @@ export const trackSearchLatency = (searchType = "general") => {
 
 export const getLatencyMetrics = (searchType) => {
   const metrics = latencyMetrics[searchType] || [];
-  
+
   if (metrics.length === 0) {
     return {
       searchType,

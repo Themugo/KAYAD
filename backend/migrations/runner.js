@@ -7,10 +7,10 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/kayad";
 
-async function runMigration(migrationName, direction = 'up') {
+async function runMigration(migrationName, direction = "up") {
   try {
     console.log(`\n🚀 Running migration: ${migrationName} (${direction})`);
-    
+
     // Connect to MongoDB
     await mongoose.connect(MONGODB_URI);
     console.log("✓ Connected to MongoDB");
@@ -18,7 +18,7 @@ async function runMigration(migrationName, direction = 'up') {
     // Import and run migration
     const migration = await import(`./${migrationName}.js`);
     await migration[direction]();
-    
+
     console.log(`✅ Migration ${migrationName} (${direction}) completed successfully`);
   } catch (error) {
     console.error(`❌ Migration ${migrationName} (${direction}) failed:`, error);
@@ -31,7 +31,7 @@ async function runMigration(migrationName, direction = 'up') {
 
 // Get migration name and direction from command line args
 const migrationName = process.argv[2];
-const direction = process.argv[3] || 'up';
+const direction = process.argv[3] || "up";
 
 if (!migrationName) {
   console.error("Usage: node runner.js <migration-name> [up|down]");

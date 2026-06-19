@@ -258,7 +258,7 @@ dealerHealthScoreSchema.statics.getScoreDistribution = async function () {
 // =============================
 dealerHealthScoreSchema.statics.getTopDealers = async function (category = null, limit = 10) {
   const match = category ? { scoreCategory: category } : {};
-  
+
   const topDealers = await this.find(match)
     .sort({ healthScore: -1 })
     .limit(limit)
@@ -273,7 +273,7 @@ dealerHealthScoreSchema.statics.getTopDealers = async function (category = null,
 // =============================
 dealerHealthScoreSchema.statics.getDealerRank = async function (dealerId) {
   const score = await this.findOne({ dealer: dealerId }).select("healthScore");
-  
+
   if (!score) return null;
 
   const rank = await this.countDocuments({ healthScore: { $gt: score.healthScore } });
@@ -284,6 +284,7 @@ dealerHealthScoreSchema.statics.getDealerRank = async function (dealerId) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const DealerHealthScore = mongoose.models.DealerHealthScore || mongoose.model("DealerHealthScore", dealerHealthScoreSchema);
+const DealerHealthScore =
+  mongoose.models.DealerHealthScore || mongoose.model("DealerHealthScore", dealerHealthScoreSchema);
 
 export default DealerHealthScore;

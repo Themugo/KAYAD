@@ -46,43 +46,18 @@ router.get("/:dealerId/trends", asyncHandler(getDealerScoreTrends));
 // =============================
 
 // Recalculate specific dealer score
-router.post(
-  "/admin/recalculate/:dealerId",
-  protect,
-  adminOnly,
-  asyncHandler(recalculateDealerScore)
-);
+router.post("/admin/recalculate/:dealerId", protect, adminOnly, asyncHandler(recalculateDealerScore));
 
 // Recalculate all scores
-router.post(
-  "/admin/recalculate-all",
-  protect,
-  adminOnly,
-  asyncHandler(recalculateAllScoresAdmin)
-);
+router.post("/admin/recalculate-all", protect, adminOnly, asyncHandler(recalculateAllScoresAdmin));
 
 // Override dealer score
-router.put(
-  "/admin/override/:dealerId",
-  protect,
-  adminOnly,
-  asyncHandler(overrideDealerScore)
-);
+router.put("/admin/override/:dealerId", protect, adminOnly, asyncHandler(overrideDealerScore));
 
 // Get score distribution
-router.get(
-  "/admin/distribution",
-  protect,
-  adminOnly,
-  asyncHandler(getScoreDistribution)
-);
+router.get("/admin/distribution", protect, adminOnly, asyncHandler(getScoreDistribution));
 
 // Get score alerts
-router.get(
-  "/admin/alerts",
-  protect,
-  adminOnly,
-  asyncHandler(getScoreAlerts)
-);
+router.get("/admin/alerts", protect, adminOnly, asyncHandler(getScoreAlerts));
 
 export default router;

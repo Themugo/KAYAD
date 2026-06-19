@@ -52,7 +52,7 @@ const getSingleQueueMetrics = async (queue) => {
 
     // Calculate throughput (completed jobs in last hour)
     const completedInLastHour = completed.filter(
-      (job) => job.finishedOn && Date.now() - job.finishedOn < 3600000
+      (job) => job.finishedOn && Date.now() - job.finishedOn < 3600000,
     ).length;
 
     // Calculate failure rate (failed / total)
@@ -92,9 +92,9 @@ export const getQueueBacklogHistory = async (queueName, hours = 24) => {
     const interval = 3600000; // 1 hour intervals
 
     for (let i = 0; i < hours; i++) {
-      const timestamp = now - (i * interval);
+      const timestamp = now - i * interval;
       const key = `${queueName}:backlog:${Math.floor(timestamp / interval)}`;
-      
+
       // This would typically be stored in Redis or a time-series database
       // For now, we'll return a placeholder
       history.push({
@@ -159,9 +159,8 @@ export const getAllQueueStatistics = async (hours = 24) => {
       totalFailures: stat.totalFailures,
       unresolvedFailures: stat.unresolvedFailures,
       resolvedFailures: stat.totalFailures - stat.unresolvedFailures,
-      failureRate: stat.totalFailures > 0 
-        ? Math.round((stat.unresolvedFailures / stat.totalFailures) * 10000) / 100 
-        : 0,
+      failureRate:
+        stat.totalFailures > 0 ? Math.round((stat.unresolvedFailures / stat.totalFailures) * 10000) / 100 : 0,
       avgProcessingTime: stat.avgProcessingTime || 0,
       errorTypes: stat.errorTypes || [],
     }));
@@ -237,9 +236,8 @@ export const getAggregatedMetrics = async (queues) => {
     const totalUnresolved = allMetrics.reduce((sum, stat) => sum + stat.unresolvedFailures, 0);
     const totalResolved = totalFailures - totalUnresolved;
     const overallFailureRate = totalFailures > 0 ? (totalUnresolved / totalFailures) * 100 : 0;
-    const avgProcessingTime = allMetrics.length > 0
-      ? allMetrics.reduce((sum, stat) => sum + stat.avgProcessingTime, 0) / allMetrics.length
-      : 0;
+    const avgProcessingTime =
+      allMetrics.length > 0 ? allMetrics.reduce((sum, stat) => sum + stat.avgProcessingTime, 0) / allMetrics.length : 0;
 
     return {
       totalQueues: allMetrics.length,

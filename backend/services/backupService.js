@@ -34,40 +34,40 @@ export const createBackup = async () => {
       logInfo("Backup disabled by configuration");
       return { success: false, message: "Backup disabled" };
     }
-    
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const filename = `kayad-backup-${timestamp}.gz`;
     const filepath = path.join(BACKUP_CONFIG.backupDir, filename);
-    
+
     // Ensure backup directory exists
     if (!fs.existsSync(BACKUP_CONFIG.backupDir)) {
       fs.mkdirSync(BACKUP_CONFIG.backupDir, { recursive: true });
     }
-    
+
     // Get MongoDB URI
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
       throw new Error("MONGODB_URI not configured");
     }
-    
+
     // Create backup using mongodump
     const command = BACKUP_CONFIG.compress
       ? `mongodump --uri="${mongoUri}" --archive="${filepath}" --gzip`
       : `mongodump --uri="${mongoUri}" --archive="${filepath}"`;
-    
+
     logInfo("Starting database backup", { filename });
-    
+
     const { stdout, stderr } = await execAsync(command);
-    
+
     if (stderr) {
       logWarn("Backup stderr", { stderr });
     }
-    
+
     logInfo("Backup completed successfully", { filename, size: fs.statSync(filepath).size });
-    
+
     // Clean old backups
     await cleanOldBackups();
-    
+
     return {
       success: true,
       filename,
@@ -90,22 +90,22 @@ export const cleanOldBackups = async () => {
     if (!fs.existsSync(BACKUP_CONFIG.backupDir)) {
       return;
     }
-    
+
     const files = fs.readdirSync(BACKUP_CONFIG.backupDir);
     const now = Date.now();
     const maxAge = BACKUP_CONFIG.retentionDays * 24 * 60 * 60 * 1000;
-    
+
     for (const file of files) {
       const filepath = path.join(BACKUP_CONFIG.backupDir, file);
       const stats = fs.statSync(filepath);
       const age = now - stats.mtimeMs;
-      
+
       if (age > maxAge) {
         fs.unlinkSync(filepath);
         logInfo("Deleted old backup", { file, age });
       }
     }
-    
+
     logInfo("Old backups cleaned", { retentionDays: BACKUP_CONFIG.retentionDays });
   } catch (err) {
     logError("Failed to clean old backups", err);
@@ -121,14 +121,14 @@ export const listBackups = async () => {
     if (!fs.existsSync(BACKUP_CONFIG.backupDir)) {
       return [];
     }
-    
+
     const files = fs.readdirSync(BACKUP_CONFIG.backupDir);
     const backups = [];
-    
+
     for (const file of files) {
       const filepath = path.join(BACKUP_CONFIG.backupDir, file);
       const stats = fs.statSync(filepath);
-      
+
       backups.push({
         filename: file,
         filepath,
@@ -137,10 +137,10 @@ export const listBackups = async () => {
         age: Date.now() - stats.mtimeMs,
       });
     }
-    
+
     // Sort by creation date (newest first)
     backups.sort((a, b) => b.created - a.created);
-    
+
     return backups;
   } catch (err) {
     logError("Failed to list backups", err);
@@ -155,30 +155,30 @@ export const listBackups = async () => {
 export const restoreBackup = async (filename) => {
   try {
     const filepath = path.join(BACKUP_CONFIG.backupDir, filename);
-    
+
     if (!fs.existsSync(filepath)) {
       throw new Error(`Backup file not found: ${filename}`);
     }
-    
+
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
       throw new Error("MONGODB_URI not configured");
     }
-    
+
     logInfo("Starting database restore", { filename });
-    
+
     const command = filename.endsWith(".gz")
       ? `mongorestore --uri="${mongoUri}" --archive="${filepath}" --gzip`
       : `mongorestore --uri="${mongoUri}" --archive="${filepath}"`;
-    
+
     const { stdout, stderr } = await execAsync(command);
-    
+
     if (stderr) {
       logWarn("Restore stderr", { stderr });
     }
-    
+
     logInfo("Restore completed successfully", { filename });
-    
+
     return {
       success: true,
       filename,
@@ -197,15 +197,15 @@ export const restoreBackup = async (filename) => {
 export const deleteBackup = async (filename) => {
   try {
     const filepath = path.join(BACKUP_CONFIG.backupDir, filename);
-    
+
     if (!fs.existsSync(filepath)) {
       throw new Error(`Backup file not found: ${filename}`);
     }
-    
+
     fs.unlinkSync(filepath);
-    
+
     logInfo("Backup deleted", { filename });
-    
+
     return {
       success: true,
       filename,
@@ -225,7 +225,7 @@ export const getBackupStatus = async () => {
     const backups = await listBackups();
     const totalSize = backups.reduce((sum, backup) => sum + backup.size, 0);
     const latestBackup = backups[0] || null;
-    
+
     return {
       enabled: BACKUP_CONFIG.enabled,
       schedule: BACKUP_CONFIG.schedule,

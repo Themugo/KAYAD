@@ -19,7 +19,7 @@ export const up = async () => {
 
     // Check if collection already exists
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const collectionExists = collections.some(c => c.name === "searchanalytics");
+    const collectionExists = collections.some((c) => c.name === "searchanalytics");
 
     if (collectionExists) {
       logWarn("SearchAnalytics collection already exists, skipping creation");
@@ -34,11 +34,11 @@ export const up = async () => {
     let backfillCount = 0;
     try {
       const savedSearches = await SavedSearch.find({}).lean();
-      
+
       for (const savedSearch of savedSearches) {
         try {
           const filters = savedSearch.filters || {};
-          
+
           await SearchAnalytics.create({
             searchTerm: savedSearch.name,
             normalizedTerm: savedSearch.name.toLowerCase().trim(),
@@ -63,13 +63,13 @@ export const up = async () => {
             lastSearchedAt: savedSearch.createdAt,
             createdAt: savedSearch.createdAt,
           });
-          
+
           backfillCount++;
         } catch (err) {
           logWarn("Failed to backfill saved search", { savedSearchId: savedSearch._id, error: err.message });
         }
       }
-      
+
       logInfo("Backfilled historical search data", { count: backfillCount });
     } catch (err) {
       logError("Failed to backfill historical search data", err);
@@ -98,7 +98,7 @@ export const down = async () => {
 
     // Drop the collection
     await mongoose.connection.db.dropCollection("searchanalytics");
-    
+
     logInfo("SearchAnalytics collection dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -113,12 +113,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -126,7 +127,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

@@ -51,7 +51,7 @@ describe("MarketplaceHealth Model", () => {
       MarketplaceHealth.create({
         period: "invalid_period",
         timestamp: new Date(),
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -91,7 +91,7 @@ describe("MarketplaceHealth Model", () => {
     });
 
     const alerts = health.generateAlerts();
-    const lowInventoryAlert = alerts.find(a => a.type === "low_inventory");
+    const lowInventoryAlert = alerts.find((a) => a.type === "low_inventory");
     expect(lowInventoryAlert).toBeDefined();
     expect(lowInventoryAlert.severity).toBe("high");
   });
@@ -108,7 +108,7 @@ describe("MarketplaceHealth Model", () => {
     });
 
     const alerts = health.generateAlerts();
-    const lowConversionAlert = alerts.find(a => a.type === "low_conversion");
+    const lowConversionAlert = alerts.find((a) => a.type === "low_conversion");
     expect(lowConversionAlert).toBeDefined();
     expect(lowConversionAlert.severity).toBe("high");
   });
@@ -125,7 +125,7 @@ describe("MarketplaceHealth Model", () => {
     });
 
     const alerts = health.generateAlerts();
-    const highFraudAlert = alerts.find(a => a.type === "high_fraud");
+    const highFraudAlert = alerts.find((a) => a.type === "high_fraud");
     expect(highFraudAlert).toBeDefined();
     expect(highFraudAlert.severity).toBe("critical");
   });

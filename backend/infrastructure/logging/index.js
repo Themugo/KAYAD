@@ -10,7 +10,12 @@ import crypto from "crypto";
 import { getConfig } from "./pino.config.js";
 import { getTransports } from "./transports.js";
 import { serializers } from "./serializers.js";
-import { createChildLogger, createRequestLogger, createTransactionLogger, createFeatureLogger } from "./child-logger.js";
+import {
+  createChildLogger,
+  createRequestLogger,
+  createTransactionLogger,
+  createFeatureLogger,
+} from "./child-logger.js";
 import { sentryTransport, configureSentry } from "./sentry-integration.js";
 
 // =============================
@@ -19,13 +24,16 @@ import { sentryTransport, configureSentry } from "./sentry-integration.js";
 const config = getConfig();
 const transports = getTransports();
 
-const logger = pino({
-  ...config,
-  serializers: {
-    ...config.serializers,
-    ...serializers,
+const logger = pino(
+  {
+    ...config,
+    serializers: {
+      ...config.serializers,
+      ...serializers,
+    },
   },
-}, transports);
+  transports,
+);
 
 // =============================
 // 🔗 CONFIGURE SENTRY (if DSN provided)
@@ -76,26 +84,32 @@ export const logRequest = (req) => {
   const requestId = generateRequestId();
   req.requestId = requestId;
 
-  logger.info({
-    requestId,
-    method: req.method,
-    url: req.originalUrl || req.url,
-    ip: req.ip || req.connection?.remoteAddress,
-    userAgent: req.headers["user-agent"],
-  }, "Incoming Request");
+  logger.info(
+    {
+      requestId,
+      method: req.method,
+      url: req.originalUrl || req.url,
+      ip: req.ip || req.connection?.remoteAddress,
+      userAgent: req.headers["user-agent"],
+    },
+    "Incoming Request",
+  );
 };
 
 // =============================
 // ✅ RESPONSE LOGGER
 // =============================
 export const logResponse = (req, res, duration) => {
-  logger.info({
-    requestId: req.requestId,
-    method: req.method,
-    url: req.originalUrl || req.url,
-    status: res.statusCode,
-    duration: `${duration}ms`,
-  }, "Request Completed");
+  logger.info(
+    {
+      requestId: req.requestId,
+      method: req.method,
+      url: req.originalUrl || req.url,
+      status: res.statusCode,
+      duration: `${duration}ms`,
+    },
+    "Request Completed",
+  );
 };
 
 // =============================

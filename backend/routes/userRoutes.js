@@ -37,9 +37,9 @@ router.get(
       User.countDocuments(filter),
     ]);
 
-    res.json({ 
-      success: true, 
-      users, 
+    res.json({
+      success: true,
+      users,
       pagination: { page: safePage, limit: safeLimit, total, pages: Math.ceil(total / safeLimit) },
     });
   }),

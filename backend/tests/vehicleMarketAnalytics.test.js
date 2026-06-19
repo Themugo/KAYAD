@@ -136,7 +136,7 @@ describe("VehicleMarketAnalytics Model", () => {
         period: "invalid_period",
         startDate: new Date(),
         endDate: new Date(),
-      })
+      }),
     ).rejects.toThrow();
   });
 

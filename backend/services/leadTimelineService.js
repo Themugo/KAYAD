@@ -29,10 +29,10 @@ export const getLeadTimeline = async (leadId) => {
 export const addTimelineEvent = async (leadId, type, actorId, actorType, description, metadata = {}) => {
   try {
     const activity = await LeadActivity.createActivity(leadId, type, actorId, actorType, description, metadata);
-    
+
     // Update lead's last activity timestamp
     await Lead.findByIdAndUpdate(leadId, { lastActivityAt: new Date() });
-    
+
     logInfo("Timeline event added", { leadId, type, actorId });
     return activity;
   } catch (err) {
@@ -53,11 +53,11 @@ export const getLeadHistory = async (leadId) => {
     }
 
     const timeline = await LeadActivity.getLeadTimeline(leadId);
-    
+
     // Extract stage changes for history
     const stageHistory = timeline
-      .filter(activity => activity.type === "stage_changed")
-      .map(activity => ({
+      .filter((activity) => activity.type === "stage_changed")
+      .map((activity) => ({
         stage: activity.metadata.newStage,
         previousStage: activity.metadata.oldStage,
         changedAt: activity.createdAt,
@@ -84,14 +84,14 @@ export const getLeadHistory = async (leadId) => {
 export const getActivitySummary = async (leadId) => {
   try {
     const activities = await LeadActivity.find({ lead: leadId });
-    
+
     const summary = {
       totalActivities: activities.length,
       byType: {},
       byActor: {},
     };
 
-    activities.forEach(activity => {
+    activities.forEach((activity) => {
       summary.byType[activity.type] = (summary.byType[activity.type] || 0) + 1;
       summary.byActor[activity.actor.toString()] = (summary.byActor[activity.actor.toString()] || 0) + 1;
     });

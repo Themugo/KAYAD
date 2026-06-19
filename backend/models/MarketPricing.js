@@ -125,12 +125,14 @@ const marketPricingSchema = new mongoose.Schema(
     // =============================
     // 📊 HISTORICAL DATA
     // =============================
-    historical: [{
-      date: Date,
-      averagePrice: Number,
-      medianPrice: Number,
-      totalListings: Number,
-    }],
+    historical: [
+      {
+        date: Date,
+        averagePrice: Number,
+        medianPrice: Number,
+        totalListings: Number,
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -150,7 +152,7 @@ marketPricingSchema.index({ createdAt: -1 });
 // Calculate average price
 marketPricingSchema.methods.calculateAveragePrice = function (prices) {
   if (prices.length === 0) return this;
-  
+
   const sum = prices.reduce((acc, price) => acc + price, 0);
   this.pricing.averagePrice = sum / prices.length;
   return this;
@@ -159,11 +161,11 @@ marketPricingSchema.methods.calculateAveragePrice = function (prices) {
 // Calculate price range
 marketPricingSchema.methods.calculatePriceRange = function (prices) {
   if (prices.length === 0) return this;
-  
+
   const sortedPrices = prices.sort((a, b) => a - b);
   const q1 = sortedPrices[Math.floor(sortedPrices.length * 0.25)];
   const q3 = sortedPrices[Math.floor(sortedPrices.length * 0.75)];
-  
+
   this.pricing.priceRange.low = q1;
   this.pricing.priceRange.high = q3;
   return this;
@@ -173,7 +175,7 @@ marketPricingSchema.methods.calculatePriceRange = function (prices) {
 marketPricingSchema.methods.updateTrend = function (previousAveragePrice) {
   if (previousAveragePrice > 0) {
     const percentChange = ((this.pricing.averagePrice - previousAveragePrice) / previousAveragePrice) * 100;
-    
+
     if (percentChange > 5) {
       this.trend.direction = "increasing";
     } else if (percentChange < -5) {
@@ -181,7 +183,7 @@ marketPricingSchema.methods.updateTrend = function (previousAveragePrice) {
     } else {
       this.trend.direction = "stable";
     }
-    
+
     this.trend.percentChange = Math.abs(percentChange);
   }
   return this;
@@ -195,12 +197,12 @@ marketPricingSchema.methods.addHistoricalData = function () {
     medianPrice: this.pricing.medianPrice,
     totalListings: this.metrics.totalListings,
   });
-  
+
   // Keep only last 100 entries
   if (this.historical.length > 100) {
     this.historical = this.historical.slice(-100);
   }
-  
+
   return this;
 };
 
@@ -210,51 +212,38 @@ marketPricingSchema.methods.addHistoricalData = function () {
 
 // Get market pricing by county
 marketPricingSchema.statics.getByCounty = async function (county) {
-  return this.find({ county })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ county }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get market pricing by county and brand
 marketPricingSchema.statics.getByCountyAndBrand = async function (county, brand) {
-  return this.find({ county, "vehicle.brand": brand })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ county, "vehicle.brand": brand }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get market pricing by county and body type
 marketPricingSchema.statics.getByCountyAndBodyType = async function (county, bodyType) {
-  return this.find({ county, "vehicle.bodyType": bodyType })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ county, "vehicle.bodyType": bodyType }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get latest market pricing
 marketPricingSchema.statics.getLatest = async function (county, filters = {}) {
   const query = { county, ...filters };
-  return this.findOne(query)
-    .sort({ "period.startDate": -1 })
-    .lean();
+  return this.findOne(query).sort({ "period.startDate": -1 }).lean();
 };
 
 // Get market pricing trend
 marketPricingSchema.statics.getMarketTrend = async function (county, filters = {}) {
   const query = { county, ...filters };
-  const marketPricings = await this.find(query)
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
-  
+  const marketPricings = await this.find(query).sort({ "period.startDate": -1 }).limit(12).lean();
+
   if (marketPricings.length < 2) return null;
-  
+
   const latest = marketPricings[0];
   const previous = marketPricings[marketPricings.length - 1];
-  
-  const percentChange = ((latest.pricing.averagePrice - previous.pricing.averagePrice) / previous.pricing.averagePrice) * 100;
-  
+
+  const percentChange =
+    ((latest.pricing.averagePrice - previous.pricing.averagePrice) / previous.pricing.averagePrice) * 100;
+
   return {
     direction: percentChange > 5 ? "increasing" : percentChange < -5 ? "decreasing" : "stable",
     percentChange: Math.abs(percentChange),
@@ -267,27 +256,27 @@ marketPricingSchema.statics.getMarketTrend = async function (county, filters = {
 // Calculate market pricing from valuations
 marketPricingSchema.statics.calculateFromValuations = async function (county, filters = {}) {
   const VehicleValuation = mongoose.model("VehicleValuation");
-  
+
   const query = {
     "location.county": county,
     "pricing.salePrice": { $gt: 0 },
     ...filters,
   };
-  
+
   const valuations = await VehicleValuation.find(query).lean();
-  
+
   if (valuations.length === 0) return null;
-  
-  const prices = valuations.map(v => v.pricing.salePrice);
+
+  const prices = valuations.map((v) => v.pricing.salePrice);
   const sortedPrices = prices.sort((a, b) => a - b);
-  
+
   const sum = prices.reduce((acc, price) => acc + price, 0);
   const averagePrice = sum / prices.length;
   const medianPrice = sortedPrices[Math.floor(sortedPrices.length / 2)];
-  
+
   const q1 = sortedPrices[Math.floor(sortedPrices.length * 0.25)];
   const q3 = sortedPrices[Math.floor(sortedPrices.length * 0.75)];
-  
+
   return {
     county,
     vehicle: filters.vehicle || {},
@@ -301,7 +290,7 @@ marketPricingSchema.statics.calculateFromValuations = async function (county, fi
     },
     metrics: {
       totalListings: valuations.length,
-      totalSales: valuations.filter(v => v.pricing.salePrice > 0).length,
+      totalSales: valuations.filter((v) => v.pricing.salePrice > 0).length,
     },
   };
 };

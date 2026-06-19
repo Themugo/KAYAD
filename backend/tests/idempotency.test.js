@@ -24,7 +24,7 @@ describe("Idempotency Implementation Tests", () => {
   beforeAll(async () => {
     // Connect to test database
     await mongoose.connect(TEST_DB_URI);
-    
+
     // Create test user
     testUser = await User.create({
       name: "Test User",
@@ -45,7 +45,7 @@ describe("Idempotency Implementation Tests", () => {
     await Bid.deleteMany({});
     await DealerVerification.deleteMany({});
     await IdempotencyKey.deleteMany({});
-    
+
     // Close database connection
     await mongoose.connection.close();
   });
@@ -451,8 +451,8 @@ describe("Idempotency Implementation Tests", () => {
             responseData: { success: true },
             responseStatus: 200,
             success: true,
-          })
-        )
+          }),
+        ),
       );
 
       const creationTime = Date.now() - startTime;

@@ -82,9 +82,10 @@ describe('useCompare', () => {
   beforeEach(() => { localStorage.clear(); });
   afterEach(() => { cleanup(); });
 
-  it('returns null outside provider', () => {
+  it('throws error outside provider', () => {
     const { result } = renderHook(() => useCompare());
-    expect(result.current).toBeNull();
+    expect(result.error).toBeDefined();
+    expect(result.error.message).toBe('useCompare must be used within CompareProvider');
   });
 
   it('returns context within provider', () => {

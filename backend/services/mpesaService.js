@@ -117,7 +117,7 @@ const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
           headers: { Authorization: `Basic ${auth}` },
           timeout: 15000,
         }),
-      mpesaConfig
+      mpesaConfig,
     );
 
     const duration = Date.now() - startTime;
@@ -129,7 +129,7 @@ const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
     const duration = Date.now() - startTime;
     recordMetric("mpesa_token_fetch_duration", duration, { status: "error" });
     incrementCounter("mpesa_token_fetch_failure", { error_type: err.code || "unknown" });
-    
+
     logError("M-Pesa token fetch failed", err, { baseUrl });
     throw err;
   }
@@ -143,7 +143,7 @@ const formatPhone = (phone) => {
 
 export const stkPush = async (phone, amount, configOverrides = {}) => {
   const startTime = Date.now();
-  
+
   try {
     const cfg = await loadConfig(configOverrides);
 
@@ -197,17 +197,17 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
           headers: { Authorization: `Bearer ${token}` },
           timeout: 30000,
         }),
-      mpesaConfig
+      mpesaConfig,
     );
 
     const duration = Date.now() - startTime;
     recordMetric("mpesa_stk_push_duration", duration);
     incrementCounter("mpesa_stk_push_success");
 
-    logInfo("M-Pesa STK push successful", { 
-      phone, 
-      amount, 
-      checkoutRequestID: res.data.CheckoutRequestID 
+    logInfo("M-Pesa STK push successful", {
+      phone,
+      amount,
+      checkoutRequestID: res.data.CheckoutRequestID,
     });
 
     return res.data;
@@ -215,15 +215,15 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
     const duration = Date.now() - startTime;
     recordMetric("mpesa_stk_push_duration", duration, { status: "error" });
     incrementCounter("mpesa_stk_push_failure", { error_type: err.code || "unknown" });
-    
+
     logError("M-Pesa STK push failed", err, { phone, amount, error: err.message });
-    
+
     // Queue failed STK push for retry
     if (err.code !== "NOT_CONFIGURED" && err.code !== "CIRCUIT_BREAKER_OPEN") {
       incrementCounter("mpesa_stk_push_queued");
       logInfo("M-Pesa STK push queued for retry", { phone, amount });
     }
-    
+
     throw new Error(err.response?.data?.errorMessage || err.message || "MPESA STK push failed");
   }
 };

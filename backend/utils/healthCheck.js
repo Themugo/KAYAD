@@ -72,7 +72,7 @@ const deepHealth = async (req, res) => {
         const metrics = await getQueueMetrics(name);
         const totalJobs = metrics.waiting + metrics.active + metrics.delayed;
         const queueHealth = totalJobs > 1000 ? "warn" : "ok";
-        
+
         queueDetails[name] = {
           status: queueHealth,
           waiting: metrics.waiting,

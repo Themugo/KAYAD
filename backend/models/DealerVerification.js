@@ -87,8 +87,8 @@ const dealerVerificationSchema = new mongoose.Schema(
             trim: true,
             validate: {
               validator: function (v) {
-            // KRA PIN format: A00 000000A 000 (11 characters)
-            return /^[A-Z]\d{2}\s\d{7}[A-Z]\s\d{3}$/.test(v);
+                // KRA PIN format: A00 000000A 000 (11 characters)
+                return /^[A-Z]\d{2}\s\d{7}[A-Z]\s\d{3}$/.test(v);
               },
               message: "Invalid KRA PIN format",
             },
@@ -197,8 +197,8 @@ const dealerVerificationSchema = new mongoose.Schema(
             trim: true,
             validate: {
               validator: function (v) {
-            // Kenyan phone format: +2547XXXXXXXX or 07XXXXXXXX
-            return /^(\+254|0)?7\d{8}$/.test(v);
+                // Kenyan phone format: +2547XXXXXXXX or 07XXXXXXXX
+                return /^(\+254|0)?7\d{8}$/.test(v);
               },
               message: "Invalid Kenyan phone number",
             },
@@ -280,11 +280,7 @@ dealerVerificationSchema.index({ "documents.phoneVerification.verified": 1 });
 dealerVerificationSchema.methods.allDocumentsSubmitted = function () {
   const docs = this.documents;
   return (
-    docs.governmentId &&
-    docs.kraPin &&
-    docs.businessRegistration &&
-    docs.physicalAddress &&
-    docs.phoneVerification
+    docs.governmentId && docs.kraPin && docs.businessRegistration && docs.physicalAddress && docs.phoneVerification
   );
 };
 
@@ -308,15 +304,15 @@ dealerVerificationSchema.methods.allDocumentsVerified = function () {
 dealerVerificationSchema.methods.getVerificationProgress = function () {
   const docs = this.documents;
   const required = ["governmentId", "kraPin", "businessRegistration", "physicalAddress", "phoneVerification"];
-  
+
   let submitted = 0;
   let verified = 0;
-  
+
   for (const key of required) {
     if (docs[key]) submitted++;
     if (docs[key]?.verified) verified++;
   }
-  
+
   return {
     submitted,
     verified,
@@ -341,7 +337,7 @@ dealerVerificationSchema.methods.transitionStatus = function (newStatus, options
   const allowed = validTransitions[this.verificationStatus] || [];
   if (!allowed.includes(newStatus)) {
     throw new Error(
-      `Invalid status transition from ${this.verificationStatus} to ${newStatus}. Allowed: ${allowed.join(", ")}`
+      `Invalid status transition from ${this.verificationStatus} to ${newStatus}. Allowed: ${allowed.join(", ")}`,
     );
   }
 
@@ -431,6 +427,7 @@ dealerVerificationSchema.methods.verifyOTP = function (otp) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const DealerVerification = mongoose.models.DealerVerification || mongoose.model("DealerVerification", dealerVerificationSchema);
+const DealerVerification =
+  mongoose.models.DealerVerification || mongoose.model("DealerVerification", dealerVerificationSchema);
 
 export default DealerVerification;

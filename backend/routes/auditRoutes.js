@@ -55,14 +55,17 @@ router.get("/action/:action", asyncHandler(getActionAudits));
 router.get("/date-range", asyncHandler(getDateRangeAudits));
 
 // GET /api/audit/export/:escrowId - Export audit trail (admin only)
-router.get("/export/:escrowId", asyncHandler(async (req, res) => {
-  const result = await exportEscrowAudit(req, res);
-  await logActionFromReq(req, "audit_export", {
-    target: req.params.escrowId,
-    targetModel: "Escrow",
-    details: { exportedBy: req.user.id },
-  });
-}));
+router.get(
+  "/export/:escrowId",
+  asyncHandler(async (req, res) => {
+    const result = await exportEscrowAudit(req, res);
+    await logActionFromReq(req, "audit_export", {
+      target: req.params.escrowId,
+      targetModel: "Escrow",
+      details: { exportedBy: req.user.id },
+    });
+  }),
+);
 
 // GET /api/audit/statistics - Get audit statistics (admin only)
 router.get("/statistics", asyncHandler(getAuditStats));
@@ -93,12 +96,15 @@ router.get("/logs/target/:targetId/:targetModel", asyncHandler(getAuditLogsByTar
 router.get("/logs/statistics", asyncHandler(getAuditLogStatistics));
 
 // GET /api/audit/logs/export - Export audit logs (admin only)
-router.get("/logs/export", asyncHandler(async (req, res) => {
-  const result = await exportAuditLogs(req, res);
-  await logActionFromReq(req, "audit_logs_export", {
-    details: { exportedBy: req.user.id },
-  });
-}));
+router.get(
+  "/logs/export",
+  asyncHandler(async (req, res) => {
+    const result = await exportAuditLogs(req, res);
+    await logActionFromReq(req, "audit_logs_export", {
+      details: { exportedBy: req.user.id },
+    });
+  }),
+);
 
 // =============================
 // �🚨 FALLBACK

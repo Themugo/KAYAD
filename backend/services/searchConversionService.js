@@ -181,11 +181,9 @@ export const getConversionFunnelAnalysis = async (period = 7) => {
 export const getHighConvertingSearches = async (limit = 10, period = 7) => {
   try {
     const conversionRates = await getConversionRateBySearchTerm(period);
-    
+
     // Filter for searches with at least 10 searches
-    const significantSearches = conversionRates.filter(
-      (item) => item.totalSearches >= 10
-    );
+    const significantSearches = conversionRates.filter((item) => item.totalSearches >= 10);
 
     return significantSearches.slice(0, limit);
   } catch (err) {
@@ -201,11 +199,9 @@ export const getHighConvertingSearches = async (limit = 10, period = 7) => {
 export const getLowConvertingSearches = async (limit = 10, period = 7) => {
   try {
     const conversionRates = await getConversionRateBySearchTerm(period);
-    
+
     // Filter for searches with at least 10 searches
-    const significantSearches = conversionRates.filter(
-      (item) => item.totalSearches >= 10
-    );
+    const significantSearches = conversionRates.filter((item) => item.totalSearches >= 10);
 
     // Sort by conversion rate ascending
     const lowConverting = significantSearches.sort((a, b) => a.conversionRate - b.conversionRate);

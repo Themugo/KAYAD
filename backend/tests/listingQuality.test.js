@@ -52,7 +52,7 @@ describe("ListingQuality Model", () => {
       ListingQuality.create({
         car: carId,
         dealer: dealerId,
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -65,7 +65,7 @@ describe("ListingQuality Model", () => {
         car: carId,
         dealer: dealerId,
         rating: "invalid_rating",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -78,7 +78,7 @@ describe("ListingQuality Model", () => {
         car: carId,
         dealer: dealerId,
         overallScore: 150,
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -116,7 +116,8 @@ describe("ListingQuality Model", () => {
     });
 
     const car = {
-      description: "This is a test description with enough words to pass the minimum requirement. It includes details about condition, history, and features.",
+      description:
+        "This is a test description with enough words to pass the minimum requirement. It includes details about condition, history, and features.",
     };
 
     const score = quality.calculateDescriptionQualityScore(car);
@@ -170,7 +171,7 @@ describe("ListingQuality Model", () => {
     };
 
     const recommendations = quality.generateRecommendations(car, null);
-    const imageRec = recommendations.find(r => r.category === "images");
+    const imageRec = recommendations.find((r) => r.category === "images");
     expect(imageRec).toBeDefined();
     expect(imageRec.priority).toBe("high");
   });
@@ -307,7 +308,7 @@ describe("ListingQuality Schema Validation", () => {
             action: "Test",
           },
         ],
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -327,7 +328,7 @@ describe("ListingQuality Schema Validation", () => {
             action: "Test",
           },
         ],
-      })
+      }),
     ).rejects.toThrow();
   });
 

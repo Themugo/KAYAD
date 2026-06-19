@@ -92,7 +92,7 @@ export const detectDuplicates = async (carData, dealerId) => {
 
     // Calculate combined score if multiple detection methods
     if (detectionResults.matches.length > 0 && detectionResults.matchScore < 100) {
-      detectionResults.matchScore = Math.min(90, detectionResults.matchScore + (detectionResults.matches.length * 10));
+      detectionResults.matchScore = Math.min(90, detectionResults.matchScore + detectionResults.matches.length * 10);
       detectionResults.detectionMethod = "combined";
     }
 
@@ -115,7 +115,7 @@ export const detectDuplicates = async (carData, dealerId) => {
 export const checkByVIN = async (vin, excludeDealerId = null) => {
   try {
     const normalizedVIN = vin.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    
+
     const query = { vin: { $regex: normalizedVIN, $options: "i" } };
     if (excludeDealerId) {
       query.dealer = { $ne: excludeDealerId };
@@ -138,7 +138,7 @@ export const checkByVIN = async (vin, excludeDealerId = null) => {
 export const checkByChassis = async (chassisNumber, excludeDealerId = null) => {
   try {
     const normalizedChassis = chassisNumber.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    
+
     const query = { chassisNumber: { $regex: normalizedChassis, $options: "i" } };
     if (excludeDealerId) {
       query.dealer = { $ne: excludeDealerId };
@@ -161,7 +161,7 @@ export const checkByChassis = async (chassisNumber, excludeDealerId = null) => {
 export const checkByRegistration = async (registrationNumber, excludeDealerId = null) => {
   try {
     const normalizedReg = registrationNumber.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    
+
     const query = { registrationNumber: { $regex: normalizedReg, $options: "i" } };
     if (excludeDealerId) {
       query.dealer = { $ne: excludeDealerId };
@@ -184,7 +184,7 @@ export const checkByRegistration = async (registrationNumber, excludeDealerId = 
 export const checkByPhone = async (phone, excludeDealerId = null) => {
   try {
     const normalizedPhone = phone.replace(/[^0-9]/g, "");
-    
+
     const dealers = await User.find({
       phone: { $regex: normalizedPhone, $options: "i" },
       _id: { $ne: excludeDealerId },
@@ -328,11 +328,11 @@ export const flagDuplicate = async (carId, detectionData, dealerId) => {
     car.duplicateStatus = "flagged";
     car.duplicateLog = duplicateLog._id;
     car.duplicateListings = detectionData.matches.map((m) => m._id);
-    
+
     // Update fraud and trust scores
     const fraudImpact = Math.min(30, detectionData.matchScore * 0.3);
     const trustImpact = Math.min(20, detectionData.matchScore * 0.2);
-    
+
     car.fraudScore = Math.min(100, car.fraudScore + fraudImpact);
     car.trustScore = Math.max(0, car.trustScore - trustImpact);
 

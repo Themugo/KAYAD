@@ -24,8 +24,8 @@ export const up = async () => {
 
     // Check if collections already exist
     const collections = await mongoose.connection.db.listCollections().toArray();
-    const leadCollectionExists = collections.some(c => c.name === "leads");
-    const leadActivityCollectionExists = collections.some(c => c.name === "leadactivities");
+    const leadCollectionExists = collections.some((c) => c.name === "leads");
+    const leadActivityCollectionExists = collections.some((c) => c.name === "leadactivities");
 
     if (leadCollectionExists && leadActivityCollectionExists) {
       logWarn("Lead collections already exist, skipping creation");
@@ -41,10 +41,10 @@ export const up = async () => {
     let chatLeadCount = 0;
     try {
       const chats = await Chat.find({ car: { $ne: null } }).populate("car");
-      
+
       for (const chat of chats) {
         try {
-          const buyerId = chat.participants.find(p => p.toString() !== chat.car.dealer?.toString());
+          const buyerId = chat.participants.find((p) => p.toString() !== chat.car.dealer?.toString());
           const dealerId = chat.car.dealer;
           const vehicleId = chat.car._id;
 
@@ -56,7 +56,7 @@ export const up = async () => {
           logError("Failed to create lead from chat", err, { chatId: chat._id });
         }
       }
-      
+
       logInfo("Backfilled chat leads", { count: chatLeadCount });
     } catch (err) {
       logError("Failed to backfill chat leads", err);
@@ -66,7 +66,7 @@ export const up = async () => {
     let auctionLeadCount = 0;
     try {
       const auctions = await Auction.find({ status: "completed" }).populate("carId");
-      
+
       for (const auction of auctions) {
         try {
           if (auction.winner && auction.carId) {
@@ -80,7 +80,7 @@ export const up = async () => {
           logError("Failed to create lead from auction", err, { auctionId: auction._id });
         }
       }
-      
+
       logInfo("Backfilled auction leads", { count: auctionLeadCount });
     } catch (err) {
       logError("Failed to backfill auction leads", err);
@@ -90,7 +90,7 @@ export const up = async () => {
     let escrowLeadCount = 0;
     try {
       const escrows = await Escrow.find({ status: { $in: ["held", "released"] } }).populate("car");
-      
+
       for (const escrow of escrows) {
         try {
           await createLead(escrow.buyer, escrow.seller, escrow.car?._id, "chat", null);
@@ -99,7 +99,7 @@ export const up = async () => {
           logError("Failed to create lead from escrow", err, { escrowId: escrow._id });
         }
       }
-      
+
       logInfo("Backfilled escrow leads", { count: escrowLeadCount });
     } catch (err) {
       logError("Failed to backfill escrow leads", err);
@@ -139,7 +139,7 @@ export const down = async () => {
     // Drop the collections
     await mongoose.connection.db.dropCollection("leads");
     await mongoose.connection.db.dropCollection("leadactivities");
-    
+
     logInfo("Lead Intelligence collections dropped");
 
     return { success: true, message: "Rollback completed successfully" };
@@ -154,12 +154,13 @@ export const down = async () => {
 // =============================
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose
+    .connect(process.env.MONGODB_URI)
     .then(async () => {
       console.log("Connected to MongoDB");
-      
+
       const operation = process.argv[2];
-      
+
       if (operation === "down") {
         await down();
         console.log("Migration rolled back");
@@ -167,7 +168,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         await up();
         console.log("Migration completed");
       }
-      
+
       process.exit(0);
     })
     .catch((err) => {

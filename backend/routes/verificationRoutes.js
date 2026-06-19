@@ -51,38 +51,38 @@ router.post(
 router.get("/status", asyncHandler(getVerificationStatus));
 
 // POST /api/verification/phone/request - Request phone verification OTP (idempotent)
-router.post("/phone/request", idempotencyCheck, asyncHandler(async (req, res) => {
-  const result = await requestPhoneVerification(req, res);
-  await logActionFromReq(req, "phone_verification_request", {
-    details: { phoneNumber: req.body.phoneNumber },
-  });
-}));
+router.post(
+  "/phone/request",
+  idempotencyCheck,
+  asyncHandler(async (req, res) => {
+    const result = await requestPhoneVerification(req, res);
+    await logActionFromReq(req, "phone_verification_request", {
+      details: { phoneNumber: req.body.phoneNumber },
+    });
+  }),
+);
 
 // POST /api/verification/phone/verify - Verify OTP (idempotent)
-router.post("/phone/verify", idempotencyCheck, asyncHandler(async (req, res) => {
-  const result = await verifyOTP(req, res);
-  if (result.success) {
-    await logActionFromReq(req, "phone_verified", {});
-  }
-}));
+router.post(
+  "/phone/verify",
+  idempotencyCheck,
+  asyncHandler(async (req, res) => {
+    const result = await verifyOTP(req, res);
+    if (result.success) {
+      await logActionFromReq(req, "phone_verified", {});
+    }
+  }),
+);
 
 // =============================
 // 👮 ADMIN VERIFICATION ENDPOINTS
 // =============================
 
 // GET /api/verification/admin/all - Get all verifications (admin only)
-router.get(
-  "/admin/all",
-  allowRoles("admin", "superadmin"),
-  asyncHandler(getAllVerifications),
-);
+router.get("/admin/all", allowRoles("admin", "superadmin"), asyncHandler(getAllVerifications));
 
 // GET /api/verification/admin/:id - Get verification by ID (admin only)
-router.get(
-  "/admin/:id",
-  allowRoles("admin", "superadmin"),
-  asyncHandler(getVerificationById),
-);
+router.get("/admin/:id", allowRoles("admin", "superadmin"), asyncHandler(getVerificationById));
 
 // POST /api/verification/admin/:id/approve - Approve verification (admin only, idempotent)
 router.post(

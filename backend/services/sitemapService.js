@@ -15,9 +15,7 @@ const BASE_URL = "https://www.kayad.space";
 // =============================
 export const generateVehicleSitemap = async () => {
   try {
-    const cars = await Car.find({ status: "active" })
-      .select("_id updatedAt")
-      .lean();
+    const cars = await Car.find({ status: "active" }).select("_id updatedAt").lean();
 
     const urls = cars.map((car) => ({
       loc: `${BASE_URL}/cars/${car._id}`,
@@ -38,9 +36,7 @@ export const generateVehicleSitemap = async () => {
 // =============================
 export const generateDealerSitemap = async () => {
   try {
-    const dealers = await User.find({ role: "dealer", status: "approved" })
-      .select("_id updatedAt")
-      .lean();
+    const dealers = await User.find({ role: "dealer", status: "approved" }).select("_id updatedAt").lean();
 
     const urls = dealers.map((dealer) => ({
       loc: `${BASE_URL}/dealer/${dealer._id}`,
@@ -67,7 +63,9 @@ export const generateAuctionSitemap = async () => {
 
     const urls = auctions.map((auction) => ({
       loc: `${BASE_URL}/auctions/${auction._id}`,
-      lastmod: auction.updatedAt ? auction.updatedAt.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      lastmod: auction.updatedAt
+        ? auction.updatedAt.toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
       changefreq: "hourly",
       priority: 0.9,
     }));
@@ -107,12 +105,16 @@ export const generateSitemapIndex = async () => {
 const generateXMLSitemap = (urls) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((url) => `  <url>
+${urls
+  .map(
+    (url) => `  <url>
     <loc>${url.loc}</loc>
     <lastmod>${url.lastmod}</lastmod>
     <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>
-  </url>`).join("\n")}
+  </url>`,
+  )
+  .join("\n")}
 </urlset>`;
 
   return xml;
@@ -124,10 +126,14 @@ ${urls.map((url) => `  <url>
 const generateXMLSitemapIndex = (sitemaps) => {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemaps.map((sitemap) => `  <sitemap>
+${sitemaps
+  .map(
+    (sitemap) => `  <sitemap>
     <loc>${sitemap.loc}</loc>
     <lastmod>${sitemap.lastmod}</lastmod>
-  </sitemap>`).join("\n")}
+  </sitemap>`,
+  )
+  .join("\n")}
 </sitemapindex>`;
 
   return xml;

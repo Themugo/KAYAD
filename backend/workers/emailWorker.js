@@ -19,22 +19,22 @@ const processEmail = async (job) => {
   try {
     // Import email service dynamically
     const emailService = await import("../services/email.service.js");
-    
+
     // Send email
     await emailService.sendRawEmail({ to, subject, html, text, from });
-    
+
     const processingTime = Date.now() - startTime;
     logInfo("Email processed successfully", { to, subject, processingTime });
     return { success: true, to, subject, processingTime };
   } catch (err) {
     const processingTime = Date.now() - startTime;
     logError("Failed to process email", err, { to, subject, processingTime });
-    
+
     // Send to dead letter queue if max retries exceeded
     if (job.attemptsMade >= job.opts.attempts) {
       await sendToDeadLetterQueue(job, err);
     }
-    
+
     throw err;
   }
 };

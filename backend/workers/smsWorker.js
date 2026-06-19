@@ -19,10 +19,10 @@ const processSMS = async (job) => {
   try {
     // Import SMS utility dynamically
     const smsUtils = await import("../utils/sms.js");
-    
+
     // Send SMS
     const success = await smsUtils.sendSMS(phone, message);
-    
+
     if (success) {
       const processingTime = Date.now() - startTime;
       logInfo("SMS processed successfully", { phone, context, processingTime });
@@ -33,12 +33,12 @@ const processSMS = async (job) => {
   } catch (err) {
     const processingTime = Date.now() - startTime;
     logError("Failed to process SMS", err, { phone, processingTime });
-    
+
     // Send to dead letter queue if max retries exceeded
     if (job.attemptsMade >= job.opts.attempts) {
       await sendToDeadLetterQueue(job, err);
     }
-    
+
     throw err;
   }
 };

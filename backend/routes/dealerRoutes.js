@@ -320,7 +320,7 @@ router.get(
   cacheDealerData,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
-    
+
     const [escrows, total] = await Promise.all([
       Escrow.find({ seller: req.user.id })
         .populate("car", "title price images")
@@ -439,7 +439,7 @@ router.get(
   cacheDealerData,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
-    
+
     const [members, total] = await Promise.all([
       DealerTeam.find({ dealer: req.user.id })
         .populate("member", "name email phone role avatar")
@@ -449,9 +449,9 @@ router.get(
         .lean(),
       DealerTeam.countDocuments({ dealer: req.user.id }),
     ]);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       members,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });

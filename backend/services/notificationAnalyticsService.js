@@ -112,8 +112,8 @@ export const getFailureAnalysis = async (period = 24) => {
 export const getEngagementMetrics = async (period = 24) => {
   try {
     const stats = await NotificationAudit.getDeliveryStats(period);
-    
-    const engagement = stats.map(stat => ({
+
+    const engagement = stats.map((stat) => ({
       channel: stat.channel,
       total: stat.total,
       delivered: stat.delivered,
@@ -182,7 +182,7 @@ export const getUserNotificationStats = async (userId, period = 24) => {
       },
     ]);
 
-    return stats.map(stat => ({
+    return stats.map((stat) => ({
       channel: stat._id,
       total: stat.total,
       delivered: stat.delivered,

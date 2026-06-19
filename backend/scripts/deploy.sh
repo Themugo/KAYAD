@@ -6,7 +6,7 @@ set -e
 echo "🚀 Deploying Kayad..."
 
 # 1. Pull latest code
-git pull origin master
+git pull origin main
 
 # 2. Install dependencies
 npm ci --omit=dev

@@ -51,7 +51,7 @@ describe("SEO Service", () => {
       const metadata = generateVehicleMetadata(car);
 
       expect(metadata).toBeDefined();
-      expect(metadata.title).toContain("Toyota Corolla 2020");
+      expect(metadata.title).toContain("2020 Toyota Corolla");
       expect(metadata.description).toContain("Toyota Corolla");
       expect(metadata.url).toBe("https://www.kayad.space/cars/123");
       expect(metadata.openGraph.type).toBe("product");
@@ -91,7 +91,7 @@ describe("SEO Service", () => {
 
       expect(metadata).toBeDefined();
       expect(metadata.title).toContain("Premium Motors");
-      expect(metadata.description).toContain("Premium Motors");
+      expect(metadata.description).toContain("Leading car dealership");
       expect(metadata.url).toBe("https://www.kayad.space/dealer/456");
       expect(metadata.structuredData["@type"]).toBe("AutoDealer");
       expect(metadata.structuredData.name).toBe("Premium Motors");

@@ -43,16 +43,20 @@ const roleSchema = new mongoose.Schema(
     // =============================
     // 🔐 PERMISSIONS
     // =============================
-    permissions: [{
-      resource: {
-        type: String,
-        required: true,
+    permissions: [
+      {
+        resource: {
+          type: String,
+          required: true,
+        },
+        actions: [
+          {
+            type: String,
+            required: true,
+          },
+        ],
       },
-      actions: [{
-        type: String,
-        required: true,
-      }],
-    }],
+    ],
 
     // =============================
     // 📊 METADATA
@@ -89,7 +93,7 @@ roleSchema.index({ createdAt: -1 });
 
 // Add permission
 roleSchema.methods.addPermission = async function (resource, actions) {
-  const existingPermission = this.permissions.find(p => p.resource === resource);
+  const existingPermission = this.permissions.find((p) => p.resource === resource);
   if (existingPermission) {
     existingPermission.actions = [...new Set([...existingPermission.actions, ...actions])];
   } else {
@@ -101,15 +105,15 @@ roleSchema.methods.addPermission = async function (resource, actions) {
 
 // Remove permission
 roleSchema.methods.removePermission = async function (resource, actions) {
-  const permission = this.permissions.find(p => p.resource === resource);
+  const permission = this.permissions.find((p) => p.resource === resource);
   if (permission) {
     if (actions && actions.length > 0) {
-      permission.actions = permission.actions.filter(action => !actions.includes(action));
+      permission.actions = permission.actions.filter((action) => !actions.includes(action));
       if (permission.actions.length === 0) {
-        this.permissions = this.permissions.filter(p => p.resource !== resource);
+        this.permissions = this.permissions.filter((p) => p.resource !== resource);
       }
     } else {
-      this.permissions = this.permissions.filter(p => p.resource !== resource);
+      this.permissions = this.permissions.filter((p) => p.resource !== resource);
     }
     await this.save();
   }
@@ -118,14 +122,14 @@ roleSchema.methods.removePermission = async function (resource, actions) {
 
 // Check permission
 roleSchema.methods.hasPermission = function (resource, action) {
-  const permission = this.permissions.find(p => p.resource === resource);
+  const permission = this.permissions.find((p) => p.resource === resource);
   if (!permission) return false;
   return permission.actions.includes(action);
 };
 
 // Get all permissions for resource
 roleSchema.methods.getPermissionsForResource = function (resource) {
-  const permission = this.permissions.find(p => p.resource === resource);
+  const permission = this.permissions.find((p) => p.resource === resource);
   return permission ? permission.actions : [];
 };
 
@@ -151,23 +155,17 @@ roleSchema.methods.decrementUserCount = async function () {
 
 // Get roles by organization
 roleSchema.statics.getByOrganization = async function (organizationId) {
-  return this.find({ organization: organizationId })
-    .sort({ type: 1, name: 1 })
-    .lean();
+  return this.find({ organization: organizationId }).sort({ type: 1, name: 1 }).lean();
 };
 
 // Get system roles
 roleSchema.statics.getSystemRoles = async function () {
-  return this.find({ type: "system" })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ type: "system" }).sort({ name: 1 }).lean();
 };
 
 // Get custom roles by organization
 roleSchema.statics.getCustomRoles = async function (organizationId) {
-  return this.find({ organization: organizationId, type: "custom" })
-    .sort({ name: 1 })
-    .lean();
+  return this.find({ organization: organizationId, type: "custom" }).sort({ name: 1 }).lean();
 };
 
 // Check if user has permission through role

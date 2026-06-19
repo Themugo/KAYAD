@@ -14,17 +14,17 @@ export const SEARCH_CACHE_TTL = {
   // Real-time searches (short TTL)
   LIVE_AUCTIONS: 30, // 30 seconds
   TRENDING: 60, // 1 minute
-  
+
   // Standard searches (medium TTL)
   VEHICLE_SEARCH: 300, // 5 minutes
   DEALER_SEARCH: 300, // 5 minutes
   AUCTION_SEARCH: 300, // 5 minutes
-  
+
   // Popular searches (long TTL)
   POPULAR_FILTERS: 600, // 10 minutes
   TRENDING_SEARCHES: 600, // 10 minutes
   SEARCH_SUGGESTIONS: 600, // 10 minutes
-  
+
   // Analytics (longer TTL)
   SEARCH_ANALYTICS: 1800, // 30 minutes
   SEARCH_SUMMARY: 1800, // 30 minutes
@@ -39,7 +39,7 @@ export const generateSearchCacheKey = (req, prefix = "search") => {
   const path = req.path;
   const query = JSON.stringify(req.query);
   const body = req.method === "POST" ? JSON.stringify(req.body) : "";
-  
+
   return `${prefix}:${userId}:${path}:${query}:${body}`;
 };
 
@@ -62,27 +62,14 @@ export const generateVehicleSearchKey = (searchParams) => {
 };
 
 export const generateDealerSearchKey = (searchParams) => {
-  const {
-    q,
-    role,
-    page = 1,
-    limit = 20,
-  } = searchParams;
+  const { q, role, page = 1, limit = 20 } = searchParams;
 
   const key = `dealer_search:${q || ""}:${role || ""}:${page}:${limit}`;
   return key;
 };
 
 export const generateAuctionSearchKey = (searchParams) => {
-  const {
-    keyword,
-    minPrice,
-    maxPrice,
-    brand,
-    sort = "ending_soon",
-    page = 1,
-    limit = 12,
-  } = searchParams;
+  const { keyword, minPrice, maxPrice, brand, sort = "ending_soon", page = 1, limit = 12 } = searchParams;
 
   const key = `auction_search:${keyword || ""}:${minPrice || ""}:${maxPrice || ""}:${brand || ""}:${sort}:${page}:${limit}`;
   return key;
@@ -126,7 +113,7 @@ export const invalidateSearchCache = async (pattern) => {
   // This would be implemented with cache service
   // For now, we'll just log the invalidation
   console.log(`Search cache invalidated for pattern: ${pattern}`);
-  
+
   // In production, this would:
   // 1. Connect to Redis
   // 2. Delete keys matching pattern

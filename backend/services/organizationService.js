@@ -55,11 +55,10 @@ export const getOrganization = async (organizationId) => {
 
 export const updateOrganization = async (organizationId, updateData) => {
   try {
-    const organization = await Organization.findByIdAndUpdate(
-      organizationId,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const organization = await Organization.findByIdAndUpdate(organizationId, updateData, {
+      new: true,
+      runValidators: true,
+    });
     if (!organization) {
       logWarn("Organization not found for update", { organizationId });
       return null;
@@ -101,11 +100,10 @@ export const getOrganizationUsers = async (organizationId) => {
     if (!organization) return null;
 
     const users = await User.find({
-      $or: [
-        { _id: organization.owner },
-        { _id: { $in: organization.admins } },
-      ],
-    }).select("name email role").lean();
+      $or: [{ _id: organization.owner }, { _id: { $in: organization.admins } }],
+    })
+      .select("name email role")
+      .lean();
 
     return users;
   } catch (err) {
@@ -231,7 +229,7 @@ export const getOrganizationStats = async (organizationId) => {
         totalTeams: teams.length,
         totalRoles: roles.length,
       },
-      branches: branches.map(b => ({
+      branches: branches.map((b) => ({
         id: b._id,
         name: b.name,
         type: b.type,
@@ -239,21 +237,21 @@ export const getOrganizationStats = async (organizationId) => {
         totalDepartments: b.totalDepartments,
         totalTeams: b.totalTeams,
       })),
-      departments: departments.map(d => ({
+      departments: departments.map((d) => ({
         id: d._id,
         name: d.name,
         type: d.type,
         status: d.status,
         totalTeams: d.totalTeams,
       })),
-      teams: teams.map(t => ({
+      teams: teams.map((t) => ({
         id: t._id,
         name: t.name,
         type: t.type,
         status: t.status,
         totalMembers: t.totalMembers,
       })),
-      roles: roles.map(r => ({
+      roles: roles.map((r) => ({
         id: r._id,
         name: r.name,
         type: r.type,
@@ -303,7 +301,7 @@ export const migrateDealerToOrganization = async (dealerId) => {
 export const bulkMigrateDealers = async () => {
   try {
     const dealers = await Dealer.find({}).populate("user");
-    
+
     const results = [];
     for (const dealer of dealers) {
       try {
@@ -322,10 +320,10 @@ export const bulkMigrateDealers = async () => {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    logInfo("Bulk dealer migration completed", { 
-      total: dealers.length, 
-      success: successCount 
+    const successCount = results.filter((r) => r.success).length;
+    logInfo("Bulk dealer migration completed", {
+      total: dealers.length,
+      success: successCount,
     });
 
     return {

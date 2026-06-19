@@ -39,14 +39,14 @@ export const extractSearchFilters = (req) => {
   };
 
   // Clean up undefined values
-  Object.keys(filters).forEach(key => {
-    if (typeof filters[key] === 'object') {
-      Object.keys(filters[key]).forEach(subKey => {
-        if (filters[key][subKey] === undefined || filters[key][subKey] === '') {
+  Object.keys(filters).forEach((key) => {
+    if (typeof filters[key] === "object") {
+      Object.keys(filters[key]).forEach((subKey) => {
+        if (filters[key][subKey] === undefined || filters[key][subKey] === "") {
           delete filters[key][subKey];
         }
       });
-    } else if (filters[key] === undefined || filters[key] === '') {
+    } else if (filters[key] === undefined || filters[key] === "") {
       delete filters[key];
     }
   });

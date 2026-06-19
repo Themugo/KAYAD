@@ -98,8 +98,8 @@ export const getQueueHealthHandler = asyncHandler(async (req, res) => {
     const overallHealth = healthChecks.every((h) => h.status === "healthy")
       ? "healthy"
       : healthChecks.some((h) => h.status === "critical")
-      ? "critical"
-      : "warning";
+        ? "critical"
+        : "warning";
 
     res.json({
       success: true,

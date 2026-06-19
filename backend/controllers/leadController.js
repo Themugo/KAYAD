@@ -317,11 +317,7 @@ export const getAnalytics = async (req, res) => {
     const defaultStartDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // 30 days ago
     const defaultEndDate = new Date();
 
-    const analytics = await getLeadAnalytics(
-      dealerId,
-      startDate || defaultStartDate,
-      endDate || defaultEndDate
-    );
+    const analytics = await getLeadAnalytics(dealerId, startDate || defaultStartDate, endDate || defaultEndDate);
 
     res.json({
       success: true,
@@ -373,13 +369,13 @@ export const getConversionReport = async (req, res) => {
     const conversionMetrics = await calculateConversionRate(
       dealerId,
       startDate || defaultStartDate,
-      endDate || defaultEndDate
+      endDate || defaultEndDate,
     );
 
     const responseTimeMetrics = await calculateResponseTime(
       dealerId,
       startDate || defaultStartDate,
-      endDate || defaultEndDate
+      endDate || defaultEndDate,
     );
 
     res.json({

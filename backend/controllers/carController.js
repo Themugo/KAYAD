@@ -527,10 +527,10 @@ export const updateCar = async (req, res) => {
     }
 
     await car.save();
-    
+
     // Store old data for audit logging
     const oldData = car.toObject();
-    
+
     await cacheDelPattern("cars:list:*");
 
     await logActionFromReq(req, "update_car", {

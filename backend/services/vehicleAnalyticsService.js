@@ -566,7 +566,7 @@ export const generateMarketAnalytics = async (period, startDate, endDate) => {
         upsert: true,
         new: true,
         setDefaultsOnInsert: true,
-      }
+      },
     );
 
     logInfo("Market analytics generated", { period, startDate, endDate, analyticsId: analytics._id });

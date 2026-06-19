@@ -248,10 +248,7 @@ notificationAuditSchema.statics.getByStatus = async function (status, channel = 
   const query = { status };
   if (channel) query.channel = channel;
 
-  return this.find(query)
-    .sort({ queuedAt: -1 })
-    .limit(limit)
-    .lean();
+  return this.find(query).sort({ queuedAt: -1 }).limit(limit).lean();
 };
 
 // Get notifications by user
@@ -259,10 +256,7 @@ notificationAuditSchema.statics.getByUser = async function (userId, channel = nu
   const query = { userId };
   if (channel) query.channel = channel;
 
-  return this.find(query)
-    .sort({ queuedAt: -1 })
-    .limit(limit)
-    .lean();
+  return this.find(query).sort({ queuedAt: -1 }).limit(limit).lean();
 };
 
 // Get failed notifications
@@ -274,9 +268,7 @@ notificationAuditSchema.statics.getFailed = async function (channel = null, peri
   };
   if (channel) query.channel = channel;
 
-  return this.find(query)
-    .sort({ failedAt: -1 })
-    .lean();
+  return this.find(query).sort({ failedAt: -1 }).lean();
 };
 
 // Get notifications pending retry
@@ -288,9 +280,7 @@ notificationAuditSchema.statics.getPendingRetry = async function (channel = null
   };
   if (channel) query.channel = channel;
 
-  return this.find(query)
-    .sort({ nextRetryAt: 1 })
-    .lean();
+  return this.find(query).sort({ nextRetryAt: 1 }).lean();
 };
 
 // Get delivery statistics
@@ -336,7 +326,7 @@ notificationAuditSchema.statics.getDeliveryStats = async function (period = 24) 
     },
   ]);
 
-  return stats.map(stat => ({
+  return stats.map((stat) => ({
     channel: stat._id,
     total: stat.total,
     sent: stat.sent,
@@ -377,7 +367,7 @@ notificationAuditSchema.statics.getFailureAnalysis = async function (period = 24
     },
   ]);
 
-  return analysis.map(item => ({
+  return analysis.map((item) => ({
     channel: item._id.channel,
     failureReason: item._id.failureReason,
     failureCode: item._id.failureCode,
@@ -402,11 +392,7 @@ notificationAuditSchema.statics.getRetryStats = async function (period = 24) {
         totalRetried: { $sum: 1 },
         successfulRetries: {
           $sum: {
-            $cond: [
-              { $in: ["$status", ["delivered", "opened", "clicked"]] },
-              1,
-              0,
-            ],
+            $cond: [{ $in: ["$status", ["delivered", "opened", "clicked"]] }, 1, 0],
           },
         },
         avgRetries: { $avg: "$retryCount" },
@@ -414,7 +400,7 @@ notificationAuditSchema.statics.getRetryStats = async function (period = 24) {
     },
   ]);
 
-  return stats.map(stat => ({
+  return stats.map((stat) => ({
     channel: stat._id,
     totalRetried: stat.totalRetried,
     successfulRetries: stat.successfulRetries,
@@ -426,6 +412,7 @@ notificationAuditSchema.statics.getRetryStats = async function (period = 24) {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const NotificationAudit = mongoose.models.NotificationAudit || mongoose.model("NotificationAudit", notificationAuditSchema);
+const NotificationAudit =
+  mongoose.models.NotificationAudit || mongoose.model("NotificationAudit", notificationAuditSchema);
 
 export default NotificationAudit;

@@ -5,7 +5,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import DealerHealthScore from "../models/DealerHealthScore.js";
-import { calculateHealthScore, recalculateAllScores, getTopDealers, getDealerRank } from "../services/dealerHealthScoreService.js";
+import {
+  calculateHealthScore,
+  recalculateAllScores,
+  getTopDealers,
+  getDealerRank,
+} from "../services/dealerHealthScoreService.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { triggerAlert, ALERT_LEVELS } from "../config/alerting.js";
 import { logInfo, logError } from "../utils/logger.js";
@@ -18,8 +23,10 @@ export const getDealerHealthScore = async (req, res) => {
   try {
     const { dealerId } = req.params;
 
-    const healthScore = await DealerHealthScore.findOne({ dealer: dealerId })
-      .populate("dealer", "name email businessName location logo");
+    const healthScore = await DealerHealthScore.findOne({ dealer: dealerId }).populate(
+      "dealer",
+      "name email businessName location logo",
+    );
 
     if (!healthScore) {
       return res.status(404).json({
@@ -176,13 +183,11 @@ export const getDealerScoreTrends = async (req, res) => {
   try {
     const { dealerId } = req.params;
 
-    const healthScores = await DealerHealthScore.find({ dealer: dealerId })
-      .sort({ createdAt: -1 })
-      .limit(30);
+    const healthScores = await DealerHealthScore.find({ dealer: dealerId }).sort({ createdAt: -1 }).limit(30);
 
     res.json({
       success: true,
-      trends: healthScores.map(hs => ({
+      trends: healthScores.map((hs) => ({
         score: hs.healthScore,
         category: hs.scoreCategory,
         calculatedAt: hs.lastCalculatedAt,
@@ -241,7 +246,7 @@ export const recalculateAllScoresAdmin = async (req, res) => {
         "Mass Health Score Recalculation",
         `Admin recalculated ${result.total} dealer health scores`,
         ALERT_LEVELS.MEDIUM,
-        { result }
+        { result },
       );
     }
 
@@ -305,7 +310,7 @@ export const overrideDealerScore = async (req, res) => {
       "Dealer Health Score Override",
       `Admin overrode health score for dealer ${dealerId} from ${originalScore} to ${score}`,
       ALERT_LEVELS.HIGH,
-      { dealerId, originalScore, newScore: score, reason, adminId: req.user.id }
+      { dealerId, originalScore, newScore: score, reason, adminId: req.user.id },
     );
 
     res.json({

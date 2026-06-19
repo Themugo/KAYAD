@@ -223,10 +223,7 @@ export const processSearchData = async (limit = 100) => {
   try {
     logInfo("Processing search data for valuation analytics");
 
-    const searchAnalytics = await SearchAnalytics.find({})
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+    const searchAnalytics = await SearchAnalytics.find({}).sort({ createdAt: -1 }).limit(limit).lean();
 
     let processedCount = 0;
     for (const search of searchAnalytics) {
@@ -382,7 +379,7 @@ export const updateDepreciationData = async () => {
 
         // Group by year
         const yearGroups = {};
-        valuations.forEach(v => {
+        valuations.forEach((v) => {
           const year = v.vehicle.year;
           if (!yearGroups[year]) {
             yearGroups[year] = [];
@@ -393,7 +390,7 @@ export const updateDepreciationData = async () => {
         // Calculate average price per year
         const yearlyPrices = Object.keys(yearGroups)
           .sort((a, b) => b - a)
-          .map(year => ({
+          .map((year) => ({
             year: parseInt(year),
             averagePrice: yearGroups[year].reduce((sum, price) => sum + price, 0) / yearGroups[year].length,
             sampleSize: yearGroups[year].length,
@@ -430,7 +427,7 @@ export const generateTrainingData = async (limit = 1000) => {
       .limit(limit)
       .lean();
 
-    const trainingData = valuations.map(v => ({
+    const trainingData = valuations.map((v) => ({
       features: {
         vehicle: {
           brand: v.vehicle.brand,

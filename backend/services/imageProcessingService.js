@@ -61,7 +61,12 @@ export const compressImage = async (imageBuffer, format = "jpeg", quality = QUAL
     }
 
     const compressed = await processor.toBuffer();
-    logInfo("Image compressed", { format, quality, originalSize: imageBuffer.length, compressedSize: compressed.length });
+    logInfo("Image compressed", {
+      format,
+      quality,
+      originalSize: imageBuffer.length,
+      compressedSize: compressed.length,
+    });
 
     return compressed;
   } catch (err) {
@@ -98,7 +103,12 @@ export const convertToWebP = async (imageBuffer, quality = QUALITY_PRESETS.mediu
 // 🖼️ GENERATE THUMBNAIL
 // =============================
 
-export const generateThumbnail = async (imageBuffer, width = 300, height = 200, quality = QUALITY_PRESETS.thumbnail) => {
+export const generateThumbnail = async (
+  imageBuffer,
+  width = 300,
+  height = 200,
+  quality = QUALITY_PRESETS.thumbnail,
+) => {
   try {
     const thumbnail = await sharp(imageBuffer)
       .rotate()

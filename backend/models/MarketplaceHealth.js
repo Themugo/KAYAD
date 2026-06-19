@@ -243,11 +243,7 @@ marketplaceHealthSchema.methods.calculateHealthScore = function () {
   const trustSafety = this.calculateTrustSafety(metrics);
 
   const healthScore =
-    inventoryHealth * 0.2 +
-    conversionHealth * 0.25 +
-    userActivity * 0.2 +
-    financialHealth * 0.2 +
-    trustSafety * 0.15;
+    inventoryHealth * 0.2 + conversionHealth * 0.25 + userActivity * 0.2 + financialHealth * 0.2 + trustSafety * 0.15;
 
   this.healthScore = Math.round(healthScore);
   this.healthScoreBreakdown = {
@@ -514,6 +510,7 @@ marketplaceHealthSchema.statics.getHealthTrend = async function (startDate, endD
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const MarketplaceHealth = mongoose.models.MarketplaceHealth || mongoose.model("MarketplaceHealth", marketplaceHealthSchema);
+const MarketplaceHealth =
+  mongoose.models.MarketplaceHealth || mongoose.model("MarketplaceHealth", marketplaceHealthSchema);
 
 export default MarketplaceHealth;

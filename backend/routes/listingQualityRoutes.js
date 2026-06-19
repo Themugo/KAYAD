@@ -39,7 +39,12 @@ router.get("/dealer/:dealerId/stats", protect, dealerOnly, asyncHandler(getDeale
 router.get("/dealer/:dealerId/report", protect, dealerOnly, asyncHandler(getDealerQualityReportHandler));
 
 // Bulk recalculate dealer quality
-router.post("/dealer/:dealerId/bulk-recalculate", protect, dealerOnly, asyncHandler(bulkRecalculateDealerQualityHandler));
+router.post(
+  "/dealer/:dealerId/bulk-recalculate",
+  protect,
+  dealerOnly,
+  asyncHandler(bulkRecalculateDealerQualityHandler),
+);
 
 // =============================
 // 🔐 ADMIN ROUTES

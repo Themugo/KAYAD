@@ -28,7 +28,7 @@ const startWorkers = async () => {
 
 const gracefulShutdown = async (signal) => {
   logInfo(`Received ${signal}, shutting down workers...`);
-  
+
   try {
     await stopAllWorkers();
     logInfo("Workers stopped successfully");

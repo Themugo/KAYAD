@@ -246,9 +246,13 @@ const allowedOrigins = [
     .map((v) => v.trim())
     .filter(Boolean),
   // Add Vercel deployment URL for production
-  ...(process.env.NODE_ENV === "production" ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"] : []),
+  ...(process.env.NODE_ENV === "production"
+    ? ["https://kayad-motors.vercel.app", "https://kayad-motors-themugos-projects.vercel.app"]
+    : []),
   // Add custom domain if configured
-  ...(process.env.CUSTOM_DOMAIN ? [process.env.CUSTOM_DOMAIN, `https://www.${process.env.CUSTOM_DOMAIN.replace(/^https?:\/\//, "")}`] : []),
+  ...(process.env.CUSTOM_DOMAIN
+    ? [process.env.CUSTOM_DOMAIN, `https://www.${process.env.CUSTOM_DOMAIN.replace(/^https?:\/\//, "")}`]
+    : []),
 ];
 
 app.use(
@@ -275,8 +279,6 @@ app.use(compression());
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
 app.use(bodyGuard());
-<<<<<<< HEAD
-<<<<<<< HEAD
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
@@ -286,13 +288,6 @@ import { mediumTimeout, fastTimeout, externalTimeout, uploadTimeout } from "./mi
 
 // Apply default medium timeout to all routes (can be overridden per route)
 app.use(mediumTimeout);
-=======
-=======
->>>>>>> fee53605 (Add performance optimizations and developer tooling)
-app.use(compression()); // Enable gzip compression
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ extended: true, limit: "15mb" }));
->>>>>>> fee53605 (Add performance optimizations and developer tooling)
 // Serve uploaded files with strict headers to prevent script execution
 app.use(
   "/uploads",
@@ -510,16 +505,11 @@ app.use("/api/listing-quality", listingQualityRoutes);
 app.use("/api/notification-analytics", notificationAnalyticsRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/finance", financeRoutes);
-<<<<<<< HEAD
 app.use("/api/reconciliation", reconciliationRoutes);
-app.use("/health", healthRoutes);
-app.use("/metrics", metricsRoutes);
-=======
 app.use("/api/operations-dashboard", adminLimiter, operationsDashboardRoutes);
 app.use("/health", fastTimeout, healthRoutes);
 app.use("/metrics", fastTimeout, metricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
->>>>>>> a63ee7128eedb0544a5b26cdd47666c8644a6402
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -574,7 +564,7 @@ const bootstrap = async () => {
     console.log("✅ Environment validated");
     await connectDB();
     console.log("✅ Database connected");
-    
+
     // Temporarily disable Redis to isolate the crash
     console.log("⚠️ Disabling Redis initialization for debugging...");
     // await initCache(); // Redis (optional)
@@ -628,7 +618,7 @@ const bootstrap = async () => {
             "Server Started",
             `KAYAD backend server started successfully on port ${PORT}`,
             ALERT_LEVELS.LOW,
-            { port: PORT, host: "localhost", environment: NODE_ENV }
+            { port: PORT, host: "localhost", environment: NODE_ENV },
           );
         }
       });
@@ -646,7 +636,7 @@ const bootstrap = async () => {
       logError("Failed to start auction engine", err);
       console.log("❌ Failed to start auction engine:", err);
     }
-    
+
     try {
       startAuctionTimer(io);
       console.log("✅ Auction timer started");
@@ -654,7 +644,7 @@ const bootstrap = async () => {
       logError("Failed to start auction timer", err);
       console.log("❌ Failed to start auction timer:", err);
     }
-    
+
     try {
       startEscrowCron();
       console.log("✅ Escrow cron started");
@@ -662,7 +652,7 @@ const bootstrap = async () => {
       logError("Failed to start escrow cron", err);
       console.log("❌ Failed to start escrow cron:", err);
     }
-    
+
     try {
       startAuctionReminderCron();
       console.log("✅ Auction reminder cron started");
@@ -670,7 +660,7 @@ const bootstrap = async () => {
       logError("Failed to start auction reminder cron", err);
       console.log("❌ Failed to start auction reminder cron:", err);
     }
-    
+
     try {
       startSavedSearchCron();
       console.log("✅ Saved search cron started");
@@ -678,7 +668,7 @@ const bootstrap = async () => {
       logError("Failed to start saved search cron", err);
       console.log("❌ Failed to start saved search cron:", err);
     }
-    
+
     try {
       startPriceAlertCron();
       console.log("✅ Price alert cron started");
@@ -686,7 +676,7 @@ const bootstrap = async () => {
       logError("Failed to start price alert cron", err);
       console.log("❌ Failed to start price alert cron:", err);
     }
-    
+
     try {
       startHealthScoreScheduler();
       console.log("✅ Health score scheduler started");
@@ -694,7 +684,7 @@ const bootstrap = async () => {
       logError("Failed to start health score scheduler", err);
       console.log("❌ Failed to start health score scheduler:", err);
     }
-    
+
     try {
       startMarketTrendScheduler();
       console.log("✅ Market trend scheduler started");
@@ -702,7 +692,7 @@ const bootstrap = async () => {
       logError("Failed to start market trend scheduler", err);
       console.log("❌ Failed to start market trend scheduler:", err);
     }
-    
+
     try {
       startMarketplaceHealthScheduler();
       console.log("✅ Marketplace health scheduler started");
@@ -760,49 +750,46 @@ const shutdown = async (signal) => {
 
   // Trigger shutdown alert
   if (process.env.SENTRY_DSN) {
-    await triggerAlert(
-      "Server Shutdown",
-      `KAYAD backend server shutting down due to ${signal}`,
-      ALERT_LEVELS.MEDIUM,
-      { signal }
-    );
+    await triggerAlert("Server Shutdown", `KAYAD backend server shutting down due to ${signal}`, ALERT_LEVELS.MEDIUM, {
+      signal,
+    });
   }
 
   // Stop accepting new HTTP requests
   server.close(async () => {
     logInfo("HTTP server closed");
-    
+
     try {
       // Close Socket.IO connections
       if (io) {
         io.close();
         logInfo("Socket.IO connections closed");
       }
-      
+
       // Close queue workers
       const { closeWorkers } = await import("./config/queue.js");
       await closeWorkers();
       logInfo("Queue workers closed");
-      
+
       // Close dead letter queues
       const { closeDeadLetterQueues } = await import("./config/queue.js");
       await closeDeadLetterQueues();
       logInfo("Dead letter queues closed");
-      
+
       // Close queues
       const { closeQueues } = await import("./config/queue.js");
       await closeQueues();
       logInfo("Queues closed");
-      
+
       // Close Redis connection
       const { closeConnection } = await import("./config/queue.js");
       await closeConnection();
       logInfo("Redis connection closed");
-      
+
       // Close MongoDB connection
       await mongoose.connection.close();
       logInfo("MongoDB connection closed");
-      
+
       logInfo("Shutdown complete");
       process.exit(0);
     } catch (err) {
@@ -810,7 +797,7 @@ const shutdown = async (signal) => {
       process.exit(1);
     }
   });
-  
+
   // Force shutdown after 30 seconds
   setTimeout(() => {
     logError("Forced shutdown after timeout");
@@ -827,12 +814,9 @@ if (NODE_ENV !== "test") {
 
     // Trigger critical alert
     if (process.env.SENTRY_DSN) {
-      await triggerAlert(
-        "Unhandled Rejection",
-        `Unhandled promise rejection: ${String(err)}`,
-        ALERT_LEVELS.CRITICAL,
-        { reason: String(err) }
-      );
+      await triggerAlert("Unhandled Rejection", `Unhandled promise rejection: ${String(err)}`, ALERT_LEVELS.CRITICAL, {
+        reason: String(err),
+      });
     }
 
     shutdown("unhandledRejection");
@@ -843,12 +827,10 @@ if (NODE_ENV !== "test") {
 
     // Trigger critical alert
     if (process.env.SENTRY_DSN) {
-      await triggerAlert(
-        "Uncaught Exception",
-        `Uncaught exception: ${err.message}`,
-        ALERT_LEVELS.CRITICAL,
-        { error: err.message, stack: err.stack }
-      );
+      await triggerAlert("Uncaught Exception", `Uncaught exception: ${err.message}`, ALERT_LEVELS.CRITICAL, {
+        error: err.message,
+        stack: err.stack,
+      });
     }
 
     process.exit(1);

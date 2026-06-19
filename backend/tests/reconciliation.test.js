@@ -13,7 +13,13 @@ import Payment from "../models/Payment.js";
 import Escrow from "../models/Escrow.js";
 import Subscription from "../models/Subscription.js";
 import User from "../models/User.js";
-import { runReconciliation, detectMissingCallbacks, detectDuplicateCallbacks, detectAmountMismatches, detectOrphanTransactions } from "../services/reconciliationService.js";
+import {
+  runReconciliation,
+  detectMissingCallbacks,
+  detectDuplicateCallbacks,
+  detectAmountMismatches,
+  detectOrphanTransactions,
+} from "../services/reconciliationService.js";
 
 describe("Payment Reconciliation System", () => {
   let adminToken;
@@ -241,10 +247,7 @@ describe("Payment Reconciliation System", () => {
           user: adminUser._id,
         });
 
-        const missingCallbacks = await detectMissingCallbacks(
-          new Date(Date.now() - 3600000),
-          new Date(),
-        );
+        const missingCallbacks = await detectMissingCallbacks(new Date(Date.now() - 3600000), new Date());
 
         expect(missingCallbacks.length).toBeGreaterThan(0);
 
@@ -281,10 +284,7 @@ describe("Payment Reconciliation System", () => {
           processed: true,
         });
 
-        const duplicateCallbacks = await detectDuplicateCallbacks(
-          new Date(Date.now() - 3600000),
-          new Date(),
-        );
+        const duplicateCallbacks = await detectDuplicateCallbacks(new Date(Date.now() - 3600000), new Date());
 
         expect(duplicateCallbacks.length).toBeGreaterThan(0);
 
@@ -318,10 +318,7 @@ describe("Payment Reconciliation System", () => {
           processed: true,
         });
 
-        const mismatches = await detectAmountMismatches(
-          new Date(Date.now() - 3600000),
-          new Date(),
-        );
+        const mismatches = await detectAmountMismatches(new Date(Date.now() - 3600000), new Date());
 
         expect(mismatches.length).toBeGreaterThan(0);
 
@@ -346,10 +343,7 @@ describe("Payment Reconciliation System", () => {
           processed: true,
         });
 
-        const orphans = await detectOrphanTransactions(
-          new Date(Date.now() - 3600000),
-          new Date(),
-        );
+        const orphans = await detectOrphanTransactions(new Date(Date.now() - 3600000), new Date());
 
         expect(orphans.length).toBeGreaterThan(0);
 
@@ -383,9 +377,7 @@ describe("Payment Reconciliation System", () => {
 
     describe("GET /api/finance/reports", () => {
       it("should get all reconciliation reports (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/finance/reports")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/finance/reports").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -393,9 +385,7 @@ describe("Payment Reconciliation System", () => {
       });
 
       it("should deny access to non-admin", async () => {
-        const res = await request(app)
-          .get("/api/finance/reports")
-          .set("Authorization", "Bearer invalid_token");
+        const res = await request(app).get("/api/finance/reports").set("Authorization", "Bearer invalid_token");
 
         expect(res.status).toBe(401);
       });
@@ -415,9 +405,7 @@ describe("Payment Reconciliation System", () => {
 
     describe("GET /api/finance/statistics", () => {
       it("should get reconciliation statistics (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/finance/statistics")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/finance/statistics").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);
@@ -428,9 +416,7 @@ describe("Payment Reconciliation System", () => {
 
     describe("GET /api/finance/cron-status", () => {
       it("should get cron status (admin only)", async () => {
-        const res = await request(app)
-          .get("/api/finance/cron-status")
-          .set("Authorization", `Bearer ${adminToken}`);
+        const res = await request(app).get("/api/finance/cron-status").set("Authorization", `Bearer ${adminToken}`);
 
         expect(res.status).toBe(200);
         expect(res.body.success).toBe(true);

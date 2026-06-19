@@ -30,16 +30,16 @@ export const initiateCardPayment = async ({ userId, amount, carId, type, cardDet
     if (!CARD_CONFIG.enabled) {
       throw new Error("Card payment not enabled");
     }
-    
+
     if (!CARD_CONFIG.apiKey) {
       throw new Error("Card payment API key not configured");
     }
-    
+
     // Generate unique payment reference
     const paymentRef = `CARD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     let paymentIntent;
-    
+
     switch (CARD_CONFIG.provider) {
       case "stripe":
         paymentIntent = await initiateStripePayment({ amount, cardDetails, paymentRef });
@@ -53,7 +53,7 @@ export const initiateCardPayment = async ({ userId, amount, carId, type, cardDet
       default:
         throw new Error(`Unsupported payment provider: ${CARD_CONFIG.provider}`);
     }
-    
+
     // Create payment record
     const payment = await Payment.create({
       user: userId,
@@ -69,9 +69,9 @@ export const initiateCardPayment = async ({ userId, amount, carId, type, cardDet
         cardLast4: cardDetails.cardNumber.slice(-4),
       },
     });
-    
+
     logInfo("Card payment initiated", { paymentId: payment._id, paymentRef, amount });
-    
+
     return {
       success: true,
       payment,
@@ -93,7 +93,7 @@ const initiateStripePayment = async ({ amount, cardDetails, paymentRef }) => {
   try {
     const stripe = await import("stripe");
     const stripeClient = stripe.default(CARD_CONFIG.secretKey);
-    
+
     const paymentIntent = await stripeClient.paymentIntents.create({
       amount: Math.round(amount * 100), // Convert to cents
       currency: CARD_CONFIG.currency.toLowerCase(),
@@ -103,7 +103,7 @@ const initiateStripePayment = async ({ amount, cardDetails, paymentRef }) => {
       },
       description: "KAYAD Car Purchase",
     });
-    
+
     return paymentIntent;
   } catch (err) {
     logError("Stripe payment failed", err);
@@ -146,9 +146,9 @@ const initiateFlutterwavePayment = async ({ amount, cardDetails, paymentRef }) =
           Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
-    
+
     return {
       id: response.data.data.id,
       clientSecret: response.data.data.flw_ref,
@@ -194,9 +194,9 @@ const initiatePaystackPayment = async ({ amount, cardDetails, paymentRef }) => {
           Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
-    
+
     return {
       id: response.data.data.reference,
       clientSecret: response.data.data.access_code,
@@ -215,17 +215,17 @@ const initiatePaystackPayment = async ({ amount, cardDetails, paymentRef }) => {
 export const verifyCardPayment = async (paymentRef) => {
   try {
     const payment = await Payment.findOne({ checkoutRequestId: paymentRef });
-    
+
     if (!payment) {
       throw new Error("Payment not found");
     }
-    
+
     if (payment.status === "success") {
       return { success: true, payment };
     }
-    
+
     let verificationResult;
-    
+
     switch (CARD_CONFIG.provider) {
       case "stripe":
         verificationResult = await verifyStripePayment(payment.metadata.paymentIntentId);
@@ -239,23 +239,27 @@ export const verifyCardPayment = async (paymentRef) => {
       default:
         throw new Error(`Unsupported payment provider: ${CARD_CONFIG.provider}`);
     }
-    
+
     // Update payment status
     if (verificationResult.success) {
       payment.status = "success";
       payment.transactionId = verificationResult.transactionId;
       payment.completedAt = new Date();
       await payment.save();
-      
+
       logInfo("Card payment verified successfully", { paymentId: payment._id, paymentRef });
     } else {
       payment.status = "failed";
       payment.failureReason = verificationResult.reason;
       await payment.save();
-      
-      logWarn("Card payment verification failed", { paymentId: payment._id, paymentRef, reason: verificationResult.reason });
+
+      logWarn("Card payment verification failed", {
+        paymentId: payment._id,
+        paymentRef,
+        reason: verificationResult.reason,
+      });
     }
-    
+
     return {
       success: verificationResult.success,
       payment,
@@ -275,9 +279,9 @@ const verifyStripePayment = async (paymentIntentId) => {
   try {
     const stripe = await import("stripe");
     const stripeClient = stripe.default(CARD_CONFIG.secretKey);
-    
+
     const paymentIntent = await stripeClient.paymentIntents.retrieve(paymentIntentId);
-    
+
     return {
       success: paymentIntent.status === "succeeded",
       transactionId: paymentIntent.id,
@@ -295,17 +299,14 @@ const verifyStripePayment = async (paymentIntentId) => {
 
 const verifyFlutterwavePayment = async (paymentRef) => {
   try {
-    const response = await axios.get(
-      `https://api.flutterwave.com/v3/transactions/${paymentRef}/verify`,
-      {
-        headers: {
-          Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
-        },
-      }
-    );
-    
+    const response = await axios.get(`https://api.flutterwave.com/v3/transactions/${paymentRef}/verify`, {
+      headers: {
+        Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
+      },
+    });
+
     const transaction = response.data.data;
-    
+
     return {
       success: transaction.status === "successful",
       transactionId: transaction.id,
@@ -323,17 +324,14 @@ const verifyFlutterwavePayment = async (paymentRef) => {
 
 const verifyPaystackPayment = async (paymentRef) => {
   try {
-    const response = await axios.get(
-      `https://api.paystack.co/transaction/verify/${paymentRef}`,
-      {
-        headers: {
-          Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
-        },
-      }
-    );
-    
+    const response = await axios.get(`https://api.paystack.co/transaction/verify/${paymentRef}`, {
+      headers: {
+        Authorization: `Bearer ${CARD_CONFIG.secretKey}`,
+      },
+    });
+
     const transaction = response.data.data;
-    
+
     return {
       success: transaction.status === "success",
       transactionId: transaction.reference,

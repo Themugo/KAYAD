@@ -30,7 +30,9 @@ const getImagesToMigrate = async () => {
   try {
     const cars = await Car.find({
       images: { $exists: true, $ne: [] },
-    }).select("_id images").lean();
+    })
+      .select("_id images")
+      .lean();
 
     const images = [];
     for (const car of cars) {
@@ -69,9 +71,7 @@ const migrateSingleImage = async (carId, image) => {
     }
 
     // Extract public_id from Cloudinary URL
-    const publicId = typeof image === "string" 
-      ? image.split("/").pop().split(".")[0]
-      : image.public_id;
+    const publicId = typeof image === "string" ? image.split("/").pop().split(".")[0] : image.public_id;
 
     if (!publicId) {
       return { skipped: true, reason: "Could not extract public_id" };
@@ -81,7 +81,7 @@ const migrateSingleImage = async (carId, image) => {
     const result = await uploadImage(
       { buffer: null, path: typeof image === "string" ? image : image.url },
       "kayad/cars",
-      { generateVariants: true, preserveOriginal: true }
+      { generateVariants: true, preserveOriginal: true },
     );
 
     // Update car document

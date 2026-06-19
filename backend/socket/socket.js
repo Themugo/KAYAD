@@ -33,13 +33,13 @@ const MAX_QUEUE_SIZE = 1000;
 // 🔥 SAFE EMIT
 const emit = async (room, event, data) => {
   const startTime = Date.now();
-  
+
   try {
     const io = getIO();
     if (!io) {
       logWarn("Socket not initialized", { room, event });
       incrementCounter("socket_not_initialized");
-      
+
       // Queue failed emit for retry
       queueFailedEmit(room, event, data);
       return false;
@@ -64,27 +64,27 @@ const emit = async (room, event, data) => {
           logWarn(`Socket emit retry ${attempt}`, { room, event, error: err.message });
           incrementCounter("socket_emit_retry", { event, attempt });
         },
-      }
+      },
     );
-    
+
     const duration = Date.now() - startTime;
     recordMetric("socket_emit_duration", duration, { event });
     incrementCounter("socket_emit_success", { event });
-    
+
     logInfo("Socket emit successful", { room, event });
     return true;
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("socket_emit_duration", duration, { event, status: "error" });
     incrementCounter("socket_emit_failure", { event, error_type: err.code || "unknown" });
-    
+
     logError("Socket emit failed", err, { room, event, error: err.message });
-    
+
     // Queue failed emit for retry
     if (err.code !== "CIRCUIT_BREAKER_OPEN") {
       queueFailedEmit(room, event, data);
     }
-    
+
     return false;
   }
 };
@@ -101,12 +101,12 @@ const queueFailedEmit = (room, event, data) => {
 // Retry failed emits
 export const retryFailedEmits = async () => {
   if (failedEmitsQueue.length === 0) return;
-  
+
   logInfo(`Retrying ${failedEmitsQueue.length} failed socket emits`);
-  
+
   const queueCopy = [...failedEmitsQueue];
   failedEmitsQueue.length = 0; // Clear queue
-  
+
   for (const item of queueCopy) {
     try {
       await emit(item.room, item.event, item.data);
@@ -171,7 +171,7 @@ export const emitListingUpdate = async (carId, data) => {
       queueFailedEmit("showroom", "listingUpdate", { carId, ...data });
       return;
     }
-    
+
     await withRetry(
       () => {
         return new Promise((resolve, reject) => {
@@ -191,14 +191,14 @@ export const emitListingUpdate = async (carId, data) => {
           logWarn(`Listing update retry ${attempt}`, { carId, error: err.message });
           incrementCounter("socket_listing_update_retry", { attempt });
         },
-      }
+      },
     );
-    
+
     incrementCounter("socket_listing_update_success");
   } catch (err) {
     logError("Listing update emit error", err, { carId, error: err.message });
     incrementCounter("socket_listing_update_failure");
-    
+
     if (err.code !== "CIRCUIT_BREAKER_OPEN") {
       queueFailedEmit("showroom", "listingUpdate", { carId, ...data });
     }

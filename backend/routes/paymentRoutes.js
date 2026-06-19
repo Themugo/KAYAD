@@ -20,7 +20,14 @@ import {
 const router = express.Router();
 
 // Payment initiation with idempotency to prevent duplicate payments
-router.post("/initiate", protect, paymentLimiter, idempotencyCheck, validate(initiatePaymentSchema), asyncHandler(initiatePayment));
+router.post(
+  "/initiate",
+  protect,
+  paymentLimiter,
+  idempotencyCheck,
+  validate(initiatePaymentSchema),
+  asyncHandler(initiatePayment),
+);
 
 // 🔍 CHECK PAYMENT STATUS
 router.get("/status/:id", protect, asyncHandler(checkPaymentStatus));

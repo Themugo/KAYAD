@@ -120,9 +120,7 @@ export const getVerificationStatus = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const verification = await DealerVerification.findOne({ user: userId })
-      .populate("reviewedBy", "name email")
-      .lean();
+    const verification = await DealerVerification.findOne({ user: userId }).populate("reviewedBy", "name email").lean();
 
     if (!verification) {
       return res.json({
@@ -482,7 +480,12 @@ export const rejectVerification = async (req, res) => {
       type: "verification",
     });
 
-    logInfo("Verification rejected", { verificationId: id, userId: verification.user, adminId: req.user.id, reason: rejectionReason });
+    logInfo("Verification rejected", {
+      verificationId: id,
+      userId: verification.user,
+      adminId: req.user.id,
+      reason: rejectionReason,
+    });
 
     res.json({
       success: true,
@@ -558,7 +561,13 @@ export const suspendDealer = async (req, res) => {
       type: "verification",
     });
 
-    logInfo("Dealer suspended", { verificationId: id, userId: verification.user, adminId: req.user.id, reason: suspensionReason, expiresAt: suspensionExpiresAt });
+    logInfo("Dealer suspended", {
+      verificationId: id,
+      userId: verification.user,
+      adminId: req.user.id,
+      reason: suspensionReason,
+      expiresAt: suspensionExpiresAt,
+    });
 
     res.json({
       success: true,

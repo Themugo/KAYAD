@@ -110,7 +110,7 @@ export const sendMessage = async (req, res) => {
 
       // Update lead stage to contacted if it's new and dealer is responding
       if (lead.stage === "new") {
-        const dealerId = chat.participants.find(p => p.toString() !== req.user.id.toString());
+        const dealerId = chat.participants.find((p) => p.toString() !== req.user.id.toString());
         if (dealerId && req.user.id.toString() === dealerId.toString()) {
           await updateLeadStage(lead._id, "contacted", req.user.id);
         }

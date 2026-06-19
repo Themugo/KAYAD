@@ -56,17 +56,22 @@ const processNotification = async (job) => {
     }
 
     const processingTime = Date.now() - startTime;
-    logInfo("Notification processed successfully", { notificationId: notification._id, userId, processingTime, channelResults });
+    logInfo("Notification processed successfully", {
+      notificationId: notification._id,
+      userId,
+      processingTime,
+      channelResults,
+    });
     return { notification, processingTime, channelResults };
   } catch (err) {
     const processingTime = Date.now() - startTime;
     logError("Failed to process notification", err, { userId, title, processingTime });
-    
+
     // Send to dead letter queue if max retries exceeded
     if (job.attemptsMade >= job.opts.attempts) {
       await sendToDeadLetterQueue(job, err);
     }
-    
+
     throw err;
   }
 };

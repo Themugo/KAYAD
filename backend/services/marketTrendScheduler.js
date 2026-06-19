@@ -21,52 +21,64 @@ export const startScheduler = () => {
     logInfo("Starting Market Trend Scheduler");
 
     // Daily analytics - runs at midnight every day
-    dailyJob = cron.schedule("0 0 * * *", async () => {
-      try {
-        logInfo("Running daily market analytics generation");
-        const today = new Date();
-        await generateMarketAnalytics("daily", today, today);
-        logInfo("Daily market analytics generated successfully");
-      } catch (err) {
-        logError("Failed to generate daily market analytics", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    dailyJob = cron.schedule(
+      "0 0 * * *",
+      async () => {
+        try {
+          logInfo("Running daily market analytics generation");
+          const today = new Date();
+          await generateMarketAnalytics("daily", today, today);
+          logInfo("Daily market analytics generated successfully");
+        } catch (err) {
+          logError("Failed to generate daily market analytics", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     // Weekly analytics - runs at midnight on Sunday
-    weeklyJob = cron.schedule("0 0 * * 0", async () => {
-      try {
-        logInfo("Running weekly market analytics generation");
-        const today = new Date();
-        const startDate = new Date(today);
-        startDate.setDate(startDate.getDate() - startDate.getDay());
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 6);
-        await generateMarketAnalytics("weekly", startDate, endDate);
-        logInfo("Weekly market analytics generated successfully");
-      } catch (err) {
-        logError("Failed to generate weekly market analytics", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    weeklyJob = cron.schedule(
+      "0 0 * * 0",
+      async () => {
+        try {
+          logInfo("Running weekly market analytics generation");
+          const today = new Date();
+          const startDate = new Date(today);
+          startDate.setDate(startDate.getDate() - startDate.getDay());
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 6);
+          await generateMarketAnalytics("weekly", startDate, endDate);
+          logInfo("Weekly market analytics generated successfully");
+        } catch (err) {
+          logError("Failed to generate weekly market analytics", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     // Monthly analytics - runs at midnight on the 1st of each month
-    monthlyJob = cron.schedule("0 0 1 * *", async () => {
-      try {
-        logInfo("Running monthly market analytics generation");
-        const today = new Date();
-        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        await generateMarketAnalytics("monthly", startDate, endDate);
-        logInfo("Monthly market analytics generated successfully");
-      } catch (err) {
-        logError("Failed to generate monthly market analytics", err);
-      }
-    }, {
-      timezone: "Africa/Nairobi",
-    });
+    monthlyJob = cron.schedule(
+      "0 0 1 * *",
+      async () => {
+        try {
+          logInfo("Running monthly market analytics generation");
+          const today = new Date();
+          const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+          const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+          await generateMarketAnalytics("monthly", startDate, endDate);
+          logInfo("Monthly market analytics generated successfully");
+        } catch (err) {
+          logError("Failed to generate monthly market analytics", err);
+        }
+      },
+      {
+        timezone: "Africa/Nairobi",
+      },
+    );
 
     logInfo("Market Trend Scheduler started successfully");
   } catch (err) {

@@ -4,7 +4,7 @@
 // Provides middleware for caching and cache invalidation
 // ─────────────────────────────────────────────────────────────
 
-import cacheService from '../services/cacheService.js';
+import cacheService from "../services/cacheService.js";
 
 // Cache response middleware
 export const cacheResponse = (ttl = 3600) => {
@@ -32,22 +32,22 @@ export const cacheByUser = (ttl = 3600) => {
     if (!req.user?.id) {
       return next();
     }
-    
+
     const key = `cache:user:${req.user.id}:${req.method}:${req.originalUrl}`;
-    
+
     const cached = await cacheService.get(key);
     if (cached) {
       return res.json(cached);
     }
-    
+
     const originalJson = res.json.bind(res);
     res.json = async (data) => {
-      if (req.method === 'GET' && res.statusCode === 200) {
+      if (req.method === "GET" && res.statusCode === 200) {
         await cacheService.set(key, data, ttl);
       }
       return originalJson(data);
     };
-    
+
     next();
   };
 };
@@ -76,22 +76,22 @@ export const cacheByDealer = (ttl = 3600) => {
     if (!dealerId) {
       return next();
     }
-    
+
     const key = `cache:dealer:${dealerId}:${req.method}:${req.originalUrl}`;
-    
+
     const cached = await cacheService.get(key);
     if (cached) {
       return res.json(cached);
     }
-    
+
     const originalJson = res.json.bind(res);
     res.json = async (data) => {
-      if (req.method === 'GET' && res.statusCode === 200) {
+      if (req.method === "GET" && res.statusCode === 200) {
         await cacheService.set(key, data, ttl);
       }
       return originalJson(data);
     };
-    
+
     next();
   };
 };
@@ -119,7 +119,7 @@ export const getCacheStats = async (req, res) => {
   res.json({
     success: true,
     stats,
-    enabled: cacheService.isEnabled()
+    enabled: cacheService.isEnabled(),
   });
 };
 
@@ -129,6 +129,6 @@ export const flushCache = async (req, res) => {
   cacheService.resetStats();
   res.json({
     success: true,
-    message: 'Cache flushed successfully'
+    message: "Cache flushed successfully",
   });
 };

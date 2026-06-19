@@ -60,12 +60,12 @@ const processSEOGeneration = async (job) => {
   } catch (err) {
     const processingTime = Date.now() - startTime;
     logError("Failed to process SEO generation", err, { type, processingTime });
-    
+
     // Send to dead letter queue if max retries exceeded
     if (job.attemptsMade >= job.opts.attempts) {
       await sendToDeadLetterQueue(job, err);
     }
-    
+
     throw err;
   }
 };

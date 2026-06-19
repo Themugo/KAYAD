@@ -137,10 +137,10 @@ export const validateMpesaCallback = (req, res, next) => {
     const MAX_TIME_DIFF = 300; // 5 minutes
 
     if (timeDiff > MAX_TIME_DIFF) {
-      logError("M-Pesa callback timestamp too old", null, { 
-        callbackTimestamp, 
+      logError("M-Pesa callback timestamp too old", null, {
+        callbackTimestamp,
         timeDiff: `${timeDiff}s`,
-        maxAllowed: `${MAX_TIME_DIFF}s`
+        maxAllowed: `${MAX_TIME_DIFF}s`,
       });
       return res.status(200).json({ ResultCode: 1, ResultDesc: "Timestamp expired" });
     }
@@ -157,15 +157,12 @@ export const validateMpesaCallback = (req, res, next) => {
     }
 
     const bodyString = JSON.stringify(req.body);
-    const expectedSignature = crypto
-      .createHmac("sha256", webhookSecret)
-      .update(bodyString)
-      .digest("hex");
+    const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(bodyString).digest("hex");
 
     if (signature !== expectedSignature) {
-      logError("M-Pesa callback signature mismatch", null, { 
+      logError("M-Pesa callback signature mismatch", null, {
         received: signature.slice(0, 20),
-        expected: expectedSignature.slice(0, 20)
+        expected: expectedSignature.slice(0, 20),
       });
       return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid signature" });
     }
@@ -174,9 +171,9 @@ export const validateMpesaCallback = (req, res, next) => {
   // ── REQUEST ID TRACKING (Idempotency) ───────────────────────
   // Add unique request ID for tracking and idempotency
   req.mpesaRequestId = crypto.randomUUID();
-  logInfo("M-Pesa callback validated", { 
+  logInfo("M-Pesa callback validated", {
     requestId: req.mpesaRequestId,
-    CheckoutRequestID: cb.CheckoutRequestID 
+    CheckoutRequestID: cb.CheckoutRequestID,
   });
 
   next();

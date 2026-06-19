@@ -14,11 +14,7 @@ import { logInfo, logError } from "../utils/logger.js";
 export const featureFlag = (key, options = {}) => {
   return async (req, res, next) => {
     try {
-      const {
-        defaultValue = true,
-        errorMessage = "Feature not available",
-        redirectUrl = null,
-      } = options;
+      const { defaultValue = true, errorMessage = "Feature not available", redirectUrl = null } = options;
 
       const user = req.user || null;
       const dealer = req.dealer || null;
@@ -99,11 +95,7 @@ export const requireFeatureFlag = (key, options = {}) => {
 export const evaluateFeatureFlag = (key, options = {}) => {
   return async (req, res, next) => {
     try {
-      const {
-        defaultValue = true,
-        errorMessage = "Feature not available",
-        redirectUrl = null,
-      } = options;
+      const { defaultValue = true, errorMessage = "Feature not available", redirectUrl = null } = options;
 
       const user = req.user || null;
       const dealer = req.dealer || null;
@@ -147,7 +139,7 @@ export const environmentFlag = (key, options = {}) => {
       } = options;
 
       const currentEnv = process.env.NODE_ENV || "development";
-      
+
       // Get flag to check environment targeting
       const { getFlag } = await import("../services/featureFlagService.js");
       const flag = await getFlag(key);
@@ -193,11 +185,7 @@ export const environmentFlag = (key, options = {}) => {
 export const roleFlag = (key, options = {}) => {
   return async (req, res, next) => {
     try {
-      const {
-        defaultValue = true,
-        errorMessage = "Feature not available for your role",
-        redirectUrl = null,
-      } = options;
+      const { defaultValue = true, errorMessage = "Feature not available for your role", redirectUrl = null } = options;
 
       const user = req.user || null;
 
@@ -319,11 +307,7 @@ export const dealerFlag = (key, options = {}) => {
 export const percentageRolloutFlag = (key, options = {}) => {
   return async (req, res, next) => {
     try {
-      const {
-        defaultValue = true,
-        errorMessage = "Feature not currently available",
-        redirectUrl = null,
-      } = options;
+      const { defaultValue = true, errorMessage = "Feature not currently available", redirectUrl = null } = options;
 
       const user = req.user || null;
       const dealer = req.dealer || null;

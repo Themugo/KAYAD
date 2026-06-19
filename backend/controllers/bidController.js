@@ -73,7 +73,7 @@ const runAutoBidding = async (carId) => {
     isAuto: true,
     createdAt: { $gte: new Date(Date.now() - 60000) }, // Last 60 seconds
   });
-  
+
   const MAX_AUTO_BIDS_PER_MINUTE = 10;
   if (recentAutoBids >= MAX_AUTO_BIDS_PER_MINUTE) {
     logWarn("Auto-bid skipped: too many auto-bids in last minute", { carId, count: recentAutoBids });
@@ -85,10 +85,13 @@ const runAutoBidding = async (carId) => {
   const recentBids = await Bid.find({
     carId,
     status: "paid",
-  }).sort({ createdAt: -1 }).limit(6).lean();
-  
+  })
+    .sort({ createdAt: -1 })
+    .limit(6)
+    .lean();
+
   if (recentBids.length >= 4) {
-    const users = recentBids.slice(0, 4).map(b => b.user.toString());
+    const users = recentBids.slice(0, 4).map((b) => b.user.toString());
     const uniqueUsers = new Set(users);
     if (uniqueUsers.size === 2 && users[0] === users[2] && users[1] === users[3]) {
       logWarn("Auto-bid skipped: detected bid loop pattern", { carId, users });
@@ -118,7 +121,7 @@ const runAutoBidding = async (carId) => {
   // 🔒 BID LOOP PREVENTION: Don't auto-bid if user is already highest bidder
   const car = await Car.findById(carId);
   if (!car) return;
-  
+
   if (car.highestBidder && car.highestBidder.toString() === highest.user.toString()) {
     logDebug("Auto-bid skipped: user is already highest bidder", { carId, userId: highest.user });
     return;
@@ -153,7 +156,7 @@ const runAutoBidding = async (carId) => {
     });
   }
   emitListingUpdate(carIdStr, { currentBid: nextAmount, bidsCount: (car.bidsCount || 0) + 1 });
-  
+
   logInfo("Auto-bid placed", { carId, userId: highest.user, amount: nextAmount, maxBid: highest.maxBid });
 };
 
@@ -511,7 +514,9 @@ export const confirmBidPayment = async (req, res) => {
       if (previousHighestBidder && String(previousHighestBidder) !== String(bid.user)) {
         const prevBidder = await User.findById(previousHighestBidder).select("email name phone notifications");
         if (prevBidder?.email && typeof sendOutbidEmail === "function") {
-          sendOutbidEmail(prevBidder, bid.amount, car).catch((e) => logWarn("Outbid email failed", { error: e.message }));
+          sendOutbidEmail(prevBidder, bid.amount, car).catch((e) =>
+            logWarn("Outbid email failed", { error: e.message }),
+          );
         }
         if (prevBidder?.phone && prevBidder?.notifications?.sms !== false) {
           sendSMS(

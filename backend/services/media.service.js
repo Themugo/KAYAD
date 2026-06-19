@@ -20,19 +20,16 @@ export const uploadToCloudinary = async (filePath, options = {}) => {
     });
 
     // Upload optimized version
-    const res = await cloudinary.uploader.upload(
-      convertToWebP ? optimized.webp : optimized.compressed || fileBuffer,
-      {
-        folder: "kayad/cars",
-        resource_type: "image",
-        transformation: [
-          { width: 1200, height: 800, crop: "limit" },
-          { quality: "auto:good" },
-          { fetch_format: "auto" },
-          { progressive: "auto" },
-        ],
-      }
-    );
+    const res = await cloudinary.uploader.upload(convertToWebP ? optimized.webp : optimized.compressed || fileBuffer, {
+      folder: "kayad/cars",
+      resource_type: "image",
+      transformation: [
+        { width: 1200, height: 800, crop: "limit" },
+        { quality: "auto:good" },
+        { fetch_format: "auto" },
+        { progressive: "auto" },
+      ],
+    });
 
     // 🧹 cleanup local file
     fs.unlinkSync(filePath);

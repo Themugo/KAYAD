@@ -159,24 +159,29 @@ leadSchema.methods.updateStage = async function (newStage, actorId) {
   // Use transaction for atomic operations
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
     await this.save({ session });
 
     // Add activity
     const LeadActivity = mongoose.model("LeadActivity");
-    await LeadActivity.create([{
-      lead: this._id,
-      type: "stage_changed",
-      actor: actorId,
-      actorType: "dealer",
-      description: `Stage changed from ${oldStage} to ${newStage}`,
-      metadata: {
-        oldStage,
-        newStage,
-      },
-    }], { session });
-    
+    await LeadActivity.create(
+      [
+        {
+          lead: this._id,
+          type: "stage_changed",
+          actor: actorId,
+          actorType: "dealer",
+          description: `Stage changed from ${oldStage} to ${newStage}`,
+          metadata: {
+            oldStage,
+            newStage,
+          },
+        },
+      ],
+      { session },
+    );
+
     await session.commitTransaction();
     return this;
   } catch (error) {
@@ -192,24 +197,29 @@ leadSchema.methods.updateStage = async function (newStage, actorId) {
 // =============================
 leadSchema.methods.addActivity = async function (type, actorId, actorType, description, metadata = {}) {
   const LeadActivity = mongoose.model("LeadActivity");
-  
+
   // Use transaction for atomic operations
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
-    const activity = await LeadActivity.create([{
-      lead: this._id,
-      type,
-      actor: actorId,
-      actorType,
-      description,
-      metadata,
-    }], { session });
-    
+    const activity = await LeadActivity.create(
+      [
+        {
+          lead: this._id,
+          type,
+          actor: actorId,
+          actorType,
+          description,
+          metadata,
+        },
+      ],
+      { session },
+    );
+
     this.lastActivityAt = new Date();
     await this.save({ session });
-    
+
     await session.commitTransaction();
     return activity[0];
   } catch (error) {
@@ -237,23 +247,28 @@ leadSchema.methods.calculateResponseTime = function () {
 leadSchema.methods.archive = async function (actorId) {
   this.isArchived = true;
   this.lastActivityAt = new Date();
-  
+
   // Use transaction for atomic operations
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
     await this.save({ session });
 
     const LeadActivity = mongoose.model("LeadActivity");
-    await LeadActivity.create([{
-      lead: this._id,
-      type: "status_changed",
-      actor: actorId,
-      actorType: "dealer",
-      description: "Lead archived",
-    }], { session });
-    
+    await LeadActivity.create(
+      [
+        {
+          lead: this._id,
+          type: "status_changed",
+          actor: actorId,
+          actorType: "dealer",
+          description: "Lead archived",
+        },
+      ],
+      { session },
+    );
+
     await session.commitTransaction();
     return this;
   } catch (error) {
@@ -270,23 +285,28 @@ leadSchema.methods.archive = async function (actorId) {
 leadSchema.methods.markAsHot = async function (actorId) {
   this.isHot = !this.isHot;
   this.lastActivityAt = new Date();
-  
+
   // Use transaction for atomic operations
   const session = await mongoose.startSession();
   session.startTransaction();
-  
+
   try {
     await this.save({ session });
 
     const LeadActivity = mongoose.model("LeadActivity");
-    await LeadActivity.create([{
-      lead: this._id,
-      type: "status_changed",
-      actor: actorId,
-      actorType: "dealer",
-      description: this.isHot ? "Lead marked as hot" : "Lead unmarked as hot",
-    }], { session });
-    
+    await LeadActivity.create(
+      [
+        {
+          lead: this._id,
+          type: "status_changed",
+          actor: actorId,
+          actorType: "dealer",
+          description: this.isHot ? "Lead marked as hot" : "Lead unmarked as hot",
+        },
+      ],
+      { session },
+    );
+
     await session.commitTransaction();
     return this;
   } catch (error) {

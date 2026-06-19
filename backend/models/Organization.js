@@ -84,10 +84,12 @@ const organizationSchema = new mongoose.Schema(
       index: true,
     },
 
-    admins: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }],
+    admins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     // =============================
     // ⚙️ SETTINGS
@@ -198,15 +200,14 @@ organizationSchema.methods.addAdmin = async function (userId) {
 
 // Remove organization admin
 organizationSchema.methods.removeAdmin = async function (userId) {
-  this.admins = this.admins.filter(id => id.toString() !== userId.toString());
+  this.admins = this.admins.filter((id) => id.toString() !== userId.toString());
   await this.save();
   return this;
 };
 
 // Check if user is admin
 organizationSchema.methods.isAdmin = function (userId) {
-  return this.owner.toString() === userId.toString() || 
-         this.admins.some(id => id.toString() === userId.toString());
+  return this.owner.toString() === userId.toString() || this.admins.some((id) => id.toString() === userId.toString());
 };
 
 // Check subscription limit
@@ -304,16 +305,12 @@ organizationSchema.statics.createFromDealer = async function (dealer, owner) {
 
 // Get organizations by owner
 organizationSchema.statics.getByOwner = async function (ownerId) {
-  return this.find({ owner: ownerId })
-    .sort({ createdAt: -1 })
-    .lean();
+  return this.find({ owner: ownerId }).sort({ createdAt: -1 }).lean();
 };
 
 // Get organizations by type
 organizationSchema.statics.getByType = async function (type) {
-  return this.find({ type })
-    .sort({ createdAt: -1 })
-    .lean();
+  return this.find({ type }).sort({ createdAt: -1 }).lean();
 };
 
 // Get organization stats
@@ -335,8 +332,10 @@ organizationSchema.statics.userBelongsToOrganization = async function (userId, o
   const organization = await this.findById(organizationId);
   if (!organization) return false;
 
-  return organization.owner.toString() === userId.toString() ||
-         organization.admins.some(id => id.toString() === userId.toString());
+  return (
+    organization.owner.toString() === userId.toString() ||
+    organization.admins.some((id) => id.toString() === userId.toString())
+  );
 };
 
 // =============================

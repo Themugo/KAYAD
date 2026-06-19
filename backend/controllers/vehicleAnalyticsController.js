@@ -128,7 +128,7 @@ export const getCountyTrendsHandler = async (req, res) => {
 
     const trends = await getCountyTrends(
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -157,7 +157,7 @@ export const getBrandTrendsHandler = async (req, res) => {
 
     const trends = await getBrandTrends(
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -186,7 +186,7 @@ export const getModelTrendsHandler = async (req, res) => {
 
     const trends = await getModelTrends(
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -215,7 +215,7 @@ export const getSpecTrendsHandler = async (req, res) => {
 
     const trends = await getSpecTrends(
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -245,7 +245,7 @@ export const getMostViewedHandler = async (req, res) => {
     const vehicles = await getMostViewedVehicles(
       parseInt(limit),
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -275,7 +275,7 @@ export const getMostSearchedHandler = async (req, res) => {
     const searches = await getMostSearchedVehicles(
       parseInt(limit),
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -305,7 +305,7 @@ export const getFastestSellingHandler = async (req, res) => {
     const vehicles = await getFastestSellingVehicles(
       parseInt(limit),
       startDate ? new Date(startDate) : defaultStartDate,
-      endDate ? new Date(endDate) : defaultEndDate
+      endDate ? new Date(endDate) : defaultEndDate,
     );
 
     res.json({
@@ -343,18 +343,17 @@ export const getDealerAnalytics = async (req, res) => {
 
     // Calculate dealer-specific metrics
     const dealerListings = dealerCars.length;
-    const dealerSales = dealerCars.filter(c => c.status === "sold").length;
-    const dealerAvgPrice = dealerCars.length > 0 
-      ? dealerCars.reduce((sum, c) => sum + (c.price || 0), 0) / dealerCars.length 
-      : 0;
+    const dealerSales = dealerCars.filter((c) => c.status === "sold").length;
+    const dealerAvgPrice =
+      dealerCars.length > 0 ? dealerCars.reduce((sum, c) => sum + (c.price || 0), 0) / dealerCars.length : 0;
     const dealerTotalViews = dealerCars.reduce((sum, c) => sum + (c.views || 0), 0);
     const dealerConversionRate = dealerListings > 0 ? (dealerSales / dealerListings) * 100 : 0;
 
     // Calculate average days on market for dealer
-    const soldCars = dealerCars.filter(c => c.status === "sold");
+    const soldCars = dealerCars.filter((c) => c.status === "sold");
     let dealerAvgDaysOnMarket = 0;
     if (soldCars.length > 0) {
-      const daysOnMarket = soldCars.map(car => {
+      const daysOnMarket = soldCars.map((car) => {
         const created = new Date(car.createdAt);
         const sold = new Date(car.updatedAt);
         return Math.floor((sold - created) / (1000 * 60 * 60 * 24));
@@ -427,9 +426,7 @@ export const getAllAnalytics = async (req, res) => {
       query.period = period;
     }
 
-    const analytics = await VehicleMarketAnalytics.find(query)
-      .sort({ endDate: -1 })
-      .limit(100);
+    const analytics = await VehicleMarketAnalytics.find(query).sort({ endDate: -1 }).limit(100);
 
     res.json({
       success: true,

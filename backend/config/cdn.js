@@ -11,14 +11,14 @@
 export const CDN_CONFIG = {
   // Cloudinary CDN (built-in)
   provider: "cloudinary",
-  
+
   // Cache headers
   cacheHeaders: {
     // Images - cache for 1 year
     "image/jpeg": "public, max-age=31536000, immutable",
     "image/png": "public, max-age=31536000, immutable",
     "image/webp": "public, max-age=31536000, immutable",
-    
+
     // Fallback - cache for 1 day
     default: "public, max-age=86400",
   },

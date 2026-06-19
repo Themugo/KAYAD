@@ -139,12 +139,14 @@ const demandSignalsSchema = new mongoose.Schema(
     // =============================
     // 📊 HISTORICAL DATA
     // =============================
-    historical: [{
-      date: Date,
-      searchVolume: Number,
-      averagePrice: Number,
-      demandMultiplier: Number,
-    }],
+    historical: [
+      {
+        date: Date,
+        searchVolume: Number,
+        averagePrice: Number,
+        demandMultiplier: Number,
+      },
+    ],
   },
   { timestamps: true },
 );
@@ -166,7 +168,7 @@ demandSignalsSchema.index({ createdAt: -1 });
 // Calculate demand score
 demandSignalsSchema.methods.calculateDemandScore = function (searchVolume, competitionLevel) {
   const normalizedVolume = Math.min(searchVolume / 1000, 1);
-  const demandScore = (normalizedVolume * 0.7) + ((1 - competitionLevel) * 0.3);
+  const demandScore = normalizedVolume * 0.7 + (1 - competitionLevel) * 0.3;
   this.demand.urgencyScore = demandScore;
   return this;
 };
@@ -175,7 +177,7 @@ demandSignalsSchema.methods.calculateDemandScore = function (searchVolume, compe
 demandSignalsSchema.methods.updateTrend = function (previousVolume) {
   if (previousVolume > 0) {
     const percentChange = ((this.demand.searchVolume - previousVolume) / previousVolume) * 100;
-    
+
     if (percentChange > 10) {
       this.demand.trend = "increasing";
     } else if (percentChange < -10) {
@@ -183,7 +185,7 @@ demandSignalsSchema.methods.updateTrend = function (previousVolume) {
     } else {
       this.demand.trend = "stable";
     }
-    
+
     this.demand.trendPercent = Math.abs(percentChange);
   }
   return this;
@@ -200,7 +202,7 @@ demandSignalsSchema.methods.calculatePriceImpact = function (marketAveragePrice)
   } else {
     this.priceImpact.demandMultiplier = 1.0;
   }
-  
+
   return this;
 };
 
@@ -212,12 +214,12 @@ demandSignalsSchema.methods.addHistoricalData = function () {
     averagePrice: this.priceImpact.averagePrice,
     demandMultiplier: this.priceImpact.demandMultiplier,
   });
-  
+
   // Keep only last 100 entries
   if (this.historical.length > 100) {
     this.historical = this.historical.slice(-100);
   }
-  
+
   return this;
 };
 
@@ -227,49 +229,36 @@ demandSignalsSchema.methods.addHistoricalData = function () {
 
 // Get demand signals by search term
 demandSignalsSchema.statics.getBySearchTerm = async function (searchTerm) {
-  return this.find({ "search.searchTerm": searchTerm })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ "search.searchTerm": searchTerm }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get demand signals by county
 demandSignalsSchema.statics.getByCounty = async function (county) {
-  return this.find({ "search.county": county })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ "search.county": county }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get demand signals by brand
 demandSignalsSchema.statics.getByBrand = async function (brand) {
-  return this.find({ "search.filters.brand": brand })
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
+  return this.find({ "search.filters.brand": brand }).sort({ "period.startDate": -1 }).limit(12).lean();
 };
 
 // Get latest demand signals
 demandSignalsSchema.statics.getLatest = async function (filters = {}) {
-  return this.findOne(filters)
-    .sort({ "period.startDate": -1 })
-    .lean();
+  return this.findOne(filters).sort({ "period.startDate": -1 }).lean();
 };
 
 // Get demand trend
 demandSignalsSchema.statics.getDemandTrend = async function (filters = {}) {
-  const demandSignals = await this.find(filters)
-    .sort({ "period.startDate": -1 })
-    .limit(12)
-    .lean();
-  
+  const demandSignals = await this.find(filters).sort({ "period.startDate": -1 }).limit(12).lean();
+
   if (demandSignals.length < 2) return null;
-  
+
   const latest = demandSignals[0];
   const previous = demandSignals[demandSignals.length - 1];
-  
-  const percentChange = ((latest.demand.searchVolume - previous.demand.searchVolume) / previous.demand.searchVolume) * 100;
-  
+
+  const percentChange =
+    ((latest.demand.searchVolume - previous.demand.searchVolume) / previous.demand.searchVolume) * 100;
+
   return {
     direction: percentChange > 10 ? "increasing" : percentChange < -10 ? "decreasing" : "stable",
     percentChange: Math.abs(percentChange),
@@ -282,19 +271,19 @@ demandSignalsSchema.statics.getDemandTrend = async function (filters = {}) {
 // Calculate demand signals from search analytics
 demandSignalsSchema.statics.calculateFromSearchAnalytics = async function (filters = {}) {
   const SearchAnalytics = mongoose.model("SearchAnalytics");
-  
+
   const query = {
     ...filters,
   };
-  
+
   const searchAnalytics = await SearchAnalytics.find(query).lean();
-  
+
   if (searchAnalytics.length === 0) return null;
-  
+
   const searchVolume = searchAnalytics.length;
   const averageResultCount = searchAnalytics.reduce((sum, s) => sum + s.resultCount, 0) / searchAnalytics.length;
   const competitionLevel = Math.min(averageResultCount / 100, 1);
-  
+
   return {
     search: filters.search || {},
     demand: {

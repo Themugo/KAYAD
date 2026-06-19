@@ -284,6 +284,7 @@ vehicleMarketAnalyticsSchema.statics.getTrendData = async function (metric, star
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const VehicleMarketAnalytics = mongoose.models.VehicleMarketAnalytics || mongoose.model("VehicleMarketAnalytics", vehicleMarketAnalyticsSchema);
+const VehicleMarketAnalytics =
+  mongoose.models.VehicleMarketAnalytics || mongoose.model("VehicleMarketAnalytics", vehicleMarketAnalyticsSchema);
 
 export default VehicleMarketAnalytics;

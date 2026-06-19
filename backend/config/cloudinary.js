@@ -46,29 +46,13 @@ const T = {
   ],
 
   // Responsive variants
-  mobile: [
-    { width: 320, crop: "limit" },
-    { quality: "auto:good" },
-    { fetch_format: "auto" },
-  ],
+  mobile: [{ width: 320, crop: "limit" }, { quality: "auto:good" }, { fetch_format: "auto" }],
 
-  tablet: [
-    { width: 768, crop: "limit" },
-    { quality: "auto:good" },
-    { fetch_format: "auto" },
-  ],
+  tablet: [{ width: 768, crop: "limit" }, { quality: "auto:good" }, { fetch_format: "auto" }],
 
-  desktop: [
-    { width: 1200, crop: "limit" },
-    { quality: "auto:good" },
-    { fetch_format: "auto" },
-  ],
+  desktop: [{ width: 1200, crop: "limit" }, { quality: "auto:good" }, { fetch_format: "auto" }],
 
-  large: [
-    { width: 1920, crop: "limit" },
-    { quality: "auto:good" },
-    { fetch_format: "auto" },
-  ],
+  large: [{ width: 1920, crop: "limit" }, { quality: "auto:good" }, { fetch_format: "auto" }],
 
   // Blur placeholder
   blur: [
@@ -84,11 +68,7 @@ const T = {
 // =============================
 export const uploadImage = async (file, folder = "kayad/cars", options = {}) => {
   try {
-    const {
-      generateVariants = true,
-      preserveOriginal = true,
-      compress = true,
-    } = options;
+    const { generateVariants = true, preserveOriginal = true, compress = true } = options;
 
     // 🔥 SUPPORT BOTH MEMORY + DISK
     const uploadOptions = {

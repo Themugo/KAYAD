@@ -30,6 +30,7 @@ export default function AuctionLivePage() {
   const navigate = useNavigate();
 
   const [car, setCar] = useState(null);
+  const seoMetadata = car ? generateAuctionMetadata(car) : null;
   usePageMeta(
     car ? `Live Auction: ${car.title}` : 'Live Auction',
     car ? `Live auction for ${car.title} - ${car.brand} ${car.model} ${car.year}. Bid now on Kayad.` : 'Join live car auctions in Kenya on Kayad.'

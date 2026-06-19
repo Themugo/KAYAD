@@ -242,9 +242,7 @@ export const getAllHealthRecords = async (req, res) => {
       query.period = period;
     }
 
-    const healthRecords = await MarketplaceHealth.find(query)
-      .sort({ timestamp: -1 })
-      .limit(100);
+    const healthRecords = await MarketplaceHealth.find(query).sort({ timestamp: -1 }).limit(100);
 
     res.json({
       success: true,

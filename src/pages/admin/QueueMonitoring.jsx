@@ -17,6 +17,11 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 
 const QueueMonitoring = () => {
   const [metrics, setMetrics] = useState(null);
@@ -214,82 +219,83 @@ const QueueMonitoring = () => {
         </div>
       </div>
 
-      {activeTab === "overview" && (
-        <div className="space-y-4">
-          {metrics && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Object.entries(metrics).map(([name, data]) => (
-                <div key={name} className="bg-white border border-gray-200 rounded-lg shadow-sm">
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold">{name}</h3>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {activeTab === "overview" && (
+          <TabsContent value="overview" className="space-y-4">
+            {metrics && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(metrics).map(([name, data]) => (
+                  <div key={name} className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                    <div className="p-6">
+                      <h3 className="text-lg font-semibold">{name}</h3>
+                    </div>
+                    <div className="p-6 pt-0 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Backlog</span>
+                        <span className="font-semibold">{data.backlog || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Active</span>
+                        <span className="font-semibold">{data.active || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Completed (1h)</span>
+                        <span className="font-semibold">{data.completedInLastHour || 0}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Failure Rate</span>
+                        <span className="font-semibold">{data.failureRate?.toFixed(1) || 0}%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Avg Processing</span>
+                        <span className="font-semibold">{data.avgProcessingTime?.toFixed(0) || 0}ms</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-6 pt-0 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Backlog</span>
-                      <span className="font-semibold">{data.backlog || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Active</span>
-                      <span className="font-semibold">{data.active || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Completed (1h)</span>
-                      <span className="font-semibold">{data.completedInLastHour || 0}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Failure Rate</span>
-                      <span className="font-semibold">{data.failureRate?.toFixed(1) || 0}%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Avg Processing</span>
-                      <span className="font-semibold">{data.avgProcessingTime?.toFixed(0) || 0}ms</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
 
-          {statistics && statistics.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-              <div className="p-6">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
-                  Queue Statistics (24h)
-                </h2>
-              </div>
-              <div className="p-6 pt-0">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-2">Queue</th>
-                      <th className="text-left py-2">Total Failures</th>
-                      <th className="text-left py-2">Unresolved</th>
-                      <th className="text-left py-2">Failure Rate</th>
-                      <th className="text-left py-2">Avg Processing Time</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statistics.map((stat) => (
-                      <tr key={stat.queueName} className="border-b">
-                        <td className="py-2 font-medium">{stat.queueName}</td>
-                        <td className="py-2">{stat.totalFailures}</td>
-                        <td className="py-2">{stat.unresolvedFailures}</td>
-                        <td className="py-2">
-                          <span className={`px-2 py-1 rounded text-sm ${stat.failureRate > 5 ? "bg-red-500 text-white" : "bg-gray-200 text-gray-800"}`}>
-                            {stat.failureRate.toFixed(1)}%
-                          </span>
-                        </td>
-                        <td className="py-2">{stat.avgProcessingTime?.toFixed(0) || 0}ms</td>
+            {statistics && statistics.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div className="p-6">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Queue Statistics (24h)
+                  </h2>
+                </div>
+                <div className="p-6 pt-0">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2">Queue</th>
+                        <th className="text-left py-2">Total Failures</th>
+                        <th className="text-left py-2">Unresolved</th>
+                        <th className="text-left py-2">Failure Rate</th>
+                        <th className="text-left py-2">Avg Processing Time</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {statistics.map((stat) => (
+                        <tr key={stat.queueName} className="border-b">
+                          <td className="py-2 font-medium">{stat.queueName}</td>
+                          <td className="py-2">{stat.totalFailures}</td>
+                          <td className="py-2">{stat.unresolvedFailures}</td>
+                          <td className="py-2">
+                            <span className={`px-2 py-1 rounded text-sm ${stat.failureRate > 5 ? "bg-red-500 text-white" : "bg-gray-200 text-gray-800"}`}>
+                              {stat.failureRate.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="py-2">{stat.avgProcessingTime?.toFixed(0) || 0}ms</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </TabsContent>
+        )}
 
         {/* Queue Details Tab */}
         <TabsContent value="queues" className="space-y-4">
@@ -340,7 +346,8 @@ const QueueMonitoring = () => {
         </TabsContent>
 
         {/* Failures Tab */}
-        <TabsContent value="failures" className="space-y-4">
+        {activeTab === "failures" && (
+          <TabsContent value="failures" className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -383,10 +390,12 @@ const QueueMonitoring = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
         {/* Dead Letter Queue Tab */}
-        <TabsContent value="dlq" className="space-y-4">
+        {activeTab === "dlq" && (
+          <TabsContent value="dlq" className="space-y-4">
           {dlqStats && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
@@ -470,10 +479,12 @@ const QueueMonitoring = () => {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
+        )}
 
         {/* Circuit Breakers Tab */}
-        <TabsContent value="circuit-breakers" className="space-y-4">
+        {activeTab === "circuit-breakers" && (
+          <TabsContent value="circuit-breakers" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {circuitBreakers.map((cb) => (
               <Card key={cb.serviceName}>
@@ -530,6 +541,7 @@ const QueueMonitoring = () => {
             ))}
           </div>
         </TabsContent>
+        )}
       </Tabs>
     </div>
   );

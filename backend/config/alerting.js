@@ -41,7 +41,7 @@ const alertRules = {
     level: ALERT_LEVELS.HIGH,
     channels: [ALERT_CHANNELS.EMAIL, ALERT_CHANNELS.SLACK],
   },
-  
+
   // Response time alerts
   responseTime: {
     enabled: true,
@@ -50,7 +50,7 @@ const alertRules = {
     level: ALERT_LEVELS.MEDIUM,
     channels: [ALERT_CHANNELS.SLACK],
   },
-  
+
   // Payment failure alerts
   paymentFailure: {
     enabled: true,
@@ -59,7 +59,7 @@ const alertRules = {
     level: ALERT_LEVELS.CRITICAL,
     channels: [ALERT_CHANNELS.EMAIL, ALERT_CHANNELS.SMS, ALERT_CHANNELS.SLACK],
   },
-  
+
   // Database connection alerts
   dbConnection: {
     enabled: true,
@@ -67,7 +67,7 @@ const alertRules = {
     level: ALERT_LEVELS.CRITICAL,
     channels: [ALERT_CHANNELS.EMAIL, ALERT_CHANNELS.SMS, ALERT_CHANNELS.SLACK],
   },
-  
+
   // Queue processing alerts
   queueBacklog: {
     enabled: true,
@@ -75,7 +75,7 @@ const alertRules = {
     level: ALERT_LEVELS.HIGH,
     channels: [ALERT_CHANNELS.EMAIL, ALERT_CHANNELS.SLACK],
   },
-  
+
   // Escrow alerts
   escrowFailure: {
     enabled: true,
@@ -95,7 +95,7 @@ const sendEmailAlert = async (alert) => {
       logWarn("Email alert not configured");
       return;
     }
-    
+
     const emailService = await import("../services/email.service.js");
     await emailService.sendEmail({
       to: process.env.ALERT_EMAIL_TO,
@@ -108,7 +108,7 @@ const sendEmailAlert = async (alert) => {
         ${alert.metadata ? `<pre>${JSON.stringify(alert.metadata, null, 2)}</pre>` : ""}
       `,
     });
-    
+
     logInfo("Email alert sent", { alertId: alert.id });
   } catch (err) {
     logError("Failed to send email alert", err);
@@ -121,13 +121,13 @@ const sendSMSAlert = async (alert) => {
       logWarn("SMS alert not configured");
       return;
     }
-    
+
     const smsService = await import("../services/sms.service.js");
     await smsService.sendSMS(
       process.env.ALERT_PHONE_TO,
-      `[${alert.level.toUpperCase()}] ${alert.title}: ${alert.message}`
+      `[${alert.level.toUpperCase()}] ${alert.title}: ${alert.message}`,
     );
-    
+
     logInfo("SMS alert sent", { alertId: alert.id });
   } catch (err) {
     logError("Failed to send SMS alert", err);
@@ -140,7 +140,7 @@ const sendSlackAlert = async (alert) => {
       logWarn("Slack alert not configured");
       return;
     }
-    
+
     const axios = await import("axios");
     const color = {
       critical: "#FF0000",
@@ -148,7 +148,7 @@ const sendSlackAlert = async (alert) => {
       medium: "#FFFF00",
       low: "#00FF00",
     };
-    
+
     await axios.post(process.env.SLACK_WEBHOOK_URL, {
       text: `[${alert.level.toUpperCase()}] ${alert.title}`,
       attachments: [
@@ -162,7 +162,7 @@ const sendSlackAlert = async (alert) => {
         },
       ],
     });
-    
+
     logInfo("Slack alert sent", { alertId: alert.id });
   } catch (err) {
     logError("Failed to send Slack alert", err);
@@ -175,10 +175,10 @@ const sendWebhookAlert = async (alert) => {
       logWarn("Webhook alert not configured");
       return;
     }
-    
+
     const axios = await import("axios");
     await axios.post(process.env.ALERT_WEBHOOK_URL, alert);
-    
+
     logInfo("Webhook alert sent", { alertId: alert.id });
   } catch (err) {
     logError("Failed to send webhook alert", err);
@@ -198,9 +198,9 @@ export const triggerAlert = async (title, message, level = ALERT_LEVELS.MEDIUM, 
     timestamp: Date.now(),
     metadata,
   };
-  
+
   logError("Alert triggered", { alert });
-  
+
   // Send to configured channels
   const rule = alertRules[level.toLowerCase()] || alertRules.errorRate;
   if (rule && rule.enabled) {
@@ -221,7 +221,7 @@ export const triggerAlert = async (title, message, level = ALERT_LEVELS.MEDIUM, 
       }
     }
   }
-  
+
   return alert;
 };
 
@@ -231,43 +231,43 @@ export const triggerAlert = async (title, message, level = ALERT_LEVELS.MEDIUM, 
 
 export const checkAlertRules = async (metrics) => {
   const alerts = [];
-  
+
   // Check error rate
   if (alertRules.errorRate.enabled) {
     const totalRequests = metrics.counters["http_requests_total"] || 0;
     const totalErrors = metrics.counters["errors_total"] || 0;
     const errorRate = totalRequests > 0 ? totalErrors / totalRequests : 0;
-    
+
     if (errorRate > alertRules.errorRate.threshold) {
       alerts.push(
         await triggerAlert(
           "High Error Rate",
           `Error rate is ${(errorRate * 100).toFixed(2)}%, threshold is ${(alertRules.errorRate.threshold * 100).toFixed(2)}%`,
           alertRules.errorRate.level,
-          { errorRate, totalRequests, totalErrors }
-        )
+          { errorRate, totalRequests, totalErrors },
+        ),
       );
     }
   }
-  
+
   // Check payment failures
   if (alertRules.paymentFailure.enabled) {
     const totalPayments = metrics.counters["payments_total"] || 0;
     const failedPayments = metrics.counters["payments_total:gateway:mpesa:status:failed"] || 0;
     const failureRate = totalPayments > 0 ? failedPayments / totalPayments : 0;
-    
+
     if (failureRate > alertRules.paymentFailure.threshold) {
       alerts.push(
         await triggerAlert(
           "High Payment Failure Rate",
           `Payment failure rate is ${(failureRate * 100).toFixed(2)}%, threshold is ${(alertRules.paymentFailure.threshold * 100).toFixed(2)}%`,
           alertRules.paymentFailure.level,
-          { failureRate, totalPayments, failedPayments }
-        )
+          { failureRate, totalPayments, failedPayments },
+        ),
       );
     }
   }
-  
+
   return alerts;
 };
 

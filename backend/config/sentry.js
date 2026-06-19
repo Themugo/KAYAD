@@ -49,12 +49,12 @@ const queueError = (error, context) => {
 // Retry queued errors
 export const retryQueuedErrors = async () => {
   if (errorQueue.length === 0) return;
-  
+
   logInfo(`Retrying ${errorQueue.length} queued Sentry errors`);
-  
+
   const queueCopy = [...errorQueue];
   errorQueue.length = 0; // Clear queue
-  
+
   for (const item of queueCopy) {
     try {
       Sentry.captureException(item.error, item.context);
@@ -78,22 +78,20 @@ export const initSentry = () => {
       dsn: process.env.SENTRY_DSN,
       environment: process.env.NODE_ENV || "development",
       release: process.env.SENTRY_RELEASE || `kayad-backend@${process.env.npm_package_version || "2.0.0"}`,
-      
+
       // Performance monitoring
       tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-      
+
       // Profiling
       profilesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-      
+
       // Integrations - only use profiling integration, others are auto-instrumented
-      integrations: [
-        nodeProfilingIntegration(),
-      ],
-      
+      integrations: [nodeProfilingIntegration()],
+
       // Before send for error filtering
       beforeSend(event, hint) {
         const startTime = Date.now();
-        
+
         try {
           // Filter out sensitive data
           if (event.request) {
@@ -103,42 +101,42 @@ export const initSentry = () => {
               delete event.request.headers.cookie;
             }
           }
-          
+
           // Filter out 404 errors
           if (event.exception?.values?.[0]?.type === "NotFoundError") {
             return null;
           }
-          
+
           const duration = Date.now() - startTime;
           recordMetric("sentry_before_send_duration", duration);
           incrementCounter("sentry_before_send_success");
-          
+
           return event;
         } catch (err) {
           const duration = Date.now() - startTime;
           recordMetric("sentry_before_send_duration", duration, { status: "error" });
           incrementCounter("sentry_before_send_failure");
-          
+
           // Queue error for retry
           queueError(err, { event });
           return event; // Return event anyway
         }
       },
-      
+
       // Before send transaction for filtering
       beforeSendTransaction(transaction) {
         const startTime = Date.now();
-        
+
         try {
           // Filter out health check transactions
           if (transaction.transaction === "GET /health" || transaction.transaction === "GET /api/health") {
             return null;
           }
-          
+
           const duration = Date.now() - startTime;
           recordMetric("sentry_before_send_transaction_duration", duration);
           incrementCounter("sentry_transaction_sent");
-          
+
           return transaction;
         } catch (err) {
           const duration = Date.now() - startTime;
@@ -147,19 +145,19 @@ export const initSentry = () => {
           return transaction;
         }
       },
-      
+
       // Attach stack traces
       attachStacktrace: true,
-      
+
       // Environment
       environment: process.env.NODE_ENV || "development",
-      
+
       // Server name
       serverName: process.env.SENTRY_SERVER_NAME || "kayad-backend",
-      
+
       // Max breadcrumbs
       maxBreadcrumbs: 50,
-      
+
       // Debug mode
       debug: process.env.SENTRY_DEBUG === "true",
     });
@@ -169,7 +167,7 @@ export const initSentry = () => {
   } catch (err) {
     logError("Failed to initialize Sentry", err);
     incrementCounter("sentry_init_failure");
-    
+
     triggerAlert({
       level: "warning",
       message: "Failed to initialize Sentry",
@@ -182,7 +180,7 @@ export const initSentry = () => {
 // Safe Sentry capture with retry and fallback
 export const safeCaptureException = async (error, context = {}) => {
   const startTime = Date.now();
-  
+
   try {
     await withRetry(
       () => {
@@ -202,9 +200,9 @@ export const safeCaptureException = async (error, context = {}) => {
           logWarn(`Sentry capture retry ${attempt}`, { error: err.message });
           incrementCounter("sentry_capture_retry", { attempt });
         },
-      }
+      },
     );
-    
+
     const duration = Date.now() - startTime;
     recordMetric("sentry_capture_duration", duration);
     incrementCounter("sentry_capture_success");
@@ -212,7 +210,7 @@ export const safeCaptureException = async (error, context = {}) => {
     const duration = Date.now() - startTime;
     recordMetric("sentry_capture_duration", duration, { status: "error" });
     incrementCounter("sentry_capture_failure");
-    
+
     logError("Sentry capture failed, queuing error", err);
     queueError(error, context);
   }
@@ -221,7 +219,7 @@ export const safeCaptureException = async (error, context = {}) => {
 // Safe Sentry message capture with retry and fallback
 export const safeCaptureMessage = async (message, level = "info", context = {}) => {
   const startTime = Date.now();
-  
+
   try {
     await withRetry(
       () => {
@@ -241,9 +239,9 @@ export const safeCaptureMessage = async (message, level = "info", context = {}) 
           logWarn(`Sentry message capture retry ${attempt}`, { error: err.message });
           incrementCounter("sentry_message_retry", { attempt });
         },
-      }
+      },
     );
-    
+
     const duration = Date.now() - startTime;
     recordMetric("sentry_message_capture_duration", duration);
     incrementCounter("sentry_message_capture_success");
@@ -251,7 +249,7 @@ export const safeCaptureMessage = async (message, level = "info", context = {}) 
     const duration = Date.now() - startTime;
     recordMetric("sentry_message_capture_duration", duration, { status: "error" });
     incrementCounter("sentry_message_capture_failure");
-    
+
     logError("Sentry message capture failed", err);
   }
 };

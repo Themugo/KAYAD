@@ -46,9 +46,7 @@ export const startAllWorkers = () => {
 
 export const stopAllWorkers = async () => {
   try {
-    await Promise.all(
-      Object.values(workers).map((worker) => worker.close()),
-    );
+    await Promise.all(Object.values(workers).map((worker) => worker.close()));
 
     logInfo("All workers stopped successfully");
   } catch (err) {

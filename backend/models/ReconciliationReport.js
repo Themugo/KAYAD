@@ -281,6 +281,7 @@ reconciliationReportSchema.methods.getSummary = function () {
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const ReconciliationReport = mongoose.models.ReconciliationReport || mongoose.model("ReconciliationReport", reconciliationReportSchema);
+const ReconciliationReport =
+  mongoose.models.ReconciliationReport || mongoose.model("ReconciliationReport", reconciliationReportSchema);
 
 export default ReconciliationReport;

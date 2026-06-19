@@ -50,7 +50,7 @@ const extractOperationType = (path) => {
  */
 export const idempotencyCheck = async (req, res, next) => {
   const idempotencyKey = req.headers["x-idempotency-key"];
-  
+
   if (!idempotencyKey) {
     // If no idempotency key is provided, allow the request but log a warning
     logWarn("No idempotency key provided for request", {
@@ -60,41 +60,41 @@ export const idempotencyCheck = async (req, res, next) => {
     });
     return next();
   }
-  
+
   const operationType = extractOperationType(req.path);
   const startTime = Date.now();
-  
+
   try {
     // Check database for existing idempotency key
     const cachedResponse = await IdempotencyKey.getCachedResponse(idempotencyKey);
-    
+
     const duration = Date.now() - startTime;
-    
+
     if (cachedResponse) {
       logInfo("Idempotency hit", { idempotencyKey, operationType, path: req.path });
-      
+
       // Record metrics
       recordIdempotencyCheck(operationType, true, duration);
       recordIdempotencyHit(operationType);
-      
+
       // Return cached response with original status code
       return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
     }
-    
+
     // Record metrics for miss
     recordIdempotencyCheck(operationType, false, duration);
     recordIdempotencyMiss(operationType);
-    
+
     // Store the idempotency key in the request for later use
     req.idempotencyKey = idempotencyKey;
     req.idempotencyOperationType = operationType;
-    
+
     // Store the original res.json to intercept the response
     const originalJson = res.json.bind(res);
     const originalStatus = res.status.bind(res);
-    
+
     // Intercept response to cache it
-    res.json = function(data) {
+    res.json = function (data) {
       // Cache the response in the database
       IdempotencyKey.record({
         key: idempotencyKey,
@@ -105,9 +105,13 @@ export const idempotencyCheck = async (req, res, next) => {
         responseStatus: res.statusCode,
         success: data?.success !== false,
         errorMessage: data?.message || null,
-        resourceIds: data?.payment ? { paymentId: data.payment._id } : 
-                    data?.escrowId ? { escrowId: data.escrowId } :
-                    data?.bid ? { bidId: data.bid._id } : {},
+        resourceIds: data?.payment
+          ? { paymentId: data.payment._id }
+          : data?.escrowId
+            ? { escrowId: data.escrowId }
+            : data?.bid
+              ? { bidId: data.bid._id }
+              : {},
       })
         .then(() => {
           recordIdempotencyCache(operationType, true);
@@ -117,19 +121,19 @@ export const idempotencyCheck = async (req, res, next) => {
           recordIdempotencyCache(operationType, false);
           recordIdempotencyError(operationType, "cache_failure");
         });
-      
+
       return originalJson(data);
     };
-    
+
     next();
   } catch (error) {
     const duration = Date.now() - startTime;
     logError("Idempotency check error", error, { idempotencyKey, path: req.path });
-    
+
     // Record metrics for error
     recordIdempotencyCheck(operationType, false, duration);
     recordIdempotencyError(operationType, error.name);
-    
+
     // Fail open - allow the request if idempotency check fails
     // But still store the key for tracking
     req.idempotencyKey = idempotencyKey;
@@ -157,21 +161,21 @@ export const generateIdempotencyKey = (prefix = "idemp") => {
 export const withIdempotency = (operationType) => {
   return async (req, res, next) => {
     const idempotencyKey = req.headers["x-idempotency-key"] || generateIdempotencyKey(operationType);
-    
+
     req.idempotencyKey = idempotencyKey;
     req.idempotencyOperationType = operationType;
-    
+
     try {
       const cachedResponse = await IdempotencyKey.getCachedResponse(idempotencyKey);
-      
+
       if (cachedResponse) {
         logInfo("Idempotency hit", { idempotencyKey, operationType });
         return res.status(cachedResponse.responseStatus || 200).json(cachedResponse.responseData);
       }
-      
+
       const originalJson = res.json.bind(res);
-      
-      res.json = function(data) {
+
+      res.json = function (data) {
         IdempotencyKey.record({
           key: idempotencyKey,
           operationType,
@@ -185,10 +189,10 @@ export const withIdempotency = (operationType) => {
         }).catch((err) => {
           logError("Failed to cache idempotency response", err, { idempotencyKey });
         });
-        
+
         return originalJson(data);
       };
-      
+
       next();
     } catch (error) {
       logError("Idempotency check error", error, { idempotencyKey, operationType });

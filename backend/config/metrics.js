@@ -64,11 +64,11 @@ export const getHistogram = (name, tags = {}) => {
   const key = `${name}:${JSON.stringify(tags)}`;
   const values = metrics.histograms[key] || [];
   if (values.length === 0) return { count: 0, sum: 0, avg: 0, min: 0, max: 0, p50: 0, p95: 0, p99: 0 };
-  
+
   const sorted = [...values].sort((a, b) => a - b);
   const sum = values.reduce((a, b) => a + b, 0);
   const count = values.length;
-  
+
   return {
     count,
     sum,
@@ -113,7 +113,7 @@ export const getAllMetrics = () => {
       Object.entries(metrics.histograms).map(([key, values]) => [
         key,
         getHistogram(key.split(":")[0], JSON.parse(key.split(":").slice(1).join(":"))),
-      ])
+      ]),
     ),
   };
 };
@@ -192,7 +192,7 @@ export const recordCacheError = () => {
 
 // MongoDB replica set metrics
 export const recordReplicaSetStatus = (status, primary, secondaries) => {
-  setGauge("replica_set_status", status === 'healthy' ? 1 : 0);
+  setGauge("replica_set_status", status === "healthy" ? 1 : 0);
   setGauge("replica_set_primary_available", primary ? 1 : 0);
   setGauge("replica_set_secondaries_count", secondaries);
 };
@@ -229,19 +229,28 @@ export const recordMpesaTokenFetch = (duration, success) => {
 
 export const recordMpesaStkPush = (duration, success, errorType = null) => {
   recordHistogram("mpesa_stk_push_duration", duration);
-  incrementCounter("mpesa_stk_push_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+  incrementCounter("mpesa_stk_push_total", success ? 1 : 0, {
+    status: success ? "success" : "failure",
+    error_type: errorType,
+  });
 };
 
 // Email metrics
 export const recordEmailSend = (duration, success, errorType = null) => {
   recordHistogram("email_send_duration", duration);
-  incrementCounter("email_send_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+  incrementCounter("email_send_total", success ? 1 : 0, {
+    status: success ? "success" : "failure",
+    error_type: errorType,
+  });
 };
 
 // SMS metrics
 export const recordSmsSend = (duration, success, errorType = null) => {
   recordHistogram("sms_send_duration", duration);
-  incrementCounter("sms_send_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+  incrementCounter("sms_send_total", success ? 1 : 0, {
+    status: success ? "success" : "failure",
+    error_type: errorType,
+  });
 };
 
 // Redis metrics
@@ -253,7 +262,10 @@ export const recordRedisOperation = (operation, duration, success) => {
 // Sentry metrics
 export const recordSentryCapture = (duration, success, errorType = null) => {
   recordHistogram("sentry_capture_duration", duration);
-  incrementCounter("sentry_capture_total", success ? 1 : 0, { status: success ? "success" : "failure", error_type: errorType });
+  incrementCounter("sentry_capture_total", success ? 1 : 0, {
+    status: success ? "success" : "failure",
+    error_type: errorType,
+  });
 };
 
 // Socket.IO metrics
@@ -306,7 +318,10 @@ export const recordIdempotencyMiss = (operationType) => {
 };
 
 export const recordIdempotencyCache = (operationType, success) => {
-  incrementCounter("idempotency_cache_total", success ? 1 : 0, { operation_type: operationType, status: success ? "success" : "failure" });
+  incrementCounter("idempotency_cache_total", success ? 1 : 0, {
+    operation_type: operationType,
+    status: success ? "success" : "failure",
+  });
 };
 
 export const recordIdempotencyError = (operationType, errorType) => {

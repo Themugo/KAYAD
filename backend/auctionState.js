@@ -21,7 +21,7 @@ const isRedisReady = () => {
 // 📦 SET STATE (HYBRID)
 // =============================
 export const setAuctionState = async (carId, data) => {
-  const existing = await getAuctionState(carId) || {};
+  const existing = (await getAuctionState(carId)) || {};
   const newState = {
     ...existing,
     ...data,
@@ -109,7 +109,7 @@ export const cleanupAuctionState = async () => {
     try {
       const pattern = "auction:state:*";
       const keys = await redis.keys(pattern);
-      
+
       for (const key of keys) {
         const value = await redis.get(key);
         if (value) {

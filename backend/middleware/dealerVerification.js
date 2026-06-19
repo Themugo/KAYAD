@@ -62,7 +62,7 @@ export const requireDealerVerification = async (req, res, next) => {
     // Check if suspended
     if (verification.verificationStatus === "suspended") {
       const isExpired = verification.suspensionExpiresAt && new Date() > verification.suspensionExpiresAt;
-      
+
       if (!isExpired) {
         return res.status(403).json({
           success: false,

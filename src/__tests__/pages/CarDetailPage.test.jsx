@@ -48,6 +48,7 @@ vi.mock('../../components/SeoStructuredData', () => ({
   VehicleStructuredData: () => null,
   BreadcrumbStructuredData: () => null,
 }));
+vi.mock('../../components/SEOHead', () => ({ default: () => null }));
 vi.mock('../car/components/DetailSkeleton', () => ({ default: () => null }));
 vi.mock('../car/components/AuctionAnnouncement', () => ({ default: () => null }));
 vi.mock('../car/components/InlineBidding', () => ({ default: () => null }));

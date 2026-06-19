@@ -300,7 +300,16 @@ export const getFraudAlerts = async (req, res) => {
 
 export const getDashboardOverview = async (req, res) => {
   try {
-    const [systemHealth, paymentFailures, escrowDisputes, dealerOnboarding, listingModeration, queueHealth, notifications, fraudAlerts] = await Promise.all([
+    const [
+      systemHealth,
+      paymentFailures,
+      escrowDisputes,
+      dealerOnboarding,
+      listingModeration,
+      queueHealth,
+      notifications,
+      fraudAlerts,
+    ] = await Promise.all([
       getSystemHealth(req, res),
       getPaymentFailures(req, res),
       getEscrowDisputes(req, res),

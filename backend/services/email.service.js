@@ -120,7 +120,7 @@ const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margi
 export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => {
   const startTime = Date.now();
   const t = getTransporter();
-  
+
   if (!t) {
     if (process.env.NODE_ENV !== "test") {
       logInfo("Email disabled - would send", { subject, to });
@@ -128,7 +128,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
     incrementCounter("email_disabled");
     return { success: true, disabled: true };
   }
-  
+
   try {
     const info = await withRetry(
       () =>
@@ -148,20 +148,20 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
         },
       },
     );
-    
+
     const duration = Date.now() - startTime;
     recordMetric("email_send_duration", duration);
     incrementCounter("email_send_success");
-    
+
     logInfo(`Email sent successfully`, { subject, to, messageId: info.messageId });
     return { success: true, id: info.messageId };
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("email_send_duration", duration, { status: "error" });
     incrementCounter("email_send_failure", { error_type: err.code || "unknown" });
-    
+
     logError(`Email failed after retries`, err, { to, subject, error: err.message });
-    
+
     // Queue failed email for retry
     if (QUEUE_MODE && err.code !== "CIRCUIT_BREAKER_OPEN") {
       try {
@@ -173,7 +173,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
         logError(`Failed to queue email for retry`, queueErr);
       }
     }
-    
+
     return { success: false, error: err.message };
   }
 };

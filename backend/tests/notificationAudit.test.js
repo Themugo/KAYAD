@@ -50,7 +50,7 @@ describe("NotificationAudit Model", () => {
         notificationId,
         userId,
         channel: "invalid_channel",
-      })
+      }),
     ).rejects.toThrow();
   });
 
@@ -64,7 +64,7 @@ describe("NotificationAudit Model", () => {
         userId,
         channel: "email",
         status: "invalid_status",
-      })
+      }),
     ).rejects.toThrow();
   });
 
