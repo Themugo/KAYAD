@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node server.ts",
     "dev:js": "nodemon server.js",
-    "start": "ts-node server.ts",
+    "start": "node server.js",
     "start:js": "node server.js",
     "seed": "ts-node seed.ts",
     "seed:js": "node seed.js",

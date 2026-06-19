@@ -7,7 +7,7 @@ services:
     env: node
     region: oregon
     plan: standard
-    buildCommand: cd backend && npm ci
+    buildCommand: cd backend && npm install
     startCommand: cd backend && npm start
     healthCheckPath: /health
     autoDeploy: true
