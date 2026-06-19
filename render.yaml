@@ -7,8 +7,8 @@ services:
     env: node
     region: oregon
     plan: standard
-    buildCommand: cd backend && npm ci --omit=dev
-    startCommand: cd backend && node server.js
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
     healthCheckPath: /health
     autoDeploy: true
     envVars:
