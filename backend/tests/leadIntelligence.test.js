@@ -10,8 +10,12 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import Lead from "../models/Lead.js";
 import LeadActivity from "../models/LeadActivity.js";
 import { createLead, updateLeadStage, getLeadPipeline, calculateConversionRate } from "../services/leadService.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("Lead Intelligence Service", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("Lead Intelligence Service", () => {
   let mongoServer;
   let testBuyerId;
   let testDealerId;
@@ -57,7 +61,7 @@ describe("Lead Intelligence Service", () => {
     await mongoServer.stop();
   });
 
-  describe("Lead Creation", () => {
+  describeWithDb("Lead Creation", () => {
     it("should create a new lead", async () => {
       const lead = await createLead(testBuyerId, testDealerId, testVehicleId, "chat", null);
 
@@ -85,7 +89,7 @@ describe("Lead Intelligence Service", () => {
     });
   });
 
-  describe("Lead Stage Updates", () => {
+  describeWithDb("Lead Stage Updates", () => {
     it("should update lead stage", async () => {
       const lead = await createLead(testBuyerId, testDealerId, testVehicleId, "chat", null);
       const updatedLead = await updateLeadStage(lead._id, "contacted", testDealerId);
@@ -118,7 +122,7 @@ describe("Lead Intelligence Service", () => {
     });
   });
 
-  describe("Lead Pipeline", () => {
+  describeWithDb("Lead Pipeline", () => {
     it("should get lead pipeline", async () => {
       await createLead(testBuyerId, testDealerId, testVehicleId, "chat", null);
       await createLead(testBuyerId, testDealerId, testVehicleId, "auction", null);
@@ -144,7 +148,7 @@ describe("Lead Intelligence Service", () => {
     });
   });
 
-  describe("Conversion Rate", () => {
+  describeWithDb("Conversion Rate", () => {
     it("should calculate conversion rate", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -172,7 +176,7 @@ describe("Lead Intelligence Service", () => {
     });
   });
 
-  describe("Lead Model Methods", () => {
+  describeWithDb("Lead Model Methods", () => {
     it("should archive lead", async () => {
       const lead = await createLead(testBuyerId, testDealerId, testVehicleId, "chat", null);
       await lead.archive(testDealerId);
@@ -199,7 +203,7 @@ describe("Lead Intelligence Service", () => {
     });
   });
 
-  describe("LeadActivity Model", () => {
+  describeWithDb("LeadActivity Model", () => {
     it("should create lead activity", async () => {
       const lead = await createLead(testBuyerId, testDealerId, testVehicleId, "chat", null);
       const activity = await LeadActivity.createActivity(
@@ -227,7 +231,7 @@ describe("Lead Intelligence Service", () => {
   });
 });
 
-describe("Lead Model", () => {
+describeWithDb("Lead Model", () => {
   let mongoServer;
 
   beforeAll(async () => {

@@ -8,8 +8,12 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import SearchAnalytics from "../models/SearchAnalytics.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("SearchAnalytics Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("SearchAnalytics Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -236,7 +240,7 @@ describe("SearchAnalytics Model", () => {
   });
 });
 
-describe("SearchAnalytics Schema Validation", () => {
+describeWithDb("SearchAnalytics Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {

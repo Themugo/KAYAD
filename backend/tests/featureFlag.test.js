@@ -8,8 +8,12 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import FeatureFlag from "../models/FeatureFlag.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("FeatureFlag Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("FeatureFlag Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -299,7 +303,7 @@ describe("FeatureFlag Model", () => {
   });
 });
 
-describe("FeatureFlag Schema Validation", () => {
+describeWithDb("FeatureFlag Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {

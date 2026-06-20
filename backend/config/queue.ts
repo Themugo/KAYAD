@@ -141,7 +141,7 @@ export const getDeadLetterQueue = (queueName) => {
   }
 
   const dlq = new Queue(dlqName, {
-    connection: connection as any,
+    connection,
     defaultJobOptions: deadLetterQueueOptions,
   });
 
@@ -170,7 +170,7 @@ export const getQueue = (queueName) => {
 
   const options = queueOptions[queueName] || queueOptions.notification;
   const queue = new Queue(queueName, {
-    connection: connection as any,
+    connection,
     defaultJobOptions: options.defaultJobOptions,
   });
 
@@ -182,15 +182,15 @@ export const getQueue = (queueName) => {
     logInfo(`Job waiting: ${queueName}`, { jobId });
   });
 
-  (queue as any).on("active", (job) => {
+  queue.on("active", (job) => {
     logInfo(`Job active: ${queueName}`, { jobId: job.id, name: job.name });
   });
 
-  (queue as any).on("completed", (job) => {
+  queue.on("completed", (job) => {
     logInfo(`Job completed: ${queueName}`, { jobId: job.id, name: job.name });
   });
 
-  (queue as any).on("failed", async (job, err) => {
+  queue.on("failed", async (job, err) => {
     logError(`Job failed: ${queueName}`, err, { jobId: job?.id, name: job?.name });
 
     // Move to dead letter queue after all retries exhausted
@@ -234,7 +234,7 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
   }
 
   const worker = new Worker(queueName, processor, {
-    connection: connection as any,
+    connection,
     concurrency,
   });
 

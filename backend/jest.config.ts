@@ -1,7 +1,9 @@
 // jest.config.js
 export default {
   testEnvironment: "node",
-  transform: {},
+  transform: {
+    "^.+\\.ts$": "./jest.transformer.cjs",
+  },
   extensionsToTreatAsEsm: [".ts"],
   resolver: "./jest.resolver.cjs",
   testMatch: ["**/tests/**/*.test.[jt]s"],

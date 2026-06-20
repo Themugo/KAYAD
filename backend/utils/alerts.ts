@@ -25,7 +25,7 @@ export const triggerAdminAlert = async (type, data = {}, options: any = {}) => {
     // =============================
     // 💾 SAVE TO DB
     // =============================
-    const alert = await (AdminAlert as any).create({
+    const alert = await AdminAlert.create({
       type,
       data,
       severity: payload.severity,

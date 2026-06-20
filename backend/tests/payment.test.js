@@ -7,7 +7,7 @@ process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 process.env.REQUIRE_EMAIL_VERIFICATION = "false";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
@@ -15,7 +15,7 @@ await startTestDB();
 const { default: app } = await import("../server.js");
 import Payment from "../models/Payment.js";
 
-describe("Payments", () => {
+describeWithDb("Payments", () => {
   let buyerToken;
   let carId;
 

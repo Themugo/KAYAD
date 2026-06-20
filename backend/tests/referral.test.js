@@ -6,13 +6,13 @@ process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Referral Routes", () => {
+describeWithDb("Referral Routes", () => {
   let token;
 
   beforeAll(async () => {

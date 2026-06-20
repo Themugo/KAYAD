@@ -6,14 +6,14 @@ process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 process.env.PAYMENT_MODE = "mock";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Inspection Routes", () => {
+describeWithDb("Inspection Routes", () => {
   let buyerToken, adminToken, inspectorToken;
   let buyerId, inspectorId, carId, orderId;
 
@@ -56,7 +56,7 @@ describe("Inspection Routes", () => {
     await clearTestDB();
   });
 
-  describe("POST /api/inspections/order", () => {
+  describeWithDb("POST /api/inspections/order", () => {
     it("requires auth", async () => {
       await request(app).post("/api/inspections/order").send({ carId, phone: "254712345678" }).expect(401);
     });
@@ -91,7 +91,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/my", () => {
+  describeWithDb("GET /api/inspections/my", () => {
     it("requires auth", async () => {
       await request(app).get("/api/inspections/my").expect(401);
     });
@@ -107,7 +107,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/available-inspectors (admin)", () => {
+  describeWithDb("GET /api/inspections/available-inspectors (admin)", () => {
     it("requires admin", async () => {
       await request(app)
         .get("/api/inspections/available-inspectors")
@@ -126,7 +126,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("POST /api/inspections/:id/assign (admin)", () => {
+  describeWithDb("POST /api/inspections/:id/assign (admin)", () => {
     it("requires admin", async () => {
       if (!orderId) return; // Skip if orderId not set
       await request(app)
@@ -158,7 +158,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("POST /api/inspections/:id/start", () => {
+  describeWithDb("POST /api/inspections/:id/start", () => {
     it("requires auth", async () => {
       if (!orderId) return;
       await request(app).post(`/api/inspections/${orderId}/start`).expect(401);
@@ -184,7 +184,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("POST /api/inspections/:id/submit", () => {
+  describeWithDb("POST /api/inspections/:id/submit", () => {
     it("requires auth", async () => {
       if (!orderId) return;
       await request(app).post(`/api/inspections/${orderId}/submit`).expect(401);
@@ -215,7 +215,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/car/:carId", () => {
+  describeWithDb("GET /api/inspections/car/:carId", () => {
     it("returns completed inspection for car", async () => {
       if (!orderId) return;
       const res = await request(app)
@@ -237,7 +237,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/:id", () => {
+  describeWithDb("GET /api/inspections/:id", () => {
     it("requires auth", async () => {
       if (!orderId) return;
       await request(app).get(`/api/inspections/${orderId}`).expect(401);
@@ -280,7 +280,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/ (admin list)", () => {
+  describeWithDb("GET /api/inspections/ (admin list)", () => {
     it("requires admin", async () => {
       await request(app).get("/api/inspections/").set("Authorization", `Bearer ${buyerToken}`).expect(403);
     });
@@ -301,7 +301,7 @@ describe("Inspection Routes", () => {
     });
   });
 
-  describe("GET /api/inspections/my-tasks (inspector)", () => {
+  describeWithDb("GET /api/inspections/my-tasks (inspector)", () => {
     it("returns inspector assigned tasks", async () => {
       const res = await request(app)
         .get("/api/inspections/my-tasks")

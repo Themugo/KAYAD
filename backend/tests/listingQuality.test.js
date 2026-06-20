@@ -8,8 +8,12 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import ListingQuality from "../models/ListingQuality.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("ListingQuality Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("ListingQuality Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -225,7 +229,7 @@ describe("ListingQuality Model", () => {
   });
 });
 
-describe("ListingQuality Schema Validation", () => {
+describeWithDb("ListingQuality Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {

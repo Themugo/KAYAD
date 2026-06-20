@@ -11,14 +11,6 @@ const FROM = process.env.EMAIL_FROM || `noreply@kayad.space`;
 const ENABLED = !!process.env.EMAIL_HOST;
 const QUEUE_MODE = process.env.QUEUE_MODE === "true";
 
-type EmailMessage = {
-  to: string;
-  subject: string;
-  html: string;
-  text?: string;
-  from?: string;
-};
-
 let transporter = null;
 
 // Email service configuration with SRE
@@ -123,7 +115,7 @@ const btn = (text, url) => `
 const divider = () => `<hr style="border:none;border-top:1px solid #1E2530;margin:24px 0;">`;
 
 // Export raw email function for queue worker
-export const sendRawEmail = async ({ to, subject, html, text, from = FROM }: EmailMessage) => {
+export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => {
   const startTime = Date.now();
   const t = getTransporter();
 
@@ -184,7 +176,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }: Ema
   }
 };
 
-export const sendEmail = async ({ to, subject, html, text, from = FROM }: EmailMessage) =>
+export const sendEmail = async ({ to, subject, html, text, from = FROM }) =>
   sendRawEmail({ to, subject, html, text, from });
 
 export const sendGenericEmail = async (to, subject, message, data = {}) => {

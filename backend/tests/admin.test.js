@@ -6,7 +6,7 @@ process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
@@ -15,7 +15,7 @@ const { default: app } = await import("../server.js");
 import User from "../models/User.js";
 import Car from "../models/Car.js";
 
-describe("Admin Routes", () => {
+describeWithDb("Admin Routes", () => {
   let adminToken, userToken, adminId, targetUserId, carId;
 
   beforeAll(async () => {

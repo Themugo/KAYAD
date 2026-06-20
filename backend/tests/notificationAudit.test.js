@@ -8,8 +8,12 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import NotificationAudit from "../models/NotificationAudit.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("NotificationAudit Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("NotificationAudit Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -368,7 +372,7 @@ describe("NotificationAudit Model", () => {
   });
 });
 
-describe("NotificationAudit Schema Validation", () => {
+describeWithDb("NotificationAudit Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {
