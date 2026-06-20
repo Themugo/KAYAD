@@ -81,7 +81,7 @@ function RangeInput({ placeholder, value, onChange }) {
   );
 }
 
-export default function SearchSidebar({ cars = [], filters, onFilterChange, onBrandChange, activeBrand, isMobile, onClose }) {
+export default function SearchSidebar({ cars = [], filters, onFilterChange, onBrandChange, isMobile, onClose }) {
   const [brandSearch, setBrandSearch] = useState('');
   const [showAllBrands, setShowAllBrands] = useState(false);
 
