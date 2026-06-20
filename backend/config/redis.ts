@@ -1,4 +1,4 @@
-import Redis from "ioredis";
+import { Redis } from "ioredis";
 import { withRetry, createServiceConfig } from "../utils/retry.ts";
 import { recordMetric, setGauge, incrementCounter } from "./metrics.ts";
 import { logInfo, logError, logWarn } from "../utils/logger.ts";
@@ -73,14 +73,12 @@ if (redis) {
     logError("Redis error", err, { message: err.message });
     redisHealthStatus = "error";
     setGauge("redis_connection_status", 0);
-    incrementCounter("redis_error", { error_type: err.code || "unknown" });
+    incrementCounter("redis_error", 1, { error_type: err.code || "unknown" });
 
     // Open circuit breaker on repeated errors
     if (!redisCircuitBreakerOpen) {
       redisCircuitBreakerOpen = true;
-      triggerAlert({
-        level: "warning",
-        message: "Redis circuit breaker opened due to errors",
+      triggerAlert("Redis circuit breaker opened", "Redis circuit breaker opened due to errors", "medium", {
         source: "redis",
         metrics: { error: err.message },
       });

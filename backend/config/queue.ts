@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { Queue, Worker } from "bullmq";
-import IORedis from "ioredis";
+import { Redis } from "ioredis";
 import { logInfo, logError, logWarn } from "../utils/logger.ts";
 
 // =============================
@@ -30,7 +30,7 @@ const redisConfig = {
 };
 
 // Create Redis connection
-const connection = DISABLE_REDIS ? null : new IORedis(redisConfig);
+const connection = DISABLE_REDIS ? null : new Redis(redisConfig);
 
 if (connection) {
   connection.on("connect", () => {
@@ -141,7 +141,7 @@ export const getDeadLetterQueue = (queueName) => {
   }
 
   const dlq = new Queue(dlqName, {
-    connection,
+    connection: connection as any,
     defaultJobOptions: deadLetterQueueOptions,
   });
 
@@ -170,7 +170,7 @@ export const getQueue = (queueName) => {
 
   const options = queueOptions[queueName] || queueOptions.notification;
   const queue = new Queue(queueName, {
-    connection,
+    connection: connection as any,
     defaultJobOptions: options.defaultJobOptions,
   });
 
@@ -182,20 +182,21 @@ export const getQueue = (queueName) => {
     logInfo(`Job waiting: ${queueName}`, { jobId });
   });
 
-  queue.on("active", (job) => {
+  (queue as any).on("active", (job) => {
     logInfo(`Job active: ${queueName}`, { jobId: job.id, name: job.name });
   });
 
-  queue.on("completed", (job) => {
+  (queue as any).on("completed", (job) => {
     logInfo(`Job completed: ${queueName}`, { jobId: job.id, name: job.name });
   });
 
-  queue.on("failed", async (job, err) => {
+  (queue as any).on("failed", async (job, err) => {
     logError(`Job failed: ${queueName}`, err, { jobId: job?.id, name: job?.name });
 
     // Move to dead letter queue after all retries exhausted
     if (job && job.attemptsMade >= job.opts.attempts) {
       try {
+        const dlqName = `${queueName}:dlq`;
         const dlq = getDeadLetterQueue(queueName);
         await dlq.add(`${queueName}:${job.id}`, job.data, {
           jobId: job.id,
@@ -204,7 +205,7 @@ export const getQueue = (queueName) => {
           originalQueue: queueName,
           timestamp: new Date().toISOString(),
         });
-        logInfo(`Job moved to DLQ: ${queueName}`, { jobId: job.id, dlqName: `${queueName}:dlq` });
+        logInfo(`Job moved to DLQ: ${queueName}`, { jobId: job.id, dlqName });
 
         // Alert if DLQ size exceeds threshold
         const dlqCount = await dlq.getJobCountByTypes("waiting");
@@ -232,11 +233,9 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
     return workers[queueName];
   }
 
-  const options = queueOptions[queueName] || queueOptions.notification;
   const worker = new Worker(queueName, processor, {
-    connection,
+    connection: connection as any,
     concurrency,
-    defaultJobOptions: options.defaultJobOptions,
   });
 
   worker.on("error", (err) => {
@@ -260,17 +259,17 @@ export const getWorker = (queueName, processor, concurrency = 5) => {
 // =============================
 
 export const closeQueues = async () => {
-  await Promise.all(Object.values(queues).map((queue) => queue.close()));
+  await Promise.all(Object.values(queues).map((queue: any) => queue.close()));
   logInfo("All queues closed");
 };
 
 export const closeDeadLetterQueues = async () => {
-  await Promise.all(Object.values(deadLetterQueues).map((dlq) => dlq.close()));
+  await Promise.all(Object.values(deadLetterQueues).map((dlq: any) => dlq.close()));
   logInfo("All dead letter queues closed");
 };
 
 export const closeWorkers = async () => {
-  await Promise.all(Object.values(workers).map((worker) => worker.close()));
+  await Promise.all(Object.values(workers).map((worker: any) => worker.close()));
   logInfo("All workers closed");
 };
 

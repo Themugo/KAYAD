@@ -141,7 +141,7 @@ const sendSlackAlert = async (alert) => {
       return;
     }
 
-    const axios = await import("axios");
+    const { default: axios } = await import("axios");
     const color = {
       critical: "#FF0000",
       high: "#FFA500",
@@ -176,7 +176,7 @@ const sendWebhookAlert = async (alert) => {
       return;
     }
 
-    const axios = await import("axios");
+    const { default: axios } = await import("axios");
     await axios.post(process.env.ALERT_WEBHOOK_URL, alert);
 
     logInfo("Webhook alert sent", { alertId: alert.id });
