@@ -526,7 +526,15 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ─── DATABASE ─────────────────────────────────────────────────
-const connectDB = async (retries = 5, delay = 2000) => {
+const parsePositiveInt = (value, fallback) => {
+  const parsed = Number.parseInt(value || "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const connectDB = async (
+  retries = parsePositiveInt(process.env.MONGO_CONNECT_RETRIES, 5),
+  delay = parsePositiveInt(process.env.MONGO_CONNECT_RETRY_DELAY_MS, 2000),
+) => {
   if (mongoose.connection.readyState === 1) return mongoose.connection;
   if (!process.env.MONGO_URI) throw new Error("MONGO_URI missing in .env");
 
@@ -534,8 +542,8 @@ const connectDB = async (retries = 5, delay = 2000) => {
     try {
       const conn = await mongoose.connect(process.env.MONGO_URI, {
         maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "10"),
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
+        serverSelectionTimeoutMS: parsePositiveInt(process.env.MONGO_SERVER_SELECTION_TIMEOUT_MS, 5000),
+        socketTimeoutMS: parsePositiveInt(process.env.MONGO_SOCKET_TIMEOUT_MS, 45000),
       });
       logInfo("MongoDB connected", { host: conn.connection.host });
       return conn;
