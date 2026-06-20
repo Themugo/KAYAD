@@ -83,9 +83,9 @@ describe('useCompare', () => {
   afterEach(() => { cleanup(); });
 
   it('throws error outside provider', () => {
-    const { result } = renderHook(() => useCompare());
-    expect(result.error).toBeDefined();
-    expect(result.error.message).toBe('useCompare must be used within CompareProvider');
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => renderHook(() => useCompare())).toThrow('useCompare must be used within CompareProvider');
+    consoleError.mockRestore();
   });
 
   it('returns context within provider', () => {

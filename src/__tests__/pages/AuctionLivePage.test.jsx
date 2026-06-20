@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import AuctionLivePage from '../../pages/AuctionLivePage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
@@ -42,26 +43,34 @@ vi.mock('../../pages/auction/components/AuctionEffects', () => ({
   PriceParticles: () => null,
 }));
 
+const renderAuctionPage = () => render(
+  <HelmetProvider>
+    <MemoryRouter initialEntries={['/auction/mock1']}>
+      <AuctionLivePage />
+    </MemoryRouter>
+  </HelmetProvider>,
+);
+
 describe('AuctionLivePage', () => {
   afterEach(() => { cleanup(); });
 
   it('renders auction page with mock car', async () => {
-    render(<MemoryRouter initialEntries={['/auction/mock1']}><AuctionLivePage /></MemoryRouter>);
+    renderAuctionPage();
     expect(await screen.findByText('Test Car')).toBeInTheDocument();
   });
 
   it('shows connection status', async () => {
-    render(<MemoryRouter initialEntries={['/auction/mock1']}><AuctionLivePage /></MemoryRouter>);
+    renderAuctionPage();
     expect(await screen.findByText('Reconnecting...')).toBeInTheDocument();
   });
 
   it('shows starting price label', async () => {
-    render(<MemoryRouter initialEntries={['/auction/mock1']}><AuctionLivePage /></MemoryRouter>);
+    renderAuctionPage();
     expect(await screen.findByText('Starting Price')).toBeInTheDocument();
   });
 
   it('shows joining prompt for anonymous users', async () => {
-    render(<MemoryRouter initialEntries={['/auction/mock1']}><AuctionLivePage /></MemoryRouter>);
+    renderAuctionPage();
     expect(await screen.findByText('Join the Live Show')).toBeInTheDocument();
   });
 });

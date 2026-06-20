@@ -152,12 +152,13 @@ export const generateAuctionMetadata = (auction) => {
   if (!auction) return getDefaultMetadata();
 
   const car = auction.car;
-  const title = `${car?.year} ${car?.brand} ${car?.model} - Live Auction | Kayad`;
+  const title = `${car?.year || ''} ${car?.brand || ''} ${car?.model || ''} - Live Auction | Kayad`.trim();
+  const bidAmount = auction.currentBid || auction.startingBid || 0;
   const description = car?.description 
     ? `Live Auction: ${car.description.substring(0, 140)}...`
-    : `Live auction for ${car?.year} ${car?.brand} ${car?.model}. Current bid: KES ${(auction.currentBid || auction.startingBid).toLocaleString()}. Ends ${new Date(auction.endTime).toLocaleString()}. Bid now on Kayad.`;
+    : `Live auction for ${car?.year || ''} ${car?.brand || ''} ${car?.model || ''}. Current bid: KES ${bidAmount.toLocaleString()}. Ends ${auction.endTime ? new Date(auction.endTime).toLocaleString() : 'soon'}. Bid now on Kayad.`;
   
-  const imageUrl = car?.images?.[0]?.url || car?.images?.[0] || `${BASE_URL}/icon-512.png`;
+  const imageUrl = typeof car?.images?.[0] === 'string' ? car.images[0] : car?.images?.[0]?.url || `${BASE_URL}/icon-512.png`;
   const url = `${BASE_URL}/auctions/${auction._id}`;
 
   return {

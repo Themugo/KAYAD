@@ -4,13 +4,13 @@
 // timeouts, metrics, and fallback mechanisms
 // ─────────────────────────────────────────────────────────────
 
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, jest as vi } from "@jest/globals";
 import { withRetry, createServiceConfig, resetCircuit, getCircuitState, getAllCircuitStates } from "../utils/retry.js";
 
 describe("Retry Utility", () => {
   beforeEach(() => {
     // Reset circuit breakers before each test
-    getAllCircuitStates().forEach((state, key) => {
+    Object.keys(getAllCircuitStates()).forEach((key) => {
       resetCircuit(key);
     });
   });
@@ -59,24 +59,24 @@ describe("Retry Utility", () => {
 
   describe("Timeout Enforcement", () => {
     it("should timeout after specified duration", async () => {
-      const fn = () => new Promise((resolve) => setTimeout(resolve, 5000));
+      const fn = () => new Promise(() => {});
 
       await expect(
         withRetry(fn, { timeoutMs: 1000, retries: 0, enableMetrics: false, enableLogging: false }),
-      ).rejects.toThrow("TIMEOUT");
+      ).rejects.toMatchObject({ code: "TIMEOUT" });
     });
 
     it("should succeed before timeout", async () => {
-      const fn = () => new Promise((resolve) => setTimeout(resolve, 100));
+      const fn = () => new Promise((resolve) => setTimeout(() => resolve("success"), 100));
 
       const result = await withRetry(fn, { timeoutMs: 1000, retries: 0, enableMetrics: false, enableLogging: false });
 
-      expect(result).toBeDefined();
+      expect(result).toBe("success");
     });
 
     it("should call onTimeout callback", async () => {
       const onTimeout = vi.fn();
-      const fn = () => new Promise((resolve) => setTimeout(resolve, 5000));
+      const fn = () => new Promise(() => {});
 
       await expect(
         withRetry(fn, { timeoutMs: 100, retries: 0, onTimeout, enableMetrics: false, enableLogging: false }),
@@ -141,7 +141,7 @@ describe("Retry Utility", () => {
           enableMetrics: false,
           enableLogging: false,
         }),
-      ).rejects.toThrow("CIRCUIT_BREAKER_OPEN");
+      ).rejects.toMatchObject({ code: "CIRCUIT_BREAKER_OPEN" });
 
       expect(fn).not.toHaveBeenCalled();
     });
@@ -370,7 +370,7 @@ describe("Retry Utility", () => {
 
   describe("Integration Scenarios", () => {
     it("should handle timeout with circuit breaker", async () => {
-      const fn = () => new Promise((resolve) => setTimeout(resolve, 5000));
+      const fn = () => new Promise(() => {});
 
       // Open circuit with timeouts
       for (let i = 0; i < 5; i++) {
