@@ -10,6 +10,14 @@ const __dirname = dirname(__filename);
 // Load environment variables for tests from backend/.env
 dotenv.config({ path: resolve(__dirname, "../.env") });
 
+// Mock isomorphic-dompurify to avoid ES module issues in Jest
+global.DOMPurify = {
+  sanitize: (html) => html,
+  addHook: () => {},
+  removeHook: () => {},
+  setConfig: () => {},
+};
+
 const DEFAULT_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
 const MOCK_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
 const hadConfiguredMongoUri = Boolean(process.env.MONGO_URI);

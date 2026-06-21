@@ -10,6 +10,7 @@ export default {
   verbose: false,
   maxWorkers: 1,
   modulePathIgnorePatterns: ["node_modules"],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
   collectCoverage: true,
   collectCoverageFrom: [
     "utils/**/*.js",
