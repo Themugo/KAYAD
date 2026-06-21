@@ -35,7 +35,7 @@ export const createTicket = async (req, res) => {
 };
 
 // =============================
-// 📋 GET ALL TICKETS (ADMIN)
+// 📋 GET ALL TICKETS (ADMIN - Phase 3 Query Optimization)
 // =============================
 
 export const getAllTickets = async (req, res) => {
@@ -49,11 +49,12 @@ export const getAllTickets = async (req, res) => {
     if (assignedTo) filter.assignedTo = assignedTo;
 
     const tickets = await SupportTicket.find(filter)
-      .populate("user", "name email")
+      .populate("user", "name email phone")
       .populate("assignedTo", "name email")
       .populate("escalatedTo", "name email")
-      .populate("relatedEscrow", "amount status")
-      .populate("relatedCar", "title price")
+      .populate("relatedEscrow", "amount status buyer seller")
+      .populate("relatedCar", "title price brand model year images")
+      .select("user status priority category subject createdAt sla assignedTo escalatedTo relatedEscrow relatedCar")
       .sort({ createdAt: -1 })
       .limit(100);
 
@@ -65,7 +66,7 @@ export const getAllTickets = async (req, res) => {
 };
 
 // =============================
-// 👤 GET USER TICKETS
+// 👤 GET USER TICKETS (Phase 3 Query Optimization)
 // =============================
 
 export const getUserTickets = async (req, res) => {
@@ -75,7 +76,8 @@ export const getUserTickets = async (req, res) => {
     const tickets = await SupportTicket.find({ user: userId })
       .populate("assignedTo", "name email")
       .populate("relatedEscrow", "amount status")
-      .populate("relatedCar", "title price")
+      .populate("relatedCar", "title price brand model year images")
+      .select("status priority category subject createdAt sla assignedTo relatedEscrow relatedCar")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, tickets });
@@ -86,7 +88,7 @@ export const getUserTickets = async (req, res) => {
 };
 
 // =============================
-// 📄 GET TICKET DETAILS
+// 📄 GET TICKET DETAILS (Phase 3 Query Optimization)
 // =============================
 
 export const getTicket = async (req, res) => {
@@ -94,13 +96,14 @@ export const getTicket = async (req, res) => {
     const { ticketId } = req.params;
 
     const ticket = await SupportTicket.findById(ticketId)
-      .populate("user", "name email")
+      .populate("user", "name email phone")
       .populate("assignedTo", "name email")
       .populate("escalatedTo", "name email")
       .populate("messages.sender", "name email")
-      .populate("relatedEscrow", "amount status")
-      .populate("relatedCar", "title price")
-      .populate("relatedPayment", "amount status");
+      .populate("relatedEscrow", "amount status buyer seller")
+      .populate("relatedCar", "title price brand model year images")
+      .populate("relatedPayment", "amount status type")
+      .select("user status priority category subject description createdAt sla assignedTo escalatedTo messages relatedEscrow relatedCar relatedPayment satisfactionRating resolutionNotes closedAt closedBy");
 
     if (!ticket) {
       return res.status(404).json({ success: false, message: "Ticket not found" });
@@ -114,7 +117,7 @@ export const getTicket = async (req, res) => {
 };
 
 // =============================
-// 💬 ADD MESSAGE TO TICKET
+// 💬 ADD MESSAGE TO TICKET (Phase 3 Query Optimization)
 // =============================
 
 export const addMessage = async (req, res) => {
@@ -152,9 +155,45 @@ export const addMessage = async (req, res) => {
 
     await ticket.save();
 
-    const updatedTicket = await SupportTicket.findById(ticketId).populate("messages.sender", "name email");
+    // Use aggregation to avoid N+1 query - fetch only the last message with populated sender
+    const updatedTicket = await SupportTicket.aggregate([
+      { $match: { _id: ticket._id } },
+      {
+        $project: {
+          user: 1,
+          status: 1,
+          priority: 1,
+          category: 1,
+          subject: 1,
+          description: 1,
+          createdAt: 1,
+          sla: 1,
+          assignedTo: 1,
+          escalatedTo: 1,
+          relatedEscrow: 1,
+          relatedCar: 1,
+          relatedPayment: 1,
+          satisfactionRating: 1,
+          resolutionNotes: 1,
+          closedAt: 1,
+          closedBy: 1,
+          messages: { $slice: ["$messages", -1] },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "messages.sender",
+          foreignField: "_id",
+          as: "messages.sender",
+        },
+      },
+      {
+        $unwind: "$messages.sender",
+      },
+    ]);
 
-    res.json({ success: true, ticket: updatedTicket });
+    res.json({ success: true, ticket: updatedTicket[0] || ticket });
   } catch (error) {
     console.error("Error adding message:", error);
     res.status(500).json({ success: false, message: "Failed to add message" });
@@ -162,7 +201,7 @@ export const addMessage = async (req, res) => {
 };
 
 // =============================
-// 🔄 UPDATE TICKET STATUS
+// 🔄 UPDATE TICKET STATUS (Phase 3 Query Optimization)
 // =============================
 
 export const updateTicketStatus = async (req, res) => {
@@ -194,11 +233,80 @@ export const updateTicketStatus = async (req, res) => {
 
     await ticket.save();
 
-    const updatedTicket = await SupportTicket.findById(ticketId)
-      .populate("assignedTo", "name email")
-      .populate("escalatedTo", "name email");
+    // Use aggregation to avoid N+1 query
+    const updatedTicket = await SupportTicket.aggregate([
+      { $match: { _id: ticket._id } },
+      {
+        $project: {
+          user: 1,
+          status: 1,
+          priority: 1,
+          category: 1,
+          subject: 1,
+          description: 1,
+          createdAt: 1,
+          sla: 1,
+          assignedTo: 1,
+          escalatedTo: 1,
+          relatedEscrow: 1,
+          relatedCar: 1,
+          relatedPayment: 1,
+          satisfactionRating: 1,
+          resolutionNotes: 1,
+          closedAt: 1,
+          closedBy: 1,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedTo",
+          foreignField: "_id",
+          as: "assignedTo",
+        },
+      },
+      {
+        $unwind: { path: "$assignedTo", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "escalatedTo",
+          foreignField: "_id",
+          as: "escalatedTo",
+        },
+      },
+      {
+        $unwind: { path: "$escalatedTo", preserveNullAndEmptyArrays: true },
+      },
+      {
+        $project: {
+          "assignedTo.name": 1,
+          "assignedTo.email": 1,
+          "escalatedTo.name": 1,
+          "escalatedTo.email": 1,
+          user: 1,
+          status: 1,
+          priority: 1,
+          category: 1,
+          subject: 1,
+          description: 1,
+          createdAt: 1,
+          sla: 1,
+          assignedTo: 1,
+          escalatedTo: 1,
+          relatedEscrow: 1,
+          relatedCar: 1,
+          relatedPayment: 1,
+          satisfactionRating: 1,
+          resolutionNotes: 1,
+          closedAt: 1,
+          closedBy: 1,
+        },
+      },
+    ]);
 
-    res.json({ success: true, ticket: updatedTicket });
+    res.json({ success: true, ticket: updatedTicket[0] || ticket });
   } catch (error) {
     console.error("Error updating ticket status:", error);
     res.status(500).json({ success: false, message: "Failed to update ticket status" });

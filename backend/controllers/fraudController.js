@@ -17,17 +17,35 @@ import {
 } from "../services/fraudDetectionService.js";
 
 // =============================
-// 📊 GET FRAUD ANALYTICS
+// 📊 GET FRAUD ANALYTICS (Phase 3 Query Optimization)
 // =============================
 
 export const getFraudAnalytics = async (req, res) => {
   try {
     const now = new Date();
     const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const previousPeriod = new Date(thirtyDaysAgo - 30 * 24 * 60 * 60 * 1000);
 
-    const [totalDetections, recentFraud, byType, severityBreakdown] = await Promise.all([
-      FraudDetection.countDocuments(),
-      FraudDetection.find().sort({ createdAt: -1 }).limit(50).populate("target", "name email"),
+    // Use aggregation to combine multiple count queries into a single operation
+    const [stats, recentFraud, byType, severityBreakdown] = await Promise.all([
+      FraudDetection.aggregate([
+        {
+          $facet: {
+            totalDetections: [{ $count: "count" }],
+            criticalCount: [{ $match: { severity: "critical" } }, { $count: "count" }],
+            underReviewCount: [{ $match: { status: "under_review" } }, { $count: "count" }],
+            actionTakenCount: [{ $match: { status: "action_taken" } }, { $count: "count" }],
+            currentPeriodCount: [{ $match: { createdAt: { $gte: thirtyDaysAgo } } }, { $count: "count" }],
+            previousPeriodCount: [{ $match: { createdAt: { $gte: previousPeriod, $lt: thirtyDaysAgo } } }, { $count: "count" }],
+          },
+        },
+      ]),
+      FraudDetection.find()
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate("target", "name email")
+        .select("fraudType severity status target createdAt")
+        .lean(),
       FraudDetection.aggregate([
         { $match: { createdAt: { $gte: thirtyDaysAgo } } },
         { $group: { _id: "$fraudType", count: { $sum: 1 } } },
@@ -39,18 +57,13 @@ export const getFraudAnalytics = async (req, res) => {
       ]),
     ]);
 
-    const criticalCount = await FraudDetection.countDocuments({ severity: "critical" });
-    const underReviewCount = await FraudDetection.countDocuments({ status: "under_review" });
-    const actionTakenCount = await FraudDetection.countDocuments({ status: "action_taken" });
-
-    // Calculate trend
-    const previousPeriod = new Date(thirtyDaysAgo - 30 * 24 * 60 * 60 * 1000);
-    const currentPeriodCount = await FraudDetection.countDocuments({
-      createdAt: { $gte: thirtyDaysAgo },
-    });
-    const previousPeriodCount = await FraudDetection.countDocuments({
-      createdAt: { $gte: previousPeriod, $lt: thirtyDaysAgo },
-    });
+    const statsData = stats[0];
+    const totalDetections = statsData.totalDetections[0]?.count || 0;
+    const criticalCount = statsData.criticalCount[0]?.count || 0;
+    const underReviewCount = statsData.underReviewCount[0]?.count || 0;
+    const actionTakenCount = statsData.actionTakenCount[0]?.count || 0;
+    const currentPeriodCount = statsData.currentPeriodCount[0]?.count || 0;
+    const previousPeriodCount = statsData.previousPeriodCount[0]?.count || 0;
 
     const trendPercentage =
       previousPeriodCount > 0
@@ -65,7 +78,7 @@ export const getFraudAnalytics = async (req, res) => {
         underReviewCount,
         actionTakenCount,
         recentFraud: recentFraud.map((f) => ({
-          ...f.toObject(),
+          ...f,
           targetName: f.target?.name || f.target?.email || "Unknown",
         })),
         byType: byType.map((item) => ({ type: item._id, count: item.count })),
@@ -317,7 +330,7 @@ export const updateFraudStatus = async (req, res) => {
 };
 
 // =============================
-// 📋 GET ALL FRAUD DETECTIONS
+// 📋 GET ALL FRAUD DETECTIONS (Phase 3 Query Optimization)
 // =============================
 
 export const getAllFraudDetections = async (req, res) => {
@@ -333,6 +346,7 @@ export const getAllFraudDetections = async (req, res) => {
       .populate("target", "name email")
       .populate("actionTakenBy", "name email")
       .populate("reviewedBy", "name email")
+      .select("fraudType severity status target actionTaken actionTakenBy actionTakenAt actionNotes reviewedBy reviewedAt createdAt")
       .sort({ createdAt: -1 });
 
     res.json({ success: true, frauds });

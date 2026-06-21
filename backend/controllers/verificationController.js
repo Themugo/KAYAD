@@ -280,7 +280,7 @@ export const verifyOTP = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: GET ALL VERIFICATIONS
+// 👮 ADMIN: GET ALL VERIFICATIONS (Phase 3 Query Optimization)
 // =============================
 export const getAllVerifications = async (req, res) => {
   try {
@@ -295,9 +295,10 @@ export const getAllVerifications = async (req, res) => {
 
     const [verifications, total] = await Promise.all([
       DealerVerification.find(filter)
-        .populate("user", "name email phone")
-        .populate("dealer", "businessName location")
+        .populate("user", "name email phone status")
+        .populate("dealer", "businessName location approved")
         .populate("reviewedBy", "name email")
+        .select("user dealer verificationStatus submittedAt reviewedAt reviewedBy rejectionReason suspensionReason suspensionExpiresAt")
         .sort({ submittedAt: -1 })
         .skip(skip)
         .limit(parseInt(limit))
@@ -325,16 +326,17 @@ export const getAllVerifications = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: GET VERIFICATION BY ID
+// 👮 ADMIN: GET VERIFICATION BY ID (Phase 3 Query Optimization)
 // =============================
 export const getVerificationById = async (req, res) => {
   try {
     const { id } = req.params;
 
     const verification = await DealerVerification.findById(id)
-      .populate("user", "name email phone")
-      .populate("dealer", "businessName location")
+      .populate("user", "name email phone status")
+      .populate("dealer", "businessName location approved isSuspended")
       .populate("reviewedBy", "name email")
+      .select("user dealer verificationStatus submittedAt reviewedAt reviewedBy rejectionReason rejectionDetails adminNotes suspensionReason suspensionExpiresAt documents")
       .lean();
 
     if (!verification) {
@@ -361,14 +363,16 @@ export const getVerificationById = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: APPROVE VERIFICATION
+// 👮 ADMIN: APPROVE VERIFICATION (Phase 3 Query Optimization)
 // =============================
 export const approveVerification = async (req, res) => {
   try {
     const { id } = req.params;
     const { adminNotes } = req.body;
 
-    const verification = await DealerVerification.findById(id);
+    const verification = await DealerVerification.findById(id)
+      .populate("dealer", "approved")
+      .populate("user", "status");
 
     if (!verification) {
       return res.status(404).json({
@@ -383,18 +387,16 @@ export const approveVerification = async (req, res) => {
     });
 
     // Update dealer approval
-    const dealer = await Dealer.findById(verification.dealer);
-    if (dealer) {
-      dealer.approved = true;
-      dealer.verifiedAt = new Date();
-      await dealer.save();
+    if (verification.dealer) {
+      verification.dealer.approved = true;
+      verification.dealer.verifiedAt = new Date();
+      await verification.dealer.save();
     }
 
     // Update user status
-    const user = await User.findById(verification.user);
-    if (user) {
-      user.status = "approved";
-      await user.save();
+    if (verification.user) {
+      verification.user.status = "approved";
+      await verification.user.save();
     }
 
     if (adminNotes) {
@@ -430,7 +432,7 @@ export const approveVerification = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: REJECT VERIFICATION
+// 👮 ADMIN: REJECT VERIFICATION (Phase 3 Query Optimization)
 // =============================
 export const rejectVerification = async (req, res) => {
   try {
@@ -444,7 +446,8 @@ export const rejectVerification = async (req, res) => {
       });
     }
 
-    const verification = await DealerVerification.findById(id);
+    const verification = await DealerVerification.findById(id)
+      .populate("user", "status");
 
     if (!verification) {
       return res.status(404).json({
@@ -466,10 +469,9 @@ export const rejectVerification = async (req, res) => {
     }
 
     // Update user status
-    const user = await User.findById(verification.user);
-    if (user) {
-      user.status = "rejected";
-      await user.save();
+    if (verification.user) {
+      verification.user.status = "rejected";
+      await verification.user.save();
     }
 
     // Send notification to dealer
@@ -502,7 +504,7 @@ export const rejectVerification = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: SUSPEND DEALER
+// 👮 ADMIN: SUSPEND DEALER (Phase 3 Query Optimization)
 // =============================
 export const suspendDealer = async (req, res) => {
   try {
@@ -516,7 +518,9 @@ export const suspendDealer = async (req, res) => {
       });
     }
 
-    const verification = await DealerVerification.findById(id);
+    const verification = await DealerVerification.findById(id)
+      .populate("dealer", "isSuspended")
+      .populate("user", "status");
 
     if (!verification) {
       return res.status(404).json({
@@ -539,18 +543,16 @@ export const suspendDealer = async (req, res) => {
     }
 
     // Update dealer
-    const dealer = await Dealer.findById(verification.dealer);
-    if (dealer) {
-      dealer.isSuspended = true;
-      dealer.suspensionReason = suspensionReason;
-      await dealer.save();
+    if (verification.dealer) {
+      verification.dealer.isSuspended = true;
+      verification.dealer.suspensionReason = suspensionReason;
+      await verification.dealer.save();
     }
 
     // Update user status
-    const user = await User.findById(verification.user);
-    if (user) {
-      user.status = "suspended";
-      await user.save();
+    if (verification.user) {
+      verification.user.status = "suspended";
+      await verification.user.save();
     }
 
     // Send notification to dealer
@@ -584,14 +586,16 @@ export const suspendDealer = async (req, res) => {
 };
 
 // =============================
-// 👮 ADMIN: REINSTATE DEALER
+// 👮 ADMIN: REINSTATE DEALER (Phase 3 Query Optimization)
 // =============================
 export const reinstateDealer = async (req, res) => {
   try {
     const { id } = req.params;
     const { adminNotes } = req.body;
 
-    const verification = await DealerVerification.findById(id);
+    const verification = await DealerVerification.findById(id)
+      .populate("dealer", "isSuspended")
+      .populate("user", "status");
 
     if (!verification) {
       return res.status(404).json({
@@ -615,18 +619,16 @@ export const reinstateDealer = async (req, res) => {
     await verification.save();
 
     // Update dealer
-    const dealer = await Dealer.findById(verification.dealer);
-    if (dealer) {
-      dealer.isSuspended = false;
-      dealer.suspensionReason = null;
-      await dealer.save();
+    if (verification.dealer) {
+      verification.dealer.isSuspended = false;
+      verification.dealer.suspensionReason = null;
+      await verification.dealer.save();
     }
 
     // Update user status
-    const user = await User.findById(verification.user);
-    if (user) {
-      user.status = "approved";
-      await user.save();
+    if (verification.user) {
+      verification.user.status = "approved";
+      await verification.user.save();
     }
 
     // Send notification to dealer
