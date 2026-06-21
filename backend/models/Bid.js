@@ -125,7 +125,46 @@ const bidSchema = new mongoose.Schema(
 );
 
 // =============================
-// 🔥 INDEXES (OPTIMIZED)
+// �️ SOFT DELETE (Phase 2 Database Audit)
+// =============================
+bidSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+bidSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+// Soft-delete filter — exclude deleted bids by default
+bidSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+bidSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+bidSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+// =============================
+// �🔥 INDEXES (OPTIMIZED)
 // =============================
 
 // leaderboard

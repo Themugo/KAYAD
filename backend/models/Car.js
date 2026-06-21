@@ -348,4 +348,38 @@ carSchema.index({ registrationNumber: 1 }, { unique: true, sparse: true });
 carSchema.index({ isFlaggedDuplicate: 1, duplicateStatus: 1 });
 carSchema.index({ dealer: 1, isFlaggedDuplicate: 1 });
 
+// =============================
+// 🔗 CASCADE DELETE LOGIC (Phase 2 Database Audit)
+// =============================
+
+// Cascade delete: When car is deleted, soft-delete all related records
+carSchema.post("findOneAndDelete", async function (doc) {
+  if (!doc) return;
+
+  try {
+    const Bid = mongoose.model("Bid");
+    const Escrow = mongoose.model("Escrow");
+    const Favorite = mongoose.model("Favorite");
+    const Review = mongoose.model("Review");
+    const Chat = mongoose.model("Chat");
+
+    // Soft-delete car's bids
+    await Bid.updateMany({ carId: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's escrows
+    await Escrow.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's favorites
+    await Favorite.updateMany({ car: doc._id }, { $set: { deletedAt: new Date() } });
+
+    // Soft-delete car's reviews
+    await Review.updateMany({ car: doc._id }, { $set: { deletedAt: new Date() } });
+
+    // Soft-delete car's chats
+    await Chat.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+  } catch (err) {
+    console.error("❌ CASCADE DELETE ERROR FOR CAR:", err);
+  }
+});
+
 export default mongoose.model("Car", carSchema);

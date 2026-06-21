@@ -43,6 +43,45 @@ const chatSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// =============================
+// 🗑️ SOFT DELETE (Phase 2 Database Audit)
+// =============================
+chatSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+chatSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+// Soft-delete filter — exclude deleted chats by default
+chatSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+chatSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+chatSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
 chatSchema.index({ participants: 1 });
 chatSchema.index({ updatedAt: -1 });
 // Phase 1: Add compound index for user chat queries sorted by recent activity

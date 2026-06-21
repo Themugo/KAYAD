@@ -23,6 +23,45 @@ const notificationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// =============================
+// 🗑️ SOFT DELETE (Phase 2 Database Audit)
+// =============================
+notificationSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+notificationSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+// Soft-delete filter — exclude deleted notifications by default
+notificationSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+notificationSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+notificationSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
 notificationSchema.index({ user: 1, createdAt: -1 });
 notificationSchema.index({ user: 1, read: 1 });
 // Phase 1: Add compound index for unread notifications

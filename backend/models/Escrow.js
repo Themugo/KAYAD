@@ -71,6 +71,45 @@ const escrowSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// =============================
+// 🗑️ SOFT DELETE (Phase 2 Database Audit)
+// =============================
+escrowSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+escrowSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+// Soft-delete filter — exclude deleted escrows by default
+escrowSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+escrowSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+escrowSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
 escrowSchema.index({ car: 1 });
 escrowSchema.index({ buyer: 1, createdAt: -1 });
 escrowSchema.index({ seller: 1, createdAt: -1 });

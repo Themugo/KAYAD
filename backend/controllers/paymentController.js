@@ -1,18 +1,24 @@
 // backend/controllers/paymentController.js
 
+import mongoose from "mongoose";
 import Payment from "../models/Payment.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 
 // =============================
-// 📲 INITIATE PAYMENT
+// 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
 // =============================
 export const initiatePayment = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { phone, amount, carId, type } = req.body;
 
     if (!phone || !amount || !type) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Phone, amount and type required",
@@ -21,6 +27,8 @@ export const initiatePayment = async (req, res) => {
 
     const parsedAmount = Number(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Amount must be a positive number",
@@ -29,6 +37,8 @@ export const initiatePayment = async (req, res) => {
 
     // Minimum payment: KES 1 (M-Pesa minimum is 1)
     if (parsedAmount < 1) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Minimum payment is KES 1",
@@ -49,36 +59,41 @@ export const initiatePayment = async (req, res) => {
     // Create Escrow record only when car has escrow enabled
     if (normalizedType === "escrow" && result.payment?._id) {
       const Car = (await import("../models/Car.js")).default;
-      const car = await Car.findById(carId).select("escrowEnabled dealer");
+      const car = await Car.findById(carId).select("escrowEnabled dealer").session(session);
       if (car && car.escrowEnabled !== false) {
         const Escrow = (await import("../models/Escrow.js")).default;
-        const escrow = await Escrow.create({
+        const escrow = await Escrow.create([{
           car: carId,
           buyer: req.user.id,
           seller: car.dealer,
           amount: parsedAmount,
           payment: result.payment._id,
           status: "pending",
-        });
+        }], { session });
 
         // Create or update lead from escrow
         try {
           const { findOrCreateLeadFromEscrow, updateLeadStage } = await import("../services/leadService.js");
-          const lead = await findOrCreateLeadFromEscrow(escrow._id);
+          const lead = await findOrCreateLeadFromEscrow(escrow[0]._id);
           await updateLeadStage(lead._id, "escrow_started", car.dealer);
         } catch (leadErr) {
           console.warn("⚠️ Failed to update lead from escrow:", leadErr.message);
         }
 
-        result.escrowId = escrow._id;
+        result.escrowId = escrow[0]._id;
       }
     }
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.json({
       success: true,
       ...result,
     });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("INITIATE ERROR:", err);
 
     res.status(500).json({

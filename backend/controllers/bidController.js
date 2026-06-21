@@ -192,31 +192,42 @@ export const getAuctionBids = async (req, res) => {
 };
 
 // =============================
-// 💰 PLACE BID (AUTO-BID READY)
+// 💰 PLACE BID (AUTO-BID READY - Phase 2 Transaction Support)
 // =============================
 export const placeBid = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { id: carId } = req.params;
     const { amount, phone, maxBid } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!amount || isNaN(amount)) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Invalid bid amount",
       });
     }
 
-    const car = await Car.findById(carId);
+    const car = await Car.findById(carId).session(session);
     if (!car) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     if (car.dealer?.toString() === userId) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "You cannot bid on your own car",
@@ -227,6 +238,8 @@ export const placeBid = async (req, res) => {
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================
     if (car.auctionStatus !== "live") {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Auction not live",
@@ -234,8 +247,10 @@ export const placeBid = async (req, res) => {
     }
 
     // 📱 Require verified phone for bids
-    const bidder = await mongoose.model("User").findById(userId).select("phone emailVerified phone notifications");
+    const bidder = await mongoose.model("User").findById(userId).select("phone emailVerified phone notifications").session(session);
     if (!bidder?.phone || bidder.phone.length < 8) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: "A verified phone number is required to place bids. Update your profile.",
@@ -248,11 +263,13 @@ export const placeBid = async (req, res) => {
         buyer: userId,
         amount: { $gte: 50000 },
         status: "held",
-      });
+      }).session(session);
       if (!escrowDeposit) {
+        await session.abortTransaction();
+        session.endSession();
         return res.status(403).json({
           success: false,
-          message:
+            message:
             "Bids over KES 5,000,000 require a KES 50,000 pre-authorized deposit held in escrow. Please deposit via your profile.",
           code: "WALLET_LOCK_REQUIRED",
           minDeposit: 50000,
@@ -266,6 +283,8 @@ export const placeBid = async (req, res) => {
     // 📏 Enforce minimum bid increment
     const minIncrement = currentBid < 100000 ? 1000 : currentBid < 500000 ? 5000 : currentBid < 2000000 ? 10000 : 25000;
     if (amount < currentBid + minIncrement) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({
         success: false,
         message: `Minimum bid increment is KES ${minIncrement.toLocaleString("en-KE")}. Current bid: KES ${currentBid.toLocaleString("en-KE")}`,
@@ -288,7 +307,7 @@ export const placeBid = async (req, res) => {
     // =============================
     // 🧾 CREATE BID
     // =============================
-    const bid = await Bid.create({
+    const bid = await Bid.create([{
       carId,
       user: userId,
       amount,
@@ -297,7 +316,7 @@ export const placeBid = async (req, res) => {
       bidderTag: generatePseudonym(userId, carId),
       status: payment.mode === "mpesa" ? "pending" : "paid",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
-    });
+    }], { session });
 
     // Create lead from bid
     try {
@@ -316,24 +335,27 @@ export const placeBid = async (req, res) => {
       car.highestBidder = userId;
       car.bidsCount = (car.bidsCount || 0) + 1;
 
-      await car.save();
+      await car.save({ session });
 
       // ⏱ SNIPING PROTECTION BEFORE AUTO-BID
       await applySnipingProtection(car);
 
-      // 🔥 RUN AUTO-BID AFTER MANUAL BID
+      await session.commitTransaction();
+      session.endSession();
+
+      // 🔥 RUN AUTO-BID AFTER MANUAL BID (outside transaction)
       await runAutoBidding(carId);
 
       logActionFromReq(req, "bid.placed", {
         target: car._id,
         targetModel: "Car",
         resourceId: carId,
-        details: { amount, bidId: bid._id, mode: payment.mode },
+        details: { amount, bidId: bid[0]._id, mode: payment.mode },
         severity: "info",
       });
 
       // Log auction bid to audit trail
-      await logAuctionBidPlaced(car, bid, req.user, req);
+      await logAuctionBidPlaced(car, bid[0], req.user, req);
 
       if (getIO()) {
         getIO().to(`car_${carId}`).emit("auctionUpdate", {
@@ -344,12 +366,10 @@ export const placeBid = async (req, res) => {
       emitListingUpdate(carId, { currentBid: car.currentBid, bidsCount: car.bidsCount });
 
       // 📧 Email notifications + 📱 SMS (fire-and-forget with throttle)
-      // Issue #10: Per-user throttle prevents SMS/email hammering under rapid bids
       try {
         const { sendBidConfirmationEmail, sendOutbidEmail } = bidEmailService;
         const User = (await import("../models/User.js")).default;
 
-        // Simple per-user notification throttle: 1 notification per user per 30 seconds
         const THROTTLE_MS = 30000;
         if (!global._bidNotifThrottle) global._bidNotifThrottle = new Map();
         const throttle = global._bidNotifThrottle;
@@ -358,7 +378,6 @@ export const placeBid = async (req, res) => {
           const last = throttle.get(key) || 0;
           if (Date.now() - last < THROTTLE_MS) return false;
           throttle.set(key, Date.now());
-          // Cleanup stale entries every 100 checks
           if (throttle.size > 500) {
             const cutoff = Date.now() - THROTTLE_MS * 2;
             for (const [k, v] of throttle) {
@@ -371,14 +390,14 @@ export const placeBid = async (req, res) => {
         if (canNotify(userId)) {
           const bidder = await User.findById(userId).select("email name phone notifications");
           if (bidder?.email && typeof sendBidConfirmationEmail === "function") {
-            sendBidConfirmationEmail(bidder, bid, car).catch((e) =>
+            sendBidConfirmationEmail(bidder, bid[0], car).catch((e) =>
               logWarn("Bid confirm email failed", { error: e.message }),
             );
           }
           if (bidder?.phone && bidder?.notifications?.sms !== false) {
             sendSMS(
               bidder.phone,
-              `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid.amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
+              `Bid confirmed on ${car.title || "vehicle"} — KES ${Number(amount || bid[0].amount).toLocaleString("en-KE")}. Track it live on Kayad.`,
             ).catch((e) => logWarn("SMS send failed", { error: e.message }));
           }
         }
@@ -400,15 +419,20 @@ export const placeBid = async (req, res) => {
           }
         }
       } catch (_) {}
+    } else {
+      await session.commitTransaction();
+      session.endSession();
     }
 
     res.json({
       success: true,
       message: payment.mode === "mpesa" ? "STK push sent" : "Bid placed",
       checkoutRequestID: payment.checkoutRequestID || payment.checkoutID,
-      bid,
+      bid: bid[0],
     });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     logError("PLACE BID ERROR", err);
     res.status(500).json({ success: false, message: "Bid failed" });
   }

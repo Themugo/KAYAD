@@ -1,5 +1,6 @@
 // backend/controllers/favoriteController.js
 // Uses the Favorite collection (separate model — no embedded User.favorites needed)
+import mongoose from "mongoose";
 import Favorite from "../models/Favorite.js";
 import Car from "../models/Car.js";
 
@@ -43,12 +44,19 @@ export const getFavorites = async (req, res) => {
   }
 };
 
-// POST /api/favorites/:carId
+// POST /api/favorites/:carId (Phase 2 Transaction Support)
 export const addFavorite = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand").lean();
-    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    const car = await Car.findById(carId).select("title price images brand").session(session);
+    if (!car) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, message: "Car not found" });
+    }
 
     await Favorite.findOneAndUpdate(
       { user: req.user.id, car: carId },
@@ -62,12 +70,18 @@ export const addFavorite = async (req, res) => {
           image: car.images?.[0]?.url || car.images?.[0] || null,
         },
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true, session },
     );
 
-    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
+    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
     return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     if (err.code === 11000) return res.json({ success: true, favorited: true, message: "Already in favourites" });
     console.error("❌ addFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to add favourite" });
@@ -93,35 +107,53 @@ export const updateFavoritePriceAlert = async (req, res) => {
   }
 };
 
-// DELETE /api/favorites/:carId
+// DELETE /api/favorites/:carId (Phase 2 Transaction Support)
 export const removeFavorite = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { carId } = req.params;
-    const deleted = await Favorite.findOneAndDelete({ user: req.user.id, car: carId });
-    if (deleted) await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
+    const deleted = await Favorite.findOneAndDelete({ user: req.user.id, car: carId }).session(session);
+    if (deleted) {
+      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } }).session(session);
+    }
+    await session.commitTransaction();
+    session.endSession();
     res.json({ success: true, favorited: false, message: "Removed from favourites" });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("❌ removeFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to remove favourite" });
   }
 };
 
-// POST /api/favorites/:carId/toggle
+// POST /api/favorites/:carId/toggle (Phase 2 Transaction Support)
 export const toggleFavorite = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand").lean();
-    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    const car = await Car.findById(carId).select("title price images brand").session(session);
+    if (!car) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ success: false, message: "Car not found" });
+    }
 
-    const existing = await Favorite.findOne({ user: req.user.id, car: carId });
+    const existing = await Favorite.findOne({ user: req.user.id, car: carId }).session(session);
 
     if (existing) {
-      await existing.deleteOne();
-      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } });
+      await existing.deleteOne({ session });
+      await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: -1 } }).session(session);
+      await session.commitTransaction();
+      session.endSession();
       return res.json({ success: true, favorited: false, message: "Removed from favourites" });
     }
 
-    await Favorite.create({
+    await Favorite.create([{
       user: req.user.id,
       car: carId,
       carSnapshot: {
@@ -130,10 +162,16 @@ export const toggleFavorite = async (req, res) => {
         brand: car.brand,
         image: car.images?.[0]?.url || car.images?.[0] || null,
       },
-    });
-    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } });
+    }], { session });
+    await Car.findByIdAndUpdate(carId, { $inc: { favoritesCount: 1 } }).session(session);
+
+    await session.commitTransaction();
+    session.endSession();
+
     return res.json({ success: true, favorited: true, notifyOnPriceDrop: false, message: "Added to favourites" });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("❌ toggleFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to toggle favourite" });
   }

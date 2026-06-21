@@ -1,38 +1,51 @@
 // backend/controllers/reviewController.js
+import mongoose from "mongoose";
 import Review from "../models/Review.js";
 import User from "../models/User.js";
 
-// POST /api/reviews
+// POST /api/reviews (Phase 2 Transaction Support)
 export const createReview = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const { dealer, rating, comment, carId } = req.body;
 
     if (!dealer || !rating || !comment) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: "dealer, rating and comment are required" });
     }
 
-    const existing = await Review.findOne({ user: req.user.id, dealer });
+    const existing = await Review.findOne({ user: req.user.id, dealer }).session(session);
     if (existing) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(400).json({ success: false, message: "You have already reviewed this dealer" });
     }
 
-    const review = await Review.create({
+    const review = await Review.create([{
       user: req.user.id,
       dealer,
       car: carId || undefined,
       rating: Math.min(5, Math.max(1, Number(rating))),
       comment: comment.trim(),
-    });
+    }], { session });
 
     // Update dealer average rating
-    const reviews = await Review.find({ dealer });
+    const reviews = await Review.find({ dealer }).session(session);
     const avg = reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
-    await User.findByIdAndUpdate(dealer, { dealerRating: Math.round(avg * 10) / 10, reviewCount: reviews.length });
+    await User.findByIdAndUpdate(dealer, { dealerRating: Math.round(avg * 10) / 10, reviewCount: reviews.length }).session(session);
 
-    await review.populate("user", "name");
+    await session.commitTransaction();
+    session.endSession();
 
-    res.status(201).json({ success: true, review });
+    await review[0].populate("user", "name");
+
+    res.status(201).json({ success: true, review: review[0] });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("❌ createReview error:", err.message);
     res.status(500).json({ success: false, message: "Failed to create review" });
   }

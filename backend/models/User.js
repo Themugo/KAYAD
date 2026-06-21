@@ -453,6 +453,65 @@ userSchema.index({ role: 1, dealerRating: -1 });
 userSchema.index({ phone: 1 }, { unique: true, sparse: true });
 
 // =============================
+// 🔗 CASCADE DELETE LOGIC (Phase 2 Database Audit)
+// =============================
+
+// Cascade delete: When user is deleted, soft-delete all related records
+userSchema.post("findOneAndDelete", async function (doc) {
+  if (!doc) return;
+
+  try {
+    const Car = mongoose.model("Car");
+    const Bid = mongoose.model("Bid");
+    const Escrow = mongoose.model("Escrow");
+    const Payment = mongoose.model("Payment");
+    const Chat = mongoose.model("Chat");
+    const Notification = mongoose.model("Notification");
+    const Favorite = mongoose.model("Favorite");
+    const Review = mongoose.model("Review");
+    const RefreshToken = mongoose.model("RefreshToken");
+
+    // Soft-delete user's cars
+    await Car.updateMany({ dealer: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
+
+    // Soft-delete user's bids
+    await Bid.updateMany({ user: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
+
+    // Soft-delete user's escrows (as buyer or seller)
+    await Escrow.updateMany(
+      { $or: [{ buyer: doc._id }, { seller: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete user's payments
+    await Payment.updateMany({ user: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
+
+    // Soft-delete user's chats
+    await Chat.updateMany(
+      { participants: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete user's notifications
+    await Notification.updateMany({ user: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
+
+    // Soft-delete user's favorites
+    await Favorite.updateMany({ user: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
+
+    // Soft-delete user's reviews (as user or dealer)
+    await Review.updateMany(
+      { $or: [{ user: doc._id }, { dealer: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Revoke all refresh tokens
+    await RefreshToken.updateMany({ user: doc._id }, { $set: { isRevoked: true, revokedAt: new Date() } });
+  } catch (err) {
+    console.error("❌ CASCADE DELETE ERROR FOR USER:", err);
+  }
+});
+
+// =============================
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

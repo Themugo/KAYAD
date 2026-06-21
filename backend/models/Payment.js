@@ -145,7 +145,46 @@ const paymentSchema = new mongoose.Schema(
 );
 
 // =============================
-// 🔥 INDEXES (CRITICAL FOR SCALE - Phase 1 Database Audit)
+// �️ SOFT DELETE (Phase 2 Database Audit)
+// =============================
+paymentSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+// Override delete to soft-delete
+paymentSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+// Soft-delete filter — exclude deleted payments by default
+paymentSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+paymentSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+paymentSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) {
+    this.where({ deletedAt: null });
+  }
+  next();
+});
+
+// =============================
+// � INDEXES (CRITICAL FOR SCALE - Phase 1 Database Audit)
 // =============================
 
 // user history
@@ -162,6 +201,26 @@ paymentSchema.index({ referenceId: 1, referenceModel: 1 });
 
 // Phase 1: Add compound index for pending payments
 paymentSchema.index({ status: 1, processed: 1, createdAt: -1 });
+
+// =============================
+// 🔗 CASCADE DELETE LOGIC (Phase 2 Database Audit)
+// =============================
+
+// Cascade delete: When payment is deleted, soft-delete related escrow
+paymentSchema.post("findOneAndDelete", async function (doc) {
+  if (!doc) return;
+
+  try {
+    const Escrow = mongoose.model("Escrow");
+
+    // Soft-delete related escrow
+    if (doc.escrow) {
+      await Escrow.updateMany({ _id: doc.escrow }, { $set: { deletedAt: new Date(), deletedBy: doc.user } });
+    }
+  } catch (err) {
+    console.error("❌ CASCADE DELETE ERROR FOR PAYMENT:", err);
+  }
+});
 
 // =============================
 // ⚡ METHODS
