@@ -18,8 +18,8 @@ export default function HomeHero({ liveCount, isAuth, user }) {
       )}
 
       <h1 className="font-display font-black italic text-[clamp(1.6rem,3.8vw,2.8rem)] leading-none uppercase text-white mb-2 tracking-[-0.01em] z-[1]">
-        Where Kenya{' '}
-        <span className="text-gold" style={{ textShadow: '0 0 30px rgba(212,196,168,0.28)' }}>Drives</span>
+        Drive Your{' '}
+        <span className="text-gold" style={{ textShadow: '0 0 30px rgba(212,196,168,0.28)' }}>Dream Today</span>
       </h1>
 
       <p className="text-white/55 text-xs md:text-sm max-w-[460px] mx-auto mb-4 leading-relaxed z-[1] font-normal">

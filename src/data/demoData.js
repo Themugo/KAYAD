@@ -102,17 +102,69 @@ export const DEMO_USERS = {
   },
 };
 
-try { localStorage.removeItem('kayad_demo_cars'); } catch { /* ignore */ }
+const DEMO_CARS_KEY = 'kayad_demo_cars';
 
-let _cars = buildDemoCars();
+// Load persisted demo cars from localStorage or use seed data
+const loadDemoCars = () => {
+  try {
+    const stored = localStorage.getItem(DEMO_CARS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch { /* ignore */ }
+  return buildDemoCars();
+};
 
-export const DEMO_CARS = _cars;
+const saveDemoCars = (cars) => {
+  try {
+    localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(cars));
+  } catch { /* ignore */ }
+};
+
+let _cars = loadDemoCars();
+
+export const DEMO_CARS = new Proxy(_cars, {
+  get(target, prop) {
+    return target[prop];
+  },
+  set(target, prop, value) {
+    target[prop] = value;
+    saveDemoCars(target);
+    return true;
+  }
+});
+
+// For direct array mutations, we need to save manually
+const persistCars = () => saveDemoCars(_cars);
+
 export function addDemoCar(car) {
   if (!car.createdAt) car.createdAt = new Date().toISOString();
   _cars.unshift(car);
+  persistCars();
 }
-export function updateDemoCar(id, updates) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars[i] = { ..._cars[i], ...updates }; }
-export function removeDemoCar(id) { const i = _cars.findIndex(c => c._id === id); if (i >= 0) _cars.splice(i, 1); }
+export function updateDemoCar(id, updates) {
+  const i = _cars.findIndex(c => c._id === id);
+  if (i >= 0) {
+    _cars[i] = { ..._cars[i], ...updates };
+    persistCars();
+  }
+}
+export function removeDemoCar(id) {
+  const i = _cars.findIndex(c => c._id === id);
+  if (i >= 0) {
+    _cars.splice(i, 1);
+    persistCars();
+  }
+}
+
+// Reset demo cars to seed data (for admin use)
+export const resetDemoCars = () => {
+  _cars = buildDemoCars();
+  persistCars();
+};
 
 export const DEMO_BIDS = (() => {
   const bids = [];

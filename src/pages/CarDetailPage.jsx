@@ -258,7 +258,7 @@ export default function CarDetailPage() {
 
   return (
     <>
-      <SEOHead metadata={seoMetadata} />
+      {seoMetadata && <SEOHead metadata={seoMetadata} />}
       <div className="car-detail-page">
       <VehicleStructuredData car={car} />
       <BreadcrumbStructuredData items={[

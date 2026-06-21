@@ -1,6 +1,5 @@
 # render.yaml — Kayad Backend
 # Deploy on Render: Connect GitHub repo → Render auto-detects this file
-# Updated: 2025-06-19
 
 services:
   - type: web
@@ -8,7 +7,7 @@ services:
     env: node
     region: oregon
     plan: standard
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm ci --omit=dev
     startCommand: cd backend && node server.js
     healthCheckPath: /health
     autoDeploy: true

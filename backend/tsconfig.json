@@ -7,19 +7,16 @@
     "checkJs": false,
     "outDir": "./dist",
     "rootDir": ".",
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": false,
-    "declarationMap": false,
+    "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
     "noEmit": true,
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false
+    "allowSyntheticDefaultImports": true
   },
   "include": ["**/*.js", "**/*.ts"],
   "exclude": ["node_modules", "dist", "tests", "uploads"]
