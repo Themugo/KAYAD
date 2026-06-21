@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { useEffect } from "react";
-import { generateMetaTags } from "../utils/seoService.js";
+import { generateMetaTags } from "../utils/seoService";
 
 export const useSEO = (metadata) => {
   useEffect(() => {
