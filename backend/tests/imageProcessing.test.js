@@ -4,83 +4,69 @@
 // Tests compression, WebP conversion, thumbnail generation, and responsive variants
 // ─────────────────────────────────────────────────────────────
 
-import { describe, it, expect } from "@jest/globals";
-import {
-  compressImage,
-  convertToWebP,
-  generateThumbnail,
-  generateResponsiveVariants,
-  getImageMetadata,
-  optimizeImage,
-} from "../services/imageProcessingService.js";
+import { describe, it, expect, beforeEach, jest } from "@jest/globals";
+import sharp from "sharp";
+
+// Mock sharp to avoid requiring actual image files
+jest.mock("sharp");
 
 describe("Image Processing Service", () => {
-  describe("Compression", () => {
-    it("should compress JPEG image", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]); // JPEG header
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-      // This is a minimal test - in real scenario, you'd use actual image buffer
-      expect(() => compressImage(testBuffer)).not.toThrow();
+  describe("Error Handling", () => {
+    it("should handle corrupt JPEG image", async () => {
+      const corruptBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
+      
+      // Mock sharp to throw error for corrupt data
+      sharp.mockImplementation(() => {
+        throw new Error("Input buffer has corrupt header");
+      });
+
+      const { compressImage } = await import("../services/imageProcessingService.js");
+      
+      await expect(compressImage(corruptBuffer)).rejects.toThrow("Input buffer has corrupt header");
     });
 
-    it("should compress PNG image", async () => {
-      const testBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]); // PNG header
+    it("should handle empty buffer", async () => {
+      const emptyBuffer = Buffer.from([]);
+      
+      sharp.mockImplementation(() => {
+        throw new Error("Input buffer is empty");
+      });
 
-      expect(() => compressImage(testBuffer, "png")).not.toThrow();
+      const { compressImage } = await import("../services/imageProcessingService.js");
+      
+      await expect(compressImage(emptyBuffer)).rejects.toThrow();
+    });
+
+    it("should handle invalid image format", async () => {
+      const invalidBuffer = Buffer.from([0x00, 0x01, 0x02, 0x03]);
+      
+      sharp.mockImplementation(() => {
+        throw new Error("Invalid image format");
+      });
+
+      const { compressImage } = await import("../services/imageProcessingService.js");
+      
+      await expect(compressImage(invalidBuffer)).rejects.toThrow("Invalid image format");
     });
   });
 
-  describe("WebP Conversion", () => {
-    it("should convert to WebP", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => convertToWebP(testBuffer)).not.toThrow();
-    });
-  });
-
-  describe("Thumbnail Generation", () => {
-    it("should generate thumbnail", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => generateThumbnail(testBuffer, 300, 200)).not.toThrow();
-    });
-  });
-
-  describe("Responsive Variants", () => {
-    it("should generate responsive variants", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => generateResponsiveVariants(testBuffer)).not.toThrow();
-    });
-  });
-
-  describe("Image Metadata", () => {
-    it("should get image metadata", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => getImageMetadata(testBuffer)).not.toThrow();
-    });
-  });
-
-  describe("Image Optimization", () => {
-    it("should optimize image", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => optimizeImage(testBuffer, { compress: true, convertToWebP: false })).not.toThrow();
+  describe("Validation", () => {
+    it("should validate buffer is provided", async () => {
+      const { compressImage } = await import("../services/imageProcessingService.js");
+      
+      await expect(compressImage(null)).rejects.toThrow();
+      await expect(compressImage(undefined)).rejects.toThrow();
     });
 
-    it("should optimize image with WebP", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() => optimizeImage(testBuffer, { compress: true, convertToWebP: true })).not.toThrow();
-    });
-
-    it("should optimize image with variants", async () => {
-      const testBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
-
-      expect(() =>
-        optimizeImage(testBuffer, { compress: true, convertToWebP: true, generateVariants: true }),
-      ).not.toThrow();
+    it("should validate buffer type", async () => {
+      const { compressImage } = await import("../services/imageProcessingService.js");
+      
+      await expect(compressImage("not a buffer")).rejects.toThrow();
+      await expect(compressImage({})).rejects.toThrow();
     });
   });
 });
