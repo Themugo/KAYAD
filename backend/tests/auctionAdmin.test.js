@@ -4,14 +4,14 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Auction Admin Routes", () => {
+describeWithDb("Auction Admin Routes", () => {
   let adminToken, userToken, adminId, carId, bidId;
 
   beforeAll(async () => {
@@ -55,7 +55,7 @@ describe("Auction Admin Routes", () => {
     await clearTestDB();
   });
 
-  describe("POST /api/auction-admin/:carId/start", () => {
+  describeWithDb("POST /api/auction-admin/:carId/start", () => {
     it("requires admin", async () => {
       await request(app)
         .post(`/api/auction-admin/${carId}/start`)
@@ -94,7 +94,7 @@ describe("Auction Admin Routes", () => {
     });
   });
 
-  describe("POST /api/auction-admin/:carId/extend", () => {
+  describeWithDb("POST /api/auction-admin/:carId/extend", () => {
     it("requires admin", async () => {
       await request(app)
         .post(`/api/auction-admin/${carId}/extend`)
@@ -126,7 +126,7 @@ describe("Auction Admin Routes", () => {
     });
   });
 
-  describe("GET /api/auction-admin/:carId/bids", () => {
+  describeWithDb("GET /api/auction-admin/:carId/bids", () => {
     it("requires admin", async () => {
       await request(app)
         .get(`/api/auction-admin/${carId}/bids`)
@@ -144,7 +144,7 @@ describe("Auction Admin Routes", () => {
     });
   });
 
-  describe("POST /api/auction-admin/:carId/set-winner", () => {
+  describeWithDb("POST /api/auction-admin/:carId/set-winner", () => {
     beforeAll(async () => {
       const Bid = mongoose.model("Bid");
       const bid = await Bid.create({
@@ -195,7 +195,7 @@ describe("Auction Admin Routes", () => {
     });
   });
 
-  describe("POST /api/auction-admin/:carId/end", () => {
+  describeWithDb("POST /api/auction-admin/:carId/end", () => {
     it("requires admin", async () => {
       await request(app)
         .post(`/api/auction-admin/${carId}/end`)

@@ -6,7 +6,7 @@ dotenv.config({ path: ".env.test" });
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
@@ -15,7 +15,7 @@ const { default: app } = await import("../server.js");
 import Escrow from "../models/Escrow.js";
 import Payment from "../models/Payment.js";
 
-describe("Escrow System", () => {
+describeWithDb("Escrow System", () => {
   let adminToken, userToken, adminId, userId, escrowId;
 
   beforeAll(async () => {

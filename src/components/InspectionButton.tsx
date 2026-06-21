@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { inspectionAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { Eye, Star, ShieldCheck, Smartphone, Clock, ChevronRight } from 'lucide-react';
+import { Eye, Star, ShieldCheck, Clock, ChevronRight } from 'lucide-react';
 import GhostCheckOrderModal from './GhostCheckOrderModal';
 
 interface InspectionButtonProps {
@@ -11,12 +10,21 @@ interface InspectionButtonProps {
   onInspectionComplete?: () => void;
 }
 
+type InspectionOrder = {
+  car?: string | { _id?: string };
+  status?: string;
+  overallScore?: number;
+  conditionRating?: string;
+  inspectorNotes?: string;
+  checklist?: unknown[];
+  inspector?: { name?: string };
+};
+
 export default function InspectionButton({ carId, location, onInspectionComplete }: InspectionButtonProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [inspection, setInspection] = useState<any>(null);
+  const [inspection, setInspection] = useState<InspectionOrder | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [pendingOrder, setPendingOrder] = useState<any>(null);
+  const [pendingOrder, setPendingOrder] = useState<InspectionOrder | null>(null);
 
   useEffect(() => {
     if (!carId) return;
@@ -28,8 +36,9 @@ export default function InspectionButton({ carId, location, onInspectionComplete
   useEffect(() => {
     if (!carId || !user) return;
     inspectionAPI.myOrders().then(r => {
-      const orders = (r.orders || []).filter((o: any) => o.car === carId || o.car?._id === carId);
-      const active = orders.find((o: any) => o.status !== 'completed' && o.status !== 'cancelled');
+      const orders = (r.orders || []) as InspectionOrder[];
+      const matchingOrders = orders.filter((o) => o.car === carId || (typeof o.car === 'object' && o.car?._id === carId));
+      const active = matchingOrders.find((o) => o.status !== 'completed' && o.status !== 'cancelled');
       if (active) setPendingOrder(active);
     }).catch(() => {});
   }, [carId, user]);

@@ -9,7 +9,7 @@ process.env.ESCROW_ACCOUNT_NUMBER = "1234567890";
 process.env.ESCROW_PLATFORM_NAME = "Test Escrow";
 process.env.ESCROW_BANK_NAME = "Test Bank";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
@@ -17,7 +17,7 @@ await startTestDB();
 const { default: app } = await import("../server.js");
 import User from "../models/User.js";
 
-describe("Escrow Vault Routes", () => {
+describeWithDb("Escrow Vault Routes", () => {
   let token, userId, carId;
 
   beforeAll(async () => {

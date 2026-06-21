@@ -30,7 +30,7 @@ function ScoreRing({ score, size = 56 }) {
   );
 }
 
-export default function MarketPulse({ carId, carPrice, carBrand, carYear }) {
+export default function MarketPulse({ carId, carBrand, carYear }) {
   const [pulse, setPulse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);

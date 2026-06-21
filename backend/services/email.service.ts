@@ -17,9 +17,7 @@ let transporter = null;
 const emailConfig = createServiceConfig("email", {
   circuitBreaker: true,
   onCircuitOpen: (key, failures, resetMs) => {
-    triggerAlert({
-      level: "warning",
-      message: `Email circuit breaker opened after ${failures} failures`,
+    triggerAlert("Email circuit breaker opened", `Email circuit breaker opened after ${failures} failures`, "medium", {
       source: "email",
       metrics: { failures, resetMs },
     });
@@ -144,7 +142,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
         timeoutMs: 30000,
         onRetry: (err, attempt) => {
           logWarn(`Email send retry ${attempt}`, { to, subject, error: err.message });
-          incrementCounter("email_retry", { attempt });
+          incrementCounter("email_retry", 1, { attempt });
         },
       },
     );
@@ -158,7 +156,7 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
   } catch (err) {
     const duration = Date.now() - startTime;
     recordMetric("email_send_duration", duration, { status: "error" });
-    incrementCounter("email_send_failure", { error_type: err.code || "unknown" });
+    incrementCounter("email_send_failure", 1, { error_type: err.code || "unknown" });
 
     logError(`Email failed after retries`, err, { to, subject, error: err.message });
 
@@ -176,6 +174,30 @@ export const sendRawEmail = async ({ to, subject, html, text, from = FROM }) => 
 
     return { success: false, error: err.message };
   }
+};
+
+export const sendEmail = async ({ to, subject, html, text, from = FROM }) =>
+  sendRawEmail({ to, subject, html, text, from });
+
+export const sendGenericEmail = async (to, subject, message, data = {}) => {
+  const metadata =
+    data && Object.keys(data).length
+      ? `<pre style="white-space:pre-wrap;background:#0a0d12;border:1px solid #252E3D;border-radius:10px;padding:14px;color:#7A8599;">${JSON.stringify(data, null, 2)}</pre>`
+      : "";
+
+  return sendEmail({
+    to,
+    subject,
+    text: message,
+    html: layout(
+      `
+      ${heading(subject)}
+      ${para(message)}
+      ${metadata}
+    `,
+      subject,
+    ),
+  });
 };
 
 export const sendWelcomeEmail = (user) =>

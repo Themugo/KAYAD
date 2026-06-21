@@ -61,7 +61,7 @@ export default function TcoCalculator({ vehicle }) {
     const totalInterest = totalFinanced - loanAmt;
 
     return { importDuty, annualInsurance, monthlyPmt, totalFinanced, totalInterest, loanAmt };
-  }, [price, cc, downPct, loanYears, selectedBank, isUsed, customsRate, exciseSlab]);
+  }, [price, downPct, loanYears, selectedBank, isUsed, customsRate, exciseSlab]);
 
   return (
     <div style={{

@@ -5,12 +5,12 @@ process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-import { startTestDB, stopTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Health Check", () => {
+describeWithDb("Health Check", () => {
   it("GET /health returns 200", async () => {
     const res = await request(app).get("/health");
     expect([200, 502]).toContain(res.statusCode);

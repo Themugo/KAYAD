@@ -12,8 +12,12 @@ import Branch from "../models/Branch.js";
 import Department from "../models/Department.js";
 import Team from "../models/Team.js";
 import Role from "../models/Role.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("Organization Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("Organization Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -183,7 +187,7 @@ describe("Organization Model", () => {
   });
 });
 
-describe("Branch Model", () => {
+describeWithDb("Branch Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -292,7 +296,7 @@ describe("Branch Model", () => {
   });
 });
 
-describe("Team Model", () => {
+describeWithDb("Team Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -405,7 +409,7 @@ describe("Team Model", () => {
   });
 });
 
-describe("Role Model", () => {
+describeWithDb("Role Model", () => {
   let mongoServer;
 
   beforeAll(async () => {

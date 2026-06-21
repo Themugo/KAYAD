@@ -8,6 +8,10 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import DealerHealthScore from "../models/DealerHealthScore.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
+
+await startTestDB();
+await stopTestDB();
 import {
   calculateVerificationScore,
   calculateAccountAgeScore,
@@ -20,7 +24,7 @@ import {
   calculateAuctionScore,
 } from "../services/dealerHealthScoreService.js";
 
-describe("Dealer Health Score Service", () => {
+describeWithDb("Dealer Health Score Service", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -33,7 +37,7 @@ describe("Dealer Health Score Service", () => {
     await mongoServer.stop();
   });
 
-  describe("Verification Score Calculation", () => {
+  describeWithDb("Verification Score Calculation", () => {
     it("should calculate verification score with all documents verified", async () => {
       const result = await calculateVerificationScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -48,7 +52,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Account Age Score Calculation", () => {
+  describeWithDb("Account Age Score Calculation", () => {
     it("should calculate account age score based on account age", async () => {
       const result = await calculateAccountAgeScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -63,7 +67,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Transaction Score Calculation", () => {
+  describeWithDb("Transaction Score Calculation", () => {
     it("should calculate transaction score based on success rate", async () => {
       const result = await calculateTransactionScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -78,7 +82,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Escrow Score Calculation", () => {
+  describeWithDb("Escrow Score Calculation", () => {
     it("should calculate escrow score based on completion rate", async () => {
       const result = await calculateEscrowScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -93,7 +97,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Review Score Calculation", () => {
+  describeWithDb("Review Score Calculation", () => {
     it("should calculate review score based on ratings", async () => {
       const result = await calculateReviewScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -108,7 +112,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Fraud Score Calculation", () => {
+  describeWithDb("Fraud Score Calculation", () => {
     it("should calculate fraud score based on flags", async () => {
       const result = await calculateFraudScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -123,7 +127,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Response Score Calculation", () => {
+  describeWithDb("Response Score Calculation", () => {
     it("should calculate response score based on response time", async () => {
       const result = await calculateResponseScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -138,7 +142,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Listing Quality Score Calculation", () => {
+  describeWithDb("Listing Quality Score Calculation", () => {
     it("should calculate listing quality score based on listing data", async () => {
       const result = await calculateListingQualityScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -153,7 +157,7 @@ describe("Dealer Health Score Service", () => {
     });
   });
 
-  describe("Auction Score Calculation", () => {
+  describeWithDb("Auction Score Calculation", () => {
     it("should calculate auction score based on auction performance", async () => {
       const result = await calculateAuctionScore("dealer123");
       expect(result).toHaveProperty("score");
@@ -169,7 +173,7 @@ describe("Dealer Health Score Service", () => {
   });
 });
 
-describe("DealerHealthScore Model", () => {
+describeWithDb("DealerHealthScore Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -220,7 +224,7 @@ describe("DealerHealthScore Model", () => {
   });
 });
 
-describe("Score Category Determination", () => {
+describeWithDb("Score Category Determination", () => {
   it("should correctly categorize platinum scores", () => {
     expect(DealerHealthScore.determineScoreCategory(90)).toBe("platinum");
     expect(DealerHealthScore.determineScoreCategory(100)).toBe("platinum");

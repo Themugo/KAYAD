@@ -7,7 +7,7 @@ process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-import { startTestDB, stopTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 await startTestDB();
 
 const { default: app } = await import("../server.js");
@@ -22,7 +22,7 @@ const TEST_USER = {
 let token = "";
 let userId = "";
 
-describe("🔑 Authentication", () => {
+describeWithDb("🔑 Authentication", () => {
   test("POST /api/auth/register — creates new user", async () => {
     const res = await request(app).post("/api/auth/register").send(TEST_USER).expect(201);
 

@@ -2,30 +2,29 @@ import { useState, useEffect } from 'react';
 import { inspectionAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Eye, Star, ShieldCheck, Smartphone, CheckCircle, Clock, X, AlertTriangle, FileText } from 'lucide-react';
+import { Star, ShieldCheck, Smartphone, CheckCircle, Clock, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const GHOST_CHECK_FEE = 2500;
 
-const STATUS_MAP = {
-  pending_payment: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b', label: 'Pending Payment' },
-  paid: { bg: 'rgba(59,130,246,0.1)', color: '#3b82f6', label: 'Paid — Awaiting Assignment' },
-  assigned: { bg: 'rgba(139,92,246,0.1)', color: '#8b5cf6', label: 'Inspector Assigned' },
-  in_progress: { bg: 'rgba(212,196,168,0.12)', color: 'var(--gold)', label: 'Inspection In Progress' },
-  completed: { bg: 'rgba(34,197,94,0.1)', color: '#22c55e', label: 'Report Ready' },
-  cancelled: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444', label: 'Cancelled' },
+type InspectionOrder = {
+  car?: string | { _id?: string };
+  status?: string;
+  overallScore?: number;
+  conditionRating?: string;
+  inspectorNotes?: string;
+  checklist?: unknown[];
 };
 
 export default function GhostCheckOrderModal({ carId, location, onClose, onInspectionComplete }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState('check'); // check | payment | tracking
-  const [phone, setPhone] = useState((user as any)?.phone || '');
+  const userPhone = user && 'phone' in user && typeof user.phone === 'string' ? user.phone : '';
+  const [phone, setPhone] = useState(userPhone);
   const [ordering, setOrdering] = useState(false);
-  const [inspection, setInspection] = useState(null);
-  const [orderResult, setOrderResult] = useState(null);
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
-  const [existingOrder, setExistingOrder] = useState(null);
+  const [inspection, setInspection] = useState<InspectionOrder | null>(null);
+  const [existingOrder, setExistingOrder] = useState<InspectionOrder | null>(null);
 
   useEffect(() => {
     if (!carId) return;
@@ -34,7 +33,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
       if (r.inspection?.status === 'completed') setInspection(r.inspection);
     }).catch(() => {});
     inspectionAPI.myOrders().then(r => {
-      const orders = r.orders || [];
+      const orders = (r.orders || []) as InspectionOrder[];
       const pending = orders.find(o => o.car === carId && o.status !== 'completed' && o.status !== 'cancelled');
       if (pending) setExistingOrder(pending);
     }).catch(() => {});
@@ -47,8 +46,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
     }
     setOrdering(true);
     try {
-      const res = await inspectionAPI.order({ carId, phone, location });
-      setOrderResult(res);
+      await inspectionAPI.order({ carId, phone, location });
       // Do NOT set paymentConfirmed to true yet - wait for actual M-Pesa confirmation
       toast('Inspection ordered! Check M-Pesa on your phone to complete payment.', 'success');
       setStep('tracking');

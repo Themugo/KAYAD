@@ -10,10 +10,14 @@ const __dirname = dirname(__filename);
 // Load environment variables for tests from backend/.env
 dotenv.config({ path: resolve(__dirname, "../.env") });
 
-// Set MONGO_URI for tests only if not already provided (e.g., CI supplies it)
-// Using local MongoDB when no URI is set
-if (!process.env.MONGO_URI) {
-  process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
+const DEFAULT_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
+const MOCK_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
+const hadConfiguredMongoUri = Boolean(process.env.MONGO_URI);
+
+// Set MONGO_URI for tests only if not already provided (e.g., CI supplies it).
+// Using local MongoDB when no URI is set.
+if (!hadConfiguredMongoUri) {
+  process.env.MONGO_URI = DEFAULT_TEST_MONGO_URI;
   console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
 } else {
   console.log("ℹ️  MONGO_URI already set to:", process.env.MONGO_URI.replace(/:.*@/, ":***@"));
@@ -40,8 +44,47 @@ let isMockDb = false;
  * LTS that exists on the official MongoDB download CDN for all platforms.
  */
 const MEMORY_DB_VERSION = process.env.MEMORY_DB_VERSION || "7.0.14";
+const SHOULD_TRY_MEMORY_DB = process.env.USE_MEMORY_DB === "true" || Boolean(process.env.MEMORY_DB_VERSION);
+
+function markMockDb(err) {
+  const isExecFormat = /EFTYPE|spawn|exec format/i.test(err?.message || "");
+  console.warn("\n" + "=".repeat(70));
+  console.warn("⚠️  No test database available — DB-dependent tests will be skipped.");
+  console.warn("    Reason:", err?.message || "MONGO_URI is not reachable");
+  if (isExecFormat) {
+    console.warn("    This usually means the bundled mongod can't run on your");
+    console.warn("    Node version. This project targets Node 20 (see .nvmrc).");
+  }
+  console.warn("    Fix (either one):");
+  console.warn("      • Use Node 20:   nvm install 20 && nvm use 20");
+  console.warn("      • Or point at a real DB:");
+  console.warn("        set MONGO_URI=mongodb://127.0.0.1:27017/kayad-test  (Windows cmd)");
+  console.warn("        export MONGO_URI=mongodb+srv://<atlas-uri>/kayad-test  (or Atlas)");
+  console.warn("      • Or explicitly try memory Mongo: set USE_MEMORY_DB=true");
+  console.warn("    CI is unaffected — it always provides MONGO_URI.");
+  console.warn("=".repeat(70) + "\n");
+
+  process.env.MONGO_URI = MOCK_TEST_MONGO_URI;
+  process.env.KAYAD_TEST_DB_UNAVAILABLE = "1";
+  usingMemoryServer = false;
+  isMockDb = true;
+
+  // Disable mongoose buffering globally so any DB-dependent test fails
+  // fast instead of hanging on the default 10s bufferTimeoutMS.
+  mongoose.set("bufferCommands", false);
+
+  return process.env.MONGO_URI;
+}
 
 export async function startTestDB() {
+  if (process.env.KAYAD_TEST_DB_UNAVAILABLE === "1") {
+    process.env.MONGO_URI = MOCK_TEST_MONGO_URI;
+    usingMemoryServer = false;
+    isMockDb = true;
+    mongoose.set("bufferCommands", false);
+    return process.env.MONGO_URI;
+  }
+
   if (mongoose.connection.readyState === 1) {
     await mongoose.connection.close();
   }
@@ -49,9 +92,12 @@ export async function startTestDB() {
   // If MONGO_URI is already set (e.g., CI provides it or Atlas), use it directly
   if (process.env.MONGO_URI && !process.env.MONGO_URI.includes("kayad-test-mock")) {
     try {
+      const connectTimeoutMs = Number(
+        process.env.TEST_DB_CONNECT_TIMEOUT_MS || (!hadConfiguredMongoUri ? "2000" : "15000"),
+      );
       await mongoose.connect(process.env.MONGO_URI, {
         maxPoolSize: 5,
-        serverSelectionTimeoutMS: 15000,
+        serverSelectionTimeoutMS: connectTimeoutMs,
       });
       usingMemoryServer = false;
       isMockDb = false;
@@ -64,11 +110,17 @@ export async function startTestDB() {
     } catch (err) {
       // Connection failed — fall through to memory server
       console.warn("⚠️  MONGO_URI connection failed:", err.message);
+      if (!SHOULD_TRY_MEMORY_DB) {
+        return markMockDb(err);
+      }
       console.warn("    Falling back to in-memory MongoDB");
     }
   } else {
     console.warn("⚠️  MONGO_URI not set or is mock URI");
     console.warn("    Set MONGO_URI in backend/.env to use a real database");
+    if (!SHOULD_TRY_MEMORY_DB) {
+      return markMockDb(new Error("MONGO_URI not set"));
+    }
     console.warn("    Falling back to in-memory MongoDB");
   }
 
@@ -94,31 +146,7 @@ export async function startTestDB() {
 
     return uri;
   } catch (err) {
-    const isExecFormat = /EFTYPE|spawn|exec format/i.test(err.message || "");
-    console.warn("\n" + "=".repeat(70));
-    console.warn("⚠️  No test database available — DB-dependent tests will fail.");
-    console.warn("    Reason:", err.message);
-    if (isExecFormat) {
-      console.warn("    This usually means the bundled mongod can't run on your");
-      console.warn("    Node version. This project targets Node 20 (see .nvmrc).");
-    }
-    console.warn("    Fix (either one):");
-    console.warn("      • Use Node 20:   nvm install 20 && nvm use 20");
-    console.warn("      • Or point at a real DB:");
-    console.warn("        set MONGO_URI=mongodb://127.0.0.1:27017/kayad-test  (Windows cmd)");
-    console.warn("        export MONGO_URI=mongodb+srv://<atlas-uri>/kayad-test  (or Atlas)");
-    console.warn("    CI is unaffected — it always provides MONGO_URI.");
-    console.warn("=".repeat(70) + "\n");
-
-    process.env.MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
-    usingMemoryServer = false;
-    isMockDb = true;
-
-    // Disable mongoose buffering globally so any DB-dependent test fails
-    // fast instead of hanging on the default 10s bufferTimeoutMS.
-    mongoose.set("bufferCommands", false);
-
-    return process.env.MONGO_URI;
+    return markMockDb(err);
   }
 }
 

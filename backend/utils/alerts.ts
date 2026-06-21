@@ -13,7 +13,7 @@ const CRITICAL_TYPES = ["fraud", "payment_failure"];
 // =============================
 // 🚨 GENERIC ALERT EMITTER
 // =============================
-export const triggerAdminAlert = async (type, data = {}, options = {}) => {
+export const triggerAdminAlert = async (type, data = {}, options: any = {}) => {
   try {
     const payload = {
       type,
@@ -67,7 +67,7 @@ const escalateAlert = async (type, data) => {
     const message = `🚨 ${type.toUpperCase()} ALERT: ${JSON.stringify(data)}`;
 
     // 📧 Email admin
-    await sendEmail({
+    await sendRawEmail({
       to: process.env.ADMIN_EMAIL,
       subject: `Critical Alert: ${type}`,
       html: `<pre>${message}</pre>`,

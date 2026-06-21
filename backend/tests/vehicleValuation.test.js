@@ -12,8 +12,12 @@ import MarketPricing from "../models/MarketPricing.js";
 import BrandDepreciation from "../models/BrandDepreciation.js";
 import MileageImpact from "../models/MileageImpact.js";
 import DemandSignals from "../models/DemandSignals.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("VehicleValuation Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("VehicleValuation Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -216,7 +220,7 @@ describe("VehicleValuation Model", () => {
   });
 });
 
-describe("MarketPricing Model", () => {
+describeWithDb("MarketPricing Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -309,7 +313,7 @@ describe("MarketPricing Model", () => {
   });
 });
 
-describe("BrandDepreciation Model", () => {
+describeWithDb("BrandDepreciation Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -399,7 +403,7 @@ describe("BrandDepreciation Model", () => {
   });
 });
 
-describe("MileageImpact Model", () => {
+describeWithDb("MileageImpact Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -504,7 +508,7 @@ describe("MileageImpact Model", () => {
   });
 });
 
-describe("DemandSignals Model", () => {
+describeWithDb("DemandSignals Model", () => {
   let mongoServer;
 
   beforeAll(async () => {

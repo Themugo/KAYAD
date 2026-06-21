@@ -5,12 +5,12 @@ process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 process.env.MPESA_SKIP_IP_CHECK = "true";
 
-import { startTestDB, stopTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Security", () => {
+describeWithDb("Security", () => {
   it("GET /api/cars?limit=999999 — enforces pagination cap", async () => {
     const res = await request(app).get("/api/cars?limit=999999");
     expect(res.status).not.toBe(500);

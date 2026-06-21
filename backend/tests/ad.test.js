@@ -4,7 +4,7 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
@@ -12,7 +12,7 @@ await startTestDB();
 const { default: app } = await import("../server.js");
 import Ad from "../models/Ad.js";
 
-describe("Ad Routes", () => {
+describeWithDb("Ad Routes", () => {
   beforeAll(async () => {
     await Ad.create([
       {
@@ -43,7 +43,7 @@ describe("Ad Routes", () => {
     await clearTestDB();
   });
 
-  describe("GET /api/ads/", () => {
+  describeWithDb("GET /api/ads/", () => {
     it("returns only active ads", async () => {
       const res = await request(app).get("/api/ads/").expect(200);
       expect(res.body.success).toBe(true);

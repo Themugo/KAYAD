@@ -4,14 +4,14 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("SMS Bidding Routes", () => {
+describeWithDb("SMS Bidding Routes", () => {
   let userToken, dealerToken, userId, dealerId, carId;
 
   beforeAll(async () => {
@@ -48,7 +48,7 @@ describe("SMS Bidding Routes", () => {
     await clearTestDB();
   });
 
-  describe("POST /api/sms-bidding/register", () => {
+  describeWithDb("POST /api/sms-bidding/register", () => {
     it("requires auth", async () => {
       await request(app).post("/api/sms-bidding/register").send({ phone: "254712345678" }).expect(401);
     });
@@ -83,7 +83,7 @@ describe("SMS Bidding Routes", () => {
     });
   });
 
-  describe("GET /api/sms-bidding/my", () => {
+  describeWithDb("GET /api/sms-bidding/my", () => {
     it("requires auth", async () => {
       await request(app).get("/api/sms-bidding/my").expect(401);
     });
@@ -95,7 +95,7 @@ describe("SMS Bidding Routes", () => {
     });
   });
 
-  describe("POST /api/sms-bidding/subscribe", () => {
+  describeWithDb("POST /api/sms-bidding/subscribe", () => {
     it("requires auth", async () => {
       await request(app).post("/api/sms-bidding/subscribe").send({ carId }).expect(401);
     });
@@ -121,7 +121,7 @@ describe("SMS Bidding Routes", () => {
     });
   });
 
-  describe("DELETE /api/sms-bidding/unsubscribe/:carId", () => {
+  describeWithDb("DELETE /api/sms-bidding/unsubscribe/:carId", () => {
     it("requires auth", async () => {
       await request(app).delete(`/api/sms-bidding/unsubscribe/${carId}`).expect(401);
     });
@@ -135,7 +135,7 @@ describe("SMS Bidding Routes", () => {
     });
   });
 
-  describe("POST /api/sms-bidding/webhook/inbound", () => {
+  describeWithDb("POST /api/sms-bidding/webhook/inbound", () => {
     it("rejects missing from or text", async () => {
       await request(app).post("/api/sms-bidding/webhook/inbound").send({}).expect(400);
     });

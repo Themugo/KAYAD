@@ -8,6 +8,10 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import VehicleMarketAnalytics from "../models/VehicleMarketAnalytics.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
+
+await startTestDB();
+await stopTestDB();
 import {
   calculateAverageSellingPrice,
   calculateAverageListingPrice,
@@ -17,7 +21,7 @@ import {
   getCountyTrends,
 } from "../services/vehicleAnalyticsService.js";
 
-describe("Vehicle Market Analytics Service", () => {
+describeWithDb("Vehicle Market Analytics Service", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -30,7 +34,7 @@ describe("Vehicle Market Analytics Service", () => {
     await mongoServer.stop();
   });
 
-  describe("Average Price Calculations", () => {
+  describeWithDb("Average Price Calculations", () => {
     it("should return 0 when no data available", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -43,7 +47,7 @@ describe("Vehicle Market Analytics Service", () => {
     });
   });
 
-  describe("Days on Market Calculation", () => {
+  describeWithDb("Days on Market Calculation", () => {
     it("should return zeros when no sold cars", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -58,7 +62,7 @@ describe("Vehicle Market Analytics Service", () => {
     });
   });
 
-  describe("Brand Trends", () => {
+  describeWithDb("Brand Trends", () => {
     it("should return empty array when no data", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -70,7 +74,7 @@ describe("Vehicle Market Analytics Service", () => {
     });
   });
 
-  describe("County Trends", () => {
+  describeWithDb("County Trends", () => {
     it("should return empty array when no data", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -82,7 +86,7 @@ describe("Vehicle Market Analytics Service", () => {
     });
   });
 
-  describe("Most Viewed Vehicles", () => {
+  describeWithDb("Most Viewed Vehicles", () => {
     it("should return empty array when no data", async () => {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = new Date();
@@ -95,7 +99,7 @@ describe("Vehicle Market Analytics Service", () => {
   });
 });
 
-describe("VehicleMarketAnalytics Model", () => {
+describeWithDb("VehicleMarketAnalytics Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -162,7 +166,7 @@ describe("VehicleMarketAnalytics Model", () => {
   });
 });
 
-describe("VehicleMarketAnalytics Schema Validation", () => {
+describeWithDb("VehicleMarketAnalytics Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {

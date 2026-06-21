@@ -4,14 +4,14 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("NTSA Verification Routes", () => {
+describeWithDb("NTSA Verification Routes", () => {
   let adminToken, ownerToken, userToken, ownerId, carId, requestId;
 
   beforeAll(async () => {
@@ -50,7 +50,7 @@ describe("NTSA Verification Routes", () => {
     await clearTestDB();
   });
 
-  describe("POST /api/ntsa-verification/", () => {
+  describeWithDb("POST /api/ntsa-verification/", () => {
     it("requires auth", async () => {
       await request(app).post("/api/ntsa-verification/").send({ carId }).expect(401);
     });
@@ -94,7 +94,7 @@ describe("NTSA Verification Routes", () => {
     });
   });
 
-  describe("GET /api/ntsa-verification/car/:carId/status", () => {
+  describeWithDb("GET /api/ntsa-verification/car/:carId/status", () => {
     it("requires auth", async () => {
       await request(app).get(`/api/ntsa-verification/car/${carId}/status`).expect(401);
     });
@@ -109,7 +109,7 @@ describe("NTSA Verification Routes", () => {
     });
   });
 
-  describe("POST /api/ntsa-verification/:id/documents", () => {
+  describeWithDb("POST /api/ntsa-verification/:id/documents", () => {
     it("requires auth", async () => {
       await request(app)
         .post(`/api/ntsa-verification/${requestId}/documents`)
@@ -156,7 +156,7 @@ describe("NTSA Verification Routes", () => {
     });
   });
 
-  describe("POST /api/ntsa-verification/:id/process (admin)", () => {
+  describeWithDb("POST /api/ntsa-verification/:id/process (admin)", () => {
     it("requires admin", async () => {
       await request(app)
         .post(`/api/ntsa-verification/${requestId}/process`)
@@ -201,7 +201,7 @@ describe("NTSA Verification Routes", () => {
     });
   });
 
-  describe("GET /api/ntsa-verification/ (admin list)", () => {
+  describeWithDb("GET /api/ntsa-verification/ (admin list)", () => {
     it("requires admin", async () => {
       await request(app).get("/api/ntsa-verification/").set("Authorization", `Bearer ${ownerToken}`).expect(403);
     });

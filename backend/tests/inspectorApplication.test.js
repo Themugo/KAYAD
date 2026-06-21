@@ -4,14 +4,14 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("Inspector Application Routes", () => {
+describeWithDb("Inspector Application Routes", () => {
   let adminToken, userToken, adminId, applicationId;
 
   beforeAll(async () => {
@@ -44,7 +44,7 @@ describe("Inspector Application Routes", () => {
     certifications: ["ASE Certified"],
   };
 
-  describe("POST /api/inspector-applications/apply", () => {
+  describeWithDb("POST /api/inspector-applications/apply", () => {
     it("rejects missing required fields", async () => {
       const res = await request(app)
         .post("/api/inspector-applications/apply")
@@ -74,7 +74,7 @@ describe("Inspector Application Routes", () => {
     });
   });
 
-  describe("GET /api/inspector-applications/my", () => {
+  describeWithDb("GET /api/inspector-applications/my", () => {
     it("requires auth", async () => {
       await request(app).get("/api/inspector-applications/my").expect(401);
     });
@@ -89,7 +89,7 @@ describe("Inspector Application Routes", () => {
     });
   });
 
-  describe("GET /api/inspector-applications/ (admin)", () => {
+  describeWithDb("GET /api/inspector-applications/ (admin)", () => {
     it("requires admin", async () => {
       await request(app).get("/api/inspector-applications/").set("Authorization", `Bearer ${userToken}`).expect(403);
     });
@@ -113,7 +113,7 @@ describe("Inspector Application Routes", () => {
     });
   });
 
-  describe("GET /api/inspector-applications/:id", () => {
+  describeWithDb("GET /api/inspector-applications/:id", () => {
     it("requires admin", async () => {
       await request(app)
         .get(`/api/inspector-applications/${applicationId}`)
@@ -140,7 +140,7 @@ describe("Inspector Application Routes", () => {
     });
   });
 
-  describe("POST /api/inspector-applications/:id/approve", () => {
+  describeWithDb("POST /api/inspector-applications/:id/approve", () => {
     let pendingAppId;
 
     beforeAll(async () => {
@@ -183,7 +183,7 @@ describe("Inspector Application Routes", () => {
     });
   });
 
-  describe("POST /api/inspector-applications/:id/reject", () => {
+  describeWithDb("POST /api/inspector-applications/:id/reject", () => {
     let rejectableId;
 
     beforeAll(async () => {

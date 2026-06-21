@@ -8,8 +8,12 @@ import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import MarketplaceHealth from "../models/MarketplaceHealth.js";
+import { startTestDB, stopTestDB, describeWithDb } from "./setup.js";
 
-describe("MarketplaceHealth Model", () => {
+await startTestDB();
+await stopTestDB();
+
+describeWithDb("MarketplaceHealth Model", () => {
   let mongoServer;
 
   beforeAll(async () => {
@@ -265,7 +269,7 @@ describe("MarketplaceHealth Model", () => {
   });
 });
 
-describe("MarketplaceHealth Schema Validation", () => {
+describeWithDb("MarketplaceHealth Schema Validation", () => {
   let mongoServer;
 
   beforeAll(async () => {

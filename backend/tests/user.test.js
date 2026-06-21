@@ -4,14 +4,14 @@ import request from "supertest";
 process.env.JWT_SECRET = "test-secret-key-32-chars-minimum-x";
 process.env.NODE_ENV = "test";
 
-import { startTestDB, stopTestDB, clearTestDB } from "./setup.js";
+import { startTestDB, stopTestDB, clearTestDB, describeWithDb } from "./setup.js";
 import mongoose from "mongoose";
 
 await startTestDB();
 
 const { default: app } = await import("../server.js");
 
-describe("User Routes", () => {
+describeWithDb("User Routes", () => {
   let userToken, userId;
 
   beforeAll(async () => {
@@ -37,7 +37,7 @@ describe("User Routes", () => {
     await clearTestDB();
   });
 
-  describe("GET /api/users/search", () => {
+  describeWithDb("GET /api/users/search", () => {
     it("searches users by name", async () => {
       const res = await request(app).get("/api/users/search?q=Test").expect(200);
       expect(res.body.success).toBe(true);
@@ -64,7 +64,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("GET /api/users/me", () => {
+  describeWithDb("GET /api/users/me", () => {
     it("requires auth", async () => {
       await request(app).get("/api/users/me").expect(401);
     });
@@ -77,7 +77,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("PUT /api/users/settings", () => {
+  describeWithDb("PUT /api/users/settings", () => {
     it("requires auth", async () => {
       await request(app).put("/api/users/settings").send({ language: "fr" }).expect(401);
     });
@@ -102,7 +102,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("GET /api/users/:id", () => {
+  describeWithDb("GET /api/users/:id", () => {
     it("returns public user profile", async () => {
       const res = await request(app).get(`/api/users/${userId}`).expect(200);
       expect(res.body.success).toBe(true);
@@ -116,7 +116,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("POST /api/users/bank-pre-approval", () => {
+  describeWithDb("POST /api/users/bank-pre-approval", () => {
     it("requires auth", async () => {
       await request(app)
         .post("/api/users/bank-pre-approval")
@@ -153,7 +153,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("DELETE /api/users/bank-pre-approval", () => {
+  describeWithDb("DELETE /api/users/bank-pre-approval", () => {
     it("requires auth", async () => {
       await request(app).delete("/api/users/bank-pre-approval").expect(401);
     });
@@ -168,7 +168,7 @@ describe("User Routes", () => {
     });
   });
 
-  describe("404 fallback", () => {
+  describeWithDb("404 fallback", () => {
     it("returns 404 for unknown user routes", async () => {
       const res = await request(app).get("/api/users/nonexistent-route").expect(400);
       expect(res.body.success).toBe(false);

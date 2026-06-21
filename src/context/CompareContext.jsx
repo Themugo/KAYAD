@@ -67,4 +67,10 @@ export function CompareProvider({ children }) {
   );
 }
 
-export const useCompare = () => useContext(CompareCtx);
+export const useCompare = () => {
+  const ctx = useContext(CompareCtx);
+  if (!ctx) {
+    throw new Error('useCompare must be used within CompareProvider');
+  }
+  return ctx;
+};
