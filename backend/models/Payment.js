@@ -145,7 +145,7 @@ const paymentSchema = new mongoose.Schema(
 );
 
 // =============================
-// 🔥 INDEXES (CRITICAL FOR SCALE)
+// 🔥 INDEXES (CRITICAL FOR SCALE - Phase 1 Database Audit)
 // =============================
 
 // user history
@@ -159,6 +159,9 @@ paymentSchema.index({ type: 1, createdAt: -1 });
 
 // reference lookup
 paymentSchema.index({ referenceId: 1, referenceModel: 1 });
+
+// Phase 1: Add compound index for pending payments
+paymentSchema.index({ status: 1, processed: 1, createdAt: -1 });
 
 // =============================
 // ⚡ METHODS

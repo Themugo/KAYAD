@@ -142,17 +142,32 @@ export const getOperationsDashboard = async (req, res) => {
 
 export const getEscrowQueue = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, page = 1, limit = 50 } = req.query;
     const filter = status ? { status } : {};
 
-    const escrows = await Escrow.find(filter)
-      .populate("buyer", "name email")
-      .populate("seller", "name email")
-      .populate("car", "title price")
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, escrows });
+    const [escrows, total] = await Promise.all([
+      Escrow.find(filter)
+        .populate("buyer", "name email")
+        .populate("seller", "name email")
+        .populate("car", "title price")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      Escrow.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      escrows,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting escrow queue:", error);
     res.status(500).json({ success: false, message: "Failed to get escrow queue" });
@@ -165,17 +180,32 @@ export const getEscrowQueue = async (req, res) => {
 
 export const getInspectionQueue = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, page = 1, limit = 50 } = req.query;
     const filter = status ? { status } : {};
 
-    const inspections = await InspectionOrder.find(filter)
-      .populate("car", "title price")
-      .populate("inspector", "name email")
-      .populate("requestedBy", "name email")
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, inspections });
+    const [inspections, total] = await Promise.all([
+      InspectionOrder.find(filter)
+        .populate("car", "title price")
+        .populate("inspector", "name email")
+        .populate("requestedBy", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      InspectionOrder.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      inspections,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting inspection queue:", error);
     res.status(500).json({ success: false, message: "Failed to get inspection queue" });
@@ -188,7 +218,7 @@ export const getInspectionQueue = async (req, res) => {
 
 export const getDealerQueue = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, page = 1, limit = 50 } = req.query;
     const filter = { role: "dealer" };
 
     if (status === "pending_verification") {
@@ -199,12 +229,27 @@ export const getDealerQueue = async (req, res) => {
       filter.status = "pending";
     }
 
-    const dealers = await User.find(filter)
-      .select("name email phone businessName verified kycVerified status createdAt")
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, dealers });
+    const [dealers, total] = await Promise.all([
+      User.find(filter)
+        .select("name email phone businessName verified kycVerified status createdAt")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      User.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      dealers,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting dealer queue:", error);
     res.status(500).json({ success: false, message: "Failed to get dealer queue" });
@@ -217,20 +262,35 @@ export const getDealerQueue = async (req, res) => {
 
 export const getSupportQueue = async (req, res) => {
   try {
-    const { status, severity } = req.query;
+    const { status, severity, page = 1, limit = 50 } = req.query;
     const filter = {};
 
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
 
-    const disputes = await Dispute.find(filter)
-      .populate("openedBy", "name email")
-      .populate("openedAgainst", "name email")
-      .populate("relatedEscrow", "amount status")
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, disputes });
+    const [disputes, total] = await Promise.all([
+      Dispute.find(filter)
+        .populate("openedBy", "name email")
+        .populate("openedAgainst", "name email")
+        .populate("relatedEscrow", "amount status")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      Dispute.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      disputes,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting support queue:", error);
     res.status(500).json({ success: false, message: "Failed to get support queue" });
@@ -243,16 +303,31 @@ export const getSupportQueue = async (req, res) => {
 
 export const getPaymentQueue = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, page = 1, limit = 50 } = req.query;
     const filter = status ? { status } : {};
 
-    const payments = await Payment.find(filter)
-      .populate("user", "name email")
-      .populate("escrow", "amount status")
-      .sort({ createdAt: -1 })
-      .limit(50);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, payments });
+    const [payments, total] = await Promise.all([
+      Payment.find(filter)
+        .populate("user", "name email")
+        .populate("escrow", "amount status")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      Payment.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      payments,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting payment queue:", error);
     res.status(500).json({ success: false, message: "Failed to get payment queue" });

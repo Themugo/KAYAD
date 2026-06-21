@@ -133,7 +133,7 @@ const leadSchema = new mongoose.Schema(
 );
 
 // =============================
-// 🔥 INDEXES (PERFORMANCE)
+// 🔥 INDEXES (PERFORMANCE - Phase 1 Database Audit)
 // =============================
 leadSchema.index({ buyer: 1, dealer: 1, vehicle: 1 });
 leadSchema.index({ dealer: 1, stage: 1, lastActivityAt: -1 });
@@ -141,6 +141,8 @@ leadSchema.index({ dealer: 1, source: 1 });
 leadSchema.index({ dealer: 1, isArchived: 1, lastActivityAt: -1 });
 leadSchema.index({ dealer: 1, isHot: 1, lastActivityAt: -1 });
 leadSchema.index({ dealer: 1, isArchived: 1, stage: 1 }); // Lead pipeline aggregation optimization
+// Phase 1: Add compound index for buyer pipeline
+leadSchema.index({ buyer: 1, stage: 1, lastActivityAt: -1 });
 
 // =============================
 // ⚡ METHOD: UPDATE STAGE

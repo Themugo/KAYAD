@@ -449,6 +449,9 @@ userSchema.index({ role: 1, createdAt: -1 });
 userSchema.index({ role: 1, location: 1 });
 userSchema.index({ role: 1, dealerRating: -1 });
 
+// Phase 1: Add unique constraint on phone (sparse to allow null values)
+userSchema.index({ phone: 1 }, { unique: true, sparse: true });
+
 // =============================
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 

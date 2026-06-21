@@ -265,18 +265,33 @@ export const checkUsageLimits = async (req, res) => {
 
 export const getAllSubscriptions = async (req, res) => {
   try {
-    const { status, plan } = req.query;
+    const { status, plan, page = 1, limit = 50 } = req.query;
     const filter = {};
 
     if (status) filter.status = status;
     if (plan) filter.plan = plan;
 
-    const subscriptions = await Subscription.find(filter)
-      .populate("dealer", "name email businessName")
-      .sort({ createdAt: -1 })
-      .limit(100);
+    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 100);
 
-    res.json({ success: true, subscriptions });
+    const [subscriptions, total] = await Promise.all([
+      Subscription.find(filter)
+        .populate("dealer", "name email businessName")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(Math.min(Number(limit), 100)),
+      Subscription.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      subscriptions,
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        pages: Math.ceil(total / Number(limit)),
+      },
+    });
   } catch (error) {
     console.error("Error getting all subscriptions:", error);
     res.status(500).json({ success: false, message: "Failed to get subscriptions" });

@@ -304,7 +304,7 @@ carSchema.pre("countDocuments", function (next) {
 });
 
 // =============================
-// 🔥 INDEXES (CRITICAL)
+// 🔥 INDEXES (OPTIMIZED - Phase 1 Database Audit)
 // =============================
 
 // Single-field indexes
@@ -313,20 +313,17 @@ carSchema.index({ createdAt: -1 });
 carSchema.index({ views: -1 });
 carSchema.index({ deletedAt: 1 });
 
-// Compound indexes for common filter combinations (Issue #2 / #9)
+// Compound indexes for common filter combinations
+// REMOVED REDUNDANT INDEXES: { status: 1, createdAt: -1 }, { status: 1, price: 1 }, { status: 1, year: -1 }, { status: 1, views: -1 }, { brand: 1, price: 1 }
+// These are covered by the comprehensive compound index below
 carSchema.index({ status: 1, brand: 1, "location.city": 1, price: 1 });
-carSchema.index({ status: 1, createdAt: -1 });
-carSchema.index({ status: 1, price: 1 });
-carSchema.index({ status: 1, year: -1 });
-carSchema.index({ status: 1, views: -1 });
 carSchema.index({ dealer: 1, createdAt: -1 });
-carSchema.index({ brand: 1, price: 1 });
 carSchema.index({ "location.city": 1 });
 carSchema.index({ allowBid: 1, auctionStatus: 1 });
 carSchema.index({ status: 1, auctionStatus: 1, allowBid: 1 });
 carSchema.index({ isDemo: 1, createdAt: -1 });
 
-// Auction-specific indexes (NEW)
+// Auction-specific indexes
 carSchema.index({ auctionStatus: 1, auctionEnd: -1 });
 carSchema.index({ auctionStatus: 1, currentBid: -1 });
 carSchema.index({ auctionStatus: 1, allowBid: 1, auctionEnd: -1 });
@@ -334,7 +331,7 @@ carSchema.index({ status: 1, auctionStatus: 1, price: 1 });
 carSchema.index({ status: 1, auctionStatus: 1, year: 1 });
 carSchema.index({ status: 1, auctionStatus: 1, brand: 1 });
 
-// Text index for keyword search (Issue #9)
+// Text index for keyword search
 carSchema.index({
   title: "text",
   brand: "text",
@@ -344,10 +341,10 @@ carSchema.index({
 // GEO SEARCH
 carSchema.index({ "location.coordinates": "2dsphere" });
 
-// DUPLICATE DETECTION INDEXES
-carSchema.index({ vin: 1 }, { sparse: true });
-carSchema.index({ chassisNumber: 1 }, { sparse: true });
-carSchema.index({ registrationNumber: 1 }, { sparse: true });
+// DUPLICATE DETECTION INDEXES - Changed to unique constraints (Phase 1)
+carSchema.index({ vin: 1 }, { unique: true, sparse: true });
+carSchema.index({ chassisNumber: 1 }, { unique: true, sparse: true });
+carSchema.index({ registrationNumber: 1 }, { unique: true, sparse: true });
 carSchema.index({ isFlaggedDuplicate: 1, duplicateStatus: 1 });
 carSchema.index({ dealer: 1, isFlaggedDuplicate: 1 });
 

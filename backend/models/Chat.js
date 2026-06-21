@@ -45,6 +45,8 @@ const chatSchema = new mongoose.Schema(
 
 chatSchema.index({ participants: 1 });
 chatSchema.index({ updatedAt: -1 });
+// Phase 1: Add compound index for user chat queries sorted by recent activity
+chatSchema.index({ participants: 1, updatedAt: -1 });
 
 chatSchema.methods.addMessage = function (messageData) {
   this.messages.push(messageData);

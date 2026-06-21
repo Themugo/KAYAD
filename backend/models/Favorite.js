@@ -52,9 +52,10 @@ const favoriteSchema = new mongoose.Schema(
 favoriteSchema.index({ user: 1, car: 1 }, { unique: true });
 
 // =============================
-// ⚡ PERFORMANCE INDEXES
+// ⚡ PERFORMANCE INDEXES (Phase 1 Database Audit)
 // =============================
 favoriteSchema.index({ user: 1, createdAt: -1 });
+// Phase 1: Add index for car popularity queries
 favoriteSchema.index({ car: 1, createdAt: -1 });
 
 // =============================

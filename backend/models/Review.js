@@ -73,11 +73,13 @@ const reviewSchema = new mongoose.Schema(
 reviewSchema.index({ user: 1, dealer: 1, car: 1 }, { unique: true });
 
 // =============================
-// 🔥 INDEXES (PERFORMANCE)
+// 🔥 INDEXES (PERFORMANCE - Phase 1 Database Audit)
 // =============================
 reviewSchema.index({ dealer: 1, createdAt: -1 });
 reviewSchema.index({ rating: 1 });
 // isVerified already indexed via schema field index:true
+// Phase 1: Add compound index for approved reviews sorted by rating
+reviewSchema.index({ dealer: 1, isApproved: 1, rating: -1 });
 
 // =============================
 // ⚡ STATIC: GET DEALER REVIEWS

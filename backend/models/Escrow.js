@@ -75,6 +75,9 @@ escrowSchema.index({ car: 1 });
 escrowSchema.index({ buyer: 1, createdAt: -1 });
 escrowSchema.index({ seller: 1, createdAt: -1 });
 escrowSchema.index({ status: 1, createdAt: -1 });
+// Phase 1: Add compound indexes for status queries
+escrowSchema.index({ buyer: 1, status: 1, createdAt: -1 });
+escrowSchema.index({ seller: 1, status: 1, createdAt: -1 });
 
 escrowSchema.methods.addHistory = function (action, userId) {
   this.history.push({ action, by: userId || null, at: new Date() });

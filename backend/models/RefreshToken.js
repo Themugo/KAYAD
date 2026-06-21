@@ -60,6 +60,9 @@ const refreshTokenSchema = new mongoose.Schema(
 // Index for cleanup of expired tokens
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// Phase 1: Add unique constraint on user + deviceId
+refreshTokenSchema.index({ user: 1, deviceId: 1 }, { unique: true });
+
 // Static method to clean up expired and revoked tokens
 refreshTokenSchema.statics.cleanupExpired = async function () {
   const now = new Date();
