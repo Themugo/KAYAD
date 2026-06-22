@@ -2,6 +2,9 @@
 
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
+// Export ipKeyGenerator for use in other modules
+export { ipKeyGenerator };
+
 // =============================
 // 🧠 SAFE KEY GENERATOR (IPv6 FIX ✅)
 // =============================
