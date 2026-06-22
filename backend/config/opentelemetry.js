@@ -4,12 +4,18 @@
 // Provides distributed tracing for the application
 // ─────────────────────────────────────────────────────────────
 
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { Resource } from "@opentelemetry/resources";
-import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
-import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-node";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import pkg from "@opentelemetry/sdk-node";
+const { NodeSDK } = pkg;
+import pkg2 from "@opentelemetry/resources";
+const { Resource } = pkg2;
+import pkg3 from "@opentelemetry/semantic-conventions";
+const { SemanticResourceAttributes } = pkg3;
+import pkg4 from "@opentelemetry/auto-instrumentations-node";
+const { getNodeAutoInstrumentations } = pkg4;
+import pkg5 from "@opentelemetry/sdk-trace-node";
+const { ConsoleSpanExporter } = pkg5;
+import pkg6 from "@opentelemetry/sdk-trace-base";
+const { BatchSpanProcessor } = pkg6;
 import { logInfo, logError } from "../utils/logger.js";
 
 // Check if OpenTelemetry is enabled
