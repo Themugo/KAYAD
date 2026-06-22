@@ -1,5 +1,6 @@
 import Contact from "../models/Contact.js";
 import { sendRawEmail } from "../services/email.service.js";
+import { logInfo, logError } from "../utils/logger.js";
 
 export const submitContact = async (req, res) => {
   try {
@@ -9,6 +10,7 @@ export const submitContact = async (req, res) => {
     }
     const contact = await Contact.create({ name, email, subject, message });
 
+    // Send email asynchronously without awaiting
     sendRawEmail({
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
       subject: `Contact form: ${subject}`,
@@ -20,11 +22,13 @@ export const submitContact = async (req, res) => {
         <hr style="border-color:#252E3D;" />
         <p>${message}</p>
       </div>`,
+    }).catch(err => {
+      logError("Failed to send contact email", err);
     });
 
     res.json({ success: true, message: "Message received. We'll get back to you soon." });
   } catch (err) {
-    console.error("Contact form error:", err);
+    logError("Contact form error", err);
     res.status(500).json({ success: false, message: "Failed to send message" });
   }
 };
@@ -34,6 +38,7 @@ export const listContacts = async (req, res) => {
     const contacts = await Contact.find().sort({ createdAt: -1 }).lean();
     res.json({ success: true, contacts });
   } catch (err) {
+    logError("Failed to list contacts", err);
     res.status(500).json({ success: false, message: "Failed to list contacts" });
   }
 };
@@ -44,6 +49,7 @@ export const markRead = async (req, res) => {
     if (!contact) return res.status(404).json({ success: false, message: "Contact not found" });
     res.json({ success: true, contact });
   } catch (err) {
+    logError("Failed to update contact", err);
     res.status(500).json({ success: false, message: "Failed to update contact" });
   }
 };
