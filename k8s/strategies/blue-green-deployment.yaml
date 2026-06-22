@@ -1,0 +1,170 @@
+# Blue-Green Deployment Strategy
+# This strategy maintains two identical production environments (blue and green)
+# Traffic is switched between them during deployments
+
+---
+# Blue Environment (Current Production)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kayad-backend-blue
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    environment: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kayad-backend
+      environment: blue
+  template:
+    metadata:
+      labels:
+        app: kayad-backend
+        environment: blue
+        version: v1
+    spec:
+      containers:
+      - name: kayad-backend
+        image: kayad-backend:v1
+        ports:
+        - containerPort: 5000
+        # ... rest of container configuration
+
+---
+# Green Environment (New Version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kayad-backend-green
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    environment: green
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kayad-backend
+      environment: green
+  template:
+    metadata:
+      labels:
+        app: kayad-backend
+        environment: green
+        version: v2
+    spec:
+      containers:
+      - name: kayad-backend
+        image: kayad-backend:v2
+        ports:
+        - containerPort: 5000
+        # ... rest of container configuration
+
+---
+# Blue Service (Current Production)
+apiVersion: v1
+kind: Service
+metadata:
+  name: kayad-backend-blue
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    environment: blue
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+  selector:
+    app: kayad-backend
+    environment: blue
+
+---
+# Green Service (New Version)
+apiVersion: v1
+kind: Service
+metadata:
+  name: kayad-backend-green
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    environment: green
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+  selector:
+    app: kayad-backend
+    environment: green
+
+---
+# Main Service (Traffic Switcher)
+apiVersion: v1
+kind: Service
+metadata:
+  name: kayad-backend
+  namespace: kayad
+  labels:
+    app: kayad-backend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: kayad-backend
+    environment: blue  # Initially points to blue
+
+---
+# Blue-Green Deployment Process:
+# 1. Deploy green environment with new version
+# 2. Run smoke tests on green environment
+# 3. Switch main service to point to green
+# 4. Monitor green environment for issues
+# 5. If issues detected, switch back to blue immediately
+# 6. If green is stable, decommission blue environment
+# 7. Blue becomes the new green for next deployment
+
+# Traffic Switching:
+# To switch traffic from blue to green:
+# kubectl patch service kayad-backend -p '{"spec":{"selector":{"environment":"green"}}}'
+
+# To switch traffic from green to blue:
+# kubectl patch service kayad-backend -p '{"spec":{"selector":{"environment":"blue"}}}'
+
+# Benefits:
+# - Instant rollback capability
+# - Zero downtime deployment
+# - Full testing before traffic switch
+# - Clean separation of environments
+# - Easy to compare versions side-by-side
+
+# Considerations:
+# - Requires double the resources (2x replicas)
+# - More complex deployment process
+# - Requires database schema changes to be backward compatible
+# - Longer deployment time due to full environment provisioning
+
+# Automation Script Example:
+# #!/bin/bash
+# # Deploy green environment
+# helm upgrade kayad-backend-green ./helm/kayad-backend --set image.tag=v2 --set environment=green
+# 
+# # Wait for green to be ready
+# kubectl rollout status deployment/kayad-backend-green
+# 
+# # Run smoke tests
+# ./scripts/smoke-tests.sh green
+# 
+# # Switch traffic to green
+# kubectl patch service kayad-backend -p '{"spec":{"selector":{"environment":"green"}}}'
+# 
+# # Monitor green environment
+# ./scripts/monitor-deployment.sh green
+# 
+# # If successful, decommission blue
+# kubectl delete deployment kayad-backend-blue
+# kubectl delete service kayad-backend-blue

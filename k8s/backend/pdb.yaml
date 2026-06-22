@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kayad-backend-pdb
+  namespace: kayad
+  labels:
+    app: kayad-backend
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: kayad-backend
