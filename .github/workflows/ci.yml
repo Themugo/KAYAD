@@ -60,6 +60,9 @@ jobs:
 
       - run: npm ci
 
+      - name: Run lint checks
+        run: npm run format:check
+
       - name: Run backend tests
         id: backend_tests
         run: |
@@ -93,8 +96,20 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm audit --omit=dev
+      - name: Run npm audit (root)
+        run: npm audit --audit-level=moderate
         continue-on-error: true
-      - run: npm audit --omit=dev
+
+      - name: Run npm audit (backend)
+        run: npm audit --audit-level=moderate
         working-directory: ./backend
         continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          working-directory: ./backend
