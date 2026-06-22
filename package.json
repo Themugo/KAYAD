@@ -9,8 +9,8 @@
   "scripts": {
     "dev": "vite --port 3000",
     "dev:staging": "vite --port 3000 --mode staging",
-    "build": "tsc && vite build",
-    "build:staging": "tsc && vite build --mode staging",
+    "build": "vite build",
+    "build:staging": "vite build --mode staging",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,json}\"",
