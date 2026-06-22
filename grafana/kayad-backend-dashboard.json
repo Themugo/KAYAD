@@ -1,0 +1,147 @@
+{
+  "dashboard": {
+    "title": "KAYAD Backend - Overview",
+    "uid": "kayad-backend-overview",
+    "tags": ["kayad", "backend"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{path}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Errors",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Errors",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Response Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m]))",
+            "legendFormat": "P95 Response Time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "memory_heap_used_mb",
+            "legendFormat": "Heap Used",
+            "refId": "A"
+          },
+          {
+            "expr": "memory_heap_total_mb",
+            "legendFormat": "Heap Total",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Database Query Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_ms_bucket[5m]))",
+            "legendFormat": "P95 Query Time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Cache Hit Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cache_hits_total / (cache_hits_total + cache_misses_total) * 100",
+            "legendFormat": "Hit Rate %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 16},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Slow Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(slow_requests_total[5m])",
+            "legendFormat": "Slow Requests (>1s)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(very_slow_requests_total[5m])",
+            "legendFormat": "Very Slow Requests (>5s)",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Connection Pool",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "connection_pool_total",
+            "legendFormat": "Total",
+            "refId": "A"
+          },
+          {
+            "expr": "connection_pool_available",
+            "legendFormat": "Available",
+            "refId": "B"
+          },
+          {
+            "expr": "connection_pool_checked_out",
+            "legendFormat": "Checked Out",
+            "refId": "C"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ]
+  }
+}

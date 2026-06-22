@@ -31,6 +31,7 @@ import { csrfProtection } from "./middleware/csrf.js";
 import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
 import responseWrapper from "./middleware/responseWrapper.js";
+import { performanceMonitor, memoryMonitor, cpuMonitor } from "./middleware/performanceMonitor.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 
@@ -86,6 +87,7 @@ import financeRoutes from "./routes/financeRoutes.js";
 import seoRoutes from "./routes/seoRoutes.js";
 import healthRoutes from "./routes/healthRoutes.js";
 import metricsRoutes from "./routes/metricsRoutes.js";
+import prometheusMetricsRoutes from "./routes/prometheusMetrics.js";
 import reconciliationRoutes from "./routes/reconciliationRoutes.js";
 import queueRoutes from "./routes/queueRoutes.js";
 import operationsDashboardRoutes from "./routes/operationsDashboardRoutes.js";
@@ -117,6 +119,7 @@ import { getEnv, validateEnv } from "./utils/env.js";
 import { isRedisConnected } from "./utils/cache.js";
 import redisClient from "./config/redis.js";
 import { initSentry } from "./config/sentry.js";
+import { initOpenTelemetry } from "./config/opentelemetry.js";
 import { triggerAlert, ALERT_LEVELS } from "./config/alerting.js";
 import { recordHttpRequest, recordError } from "./config/metrics.js";
 const getRedisClient = () => redisClient;
@@ -141,6 +144,11 @@ try {
 // 🔧 SENTRY INITIALIZATION
 // =============================
 initSentry();
+
+// =============================
+// 🔧 OPENTELEMETRY INITIALIZATION
+// =============================
+initOpenTelemetry();
 
 // ─── CONFIG ───────────────────────────────────────────────────
 const app = express();
@@ -170,8 +178,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        // Removed 'unsafe-inline' for better security. 
+        // For inline scripts/styles, implement nonce-based CSP in future
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https://res.cloudinary.com", "blob:"],
         connectSrc: [
           "'self'",
@@ -184,6 +194,9 @@ app.use(
         frameAncestors: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        manifestSrc: ["'self'"],
       },
     },
     hsts: {
@@ -214,6 +227,11 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+// ─── PERFORMANCE MONITORING MIDDLEWARE
+app.use(performanceMonitor);
+app.use(memoryMonitor);
+app.use(cpuMonitor);
 
 // ─── SENTRY REQUEST HANDLER
 // Note: In newer Sentry versions, handlers are auto-instrumented
@@ -509,6 +527,7 @@ app.use("/api/reconciliation", reconciliationRoutes);
 app.use("/api/operations-dashboard", adminLimiter, operationsDashboardRoutes);
 app.use("/health", fastTimeout, healthRoutes);
 app.use("/metrics", fastTimeout, metricsRoutes);
+app.use("/prometheus", fastTimeout, prometheusMetricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
 app.use(seoRoutes);
 
