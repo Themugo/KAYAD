@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
+import viteCompression from 'vite-plugin-compression';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -29,6 +31,26 @@ export default defineConfig({
           }
         ]
       }
+    }),
+    // Bundle analysis
+    visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'dist/stats.html'
+    }),
+    // Compression
+    viteCompression({
+      algorithm: 'gzip',
+      ext: '.gz',
+      threshold: 10240,
+      deleteOriginFile: false
+    }),
+    viteCompression({
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      threshold: 10240,
+      deleteOriginFile: false
     })
   ],
   server: {
@@ -37,14 +59,54 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // Disable sourcemaps in production
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['framer-motion', 'lucide-react']
-        }
+        manualChunks: (id: string) => {
+          // Vendor chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'react-vendor';
+            }
+            if (id.includes('react-router')) {
+              return 'router-vendor';
+            }
+            if (id.includes('framer-motion')) {
+              return 'animation-vendor';
+            }
+            if (id.includes('axios')) {
+              return 'http-vendor';
+            }
+            if (id.includes('socket.io')) {
+              return 'socket-vendor';
+            }
+            if (id.includes('@sentry')) {
+              return 'sentry-vendor';
+            }
+            if (id.includes('posthog')) {
+              return 'analytics-vendor';
+            }
+            return 'vendor';
+          }
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
-    }
+    },
+    chunkSizeWarningLimit: 1000
+  },
+  // Performance budgets
+  performance: {
+    maxEntrypointSize: 512000, // 500KB
+    maxAssetSize: 256000, // 250KB
+    hints: 'warning'
   }
 });
