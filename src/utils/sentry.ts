@@ -6,7 +6,14 @@
 //   2. Add VITE_SENTRY_DSN=https://xxx@sentry.io/xxx to .env
 // ─────────────────────────────────────────────────────────────
 
-let Sentry: any = null;
+interface SentryClient {
+  init: (config: { dsn: string; environment: string; release: string; tracesSampleRate: number; replaysOnErrorSampleRate: number; ignoreErrors: (string | RegExp)[]; beforeSend?: (event: { request?: { data?: Record<string, string> } }) => { request?: { data?: Record<string, string> } } }) => void;
+  withScope: (callback: (scope: { setExtra: (key: string, value: unknown) => void }) => void) => void;
+  captureException: (err: Error) => void;
+  setUser: (user: { id: string; email?: string; role?: string } | null) => void;
+}
+
+let Sentry: SentryClient | null = null;
 let initialized = false;
 
 export const initSentry = async (): Promise<void> => {
@@ -21,7 +28,7 @@ export const initSentry = async (): Promise<void> => {
       return;
     }
 
-    Sentry = mod;
+    Sentry = mod as SentryClient;
 
     Sentry.init({
       dsn,
@@ -40,7 +47,7 @@ export const initSentry = async (): Promise<void> => {
         /Loading chunk \d+ failed/,
       ],
 
-      beforeSend(event: any) {
+      beforeSend(event) {
         // Strip sensitive data
         if (event.request?.data) {
           ["password", "token", "phone"].forEach(k => {
@@ -58,12 +65,12 @@ export const initSentry = async (): Promise<void> => {
 };
 
 // Manually report an error
-export const reportError = (err: Error, context: Record<string, any> = {}): void => {
+export const reportError = (err: Error, context: Record<string, unknown> = {}): void => {
   if (!initialized || !Sentry) {
     console.error("[Error]", err);
     return;
   }
-  Sentry.withScope((scope: any) => {
+  Sentry.withScope((scope) => {
     Object.entries(context).forEach(([k, v]) => scope.setExtra(k, v));
     Sentry.captureException(err);
   });

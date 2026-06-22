@@ -1,5 +1,6 @@
 // Type declarations for shadcn/ui components
 // These are stub declarations to satisfy TypeScript during migration
+// eslint-disable @typescript-eslint/no-explicit-any
 
 declare module '@/components/ui/button' {
   export const Button: any;

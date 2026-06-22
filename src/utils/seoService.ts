@@ -81,7 +81,7 @@ export interface Twitter {
 export interface StructuredData {
   "@context": string;
   "@type": string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Metadata {

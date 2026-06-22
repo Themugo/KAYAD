@@ -1,4 +1,4 @@
-let posthog: any = null;
+let posthog: { init: (key: string, config: Record<string, unknown>) => void; captureException: (err: Error, context: Record<string, unknown>) => void; identify: (id: string, props?: Record<string, unknown>) => void; reset: () => void } | null = null;
 let initialized = false;
 
 export const initPostHog = async (): Promise<void> => {
@@ -28,7 +28,7 @@ export const initPostHog = async (): Promise<void> => {
   }
 };
 
-export const reportError = (err: Error, context: Record<string, any> = {}): void => {
+export const reportError = (err: Error, context: Record<string, unknown> = {}): void => {
   if (!initialized || !posthog) {
     console.error("[Error]", err);
     return;
