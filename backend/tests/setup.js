@@ -22,9 +22,12 @@ const DEFAULT_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test";
 const MOCK_TEST_MONGO_URI = "mongodb://127.0.0.1:27017/kayad-test-mock";
 const hadConfiguredMongoUri = Boolean(process.env.MONGO_URI);
 
-// Set MONGO_URI for tests only if not already provided (e.g., CI supplies it).
-// Using local MongoDB when no URI is set.
-if (!hadConfiguredMongoUri) {
+// For tests, always prioritize in-memory MongoDB unless explicitly disabled
+// This ensures tests run in isolation without requiring external MongoDB
+if (process.env.USE_MEMORY_DB !== "false") {
+  process.env.MONGO_URI = MOCK_TEST_MONGO_URI;
+  console.log("ℹ️  Tests configured for in-memory MongoDB");
+} else if (!hadConfiguredMongoUri) {
   process.env.MONGO_URI = DEFAULT_TEST_MONGO_URI;
   console.log("ℹ️  MONGO_URI set to local MongoDB for tests");
 } else {
@@ -97,6 +100,38 @@ export async function startTestDB() {
     await mongoose.connection.close();
   }
 
+  // For tests, always use in-memory MongoDB unless explicitly disabled
+  // This ensures tests run in isolation without requiring external MongoDB
+  if (process.env.USE_MEMORY_DB !== "false") {
+    console.log("ℹ️  Attempting to start in-memory MongoDB");
+    try {
+      const { MongoMemoryServer } = await import("mongodb-memory-server");
+      mongod = await MongoMemoryServer.create({
+        binary: { version: MEMORY_DB_VERSION },
+        instance: {
+          timeout: 60000, // Increase startup timeout to 60 seconds
+        },
+        autoDownload: true,
+      });
+      const uri = mongod.getUri();
+      process.env.MONGO_URI = uri;
+      usingMemoryServer = true;
+      isMockDb = false;
+
+      await mongoose.connect(uri, {
+        maxPoolSize: 5,
+        serverSelectionTimeoutMS: 30000,
+      });
+
+      await clearTestDB();
+      console.log("✅ Connected to in-memory MongoDB");
+      return uri;
+    } catch (err) {
+      console.warn("⚠️  In-memory MongoDB failed:", err.message);
+      return markMockDb(err);
+    }
+  }
+
   // If MONGO_URI is already set (e.g., CI provides it or Atlas), use it directly
   if (process.env.MONGO_URI && !process.env.MONGO_URI.includes("kayad-test-mock")) {
     try {
@@ -109,53 +144,16 @@ export async function startTestDB() {
       });
       usingMemoryServer = false;
       isMockDb = false;
-      // CI uses ONE shared database across all test files. Clear it on connect
-      // so each file starts from a clean slate (prevents cross-file pollution
-      // that breaks exact-count assertions).
       await clearTestDB();
       console.log("✅ Connected to MongoDB:", process.env.MONGO_URI.replace(/:.*@/, ":***@"));
       return process.env.MONGO_URI;
     } catch (err) {
-      // Connection failed — fall through to memory server
       console.warn("⚠️  MONGO_URI connection failed:", err.message);
-      if (!SHOULD_TRY_MEMORY_DB) {
-        return markMockDb(err);
-      }
-      console.warn("    Falling back to in-memory MongoDB");
+      return markMockDb(err);
     }
-  } else {
-    console.warn("⚠️  MONGO_URI not set or is mock URI");
-    console.warn("    Set MONGO_URI in backend/.env to use a real database");
-    if (!SHOULD_TRY_MEMORY_DB) {
-      return markMockDb(new Error("MONGO_URI not set"));
-    }
-    console.warn("    Falling back to in-memory MongoDB");
   }
 
-  try {
-    const { MongoMemoryServer } = await import("mongodb-memory-server");
-    mongod = await MongoMemoryServer.create({
-      binary: { version: MEMORY_DB_VERSION },
-      instance: {
-        timeout: 60000, // Increase startup timeout to 60 seconds
-      },
-      // Skip auto-download if binary fails to run
-      autoDownload: true,
-    });
-    const uri = mongod.getUri();
-    process.env.MONGO_URI = uri;
-    usingMemoryServer = true;
-    isMockDb = false;
-
-    await mongoose.connect(uri, {
-      maxPoolSize: 5,
-      serverSelectionTimeoutMS: 30000,
-    });
-
-    return uri;
-  } catch (err) {
-    return markMockDb(err);
-  }
+  return markMockDb(new Error("MONGO_URI not set"));
 }
 
 export async function stopTestDB() {
