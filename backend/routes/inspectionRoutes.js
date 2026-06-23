@@ -4,6 +4,7 @@ import GlobalSettings from "../models/GlobalSettings.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
+import { validateObjectId, validateQuery, inspectionListQuerySchema } from "../middleware/validate.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import Car from "../models/Car.js";
 import { initiatePayment } from "../services/paymentService.js";
@@ -89,6 +90,7 @@ router.post(
 // ── Buyer: my inspection orders ──────────────────────────────
 router.get(
   "/my",
+  validateQuery(inspectionListQuerySchema),
   asyncHandler(async (req, res) => {
     const orders = await InspectionOrder.find({ buyer: req.user.id })
       .populate("car", "title brand model year price images")
@@ -118,6 +120,7 @@ router.get(
 router.get(
   "/",
   adminOnly,
+  validateQuery(inspectionListQuerySchema),
   asyncHandler(async (req, res) => {
     const filter = {};
     if (req.query.status) filter.status = req.query.status;

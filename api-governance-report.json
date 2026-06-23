@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:10:30.496Z",
+  "generated": "2026-06-23T08:11:24.337Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 155,
-    "routesWithoutValidation": 263,
-    "validationCoverage": "38.46"
+    "routesWithValidation": 163,
+    "routesWithoutValidation": 256,
+    "validationCoverage": "40.45"
   },
   "undocumentedEndpoints": [
     {
@@ -1712,7 +1712,7 @@
       "path": "/order",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /confirm-payment",
@@ -1720,7 +1720,7 @@
       "path": "/confirm-payment",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /my-tasks",
@@ -1728,7 +1728,7 @@
       "path": "/my-tasks",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /available-inspectors",
@@ -1736,7 +1736,7 @@
       "path": "/available-inspectors",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/assign",
@@ -1744,7 +1744,7 @@
       "path": "/:id/assign",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/start",
@@ -1752,7 +1752,7 @@
       "path": "/:id/start",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/submit",
@@ -1760,7 +1760,7 @@
       "path": "/:id/submit",
       "file": "inspectionRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /car/:carId",
@@ -3093,16 +3093,8 @@
     "GET /detailed",
     "GET /cache",
     "POST /cache/flush",
-    "POST /order",
-    "POST /confirm-payment",
-    "GET /my",
-    "GET /my-tasks",
-    "GET /available-inspectors",
-    "POST /:id/assign",
-    "POST /:id/start",
-    "POST /:id/submit",
-    "GET /car/:carId",
     "POST /apply",
+    "GET /my",
     "POST /:id/approve",
     "POST /:id/reject",
     "GET /:leadId",
@@ -3117,6 +3109,7 @@
     "GET /analyze/:carId",
     "POST /batch-analyze",
     "GET /dealer-stats",
+    "GET /car/:carId",
     "GET /dealer/:dealerId/stats",
     "GET /dealer/:dealerId/report",
     "POST /dealer/:dealerId/bulk-recalculate",
