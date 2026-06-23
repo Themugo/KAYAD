@@ -3,7 +3,7 @@ import { protect, adminOnly } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
 import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
 
@@ -206,6 +206,7 @@ router.get(
 // =============================
 router.get(
   "/users",
+  validateQuery(userListQuerySchema),
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
@@ -1312,6 +1313,7 @@ router.delete(
 // =============================
 router.get(
   "/payments",
+  validateQuery(paymentListQuerySchema),
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
@@ -1443,6 +1445,7 @@ router.post(
 router.get(
   "/reviews",
   staffRole,
+  validateQuery(reviewListQuerySchema),
   asyncHandler(async (req, res) => {
     const { status, dealerId, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -1700,6 +1703,7 @@ router.get(
 router.get(
   "/chats/:chatId/messages",
   adminOrSuper,
+  validateQuery(messageListQuerySchema),
   asyncHandler(async (req, res) => {
     const chat = await Chat.findById(req.params.chatId)
       .populate("participants", "name email")
@@ -2060,4 +2064,5 @@ router.get(
   }),
 );
 
+export default router;
 export default router;
