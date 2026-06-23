@@ -91,6 +91,8 @@ import prometheusMetricsRoutes from "./routes/prometheusMetrics.js";
 import reconciliationRoutes from "./routes/reconciliationRoutes.js";
 import queueRoutes from "./routes/queueRoutes.js";
 import operationsDashboardRoutes from "./routes/operationsDashboardRoutes.js";
+import supportDashboardRoutes from "./routes/supportDashboardRoutes.js";
+import salesDashboardRoutes from "./routes/salesDashboardRoutes.js";
 import v1Routes from "./routes/v1.js";
 import v2Routes from "./routes/v2.js";
 
@@ -390,6 +392,11 @@ if (NODE_ENV !== "production") {
 app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);
 app.use("/api", v1Routes); // Default to v1 for backward compatibility
+
+// ─── DASHBOARD ROUTES (ROLE-BASED) ───────────────────────────
+app.use("/api/v1/analytics/operations", operationsDashboardRoutes);
+app.use("/api/v1/analytics/support", supportDashboardRoutes);
+app.use("/api/v1/analytics/sales", salesDashboardRoutes);
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
 const io = new Server(server, {
