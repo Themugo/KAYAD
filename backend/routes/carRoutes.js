@@ -94,9 +94,97 @@ router.get("/demo/all", protect, asyncHandler(getDemoCars));
 // =============================
 
 // 🔍 GET ALL CARS
+/**
+ * @swagger
+ * /api/v1/cars:
+ *   get:
+ *     summary: Get all cars
+ *     description: Get paginated list of cars with optional filters
+ *     tags: [Cars]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: brand
+ *         schema:
+ *           type: string
+ *         description: Filter by brand
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
+ *     responses:
+ *       200:
+ *         description: Cars retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Car'
+ *                     meta:
+ *                       $ref: '#/components/schemas/PaginationMeta'
+ */
 router.get("/", cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
 
 // 🔎 GET SINGLE CAR
+/**
+ * @swagger
+ * /api/v1/cars/{id}:
+ *   get:
+ *     summary: Get single car
+ *     description: Get detailed information about a specific car
+ *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car ID
+ *     responses:
+ *       200:
+ *         description: Car retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Car'
+ *       404:
+ *         description: Car not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 router.get(
   "/:id",
   optionalAuth,

@@ -1,10 +1,10 @@
 {
-  "generated": "2026-06-23T08:01:02.152Z",
+  "generated": "2026-06-23T08:05:15.250Z",
   "summary": {
     "totalRoutes": 403,
-    "documentedRoutes": 0,
-    "undocumentedRoutes": 403,
-    "documentationCoverage": "0.00",
+    "documentedRoutes": 41,
+    "undocumentedRoutes": 362,
+    "documentationCoverage": "10.17",
     "routesWithValidation": 136,
     "routesWithoutValidation": 284,
     "validationCoverage": "33.75"
@@ -531,14 +531,6 @@
       "hasValidation": false
     },
     {
-      "key": "POST /:id/click",
-      "method": "POST",
-      "path": "/:id/click",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
       "key": "POST /:carId/start",
       "method": "POST",
       "path": "/:carId/start",
@@ -707,22 +699,6 @@
       "hasValidation": false
     },
     {
-      "key": "POST /login",
-      "method": "POST",
-      "path": "/login",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /refresh",
-      "method": "POST",
-      "path": "/refresh",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
       "key": "GET /profile",
       "method": "GET",
       "path": "/profile",
@@ -739,14 +715,6 @@
       "hasValidation": true
     },
     {
-      "key": "POST /logout",
-      "method": "POST",
-      "path": "/logout",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
       "key": "PUT /profile",
       "method": "PUT",
       "path": "/profile",
@@ -755,84 +723,12 @@
       "hasValidation": false
     },
     {
-      "key": "PUT /change-password",
-      "method": "PUT",
-      "path": "/change-password",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /verify-email/:token",
-      "method": "GET",
-      "path": "/verify-email/:token",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /resend-verification",
-      "method": "POST",
-      "path": "/resend-verification",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /forgot-password",
-      "method": "POST",
-      "path": "/forgot-password",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /reset-password",
-      "method": "POST",
-      "path": "/reset-password",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /sessions",
-      "method": "GET",
-      "path": "/sessions",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "DELETE /sessions/:tokenId",
-      "method": "DELETE",
-      "path": "/sessions/:tokenId",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /sessions/revoke-all",
-      "method": "POST",
-      "path": "/sessions/revoke-all",
-      "file": "authRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
       "key": "GET /my",
       "method": "GET",
       "path": "/my",
       "file": "smsBiddingRoutes.js",
       "hasSwagger": false,
       "hasValidation": false
-    },
-    {
-      "key": "POST /:id/bid",
-      "method": "POST",
-      "path": "/:id/bid",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
     },
     {
       "key": "GET /:id/bids",
@@ -883,36 +779,12 @@
       "hasValidation": true
     },
     {
-      "key": "GET /dealer/my-cars",
-      "method": "GET",
-      "path": "/dealer/my-cars",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
       "key": "GET /dealer/analytics",
       "method": "GET",
       "path": "/dealer/analytics",
       "file": "conversionFunnelRoutes.js",
       "hasSwagger": false,
       "hasValidation": false
-    },
-    {
-      "key": "GET /demo/all",
-      "method": "GET",
-      "path": "/demo/all",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /:id/favorite",
-      "method": "POST",
-      "path": "/:id/favorite",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
     },
     {
       "key": "POST /",
@@ -935,86 +807,6 @@
       "method": "DELETE",
       "path": "/:id",
       "file": "savedSearchRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "DELETE /:id/images/:imageIndex",
-      "method": "DELETE",
-      "path": "/:id/images/:imageIndex",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /:id/images",
-      "method": "POST",
-      "path": "/:id/images",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /:id/price-history",
-      "method": "GET",
-      "path": "/:id/price-history",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /:id/insights",
-      "method": "GET",
-      "path": "/:id/insights",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /:id/valuation",
-      "method": "GET",
-      "path": "/:id/valuation",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "GET /admin/:id/fraud",
-      "method": "GET",
-      "path": "/admin/:id/fraud",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /admin/:id/start",
-      "method": "POST",
-      "path": "/admin/:id/start",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /admin/:id/end",
-      "method": "POST",
-      "path": "/admin/:id/end",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "POST /batch",
-      "method": "POST",
-      "path": "/batch",
-      "file": "carRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": true
-    },
-    {
-      "key": "PATCH /:id/promote",
-      "method": "PATCH",
-      "path": "/:id/promote",
-      "file": "carRoutes.js",
       "hasSwagger": false,
       "hasValidation": true
     },
@@ -2551,38 +2343,6 @@
       "method": "GET",
       "path": "/:id/stats",
       "file": "organizationRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": false
-    },
-    {
-      "key": "POST /initiate",
-      "method": "POST",
-      "path": "/initiate",
-      "file": "paymentRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": false
-    },
-    {
-      "key": "GET /status/:id",
-      "method": "GET",
-      "path": "/status/:id",
-      "file": "paymentRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": false
-    },
-    {
-      "key": "POST /callback",
-      "method": "POST",
-      "path": "/callback",
-      "file": "paymentRoutes.js",
-      "hasSwagger": false,
-      "hasValidation": false
-    },
-    {
-      "key": "GET /checkout/:checkoutRequestId",
-      "method": "GET",
-      "path": "/checkout/:checkoutRequestId",
-      "file": "paymentRoutes.js",
       "hasSwagger": false,
       "hasValidation": false
     },
