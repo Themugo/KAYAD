@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:28:17.269Z",
+  "generated": "2026-06-23T08:29:34.254Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 205,
-    "routesWithoutValidation": 214,
-    "validationCoverage": "50.87"
+    "routesWithValidation": 206,
+    "routesWithoutValidation": 212,
+    "validationCoverage": "51.12"
   },
   "undocumentedEndpoints": [
     {
@@ -32,7 +32,7 @@
       "path": "/stats",
       "file": "referralRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /users",
@@ -2480,7 +2480,7 @@
       "path": "/code",
       "file": "referralRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /dealer/:dealerId",
@@ -3147,8 +3147,6 @@
     "POST /run",
     "POST /reports/:reportId/resolve",
     "GET /export/:reportId/:format",
-    "GET /stats",
-    "GET /code",
     "GET /dealers/:dealerId",
     "GET /dealers",
     "GET /trending",

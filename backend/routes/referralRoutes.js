@@ -1,6 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import User from "../models/User.js";
 import Referral from "../models/Referral.js";
 import Transaction from "../models/Transaction.js";
@@ -10,6 +11,7 @@ const router = express.Router();
 router.get(
   "/stats",
   protect,
+  validateQuery(analyticsQuerySchema),
   asyncHandler(async (req, res) => {
     const userId = req.user.id;
 
