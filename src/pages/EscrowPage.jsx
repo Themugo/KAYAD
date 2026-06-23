@@ -87,7 +87,10 @@ export default function EscrowPage() {
     setLoading(true);
     escrowAPI.mine()
       .then(d => setEscrows(d.escrows || d.data || []))
-      .catch(() => toast('Failed to load escrows', 'error'))
+      .catch((error) => {
+        console.error('Failed to load escrows:', error);
+        toast('Failed to load escrows', 'error');
+      })
       .finally(() => setLoading(false));
   };
 
