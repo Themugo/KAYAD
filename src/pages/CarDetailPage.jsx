@@ -75,10 +75,15 @@ export default function CarDetailPage() {
         let c = data?.car || data?.data || data;
         if (!c || !c._id) c = getMockCar(id);
         setCar(c);
-        if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick?.(id).catch(() => {}); }
-        if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch(() => {});
+        if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick?.(id).catch((error) => console.error('Track click failed:', error)); }
+        if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch((error) => console.error('Fetch reviews failed:', error));
       })
-      .catch(() => { const m = getMockCar(id); setCar(m); if (m) setImgIdx(m.coverImage ?? 0); })
+      .catch((error) => {
+        console.error('Failed to fetch car:', error);
+        const m = getMockCar(id);
+        setCar(m);
+        if (m) setImgIdx(m.coverImage ?? 0);
+      })
       .finally(() => setLoading(false));
     if (isAuth) {
       favoritesAPI.list().then(d => {
@@ -86,7 +91,7 @@ export default function CarDetailPage() {
         const match = favs.find(f => (f._id === id || f?.car?._id === id));
         setIsFav(!!match);
         setPriceAlertOn(match?.notifyOnPriceDrop === true);
-      }).catch(() => {});
+      }).catch((error) => console.error('Failed to fetch favorites:', error));
     }
   }, [id]);
 
@@ -96,7 +101,7 @@ export default function CarDetailPage() {
     setNtsaLoading(true);
     ntsaAPI.status(car._id).then(d => {
       setNtsaStatus(d);
-    }).catch(() => {}).finally(() => setNtsaLoading(false));
+    }).catch((error) => console.error('Failed to fetch NTSA status:', error)).finally(() => setNtsaLoading(false));
   }, [car?._id]);
 
   const handleRequestNtsa = async () => {
@@ -150,7 +155,7 @@ export default function CarDetailPage() {
   useEffect(() => {
     if (!car?._id || !isLive) return;
     const fetchBids = () => {
-      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch(() => {});
+      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch((error) => console.error('Failed to fetch bids:', error));
     };
     fetchBids();
     const iv = setInterval(fetchBids, 8000);
@@ -202,7 +207,10 @@ export default function CarDetailPage() {
       setIsFav(nowFav);
       if (!nowFav) setPriceAlertOn(false);
       toast(nowFav ? 'Saved to wishlist' : 'Removed from wishlist', 'success');
-    } catch { toast('Failed', 'error'); }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      toast('Failed to update wishlist', 'error');
+    }
   };
 
   const handlePriceAlert = async () => {
@@ -212,7 +220,10 @@ export default function CarDetailPage() {
       await favoritesAPI.setPriceAlert(id, next);
       setPriceAlertOn(next);
       toast(next ? 'Price alerts enabled' : 'Price alerts disabled', 'success');
-    } catch { toast('Failed to update price alert', 'error'); }
+    } catch (error) {
+      console.error('Failed to update price alert:', error);
+      toast('Failed to update price alert', 'error');
+    }
   };
 
   const handleChat = async () => {
@@ -225,8 +236,14 @@ export default function CarDetailPage() {
 
   const handleSetCover = async (idx) => {
     setImgIdx(idx);
-    try { await carsAPI.promote(id, { coverImage: idx }); setCar(p => ({ ...p, coverImage: idx })); toast('Cover image updated', 'success'); }
-    catch { toast('Failed to update cover', 'error'); }
+    try {
+      await carsAPI.promote(id, { coverImage: idx });
+      setCar(p => ({ ...p, coverImage: idx }));
+      toast('Cover image updated', 'success');
+    } catch (error) {
+      console.error('Failed to update cover image:', error);
+      toast('Failed to update cover', 'error');
+    }
   };
 
   const handleTogglePromote = async () => {
@@ -236,8 +253,10 @@ export default function CarDetailPage() {
       await carsAPI.promote(id, { isPromoted: next });
       setCar(p => ({ ...p, isPromoted: next }));
       toast(next ? 'Featured on homepage' : 'Removed from featured', 'success');
-    } catch { toast('Failed', 'error'); }
-    finally { setPromoting(false); }
+    } catch (error) {
+      console.error('Failed to toggle promotion:', error);
+      toast('Failed to update promotion status', 'error');
+    } finally { setPromoting(false); }
   };
 
   if (loading) return <DetailSkeleton />;

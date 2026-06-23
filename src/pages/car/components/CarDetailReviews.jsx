@@ -13,8 +13,9 @@ export default function CarDetailReviews({ dealerId, carId, reviews, isAuth, isO
       await reviewsAPI.create({ ...reviewForm, dealer: dealerId, carId });
       setReviewForm({ rating: 5, comment: '' });
       if (onReviewSubmitted) onReviewSubmitted();
-    } catch { /* ignore */ }
-    finally { setSubmittingReview(false); }
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+    } finally { setSubmittingReview(false); }
   };
 
   return (
