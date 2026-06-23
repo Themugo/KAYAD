@@ -92,6 +92,7 @@ import reconciliationRoutes from "./routes/reconciliationRoutes.js";
 import queueRoutes from "./routes/queueRoutes.js";
 import operationsDashboardRoutes from "./routes/operationsDashboardRoutes.js";
 import v1Routes from "./routes/v1.js";
+import v2Routes from "./routes/v2.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
 import notFound from "./middleware/notFound.js";
@@ -296,6 +297,10 @@ app.use(compression());
 
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
+
+// ─── API VERSION DETECTION ───────────────────────────────────
+import apiVersionMiddleware from "./middleware/apiVersion.js";
+app.use(apiVersionMiddleware);
 app.use(bodyGuard());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true, limit: "2mb" }));
@@ -380,6 +385,11 @@ if (NODE_ENV !== "production") {
     }),
   );
 }
+
+// ─── API ROUTES (VERSIONED) ───────────────────────────────────
+app.use("/api/v1", v1Routes);
+app.use("/api/v2", v2Routes);
+app.use("/api", v1Routes); // Default to v1 for backward compatibility
 
 // ─── SOCKET.IO ────────────────────────────────────────────────
 const io = new Server(server, {
