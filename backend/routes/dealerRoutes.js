@@ -38,6 +38,7 @@ router.use(protect, dealerOnly);
 // =============================
 router.get(
   "/earnings",
+  validateQuery(analyticsQuerySchema),
   cacheAnalytics,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);

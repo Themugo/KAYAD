@@ -1,7 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, userListQuerySchema } from "../middleware/validate.js";
 import { getPagination } from "../middleware/apiPagination.js";
 import { cacheUserData, invalidateCache } from "../middleware/apiCache.js";
 import { cacheDealerSearch, invalidateDealerSearchCache } from "../middleware/searchCache.js";
@@ -13,6 +13,7 @@ const router = express.Router();
 
 router.get(
   "/search",
+  validateQuery(userListQuerySchema),
   cacheDealerSearch,
   trackDealerSearchLatency,
   trackCarSearch,

@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:06:32.727Z",
+  "generated": "2026-06-23T08:08:54.768Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 136,
-    "routesWithoutValidation": 284,
-    "validationCoverage": "33.75"
+    "routesWithValidation": 155,
+    "routesWithoutValidation": 263,
+    "validationCoverage": "38.46"
   },
   "undocumentedEndpoints": [
     {
@@ -72,7 +72,7 @@
       "path": "/cars",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "DELETE /cars/:id",
@@ -704,7 +704,7 @@
       "path": "/profile",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /me",
@@ -720,7 +720,7 @@
       "path": "/profile",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /my",
@@ -1032,7 +1032,7 @@
       "path": "/earnings",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /analytics",
@@ -1056,7 +1056,7 @@
       "path": "/quick-stats",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /bids",
@@ -1064,7 +1064,7 @@
       "path": "/bids",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /escrows",
@@ -1072,7 +1072,7 @@
       "path": "/escrows",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /settlement",
@@ -1080,7 +1080,7 @@
       "path": "/settlement",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /settlement",
@@ -1088,7 +1088,7 @@
       "path": "/settlement",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /team",
@@ -1096,7 +1096,7 @@
       "path": "/team",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /team/invite",
@@ -1104,7 +1104,7 @@
       "path": "/team/invite",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PATCH /team/:memberId",
@@ -1112,7 +1112,7 @@
       "path": "/team/:memberId",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "DELETE /team/:memberId",
@@ -1120,7 +1120,7 @@
       "path": "/team/:memberId",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/duplicate",
@@ -1128,7 +1128,7 @@
       "path": "/cars/:id/duplicate",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PATCH /cars/:id/mark-sold",
@@ -1136,7 +1136,7 @@
       "path": "/cars/:id/mark-sold",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PATCH /cars/bulk-status",
@@ -1144,7 +1144,7 @@
       "path": "/cars/bulk-status",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/accept-bid",
@@ -1152,7 +1152,7 @@
       "path": "/cars/:id/accept-bid",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/reject-bid",
@@ -1160,7 +1160,7 @@
       "path": "/cars/:id/reject-bid",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/auction/start",
@@ -1168,7 +1168,7 @@
       "path": "/cars/:id/auction/start",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/auction/end",
@@ -1176,7 +1176,7 @@
       "path": "/cars/:id/auction/end",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /cars/:id/auction/extend",
@@ -1184,7 +1184,7 @@
       "path": "/cars/:id/auction/extend",
       "file": "dealerRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:disputeId/evidence",
@@ -3038,29 +3038,6 @@
     "PUT /admin/override/:dealerId",
     "GET /admin/distribution",
     "GET /admin/alerts",
-    "GET /earnings",
-    "GET /cars",
-    "GET /analytics",
-    "GET /summary",
-    "GET /quick-stats",
-    "GET /bids",
-    "GET /escrows",
-    "GET /settlement",
-    "PUT /settlement",
-    "GET /profile",
-    "PUT /profile",
-    "GET /team",
-    "POST /team/invite",
-    "PATCH /team/:memberId",
-    "DELETE /team/:memberId",
-    "POST /cars/:id/duplicate",
-    "PATCH /cars/:id/mark-sold",
-    "PATCH /cars/bulk-status",
-    "POST /cars/:id/accept-bid",
-    "POST /cars/:id/reject-bid",
-    "POST /cars/:id/auction/start",
-    "POST /cars/:id/auction/end",
-    "POST /cars/:id/auction/extend",
     "POST /:disputeId/evidence",
     "GET /:disputeId",
     "GET /user/my-disputes",
@@ -3078,6 +3055,7 @@
     "POST /offer",
     "POST /bid",
     "POST /escrow",
+    "GET /analytics",
     "GET /my-events",
     "GET /revenue",
     "GET /user-growth",
@@ -3147,6 +3125,7 @@
     "GET /platform/trends",
     "GET /platform/low-quality",
     "GET /platform/benchmarks",
+    "GET /summary",
     "GET /trends",
     "GET /alerts",
     "POST /alerts/:alertId/resolve",

@@ -1,7 +1,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateBid } from "../middleware/validate.js";
+import { validateObjectId, validateBid;
 import { bidLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
@@ -26,7 +26,7 @@ const getPagination = (req) => {
 // =============================
 // 👤 MY BIDS (USER)
 // =============================
-router.get("/my", protect, asyncHandler(getMyBids));
+router.get("/my", protect, validateQuery(bidListQuerySchema), asyncHandler(getMyBids));
 
 // =============================
 // ⚡ PLACE BID (USER) - Idempotent to prevent duplicate bids
@@ -44,7 +44,7 @@ router.post(
 // =============================
 // 📊 GET BIDS FOR A CAR
 // =============================
-router.get("/:id/bids", validateObjectId, asyncHandler(getAuctionBids));
+router.get("/:id/bids", validateObjectId, validateQuery(bidListQuerySchema), asyncHandler(getAuctionBids));
 
 // =============================
 // 📲 MPESA CALLBACK (SAFE ENTRY) - Idempotent to prevent duplicate callbacks
