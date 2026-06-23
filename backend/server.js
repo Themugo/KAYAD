@@ -95,6 +95,7 @@ import supportDashboardRoutes from "./routes/supportDashboardRoutes.js";
 import salesDashboardRoutes from "./routes/salesDashboardRoutes.js";
 import v1Routes from "./routes/v1.js";
 import v2Routes from "./routes/v2.js";
+import reliabilityRoutes from "./routes/reliabilityRoutes.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
 import notFound from "./middleware/notFound.js";
@@ -115,6 +116,7 @@ import { startPriceAlertCron } from "./services/priceAlertCron.js";
 import { startScheduler as startHealthScoreScheduler } from "./services/dealerHealthScoreScheduler.js";
 import { startScheduler as startMarketTrendScheduler } from "./services/marketTrendScheduler.js";
 import { startScheduler as startMarketplaceHealthScheduler } from "./services/marketplaceHealthScheduler.js";
+import { startSliScheduler } from "./services/sliScheduler.js";
 import { initPostHog } from "./utils/posthog.js";
 import { initCache } from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
@@ -546,6 +548,7 @@ app.use("/health", fastTimeout, healthRoutes);
 app.use("/metrics", fastTimeout, metricsRoutes);
 app.use("/prometheus", fastTimeout, prometheusMetricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
+app.use("/api/reliability", reliabilityRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -737,12 +740,21 @@ const bootstrap = async () => {
       console.log("❌ Failed to start marketplace health scheduler:", err);
     }
 
+    try {
+      startSliScheduler();
+      console.log("✅ Reliability/SLI scheduler started");
+    } catch (err) {
+      logError("Failed to start SLI scheduler", err);
+      console.log("❌ Failed to start SLI scheduler:", err);
+    }
+
     logInfo("Background services started", {
       escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
       auctionReminderCron: "reminders active",
       savedSearchCron: "10-min cycle",
       priceAlertCron: "15-min cycle",
       auctionEngine: "running",
+      sliScheduler: "1-min SLI / 5-min budget / 1-min alerts",
     });
 
     // ── VIEW COUNT FLUSH (Issue #5) ─────────────────────────

@@ -141,6 +141,174 @@
           }
         ],
         "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "SLO Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "slo_compliance_percent",
+            "legendFormat": "SLO Compliance %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 32},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 90, "color": "red"},
+          {"value": 95, "color": "yellow"},
+          {"value": 99.9, "color": "green"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Error Budget Remaining",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "error_budget_remaining_percent",
+            "legendFormat": "Remaining %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 32},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 0, "color": "red"},
+          {"value": 50, "color": "yellow"},
+          {"value": 80, "color": "green"}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Error Budget Consumption (30d)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "error_budget_consumed_percent",
+            "legendFormat": "Consumed %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36},
+        "lines": true,
+        "fill": 1
+      },
+      {
+        "id": 12,
+        "title": "Burn Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "burn_rate",
+            "legendFormat": "Burn Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "burn_rate_critical_threshold",
+            "legendFormat": "Critical Threshold (6x)",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36},
+        "lines": true,
+        "fill": 0
+      },
+      {
+        "id": 13,
+        "title": "Queue Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "queue_depth",
+            "legendFormat": "Depth {{queue}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(queue_processing_total{status=\"success\"}[5m])",
+            "legendFormat": "Processed/s {{queue}}",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 44}
+      },
+      {
+        "id": 14,
+        "title": "Availability SLI",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_availability_percent",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 0, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 99.0, "color": "red"},
+          {"value": 99.5, "color": "yellow"},
+          {"value": 99.9, "color": "green"}
+        ]
+      },
+      {
+        "id": 15,
+        "title": "P95 Latency (ms)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_latency_p95_ms",
+            "legendFormat": "P95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 4, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 5000, "color": "red"},
+          {"value": 3000, "color": "yellow"},
+          {"value": 2000, "color": "green"}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Error Rate %",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_error_rate_percent",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 8, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 5, "color": "red"},
+          {"value": 2, "color": "yellow"},
+          {"value": 1, "color": "green"}
+        ]
       }
     ]
   }
