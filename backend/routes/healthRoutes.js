@@ -10,6 +10,7 @@ import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -204,7 +205,7 @@ router.get("/detailed", checkReplicaSetHealth, async (req, res) => {
 });
 
 // Cache statistics endpoint
-router.get("/cache", async (req, res) => {
+router.get("/cache", validateQuery(analyticsQuerySchema), async (req, res) => {
   const stats = cacheService.getStats();
   res.json({
     success: true,

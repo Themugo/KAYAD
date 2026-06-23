@@ -20,6 +20,7 @@ import {
 } from "../controllers/searchAnalyticsController.js";
 import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ const router = express.Router();
 // =============================
 
 // Get trending searches
-router.get("/trending", asyncHandler(getTrendingSearchesHandler));
+router.get("/trending", validateQuery(analyticsQuerySchema), asyncHandler(getTrendingSearchesHandler));
 
 // =============================
 // 🔐 ADMIN ROUTES

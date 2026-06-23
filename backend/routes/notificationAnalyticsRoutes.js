@@ -22,6 +22,7 @@ import {
 } from "../controllers/notificationAnalyticsController.js";
 import { adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 
 const router = express.Router();
 

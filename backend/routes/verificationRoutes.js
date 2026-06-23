@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
@@ -82,12 +83,13 @@ router.post(
 router.get("/admin/all", allowRoles("admin", "superadmin"), asyncHandler(getAllVerifications));
 
 // GET /api/verification/admin/:id - Get verification by ID (admin only)
-router.get("/admin/:id", allowRoles("admin", "superadmin"), asyncHandler(getVerificationById));
+router.get("/admin/:id", allowRoles("admin", "superadmin"), validateObjectId, asyncHandler(getVerificationById));
 
 // POST /api/verification/admin/:id/approve - Approve verification (admin only, idempotent)
 router.post(
   "/admin/:id/approve",
   allowRoles("admin", "superadmin"),
+  validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await approveVerification(req, res);
@@ -103,6 +105,7 @@ router.post(
 router.post(
   "/admin/:id/reject",
   allowRoles("admin", "superadmin"),
+  validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await rejectVerification(req, res);
@@ -118,6 +121,7 @@ router.post(
 router.post(
   "/admin/:id/suspend",
   allowRoles("admin", "superadmin"),
+  validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await suspendDealer(req, res);
@@ -133,6 +137,7 @@ router.post(
 router.post(
   "/admin/:id/reinstate",
   allowRoles("admin", "superadmin"),
+  validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await reinstateDealer(req, res);

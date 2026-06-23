@@ -2,6 +2,7 @@ import { Router } from "express";
 import InspectorApplication from "../models/InspectorApplication.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   submitApplication,
   approveApplication,
@@ -24,8 +25,8 @@ router.get(
 );
 
 router.get("/", protect, adminOnly, asyncHandler(listApplications));
-router.get("/:id", protect, adminOnly, asyncHandler(getApplication));
-router.post("/:id/approve", protect, adminOnly, asyncHandler(approveApplication));
-router.post("/:id/reject", protect, adminOnly, asyncHandler(rejectApplication));
+router.get("/:id", protect, adminOnly, validateObjectId, asyncHandler(getApplication));
+router.post("/:id/approve", protect, adminOnly, validateObjectId, asyncHandler(approveApplication));
+router.post("/:id/reject", protect, adminOnly, validateObjectId, asyncHandler(rejectApplication));
 
 export default router;

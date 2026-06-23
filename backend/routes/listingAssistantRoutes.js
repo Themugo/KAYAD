@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { analyzeListing, batchAnalyze, getDealerQualityStats } from "../controllers/listingAssistantController.js";
 
 const router = express.Router();
@@ -10,7 +11,7 @@ const router = express.Router();
 // =============================
 
 // Analyze listing quality
-router.get("/analyze/:carId", protect, asyncHandler(analyzeListing));
+router.get("/analyze/:carId", protect, validateObjectId, asyncHandler(analyzeListing));
 
 // Batch analyze listings (admin only)
 router.post("/batch-analyze", protect, adminOnly, asyncHandler(batchAnalyze));

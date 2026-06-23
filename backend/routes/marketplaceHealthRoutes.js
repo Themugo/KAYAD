@@ -16,6 +16,7 @@ import {
 } from "../controllers/marketplaceHealthController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ router.get("/alerts", asyncHandler(getAlertsHandler));
 // =============================
 
 // Resolve alert
-router.post("/alerts/:alertId/resolve", adminOnly, asyncHandler(resolveAlert));
+router.post("/alerts/:alertId/resolve", adminOnly, validateObjectId, asyncHandler(resolveAlert));
 
 // Get detailed metrics
 router.get("/metrics", adminOnly, asyncHandler(getDetailedMetrics));

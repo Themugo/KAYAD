@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import {
   getSystemHealth,
   getPaymentFailures,
@@ -32,7 +33,7 @@ router.use(adminOnly);
 // =============================
 // 📊 DASHBOARD OVERVIEW
 // =============================
-router.get("/overview", asyncHandler(getDashboardOverview));
+router.get("/overview", validateQuery(analyticsQuerySchema), asyncHandler(getDashboardOverview));
 
 // =============================
 // 💻 SYSTEM HEALTH

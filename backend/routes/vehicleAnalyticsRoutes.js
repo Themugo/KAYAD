@@ -22,6 +22,7 @@ import {
 } from "../controllers/vehicleAnalyticsController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -30,7 +31,7 @@ const router = express.Router();
 // =============================
 
 // Get market summary
-router.get("/market/summary", asyncHandler(getMarketSummary));
+router.get("/market/summary", validateQuery(analyticsQuerySchema), asyncHandler(getMarketSummary));
 
 // Get price trends
 router.get("/market/price-trends", asyncHandler(getPriceTrends));
@@ -64,7 +65,7 @@ router.get("/market/fastest-selling", asyncHandler(getFastestSellingHandler));
 // =============================
 
 // Get dealer-specific analytics
-router.get("/market/dealer/:dealerId", protect, asyncHandler(getDealerAnalytics));
+router.get("/market/dealer/:dealerId", protect, validateObjectId, asyncHandler(getDealerAnalytics));
 
 // =============================
 // 🔐 ADMIN ROUTES

@@ -18,6 +18,7 @@ import {
 } from "../controllers/listingQualityController.js";
 import { protect, adminOnly, dealerOnly, optionalAuth } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -26,23 +27,24 @@ const router = express.Router();
 // =============================
 
 // Get listing quality score
-router.get("/car/:carId", optionalAuth, asyncHandler(getListingQualityHandler));
+router.get("/car/:carId", optionalAuth, validateObjectId, asyncHandler(getListingQualityHandler));
 
 // =============================
 // 🏪 DEALER ROUTES
 // =============================
 
 // Get dealer quality stats
-router.get("/dealer/:dealerId/stats", protect, dealerOnly, asyncHandler(getDealerQualityStatsHandler));
+router.get("/dealer/:dealerId/stats", protect, dealerOnly, validateObjectId, asyncHandler(getDealerQualityStatsHandler));
 
 // Get dealer quality report
-router.get("/dealer/:dealerId/report", protect, dealerOnly, asyncHandler(getDealerQualityReportHandler));
+router.get("/dealer/:dealerId/report", protect, dealerOnly, validateObjectId, asyncHandler(getDealerQualityReportHandler));
 
 // Bulk recalculate dealer quality
 router.post(
   "/dealer/:dealerId/bulk-recalculate",
   protect,
   dealerOnly,
+  validateObjectId,
   asyncHandler(bulkRecalculateDealerQualityHandler),
 );
 
@@ -51,7 +53,7 @@ router.post(
 // =============================
 
 // Recalculate listing quality
-router.post("/car/:carId/recalculate", adminOnly, asyncHandler(recalculateListingQualityHandler));
+router.post("/car/:carId/recalculate", adminOnly, validateObjectId, asyncHandler(recalculateListingQualityHandler));
 
 // Get platform quality stats
 router.get("/platform/stats", adminOnly, asyncHandler(getPlatformQualityStatsHandler));

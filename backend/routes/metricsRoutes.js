@@ -10,6 +10,7 @@ import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { getAllMetrics, getCounter, getGauge, getHistogram } from "../config/metrics.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -54,7 +55,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get HTTP metrics
-router.get("/http", async (req, res) => {
+router.get("/http", validateQuery(analyticsQuerySchema), async (req, res) => {
   try {
     const metrics = getAllMetrics();
     const httpMetrics = {};

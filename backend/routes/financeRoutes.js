@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
 import {
@@ -36,7 +37,7 @@ router.use(allowRoles("admin", "superadmin"));
 router.get("/reports", asyncHandler(getAllReports));
 
 // GET /api/finance/reports/:id - Get specific reconciliation report (admin only)
-router.get("/reports/:id", asyncHandler(getReportById));
+router.get("/reports/:id", validateObjectId, asyncHandler(getReportById));
 
 // GET /api/finance/issues - Get unresolved reconciliation issues (admin only)
 router.get("/issues", asyncHandler(getUnresolvedIssues));
@@ -44,6 +45,7 @@ router.get("/issues", asyncHandler(getUnresolvedIssues));
 // POST /api/finance/reports/:reportId/issues/:issueIndex/resolve - Resolve reconciliation issue (admin only)
 router.post(
   "/reports/:reportId/issues/:issueIndex/resolve",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const result = await resolveIssue(req, res);
     await logActionFromReq(req, "finance_issue_resolved", {

@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
 import {
@@ -35,11 +36,12 @@ router.use(allowRoles("admin", "superadmin"));
 router.get("/all", asyncHandler(getAllFlaggedDuplicates));
 
 // GET /api/duplicates/:id - Get duplicate log by ID (admin only)
-router.get("/:id", asyncHandler(getDuplicateLogById));
+router.get("/:id", validateObjectId, asyncHandler(getDuplicateLogById));
 
 // POST /api/duplicates/:id/false-positive - Mark as false positive (admin only)
 router.post(
   "/:id/false-positive",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const result = await markAsFalsePositive(req, res);
     await logActionFromReq(req, "duplicate_false_positive", {
@@ -53,6 +55,7 @@ router.post(
 // POST /api/duplicates/:id/confirm - Confirm as duplicate (admin only)
 router.post(
   "/:id/confirm",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const result = await confirmAsDuplicate(req, res);
     await logActionFromReq(req, "duplicate_confirmed", {
@@ -66,6 +69,7 @@ router.post(
 // POST /api/duplicates/:id/under-review - Set to under review (admin only)
 router.post(
   "/:id/under-review",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const result = await setToUnderReview(req, res);
     await logActionFromReq(req, "duplicate_under_review", {

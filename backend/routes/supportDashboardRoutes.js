@@ -3,6 +3,7 @@
 
 import express from "express";
 import { protect, supportOnly } from "../middleware/auth.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   getSupportDashboard,
   getTicketMetrics,
@@ -22,7 +23,7 @@ router.get("/", protect, supportOnly, getSupportDashboard);
 router.get("/tickets", protect, supportOnly, getTicketMetrics);
 
 // Agent performance
-router.get("/agents/:agentId", protect, supportOnly, getAgentPerformance);
+router.get("/agents/:agentId", protect, supportOnly, validateObjectId, getAgentPerformance);
 router.get("/agents", protect, supportOnly, getAgentPerformance);
 
 export default router;

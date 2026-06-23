@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   getQueueMetricsHandler,
   getQueueStatisticsHandler,
@@ -58,10 +59,10 @@ router.get("/dlq/statistics", protect, adminOnly, asyncHandler(getDLQStatisticsH
 router.get("/dlq/jobs", protect, adminOnly, asyncHandler(getDLQJobsHandler));
 
 // Retry a failed job from DLQ
-router.post("/dlq/retry/:jobId", protect, adminOnly, asyncHandler(retryDLQJobHandler));
+router.post("/dlq/retry/:jobId", protect, adminOnly, validateObjectId, asyncHandler(retryDLQJobHandler));
 
 // Delete a failed job from DLQ
-router.delete("/dlq/delete/:jobId", protect, adminOnly, asyncHandler(deleteDLQJobHandler));
+router.delete("/dlq/delete/:jobId", protect, adminOnly, validateObjectId, asyncHandler(deleteDLQJobHandler));
 
 // =============================
 // 📊 JOB FAILURE ENDPOINTS
@@ -71,9 +72,9 @@ router.delete("/dlq/delete/:jobId", protect, adminOnly, asyncHandler(deleteDLQJo
 router.get("/failures", protect, adminOnly, asyncHandler(getJobFailuresHandler));
 
 // Get job failure details
-router.get("/failures/:failureId", protect, adminOnly, asyncHandler(getJobFailureDetailsHandler));
+router.get("/failures/:failureId", protect, adminOnly, validateObjectId, asyncHandler(getJobFailureDetailsHandler));
 
 // Resolve a job failure
-router.post("/failures/:failureId/resolve", protect, adminOnly, asyncHandler(resolveJobFailureHandler));
+router.post("/failures/:failureId/resolve", protect, adminOnly, validateObjectId, asyncHandler(resolveJobFailureHandler));
 
 export default router;

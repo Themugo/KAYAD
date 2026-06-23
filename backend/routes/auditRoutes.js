@@ -8,6 +8,7 @@ import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { validateObjectId } from "../middleware/validate.js";
 
 import {
   getAllAudits,
@@ -43,10 +44,10 @@ router.use(allowRoles("admin", "superadmin"));
 router.get("/all", asyncHandler(getAllAudits));
 
 // GET /api/audit/escrow/:id - Get audit trail for escrow (admin only)
-router.get("/escrow/:id", asyncHandler(getEscrowAuditTrail));
+router.get("/escrow/:id", validateObjectId, asyncHandler(getEscrowAuditTrail));
 
 // GET /api/audit/user/:userId - Get audits by user (admin only)
-router.get("/user/:userId", asyncHandler(getUserAudits));
+router.get("/user/:userId", validateObjectId, asyncHandler(getUserAudits));
 
 // GET /api/audit/action/:action - Get audits by action type (admin only)
 router.get("/action/:action", asyncHandler(getActionAudits));
@@ -57,6 +58,7 @@ router.get("/date-range", asyncHandler(getDateRangeAudits));
 // GET /api/audit/export/:escrowId - Export audit trail (admin only)
 router.get(
   "/export/:escrowId",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const result = await exportEscrowAudit(req, res);
     await logActionFromReq(req, "audit_export", {
@@ -71,7 +73,7 @@ router.get(
 router.get("/statistics", asyncHandler(getAuditStats));
 
 // GET /api/audit/:id - Get single audit record (admin only)
-router.get("/:id", asyncHandler(getAuditById));
+router.get("/:id", validateObjectId, asyncHandler(getAuditById));
 
 // =============================
 // � GENERAL AUDIT LOG ENDPOINTS
@@ -81,16 +83,16 @@ router.get("/:id", asyncHandler(getAuditById));
 router.get("/logs", asyncHandler(getAllAuditLogs));
 
 // GET /api/audit/logs/:id - Get single audit log by ID (admin only)
-router.get("/logs/:id", asyncHandler(getAuditLogById));
+router.get("/logs/:id", validateObjectId, asyncHandler(getAuditLogById));
 
 // GET /api/audit/logs/action/:action - Get audit logs by action (admin only)
 router.get("/logs/action/:action", asyncHandler(getAuditLogsByAction));
 
 // GET /api/audit/logs/actor/:actorId - Get audit logs by actor (admin only)
-router.get("/logs/actor/:actorId", asyncHandler(getAuditLogsByActor));
+router.get("/logs/actor/:actorId", validateObjectId, asyncHandler(getAuditLogsByActor));
 
 // GET /api/audit/logs/target/:targetId/:targetModel - Get audit logs by target (admin only)
-router.get("/logs/target/:targetId/:targetModel", asyncHandler(getAuditLogsByTarget));
+router.get("/logs/target/:targetId/:targetModel", validateObjectId, asyncHandler(getAuditLogsByTarget));
 
 // GET /api/audit/logs/statistics - Get audit log statistics (admin only)
 router.get("/logs/statistics", asyncHandler(getAuditLogStatistics));

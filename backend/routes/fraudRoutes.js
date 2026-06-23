@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   getFraudAnalytics,
   runFraudCheckOnTarget,
@@ -35,31 +36,31 @@ router.get("/all", protect, adminOnly, asyncHandler(getAllFraudDetections));
 router.post("/check", protect, adminOnly, asyncHandler(runFraudCheckOnTarget));
 
 // Check user for fraud
-router.get("/check/user/:userId", protect, adminOnly, asyncHandler(checkUserFraud));
+router.get("/check/user/:userId", protect, adminOnly, validateObjectId, asyncHandler(checkUserFraud));
 
 // Check auction for fraud
-router.get("/check/auction/:carId", protect, adminOnly, asyncHandler(checkAuctionFraud));
+router.get("/check/auction/:carId", protect, adminOnly, validateObjectId, asyncHandler(checkAuctionFraud));
 
 // Check escrow for fraud
-router.get("/check/escrow/:escrowId", protect, adminOnly, asyncHandler(checkEscrowFraud));
+router.get("/check/escrow/:escrowId", protect, adminOnly, validateObjectId, asyncHandler(checkEscrowFraud));
 
 // Check dealer for fraud
-router.get("/check/dealer/:dealerId", protect, adminOnly, asyncHandler(checkDealerFraud));
+router.get("/check/dealer/:dealerId", protect, adminOnly, validateObjectId, asyncHandler(checkDealerFraud));
 
 // Check for price manipulation
-router.get("/check/price-manipulation/:carId", protect, adminOnly, asyncHandler(checkPriceManipulation));
+router.get("/check/price-manipulation/:carId", protect, adminOnly, validateObjectId, asyncHandler(checkPriceManipulation));
 
 // Check for account farms
-router.get("/check/account-farms/:dealerId", protect, adminOnly, asyncHandler(checkAccountFarms));
+router.get("/check/account-farms/:dealerId", protect, adminOnly, validateObjectId, asyncHandler(checkAccountFarms));
 
 // Check for duplicate photos
-router.get("/check/duplicate-photos/:carId", protect, adminOnly, asyncHandler(checkDuplicatePhotos));
+router.get("/check/duplicate-photos/:carId", protect, adminOnly, validateObjectId, asyncHandler(checkDuplicatePhotos));
 
 // =============================
 // ⚖️ FRAUD MANAGEMENT
 // =============================
 
 // Update fraud status and take action (admin only)
-router.put("/:fraudId/status", protect, adminOnly, asyncHandler(updateFraudStatus));
+router.put("/:fraudId/status", protect, adminOnly, validateObjectId, asyncHandler(updateFraudStatus));
 
 export default router;

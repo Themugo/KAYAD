@@ -126,7 +126,7 @@ export const validateParams = (schema) => (req, res, next) => {
   next();
 };
 
-const OBJECT_ID_KEYS = ["id", "chatId", "carId", "bidId", "userId", "reviewId"];
+const OBJECT_ID_KEYS = ["id", "chatId", "carId", "bidId", "userId", "reviewId", "dealerId", "escrowId", "fraudId", "auditId", "jobId", "failureId", "reportId", "agentId", "ticketId", "carId", "alertId", "inspectorId", "dealerId", "reportId", "issueIndex"];
 
 export const validateObjectId = (req, res, next) => {
   const id = req.params.id || OBJECT_ID_KEYS.map((k) => req.params[k]).find(Boolean);

@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   createTicket,
   getAllTickets,
@@ -35,15 +36,15 @@ router.get("/analytics", protect, adminOnly, asyncHandler(getSupportAnalytics));
 // =============================
 
 // Get ticket details
-router.get("/:ticketId", protect, asyncHandler(getTicket));
+router.get("/:ticketId", protect, validateObjectId, asyncHandler(getTicket));
 
 // Add message to ticket
-router.post("/:ticketId/messages", protect, asyncHandler(addMessage));
+router.post("/:ticketId/messages", protect, validateObjectId, asyncHandler(addMessage));
 
 // Update ticket status (admin only)
-router.put("/:ticketId/status", protect, adminOnly, asyncHandler(updateTicketStatus));
+router.put("/:ticketId/status", protect, adminOnly, validateObjectId, asyncHandler(updateTicketStatus));
 
 // Rate ticket satisfaction
-router.post("/:ticketId/rate", protect, asyncHandler(rateTicket));
+router.post("/:ticketId/rate", protect, validateObjectId, asyncHandler(rateTicket));
 
 export default router;

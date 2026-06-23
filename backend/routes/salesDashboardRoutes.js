@@ -3,6 +3,7 @@
 
 import express from "express";
 import { protect, salesOnly } from "../middleware/auth.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   getSalesDashboard,
   getDealerPerformance,
@@ -19,7 +20,7 @@ const router = express.Router();
 router.get("/", protect, salesOnly, getSalesDashboard);
 
 // Dealer performance
-router.get("/dealers/:dealerId", protect, salesOnly, getDealerPerformance);
+router.get("/dealers/:dealerId", protect, salesOnly, validateObjectId, getDealerPerformance);
 router.get("/dealers", protect, salesOnly, getDealerPerformance);
 
 // Revenue metrics

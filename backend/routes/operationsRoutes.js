@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import {
   getOperationsDashboard,
   getEscrowQueue,
@@ -17,7 +18,7 @@ const router = express.Router();
 // =============================
 
 // Get operations dashboard (admin only)
-router.get("/dashboard", protect, adminOnly, asyncHandler(getOperationsDashboard));
+router.get("/dashboard", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getOperationsDashboard));
 
 // =============================
 // 🔒 ESCROW QUEUE

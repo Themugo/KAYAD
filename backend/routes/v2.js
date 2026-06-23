@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authLimiter } from "../middleware/rateLimiter.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 // Import v2 routes (future implementation)
 // import authRoutesV2 from "./v2/authRoutes.js";
@@ -11,7 +12,7 @@ const router = Router();
 // This file is prepared for future API versioning
 // When v2 is implemented, import and use v2-specific routes here
 
-router.get("/", (req, res) => {
+router.get("/", validateQuery(analyticsQuerySchema), (req, res) => {
   res.json({
     success: true,
     message: "KAYAD API v2 - Coming Soon",

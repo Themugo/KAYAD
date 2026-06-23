@@ -7,6 +7,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import {
   getReconciliationDashboard,
   runReconciliationReport,
@@ -54,10 +55,10 @@ router.post("/run", asyncHandler(runReconciliationReport));
 router.get("/reports", asyncHandler(getReconciliationReports));
 
 // GET /api/reconciliation/reports/:id - Get reconciliation report by ID
-router.get("/reports/:id", asyncHandler(getReconciliationReportById));
+router.get("/reports/:id", validateObjectId, asyncHandler(getReconciliationReportById));
 
 // POST /api/reconciliation/reports/:reportId/resolve - Resolve reconciliation issue
-router.post("/reports/:reportId/resolve", asyncHandler(resolveReconciliationIssue));
+router.post("/reports/:reportId/resolve", validateObjectId, asyncHandler(resolveReconciliationIssue));
 
 // =============================
 // 📄 EXPORT ENDPOINTS

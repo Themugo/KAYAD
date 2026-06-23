@@ -1,6 +1,7 @@
 import express from "express";
 import Ad from "../models/Ad.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ router.get(
 // Public: track ad click
 router.post(
   "/:id/click",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const ad = await Ad.findByIdAndUpdate(req.params.id, { $inc: { clickCount: 1 } }, { new: false });
     if (!ad) return res.status(404).json({ success: false, message: "Ad not found" });

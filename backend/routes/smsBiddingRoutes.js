@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { createLimiter, webhookLimiter } from "../middleware/rateLimiter.js";
 import {
   handleInboundSms,
@@ -34,6 +35,6 @@ router.post("/webhook/inbound", [requireWebhookApiKey, webhookLimiter], asyncHan
 router.post("/register", protect, createLimiter, asyncHandler(registerSmsBidder));
 router.get("/my", protect, asyncHandler(getMySmsProfile));
 router.post("/subscribe", protect, createLimiter, asyncHandler(subscribeToCar));
-router.delete("/unsubscribe/:carId", protect, asyncHandler(unsubscribeFromCar));
+router.delete("/unsubscribe/:carId", protect, validateObjectId, asyncHandler(unsubscribeFromCar));
 
 export default router;

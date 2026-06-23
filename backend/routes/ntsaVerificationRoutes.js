@@ -1,6 +1,8 @@
 import express from "express";
 import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validate } from "../middleware/validate.js";
+import { queueNtsaVerificationSchema, processNtsaVerificationSchema, addNtsaDocumentSchema } from "../validation/ntsa.schema.js";
 import NtsaVerificationRequest from "../models/NtsaVerificationRequest.js";
 import Car from "../models/Car.js";
 
@@ -11,6 +13,7 @@ router.use(protect);
 router.get(
   "/",
   adminOnly,
+  validate(queueNtsaVerificationSchema),
   asyncHandler(async (req, res) => {
     const filter = {};
     if (req.query.status) filter.status = req.query.status;
@@ -28,6 +31,7 @@ router.get(
 // Get verification status for a specific car (any authenticated user)
 router.get(
   "/car/:carId/status",
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const request = await NtsaVerificationRequest.findOne({ car: req.params.carId })
       .sort({ createdAt: -1 })
@@ -49,6 +53,7 @@ router.get(
 // Request verification for own car (dealer/owner) or admin-enqueue
 router.post(
   "/",
+  validate(queueNtsaVerificationSchema),
   asyncHandler(async (req, res) => {
     const { carId } = req.body;
     if (!carId) return res.status(400).json({ success: false, message: "carId required" });
@@ -80,6 +85,8 @@ router.post(
 router.post(
   "/:id/process",
   adminOnly,
+  validateObjectId,
+  validate(processNtsaVerificationSchema),
   asyncHandler(async (req, res) => {
     const { status, adminNotes, dutyStatus, chassisVerified, logbookVerified, importVerified } = req.body;
     if (!["passed", "failed"].includes(status)) {
@@ -115,6 +122,8 @@ router.post(
 // Upload supporting documents for a request (admin or requestor)
 router.post(
   "/:id/documents",
+  validateObjectId,
+  validate(addNtsaDocumentSchema),
   asyncHandler(async (req, res) => {
     const { url, label } = req.body;
     if (!url) return res.status(400).json({ success: false, message: "url required" });

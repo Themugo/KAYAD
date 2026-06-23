@@ -32,6 +32,7 @@ import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import { performanceMonitor, memoryMonitor, cpuMonitor } from "./middleware/performanceMonitor.js";
+import sliMiddleware from "./middleware/sliMiddleware.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
 
@@ -96,6 +97,7 @@ import salesDashboardRoutes from "./routes/salesDashboardRoutes.js";
 import v1Routes from "./routes/v1.js";
 import v2Routes from "./routes/v2.js";
 import reliabilityRoutes from "./routes/reliabilityRoutes.js";
+import ledgerRoutes from "./routes/ledgerRoutes.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
 import notFound from "./middleware/notFound.js";
@@ -117,6 +119,8 @@ import { startScheduler as startHealthScoreScheduler } from "./services/dealerHe
 import { startScheduler as startMarketTrendScheduler } from "./services/marketTrendScheduler.js";
 import { startScheduler as startMarketplaceHealthScheduler } from "./services/marketplaceHealthScheduler.js";
 import { startSliScheduler } from "./services/sliScheduler.js";
+import { startAllWorkers } from "./infrastructure/queues/workerManager.js";
+import { initializeQueues } from "./infrastructure/queues/index.js";
 import { initPostHog } from "./utils/posthog.js";
 import { initCache } from "./utils/cache.js";
 import { registerHealthRoutes } from "./utils/healthCheck.js";
@@ -364,6 +368,9 @@ app.use(mongoSanitize()); // Block NoSQL injection
 app.use(xssProtection()); // Sanitize XSS in inputs
 app.use(paginationCap()); // Cap ?limit and ?page params
 
+// ─── SLI CAPTURE (per-request latency, status, error tracking) ──
+app.use(sliMiddleware);
+
 // ─── HEALTH CHECKS (before other routes, no auth) ────────────
 registerHealthRoutes(app);
 
@@ -598,6 +605,7 @@ app.use("/metrics", fastTimeout, metricsRoutes);
 app.use("/prometheus", fastTimeout, prometheusMetricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
 app.use("/api/reliability", reliabilityRoutes);
+app.use("/api/ledger", ledgerRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -795,6 +803,26 @@ const bootstrap = async () => {
     } catch (err) {
       logError("Failed to start SLI scheduler", err);
       console.log("❌ Failed to start SLI scheduler:", err);
+    }
+
+    if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+      try {
+        await initializeQueues();
+        console.log("✅ Queue infrastructure initialized");
+      } catch (err) {
+        logError("Failed to initialize queues", err);
+        console.log("⚠️ Queue infrastructure init failed (non-fatal)");
+      }
+
+      try {
+        startAllWorkers();
+        console.log("✅ Background workers started");
+      } catch (err) {
+        logError("Failed to start workers", err);
+        console.log("⚠️ Worker startup failed (non-fatal)");
+      }
+    } else {
+      console.log("⚠️ Redis not configured — queues/workers disabled");
     }
 
     logInfo("Background services started", {

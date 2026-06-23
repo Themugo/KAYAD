@@ -6,6 +6,7 @@
 
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import {
   getVehicleSitemap,
   getDealerSitemap,
@@ -20,7 +21,7 @@ const router = express.Router();
 // =============================
 
 // GET /sitemap.xml - Sitemap index
-router.get("/sitemap.xml", asyncHandler(getSitemapIndex));
+router.get("/sitemap.xml", validateQuery(analyticsQuerySchema), asyncHandler(getSitemapIndex));
 
 // GET /sitemap-cars.xml - Vehicle sitemap
 router.get("/sitemap-cars.xml", asyncHandler(getVehicleSitemap));

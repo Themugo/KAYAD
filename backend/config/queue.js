@@ -11,8 +11,8 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 // =============================
 // 🔴 REDIS CONNECTION
 // =============================
-// Temporarily disable Redis for debugging
-const DISABLE_REDIS = true;
+// Redis is enabled by default; set DISABLE_REDIS=true to disable
+const DISABLE_REDIS = process.env.DISABLE_REDIS === "true";
 
 const redisConfig = {
   host: process.env.REDIS_HOST || "localhost",
