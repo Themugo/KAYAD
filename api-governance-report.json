@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:27:16.622Z",
+  "generated": "2026-06-23T08:28:17.269Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 198,
-    "routesWithoutValidation": 222,
-    "validationCoverage": "49.13"
+    "routesWithValidation": 205,
+    "routesWithoutValidation": 214,
+    "validationCoverage": "50.87"
   },
   "undocumentedEndpoints": [
     {
@@ -2104,7 +2104,7 @@
       "path": "/platform-stats",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /delivery-report",
@@ -2304,7 +2304,7 @@
       "path": "/:id/users",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/admins",
@@ -2312,7 +2312,7 @@
       "path": "/:id/admins",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "DELETE /:id/admins/:userId",
@@ -2320,7 +2320,7 @@
       "path": "/:id/admins/:userId",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/branches",
@@ -2328,7 +2328,7 @@
       "path": "/:id/branches",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:id/branches",
@@ -2336,7 +2336,7 @@
       "path": "/:id/branches",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:id/stats",
@@ -2344,7 +2344,7 @@
       "path": "/:id/stats",
       "file": "organizationRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /health",
@@ -3131,14 +3131,6 @@
     "GET /dealer-queue",
     "GET /support-queue",
     "GET /payment-queue",
-    "PUT /:id",
-    "DELETE /:id",
-    "GET /:id/users",
-    "POST /:id/admins",
-    "DELETE /:id/admins/:userId",
-    "POST /:id/branches",
-    "GET /:id/branches",
-    "GET /:id/stats",
     "GET /health",
     "GET /aggregated",
     "GET /circuit-breakers",

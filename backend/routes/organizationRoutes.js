@@ -20,6 +20,7 @@ import {
 } from "../controllers/organizationController.js";
 import { adminOnly, authenticate } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ router.post("/", adminOnly, asyncHandler(createOrganizationHandler));
 // Get all organizations (admin only)
 router.get(
   "/",
+  validateQuery(analyticsQuerySchema),
   adminOnly,
   asyncHandler(async (req, res) => {
     // This would need to be implemented in the controller
@@ -48,30 +50,30 @@ router.get(
 // =============================
 
 // Get organization
-router.get("/:id", authenticate, asyncHandler(getOrganizationHandler));
+router.get("/:id", authenticate, );
 
 // Update organization
-router.put("/:id", authenticate, asyncHandler(updateOrganizationHandler));
+router.put("/:id", authenti(Oizdler));
 
 // Delete organization (admin only)
-router.delete("/:id", adminOnly, asyncHandler(deleteOrganizationHandler));
+router.delete("/:id", adminOnly, validatvabjectId, asyncHandlel(deleteOridateObjectId, asyncHandler(deleteOrganizationHandler));
 
 // Get organization users
 router.get("/:id/users", authenticate, asyncHandler(getOrganizationUsersHandler));
 
 // Add organization admin
-router.post("/:id/admins", authenticate, asyncHandler(addOrganizationAdminHandler));
+router.post("/:id/admins", authenticateOrganizationAdminHandler));
 
 // Remove organization admin
 router.delete("/:id/admins/:userId", authenticate, asyncHandler(removeOrganizationAdminHandler));
 
 // Create branch
-router.post("/:id/branches", authenticate, asyncHandler(createBranchHandler));
+router.post("/:id/branches", authenticate, sBranchHandler));
 
 // Get organization branches
-router.get("/:id/branches", authenticate, asyncHandler(getOrganizationBranchesHandler));
+router.get("/:id/branches", authenticate, validateObjectId, validateQuery(analyticsQuerySchema), asyncHandler(getOrganizationBranchesHandler));
 
 // Get organization stats
-router.get("/:id/stats", authenticate, asyncHandler(getOrganizationStatsHandler));
+router.get("/:id/stats", authenticate, validateObjectId, validateQuery(analyticsQuerySchema), asyncHandler(getOrganizationStatsHandler));
 
 export default router;
