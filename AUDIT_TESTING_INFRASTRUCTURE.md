@@ -1,3 +1,14 @@
+---
+title: Testing Infrastructure Audit Report
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [testing, audit, infrastructure]
+related: [TEST_COVERAGE_ANALYSIS.md, E2E_TEST_DOCUMENTATION.md]
+---
+
 # Testing Infrastructure Audit Report
 
 ## Audit Date: 2026-06-23

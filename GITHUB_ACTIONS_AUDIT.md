@@ -1,3 +1,14 @@
+---
+title: GitHub Actions Workflow Audit Report
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [github-actions, ci-cd, audit]
+related: [DEPLOYMENT_GUIDE.md, SECURITY.md]
+---
+
 # GitHub Actions Workflow Audit Report
 
 ## Audit Date: 2026-06-23

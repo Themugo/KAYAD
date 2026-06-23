@@ -1,3 +1,14 @@
+---
+title: Dependency Harmonization Report
+owner: @tech-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [dependencies, governance, security]
+related: [package.json, backend/package.json]
+---
+
 # Dependency Harmonization Report
 
 ## Audit Date: 2026-06-23
