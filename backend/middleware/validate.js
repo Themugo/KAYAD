@@ -66,6 +66,21 @@ import {
   rejectApplicationSchema,
 } from "../validation/inspectorApplication.schema.js";
 import { createReviewSchema } from "../validation/platform.schema.js";
+import {
+  carListQuerySchema,
+  carSearchQuerySchema,
+  userListQuerySchema,
+  dealerListQuerySchema,
+  analyticsQuerySchema,
+  bidListQuerySchema,
+  paymentListQuerySchema,
+  notificationListQuerySchema,
+  reviewListQuerySchema,
+  chatListQuerySchema,
+  messageListQuerySchema,
+  inspectionListQuerySchema,
+  escrowListQuerySchema,
+} from "../validation/query.schema.js";
 
 const bidSchema = z.object({
   amount: z.number().positive("Bid must be positive").max(100_000_000),
@@ -245,4 +260,18 @@ export {
   rejectApplicationSchema,
   // Reviews
   createReviewSchema,
+  // Query Schemas
+  carListQuerySchema,
+  carSearchQuerySchema,
+  userListQuerySchema,
+  dealerListQuerySchema,
+  analyticsQuerySchema,
+  bidListQuerySchema,
+  paymentListQuerySchema,
+  notificationListQuerySchema,
+  reviewListQuerySchema,
+  chatListQuerySchema,
+  messageListQuerySchema,
+  inspectionListQuerySchema,
+  escrowListQuerySchema,
 };
