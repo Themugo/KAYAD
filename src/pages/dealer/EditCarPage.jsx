@@ -94,8 +94,14 @@ export default function EditCarPage() {
 
   const handleDelete = async () => {
     if (!confirm('Delete this listing? This cannot be undone.')) return;
-    try { await carsAPI.remove(id); toast('Listing deleted', 'info'); navigate('/dealer'); }
-    catch { toast('Failed to delete', 'error'); }
+    try {
+      await carsAPI.remove(id);
+      toast('Listing deleted', 'info');
+      navigate('/dealer');
+    } catch (error) {
+      console.error('Failed to delete listing:', error);
+      toast('Failed to delete', 'error');
+    }
   };
 
   const handleSetCover = async (idx) => {
@@ -296,6 +302,9 @@ export default function EditCarPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
     </div>
   );
 }

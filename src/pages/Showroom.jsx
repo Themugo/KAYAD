@@ -278,7 +278,10 @@ export default function Showroom() {
       setShowSavePrompt(false);
       setSaveName('');
       toast('✓ Saved', 'success');
-    } catch { toast('Failed to save', 'error'); }
+    } catch (error) {
+      console.error('Failed to save search:', error);
+      toast('Failed to save', 'error');
+    }
   };
 
   const handleRestoreSavedSearch = saved => {
