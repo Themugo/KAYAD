@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:20:10.169Z",
+  "generated": "2026-06-23T08:20:52.341Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 167,
-    "routesWithoutValidation": 252,
-    "validationCoverage": "41.44"
+    "routesWithValidation": 171,
+    "routesWithoutValidation": 248,
+    "validationCoverage": "42.43"
   },
   "undocumentedEndpoints": [
     {
@@ -1440,7 +1440,7 @@
       "path": "/:carId",
       "file": "favoriteRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "DELETE /:carId",
@@ -1448,7 +1448,7 @@
       "path": "/:carId",
       "file": "favoriteRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:carId/toggle",
@@ -1456,7 +1456,7 @@
       "path": "/:carId/toggle",
       "file": "favoriteRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /:carId/price-alert",
@@ -1464,7 +1464,7 @@
       "path": "/:carId/price-alert",
       "file": "favoriteRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /user",
@@ -3059,10 +3059,6 @@
     "GET /my-events",
     "GET /revenue",
     "GET /user-growth",
-    "POST /:carId",
-    "DELETE /:carId",
-    "POST /:carId/toggle",
-    "PUT /:carId/price-alert",
     "GET /user",
     "GET /evaluate/:key",
     "GET /:key",

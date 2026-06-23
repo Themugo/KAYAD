@@ -2,6 +2,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateQuery, carListQuerySchema } from "../middleware/validate.js";
 import {
   getFavorites,
   addFavorite,
@@ -13,7 +14,7 @@ import {
 const router = express.Router();
 router.use(protect);
 
-router.get("/", asyncHandler(getFavorites));
+router.get("/", validateQuery(carListQuerySchema), asyncHandler(getFavorites));
 router.post("/:carId", asyncHandler(addFavorite));
 router.delete("/:carId", asyncHandler(removeFavorite));
 router.post("/:carId/toggle", asyncHandler(toggleFavorite));
