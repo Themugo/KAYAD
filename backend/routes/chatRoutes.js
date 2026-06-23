@@ -1,7 +1,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validate, validateObjectId } from "../middleware/validate.js";
+import { validate, validateObjectId, validateQuery, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { chatLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { createChatSchema, sendMessageSchema } from "../validation/platform.schema.js";
 import {
@@ -17,9 +17,9 @@ const router = express.Router();
 
 router.post("/", protect, createLimiter, validate(createChatSchema), asyncHandler(startChat));
 
-router.get("/", protect, asyncHandler(getUserChats));
+router.get("/", protect, validateQuery(chatListQuerySchema), asyncHandler(getUserChats));
 
-router.get("/:chatId/messages", protect, validateObjectId, asyncHandler(getMessages));
+router.get("/:chatId/messages", protect, validateObjectId, validateQuery(messageListQuerySchema), asyncHandler(getMessages));
 
 router.post(
   "/:chatId/message",

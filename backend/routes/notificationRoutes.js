@@ -2,7 +2,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, notificationListQuerySchema } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import {
   getNotifications,
@@ -14,7 +14,7 @@ import {
 const router = express.Router();
 router.use(protect);
 
-router.get("/", asyncHandler(getNotifications));
+router.get("/", validateQuery(notificationListQuerySchema), asyncHandler(getNotifications));
 router.post("/read-all", idempotencyCheck, asyncHandler(markAllAsRead));
 router.post("/:id/read", idempotencyCheck, validateObjectId, asyncHandler(markAsRead));
 router.delete("/:id", idempotencyCheck, validateObjectId, asyncHandler(deleteNotification));

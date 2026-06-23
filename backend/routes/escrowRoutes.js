@@ -3,7 +3,7 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, escrowListQuerySchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 
@@ -24,7 +24,7 @@ const router = express.Router();
 // =============================
 // 📄 USER ESCROWS (BUYER / SELLER)
 // =============================
-router.get("/my", protect, asyncHandler(getUserEscrows));
+router.get("/my", protect, validateQuery(escrowListQuerySchema), asyncHandler(getUserEscrows));
 
 // =============================
 // 🧠 ADMIN: ALL ESCROWS (PAGINATED + FILTER)
@@ -33,6 +33,7 @@ router.get(
   "/",
   protect,
   adminOnly,
+  validateQuery(escrowListQuerySchema),
   asyncHandler(async (req, res) => {
     req.query.page = Number(req.query.page) || 1;
     req.query.limit = Number(req.query.limit) || 20;
