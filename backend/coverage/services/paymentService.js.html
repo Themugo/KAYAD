@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">3.96% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/101</span>
+                <span class='fraction'>0/101</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.34% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/92</span>
+                <span class='fraction'>0/92</span>
             </div>
         
             
@@ -264,17 +264,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -338,8 +338,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -430,7 +430,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -458,7 +458,7 @@ import { stkPush } from "./mpesaService.js";
 import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
 &nbsp;
-const formatPhone = <span class="fstat-no" title="function not covered" >(p</span>hone) =&gt; {
+const formatPhone = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>hone) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  if (!phone) <span class="cstat-no" title="statement not covered" >return null;</span></span>
 <span class="cstat-no" title="statement not covered" >  phone = phone.toString().trim();</span>
 <span class="cstat-no" title="statement not covered" >  if (phone.startsWith("0")) <span class="cstat-no" title="statement not covered" >return "254" + phone.slice(1);</span></span>
@@ -468,7 +468,7 @@ const formatPhone = <span class="fstat-no" title="function not covered" >(p</spa
 };
 &nbsp;
 // ── INITIATE ─────────────────────────────────────────────────
-export const initiatePayment = <span class="fstat-no" title="function not covered" >as</span>ync ({ userId, carId, type, amount, phone, metadata = <span class="branch-0 cbranch-no" title="branch not covered" >{} </span>}) =&gt; {
+export const initiatePayment = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync ({ userId, carId, type, amount, phone, metadata = <span class="branch-0 cbranch-no" title="branch not covered" >{} </span>}) =&gt; {</span>
   const formattedPhone = <span class="cstat-no" title="statement not covered" >formatPhone(phone);</span>
 <span class="cstat-no" title="statement not covered" >  if (!formattedPhone) <span class="cstat-no" title="statement not covered" >return { success: false, message: "Invalid Safaricom number" };</span></span>
 &nbsp;
@@ -532,7 +532,7 @@ export const initiatePayment = <span class="fstat-no" title="function not covere
 };
 &nbsp;
 // ── CONFIRM (fires socket events) ─────────────────────────────
-export const confirmPayment = <span class="fstat-no" title="function not covered" >as</span>ync ({ checkoutRequestID, receipt, amount }) =&gt; {
+export const confirmPayment = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync ({ checkoutRequestID, receipt, amount }) =&gt; {</span>
   const payment = <span class="cstat-no" title="statement not covered" >await Payment.findOne({ checkoutRequestId: checkoutRequestID });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!payment) <span class="cstat-no" title="statement not covered" >throw new Error("Payment record not found");</span></span>
@@ -624,7 +624,7 @@ export const confirmPayment = <span class="fstat-no" title="function not covered
 };
 &nbsp;
 // ── FAIL ──────────────────────────────────────────────────────
-export const failPayment = <span class="fstat-no" title="function not covered" >as</span>ync (checkoutRequestID, resultDesc = <span class="branch-0 cbranch-no" title="branch not covered" >"")</span> =&gt; {
+export const failPayment = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (checkoutRequestID, resultDesc = <span class="branch-0 cbranch-no" title="branch not covered" >"")</span> =&gt; {</span>
   const payment = <span class="cstat-no" title="statement not covered" >await Payment.findOne({ checkoutRequestId: checkoutRequestID });</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!payment || payment.status === "success") <span class="cstat-no" title="statement not covered" >return;</span></span>
@@ -652,7 +652,7 @@ export const failPayment = <span class="fstat-no" title="function not covered" >
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

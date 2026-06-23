@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">14.28% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>8/56</span>
+                <span class='fraction'>0/56</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.52% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/42</span>
+                <span class='fraction'>0/42</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">16.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/48</span>
+                <span class='fraction'>0/48</span>
             </div>
         
             
@@ -130,38 +130,21 @@
 <a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -175,8 +158,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -194,15 +194,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { emitAuctionExtended } from "../socket/socket.js";
 import { getIO } from "./io.js";
 &nbsp;
-const SNIPE_WINDOW_MS = (parseInt(process.env.AUCTION_SNIPE_WINDOW_SECONDS, 10) || <span class="branch-1 cbranch-no" title="branch not covered" >120)</span> * 1000;
-const EXTENSION_MS = (parseInt(process.env.AUCTION_SNIPE_EXTENSION_SECONDS, 10) || <span class="branch-1 cbranch-no" title="branch not covered" >120)</span> * 1000;
-const MAX_EXTENSIONS = parseInt(process.env.AUCTION_MAX_EXTENSIONS, 10) || <span class="branch-1 cbranch-no" title="branch not covered" >5;</span>
-const MAX_TOTAL_EXTENSION_MS = parseInt(process.env.AUCTION_MAX_TOTAL_EXTENSION_SECONDS, 10) || <span class="branch-1 cbranch-no" title="branch not covered" >600;</span>
-const MAX_TOTAL_EXTENSION_MS_CALC = MAX_TOTAL_EXTENSION_MS * 1000;
+const SNIPE_WINDOW_MS = <span class="cstat-no" title="statement not covered" >(parseInt(process.env.AUCTION_SNIPE_WINDOW_SECONDS, 10) || 120) * 1000;</span>
+const EXTENSION_MS = <span class="cstat-no" title="statement not covered" >(parseInt(process.env.AUCTION_SNIPE_EXTENSION_SECONDS, 10) || 120) * 1000;</span>
+const MAX_EXTENSIONS = <span class="cstat-no" title="statement not covered" >parseInt(process.env.AUCTION_MAX_EXTENSIONS, 10) || 5;</span>
+const MAX_TOTAL_EXTENSION_MS = <span class="cstat-no" title="statement not covered" >parseInt(process.env.AUCTION_MAX_TOTAL_EXTENSION_SECONDS, 10) || 600;</span>
+const MAX_TOTAL_EXTENSION_MS_CALC = <span class="cstat-no" title="statement not covered" >MAX_TOTAL_EXTENSION_MS * 1000;</span>
 &nbsp;
 export { SNIPE_WINDOW_MS, EXTENSION_MS, MAX_EXTENSIONS };
 &nbsp;
-export const applySnipingProtection = <span class="fstat-no" title="function not covered" >as</span>ync (car) =&gt; {
+export const applySnipingProtection = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (car) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  if (!car.auctionEnd) <span class="cstat-no" title="statement not covered" >return false;</span></span>
   const now = <span class="cstat-no" title="statement not covered" >Date.now();</span>
   const end = <span class="cstat-no" title="statement not covered" >new Date(car.auctionEnd).getTime();</span>
@@ -225,7 +225,7 @@ export const applySnipingProtection = <span class="fstat-no" title="function not
 <span class="cstat-no" title="statement not covered" >  return false;</span>
 };
 &nbsp;
-export const applyAuctionSnipingProtection = <span class="fstat-no" title="function not covered" >as</span>ync (auction) =&gt; {
+export const applyAuctionSnipingProtection = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (auction) =&gt; {</span>
   const now = <span class="cstat-no" title="statement not covered" >Date.now();</span>
   const timeRemaining = <span class="cstat-no" title="statement not covered" >auction.endTime - now;</span>
 <span class="cstat-no" title="statement not covered" >  if (timeRemaining &gt; 0 &amp;&amp; timeRemaining &lt; SNIPE_WINDOW_MS) {</span>
@@ -240,7 +240,7 @@ export const applyAuctionSnipingProtection = <span class="fstat-no" title="funct
 <span class="cstat-no" title="statement not covered" >  return false;</span>
 };
 &nbsp;
-export const applyRedisSnipingProtection = <span class="fstat-no" title="function not covered" >as</span>ync (redis, roomId, endTime, now) =&gt; {
+export const applyRedisSnipingProtection = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (redis, roomId, endTime, now) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  if (!endTime || endTime - now &gt;= SNIPE_WINDOW_MS) <span class="cstat-no" title="statement not covered" >return false;</span></span>
 &nbsp;
   const extKey = <span class="cstat-no" title="statement not covered" >`auction:${roomId}:extensions`;</span>
@@ -262,7 +262,7 @@ export const applyRedisSnipingProtection = <span class="fstat-no" title="functio
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

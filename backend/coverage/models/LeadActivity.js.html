@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.77% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/9</span>
+                <span class='fraction'>0/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/3</span>
+                <span class='fraction'>0/3</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">77.77% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/9</span>
+                <span class='fraction'>0/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -196,7 +196,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -275,14 +275,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -303,14 +303,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/models/LeadActivity.js - Production Hardened v7.0
@@ -321,7 +321,7 @@
 &nbsp;
 import mongoose from "mongoose";
 &nbsp;
-const leadActivitySchema = new mongoose.Schema(
+const leadActivitySchema = <span class="cstat-no" title="statement not covered" >new mongoose.Schema(</span>
   {
     // =============================
     // 🔗 RELATIONSHIP
@@ -400,14 +400,14 @@ const leadActivitySchema = new mongoose.Schema(
 // =============================
 // 🔥 INDEXES (PERFORMANCE)
 // =============================
-leadActivitySchema.index({ lead: 1, createdAt: -1 });
-leadActivitySchema.index({ type: 1, createdAt: -1 });
-leadActivitySchema.index({ actor: 1, createdAt: -1 });
+<span class="cstat-no" title="statement not covered" >leadActivitySchema.index({ lead: 1, createdAt: -1 });</span>
+<span class="cstat-no" title="statement not covered" >leadActivitySchema.index({ type: 1, createdAt: -1 });</span>
+<span class="cstat-no" title="statement not covered" >leadActivitySchema.index({ actor: 1, createdAt: -1 });</span>
 &nbsp;
 // =============================
 // ⚡ STATIC: CREATE ACTIVITY
 // =============================
-leadActivitySchema.statics.createActivity = <span class="fstat-no" title="function not covered" >as</span>ync function (
+<span class="cstat-no" title="statement not covered" >leadActivitySchema.statics.createActivity = <span class="fstat-no" title="function not covered" >as</span>ync function (</span>
   leadId,
   type,
   actorId,
@@ -428,14 +428,14 @@ leadActivitySchema.statics.createActivity = <span class="fstat-no" title="functi
 // =============================
 // ⚡ STATIC: GET LEAD TIMELINE
 // =============================
-leadActivitySchema.statics.getLeadTimeline = <span class="fstat-no" title="function not covered" >as</span>ync function (leadId) {
+<span class="cstat-no" title="statement not covered" >leadActivitySchema.statics.getLeadTimeline = <span class="fstat-no" title="function not covered" >as</span>ync function (leadId) {</span>
 <span class="cstat-no" title="statement not covered" >  return await this.find({ lead: leadId }).populate("actor", "name email avatar").sort({ createdAt: -1 });</span>
 };
 &nbsp;
 // =============================
 // 🧠 SAFE EXPORT
 // =============================
-const LeadActivity = mongoose.models.LeadActivity || mongoose.model("LeadActivity", leadActivitySchema);
+const LeadActivity = <span class="cstat-no" title="statement not covered" >mongoose.models.LeadActivity || mongoose.model("LeadActivity", leadActivitySchema);</span>
 &nbsp;
 export default LeadActivity;
 &nbsp;</pre></td></tr></table></pre>
@@ -445,7 +445,7 @@ export default LeadActivity;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

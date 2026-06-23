@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.33% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>10/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>10/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -123,8 +123,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -135,8 +135,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -146,8 +146,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -157,8 +157,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -167,8 +167,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -178,8 +178,8 @@
 // =============================
 // ✅ SUCCESS RESPONSE
 // =============================
-export const success = (res, data = <span class="branch-0 cbranch-no" title="branch not covered" >null,</span> message = "Success", meta = {}) =&gt; {
-  return res.status(200).json({
+export const success = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>es, data = <span class="branch-0 cbranch-no" title="branch not covered" >null,</span> message = <span class="branch-0 cbranch-no" title="branch not covered" >"Success",</span> meta = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return res.status(200).json({</span>
     success: true,
     message,
     data,
@@ -190,8 +190,8 @@ export const success = (res, data = <span class="branch-0 cbranch-no" title="bra
 // =============================
 // ❌ ERROR RESPONSE
 // =============================
-export const error = (res, message = <span class="branch-0 cbranch-no" title="branch not covered" >"Error",</span> code = 500, details = null) =&gt; {
-  return res.status(code).json({
+export const error = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>es, message = <span class="branch-0 cbranch-no" title="branch not covered" >"Error",</span> code = <span class="branch-0 cbranch-no" title="branch not covered" >500,</span> details = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return res.status(code).json({</span>
     success: false,
     message,
     ...(details &amp;&amp; { details }),
@@ -201,8 +201,8 @@ export const error = (res, message = <span class="branch-0 cbranch-no" title="br
 // =============================
 // ⚠️ VALIDATION ERROR
 // =============================
-export const validationError = (res, errors) =&gt; {
-  return res.status(400).json({
+export const validationError = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>es, errors) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return res.status(400).json({</span>
     success: false,
     message: "Validation failed",
     errors,
@@ -212,8 +212,8 @@ export const validationError = (res, errors) =&gt; {
 // =============================
 // 🚫 NOT FOUND
 // =============================
-export const notFound = (res, message = "Resource not found") =&gt; {
-  return res.status(404).json({
+export const notFound = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>es, message = <span class="branch-0 cbranch-no" title="branch not covered" >"Resource not found")</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return res.status(404).json({</span>
     success: false,
     message,
   });
@@ -222,8 +222,8 @@ export const notFound = (res, message = "Resource not found") =&gt; {
 // =============================
 // 🔐 UNAUTHORIZED
 // =============================
-export const unauthorized = (res, message = "Unauthorized") =&gt; {
-  return res.status(401).json({
+export const unauthorized = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>es, message = <span class="branch-0 cbranch-no" title="branch not covered" >"Unauthorized")</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return res.status(401).json({</span>
     success: false,
     message,
   });
@@ -235,7 +235,7 @@ export const unauthorized = (res, message = "Unauthorized") =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

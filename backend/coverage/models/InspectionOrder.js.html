@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/2</span>
+                <span class='fraction'>0/2</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -117,7 +117,7 @@
 <a name='L52'></a><a href='#L52'>52</a>
 <a name='L53'></a><a href='#L53'>53</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -127,17 +127,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -160,16 +150,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import mongoose from "mongoose";
 &nbsp;
-const checklistItemSchema = new mongoose.Schema(
+const checklistItemSchema = <span class="cstat-no" title="statement not covered" >new mongoose.Schema(</span>
   {
     category: { type: String, required: true },
     item: { type: String, required: true },
@@ -179,7 +179,7 @@ const checklistItemSchema = new mongoose.Schema(
   { _id: false },
 );
 &nbsp;
-const inspectionOrderSchema = new mongoose.Schema(
+const inspectionOrderSchema = <span class="cstat-no" title="statement not covered" >new mongoose.Schema(</span>
   {
     car: { type: mongoose.Schema.Types.ObjectId, ref: "Car", required: true, index: true },
     buyer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -212,11 +212,11 @@ const inspectionOrderSchema = new mongoose.Schema(
   { timestamps: true },
 );
 &nbsp;
-inspectionOrderSchema.index({ buyer: 1, createdAt: -1 });
-inspectionOrderSchema.index({ inspector: 1, status: 1 });
-inspectionOrderSchema.index({ car: 1, status: 1 });
+<span class="cstat-no" title="statement not covered" >inspectionOrderSchema.index({ buyer: 1, createdAt: -1 });</span>
+<span class="cstat-no" title="statement not covered" >inspectionOrderSchema.index({ inspector: 1, status: 1 });</span>
+<span class="cstat-no" title="statement not covered" >inspectionOrderSchema.index({ car: 1, status: 1 });</span>
 &nbsp;
-const InspectionOrder = mongoose.models.InspectionOrder || mongoose.model("InspectionOrder", inspectionOrderSchema);
+const InspectionOrder = <span class="cstat-no" title="statement not covered" >mongoose.models.InspectionOrder || mongoose.model("InspectionOrder", inspectionOrderSchema);</span>
 &nbsp;
 export default InspectionOrder;
 &nbsp;</pre></td></tr></table></pre>
@@ -226,7 +226,7 @@ export default InspectionOrder;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

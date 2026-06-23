@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">42.85% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>3/7</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">60% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -121,12 +121,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -161,8 +161,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import cloudinary from "../config/cloudinary.js";
@@ -172,12 +172,12 @@ import { optimizeImage } from "./imageProcessingService.js";
 // =============================
 // 📦 UPLOAD IMAGE (OPTIMIZED)
 // =============================
-export const uploadToCloudinary = async (filePath, options = {}) =&gt; {
-  try {
-    const { compress = true, convertToWebP = true } = options;
+export const uploadToCloudinary = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (filePath, options = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  try {</span>
+    const { compress = <span class="branch-0 cbranch-no" title="branch not covered" >true,</span> convertToWebP = <span class="branch-0 cbranch-no" title="branch not covered" >true </span>} = <span class="cstat-no" title="statement not covered" >options;</span>
 &nbsp;
     // Read file
-    const fileBuffer = fs.readFileSync(filePath);
+    const fileBuffer = <span class="cstat-no" title="statement not covered" >fs.readFileSync(filePath);</span>
 &nbsp;
     // Optimize image
     const optimized = <span class="cstat-no" title="statement not covered" >await optimizeImage(fileBuffer, {</span>
@@ -212,8 +212,8 @@ export const uploadToCloudinary = async (filePath, options = {}) =&gt; {
       metadata: optimized.metadata,
     };
   } catch (err) {
-    console.error("❌ CLOUDINARY ERROR:", err.message);
-    throw err;
+<span class="cstat-no" title="statement not covered" >    console.error("❌ CLOUDINARY ERROR:", err.message);</span>
+<span class="cstat-no" title="statement not covered" >    throw err;</span>
   }
 };
 &nbsp;</pre></td></tr></table></pre>
@@ -223,7 +223,7 @@ export const uploadToCloudinary = async (filePath, options = {}) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

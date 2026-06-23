@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>0/13</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>11/11</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -104,72 +104,72 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">21x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">21x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import Car from "../models/Car.js";
 &nbsp;
 // =============================
 // 🧠 SCORE CALCULATOR
 // =============================
-const calculateScore = (car) =&gt; {
-  const viewsScore = (car.views || 0) * 0.3;
-  const bidScore = (car.currentBid || 0) * 0.5;
-  const recencyScore = (Date.now() - new Date(car.createdAt)) / 100000000;
+const calculateScore = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(c</span>ar) =&gt; {</span>
+  const viewsScore = <span class="cstat-no" title="statement not covered" >(car.views || 0) * 0.3;</span>
+  const bidScore = <span class="cstat-no" title="statement not covered" >(car.currentBid || 0) * 0.5;</span>
+  const recencyScore = <span class="cstat-no" title="statement not covered" >(Date.now() - new Date(car.createdAt)) / 100000000;</span>
 &nbsp;
-  return viewsScore + bidScore - recencyScore;
+<span class="cstat-no" title="statement not covered" >  return viewsScore + bidScore - recencyScore;</span>
 };
 &nbsp;
 // =============================
 // 🚗 GET RECOMMENDED CARS
 // =============================
-export const getRecommendedCars = async ({ userId, limit = 10, filters = {} } = {}) =&gt; {
-  const query = {
+export const getRecommendedCars = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync ({ userId, limit = <span class="branch-0 cbranch-no" title="branch not covered" >10,</span> filters = <span class="branch-0 cbranch-no" title="branch not covered" >{} </span>} = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; {</span>
+  const query = <span class="cstat-no" title="statement not covered" >{</span>
     status: "active", // 🔥 only active listings
     ...filters,
   };
 &nbsp;
-  const cars = await Car.find(query).lean();
+  const cars = <span class="cstat-no" title="statement not covered" >await Car.find(query).lean();</span>
 &nbsp;
   // =============================
   // 🧠 SCORE + SORT
   // =============================
-  const scored = cars.map((car) =&gt; ({
+  const scored = <span class="cstat-no" title="statement not covered" >cars.map(<span class="fstat-no" title="function not covered" >(c</span>ar) =&gt; (<span class="cstat-no" title="statement not covered" >{</span></span>
     ...car,
     score: calculateScore(car),
   }));
 &nbsp;
-  scored.sort((a, b) =&gt; b.score - a.score);
+<span class="cstat-no" title="statement not covered" >  scored.sort(<span class="fstat-no" title="function not covered" >(a</span>, b) =&gt; <span class="cstat-no" title="statement not covered" >b.score - a.score)</span>;</span>
 &nbsp;
-  return scored.slice(0, limit);
+<span class="cstat-no" title="statement not covered" >  return scored.slice(0, limit);</span>
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -178,7 +178,7 @@ export const getRecommendedCars = async ({ userId, limit = 10, filters = {} } = 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>8/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>8/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -234,7 +234,7 @@
 <a name='L169'></a><a href='#L169'>169</a>
 <a name='L170'></a><a href='#L170'>170</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -383,27 +383,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import mongoose from "mongoose";
 &nbsp;
-const supportTicketSchema = new mongoose.Schema(
+const supportTicketSchema = <span class="cstat-no" title="statement not covered" >new mongoose.Schema(</span>
   {
     // =============================
     // 👤 PARTICIPANTS
@@ -552,14 +552,14 @@ const supportTicketSchema = new mongoose.Schema(
 );
 &nbsp;
 // Indexes for efficient queries
-supportTicketSchema.index({ status: 1, createdAt: -1 });
-supportTicketSchema.index({ priority: 1, status: 1 });
-supportTicketSchema.index({ category: 1, status: 1 });
-supportTicketSchema.index({ assignedTo: 1, status: 1 });
-supportTicketSchema.index({ user: 1, createdAt: -1 });
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.index({ status: 1, createdAt: -1 });</span>
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.index({ priority: 1, status: 1 });</span>
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.index({ category: 1, status: 1 });</span>
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.index({ assignedTo: 1, status: 1 });</span>
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.index({ user: 1, createdAt: -1 });</span>
 &nbsp;
 // Generate ticket number before save
-supportTicketSchema.pre("save", <span class="fstat-no" title="function not covered" >as</span>ync function (next) {
+<span class="cstat-no" title="statement not covered" >supportTicketSchema.pre("save", <span class="fstat-no" title="function not covered" >as</span>ync function (next) {</span>
 <span class="cstat-no" title="statement not covered" >  if (!this.ticketNumber) {</span>
     const count = <span class="cstat-no" title="statement not covered" >await SupportTicket.countDocuments();</span>
 <span class="cstat-no" title="statement not covered" >    this.ticketNumber = `TKT-${String(count + 1).padStart(6, "0")}`;</span>
@@ -567,7 +567,7 @@ supportTicketSchema.pre("save", <span class="fstat-no" title="function not cover
 <span class="cstat-no" title="statement not covered" >  next();</span>
 });
 &nbsp;
-const SupportTicket = mongoose.models.SupportTicket || mongoose.model("SupportTicket", supportTicketSchema);
+const SupportTicket = <span class="cstat-no" title="statement not covered" >mongoose.models.SupportTicket || mongoose.model("SupportTicket", supportTicketSchema);</span>
 &nbsp;
 export default SupportTicket;
 &nbsp;</pre></td></tr></table></pre>
@@ -577,7 +577,7 @@ export default SupportTicket;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

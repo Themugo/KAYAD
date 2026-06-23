@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.97% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/86</span>
+                <span class='fraction'>0/86</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.14% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/84</span>
+                <span class='fraction'>0/84</span>
             </div>
         
             
@@ -434,11 +434,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -586,10 +586,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -625,7 +625,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -664,10 +664,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -708,10 +708,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -750,7 +750,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -794,7 +794,7 @@ import Payment from "../models/Payment.js";
 // 📊 OPERATIONS COMMAND CENTER (Phase 3 Query Optimization)
 // =============================
 &nbsp;
-export const getOperationsDashboard = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getOperationsDashboard = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const now = <span class="cstat-no" title="statement not covered" >new Date();</span>
     const today = <span class="cstat-no" title="statement not covered" >new Date(now.getFullYear(), now.getMonth(), now.getDate());</span>
@@ -946,7 +946,7 @@ export const getOperationsDashboard = <span class="fstat-no" title="function not
 // 🔒 ESCROW QUEUE DETAILS (Phase 3 Query Optimization)
 // =============================
 &nbsp;
-export const getEscrowQueue = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getEscrowQueue = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >50 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >status ? { status } : {};</span>
@@ -985,7 +985,7 @@ export const getEscrowQueue = <span class="fstat-no" title="function not covered
 // 🔍 INSPECTION QUEUE DETAILS (Phase 3 Query Optimization)
 // =============================
 &nbsp;
-export const getInspectionQueue = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getInspectionQueue = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >50 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >status ? { status } : {};</span>
@@ -1024,7 +1024,7 @@ export const getInspectionQueue = <span class="fstat-no" title="function not cov
 // 🚗 DEALER QUEUE DETAILS
 // =============================
 &nbsp;
-export const getDealerQueue = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getDealerQueue = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >50 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >{ role: "dealer" };</span>
@@ -1068,7 +1068,7 @@ export const getDealerQueue = <span class="fstat-no" title="function not covered
 // 🎫 SUPPORT QUEUE DETAILS (Phase 3 Query Optimization)
 // =============================
 &nbsp;
-export const getSupportQueue = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getSupportQueue = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, severity, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >50 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >{};</span>
@@ -1110,7 +1110,7 @@ export const getSupportQueue = <span class="fstat-no" title="function not covere
 // 💰 PAYMENT QUEUE DETAILS (Phase 3 Query Optimization)
 // =============================
 &nbsp;
-export const getPaymentQueue = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getPaymentQueue = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >50 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >status ? { status } : {};</span>
@@ -1150,7 +1150,7 @@ export const getPaymentQueue = <span class="fstat-no" title="function not covere
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

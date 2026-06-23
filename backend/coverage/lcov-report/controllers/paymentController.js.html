@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.06% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/99</span>
+                <span class='fraction'>0/99</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">6.18% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/97</span>
+                <span class='fraction'>0/97</span>
             </div>
         
             
@@ -350,9 +350,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -447,9 +447,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -475,7 +475,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -514,11 +514,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -543,11 +543,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -578,7 +578,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -626,7 +626,7 @@ import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
 // =============================
-export const initiatePayment = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const initiatePayment = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const session = <span class="cstat-no" title="statement not covered" >await mongoose.startSession();</span>
 <span class="cstat-no" title="statement not covered" >  session.startTransaction();</span>
 &nbsp;
@@ -723,7 +723,7 @@ export const initiatePayment = <span class="fstat-no" title="function not covere
 // =============================
 // 📥 MPESA CALLBACK (with retry)
 // =============================
-export const mpesaCallback = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const mpesaCallback = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const callback = <span class="cstat-no" title="statement not covered" >req.body?.Body?.stkCallback || req.body?.stkCallback;</span>
 &nbsp;
@@ -751,7 +751,7 @@ export const mpesaCallback = <span class="fstat-no" title="function not covered"
 // =============================
 // 🔍 CHECK PAYMENT STATUS
 // =============================
-export const checkPaymentStatus = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const checkPaymentStatus = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const payment = <span class="cstat-no" title="statement not covered" >await Payment.findOne({</span>
       checkoutRequestId: req.params.id,
@@ -790,7 +790,7 @@ export const checkPaymentStatus = <span class="fstat-no" title="function not cov
 // =============================
 // 📄 GET USER PAYMENTS
 // =============================
-export const getUserPayments = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getUserPayments = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const page = <span class="cstat-no" title="statement not covered" >Math.max(1, parseInt(req.query.page) || 1);</span>
     const limit = <span class="cstat-no" title="statement not covered" >Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));</span>
@@ -819,7 +819,7 @@ export const getUserPayments = <span class="fstat-no" title="function not covere
 // =============================
 // 📊 ADMIN: GET ALL PAYMENTS
 // =============================
-export const getAllPayments = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getAllPayments = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const page = <span class="cstat-no" title="statement not covered" >Math.max(1, parseInt(req.query.page) || 1);</span>
     const limit = <span class="cstat-no" title="statement not covered" >Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));</span>
@@ -854,7 +854,7 @@ export const getAllPayments = <span class="fstat-no" title="function not covered
 // =============================
 // 🔍 GET SINGLE PAYMENT
 // =============================
-export const getPaymentById = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getPaymentById = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    if (!isValidId(req.params.id)) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(400).json({ success: false, message: "Invalid payment ID" });</span>
@@ -898,7 +898,7 @@ export const getPaymentById = <span class="fstat-no" title="function not covered
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

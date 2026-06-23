@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.5% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/80</span>
+                <span class='fraction'>0/80</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.89% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/76</span>
+                <span class='fraction'>0/76</span>
             </div>
         
             
@@ -281,13 +281,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -354,7 +354,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -413,10 +413,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -445,11 +445,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -481,7 +481,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -495,12 +495,12 @@
 import User from "../models/User.js";
 import { sendNotification } from "../services/notification.service.js";
 &nbsp;
-const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
+const INSPECTOR_REVIEW_ROLES = <span class="cstat-no" title="statement not covered" >["admin", "superadmin", "hr", "technical_support"];</span>
 &nbsp;
 // =============================
 // 📝 SUBMIT APPLICATION
 // =============================
-export const submitApplication = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const submitApplication = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const {
       fullName,
@@ -568,7 +568,7 @@ export const submitApplication = <span class="fstat-no" title="function not cove
 // =============================
 // ✅ APPROVE APPLICATION
 // =============================
-export const approveApplication = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const approveApplication = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { id } = <span class="cstat-no" title="statement not covered" >req.params;</span>
     const { assignedSpecialty, assignedRegion, reviewNotes } = <span class="cstat-no" title="statement not covered" >req.body;</span>
@@ -627,7 +627,7 @@ export const approveApplication = <span class="fstat-no" title="function not cov
 // =============================
 // ❌ REJECT APPLICATION
 // =============================
-export const rejectApplication = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const rejectApplication = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { id } = <span class="cstat-no" title="statement not covered" >req.params;</span>
     const { reviewNotes } = <span class="cstat-no" title="statement not covered" >req.body;</span>
@@ -659,7 +659,7 @@ export const rejectApplication = <span class="fstat-no" title="function not cove
 // =============================
 // 📋 LIST APPLICATIONS (ADMIN)
 // =============================
-export const listApplications = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const listApplications = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { status, page = <span class="branch-0 cbranch-no" title="branch not covered" >1,</span> limit = <span class="branch-0 cbranch-no" title="branch not covered" >20 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
     const filter = <span class="cstat-no" title="statement not covered" >{};</span>
@@ -695,7 +695,7 @@ export const listApplications = <span class="fstat-no" title="function not cover
 // =============================
 // 🔍 GET APPLICATION BY ID
 // =============================
-export const getApplication = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getApplication = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const application = <span class="cstat-no" title="statement not covered" >await InspectorApplication.findById(req.params.id).lean();</span>
 <span class="cstat-no" title="statement not covered" >    if (!application) <span class="cstat-no" title="statement not covered" >return res.status(404).json({ success: false, message: "Not found" });</span></span>
@@ -712,7 +712,7 @@ export const getApplication = <span class="fstat-no" title="function not covered
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

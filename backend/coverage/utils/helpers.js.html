@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>18/18</span>
+                <span class='fraction'>0/18</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>5/5</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>4/4</span>
+                <span class='fraction'>0/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -112,40 +112,40 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// utils/helpers.js
 &nbsp;
@@ -154,40 +154,40 @@ import crypto from "crypto";
 // =============================
 // 🔢 SECURE RANDOM ID
 // =============================
-export const generateId = (length = 16) =&gt; {
-  return crypto.randomBytes(length).toString("hex");
+export const generateId = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(l</span>ength = <span class="branch-0 cbranch-no" title="branch not covered" >16)</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return crypto.randomBytes(length).toString("hex");</span>
 };
 &nbsp;
 // =============================
 // 🔥 UNIQUE BIDDER TAG
 // =============================
-export const generateBidderTag = () =&gt; {
-  const random = crypto.randomBytes(2).toString("hex"); // 4 chars
-  const number = Math.floor(1000 + Math.random() * 9000);
-  return `Bidder-${number}-${random}`;
+export const generateBidderTag = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  const random = <span class="cstat-no" title="statement not covered" >crypto.randomBytes(2).toString("hex");</span> // 4 chars
+  const number = <span class="cstat-no" title="statement not covered" >Math.floor(1000 + Math.random() * 9000);</span>
+<span class="cstat-no" title="statement not covered" >  return `Bidder-${number}-${random}`;</span>
 };
 &nbsp;
 // =============================
 // ⏱ TIME LEFT (RAW)
 // =============================
-export const getTimeLeft = (endTime) =&gt; {
-  if (!endTime) return 0;
-  return Math.max(new Date(endTime).getTime() - Date.now(), 0);
+export const getTimeLeft = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(e</span>ndTime) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  if (!endTime) <span class="cstat-no" title="statement not covered" >return 0;</span></span>
+<span class="cstat-no" title="statement not covered" >  return Math.max(new Date(endTime).getTime() - Date.now(), 0);</span>
 };
 &nbsp;
 // =============================
 // ⏱ FORMAT TIME LEFT (UX)
 // =============================
-export const formatTimeLeft = (ms) =&gt; {
-  if (ms &lt;= 0) return "Ended";
+export const formatTimeLeft = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(m</span>s) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  if (ms &lt;= 0) <span class="cstat-no" title="statement not covered" >return "Ended";</span></span>
 &nbsp;
-  const totalSeconds = Math.floor(ms / 1000);
+  const totalSeconds = <span class="cstat-no" title="statement not covered" >Math.floor(ms / 1000);</span>
 &nbsp;
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const hours = <span class="cstat-no" title="statement not covered" >Math.floor(totalSeconds / 3600);</span>
+  const minutes = <span class="cstat-no" title="statement not covered" >Math.floor((totalSeconds % 3600) / 60);</span>
+  const seconds = <span class="cstat-no" title="statement not covered" >totalSeconds % 60;</span>
 &nbsp;
-  return `${hours}h ${minutes}m ${seconds}s`;
+<span class="cstat-no" title="statement not covered" >  return `${hours}h ${minutes}m ${seconds}s`;</span>
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -196,7 +196,7 @@ export const formatTimeLeft = (ms) =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

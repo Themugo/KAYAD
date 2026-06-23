@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.37% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>9/96</span>
+                <span class='fraction'>0/96</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">9.37% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>9/96</span>
+                <span class='fraction'>0/96</span>
             </div>
         
             
@@ -277,15 +277,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -360,9 +360,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -390,7 +390,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -410,7 +410,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -422,6 +421,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -432,7 +432,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -441,6 +440,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -451,7 +451,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -481,15 +481,15 @@ import cron from "node-cron";
 import { generateMarketAnalytics } from "./vehicleAnalyticsService.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 &nbsp;
-let dailyJob = null;
-let weeklyJob = null;
-let monthlyJob = null;
+let dailyJob = <span class="cstat-no" title="statement not covered" >null;</span>
+let weeklyJob = <span class="cstat-no" title="statement not covered" >null;</span>
+let monthlyJob = <span class="cstat-no" title="statement not covered" >null;</span>
 &nbsp;
 // =============================
 // 🚀 START SCHEDULER
 // =============================
 &nbsp;
-export const startScheduler = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+export const startScheduler = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Starting Market Trend Scheduler");</span>
 &nbsp;
@@ -564,7 +564,7 @@ export const startScheduler = <span class="fstat-no" title="function not covered
 // 🛑 STOP SCHEDULER
 // =============================
 &nbsp;
-export const stopScheduler = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+export const stopScheduler = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Stopping Market Trend Scheduler");</span>
 &nbsp;
@@ -594,7 +594,7 @@ export const stopScheduler = <span class="fstat-no" title="function not covered"
 // 🔄 GENERATE DAILY ANALYTICS
 // =============================
 &nbsp;
-export const generateDailyAnalytics = <span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {
+export const generateDailyAnalytics = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Generating daily analytics", { date });</span>
     const startDate = <span class="cstat-no" title="statement not covered" >new Date(date);</span>
@@ -614,7 +614,7 @@ export const generateDailyAnalytics = <span class="fstat-no" title="function not
 // 🔄 GENERATE WEEKLY ANALYTICS
 // =============================
 &nbsp;
-export const generateWeeklyAnalytics = <span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {
+export const generateWeeklyAnalytics = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Generating weekly analytics", { date });</span>
     const startDate = <span class="cstat-no" title="statement not covered" >new Date(date);</span>
@@ -636,7 +636,7 @@ export const generateWeeklyAnalytics = <span class="fstat-no" title="function no
 // 🔄 GENERATE MONTHLY ANALYTICS
 // =============================
 &nbsp;
-export const generateMonthlyAnalytics = <span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {
+export const generateMonthlyAnalytics = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (date = <span class="branch-0 cbranch-no" title="branch not covered" >new Date())</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Generating monthly analytics", { date });</span>
     const startDate = <span class="cstat-no" title="statement not covered" >new Date(date.getFullYear(), date.getMonth(), 1);</span>
@@ -655,7 +655,7 @@ export const generateMonthlyAnalytics = <span class="fstat-no" title="function n
 // 🎯 TRIGGER ANALYTICS GENERATION
 // =============================
 &nbsp;
-export const triggerAnalyticsGeneration = <span class="fstat-no" title="function not covered" >as</span>ync (period, startDate, endDate) =&gt; {
+export const triggerAnalyticsGeneration = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (period, startDate, endDate) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    logInfo("Triggering analytics generation", { period, startDate, endDate });</span>
     const analytics = <span class="cstat-no" title="statement not covered" >await generateMarketAnalytics(period, new Date(startDate), new Date(endDate));</span>
@@ -682,7 +682,7 @@ export default {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

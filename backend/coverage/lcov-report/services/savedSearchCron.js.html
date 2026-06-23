@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.19% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>4/77</span>
+                <span class='fraction'>0/77</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">7.4% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>4/54</span>
+                <span class='fraction'>0/54</span>
             </div>
         
             
@@ -171,15 +171,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -193,15 +186,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -272,9 +272,9 @@ import { createNotification } from "../controllers/notificationController.js";
 import { sendSavedSearchAlertEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 &nbsp;
-const CHECK_INTERVAL = 10 * 60 * 1000;
+const CHECK_INTERVAL = <span class="cstat-no" title="statement not covered" >10 * 60 * 1000;</span>
 &nbsp;
-const matches = <span class="fstat-no" title="function not covered" >(c</span>ar, filters) =&gt; {
+const matches = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(c</span>ar, filters) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  if (!filters || typeof filters !== "object") <span class="cstat-no" title="statement not covered" >return true;</span></span>
   const f = <span class="cstat-no" title="statement not covered" >filters;</span>
 &nbsp;
@@ -298,11 +298,11 @@ const matches = <span class="fstat-no" title="function not covered" >(c</span>ar
 <span class="cstat-no" title="statement not covered" >  return true;</span>
 };
 &nbsp;
-const shouldNotify = <span class="fstat-no" title="function not covered" >(p</span>refs, channel) =&gt; {
+const shouldNotify = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(p</span>refs, channel) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  return prefs?.[channel] !== false;</span>
 };
 &nbsp;
-export const startSavedSearchCron = <span class="fstat-no" title="function not covered" >()</span> =&gt; {
+export const startSavedSearchCron = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
   const tick = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
       const searches = <span class="cstat-no" title="statement not covered" >await SavedSearch.find({ notify: true }).lean();</span>
@@ -373,7 +373,7 @@ export const startSavedSearchCron = <span class="fstat-no" title="function not c
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

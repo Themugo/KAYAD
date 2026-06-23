@@ -46,6 +46,9 @@ process.env.AT_API_KEY = "";
 process.env.PAYMENT_MODE = "mock";
 process.env.MPESA_ENV = "mock";
 
+// Disable OpenTelemetry in tests to avoid interference
+process.env.OTEL_SDK_DISABLED = "true";
+
 let mongod = null;
 let usingMemoryServer = false;
 let isMockDb = false;
@@ -107,8 +110,7 @@ export async function startTestDB() {
 
   // For tests, always use in-memory MongoDB unless explicitly disabled
   // This ensures tests run in isolation without requiring external MongoDB
-  // Disabled for Windows compatibility - will use mock DB fallback
-  if (false) { // process.env.USE_MEMORY_DB !== "false"
+  if (SHOULD_TRY_MEMORY_DB) { // process.env.USE_MEMORY_DB !== "false"
     console.log("ℹ️  Attempting to start in-memory MongoDB");
     try {
       const { MongoMemoryServer } = await import("mongodb-memory-server");

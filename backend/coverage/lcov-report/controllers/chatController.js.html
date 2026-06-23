@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.04% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/119</span>
+                <span class='fraction'>0/119</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">5.4% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/111</span>
+                <span class='fraction'>0/111</span>
             </div>
         
             
@@ -340,9 +340,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -379,9 +379,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -397,7 +397,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -510,9 +510,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -544,9 +544,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -573,7 +573,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -606,7 +606,7 @@ import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../s
 // =============================
 // 💬 START / CREATE CHAT
 // =============================
-export const startChat = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const startChat = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { participantId, carId } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -645,7 +645,7 @@ export const startChat = <span class="fstat-no" title="function not covered" >as
 // =============================
 // 📥 GET USER CHATS (INBOX)
 // =============================
-export const getUserChats = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getUserChats = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const chats = <span class="cstat-no" title="statement not covered" >await Chat.find({ participants: req.user.id })</span>
       .populate("participants", "name avatar")
@@ -663,7 +663,7 @@ export const getUserChats = <span class="fstat-no" title="function not covered" 
 // =============================
 // 📤 SEND MESSAGE
 // =============================
-export const sendMessage = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const sendMessage = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { content, text, message, attachments } = <span class="cstat-no" title="statement not covered" >req.body;</span>
     const msgText = <span class="cstat-no" title="statement not covered" >content || text || message;</span>
@@ -776,7 +776,7 @@ export const sendMessage = <span class="fstat-no" title="function not covered" >
 // =============================
 // 📥 GET MESSAGES
 // =============================
-export const getMessages = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const getMessages = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { chatId } = <span class="cstat-no" title="statement not covered" >req.params;</span>
 &nbsp;
@@ -810,7 +810,7 @@ export const getMessages = <span class="fstat-no" title="function not covered" >
 // =============================
 // 👀 MARK AS SEEN
 // =============================
-export const markAsSeen = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const markAsSeen = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { chatId } = <span class="cstat-no" title="statement not covered" >req.params;</span>
 &nbsp;
@@ -839,7 +839,7 @@ export const markAsSeen = <span class="fstat-no" title="function not covered" >a
 // =============================
 // 🧹 DELETE / LEAVE CHAT
 // =============================
-export const deleteChat = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {
+export const deleteChat = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const chat = <span class="cstat-no" title="statement not covered" >await Chat.findById(req.params.chatId);</span>
 &nbsp;
@@ -868,7 +868,7 @@ export const deleteChat = <span class="fstat-no" title="function not covered" >a
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:40.711Z
+                at 2026-06-23T07:10:24.804Z
             </div>
         <script src="../prettify.js"></script>
         <script>

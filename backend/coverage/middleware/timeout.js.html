@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>0/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">70% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/10</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -87,27 +87,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">145x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
-<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/middleware/timeout.js
 // ─────────────────────────────────────────────────────────────
 // Operation-specific request timeout middleware
 // ─────────────────────────────────────────────────────────────
 &nbsp;
-export const createTimeoutMiddleware = (timeoutMs) =&gt; {
-  return <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+export const createTimeoutMiddleware = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(t</span>imeoutMs) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  return <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    req.setTimeout(timeoutMs);</span>
 <span class="cstat-no" title="statement not covered" >    res.setTimeout(timeoutMs);</span>
 <span class="cstat-no" title="statement not covered" >    next();</span>
@@ -115,11 +115,11 @@ export const createTimeoutMiddleware = (timeoutMs) =&gt; {
 };
 &nbsp;
 // Pre-configured timeout middleware for different operation types
-export const fastTimeout = createTimeoutMiddleware(5_000); // 5 seconds for simple queries
-export const mediumTimeout = createTimeoutMiddleware(10_000); // 10 seconds for standard operations
-export const slowTimeout = createTimeoutMiddleware(30_000); // 30 seconds for complex operations
-export const externalTimeout = createTimeoutMiddleware(15_000); // 15 seconds for external API calls
-export const uploadTimeout = createTimeoutMiddleware(120_000); // 2 minutes for file uploads
+export const fastTimeout = <span class="cstat-no" title="statement not covered" >createTimeoutMiddleware(5_000);</span> // 5 seconds for simple queries
+export const mediumTimeout = <span class="cstat-no" title="statement not covered" >createTimeoutMiddleware(10_000);</span> // 10 seconds for standard operations
+export const slowTimeout = <span class="cstat-no" title="statement not covered" >createTimeoutMiddleware(30_000);</span> // 30 seconds for complex operations
+export const externalTimeout = <span class="cstat-no" title="statement not covered" >createTimeoutMiddleware(15_000);</span> // 15 seconds for external API calls
+export const uploadTimeout = <span class="cstat-no" title="statement not covered" >createTimeoutMiddleware(120_000);</span> // 2 minutes for file uploads
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -127,7 +127,7 @@ export const uploadTimeout = createTimeoutMiddleware(120_000); // 2 minutes for 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>

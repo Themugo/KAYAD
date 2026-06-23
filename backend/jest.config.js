@@ -21,9 +21,11 @@ export default {
     "!**/node_modules/**",
     "!**/tests/**",
     "!**/migrations/**",
+    "!**/seed.js",
+    "!**/server.js",
   ],
   coverageDirectory: "coverage",
-  coverageReporters: ["text", "lcov", "clover", "html"],
+  coverageReporters: ["text", "lcov", "html", "json-summary"],
   coverageThreshold: {
     global: {
       branches: 50,

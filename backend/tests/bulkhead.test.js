@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { describe, it, expect, beforeEach, afterEach } from "@jest/globals";
+import { jest } from "@jest/globals";
 import { getBulkhead, createBulkheadMiddleware, getAllBulkheadStates, resetBulkhead } from "../middleware/bulkhead.js";
 
 describe("Bulkhead Isolation", () => {

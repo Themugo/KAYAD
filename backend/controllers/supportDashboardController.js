@@ -1,11 +1,11 @@
 // backend/controllers/supportDashboardController.js
 // Support Dashboard controller for customer support analytics
 
-import Ticket from "../models/Ticket.js";
+import Ticket from "../models/SupportTicket.js";
 import Chat from "../models/Chat.js";
 import User from "../models/User.js";
 import Dispute from "../models/Dispute.js";
-import { protect, supportOnly } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 // =============================

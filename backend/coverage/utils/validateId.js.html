@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>2/2</span>
+                <span class='fraction'>0/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>7/7</span>
+                <span class='fraction'>0/7</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -113,8 +113,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">19x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -126,12 +126,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">30x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/utils/validateId.js
 // Safe ObjectId validation for controllers.
@@ -148,8 +148,8 @@
 &nbsp;
 import mongoose from "mongoose";
 &nbsp;
-export const isValidId = (id) =&gt;
-  typeof id === "string" &amp;&amp; mongoose.Types.ObjectId.isValid(id) &amp;&amp; /^[a-f0-9]{24}$/i.test(id);
+export const isValidId = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(i</span>d) =&gt;</span>
+<span class="cstat-no" title="statement not covered" >  typeof id === "string" &amp;&amp; mongoose.Types.ObjectId.isValid(id) &amp;&amp; /^[a-f0-9]{24}$/i.test(id);</span>
 &nbsp;
 /**
  * Validates an ObjectId param. If invalid, sends 400 and returns true.
@@ -161,12 +161,12 @@ export const isValidId = (id) =&gt;
  * @param {string} [label="ID"] - Label for the error message
  * @returns {boolean} true if INVALID (response already sent), false if valid
  */
-export const requireValidId = (req, res, id, label = "ID") =&gt; {
-  if (!isValidId(id)) {
-    res.status(400).json({ success: false, message: `Invalid ${label} format` });
-    return true;
+export const requireValidId = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>eq, res, id, label = <span class="branch-0 cbranch-no" title="branch not covered" >"ID")</span> =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >  if (!isValidId(id)) {</span>
+<span class="cstat-no" title="statement not covered" >    res.status(400).json({ success: false, message: `Invalid ${label} format` });</span>
+<span class="cstat-no" title="statement not covered" >    return true;</span>
   }
-  return false;
+<span class="cstat-no" title="statement not covered" >  return false;</span>
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -175,7 +175,7 @@ export const requireValidId = (req, res, id, label = "ID") =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-06-22T15:38:43.160Z
+                at 2026-06-23T07:10:26.987Z
             </div>
         <script src="../prettify.js"></script>
         <script>
