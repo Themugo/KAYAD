@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:24:53.180Z",
+  "generated": "2026-06-23T08:26:19.622Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 177,
-    "routesWithoutValidation": 242,
-    "validationCoverage": "43.92"
+    "routesWithValidation": 186,
+    "routesWithoutValidation": 233,
+    "validationCoverage": "46.15"
   },
   "undocumentedEndpoints": [
     {
@@ -1800,7 +1800,7 @@
       "path": "/:leadId",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /:leadId/stage",
@@ -1808,7 +1808,7 @@
       "path": "/:leadId/stage",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /:leadId/archive",
@@ -1816,7 +1816,7 @@
       "path": "/:leadId/archive",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /:leadId/hot",
@@ -1824,7 +1824,7 @@
       "path": "/:leadId/hot",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:leadId/notes",
@@ -1832,7 +1832,7 @@
       "path": "/:leadId/notes",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:leadId/timeline",
@@ -1840,7 +1840,7 @@
       "path": "/:leadId/timeline",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /analytics/summary",
@@ -1848,7 +1848,7 @@
       "path": "/analytics/summary",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /pipeline/view",
@@ -1856,7 +1856,7 @@
       "path": "/pipeline/view",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /conversion/report",
@@ -1864,7 +1864,7 @@
       "path": "/conversion/report",
       "file": "leadRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /analyze/:carId",
@@ -3086,15 +3086,6 @@
     "GET /my",
     "POST /:id/approve",
     "POST /:id/reject",
-    "GET /:leadId",
-    "PUT /:leadId/stage",
-    "PUT /:leadId/archive",
-    "PUT /:leadId/hot",
-    "POST /:leadId/notes",
-    "GET /:leadId/timeline",
-    "GET /analytics/summary",
-    "GET /pipeline/view",
-    "GET /conversion/report",
     "GET /analyze/:carId",
     "POST /batch-analyze",
     "GET /dealer-stats",

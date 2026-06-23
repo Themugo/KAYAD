@@ -20,6 +20,7 @@ import {
 } from "../controllers/leadController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -28,10 +29,10 @@ const router = express.Router();
 // =============================
 
 // Get dealer's leads
-router.get("/", protect, asyncHandler(getLeads));
+router.get("/", protect, validateQuery(analyticsQuerySchema), asyncHandler(getLeads));
 
 // Get lead details
-router.get("/:leadId", protect, asyncHandler(getLead));
+router.get("/:leadId", protect, validateObjectId, asyncHandler(getLead));
 
 // Create lead manually
 router.post("/", protect, asyncHandler(createLeadManual));
@@ -49,15 +50,15 @@ router.put("/:leadId/hot", protect, asyncHandler(markAsHot));
 router.post("/:leadId/notes", protect, asyncHandler(addNote));
 
 // Get lead timeline
-router.get("/:leadId/timeline", protect, asyncHandler(getTimeline));
+router.get("/:leadId/timeline", protect, validateObjectId, asyncHandler(getTimeline));
 
 // Get lead analytics
-router.get("/analytics/summary", protect, asyncHandler(getAnalytics));
+router.get("/analytics/summary", protect, validateQuery(analyticsQuerySchema), asyncHandler(getAnalytics));
 
 // Get lead pipeline
-router.get("/pipeline/view", protect, asyncHandler(getPipeline));
+router.get("/pipeline/view", protect, validateQuery(analyticsQuerySchema), asyncHandler(getPipeline));
 
 // Get conversion report
-router.get("/conversion/report", protect, asyncHandler(getConversionReport));
+router.get("/conversion/report", protect, validateQuery(analyticsQuerySchema), asyncHandler(getConversionReport));
 
 export default router;
