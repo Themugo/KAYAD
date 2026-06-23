@@ -23,3 +23,19 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Generated documentation artifacts
+doc-inventory*.json
+doc-quality-report*.json
+api-governance-report*.json
+DOCUMENTATION_QUALITY_DASHBOARD.md
+
+# Tool-specific config
+.bolt/
+.vercel/
+
+# Test coverage output
+backend/coverage/
+
+# TypeScript incremental build
+*.tsbuildinfo
