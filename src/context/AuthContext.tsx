@@ -87,7 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const logout = useCallback(async () => {
-    try { await authAPI.logout(); } catch { /* ignore */ }
+    try { await authAPI.logout(); } catch (error) { console.error('Logout failed:', error); }
     setUser(null);
     setLoading(false);
   }, []);

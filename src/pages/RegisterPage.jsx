@@ -72,7 +72,10 @@ function RegisterFlow({ roleParam, isDealerUrl, redirectTo }) {
     adminAPI.getConfig().then(({ config: c }) => {
       if (c?.packages) setLivePkgs(c.packages);
       setFreeMode(c?.freeMarket !== false || c?.waivePayments === true);
-    }).catch(() => setFreeMode(true));
+    }).catch((error) => {
+      console.error('Failed to fetch config:', error);
+      setFreeMode(true);
+    });
   }, []);
 
   const isDealer = role === 'dealer';

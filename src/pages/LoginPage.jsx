@@ -71,7 +71,8 @@ function LoginPage() {
     try {
       await authAPI.resendVerification({ email: unverifiedEmail || form.email });
       toast('Verification email sent! Check your inbox.', 'success');
-    } catch {
+    } catch (error) {
+      console.error('Failed to resend verification email:', error);
       toast('Failed to resend. Try again later.', 'error');
     } finally {
       setResending(false);
