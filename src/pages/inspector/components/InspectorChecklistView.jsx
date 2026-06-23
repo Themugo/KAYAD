@@ -1,4 +1,6 @@
-import { AlertTriangle, ChevronRight, FileText } from 'lucide-react';
+import { AlertTriangle, ChevronRight, FileText, Save, Keyboard } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { timeAgo } from '../../../utils/helpers';
 
 export default function InspectorChecklistView({ activeTask, setActiveTask, checklist, setChecklist, notes, setNotes, condition, setCondition, collapsedCats, setCollapsedCats, searchQuery, setSearchQuery, handleSubmit, CATEGORIES }) {
   const total = checklist.length;
@@ -8,6 +10,45 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
   const filtered = searchQuery
     ? checklist.filter(c => c.item.toLowerCase().includes(searchQuery.toLowerCase()) || c.category.toLowerCase().includes(searchQuery.toLowerCase()))
     : checklist;
+  const [lastSaved, setLastSaved] = useState(null);
+  const [showKeyboardHint, setShowKeyboardHint] = useState(false);
+
+  // Auto-save functionality
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const data = { checklist, notes, condition };
+      localStorage.setItem(`ghost_check_${activeTask._id}`, JSON.stringify(data));
+      setLastSaved(new Date());
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [checklist, notes, condition, activeTask._id]);
+
+  // Load saved state on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(`ghost_check_${activeTask._id}`);
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.checklist && data.checklist.length === checklist.length) {
+          setChecklist(data.checklist);
+        }
+        if (data.notes) setNotes(data.notes);
+        if (data.condition) setCondition(data.condition);
+        setLastSaved(new Date(data.timestamp));
+      } catch (e) {
+        console.error('Failed to load saved state:', e);
+      }
+    }
+    // Show keyboard hint on first visit
+    const hintShown = sessionStorage.getItem('keyboard_hint_shown');
+    if (!hintShown) {
+      setShowKeyboardHint(true);
+      setTimeout(() => {
+        setShowKeyboardHint(false);
+        sessionStorage.setItem('keyboard_hint_shown', 'true');
+      }, 5000);
+    }
+  }, [activeTask._id]);
 
   const toggleCheck = (idx) => {
     setChecklist(prev => prev.map((c, i) => i === idx ? { ...c, passed: c.passed === true ? false : c.passed === false ? null : true } : c));
@@ -16,6 +57,20 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
   const toggleCategory = (cat) => {
     setCollapsedCats(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
   };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSubmit]);
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
@@ -38,6 +93,11 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
                 <span style={{ color: '#22c55e', fontWeight: 700 }}>{passed}</span> passed · <span style={{ color: failed > 0 ? '#ef4444' : 'rgba(255,255,255,0.35)', fontWeight: 700 }}>{failed}</span> failed · <span style={{ color: 'rgba(255,255,255,0.2)' }}>{untested}</span> pending
               </span>
+              {lastSaved && (
+                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Save size={10} /> Saved {timeAgo(lastSaved)}
+                </span>
+              )}
               <div style={{ width: 100, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden', display: 'flex' }}>
                 <div style={{ width: `${(passed / total) * 100}%`, height: '100%', background: '#22c55e', transition: 'width 0.3s' }} />
                 <div style={{ width: `${(failed / total) * 100}%`, height: '100%', background: '#ef4444', transition: 'width 0.3s' }} />
@@ -150,7 +210,18 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
                         const globalIdx = checklist.indexOf(item);
                         return (
                           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 0' }}>
-                            <button onClick={() => toggleCheck(globalIdx)}
+                            <button 
+                              onClick={() => toggleCheck(globalIdx)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  toggleCheck(globalIdx);
+                                }
+                              }}
+                              aria-label={`Toggle ${item.item}`}
+                              role="checkbox"
+                              aria-checked={item.passed === true ? 'true' : item.passed === false ? 'false' : 'mixed'}
+                              tabIndex={0}
                               style={{
                                 width: 16, height: 16, borderRadius: 4, border: '1px solid',
                                 flexShrink: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -203,6 +274,9 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
         >
           <FileText size={16} /> Submit Ghost Check Report ({Math.round((passed / total) * 100)}%)
         </button>
+        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+          <Keyboard size={10} /> Tip: Press Ctrl+S to submit quickly
+        </div>
       </div>
     </div>
   );

@@ -30,30 +30,38 @@ function Stepper({ escrow }) {
   const currentIdx = (() => { for (let i = ESCROW_STEPS.length - 1; i >= 0; i--) { if (doneKeys.has(ESCROW_STEPS[i].key)) return i; } return -1; })();
 
   return (
-    <div style={{ display: 'flex', gap: 0, margin: '16px 0 20px', position: 'relative' }}>
+    <div style={{ display: 'flex', gap: 0, margin: '20px 0 24px', position: 'relative', padding: '20px 0' }}>
       {ESCROW_STEPS.map((s, i) => {
         const isDone = doneKeys.has(s.key);
         const isCurrent = i === currentIdx;
+        const isNext = i === currentIdx + 1;
         return (
           <div key={s.key} style={{ flex: 1, textAlign: 'center', position: 'relative' }}>
             {i < ESCROW_STEPS.length - 1 && (
               <div style={{
                 position: 'absolute', top: 14, left: '50%', width: '100%',
-                height: 2, background: isDone ? '#22c55e' : 'rgba(255,255,255,0.08)',
-                zIndex: 0,
+                height: 2, background: isDone ? '#22c55e' : isCurrent ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)',
+                zIndex: 0, transition: 'background 0.3s',
               }} />
             )}
             <div style={{
-              width: 28, height: 28, borderRadius: '50%', margin: '0 auto 6px',
+              width: 32, height: 32, borderRadius: '50%', margin: '0 auto 8px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: isDone ? '#22c55e' : isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.06)',
-              color: isDone || isCurrent ? '#000' : 'rgba(255,255,255,0.25)',
-              fontSize: 12, fontWeight: 700, position: 'relative', zIndex: 1,
-              border: isCurrent && !isDone ? '2px solid var(--gold)' : 'none',
+              background: isDone ? '#22c55e' : isCurrent ? 'var(--gold)' : isNext ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.06)',
+              color: isDone || isCurrent ? '#000' : isNext ? 'var(--gold)' : 'rgba(255,255,255,0.25)',
+              fontSize: 14, fontWeight: 700, position: 'relative', zIndex: 1,
+              border: isCurrent && !isDone ? '2px solid var(--gold)' : isNext ? '1px solid rgba(212,196,168,0.3)' : 'none',
+              transition: 'all 0.3s',
+              boxShadow: isCurrent ? '0 0 0 4px rgba(212,196,168,0.1)' : 'none',
             }}>
-              {isDone ? '✓' : i + 1}
+              {isDone ? '✓' : s.icon}
             </div>
-            <div style={{ fontSize: 9, color: isDone ? '#22c55e' : 'rgba(255,255,255,0.3)', fontWeight: isCurrent ? 700 : 400 }}>
+            <div style={{ 
+              fontSize: 10, 
+              color: isDone ? '#22c55e' : isCurrent ? 'var(--gold)' : isNext ? 'rgba(212,196,168,0.6)' : 'rgba(255,255,255,0.3)', 
+              fontWeight: isCurrent ? 700 : 500,
+              transition: 'all 0.3s',
+            }}>
               {s.label}
             </div>
           </div>

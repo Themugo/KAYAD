@@ -56,6 +56,7 @@ export default function AuctionLivePage() {
   const [confetti, setConfetti] = useState(false);
   const [outbidAlert, setOutbidAlert] = useState(false);
   const [priceParticles, setPriceParticles] = useState(false);
+  const [showBidConfirm, setShowBidConfirm] = useState(false);
   const bidListRef = useRef(null);
   const prevBidRef = useRef(0);
   const newBidIdsRef = useRef(new Set());
@@ -248,8 +249,14 @@ export default function AuctionLivePage() {
     if (!phone || phone.replace(/\D/g, '').length < 9) {
       toast('Enter your M-Pesa number', 'error'); return;
     }
+    setShowBidConfirm(true);
+  };
+
+  const confirmBid = async () => {
+    setShowBidConfirm(false);
     setPlacing(true);
     try {
+      const amount = Number(bidAmount);
       const data = await bidsAPI.place(id, {
         amount,
         phone: phone.replace(/\D/g, ''),
@@ -301,6 +308,50 @@ export default function AuctionLivePage() {
       <SEOHead metadata={seoMetadata} />
       <div className="auction-live-page">
       {confetti && <ConfettiOverlay />}
+      {showBidConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div style={{
+            background: 'var(--card)', border: '1px solid var(--border)',
+            borderRadius: 16, padding: 24, maxWidth: 400, width: '100%',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
+              Confirm Your Bid
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.5 }}>
+              You are about to place a bid of <strong style={{ color: 'var(--gold)' }}>{formatKES(Number(bidAmount))}</strong> on {car.title}.
+              <br /><br />
+              A 5% commitment fee ({formatKES(Math.ceil(Number(bidAmount) * 0.05))}) will be sent via M-Pesa to the dealer.
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
+              <button
+                onClick={confirmBid}
+                disabled={placing}
+                style={{
+                  padding: '12px', borderRadius: 10, background: 'var(--gold)',
+                  color: '#000', border: 'none', fontSize: 13, fontWeight: 800,
+                  cursor: placing ? 'wait' : 'pointer', textTransform: 'uppercase',
+                }}
+              >
+                {placing ? 'Processing...' : 'Confirm & Place Bid'}
+              </button>
+              <button
+                onClick={() => setShowBidConfirm(false)}
+                style={{
+                  padding: '12px', borderRadius: 10, background: 'transparent',
+                  color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)',
+                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="container" style={{ paddingTop: 24, paddingBottom: 24 }}>
 
         {/* ─── Header ─── */}
