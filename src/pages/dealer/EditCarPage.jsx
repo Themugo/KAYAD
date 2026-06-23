@@ -106,8 +106,13 @@ export default function EditCarPage() {
 
   const handleSetCover = async (idx) => {
     setCoverImageIdx(idx);
-    try { await carsAPI.promote(id, { coverImage: idx }); toast('Cover image updated', 'success'); }
-    catch { /* non-critical */ }
+    try {
+      await carsAPI.promote(id, { coverImage: idx });
+      toast('Cover image updated', 'success');
+    } catch (error) {
+      console.error('Failed to set cover image:', error);
+      // Non-critical, so no toast
+    }
   };
 
   const handlePromote = async () => {
@@ -135,7 +140,10 @@ export default function EditCarPage() {
         return { ...p, images: newImages, coverImage: newCover };
       });
       toast('Image deleted', 'success');
-    } catch { toast('Failed to delete image', 'error'); }
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      toast('Failed to delete image', 'error');
+    }
     finally { setDeletingIdx(null); }
   };
 
@@ -205,7 +213,10 @@ export default function EditCarPage() {
       await dealerAuctionAPI.end(id);
       toast('Auction ended', 'info');
       setCar(p => ({ ...p, auctionStatus: 'ended' }));
-    } catch { toast('Failed to end auction', 'error'); }
+    } catch (error) {
+      console.error('Failed to end auction:', error);
+      toast('Failed to end auction', 'error');
+    }
     finally { setAuctionAction(null); }
   };
 
@@ -245,7 +256,16 @@ export default function EditCarPage() {
                 )}
               </div>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button onClick={async () => { try { const r = await dealerAPI.duplicate(id); toast('Listing duplicated', 'success'); navigate(`/dealer/edit/${r.car._id}`); } catch { toast('Failed to duplicate', 'error'); } } } style={{ padding: '10px 18px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)', borderRadius: 10, color: '#3b82f6', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <button onClick={async () => {
+                try {
+                  const r = await dealerAPI.duplicate(id);
+                  toast('Listing duplicated', 'success');
+                  navigate(`/dealer/edit/${r.car._id}`);
+                } catch (error) {
+                  console.error('Failed to duplicate listing:', error);
+                  toast('Failed to duplicate', 'error');
+                }
+              } } style={{ padding: '10px 18px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)', borderRadius: 10, color: '#3b82f6', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
                   <Copy size={13} /> Copy
                 </button>
                 <button onClick={handleDelete} style={{ padding: '10px 18px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
