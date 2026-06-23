@@ -1,9 +1,6 @@
-import { useState } from 'react';
 import { AlertTriangle, ChevronRight, FileText } from 'lucide-react';
 
-const ITEMS_PER_CATEGORY = 10;
-
-export default function InspectorChecklistView({ activeTask, setActiveTask, checklist, setChecklist, notes, setNotes, condition, setCondition, score, collapsedCats, setCollapsedCats, searchQuery, setSearchQuery, handleSubmit, CATEGORIES }) {
+export default function InspectorChecklistView({ activeTask, setActiveTask, checklist, setChecklist, notes, setNotes, condition, setCondition, collapsedCats, setCollapsedCats, searchQuery, setSearchQuery, handleSubmit, CATEGORIES }) {
   const total = checklist.length;
   const passed = checklist.filter(c => c.passed === true).length;
   const failed = checklist.filter(c => c.passed === false).length;

@@ -20,6 +20,8 @@ describe('api module', () => {
   beforeEach(async () => {
     vi.resetModules();
     localStorage.clear();
+    // Set environment variable to enable demo mode for testing
+    vi.stubEnv('VITE_ENABLE_DEMO', 'true');
     api = await import('../../api/api');
     // Wait for startup check to settle
     await vi.dynamicImportSettled?.();
@@ -44,5 +46,7 @@ describe('api module', () => {
   it('enableDemoMode sets demo mode', () => {
     api.enableDemoMode();
     expect(api.isDemoMode()).toBe(true);
+    // Reset for other tests by re-importing
+    vi.resetModules();
   });
 });

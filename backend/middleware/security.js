@@ -4,6 +4,8 @@
 // All features are ENV-driven — set variable to enable/disable.
 // ─────────────────────────────────────────────────────────────
 
+import DOMPurify from "isomorphic-dompurify";
+
 // ── 1. MONGO INJECTION PROTECTION ────────────────────────────
 // Strips $ and . from req.body, req.query, req.params
 // Prevents: { "email": { "$gt": "" } } style attacks
@@ -29,30 +31,10 @@ export const mongoSanitize = () => (req, res, next) => {
 };
 
 // ── 2. XSS SANITIZATION ───────────────────────────────────────
-// Escapes HTML special chars in all string fields
+// Uses DOMPurify to sanitize HTML content
 // Prevents: <script>alert(1)</script> stored in DB
-const escapeHtml = (str) =>
-  str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;")
-    .replace(/\//g, "&#x2F;");
 
-const xssClean = (obj, depth = 0) => {
-  if (depth > 10 || !obj || typeof obj !== "object") return obj;
-  for (const key of Object.keys(obj)) {
-    if (typeof obj[key] === "string") {
-      obj[key] = escapeHtml(obj[key]);
-    } else if (typeof obj[key] === "object") {
-      xssClean(obj[key], depth + 1);
-    }
-  }
-  return obj;
-};
-
-// Fields that should NOT be XSS-escaped (passwords, tokens — NOT user content)
+// Fields that should NOT be XSS-sanitized (passwords, tokens — NOT user content)
 const XSS_SKIP_FIELDS = new Set([
   "password",
   "currentPassword",
@@ -62,29 +44,29 @@ const XSS_SKIP_FIELDS = new Set([
   "checkoutRequestID",
 ]);
 
-// Fields that allow limited HTML (bold, italic, links) — sanitized, not skipped
+// Fields that allow limited HTML (bold, italic, links) — sanitized with DOMPurify
 const RICH_TEXT_FIELDS = new Set(["content", "description", "bio"]);
 
-// Strip dangerous tags/attributes but allow safe formatting
-const sanitizeRichText = (str) => {
-  return (
-    str
-      // Remove script/style/iframe/object/embed tags and their content
-      .replace(
-        /<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*>[\s\S]*?<\/\s*\1\s*>/gi,
-        "",
-      )
-      .replace(/<\s*(script|style|iframe|object|embed|form|input|textarea|button|link|meta|base)[^>]*\/?>/gi, "")
-      // Remove event handlers (onclick, onerror, onload, etc.)
-      .replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "")
-      .replace(/\s+on\w+\s*=\s*\S+/gi, "")
-      // Remove javascript: and data: URIs in href/src attributes
-      .replace(/(href|src|action)\s*=\s*["']\s*(javascript|data|vbscript)\s*:/gi, '$1="')
-      // Remove style attributes (can be used for CSS injection/exfil)
-      .replace(/\s+style\s*=\s*["'][^"']*["']/gi, "")
-      // Strip null bytes
-      .replace(/\0/g, "")
-  );
+// Configure DOMPurify for rich text fields
+const DOMPurifyConfig = {
+  ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li", "u"],
+  ALLOWED_ATTR: ["href", "target", "rel"],
+  ALLOW_DATA_ATTR: false,
+  FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form"],
+  FORBID_ATTR: ["onclick", "onerror", "onload", "onmouseover", "onfocus", "onblur"],
+};
+
+// Sanitize object recursively with DOMPurify
+const sanitizeObject = (obj, depth = 0) => {
+  if (depth > 10 || !obj || typeof obj !== "object") return obj;
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === "string") {
+      obj[key] = DOMPurify.sanitize(obj[key]);
+    } else if (typeof obj[key] === "object") {
+      sanitizeObject(obj[key], depth + 1);
+    }
+  }
+  return obj;
 };
 
 export const xssProtection = () => (req, res, next) => {
@@ -92,11 +74,13 @@ export const xssProtection = () => (req, res, next) => {
     for (const key of Object.keys(req.body)) {
       if (XSS_SKIP_FIELDS.has(key)) continue;
       if (RICH_TEXT_FIELDS.has(key) && typeof req.body[key] === "string") {
-        req.body[key] = sanitizeRichText(req.body[key]);
+        // Use relaxed config for rich text fields
+        req.body[key] = DOMPurify.sanitize(req.body[key], DOMPurifyConfig);
       } else if (typeof req.body[key] === "string") {
-        req.body[key] = escapeHtml(req.body[key]);
+        // Strict sanitization for regular fields
+        req.body[key] = DOMPurify.sanitize(req.body[key]);
       } else if (typeof req.body[key] === "object") {
-        xssClean(req.body[key]);
+        sanitizeObject(req.body[key]);
       }
     }
   }

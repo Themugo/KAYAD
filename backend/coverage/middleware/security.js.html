@@ -1,0 +1,475 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for middleware/security.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">middleware</a> security.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">22.22% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>16/72</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">3.22% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>2/62</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">41.66% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>5/12</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">17.46% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>11/63</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line low'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// backend/middleware/security.js
+// ─────────────────────────────────────────────────────────────
+// Drop-in security middleware stack. Add to server.js ONCE.
+// All features are ENV-driven — set variable to enable/disable.
+// ─────────────────────────────────────────────────────────────
+&nbsp;
+import DOMPurify from "isomorphic-dompurify";
+&nbsp;
+// ── 1. MONGO INJECTION PROTECTION ────────────────────────────
+// Strips $ and . from req.body, req.query, req.params
+// Prevents: { "email": { "$gt": "" } } style attacks
+export const mongoSanitize = () =&gt; <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+  const clean = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(o</span>bj) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    if (!obj || typeof obj !== "object") <span class="cstat-no" title="statement not covered" >return obj;</span></span>
+<span class="cstat-no" title="statement not covered" >    for (const key of Object.keys(obj)) {</span>
+<span class="cstat-no" title="statement not covered" >      if (key.startsWith("$") || key.includes(".")) {</span>
+<span class="cstat-no" title="statement not covered" >        delete obj[key];</span>
+      } else <span class="cstat-no" title="statement not covered" >if (typeof obj[key] === "object") {</span>
+<span class="cstat-no" title="statement not covered" >        clean(obj[key]);</span>
+      } else <span class="cstat-no" title="statement not covered" >if (typeof obj[key] === "string") {</span>
+        // Strip null bytes
+<span class="cstat-no" title="statement not covered" >        obj[key] = obj[key].replace(/\0/g, "");</span>
+      }
+    }
+<span class="cstat-no" title="statement not covered" >    return obj;</span>
+  };
+<span class="cstat-no" title="statement not covered" >  clean(req.body);</span>
+<span class="cstat-no" title="statement not covered" >  clean(req.query);</span>
+<span class="cstat-no" title="statement not covered" >  clean(req.params);</span>
+<span class="cstat-no" title="statement not covered" >  next();</span>
+};
+&nbsp;
+// ── 2. XSS SANITIZATION ───────────────────────────────────────
+// Uses DOMPurify to sanitize HTML content
+// Prevents: &lt;script&gt;alert(1)&lt;/script&gt; stored in DB
+&nbsp;
+// Fields that should NOT be XSS-sanitized (passwords, tokens — NOT user content)
+const XSS_SKIP_FIELDS = new Set([
+  "password",
+  "currentPassword",
+  "newPassword",
+  "token",
+  "refreshToken",
+  "checkoutRequestID",
+]);
+&nbsp;
+// Fields that allow limited HTML (bold, italic, links) — sanitized with DOMPurify
+const RICH_TEXT_FIELDS = new Set(["content", "description", "bio"]);
+&nbsp;
+// Configure DOMPurify for rich text fields
+const DOMPurifyConfig = {
+  ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "p", "br", "ul", "ol", "li", "u"],
+  ALLOWED_ATTR: ["href", "target", "rel"],
+  ALLOW_DATA_ATTR: false,
+  FORBID_TAGS: ["script", "style", "iframe", "object", "embed", "form"],
+  FORBID_ATTR: ["onclick", "onerror", "onload", "onmouseover", "onfocus", "onblur"],
+};
+&nbsp;
+// Sanitize object recursively with DOMPurify
+const sanitizeObject = <span class="fstat-no" title="function not covered" >(o</span>bj, depth = <span class="branch-0 cbranch-no" title="branch not covered" >0)</span> =&gt; {
+<span class="cstat-no" title="statement not covered" >  if (depth &gt; 10 || !obj || typeof obj !== "object") <span class="cstat-no" title="statement not covered" >return obj;</span></span>
+<span class="cstat-no" title="statement not covered" >  for (const key of Object.keys(obj)) {</span>
+<span class="cstat-no" title="statement not covered" >    if (typeof obj[key] === "string") {</span>
+<span class="cstat-no" title="statement not covered" >      obj[key] = DOMPurify.sanitize(obj[key]);</span>
+    } else <span class="cstat-no" title="statement not covered" >if (typeof obj[key] === "object") {</span>
+<span class="cstat-no" title="statement not covered" >      sanitizeObject(obj[key], depth + 1);</span>
+    }
+  }
+<span class="cstat-no" title="statement not covered" >  return obj;</span>
+};
+&nbsp;
+export const xssProtection = () =&gt; <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  if (req.body &amp;&amp; typeof req.body === "object") {</span>
+<span class="cstat-no" title="statement not covered" >    for (const key of Object.keys(req.body)) {</span>
+<span class="cstat-no" title="statement not covered" >      if (XSS_SKIP_FIELDS.has(key)) <span class="cstat-no" title="statement not covered" >continue;</span></span>
+<span class="cstat-no" title="statement not covered" >      if (RICH_TEXT_FIELDS.has(key) &amp;&amp; typeof req.body[key] === "string") {</span>
+        // Use relaxed config for rich text fields
+<span class="cstat-no" title="statement not covered" >        req.body[key] = DOMPurify.sanitize(req.body[key], DOMPurifyConfig);</span>
+      } else <span class="cstat-no" title="statement not covered" >if (typeof req.body[key] === "string") {</span>
+        // Strict sanitization for regular fields
+<span class="cstat-no" title="statement not covered" >        req.body[key] = DOMPurify.sanitize(req.body[key]);</span>
+      } else <span class="cstat-no" title="statement not covered" >if (typeof req.body[key] === "object") {</span>
+<span class="cstat-no" title="statement not covered" >        sanitizeObject(req.body[key]);</span>
+      }
+    }
+  }
+<span class="cstat-no" title="statement not covered" >  next();</span>
+};
+&nbsp;
+// ── 3. PAGINATION CAP ─────────────────────────────────────────
+// Enforces max limit on all list queries
+// Prevents: ?limit=999999 DoS attacks
+const MAX_LIMIT = parseInt(process.env.MAX_QUERY_LIMIT || <span class="branch-1 cbranch-no" title="branch not covered" >"100")</span>;
+const DEFAULT_LIM = parseInt(process.env.DEFAULT_QUERY_LIMIT || <span class="branch-1 cbranch-no" title="branch not covered" >"20")</span>;
+&nbsp;
+export const paginationCap = () =&gt; <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  if (req.query.limit !== undefined) {</span>
+    const raw = <span class="cstat-no" title="statement not covered" >parseInt(req.query.limit);</span>
+<span class="cstat-no" title="statement not covered" >    req.query.limit = String(isNaN(raw) || raw &lt; 1 ? DEFAULT_LIM : Math.min(raw, MAX_LIMIT));</span>
+  }
+<span class="cstat-no" title="statement not covered" >  if (req.query.page !== undefined) {</span>
+    const raw = <span class="cstat-no" title="statement not covered" >parseInt(req.query.page);</span>
+<span class="cstat-no" title="statement not covered" >    req.query.page = String(isNaN(raw) || raw &lt; 1 ? 1 : raw);</span>
+  }
+<span class="cstat-no" title="statement not covered" >  next();</span>
+};
+&nbsp;
+// ── 4. SECURITY HEADERS (extra, beyond helmet) ────────────────
+export const extraHeaders = () =&gt; <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+<span class="cstat-no" title="statement not covered" >  res.setHeader("X-Content-Type-Options", "nosniff");</span>
+<span class="cstat-no" title="statement not covered" >  res.setHeader("X-DNS-Prefetch-Control", "off");</span>
+<span class="cstat-no" title="statement not covered" >  res.setHeader("X-Download-Options", "noopen");</span>
+<span class="cstat-no" title="statement not covered" >  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");</span>
+<span class="cstat-no" title="statement not covered" >  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");</span>
+<span class="cstat-no" title="statement not covered" >  res.removeHeader("X-Powered-By");</span>
+<span class="cstat-no" title="statement not covered" >  next();</span>
+};
+&nbsp;
+// ── 5. REQUEST SIZE GUARD ─────────────────────────────────────
+// Reject abnormally large bodies that aren't file uploads
+export const bodyGuard = () =&gt; <span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {
+  const ct = <span class="cstat-no" title="statement not covered" >req.headers["content-type"] || "";</span>
+<span class="cstat-no" title="statement not covered" >  if (ct.includes("multipart")) <span class="cstat-no" title="statement not covered" >return next(); </span></span>// allow file uploads
+  const len = <span class="cstat-no" title="statement not covered" >parseInt(req.headers["content-length"] || "0");</span>
+  const maxBytes = <span class="cstat-no" title="statement not covered" >parseInt(process.env.MAX_BODY_BYTES || String(2 * 1024 * 1024));</span> // 2MB
+<span class="cstat-no" title="statement not covered" >  if (len &gt; maxBytes) {</span>
+<span class="cstat-no" title="statement not covered" >    return res.status(413).json({ success: false, message: "Request too large" });</span>
+  }
+<span class="cstat-no" title="statement not covered" >  next();</span>
+};
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-06-22T15:38:43.160Z
+            </div>
+        <script src="../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../sorter.js"></script>
+        <script src="../block-navigation.js"></script>
+    </body>
+</html>
+    

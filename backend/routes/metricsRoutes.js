@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { getAllMetrics, getCounter, getGauge, getHistogram } from "../config/metrics.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -300,8 +301,8 @@ router.get("/errors", async (req, res) => {
   }
 });
 
-// Reset metrics (admin only)
-router.post("/reset", async (req, res) => {
+// Reset metrics (admin only - protected)
+router.post("/reset", protect, adminOnly, async (req, res) => {
   try {
     const { resetMetrics } = await import("../config/metrics.js");
     resetMetrics();

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, cleanup } from '@testing-library/react';
 
 // App imports BrowserRouter internally, so we just render it once and
 // confirm the provider stack + Suspense fallback render without crashing.
@@ -22,9 +22,24 @@ vi.mock('socket.io-client', () => ({
   }),
 }));
 
+// Mock SWUpdateBanner to avoid PWA virtual module import issues
+vi.mock('../components/SWUpdateBanner', () => ({
+  default: () => null,
+}));
+
+// Mock BrandingContext to avoid async state updates after test teardown
+vi.mock('../context/BrandingContext', () => ({
+  BrandingProvider: ({ children }) => children,
+  useBranding: () => ({ branding: {}, loading: false }),
+}));
+
 import App from '../App';
 
 describe('App', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders without crashing', () => {
     const { container } = render(<App />);
     // App renders Suspense fallback while pages are loading. Either way,

@@ -1,9 +1,12 @@
 import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  plugins: [react()],
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom', // Changed from 'node' to 'jsdom' for React component testing
+    setupFiles: ['./src/__tests__/setup.js'],
     env: {
       JWT_SECRET: 'test-secret-key',
       // Placeholder so module-level `process.env.MONGO_URI ? describe : describe.skip`
@@ -12,13 +15,13 @@ export default defineConfig({
       // beforeAll overwrites this with a real MongoMemoryServer URI before connecting.
       MONGO_URI: 'mongodb://placeholder-overwritten-by-mongo-memory-server/test',
     },
-    include: ['__tests__/**/*.test.ts', 'tests/**/*.test.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx,jsx,js}', 'tests/**/*.{test,spec}.{ts,tsx,jsx,js}'],
     hookTimeout: 60000,
     testTimeout: 30000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['routes/**/*.ts', 'services/**/*.ts', 'middleware/**/*.ts'],
+      include: ['src/**/*.{ts,tsx,jsx}', 'routes/**/*.ts', 'services/**/*.ts', 'middleware/**/*.ts'],
       thresholds: {
         branches: 50,
         functions: 50,

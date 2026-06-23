@@ -5,14 +5,17 @@
 // ─────────────────────────────────────────────────────────────
 
 import { describe, it, expect, beforeEach, jest } from "@jest/globals";
-import sharp from "sharp";
 
 // Mock sharp to avoid requiring actual image files
-jest.mock("sharp");
+const sharpMock = {
+  mockImplementation: jest.fn(),
+  mockReset: jest.fn(),
+};
+jest.mock("sharp", () => sharpMock);
 
 describe("Image Processing Service", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    sharpMock.mockReset();
   });
 
   describe("Error Handling", () => {
@@ -20,7 +23,7 @@ describe("Image Processing Service", () => {
       const corruptBuffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00]);
       
       // Mock sharp to throw error for corrupt data
-      sharp.mockImplementation(() => {
+      sharpMock.mockImplementation(() => {
         throw new Error("Input buffer has corrupt header");
       });
 
@@ -32,7 +35,7 @@ describe("Image Processing Service", () => {
     it("should handle empty buffer", async () => {
       const emptyBuffer = Buffer.from([]);
       
-      sharp.mockImplementation(() => {
+      sharpMock.mockImplementation(() => {
         throw new Error("Input buffer is empty");
       });
 
@@ -44,7 +47,7 @@ describe("Image Processing Service", () => {
     it("should handle invalid image format", async () => {
       const invalidBuffer = Buffer.from([0x00, 0x01, 0x02, 0x03]);
       
-      sharp.mockImplementation(() => {
+      sharpMock.mockImplementation(() => {
         throw new Error("Invalid image format");
       });
 

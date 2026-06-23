@@ -9,6 +9,7 @@ import mongoose from "mongoose";
 import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -212,8 +213,8 @@ router.get("/cache", async (req, res) => {
   });
 });
 
-// Flush cache endpoint (admin only - to be protected)
-router.post("/cache/flush", async (req, res) => {
+// Flush cache endpoint (admin only - protected)
+router.post("/cache/flush", protect, adminOnly, async (req, res) => {
   await cacheService.flushAll();
   cacheService.resetStats();
   res.json({

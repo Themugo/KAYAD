@@ -32,7 +32,7 @@ export const ROLE_DEFAULTS = {
   viewer:          { canListCars:false, canEditCars:false, canDeleteCars:false, canViewEarnings:false, canManageTeam:false, canApproveDeals:false, canChatBuyers:false, canEditSettings:false },
 };
 
-export default function TeamTab({ user, toast }) {
+export default function TeamTab({ toast }) {
   const [team,       setTeam]       = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [invEmail,   setInvEmail]   = useState('');

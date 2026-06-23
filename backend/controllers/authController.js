@@ -9,6 +9,7 @@ import PlatformConfig from "../models/PlatformConfig.js";
 import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { invalidateUserCache } from "../middleware/auth.js";
+import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/accountLockout.js";
 
 // Email service — imported once at module level. Functions are no-ops
 // if the email transport isn't configured (EMAIL_HOST not set).
@@ -153,8 +154,21 @@ export const register = async (req, res) => {
       return R.error(res, "All fields required", 400);
     }
 
+    // Password complexity validation
     if (password.length < 8) {
       return R.error(res, "Password must be at least 8 characters", 400);
+    }
+    if (!/[a-z]/.test(password)) {
+      return R.error(res, "Password must contain at least one lowercase letter", 400);
+    }
+    if (!/[A-Z]/.test(password)) {
+      return R.error(res, "Password must contain at least one uppercase letter", 400);
+    }
+    if (!/\d/.test(password)) {
+      return R.error(res, "Password must contain at least one number", 400);
+    }
+    if (!/[@$!%*?&]/.test(password)) {
+      return R.error(res, "Password must contain at least one special character (@$!%*?&)", 400);
     }
 
     email = email.toLowerCase().trim();
@@ -305,6 +319,9 @@ export const login = async (req, res) => {
     }
 
     if (!user || !(await user.matchPassword(password))) {
+      // ─── Record failed attempt for IP-based lockout ──────
+      recordFailedAttempt(req);
+
       // ─── Account lockout ────────────────────────────────
       if (user && !user.isBanned) {
         const attempts = (user.loginAttempts || 0) + 1;
@@ -325,6 +342,9 @@ export const login = async (req, res) => {
       user.loginAttempts = 0;
       user.lockUntil = null;
     }
+
+    // ─── Record successful attempt for IP-based lockout ──
+    recordSuccessfulAttempt(req);
 
     if (user.isBanned) {
       return R.error(res, "Account suspended", 403);
@@ -579,6 +599,18 @@ export const changePassword = async (req, res) => {
     }
     if (newPassword.length < 8) {
       return R.error(res, "New password must be at least 8 characters", 400);
+    }
+    if (!/[a-z]/.test(newPassword)) {
+      return R.error(res, "New password must contain at least one lowercase letter", 400);
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      return R.error(res, "New password must contain at least one uppercase letter", 400);
+    }
+    if (!/\d/.test(newPassword)) {
+      return R.error(res, "New password must contain at least one number", 400);
+    }
+    if (!/[@$!%*?&]/.test(newPassword)) {
+      return R.error(res, "New password must contain at least one special character (@$!%*?&)", 400);
     }
 
     const user = await User.findById(req.user.id).select("+password +tokenVersion");
