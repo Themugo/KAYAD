@@ -20,6 +20,11 @@ jobs:
     if: github.event_name == 'push'
     uses: ./.github/workflows/security-gate.yml
 
+  api-governance:
+    name: API Governance
+    if: github.event_name == 'push'
+    uses: ./.github/workflows/api-governance.yml
+
   e2e:
     name: E2E Tests
     needs: [quality, test]

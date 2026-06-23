@@ -1,0 +1,3528 @@
+{
+  "generated": "2026-06-23T08:01:02.152Z",
+  "summary": {
+    "totalRoutes": 403,
+    "documentedRoutes": 0,
+    "undocumentedRoutes": 403,
+    "documentationCoverage": "0.00",
+    "routesWithValidation": 136,
+    "routesWithoutValidation": 284,
+    "validationCoverage": "33.75"
+  },
+  "undocumentedEndpoints": [
+    {
+      "key": "GET /public/config",
+      "method": "GET",
+      "path": "/public/config",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /reseed",
+      "method": "POST",
+      "path": "/reseed",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /stats",
+      "method": "GET",
+      "path": "/stats",
+      "file": "referralRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /users",
+      "method": "GET",
+      "path": "/users",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /users/:id/toggle-ban",
+      "method": "POST",
+      "path": "/users/:id/toggle-ban",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /users/:id/approve-dealer",
+      "method": "POST",
+      "path": "/users/:id/approve-dealer",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /users/:id/seller-settings",
+      "method": "PUT",
+      "path": "/users/:id/seller-settings",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /cars",
+      "method": "GET",
+      "path": "/cars",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /cars/:id",
+      "method": "DELETE",
+      "path": "/cars/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /cars/:id/verify",
+      "method": "POST",
+      "path": "/cars/:id/verify",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /cars/:id/moderate",
+      "method": "POST",
+      "path": "/cars/:id/moderate",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /config",
+      "method": "GET",
+      "path": "/config",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /config",
+      "method": "PUT",
+      "path": "/config",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /config/packages",
+      "method": "PUT",
+      "path": "/config/packages",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /audit-log",
+      "method": "GET",
+      "path": "/audit-log",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /audit-log",
+      "method": "POST",
+      "path": "/audit-log",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /system/kill-switch",
+      "method": "POST",
+      "path": "/system/kill-switch",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /system/recover",
+      "method": "POST",
+      "path": "/system/recover",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /dealers/:id/subdomain",
+      "method": "PUT",
+      "path": "/dealers/:id/subdomain",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /users/:id/verify-dealer",
+      "method": "POST",
+      "path": "/users/:id/verify-dealer",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /daraja/test",
+      "method": "POST",
+      "path": "/daraja/test",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /users/:id",
+      "method": "DELETE",
+      "path": "/users/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /users/:id/deactivate",
+      "method": "PUT",
+      "path": "/users/:id/deactivate",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /demo/status",
+      "method": "GET",
+      "path": "/demo/status",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /demo/cleanup",
+      "method": "DELETE",
+      "path": "/demo/cleanup",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /staff",
+      "method": "GET",
+      "path": "/staff",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /staff/permissions/catalog",
+      "method": "GET",
+      "path": "/staff/permissions/catalog",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /staff/:id/permissions",
+      "method": "GET",
+      "path": "/staff/:id/permissions",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /staff/:id/permissions",
+      "method": "PUT",
+      "path": "/staff/:id/permissions",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /staff",
+      "method": "POST",
+      "path": "/staff",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /staff/:id",
+      "method": "PUT",
+      "path": "/staff/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /staff/:id",
+      "method": "DELETE",
+      "path": "/staff/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /seed-departments",
+      "method": "POST",
+      "path": "/seed-departments",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /ads",
+      "method": "GET",
+      "path": "/ads",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /ads",
+      "method": "POST",
+      "path": "/ads",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /ads/:id",
+      "method": "PUT",
+      "path": "/ads/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /ads/:id",
+      "method": "DELETE",
+      "path": "/ads/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /payments",
+      "method": "GET",
+      "path": "/payments",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PATCH /dealers/:id/package",
+      "method": "PATCH",
+      "path": "/dealers/:id/package",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /zero-cost-onboarding",
+      "method": "POST",
+      "path": "/zero-cost-onboarding",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /upload-logo",
+      "method": "POST",
+      "path": "/upload-logo",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /reviews",
+      "method": "GET",
+      "path": "/reviews",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /reviews/:id",
+      "method": "DELETE",
+      "path": "/reviews/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /referrals/stats",
+      "method": "GET",
+      "path": "/referrals/stats",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /referrals",
+      "method": "GET",
+      "path": "/referrals",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /referrals/:id",
+      "method": "GET",
+      "path": "/referrals/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /referrals/:id/credit",
+      "method": "POST",
+      "path": "/referrals/:id/credit",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /referrals/:id/expire",
+      "method": "POST",
+      "path": "/referrals/:id/expire",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /users/:id/referrals",
+      "method": "GET",
+      "path": "/users/:id/referrals",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /chats",
+      "method": "GET",
+      "path": "/chats",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /chats/:chatId/messages",
+      "method": "GET",
+      "path": "/chats/:chatId/messages",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /chats/:chatId/messages/:messageId",
+      "method": "DELETE",
+      "path": "/chats/:chatId/messages/:messageId",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /chats/:chatId/block",
+      "method": "POST",
+      "path": "/chats/:chatId/block",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /chats/:chatId/unblock",
+      "method": "POST",
+      "path": "/chats/:chatId/unblock",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /market-data",
+      "method": "GET",
+      "path": "/market-data",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /market-data/:id",
+      "method": "GET",
+      "path": "/market-data/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /market-data",
+      "method": "POST",
+      "path": "/market-data",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /market-data/:id",
+      "method": "PUT",
+      "path": "/market-data/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /market-data/:id",
+      "method": "DELETE",
+      "path": "/market-data/:id",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /market-data/bulk",
+      "method": "POST",
+      "path": "/market-data/bulk",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /alerts",
+      "method": "GET",
+      "path": "/alerts",
+      "file": "marketplaceHealthRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /alerts/:id/read",
+      "method": "POST",
+      "path": "/alerts/:id/read",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /alerts/read-all",
+      "method": "POST",
+      "path": "/alerts/read-all",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /system/health",
+      "method": "GET",
+      "path": "/system/health",
+      "file": "adminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /",
+      "method": "GET",
+      "path": "/",
+      "file": "v2.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/click",
+      "method": "POST",
+      "path": "/:id/click",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:carId/start",
+      "method": "POST",
+      "path": "/:carId/start",
+      "file": "auctionAdminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:carId/end",
+      "method": "POST",
+      "path": "/:carId/end",
+      "file": "auctionAdminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:carId/extend",
+      "method": "POST",
+      "path": "/:carId/extend",
+      "file": "auctionAdminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:carId/bids",
+      "method": "GET",
+      "path": "/:carId/bids",
+      "file": "auctionAdminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:carId/set-winner",
+      "method": "POST",
+      "path": "/:carId/set-winner",
+      "file": "auctionAdminRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /all",
+      "method": "GET",
+      "path": "/all",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /escrow/:id",
+      "method": "GET",
+      "path": "/escrow/:id",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /user/:userId",
+      "method": "GET",
+      "path": "/user/:userId",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /action/:action",
+      "method": "GET",
+      "path": "/action/:action",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /date-range",
+      "method": "GET",
+      "path": "/date-range",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /export/:escrowId",
+      "method": "GET",
+      "path": "/export/:escrowId",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /statistics",
+      "method": "GET",
+      "path": "/statistics",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:id",
+      "method": "GET",
+      "path": "/:id",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /logs",
+      "method": "GET",
+      "path": "/logs",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/:id",
+      "method": "GET",
+      "path": "/logs/:id",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/action/:action",
+      "method": "GET",
+      "path": "/logs/action/:action",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/actor/:actorId",
+      "method": "GET",
+      "path": "/logs/actor/:actorId",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/target/:targetId/:targetModel",
+      "method": "GET",
+      "path": "/logs/target/:targetId/:targetModel",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/statistics",
+      "method": "GET",
+      "path": "/logs/statistics",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /logs/export",
+      "method": "GET",
+      "path": "/logs/export",
+      "file": "auditRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /register",
+      "method": "POST",
+      "path": "/register",
+      "file": "smsBiddingRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /login",
+      "method": "POST",
+      "path": "/login",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /refresh",
+      "method": "POST",
+      "path": "/refresh",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /profile",
+      "method": "GET",
+      "path": "/profile",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /me",
+      "method": "GET",
+      "path": "/me",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /logout",
+      "method": "POST",
+      "path": "/logout",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PUT /profile",
+      "method": "PUT",
+      "path": "/profile",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /change-password",
+      "method": "PUT",
+      "path": "/change-password",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /verify-email/:token",
+      "method": "GET",
+      "path": "/verify-email/:token",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /resend-verification",
+      "method": "POST",
+      "path": "/resend-verification",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /forgot-password",
+      "method": "POST",
+      "path": "/forgot-password",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /reset-password",
+      "method": "POST",
+      "path": "/reset-password",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /sessions",
+      "method": "GET",
+      "path": "/sessions",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /sessions/:tokenId",
+      "method": "DELETE",
+      "path": "/sessions/:tokenId",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /sessions/revoke-all",
+      "method": "POST",
+      "path": "/sessions/revoke-all",
+      "file": "authRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /my",
+      "method": "GET",
+      "path": "/my",
+      "file": "smsBiddingRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/bid",
+      "method": "POST",
+      "path": "/:id/bid",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:id/bids",
+      "method": "GET",
+      "path": "/:id/bids",
+      "file": "bidRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /mpesa/callback",
+      "method": "POST",
+      "path": "/mpesa/callback",
+      "file": "bidRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/end",
+      "method": "POST",
+      "path": "/:id/end",
+      "file": "bidRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /admin/all",
+      "method": "GET",
+      "path": "/admin/all",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /admin/suspicious",
+      "method": "GET",
+      "path": "/admin/suspicious",
+      "file": "bidRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /admin/:bidId/set-winner",
+      "method": "POST",
+      "path": "/admin/:bidId/set-winner",
+      "file": "bidRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /dealer/my-cars",
+      "method": "GET",
+      "path": "/dealer/my-cars",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /dealer/analytics",
+      "method": "GET",
+      "path": "/dealer/analytics",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /demo/all",
+      "method": "GET",
+      "path": "/demo/all",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/favorite",
+      "method": "POST",
+      "path": "/:id/favorite",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /",
+      "method": "POST",
+      "path": "/",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:id",
+      "method": "PUT",
+      "path": "/:id",
+      "file": "savedSearchRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /:id",
+      "method": "DELETE",
+      "path": "/:id",
+      "file": "savedSearchRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /:id/images/:imageIndex",
+      "method": "DELETE",
+      "path": "/:id/images/:imageIndex",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/images",
+      "method": "POST",
+      "path": "/:id/images",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:id/price-history",
+      "method": "GET",
+      "path": "/:id/price-history",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:id/insights",
+      "method": "GET",
+      "path": "/:id/insights",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:id/valuation",
+      "method": "GET",
+      "path": "/:id/valuation",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /admin/:id/fraud",
+      "method": "GET",
+      "path": "/admin/:id/fraud",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /admin/:id/start",
+      "method": "POST",
+      "path": "/admin/:id/start",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /admin/:id/end",
+      "method": "POST",
+      "path": "/admin/:id/end",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /batch",
+      "method": "POST",
+      "path": "/batch",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PATCH /:id/promote",
+      "method": "PATCH",
+      "path": "/:id/promote",
+      "file": "carRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /:chatId/messages",
+      "method": "GET",
+      "path": "/:chatId/messages",
+      "file": "chatRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:chatId/message",
+      "method": "POST",
+      "path": "/:chatId/message",
+      "file": "chatRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:chatId/seen",
+      "method": "POST",
+      "path": "/:chatId/seen",
+      "file": "chatRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /:chatId",
+      "method": "DELETE",
+      "path": "/:chatId",
+      "file": "chatRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "PATCH /:id/read",
+      "method": "PATCH",
+      "path": "/:id/read",
+      "file": "contactRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/view",
+      "method": "POST",
+      "path": "/cars/:carId/view",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/favorite",
+      "method": "POST",
+      "path": "/cars/:carId/favorite",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/chat",
+      "method": "POST",
+      "path": "/cars/:carId/chat",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/offer",
+      "method": "POST",
+      "path": "/cars/:carId/offer",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/escrow",
+      "method": "POST",
+      "path": "/cars/:carId/escrow",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:carId/sale",
+      "method": "POST",
+      "path": "/cars/:carId/sale",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /cars/:carId/analytics",
+      "method": "GET",
+      "path": "/cars/:carId/analytics",
+      "file": "conversionFunnelRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dashboard",
+      "method": "GET",
+      "path": "/dashboard",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /anomalies",
+      "method": "GET",
+      "path": "/anomalies",
+      "file": "costDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /forecast",
+      "method": "GET",
+      "path": "/forecast",
+      "file": "costDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /recommendations",
+      "method": "GET",
+      "path": "/recommendations",
+      "file": "costDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /category/:category",
+      "method": "GET",
+      "path": "/category/:category",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:dealerId",
+      "method": "GET",
+      "path": "/:dealerId",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:dealerId/details",
+      "method": "GET",
+      "path": "/:dealerId/details",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /ranking/list",
+      "method": "GET",
+      "path": "/ranking/list",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /top/:category",
+      "method": "GET",
+      "path": "/top/:category",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:dealerId/trends",
+      "method": "GET",
+      "path": "/:dealerId/trends",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/recalculate/:dealerId",
+      "method": "POST",
+      "path": "/admin/recalculate/:dealerId",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/recalculate-all",
+      "method": "POST",
+      "path": "/admin/recalculate-all",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /admin/override/:dealerId",
+      "method": "PUT",
+      "path": "/admin/override/:dealerId",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /admin/distribution",
+      "method": "GET",
+      "path": "/admin/distribution",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /admin/alerts",
+      "method": "GET",
+      "path": "/admin/alerts",
+      "file": "dealerHealthScoreRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /earnings",
+      "method": "GET",
+      "path": "/earnings",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /analytics",
+      "method": "GET",
+      "path": "/analytics",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /summary",
+      "method": "GET",
+      "path": "/summary",
+      "file": "transactionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /quick-stats",
+      "method": "GET",
+      "path": "/quick-stats",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /bids",
+      "method": "GET",
+      "path": "/bids",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /escrows",
+      "method": "GET",
+      "path": "/escrows",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /settlement",
+      "method": "GET",
+      "path": "/settlement",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /settlement",
+      "method": "PUT",
+      "path": "/settlement",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /team",
+      "method": "GET",
+      "path": "/team",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /team/invite",
+      "method": "POST",
+      "path": "/team/invite",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PATCH /team/:memberId",
+      "method": "PATCH",
+      "path": "/team/:memberId",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /team/:memberId",
+      "method": "DELETE",
+      "path": "/team/:memberId",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/duplicate",
+      "method": "POST",
+      "path": "/cars/:id/duplicate",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PATCH /cars/:id/mark-sold",
+      "method": "PATCH",
+      "path": "/cars/:id/mark-sold",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PATCH /cars/bulk-status",
+      "method": "PATCH",
+      "path": "/cars/bulk-status",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/accept-bid",
+      "method": "POST",
+      "path": "/cars/:id/accept-bid",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/reject-bid",
+      "method": "POST",
+      "path": "/cars/:id/reject-bid",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/auction/start",
+      "method": "POST",
+      "path": "/cars/:id/auction/start",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/auction/end",
+      "method": "POST",
+      "path": "/cars/:id/auction/end",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cars/:id/auction/extend",
+      "method": "POST",
+      "path": "/cars/:id/auction/extend",
+      "file": "dealerRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:disputeId/evidence",
+      "method": "POST",
+      "path": "/:disputeId/evidence",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:disputeId",
+      "method": "GET",
+      "path": "/:disputeId",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /user/my-disputes",
+      "method": "GET",
+      "path": "/user/my-disputes",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:disputeId/resolve",
+      "method": "POST",
+      "path": "/:disputeId/resolve",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:disputeId/notes",
+      "method": "POST",
+      "path": "/:disputeId/notes",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:disputeId/appeal",
+      "method": "POST",
+      "path": "/:disputeId/appeal",
+      "file": "disputeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/false-positive",
+      "method": "POST",
+      "path": "/:id/false-positive",
+      "file": "duplicateRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/confirm",
+      "method": "POST",
+      "path": "/:id/confirm",
+      "file": "duplicateRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/under-review",
+      "method": "POST",
+      "path": "/:id/under-review",
+      "file": "duplicateRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /search",
+      "method": "GET",
+      "path": "/search",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/release",
+      "method": "POST",
+      "path": "/:id/release",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/refund",
+      "method": "POST",
+      "path": "/:id/refund",
+      "file": "escrowRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/dispute",
+      "method": "POST",
+      "path": "/:id/dispute",
+      "file": "escrowRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/confirm-delivery",
+      "method": "POST",
+      "path": "/:id/confirm-delivery",
+      "file": "escrowRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/request-release",
+      "method": "POST",
+      "path": "/:id/request-release",
+      "file": "escrowRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /webhook/:id/funded",
+      "method": "POST",
+      "path": "/webhook/:id/funded",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/init",
+      "method": "POST",
+      "path": "/:id/init",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /car/:id",
+      "method": "GET",
+      "path": "/car/:id",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/inspection-complete",
+      "method": "POST",
+      "path": "/:id/inspection-complete",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/request-otp",
+      "method": "POST",
+      "path": "/:id/request-otp",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/admin-confirm-funding",
+      "method": "POST",
+      "path": "/:id/admin-confirm-funding",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/admin-refund",
+      "method": "POST",
+      "path": "/:id/admin-refund",
+      "file": "escrowVaultRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /track",
+      "method": "POST",
+      "path": "/track",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /search",
+      "method": "POST",
+      "path": "/search",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /vehicle-view",
+      "method": "POST",
+      "path": "/vehicle-view",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /offer",
+      "method": "POST",
+      "path": "/offer",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /bid",
+      "method": "POST",
+      "path": "/bid",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /escrow",
+      "method": "POST",
+      "path": "/escrow",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /my-events",
+      "method": "GET",
+      "path": "/my-events",
+      "file": "eventRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /revenue",
+      "method": "GET",
+      "path": "/revenue",
+      "file": "salesDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /user-growth",
+      "method": "GET",
+      "path": "/user-growth",
+      "file": "executiveAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:carId",
+      "method": "POST",
+      "path": "/:carId",
+      "file": "favoriteRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /:carId",
+      "method": "DELETE",
+      "path": "/:carId",
+      "file": "favoriteRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:carId/toggle",
+      "method": "POST",
+      "path": "/:carId/toggle",
+      "file": "favoriteRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:carId/price-alert",
+      "method": "PUT",
+      "path": "/:carId/price-alert",
+      "file": "favoriteRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /user",
+      "method": "GET",
+      "path": "/user",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /evaluate/:key",
+      "method": "GET",
+      "path": "/evaluate/:key",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:key",
+      "method": "GET",
+      "path": "/:key",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:key",
+      "method": "PUT",
+      "path": "/:key",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /:key",
+      "method": "DELETE",
+      "path": "/:key",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:key/toggle",
+      "method": "POST",
+      "path": "/:key/toggle",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:key/stats",
+      "method": "GET",
+      "path": "/:key/stats",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /environment/:environment",
+      "method": "GET",
+      "path": "/environment/:environment",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /role/:role",
+      "method": "GET",
+      "path": "/role/:role",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /meta/categories",
+      "method": "GET",
+      "path": "/meta/categories",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /batch/evaluate",
+      "method": "POST",
+      "path": "/batch/evaluate",
+      "file": "featureFlagRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /reports",
+      "method": "GET",
+      "path": "/reports",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /reports/:id",
+      "method": "GET",
+      "path": "/reports/:id",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /issues",
+      "method": "GET",
+      "path": "/issues",
+      "file": "financeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /reports/:reportId/issues/:issueIndex/resolve",
+      "method": "POST",
+      "path": "/reports/:reportId/issues/:issueIndex/resolve",
+      "file": "financeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /reconcile",
+      "method": "POST",
+      "path": "/reconcile",
+      "file": "financeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /cron-status",
+      "method": "GET",
+      "path": "/cron-status",
+      "file": "financeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /export/:reportId",
+      "method": "GET",
+      "path": "/export/:reportId",
+      "file": "financeRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /check",
+      "method": "POST",
+      "path": "/check",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/user/:userId",
+      "method": "GET",
+      "path": "/check/user/:userId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/auction/:carId",
+      "method": "GET",
+      "path": "/check/auction/:carId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/escrow/:escrowId",
+      "method": "GET",
+      "path": "/check/escrow/:escrowId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/dealer/:dealerId",
+      "method": "GET",
+      "path": "/check/dealer/:dealerId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/price-manipulation/:carId",
+      "method": "GET",
+      "path": "/check/price-manipulation/:carId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/account-farms/:dealerId",
+      "method": "GET",
+      "path": "/check/account-farms/:dealerId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /check/duplicate-photos/:carId",
+      "method": "GET",
+      "path": "/check/duplicate-photos/:carId",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:fraudId/status",
+      "method": "PUT",
+      "path": "/:fraudId/status",
+      "file": "fraudRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /detailed",
+      "method": "GET",
+      "path": "/detailed",
+      "file": "healthRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /cache",
+      "method": "GET",
+      "path": "/cache",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cache/flush",
+      "method": "POST",
+      "path": "/cache/flush",
+      "file": "healthRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /order",
+      "method": "POST",
+      "path": "/order",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /confirm-payment",
+      "method": "POST",
+      "path": "/confirm-payment",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /my-tasks",
+      "method": "GET",
+      "path": "/my-tasks",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /available-inspectors",
+      "method": "GET",
+      "path": "/available-inspectors",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/assign",
+      "method": "POST",
+      "path": "/:id/assign",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/start",
+      "method": "POST",
+      "path": "/:id/start",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/submit",
+      "method": "POST",
+      "path": "/:id/submit",
+      "file": "inspectionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /car/:carId",
+      "method": "GET",
+      "path": "/car/:carId",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /apply",
+      "method": "POST",
+      "path": "/apply",
+      "file": "inspectorApplicationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/approve",
+      "method": "POST",
+      "path": "/:id/approve",
+      "file": "inspectorApplicationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/reject",
+      "method": "POST",
+      "path": "/:id/reject",
+      "file": "inspectorApplicationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:leadId",
+      "method": "GET",
+      "path": "/:leadId",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:leadId/stage",
+      "method": "PUT",
+      "path": "/:leadId/stage",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:leadId/archive",
+      "method": "PUT",
+      "path": "/:leadId/archive",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:leadId/hot",
+      "method": "PUT",
+      "path": "/:leadId/hot",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:leadId/notes",
+      "method": "POST",
+      "path": "/:leadId/notes",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:leadId/timeline",
+      "method": "GET",
+      "path": "/:leadId/timeline",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /analytics/summary",
+      "method": "GET",
+      "path": "/analytics/summary",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /pipeline/view",
+      "method": "GET",
+      "path": "/pipeline/view",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /conversion/report",
+      "method": "GET",
+      "path": "/conversion/report",
+      "file": "leadRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /analyze/:carId",
+      "method": "GET",
+      "path": "/analyze/:carId",
+      "file": "listingAssistantRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /batch-analyze",
+      "method": "POST",
+      "path": "/batch-analyze",
+      "file": "listingAssistantRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer-stats",
+      "method": "GET",
+      "path": "/dealer-stats",
+      "file": "listingAssistantRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer/:dealerId/stats",
+      "method": "GET",
+      "path": "/dealer/:dealerId/stats",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer/:dealerId/report",
+      "method": "GET",
+      "path": "/dealer/:dealerId/report",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /dealer/:dealerId/bulk-recalculate",
+      "method": "POST",
+      "path": "/dealer/:dealerId/bulk-recalculate",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /car/:carId/recalculate",
+      "method": "POST",
+      "path": "/car/:carId/recalculate",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /platform/stats",
+      "method": "GET",
+      "path": "/platform/stats",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /platform/trends",
+      "method": "GET",
+      "path": "/platform/trends",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /platform/low-quality",
+      "method": "GET",
+      "path": "/platform/low-quality",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /platform/benchmarks",
+      "method": "GET",
+      "path": "/platform/benchmarks",
+      "file": "listingQualityRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /trends",
+      "method": "GET",
+      "path": "/trends",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /alerts/:alertId/resolve",
+      "method": "POST",
+      "path": "/alerts/:alertId/resolve",
+      "file": "marketplaceHealthRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /metrics",
+      "method": "GET",
+      "path": "/metrics",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /regenerate",
+      "method": "POST",
+      "path": "/regenerate",
+      "file": "marketplaceHealthRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /pulse/:carId",
+      "method": "GET",
+      "path": "/pulse/:carId",
+      "file": "marketRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer/insights",
+      "method": "GET",
+      "path": "/dealer/insights",
+      "file": "marketRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /http",
+      "method": "GET",
+      "path": "/http",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /database",
+      "method": "GET",
+      "path": "/database",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /replica-set",
+      "method": "GET",
+      "path": "/replica-set",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /system",
+      "method": "GET",
+      "path": "/system",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /errors",
+      "method": "GET",
+      "path": "/errors",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /reset",
+      "method": "POST",
+      "path": "/reset",
+      "file": "metricsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /delivery-stats",
+      "method": "GET",
+      "path": "/delivery-stats",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /channel-stats",
+      "method": "GET",
+      "path": "/channel-stats",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /failure-analysis",
+      "method": "GET",
+      "path": "/failure-analysis",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /engagement-metrics",
+      "method": "GET",
+      "path": "/engagement-metrics",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /retry-stats",
+      "method": "GET",
+      "path": "/retry-stats",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /user/:userId/stats",
+      "method": "GET",
+      "path": "/user/:userId/stats",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /platform-stats",
+      "method": "GET",
+      "path": "/platform-stats",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /delivery-report",
+      "method": "GET",
+      "path": "/delivery-report",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /retry/:auditId",
+      "method": "POST",
+      "path": "/retry/:auditId",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /bulk-retry",
+      "method": "POST",
+      "path": "/bulk-retry",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /retry-queue",
+      "method": "GET",
+      "path": "/retry-queue",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /process-retry-queue",
+      "method": "POST",
+      "path": "/process-retry-queue",
+      "file": "notificationAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /read-all",
+      "method": "POST",
+      "path": "/read-all",
+      "file": "notificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /:id/read",
+      "method": "POST",
+      "path": "/:id/read",
+      "file": "notificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /car/:carId/status",
+      "method": "GET",
+      "path": "/car/:carId/status",
+      "file": "ntsaVerificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/process",
+      "method": "POST",
+      "path": "/:id/process",
+      "file": "ntsaVerificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/documents",
+      "method": "POST",
+      "path": "/:id/documents",
+      "file": "ntsaVerificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /overview",
+      "method": "GET",
+      "path": "/overview",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /system-health",
+      "method": "GET",
+      "path": "/system-health",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /payment-failures",
+      "method": "GET",
+      "path": "/payment-failures",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /escrow-disputes",
+      "method": "GET",
+      "path": "/escrow-disputes",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer-onboarding",
+      "method": "GET",
+      "path": "/dealer-onboarding",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /listing-moderation",
+      "method": "GET",
+      "path": "/listing-moderation",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /queue-health",
+      "method": "GET",
+      "path": "/queue-health",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /notifications",
+      "method": "GET",
+      "path": "/notifications",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /fraud-alerts",
+      "method": "GET",
+      "path": "/fraud-alerts",
+      "file": "operationsDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /escrow-queue",
+      "method": "GET",
+      "path": "/escrow-queue",
+      "file": "operationsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /inspection-queue",
+      "method": "GET",
+      "path": "/inspection-queue",
+      "file": "operationsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer-queue",
+      "method": "GET",
+      "path": "/dealer-queue",
+      "file": "operationsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /support-queue",
+      "method": "GET",
+      "path": "/support-queue",
+      "file": "operationsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /payment-queue",
+      "method": "GET",
+      "path": "/payment-queue",
+      "file": "operationsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:id/users",
+      "method": "GET",
+      "path": "/:id/users",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/admins",
+      "method": "POST",
+      "path": "/:id/admins",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /:id/admins/:userId",
+      "method": "DELETE",
+      "path": "/:id/admins/:userId",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:id/branches",
+      "method": "POST",
+      "path": "/:id/branches",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:id/branches",
+      "method": "GET",
+      "path": "/:id/branches",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:id/stats",
+      "method": "GET",
+      "path": "/:id/stats",
+      "file": "organizationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /initiate",
+      "method": "POST",
+      "path": "/initiate",
+      "file": "paymentRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /status/:id",
+      "method": "GET",
+      "path": "/status/:id",
+      "file": "paymentRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /callback",
+      "method": "POST",
+      "path": "/callback",
+      "file": "paymentRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /checkout/:checkoutRequestId",
+      "method": "GET",
+      "path": "/checkout/:checkoutRequestId",
+      "file": "paymentRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /health",
+      "method": "GET",
+      "path": "/health",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /aggregated",
+      "method": "GET",
+      "path": "/aggregated",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /circuit-breakers",
+      "method": "GET",
+      "path": "/circuit-breakers",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dlq/statistics",
+      "method": "GET",
+      "path": "/dlq/statistics",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dlq/jobs",
+      "method": "GET",
+      "path": "/dlq/jobs",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /dlq/retry/:jobId",
+      "method": "POST",
+      "path": "/dlq/retry/:jobId",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /dlq/delete/:jobId",
+      "method": "DELETE",
+      "path": "/dlq/delete/:jobId",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /failures",
+      "method": "GET",
+      "path": "/failures",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /failures/:failureId",
+      "method": "GET",
+      "path": "/failures/:failureId",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /failures/:failureId/resolve",
+      "method": "POST",
+      "path": "/failures/:failureId/resolve",
+      "file": "queueRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /integrity-score",
+      "method": "GET",
+      "path": "/integrity-score",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /negative-balances",
+      "method": "GET",
+      "path": "/negative-balances",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /unreleased-escrows",
+      "method": "GET",
+      "path": "/unreleased-escrows",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /run",
+      "method": "POST",
+      "path": "/run",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /reports/:reportId/resolve",
+      "method": "POST",
+      "path": "/reports/:reportId/resolve",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /export/:reportId/:format",
+      "method": "GET",
+      "path": "/export/:reportId/:format",
+      "file": "reconciliationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /code",
+      "method": "GET",
+      "path": "/code",
+      "file": "referralRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer/:dealerId",
+      "method": "GET",
+      "path": "/dealer/:dealerId",
+      "file": "reviewRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /dealers/:dealerId",
+      "method": "GET",
+      "path": "/dealers/:dealerId",
+      "file": "salesDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealers",
+      "method": "GET",
+      "path": "/dealers",
+      "file": "salesDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /trending",
+      "method": "GET",
+      "path": "/trending",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /no-results",
+      "method": "GET",
+      "path": "/no-results",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /filters",
+      "method": "GET",
+      "path": "/filters",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /counties",
+      "method": "GET",
+      "path": "/counties",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /price-ranges",
+      "method": "GET",
+      "path": "/price-ranges",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /brands",
+      "method": "GET",
+      "path": "/brands",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /missing-inventory",
+      "method": "GET",
+      "path": "/missing-inventory",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /demand-report",
+      "method": "GET",
+      "path": "/demand-report",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /insights",
+      "method": "GET",
+      "path": "/insights",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /dealer/demand",
+      "method": "GET",
+      "path": "/dealer/demand",
+      "file": "searchAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /feedback",
+      "method": "POST",
+      "path": "/feedback",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /weights",
+      "method": "GET",
+      "path": "/weights",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /weights",
+      "method": "PUT",
+      "path": "/weights",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /synonyms",
+      "method": "GET",
+      "path": "/synonyms",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /synonyms",
+      "method": "POST",
+      "path": "/synonyms",
+      "file": "searchIntelligenceRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /sitemap.xml",
+      "method": "GET",
+      "path": "/sitemap.xml",
+      "file": "seoRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /sitemap-cars.xml",
+      "method": "GET",
+      "path": "/sitemap-cars.xml",
+      "file": "seoRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /sitemap-dealers.xml",
+      "method": "GET",
+      "path": "/sitemap-dealers.xml",
+      "file": "seoRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /sitemap-auctions.xml",
+      "method": "GET",
+      "path": "/sitemap-auctions.xml",
+      "file": "seoRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /webhook/inbound",
+      "method": "POST",
+      "path": "/webhook/inbound",
+      "file": "smsBiddingRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /subscribe",
+      "method": "POST",
+      "path": "/subscribe",
+      "file": "smsBiddingRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "DELETE /unsubscribe/:carId",
+      "method": "DELETE",
+      "path": "/unsubscribe/:carId",
+      "file": "smsBiddingRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /plans",
+      "method": "GET",
+      "path": "/plans",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /my-subscription",
+      "method": "GET",
+      "path": "/my-subscription",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /upgrade",
+      "method": "POST",
+      "path": "/upgrade",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /cancel",
+      "method": "POST",
+      "path": "/cancel",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /reactivate",
+      "method": "POST",
+      "path": "/reactivate",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /usage-limits",
+      "method": "GET",
+      "path": "/usage-limits",
+      "file": "subscriptionRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /tickets",
+      "method": "GET",
+      "path": "/tickets",
+      "file": "supportDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /agents/:agentId",
+      "method": "GET",
+      "path": "/agents/:agentId",
+      "file": "supportDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /agents",
+      "method": "GET",
+      "path": "/agents",
+      "file": "supportDashboardRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /my-tickets",
+      "method": "GET",
+      "path": "/my-tickets",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /:ticketId",
+      "method": "GET",
+      "path": "/:ticketId",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:ticketId/messages",
+      "method": "POST",
+      "path": "/:ticketId/messages",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /:ticketId/status",
+      "method": "PUT",
+      "path": "/:ticketId/status",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /:ticketId/rate",
+      "method": "POST",
+      "path": "/:ticketId/rate",
+      "file": "supportRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "PUT /settings",
+      "method": "PUT",
+      "path": "/settings",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "POST /bank-pre-approval",
+      "method": "POST",
+      "path": "/bank-pre-approval",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "DELETE /bank-pre-approval",
+      "method": "DELETE",
+      "path": "/bank-pre-approval",
+      "file": "userRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": true
+    },
+    {
+      "key": "GET /market/summary",
+      "method": "GET",
+      "path": "/market/summary",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/price-trends",
+      "method": "GET",
+      "path": "/market/price-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/volume-trends",
+      "method": "GET",
+      "path": "/market/volume-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/county-trends",
+      "method": "GET",
+      "path": "/market/county-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/brand-trends",
+      "method": "GET",
+      "path": "/market/brand-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/model-trends",
+      "method": "GET",
+      "path": "/market/model-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/spec-trends",
+      "method": "GET",
+      "path": "/market/spec-trends",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/most-viewed",
+      "method": "GET",
+      "path": "/market/most-viewed",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/most-searched",
+      "method": "GET",
+      "path": "/market/most-searched",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/fastest-selling",
+      "method": "GET",
+      "path": "/market/fastest-selling",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/dealer/:dealerId",
+      "method": "GET",
+      "path": "/market/dealer/:dealerId",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /market/regenerate",
+      "method": "POST",
+      "path": "/market/regenerate",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /market/admin/all",
+      "method": "GET",
+      "path": "/market/admin/all",
+      "file": "vehicleAnalyticsRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /submit",
+      "method": "POST",
+      "path": "/submit",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /status",
+      "method": "GET",
+      "path": "/status",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /phone/request",
+      "method": "POST",
+      "path": "/phone/request",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /phone/verify",
+      "method": "POST",
+      "path": "/phone/verify",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "GET /admin/:id",
+      "method": "GET",
+      "path": "/admin/:id",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/:id/approve",
+      "method": "POST",
+      "path": "/admin/:id/approve",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/:id/reject",
+      "method": "POST",
+      "path": "/admin/:id/reject",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/:id/suspend",
+      "method": "POST",
+      "path": "/admin/:id/suspend",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    },
+    {
+      "key": "POST /admin/:id/reinstate",
+      "method": "POST",
+      "path": "/admin/:id/reinstate",
+      "file": "verificationRoutes.js",
+      "hasSwagger": false,
+      "hasValidation": false
+    }
+  ],
+  "routesWithoutValidation": [
+    "GET /",
+    "POST /:id/click",
+    "GET /all",
+    "GET /escrow/:id",
+    "GET /user/:userId",
+    "GET /action/:action",
+    "GET /date-range",
+    "GET /export/:escrowId",
+    "GET /statistics",
+    "GET /:id",
+    "GET /logs",
+    "GET /logs/:id",
+    "GET /logs/action/:action",
+    "GET /logs/actor/:actorId",
+    "GET /logs/target/:targetId/:targetModel",
+    "GET /logs/statistics",
+    "GET /logs/export",
+    "POST /",
+    "PATCH /:id/read",
+    "POST /cars/:carId/view",
+    "POST /cars/:carId/favorite",
+    "POST /cars/:carId/chat",
+    "POST /cars/:carId/offer",
+    "POST /cars/:carId/escrow",
+    "POST /cars/:carId/sale",
+    "GET /cars/:carId/analytics",
+    "GET /dealer/analytics",
+    "GET /dashboard",
+    "GET /anomalies",
+    "GET /forecast",
+    "GET /recommendations",
+    "GET /category/:category",
+    "GET /:dealerId",
+    "GET /:dealerId/details",
+    "GET /ranking/list",
+    "GET /top/:category",
+    "GET /:dealerId/trends",
+    "POST /admin/recalculate/:dealerId",
+    "POST /admin/recalculate-all",
+    "PUT /admin/override/:dealerId",
+    "GET /admin/distribution",
+    "GET /admin/alerts",
+    "GET /earnings",
+    "GET /cars",
+    "GET /analytics",
+    "GET /summary",
+    "GET /quick-stats",
+    "GET /bids",
+    "GET /escrows",
+    "GET /settlement",
+    "PUT /settlement",
+    "GET /profile",
+    "PUT /profile",
+    "GET /team",
+    "POST /team/invite",
+    "PATCH /team/:memberId",
+    "DELETE /team/:memberId",
+    "POST /cars/:id/duplicate",
+    "PATCH /cars/:id/mark-sold",
+    "PATCH /cars/bulk-status",
+    "POST /cars/:id/accept-bid",
+    "POST /cars/:id/reject-bid",
+    "POST /cars/:id/auction/start",
+    "POST /cars/:id/auction/end",
+    "POST /cars/:id/auction/extend",
+    "POST /:disputeId/evidence",
+    "GET /:disputeId",
+    "GET /user/my-disputes",
+    "GET /admin/all",
+    "POST /:disputeId/resolve",
+    "POST /:disputeId/notes",
+    "POST /:disputeId/appeal",
+    "POST /:id/false-positive",
+    "POST /:id/confirm",
+    "POST /:id/under-review",
+    "GET /search",
+    "POST /track",
+    "POST /search",
+    "POST /vehicle-view",
+    "POST /offer",
+    "POST /bid",
+    "POST /escrow",
+    "GET /my-events",
+    "GET /revenue",
+    "GET /user-growth",
+    "POST /:carId",
+    "DELETE /:carId",
+    "POST /:carId/toggle",
+    "PUT /:carId/price-alert",
+    "GET /user",
+    "GET /evaluate/:key",
+    "GET /:key",
+    "PUT /:key",
+    "DELETE /:key",
+    "POST /:key/toggle",
+    "GET /:key/stats",
+    "GET /environment/:environment",
+    "GET /role/:role",
+    "GET /meta/categories",
+    "POST /batch/evaluate",
+    "GET /reports",
+    "GET /reports/:id",
+    "GET /issues",
+    "POST /reports/:reportId/issues/:issueIndex/resolve",
+    "POST /reconcile",
+    "GET /cron-status",
+    "GET /export/:reportId",
+    "POST /check",
+    "GET /check/user/:userId",
+    "GET /check/auction/:carId",
+    "GET /check/escrow/:escrowId",
+    "GET /check/dealer/:dealerId",
+    "GET /check/price-manipulation/:carId",
+    "GET /check/account-farms/:dealerId",
+    "GET /check/duplicate-photos/:carId",
+    "PUT /:fraudId/status",
+    "GET /detailed",
+    "GET /cache",
+    "POST /cache/flush",
+    "POST /order",
+    "POST /confirm-payment",
+    "GET /my",
+    "GET /my-tasks",
+    "GET /available-inspectors",
+    "POST /:id/assign",
+    "POST /:id/start",
+    "POST /:id/submit",
+    "GET /car/:carId",
+    "POST /apply",
+    "POST /:id/approve",
+    "POST /:id/reject",
+    "GET /:leadId",
+    "PUT /:leadId/stage",
+    "PUT /:leadId/archive",
+    "PUT /:leadId/hot",
+    "POST /:leadId/notes",
+    "GET /:leadId/timeline",
+    "GET /analytics/summary",
+    "GET /pipeline/view",
+    "GET /conversion/report",
+    "GET /analyze/:carId",
+    "POST /batch-analyze",
+    "GET /dealer-stats",
+    "GET /dealer/:dealerId/stats",
+    "GET /dealer/:dealerId/report",
+    "POST /dealer/:dealerId/bulk-recalculate",
+    "POST /car/:carId/recalculate",
+    "GET /platform/stats",
+    "GET /platform/trends",
+    "GET /platform/low-quality",
+    "GET /platform/benchmarks",
+    "GET /trends",
+    "GET /alerts",
+    "POST /alerts/:alertId/resolve",
+    "GET /metrics",
+    "POST /regenerate",
+    "GET /pulse/:carId",
+    "GET /dealer/insights",
+    "GET /http",
+    "GET /database",
+    "GET /replica-set",
+    "GET /system",
+    "GET /errors",
+    "POST /reset",
+    "GET /delivery-stats",
+    "GET /channel-stats",
+    "GET /failure-analysis",
+    "GET /engagement-metrics",
+    "GET /retry-stats",
+    "GET /user/:userId/stats",
+    "GET /platform-stats",
+    "GET /delivery-report",
+    "POST /retry/:auditId",
+    "POST /bulk-retry",
+    "GET /retry-queue",
+    "POST /process-retry-queue",
+    "GET /car/:carId/status",
+    "POST /:id/process",
+    "POST /:id/documents",
+    "GET /overview",
+    "GET /system-health",
+    "GET /payment-failures",
+    "GET /escrow-disputes",
+    "GET /dealer-onboarding",
+    "GET /listing-moderation",
+    "GET /queue-health",
+    "GET /notifications",
+    "GET /fraud-alerts",
+    "GET /escrow-queue",
+    "GET /inspection-queue",
+    "GET /dealer-queue",
+    "GET /support-queue",
+    "GET /payment-queue",
+    "PUT /:id",
+    "DELETE /:id",
+    "GET /:id/users",
+    "POST /:id/admins",
+    "DELETE /:id/admins/:userId",
+    "POST /:id/branches",
+    "GET /:id/branches",
+    "GET /:id/stats",
+    "POST /initiate",
+    "GET /status/:id",
+    "POST /callback",
+    "GET /checkout/:checkoutRequestId",
+    "GET /health",
+    "GET /aggregated",
+    "GET /circuit-breakers",
+    "GET /dlq/statistics",
+    "GET /dlq/jobs",
+    "POST /dlq/retry/:jobId",
+    "DELETE /dlq/delete/:jobId",
+    "GET /failures",
+    "GET /failures/:failureId",
+    "POST /failures/:failureId/resolve",
+    "GET /integrity-score",
+    "GET /negative-balances",
+    "GET /unreleased-escrows",
+    "POST /run",
+    "POST /reports/:reportId/resolve",
+    "GET /export/:reportId/:format",
+    "GET /stats",
+    "GET /code",
+    "GET /dealers/:dealerId",
+    "GET /dealers",
+    "GET /trending",
+    "GET /no-results",
+    "GET /filters",
+    "GET /counties",
+    "GET /price-ranges",
+    "GET /brands",
+    "GET /missing-inventory",
+    "GET /demand-report",
+    "GET /insights",
+    "GET /dealer/demand",
+    "POST /feedback",
+    "GET /weights",
+    "PUT /weights",
+    "GET /synonyms",
+    "POST /synonyms",
+    "GET /sitemap.xml",
+    "GET /sitemap-cars.xml",
+    "GET /sitemap-dealers.xml",
+    "GET /sitemap-auctions.xml",
+    "POST /webhook/inbound",
+    "POST /register",
+    "POST /subscribe",
+    "DELETE /unsubscribe/:carId",
+    "GET /plans",
+    "GET /my-subscription",
+    "POST /upgrade",
+    "POST /cancel",
+    "POST /reactivate",
+    "GET /usage-limits",
+    "GET /tickets",
+    "GET /agents/:agentId",
+    "GET /agents",
+    "GET /my-tickets",
+    "GET /:ticketId",
+    "POST /:ticketId/messages",
+    "PUT /:ticketId/status",
+    "POST /:ticketId/rate",
+    "GET /market/summary",
+    "GET /market/price-trends",
+    "GET /market/volume-trends",
+    "GET /market/county-trends",
+    "GET /market/brand-trends",
+    "GET /market/model-trends",
+    "GET /market/spec-trends",
+    "GET /market/most-viewed",
+    "GET /market/most-searched",
+    "GET /market/fastest-selling",
+    "GET /market/dealer/:dealerId",
+    "POST /market/regenerate",
+    "GET /market/admin/all",
+    "POST /submit",
+    "GET /status",
+    "POST /phone/request",
+    "POST /phone/verify",
+    "GET /admin/:id",
+    "POST /admin/:id/approve",
+    "POST /admin/:id/reject",
+    "POST /admin/:id/suspend",
+    "POST /admin/:id/reinstate"
+  ],
+  "compliance": {
+    "documentation": false,
+    "validation": false
+  }
+}
