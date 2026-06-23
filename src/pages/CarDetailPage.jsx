@@ -188,7 +188,7 @@ export default function CarDetailPage() {
     try {
       await bidsAPI.place(car._id, { amount: bidAmount });
       setCar(c => ({ ...c, currentBid: bidAmount, bidsCount: (c?.bidsCount || 0) + 1 }));
-      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch(() => {});
+      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch((error) => console.error('Failed to fetch bids after placement:', error));
     } catch (e) { setBidError(e?.response?.data?.message || 'Bid failed'); }
     finally { setBidPlacing(false); }
   };
