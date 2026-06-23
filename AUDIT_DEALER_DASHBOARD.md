@@ -1,3 +1,12 @@
+---
+title: AUDIT_DEALER_DASHBOARD
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # System Audit Report - Dealer Dashboard
 
 ## Audit Date: 2026-06-23

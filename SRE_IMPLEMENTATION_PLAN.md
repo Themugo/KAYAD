@@ -1,3 +1,12 @@
+---
+title: SRE_IMPLEMENTATION_PLAN
+owner: @sre-lead
+team: sre
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [monitoring]
+---
 # SRE Implementation Plan: External Integrations Audit & Hardening
 
 **Date:** June 16, 2026  

@@ -1,3 +1,12 @@
+---
+title: SECURITY
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # Security Policy
 
 ## Reporting a Vulnerability
@@ -23,12 +32,52 @@ Contact the maintainer directly at the email listed in `.env.example` (`WEBHOIST
 ## Best Practices
 
 1. Keep `JWT_SECRET` and `REFRESH_TOKEN_SECRET` strong (64+ random hex chars) and rotated regularly
+
+```bash
+# Generate secure secrets
+openssl rand -hex 32
+```
+
 2. Enable `MPESA_SKIP_IP_CHECK=false` in production — never skip IP checks on live M-Pesa callbacks
+
+```env
+# backend/.env
+MPESA_SKIP_IP_CHECK=false
+```
+
 3. Set `NODE_ENV=production` to disable stack traces in error responses
+
+```env
+NODE_ENV=production
+```
+
 4. Configure `SENTRY_DSN` for error monitoring in production
+
+```env
+SENTRY_DSN=https://your-dsn@sentry.io/project
+```
+
 5. Never commit `.env` files to version control
+
+```bash
+# Add to .gitignore
+echo ".env" >> .gitignore
+echo "backend/.env" >> .gitignore
+```
+
 6. Run `npm run audit` regularly to check for dependency vulnerabilities
+
+```bash
+npm audit
+npm audit fix
+```
+
 7. Use `REQUIRE_EMAIL_VERIFICATION=true` once SMTP is configured
+
+```env
+REQUIRE_EMAIL_VERIFICATION=true
+```
+
 8. Keep admin/staff accounts limited; prefer role-based permissions over direct admin access
 9. Always use HTTPS in production — the CSP and HSTS configs assume HTTPS
 

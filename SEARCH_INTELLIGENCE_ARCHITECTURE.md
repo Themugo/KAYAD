@@ -1,3 +1,12 @@
+---
+title: SEARCH_INTELLIGENCE_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Search Intelligence Architecture Plan
 
 **Date:** June 15, 2026  
@@ -52,6 +61,59 @@ The Search Intelligence system provides comprehensive analytics and insights int
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph UserLayer["User Layer"]
+        A[User Searches]
+        B[Filter Application]
+        C[Results View]
+    end
+    
+    subgraph Tracking["Search Tracking"]
+        D[Search Logger]
+        E[Filter Tracker]
+        F[Result Counter]
+    end
+    
+    subgraph Analytics["Analytics Engine"]
+        G[Search Aggregator]
+        H[Trend Analyzer]
+        I[Gap Detector]
+    end
+    
+    subgraph Storage["Data Storage"]
+        J[SearchAnalytics DB]
+        K[Inventory DB]
+    end
+    
+    subgraph Insights["Insights & Actions"]
+        L[Admin Dashboard]
+        M[Dealer Recommendations]
+        N[Inventory Alerts]
+    end
+    
+    A --> D
+    B --> E
+    C --> F
+    
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H
+    G --> I
+    
+    H --> L
+    I --> L
+    I --> M
+    I --> N
+    
+    J --> G
+    K --> I
+```
 
 ### Metrics Tracked
 

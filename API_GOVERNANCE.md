@@ -1,3 +1,12 @@
+---
+title: API_GOVERNANCE
+owner: @backend-lead
+team: backend
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [api]
+---
 # API Governance Documentation
 
 ## Overview

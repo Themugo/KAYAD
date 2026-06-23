@@ -1,3 +1,12 @@
+---
+title: USER_JOURNEY_MAPPING
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # User Journey Mapping - KAYAD Platform
 
 This document maps all critical user journeys from frontend to backend, identifying components, APIs, database operations, failure points, and missing validation.

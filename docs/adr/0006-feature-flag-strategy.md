@@ -1,3 +1,12 @@
+---
+title: 0006 Feature Flag Strategy
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # 0006: Feature Flag Strategy
 
 ## Status

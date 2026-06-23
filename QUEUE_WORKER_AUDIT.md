@@ -1,3 +1,12 @@
+---
+title: QUEUE_WORKER_AUDIT
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # Queue Worker Audit Report
 
 **Version:** 1.0  

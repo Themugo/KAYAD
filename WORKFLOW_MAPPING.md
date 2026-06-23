@@ -1,3 +1,12 @@
+---
+title: WORKFLOW_MAPPING
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # KAYAD Business Workflow Mapping & QA Test Strategy
 
 **Phase:** QA Automation Architecture  

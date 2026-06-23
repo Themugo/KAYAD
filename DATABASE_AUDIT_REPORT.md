@@ -1,3 +1,12 @@
+---
+title: DATABASE_AUDIT_REPORT
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Database Design and Usage Audit Report
 
 **Generated:** June 21, 2026  

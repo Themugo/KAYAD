@@ -1,3 +1,12 @@
+---
+title: DEALER_HEALTH_SCORE_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Dealer Health Score Architecture Plan
 
 **Date:** June 15, 2026  
@@ -73,6 +82,64 @@ The Dealer Health Score system provides a comprehensive, data-driven assessment 
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Inputs["Data Inputs"]
+        A[Verification Data]
+        B[Account Data]
+        C[Transaction Data]
+        D[Escrow Data]
+        E[Review Data]
+        F[Fraud Flags]
+        G[Response Metrics]
+        H[Listing Quality]
+        I[Auction Data]
+    end
+    
+    subgraph Scoring["Score Calculation"]
+        J[Verification Score<br/>15%]
+        K[Account Age Score<br/>10%]
+        L[Transaction Score<br/>20%]
+        M[Escrow Score<br/>15%]
+        N[Review Score<br/>15%]
+        O[Fraud Score<br/>-15%]
+        P[Response Score<br/>10%]
+        Q[Listing Quality Score<br/>10%]
+        R[Auction Score<br/>10%]
+    end
+    
+    subgraph Output["Health Score"]
+        S[Health Score<br/>0-100]
+        T[Tier Classification]
+        U[Trust Badge]
+    end
+    
+    A --> J
+    B --> K
+    C --> L
+    D --> M
+    E --> N
+    F --> O
+    G --> P
+    H --> Q
+    I --> R
+    
+    J --> S
+    K --> S
+    L --> S
+    M --> S
+    N --> S
+    O --> S
+    P --> S
+    Q --> S
+    R --> S
+    
+    S --> T
+    T --> U
+```
 
 ### Score Calculation Formula
 

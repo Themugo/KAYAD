@@ -1,3 +1,12 @@
+---
+title: ENTERPRISE_DEALER_ORGANIZATIONS_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Enterprise Dealer Organizations Architecture Plan
 
 **Date:** June 15, 2026  
@@ -71,6 +80,57 @@ The Enterprise Dealer Organizations system provides multi-tenant organizational 
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Org["Organization Structure"]
+        A[Organization]
+        B[Branches]
+        C[Departments]
+        D[Teams]
+    end
+    
+    subgraph Users["User Management"]
+        E[Org Members]
+        F[Branch Members]
+        G[Team Members]
+    end
+    
+    subgraph Permissions["Permissions"]
+        H[Role-Based Access]
+        I[Granular Permissions]
+        J[Data Scoping]
+    end
+    
+    subgraph Integration["Integration"]
+        K[Existing Dealer]
+        L[Existing User]
+        M[Existing Team]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    
+    A --> E
+    B --> F
+    D --> G
+    
+    E --> H
+    F --> H
+    G --> H
+    
+    H --> I
+    I --> J
+    
+    K --> A
+    L --> E
+    M --> D
+```
+
+### Architecture Design
 
 ### Organizational Hierarchy
 

@@ -1,3 +1,12 @@
+---
+title: DEPLOY
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # 🚀 Kayad — Production Deployment
 ## Ubuntu 22.04 LTS · Node.js 20 · MongoDB Atlas · Nginx · PM2
 

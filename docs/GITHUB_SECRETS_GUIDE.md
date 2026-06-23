@@ -1,3 +1,12 @@
+---
+title: GITHUB_SECRETS_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # GitHub Secrets Configuration Guide
 
 This guide explains how to configure the required GitHub Secrets for the KAYAD deployment pipeline.

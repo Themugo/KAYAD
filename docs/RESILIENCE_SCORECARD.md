@@ -1,3 +1,12 @@
+---
+title: RESILIENCE_SCORECARD
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Production Resilience Scorecard
 
 ## Overview

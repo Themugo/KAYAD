@@ -1,3 +1,12 @@
+---
+title: Deployment Failure
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Deployment Failure Runbook
 
 ## Overview

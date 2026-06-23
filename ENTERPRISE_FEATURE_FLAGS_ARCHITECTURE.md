@@ -1,3 +1,12 @@
+---
+title: ENTERPRISE_FEATURE_FLAGS_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Enterprise Feature Flags Architecture Plan
 
 **Date:** June 15, 2026  
@@ -90,6 +99,60 @@ The Enterprise Feature Flags system provides granular control over feature avail
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Config["Feature Configuration"]
+        A[Feature Flags]
+        B[Environment Rules]
+        C[User Rules]
+        D[Dealer Rules]
+        E[Percentage Rules]
+    end
+    
+    subgraph Engine["Flag Engine"]
+        F[Flag Evaluator]
+        G[Context Resolver]
+        H[Cache Layer]
+    end
+    
+    subgraph Integration["Integration Points"]
+        I[Auction System]
+        J[Escrow System]
+        K[NTSA Integration]
+        L[AI Valuation]
+        M[Dealer CRM]
+    end
+    
+    subgraph Admin["Admin Interface"]
+        N[Flag Dashboard]
+        O[A/B Testing]
+        P[Rollout Control]
+    end
+    
+    A --> F
+    B --> F
+    C --> F
+    D --> F
+    E --> F
+    
+    F --> G
+    G --> H
+    
+    I --> F
+    J --> F
+    K --> F
+    L --> F
+    M --> F
+    
+    A --> N
+    E --> O
+    E --> P
+```
+
+### Architecture Design
 
 ### Feature Flag Types
 

@@ -1,3 +1,12 @@
+---
+title: AUDIT_PAYMENT_ESCROW
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # System Audit Report - Payment and Escrow Flows
 
 ## Audit Date: 2026-06-23

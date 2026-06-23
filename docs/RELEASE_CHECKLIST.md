@@ -1,3 +1,12 @@
+---
+title: RELEASE_CHECKLIST
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Release Checklist
 
 ## Pre-Release Checklist

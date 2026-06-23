@@ -1,3 +1,12 @@
+---
+title: QUEUE_ARCHITECTURE_PLAN
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Queue Architecture Plan - KAYAD Platform
 
 **Phase:** Phase 8 - Distributed Systems Architecture  

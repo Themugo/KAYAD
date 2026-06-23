@@ -1,3 +1,12 @@
+---
+title: PERFORMANCE_BUDGETS
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Performance Budgets
 
 ## Overview

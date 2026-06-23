@@ -1,3 +1,12 @@
+---
+title: IDEMPOTENCY_DOCUMENTATION
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Idempotency Implementation Documentation
 
 **Version:** 1.0  

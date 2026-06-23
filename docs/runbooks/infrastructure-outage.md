@@ -1,3 +1,12 @@
+---
+title: Infrastructure Outage
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Infrastructure Outage Runbook
 
 ## Overview

@@ -325,6 +325,3 @@ export default function EditCarPage() {
     </div>
   );
 }
-    </div>
-  );
-}

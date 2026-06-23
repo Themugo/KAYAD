@@ -1,3 +1,12 @@
+---
+title: STRUCTURED_LOGGING_MIGRATION_PLAN
+owner: @product-lead
+team: product
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [features]
+---
 # Structured Logging Migration Plan (Winston → Pino)
 
 **Phase:** Phase 6 - DevOps Engineering  

@@ -4,6 +4,12 @@ about: Report a bug to help us improve KAYAD
 title: '[BUG] '
 labels: bug
 assignees: ''
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [templates, issues]
 ---
 
 ## Bug Description

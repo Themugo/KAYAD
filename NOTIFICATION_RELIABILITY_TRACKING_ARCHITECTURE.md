@@ -1,3 +1,12 @@
+---
+title: NOTIFICATION_RELIABILITY_TRACKING_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Notification Reliability Tracking Architecture Plan
 
 **Date:** June 15, 2026  
@@ -83,6 +92,70 @@ The Notification Reliability Tracking system provides comprehensive tracking and
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Triggers["Notification Triggers"]
+        A[Chat Messages]
+        B[Auction Events]
+        C[Escrow Updates]
+        D[System Alerts]
+    end
+    
+    subgraph Channels["Notification Channels"]
+        E[Email Service]
+        F[SMS Service]
+        G[Push Service]
+        H[In-App Service]
+    end
+    
+    subgraph Tracking["Reliability Tracking"]
+        I[Notification Audit]
+        J[Delivery Tracker]
+        K[Engagement Tracker]
+        L[Retry Engine]
+    end
+    
+    subgraph Analytics["Analytics"]
+        M[Delivery Rates]
+        N[Engagement Metrics]
+        O[Failure Analysis]
+    end
+    
+    A --> E
+    A --> F
+    A --> G
+    A --> H
+    
+    B --> E
+    B --> F
+    B --> G
+    
+    C --> E
+    C --> F
+    C --> H
+    
+    D --> E
+    D --> F
+    D --> H
+    
+    E --> I
+    F --> I
+    G --> I
+    H --> I
+    
+    I --> J
+    J --> K
+    J --> L
+    
+    I --> M
+    K --> N
+    L --> O
+```
+
+### Architecture Design
 
 ### Notification Lifecycle
 

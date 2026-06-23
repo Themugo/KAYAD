@@ -1,3 +1,12 @@
+---
+title: TYPESCRIPT_MIGRATION_PLAN
+owner: @product-lead
+team: product
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [features]
+---
 # TypeScript Migration Plan for KAYAD
 
 **Date:** June 14, 2026  

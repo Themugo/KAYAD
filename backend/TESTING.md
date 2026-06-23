@@ -1,3 +1,12 @@
+---
+title: TESTING
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [testing]
+---
 # Running the backend tests
 
 The backend test suite uses **Jest + Supertest** against a MongoDB database.

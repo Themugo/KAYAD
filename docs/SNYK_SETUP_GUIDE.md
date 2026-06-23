@@ -1,3 +1,12 @@
+---
+title: SNYK_SETUP_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Snyk Integration Setup Guide
 
 This guide explains how to set up Snyk for enhanced security scanning in the KAYAD deployment pipeline.

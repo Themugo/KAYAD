@@ -1,3 +1,12 @@
+---
+title: DISASTER_RECOVERY
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Disaster Recovery Framework
 
 ## Overview

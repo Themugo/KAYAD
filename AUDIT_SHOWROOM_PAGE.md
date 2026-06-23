@@ -1,3 +1,12 @@
+---
+title: AUDIT_SHOWROOM_PAGE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # System Audit Report - Showroom Page
 
 ## Audit Date: 2026-06-23

@@ -1,3 +1,12 @@
+---
+title: QUEUE_IMPLEMENTATION_SUMMARY
+owner: @product-lead
+team: product
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [features]
+---
 # Queue Worker Implementation Summary
 
 **Version:** 1.0  

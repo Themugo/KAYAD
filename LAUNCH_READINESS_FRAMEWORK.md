@@ -1,3 +1,12 @@
+---
+title: LAUNCH_READINESS_FRAMEWORK
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # Launch Readiness Framework
 
 **Version:** 1.0  

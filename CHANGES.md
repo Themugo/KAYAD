@@ -1,3 +1,12 @@
+---
+title: CHANGES
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # KAYAD — Audit Fix Log
 *Audited and fixed by Claude, May 2026*
 

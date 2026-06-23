@@ -1,3 +1,12 @@
+---
+title: Third Party Outage
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Third-Party Outage Runbook
 
 ## Severity: Variable (depends on service)

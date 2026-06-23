@@ -1,3 +1,12 @@
+---
+title: IDEMPOTENCY_CLIENT_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Client-Side Idempotency Integration Guide
 
 **Version:** 1.0  

@@ -4,6 +4,12 @@ about: Create a pull request to contribute to KAYAD
 title: '[PR] '
 labels: ''
 assignees: ''
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [templates, pr]
 ---
 
 ## Description

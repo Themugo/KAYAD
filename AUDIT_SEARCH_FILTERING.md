@@ -1,3 +1,12 @@
+---
+title: AUDIT_SEARCH_FILTERING
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # System Audit Report - Search and Filtering Functionality
 
 ## Audit Date: 2026-06-23

@@ -1,3 +1,12 @@
+---
+title: OBSERVABILITY
+owner: @sre-lead
+team: sre
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [monitoring]
+---
 # Observability & Monitoring Guide
 
 ## Overview

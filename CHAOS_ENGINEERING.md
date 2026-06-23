@@ -1,3 +1,12 @@
+---
+title: CHAOS_ENGINEERING
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Chaos Engineering Framework
 
 ## Overview

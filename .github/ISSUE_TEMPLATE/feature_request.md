@@ -4,6 +4,12 @@ about: Suggest an idea for KAYAD
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
+owner: @product-lead
+team: product
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [templates, issues]
 ---
 
 ## Feature Description

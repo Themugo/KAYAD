@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const matter = require('gray-matter');
-const { differenceInDays, parseISO } = require('date-fns');
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { differenceInDays, parseISO } from 'date-fns';
 
 const ROOT_DIR = '.';
 const STALE_THRESHOLD_DAYS = {
@@ -35,7 +35,16 @@ function checkDirectory(dir) {
 function checkDocument(filePath) {
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    const { data } = matter(content);
+    let data = {};
+    
+    // Use regex to extract frontmatter fields directly
+    const ownerMatch = content.match(/^owner:\s*(.+)$/m);
+    const lastReviewedMatch = content.match(/^last-reviewed:\s*(.+)$/m);
+    const reviewFrequencyMatch = content.match(/^review-frequency:\s*(.+)$/m);
+    
+    if (ownerMatch) data.owner = ownerMatch[1].trim();
+    if (lastReviewedMatch) data['last-reviewed'] = lastReviewedMatch[1].trim();
+    if (reviewFrequencyMatch) data['review-frequency'] = reviewFrequencyMatch[1].trim();
     
     // Check for ownership metadata
     if (data.owner) {

@@ -1,3 +1,12 @@
+---
+title: DEPLOYMENT_READINESS
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Deployment Readiness Report
 
 **Date:** June 14, 2026

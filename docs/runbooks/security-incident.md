@@ -1,3 +1,12 @@
+---
+title: Security Incident
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # Security Incident Runbook
 
 ## Overview

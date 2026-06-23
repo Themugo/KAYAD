@@ -1,3 +1,12 @@
+---
+title: SECURITY_AUDIT_REPORT
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # KAYAD Security Audit Report
 
 **Date:** May 23, 2026  

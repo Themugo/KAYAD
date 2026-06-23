@@ -1,3 +1,12 @@
+---
+title: PRODUCTION_READINESS_AUDIT
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # KAYAD Production Readiness Audit Report
 
 **Phase:** BUILD → HARDEN → OPERATE → SCALE → OPTIMIZE  

@@ -1,3 +1,12 @@
+---
+title: GOVERNANCE
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # ADR Governance
 
 ## Overview

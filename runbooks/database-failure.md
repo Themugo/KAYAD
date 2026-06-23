@@ -1,3 +1,12 @@
+---
+title: Database Failure
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Database Failure Runbook
 
 ## Severity: Critical

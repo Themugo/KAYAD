@@ -1,0 +1,25 @@
+{
+  "generated": "2026-06-23T08:59:44.617Z",
+  "total_documents": 137,
+  "by_category": {
+    "architecture": 16,
+    "deployment": 18,
+    "security": 9,
+    "testing": 7,
+    "database": 7,
+    "api": 5,
+    "monitoring": 7,
+    "features": 10,
+    "audits": 18,
+    "planning": 6,
+    "general": 34
+  },
+  "ownership": {
+    "with_metadata": 133,
+    "missing_metadata": 4,
+    "compliance_percentage": 97.08
+  },
+  "stale_documents": 0,
+  "broken_links": 0,
+  "review_compliance": 0
+}

@@ -1,3 +1,12 @@
+---
+title: API_AUDIT_REPORT
+owner: @backend-lead
+team: backend
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [api]
+---
 # API Endpoint Audit Report
 
 **Version:** 1.0  

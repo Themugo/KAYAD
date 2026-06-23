@@ -9,7 +9,7 @@ on:
 jobs:
   quality:
     name: Quality Gate
-    uses: ./.github/workflows/quality-gate-new.yml
+    uses: ./.github/workflows/quality-gate.yml
 
   test:
     name: Test Gate

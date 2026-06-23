@@ -4,7 +4,7 @@
   "description": "Kayad — Kenya's Premium Car Marketplace — Live Bidding, Escrow, M-Pesa",
   "type": "module",
   "engines": {
-    "node": "20.x || 24.x || 26.x"
+    "node": "20.x || 22.x"
   },
   "scripts": {
     "dev": "vite --port 3000",
@@ -27,7 +27,9 @@
     "@sentry/react": "^10.56.0",
     "@testing-library/dom": "^10.4.1",
     "axios": "^1.6.0",
+    "date-fns": "^4.4.0",
     "framer-motion": "^12.40.0",
+    "gray-matter": "^4.0.3",
     "lucide-react": "^0.460.0",
     "posthog-js": "^1.382.0",
     "react": "18.3.1",
@@ -59,6 +61,7 @@
     "prettier": "^3.8.3",
     "rollup-plugin-visualizer": "^5.12.0",
     "tailwindcss": "^3.4.19",
+    "terser": "^5.39.0",
     "typescript": "^6.0.3",
     "vite": "^5.4.21",
     "vite-plugin-compression": "^0.5.1",

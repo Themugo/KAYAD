@@ -1,3 +1,12 @@
+---
+title: DEPLOYMENT_CHECKLIST
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # KAYAD Deployment Checklist
 
 **Date:** May 23, 2026  

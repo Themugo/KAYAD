@@ -1,3 +1,12 @@
+---
+title: HONEST_PROJECT_REVIEW
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # KAYAD Project Honest Review
 
 **Date:** June 14, 2026  

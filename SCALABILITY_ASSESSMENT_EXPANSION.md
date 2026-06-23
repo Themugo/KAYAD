@@ -1,3 +1,12 @@
+---
+title: SCALABILITY_ASSESSMENT_EXPANSION
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Scalability Assessment - Detailed Expansion
 
 **Current Score:** 65/100  

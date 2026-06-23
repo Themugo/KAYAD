@@ -1,3 +1,12 @@
+---
+title: IDEMPOTENCY_MIGRATION_PLAN
+owner: @product-lead
+team: product
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [features]
+---
 # Idempotency Implementation Migration Plan
 
 **Version:** 1.0  

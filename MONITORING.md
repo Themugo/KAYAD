@@ -1,3 +1,12 @@
+---
+title: MONITORING
+owner: @sre-lead
+team: sre
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [monitoring]
+---
 # Kayad — Zero-Code Integrations Guide
 ## Every integration below activates with ENV vars or DNS changes only.
 ## No code changes needed. Just set the variable and restart.

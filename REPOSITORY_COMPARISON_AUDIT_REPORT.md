@@ -1,3 +1,12 @@
+---
+title: REPOSITORY_COMPARISON_AUDIT_REPORT
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # KAYAD Repository Comparison Audit Report
 
 **Date:** June 16, 2026  

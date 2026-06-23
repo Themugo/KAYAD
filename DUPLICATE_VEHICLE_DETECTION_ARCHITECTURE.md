@@ -1,3 +1,12 @@
+---
+title: DUPLICATE_VEHICLE_DETECTION_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Duplicate Vehicle Detection Engine - Architecture
 
 **Phase:** Phase 3 - Fraud Prevention  
@@ -55,6 +64,49 @@
 ---
 
 ## 📐 ARCHITECTURE DESIGN
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Input["Vehicle Listing"]
+        A[New Car Listing]
+        B[VIN/Chassis/Reg]
+        C[Seller Info]
+    end
+    
+    subgraph Detection["Duplicate Detection"]
+        D[Criteria Matcher]
+        E[Similarity Scorer]
+        F[Flag Engine]
+    end
+    
+    subgraph Storage["Data Storage"]
+        G[DuplicateVehicleLog]
+        H[Car Model]
+    end
+    
+    subgraph Actions["Actions"]
+        I[Fraud Score Update]
+        J[Admin Review]
+        K[Listing Approval]
+    end
+    
+    A --> D
+    B --> D
+    C --> D
+    
+    D --> E
+    E --> F
+    
+    F --> G
+    F --> I
+    
+    G --> J
+    J --> K
+    
+    A --> H
+```
 
 ### New Model: DuplicateVehicleLog
 

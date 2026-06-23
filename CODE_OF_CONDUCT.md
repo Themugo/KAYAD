@@ -1,3 +1,12 @@
+---
+title: CODE_OF_CONDUCT
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Code of Conduct
 
 ## Our Pledge

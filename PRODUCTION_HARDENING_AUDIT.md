@@ -1,3 +1,12 @@
+---
+title: PRODUCTION_HARDENING_AUDIT
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # Production Hardening Audit Report
 
 **Date:** June 14, 2026

@@ -1,3 +1,12 @@
+---
+title: OPERATIONAL_READINESS
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # Operational Readiness Program
 
 ## Overview

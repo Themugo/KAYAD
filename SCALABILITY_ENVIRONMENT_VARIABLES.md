@@ -1,3 +1,12 @@
+---
+title: SCALABILITY_ENVIRONMENT_VARIABLES
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Scalability Environment Variables Documentation
 
 ## Overview

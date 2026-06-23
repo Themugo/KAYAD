@@ -1,3 +1,12 @@
+---
+title: AI_VEHICLE_VALUATION_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # AI Vehicle Valuation Architecture Plan
 
 **Date:** June 15, 2026  
@@ -72,6 +81,69 @@ The AI Vehicle Valuation system provides intelligent vehicle pricing predictions
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph DataSources["Data Sources"]
+        A[Vehicle Listings<br/>Car.js]
+        B[Auction Results<br/>Auction.js]
+        C[Escrow Sales<br/>Escrow.js]
+        D[Search Analytics<br/>SearchAnalytics.js]
+        E[Transactions<br/>Transaction.js]
+        F[External APIs<br/>KRA, etc.]
+    end
+    
+    subgraph Ingestion["Data Ingestion Pipeline"]
+        G[Data Collector]
+        H[Data Normalizer]
+        I[Feature Extractor]
+    end
+    
+    subgraph Storage["Data Storage"]
+        J[Historical Pricing DB]
+        K[Market Demand DB]
+        L[Feature Store]
+    end
+    
+    subgraph ML["ML Infrastructure"]
+        M[Training Data Pipeline]
+        N[Model Training]
+        O[Model Registry]
+    end
+    
+    subgraph API["Prediction API"]
+        P[Valuation Service]
+        Q[Batch Processing]
+    end
+    
+    A --> G
+    B --> G
+    C --> G
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H
+    H --> I
+    I --> J
+    I --> K
+    I --> L
+    
+    J --> M
+    K --> M
+    L --> M
+    
+    M --> N
+    N --> O
+    
+    O --> P
+    O --> Q
+    
+    P --> R[Real-time Valuations]
+    Q --> S[Batch Valuations]
+```
 
 ### Data Architecture
 

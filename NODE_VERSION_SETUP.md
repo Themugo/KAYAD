@@ -1,3 +1,12 @@
+---
+title: NODE_VERSION_SETUP
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Node Version Setup Instructions
 
 ## Current Issue

@@ -1,3 +1,12 @@
+---
+title: DATABASE_PERFORMANCE_AUDIT
+owner: @dba-lead
+team: database
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [database]
+---
 # Database Performance Audit Report
 
 **Version:** 1.0  

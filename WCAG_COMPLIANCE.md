@@ -1,3 +1,12 @@
+---
+title: WCAG_COMPLIANCE
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # WCAG 2.2 Accessibility Compliance Report
 
 ## Overview

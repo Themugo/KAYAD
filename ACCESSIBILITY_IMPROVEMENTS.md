@@ -1,3 +1,12 @@
+---
+title: ACCESSIBILITY_IMPROVEMENTS
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # Accessibility Improvements Documentation
 
 ## Overview

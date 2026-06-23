@@ -1,3 +1,12 @@
+---
+title: DEALER_VERIFICATION_SUMMARY
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Dealer Verification System - Implementation Summary
 
 **Phase:** Phase 2 - Production Hardening  

@@ -1,3 +1,12 @@
+---
+title: GO LIVE
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # KAYAD — Go-Live Runbook
 
 A checklist to take the platform from demo-mode to a live backend serving real

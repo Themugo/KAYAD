@@ -1,3 +1,12 @@
+---
+title: PREVIEW_DEPLOYMENT_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Preview Deployment Testing Guide
 
 This guide explains how to test preview deployments for the KAYAD application.

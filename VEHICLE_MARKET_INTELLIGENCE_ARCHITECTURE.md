@@ -1,3 +1,12 @@
+---
+title: VEHICLE_MARKET_INTELLIGENCE_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Vehicle Market Intelligence Architecture Plan
 
 **Date:** June 15, 2026  
@@ -112,6 +121,55 @@ The Vehicle Market Intelligence system provides comprehensive analytics and insi
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph DataSources["Data Sources"]
+        A[Vehicle Listings]
+        B[Sales Records]
+        C[Auction Data]
+        D[Search Analytics]
+    end
+    
+    subgraph Processing["Data Processing"]
+        E[Metrics Calculator]
+        F[Trend Analyzer]
+        G[Geographic Aggregator]
+    end
+    
+    subgraph Storage["Data Storage"]
+        H[Market Metrics DB]
+        I[Price History DB]
+        J[Trend Data DB]
+    end
+    
+    subgraph Insights["Insights & API"]
+        K[Dealer Insights]
+        L[Buyer Insights]
+        C[AI Valuation Feed]
+    end
+    
+    A --> E
+    B --> E
+    C --> E
+    D --> E
+    
+    E --> F
+    E --> G
+    
+    F --> H
+    G --> H
+    E --> I
+    F --> J
+    
+    H --> K
+    H --> L
+    I --> C
+```
+
+### Architecture Design
 
 ### Metrics Tracked
 

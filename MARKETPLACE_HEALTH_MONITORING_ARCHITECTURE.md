@@ -1,3 +1,12 @@
+---
+title: MARKETPLACE_HEALTH_MONITORING_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Marketplace Health Monitoring Architecture Plan
 
 **Date:** June 15, 2026  
@@ -127,6 +136,58 @@ The Marketplace Health Monitoring system provides comprehensive visibility into 
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph DataSources["Data Sources"]
+        A[User Activity]
+        B[Dealer Metrics]
+        C[Fraud Detection]
+        D[Escrow Data]
+        E[Transaction Data]
+        F[Vehicle Listings]
+    end
+    
+    subgraph Monitoring["Health Monitoring"]
+        G[Metrics Collector]
+        H[Health Calculator]
+        I[Alert Engine]
+    end
+    
+    subgraph Storage["Data Storage"]
+        J[Health Metrics DB]
+        K[Alert History]
+    end
+    
+    subgraph Dashboard["Dashboard"]
+        L[Health Score]
+        M[KPIs]
+        N[Alerts]
+        O[Trends]
+    end
+    
+    A --> G
+    B --> G
+    C --> G
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H
+    H --> I
+    
+    G --> J
+    I --> K
+    
+    J --> L
+    J --> M
+    K --> N
+    J --> O
+```
+
+### Architecture Design
 
 ### Metrics Tracked
 

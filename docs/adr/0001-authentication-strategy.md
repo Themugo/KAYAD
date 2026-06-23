@@ -1,3 +1,12 @@
+---
+title: 0001 Authentication Strategy
+owner: @cto
+team: leadership
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [planning]
+---
 # 0001: Authentication Strategy
 
 ## Status

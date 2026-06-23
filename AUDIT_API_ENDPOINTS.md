@@ -1,3 +1,12 @@
+---
+title: AUDIT_API_ENDPOINTS
+owner: @backend-lead
+team: backend
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [api]
+---
 # System Audit Report - API Endpoints and Error Handling
 
 ## Audit Date: 2026-06-23

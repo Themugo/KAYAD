@@ -1,3 +1,12 @@
+---
+title: EXECUTIVE_ANALYTICS
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Executive Analytics Platform
 
 ## Overview

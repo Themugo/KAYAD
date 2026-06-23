@@ -1,3 +1,12 @@
+---
+title: SECURITY_REMEDIATION_REPORT
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [security]
+---
 # Security Remediation Report
 
 **Generated:** 2026-06-21

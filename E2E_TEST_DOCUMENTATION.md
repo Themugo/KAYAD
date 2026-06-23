@@ -1,3 +1,12 @@
+---
+title: E2E_TEST_DOCUMENTATION
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [testing]
+---
 # KAYAD E2E Test Documentation
 
 **Phase:** QA Automation Architecture  

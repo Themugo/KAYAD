@@ -1,3 +1,12 @@
+---
+title: API_AUDIT
+owner: @backend-lead
+team: backend
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [api]
+---
 # API Audit Report
 
 **Generated:** 2026-06-21

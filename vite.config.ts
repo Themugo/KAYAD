@@ -55,7 +55,12 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    host: true
+    host: true,
+    proxy: {
+      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+      '/socket.io': { target: 'http://localhost:5000', changeOrigin: true, ws: true },
+      '/uploads': { target: 'http://localhost:5000', changeOrigin: true }
+    }
   },
   build: {
     outDir: 'dist',
@@ -103,10 +108,5 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000
   },
-  // Performance budgets
-  performance: {
-    maxEntrypointSize: 512000, // 500KB
-    maxAssetSize: 256000, // 250KB
-    hints: 'warning'
-  }
+
 });

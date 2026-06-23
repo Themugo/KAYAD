@@ -1,3 +1,12 @@
+---
+title: CONTRIBUTING
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Contributing to Kayad
 
 ## Getting Started
@@ -11,6 +20,28 @@
 7. Start frontend (new terminal): `npm run dev`
 
 ## Development Workflow
+
+```bash
+# Create a new branch
+git checkout -b feature/your-feature-name
+
+# Make your changes
+# ...
+
+# Run linting
+npm run lint
+
+# Run tests
+npm test
+cd backend && npm test
+
+# Commit changes
+git add .
+git commit -m "feat: add your feature"
+
+# Push and create PR
+git push origin feature/your-feature-name
+```
 
 - Create a branch from `main` for your changes
 - Run `npm run lint` and fix all errors before committing

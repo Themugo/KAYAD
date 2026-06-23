@@ -1,3 +1,12 @@
+---
+title: LOAD_TESTING_SCENARIOS
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [testing]
+---
 # Load Testing Scenarios
 
 **Version:** 1.0  

@@ -1,3 +1,12 @@
+---
+title: LISTING_QUALITY_SCORE_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Listing Quality Score Architecture Plan
 
 **Date:** June 15, 2026  
@@ -61,6 +70,56 @@ The Listing Quality Score system provides automated quality assessment for vehic
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Inputs["Listing Data"]
+        A[Car Images]
+        B[Description]
+        C[Vehicle Specs]
+        D[Features]
+        E[Price]
+        F[Dealer Status]
+        G[Inspection Report]
+    end
+    
+    subgraph Scoring["Quality Scoring"]
+        H[Image Score<br/>25%]
+        I[Description Score<br/>20%]
+        J[Specs Score<br/>15%]
+        K[Features Score<br/>10%]
+        L[Price Score<br/>10%]
+        M[Dealer Score<br/>10%]
+        N[Inspection Score<br/>10%]
+    end
+    
+    subgraph Output["Quality Results"]
+        O[Quality Score<br/>0-100]
+        P[Quality Tier]
+        Q[Recommendations]
+    end
+    
+    A --> H
+    B --> I
+    C --> J
+    D --> K
+    E --> L
+    F --> M
+    G --> N
+    
+    H --> O
+    I --> O
+    J --> O
+    K --> O
+    L --> O
+    M --> O
+    N --> O
+    
+    O --> P
+    O --> Q
+```
 
 ### Quality Score Factors
 

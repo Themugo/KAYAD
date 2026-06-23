@@ -1,3 +1,12 @@
+---
+title: BACKEND_DEPLOYMENT_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Backend Deployment Guide for api.kayad.space
 
 **Date:** May 23, 2026  

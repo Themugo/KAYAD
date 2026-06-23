@@ -1,3 +1,12 @@
+---
+title: AUDIT_CAR_DETAILS_PAGE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # System Audit Report - Car Details Page
 
 ## Audit Date: 2026-06-23

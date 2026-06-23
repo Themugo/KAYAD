@@ -1,3 +1,12 @@
+---
+title: LEAD_INTELLIGENCE_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Lead Intelligence System Architecture Plan
 
 **Date:** June 15, 2026  
@@ -119,6 +128,69 @@ The Lead Intelligence system provides comprehensive CRM capabilities for dealers
 ---
 
 ## Architecture Design
+
+### System Architecture
+
+```mermaid
+graph TB
+    subgraph Interactions["User Interactions"]
+        A[Chat Messages]
+        B[Auction Bids]
+        C[Escrow Actions]
+        D[Contact Forms]
+    end
+    
+    subgraph LeadCreation["Lead Creation"]
+        E[Lead Generator]
+        F[Lead Enrichment]
+    end
+    
+    subgraph Pipeline["Sales Pipeline"]
+        G[New Leads]
+        H[Contacted]
+        I[Qualified]
+        J[Negotiating]
+        K[Closed Won]
+        L[Closed Lost]
+    end
+    
+    subgraph Analytics["Analytics"]
+        M[Conversion Tracking]
+        N[Response Time]
+        O[Funnel Analytics]
+    end
+    
+    A --> E
+    B --> E
+    C --> E
+    D --> E
+    
+    E --> F
+    F --> G
+    
+    G --> H
+    H --> I
+    I --> J
+    J --> K
+    J --> L
+    
+    G --> M
+    H --> M
+    I --> M
+    J --> M
+    K --> M
+    
+    E --> N
+    F --> N
+    
+    G --> O
+    H --> O
+    I --> O
+    J --> O
+    K --> O
+```
+
+### Architecture Design
 
 ### Lead Stages
 

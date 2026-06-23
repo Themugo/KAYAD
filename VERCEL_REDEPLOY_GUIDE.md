@@ -1,3 +1,12 @@
+---
+title: VERCEL_REDEPLOY_GUIDE
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Vercel Redeploy Guide for KAYAD
 
 **Project:** KAYAD Motors  

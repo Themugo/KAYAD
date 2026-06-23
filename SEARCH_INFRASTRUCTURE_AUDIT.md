@@ -1,3 +1,12 @@
+---
+title: SEARCH_INFRASTRUCTURE_AUDIT
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: as-needed
+status: active
+tags: [audit]
+---
 # Search Infrastructure Audit Report
 
 **Version:** 1.0  

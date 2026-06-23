@@ -1,3 +1,12 @@
+---
+title: README
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Architecture Decision Records (ADRs)
 
 This directory contains Architecture Decision Records (ADRs) for the KAYAD platform.

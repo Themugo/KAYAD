@@ -1,3 +1,12 @@
+---
+title: 0002 Payment Architecture
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # 0002: Payment Architecture
 
 ## Status

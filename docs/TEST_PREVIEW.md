@@ -1,3 +1,12 @@
+---
+title: TEST_PREVIEW
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [testing]
+---
 # Preview Deployment Test
 
 This file is used to test the preview deployment workflow.

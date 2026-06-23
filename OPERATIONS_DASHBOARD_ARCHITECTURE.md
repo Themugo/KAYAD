@@ -1,3 +1,12 @@
+---
+title: OPERATIONS_DASHBOARD_ARCHITECTURE
+owner: @tech-lead
+team: architecture
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [architecture]
+---
 # Unified Operations Dashboard Architecture
 
 **Version:** 1.0  
@@ -25,35 +34,71 @@ This document outlines the architecture for a unified operations dashboard that 
 
 ### 1.1 High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                     Operations Dashboard                         │
-│                    (React Frontend)                              │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              │ REST API / WebSocket
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Operations API Gateway                         │
-│                  (Express.js Backend)                            │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-        ┌─────────────────────┼─────────────────────┐
-        ▼                     ▼                     ▼
-┌───────────────┐    ┌───────────────┐    ┌───────────────┐
-│  System Health│    │  Payment Ops  │    │  Escrow Mgmt  │
-│   Service     │    │   Service     │    │   Service     │
-└───────────────┘    └───────────────┘    └───────────────┘
-        │                     │                     │
-        └─────────────────────┼─────────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   Data Layer                                      │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐           │
-│  │ MongoDB │  │  Redis  │  │  BullMQ │  │  Cloud  │           │
-│  └─────────┘  └─────────┘  └─────────┘  │ nary   │           │
-│                                         └─────────┘           │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph Frontend["Operations Dashboard<br/>React Frontend"]
+        A[Dashboard Layout]
+        B[Widget Components]
+        C[Alert Management]
+        D[Role-Based UI]
+    end
+    
+    subgraph API["Operations API Gateway<br/>Express.js Backend"]
+        E[API Controller]
+        F[WebSocket Gateway]
+    end
+    
+    subgraph Services["Backend Services"]
+        G[System Health Service]
+        H[Payment Operations Service]
+        I[Escrow Management Service]
+        J[Dealer Onboarding Service]
+        K[Content Moderation Service]
+        L[Queue Operations Service]
+        M[Notification Service]
+        N[Fraud Detection Service]
+    end
+    
+    subgraph Data["Data Layer"]
+        O[(MongoDB)]
+        P[(Redis)]
+        Q[(BullMQ)]
+        R[(Cloudinary)]
+    end
+    
+    A --> E
+    B --> E
+    C --> E
+    D --> E
+    
+    A --> F
+    B --> F
+    
+    E --> G
+    E --> H
+    E --> I
+    E --> J
+    E --> K
+    E --> L
+    E --> M
+    E --> N
+    
+    G --> O
+    H --> O
+    I --> O
+    J --> O
+    K --> O
+    L --> O
+    M --> O
+    N --> O
+    
+    G --> P
+    H --> P
+    I --> P
+    
+    L --> Q
+    
+    K --> R
 ```
 
 ### 1.2 Component Overview

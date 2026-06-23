@@ -1,3 +1,12 @@
+---
+title: CRITICAL_FIXES_SUMMARY
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # CRITICAL FIXES SUMMARY
 ## Production Hardening - Critical Issues Resolution
 

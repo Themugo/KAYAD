@@ -4,6 +4,12 @@ about: Report a security vulnerability privately
 title: '[SECURITY] '
 labels: security
 assignees: ''
+owner: @security-lead
+team: security
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [templates, security]
 ---
 
 ⚠️ **IMPORTANT: Do not report security vulnerabilities publicly.**

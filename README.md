@@ -1,3 +1,12 @@
+---
+title: README
+owner: @tech-lead
+team: all
+last-reviewed: 2026-06-23
+review-frequency: quarterly
+status: active
+tags: [general]
+---
 # Kayad
 
 Kenya's premium car marketplace for live vehicle auctions, dealer listings, M-Pesa payments, escrow workflows, inspections, and admin operations.

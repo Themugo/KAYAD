@@ -20,7 +20,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install -g gray-matter date-fns
+        run: npm install gray-matter date-fns
 
       - name: Generate quality report
         run: node scripts/doc-quality-report.js

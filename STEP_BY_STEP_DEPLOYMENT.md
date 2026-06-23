@@ -1,3 +1,12 @@
+---
+title: STEP_BY_STEP_DEPLOYMENT
+owner: @devops-lead
+team: devops
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [deployment]
+---
 # Step-by-Step Deployment Guide for Windows
 
 **Date:** May 23, 2026  

@@ -1,3 +1,12 @@
+---
+title: SRE_DOCUMENTATION
+owner: @sre-lead
+team: sre
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [monitoring]
+---
 # SRE Implementation Documentation
 
 **Version:** 1.0  

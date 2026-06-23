@@ -1,3 +1,12 @@
+---
+title: TEST_COVERAGE_ANALYSIS
+owner: @qa-lead
+team: qa
+last-reviewed: 2026-06-23
+review-frequency: monthly
+status: active
+tags: [testing]
+---
 # Test Coverage Analysis - KAYAD Platform
 **Generated:** June 22, 2026
 **Target Coverage:** Backend 90%, Frontend 80%, Critical Workflows 100%
