@@ -127,3 +127,12 @@ export const escrowListQuerySchema = z.object({
   sortBy: z.enum(["createdAt", "amount"]).default("createdAt"),
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
+
+// Dispute query validation schemas
+export const disputeListQuerySchema = z.object({
+  status: z.enum(["open", "in_progress", "resolved", "closed"]).optional(),
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  sortBy: z.enum(["createdAt", "updatedAt"]).default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+});

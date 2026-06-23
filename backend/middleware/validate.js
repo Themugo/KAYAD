@@ -80,6 +80,7 @@ import {
   messageListQuerySchema,
   inspectionListQuerySchema,
   escrowListQuerySchema,
+  disputeListQuerySchema,
 } from "../validation/query.schema.js";
 
 const bidSchema = z.object({
@@ -274,4 +275,5 @@ export {
   messageListQuerySchema,
   inspectionListQuerySchema,
   escrowListQuerySchema,
+  disputeListQuerySchema,
 };

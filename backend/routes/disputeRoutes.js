@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { validateQuery, disputeListQuerySchema } from "../middleware/validate.js";
 import {
   createDispute,
   uploadEvidence,
@@ -52,14 +53,14 @@ router.post("/:disputeId/evidence", protect, upload.single("file"), asyncHandler
 router.get("/:disputeId", protect, asyncHandler(getDispute));
 
 // Get user's disputes
-router.get("/user/my-disputes", protect, asyncHandler(getUserDisputes));
+router.get("/user/my-disputes", protect, validateQuery(disputeListQuerySchema), asyncHandler(getUserDisputes));
 
 // =============================
 // ⚖️ ADMIN DISPUTE MANAGEMENT
 // =============================
 
 // Get all disputes (admin only)
-router.get("/admin/all", protect, adminOnly, asyncHandler(getAllDisputes));
+router.get("/admin/all", protect, adminOnly, validateQuery(disputeListQuerySchema), asyncHandler(getAllDisputes));
 
 // Resolve dispute (admin only)
 router.post("/:disputeId/resolve", protect, adminOnly, asyncHandler(resolveDispute));

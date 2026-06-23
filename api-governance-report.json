@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:23:34.585Z",
+  "generated": "2026-06-23T08:24:53.180Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 171,
-    "routesWithoutValidation": 248,
-    "validationCoverage": "42.43"
+    "routesWithValidation": 177,
+    "routesWithoutValidation": 242,
+    "validationCoverage": "43.92"
   },
   "undocumentedEndpoints": [
     {
@@ -1192,7 +1192,7 @@
       "path": "/:disputeId/evidence",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:disputeId",
@@ -1200,7 +1200,7 @@
       "path": "/:disputeId",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /user/my-disputes",
@@ -1208,7 +1208,7 @@
       "path": "/user/my-disputes",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:disputeId/resolve",
@@ -1216,7 +1216,7 @@
       "path": "/:disputeId/resolve",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:disputeId/notes",
@@ -1224,7 +1224,7 @@
       "path": "/:disputeId/notes",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:disputeId/appeal",
@@ -1232,7 +1232,7 @@
       "path": "/:disputeId/appeal",
       "file": "disputeRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:id/false-positive",
@@ -3038,13 +3038,6 @@
     "PUT /admin/override/:dealerId",
     "GET /admin/distribution",
     "GET /admin/alerts",
-    "POST /:disputeId/evidence",
-    "GET /:disputeId",
-    "GET /user/my-disputes",
-    "GET /admin/all",
-    "POST /:disputeId/resolve",
-    "POST /:disputeId/notes",
-    "POST /:disputeId/appeal",
     "POST /:id/false-positive",
     "POST /:id/confirm",
     "POST /:id/under-review",
@@ -3120,6 +3113,7 @@
     "POST /alerts/:alertId/resolve",
     "GET /metrics",
     "POST /regenerate",
+    "GET /admin/all",
     "GET /pulse/:carId",
     "GET /dealer/insights",
     "GET /http",
