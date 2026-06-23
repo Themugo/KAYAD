@@ -410,7 +410,7 @@ jobs:
    - ci.yml (replaced by ci-pipeline.yml)
 
 ### Remaining Workflows (21)
-- ci-cd.yml (to be replaced by ci-pipeline.yml)
+- ci-cdOLD.yml (backup of old CI/CD - can be deleted after validation)
 - security.yml (comprehensive security - keep for scheduled scans)
 - security-gate.yml (updated reusable gate)
 - release.yml (semantic release - keep)
@@ -430,17 +430,10 @@ jobs:
 - performance-test.yml (performance testing - keep)
 - tenant-isolation-audit.yml (tenant isolation - keep)
 - contract-test.yml (contract testing - keep)
-- quality-gate-new.yml (new reusable gate)
+- quality-gate.yml (new reusable gate)
 - test-gate.yml (new reusable gate)
 - deploy-gate.yml (new reusable gate)
-- ci-pipeline.yml (new main CI pipeline)
-
-### Next Steps
-1. Rename ci-cdOLD.yml to keep as backup
-2. Rename ci-pipeline.yml to ci.yml
-3. Rename quality-gate-new.yml to quality-gate.yml (replace old)
-4. Update documentation
-5. Commit changes
+- ci.yml (new main CI pipeline)
 
 ---
 
