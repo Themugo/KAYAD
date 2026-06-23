@@ -3,7 +3,7 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validate } from "../middleware/validate.js";
+import { validate, validateQuery, paymentListQuerySchema } from "../middleware/validate.js";
 import { paymentLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { initiatePaymentSchema } from "../validation/platform.schema.js";
@@ -179,7 +179,7 @@ router.get("/status/:id", protect, asyncHandler(checkPaymentStatus));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/my", protect, asyncHandler(getUserPayments));
+router.get("/my", protect, validateQuery(paymentListQuerySchema), asyncHandler(getUserPayments));
 
 // =============================
 // 📥 MPESA CALLBACK (PUBLIC — protected by IP whitelist + payload validation + idempotency)

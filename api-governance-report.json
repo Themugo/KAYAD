@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:11:24.337Z",
+  "generated": "2026-06-23T08:12:29.607Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 163,
-    "routesWithoutValidation": 256,
-    "validationCoverage": "40.45"
+    "routesWithValidation": 167,
+    "routesWithoutValidation": 252,
+    "validationCoverage": "41.44"
   },
   "undocumentedEndpoints": [
     {
@@ -3169,10 +3169,6 @@
     "POST /:id/branches",
     "GET /:id/branches",
     "GET /:id/stats",
-    "POST /initiate",
-    "GET /status/:id",
-    "POST /callback",
-    "GET /checkout/:checkoutRequestId",
     "GET /health",
     "GET /aggregated",
     "GET /circuit-breakers",
