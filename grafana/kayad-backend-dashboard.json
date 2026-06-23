@@ -1,0 +1,315 @@
+{
+  "dashboard": {
+    "title": "KAYAD Backend - Overview",
+    "uid": "kayad-backend-overview",
+    "tags": ["kayad", "backend"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{path}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status=~\"5..\"}[5m])",
+            "legendFormat": "5xx Errors",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(http_requests_total{status=~\"4..\"}[5m])",
+            "legendFormat": "4xx Errors",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Response Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m]))",
+            "legendFormat": "P95 Response Time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "memory_heap_used_mb",
+            "legendFormat": "Heap Used",
+            "refId": "A"
+          },
+          {
+            "expr": "memory_heap_total_mb",
+            "legendFormat": "Heap Total",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Database Query Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_ms_bucket[5m]))",
+            "legendFormat": "P95 Query Time",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Cache Hit Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "cache_hits_total / (cache_hits_total + cache_misses_total) * 100",
+            "legendFormat": "Hit Rate %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 16},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        }
+      },
+      {
+        "id": 7,
+        "title": "Slow Requests",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(slow_requests_total[5m])",
+            "legendFormat": "Slow Requests (>1s)",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(very_slow_requests_total[5m])",
+            "legendFormat": "Very Slow Requests (>5s)",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Connection Pool",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "connection_pool_total",
+            "legendFormat": "Total",
+            "refId": "A"
+          },
+          {
+            "expr": "connection_pool_available",
+            "legendFormat": "Available",
+            "refId": "B"
+          },
+          {
+            "expr": "connection_pool_checked_out",
+            "legendFormat": "Checked Out",
+            "refId": "C"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "SLO Compliance",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "slo_compliance_percent",
+            "legendFormat": "SLO Compliance %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 32},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 90, "color": "red"},
+          {"value": 95, "color": "yellow"},
+          {"value": 99.9, "color": "green"}
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Error Budget Remaining",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "error_budget_remaining_percent",
+            "legendFormat": "Remaining %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 32},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 0, "color": "red"},
+          {"value": 50, "color": "yellow"},
+          {"value": 80, "color": "green"}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Error Budget Consumption (30d)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "error_budget_consumed_percent",
+            "legendFormat": "Consumed %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 36},
+        "lines": true,
+        "fill": 1
+      },
+      {
+        "id": 12,
+        "title": "Burn Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "burn_rate",
+            "legendFormat": "Burn Rate",
+            "refId": "A"
+          },
+          {
+            "expr": "burn_rate_critical_threshold",
+            "legendFormat": "Critical Threshold (6x)",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 36},
+        "lines": true,
+        "fill": 0
+      },
+      {
+        "id": 13,
+        "title": "Queue Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "queue_depth",
+            "legendFormat": "Depth {{queue}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(queue_processing_total{status=\"success\"}[5m])",
+            "legendFormat": "Processed/s {{queue}}",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 44}
+      },
+      {
+        "id": 14,
+        "title": "Availability SLI",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_availability_percent",
+            "legendFormat": "Availability %",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 0, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 99.0, "color": "red"},
+          {"value": 99.5, "color": "yellow"},
+          {"value": 99.9, "color": "green"}
+        ]
+      },
+      {
+        "id": 15,
+        "title": "P95 Latency (ms)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_latency_p95_ms",
+            "legendFormat": "P95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 4, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 5000, "color": "red"},
+          {"value": 3000, "color": "yellow"},
+          {"value": 2000, "color": "green"}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Error Rate %",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sli_error_rate_percent",
+            "legendFormat": "Error Rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 4, "w": 4, "x": 8, "y": 52},
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "orientation": "auto"
+        },
+        "thresholds": [
+          {"value": 5, "color": "red"},
+          {"value": 2, "color": "yellow"},
+          {"value": 1, "color": "green"}
+        ]
+      }
+    ]
+  }
+}

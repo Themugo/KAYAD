@@ -1,0 +1,41 @@
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+playwright-report
+test-results
+dist-ssr
+*.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+
+# Generated documentation artifacts
+doc-inventory*.json
+doc-quality-report*.json
+api-governance-report*.json
+DOCUMENTATION_QUALITY_DASHBOARD.md
+
+# Tool-specific config
+.bolt/
+.vercel/
+
+# Test coverage output
+backend/coverage/
+
+# TypeScript incremental build
+*.tsbuildinfo

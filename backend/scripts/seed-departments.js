@@ -1,0 +1,80 @@
+// Run: node backend/scripts/seed-departments.js
+// Creates platform staff accounts for production operations.
+// Run this after the main seed to provision additional department roles.
+// Make sure your .env MONGO_URI is set and backend isn't running
+
+import mongoose from "mongoose";
+import { config } from "dotenv";
+config();
+
+const isProd = process.env.NODE_ENV === "production";
+const devFallback = (pw) => {
+  if (isProd) throw new Error("Seed password required via env var in production");
+  console.warn("⚠️  Using dev-only fallback password — set SEED_* env vars for production");
+  return pw;
+};
+
+const departments = [
+  {
+    name: "Marketing",
+    email: "marketing@kayad.space",
+    password: process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"),
+    role: "marketing",
+  },
+  {
+    name: "Tech Support",
+    email: "support@kayad.space",
+    password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"),
+    role: "technical_support",
+  },
+  { name: "HR", email: "hr@kayad.space", password: process.env.SEED_HR_PW || devFallback("SEED_HR_PW"), role: "hr" },
+  {
+    name: "Accounts",
+    email: "accounts@kayad.space",
+    password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"),
+    role: "accounts",
+  },
+  {
+    name: "Escrow",
+    email: "escrow@kayad.space",
+    password: process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"),
+    role: "escrow_officer",
+  },
+  {
+    name: "Ad Manager",
+    email: "ads@kayad.space",
+    password: process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"),
+    role: "ad_manager",
+  },
+];
+
+async function run() {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.error("MONGO_URI not set in .env");
+    process.exit(1);
+  }
+
+  await mongoose.connect(uri);
+  console.log("Connected to MongoDB");
+
+  const User = mongoose.model("User", (await import("../models/User.js")).default.schema);
+
+  for (const d of departments) {
+    const exists = await User.findOne({ email: d.email });
+    if (exists) {
+      console.log(`  EXISTS: ${d.email} (${d.role})`);
+    } else {
+      await User.create(d);
+      console.log(`  CREATED: ${d.email} (${d.role})`);
+    }
+  }
+
+  await mongoose.disconnect();
+  console.log("\nDone! Staff accounts provisioned.");
+}
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

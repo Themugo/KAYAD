@@ -1,0 +1,202 @@
+# Canary Release Strategy
+# This strategy gradually rolls out new versions to a subset of users
+# Traffic is split between stable and canary deployments
+
+---
+# Stable Deployment (Current Production)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kayad-backend-stable
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    track: stable
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kayad-backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: kayad-backend
+        track: stable
+        version: v1
+    spec:
+      containers:
+      - name: kayad-backend
+        image: kayad-backend:v1
+        ports:
+        - containerPort: 5000
+        # ... rest of container configuration
+
+---
+# Canary Deployment (New Version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kayad-backend-canary
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    track: canary
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kayad-backend
+      track: canary
+  template:
+    metadata:
+      labels:
+        app: kayad-backend
+        track: canary
+        version: v2
+    spec:
+      containers:
+      - name: kayad-backend
+        image: kayad-backend:v2
+        ports:
+        - containerPort: 5000
+        # ... rest of container configuration
+
+---
+# Stable Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kayad-backend-stable
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    track: stable
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+  selector:
+    app: kayad-backend
+    track: stable
+
+---
+# Canary Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: kayad-backend-canary
+  namespace: kayad
+  labels:
+    app: kayad-backend
+    track: canary
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 5000
+  selector:
+    app: kayad-backend
+    track: canary
+
+---
+# Main Service with Traffic Splitting (using Istio or similar)
+# Note: This requires a service mesh like Istio for advanced traffic splitting
+# For basic canary without service mesh, use weighted services or ingress rules
+
+---
+# Canary Deployment Process:
+# 1. Deploy canary with new version (1 replica initially)
+# 2. Route 5% of traffic to canary
+# 3. Monitor canary for errors and performance
+# 4. Gradually increase traffic to canary (10%, 25%, 50%, 75%, 100%)
+# 5. If issues detected, rollback by reducing canary traffic to 0%
+# 6. If canary is stable, promote canary to stable
+# 7. Scale down old stable deployment
+
+# Traffic Splitting with Istio:
+# apiVersion: networking.istio.io/v1alpha3
+# kind: VirtualService
+# metadata:
+#   name: kayad-backend
+#   namespace: kayad
+# spec:
+#   hosts:
+#   - kayad-backend
+#   http:
+#   - route:
+#     - destination:
+#         host: kayad-backend-stable
+#       weight: 95
+#     - destination:
+#         host: kayad-backend-canary
+#       weight: 5
+
+# Traffic Splitting with Nginx Ingress:
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: kayad-backend-canary-ingress
+#   namespace: kayad
+#   annotations:
+#     nginx.ingress.kubernetes.io/canary: "true"
+#     nginx.ingress.kubernetes.io/canary-weight: "5"
+# spec:
+#   rules:
+#   - host: api.kayad.space
+#     http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: kayad-backend-stable
+#             port:
+#               number: 80
+
+# Canary Traffic Increment Script:
+# #!/bin/bash
+# # Gradually increase canary traffic
+# for weight in 5 10 25 50 75 100; do
+#   kubectl patch virtualservice kayad-backend -p "{\"spec\":{\"http\":[{\"route\":[{\"destination\":{\"host\":\"kayad-backend-canary\"},\"weight\":$weight},{\"destination\":{\"host\":\"kayad-backend-stable\"},\"weight\":$((100-weight))}]}]}}"
+#   echo "Canary traffic set to $weight%"
+#   sleep 300  # Wait 5 minutes between increments
+#   
+#   # Monitor for errors
+#   if ./scripts/check-errors.sh; then
+#     echo "Errors detected, rolling back"
+#     kubectl patch virtualservice kayad-backend -p "{\"spec\":{\"http\":[{\"route\":[{\"destination\":{\"host\":\"kayad-backend-canary\"},\"weight\":0},{\"destination\":{\"host\":\"kayad-backend-stable\"},\"weight\":100}]}]}}"
+#     exit 1
+#   fi
+# done
+
+# Benefits:
+# - Gradual rollout reduces risk
+# - Early detection of issues
+# - Easy rollback capability
+# - A/B testing capability
+# - Resource efficient (small canary initially)
+
+# Considerations:
+# - Requires service mesh or advanced ingress for traffic splitting
+# - More complex deployment process
+# - Requires monitoring and automated rollback
+# - Database schema changes must be backward compatible
+# - Longer deployment time due to gradual rollout
+
+# Canary Best Practices:
+# - Start with small traffic percentage (1-5%)
+# - Monitor key metrics (error rate, latency, conversion)
+# - Set up automated rollback triggers
+# - Use feature flags for canary-specific functionality
+# - Test canary with internal users first
+# - Document canary success criteria
+# - Have clear rollback procedures
+
+# Canary Success Criteria:
+# - Error rate < 0.1%
+# - P95 latency < 200ms
+- # Conversion rate >= stable version
+# - No critical bugs reported
+# - Resource utilization within limits

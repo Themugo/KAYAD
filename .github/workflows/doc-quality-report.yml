@@ -1,0 +1,69 @@
+name: Documentation Quality Report
+
+on:
+  schedule:
+    - cron: '0 0 1 * *' # Monthly on 1st
+  workflow_dispatch:
+
+jobs:
+  quality-report:
+    name: Generate Documentation Quality Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter date-fns
+
+      - name: Generate quality report
+        run: node scripts/doc-quality-report.js
+
+      - name: Upload quality report
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-quality-report
+          path: doc-quality-report.json
+          retention-days: 90
+
+      - name: Comment on issue
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('doc-quality-report.json', 'utf8'));
+            
+            const body = `# Documentation Quality Report
+            
+Generated: ${report.generated}
+
+## Summary
+- Total Documents: ${report.totalDocuments}
+- Stale Documents: ${report.staleDocuments} (${report.stalePercentage}%)
+- Documents with Ownership: ${report.documentsWithOwnership} (${report.ownershipCompliance}%)
+- Broken Links: ${report.brokenLinks}
+- Review Compliance: ${report.reviewCompliance}%
+
+## Quality Metrics
+- Overall Score: ${report.overallScore}/100
+- Readability Score: ${report.readabilityScore}/100
+- Completeness Score: ${report.completenessScore}/100
+
+## Recommendations
+${report.recommendations.map(r => `- ${r}`).join('\n')}
+`;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Documentation Quality Report',
+              body: body,
+              labels: ['documentation', 'quality-report']
+            });

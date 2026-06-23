@@ -1,0 +1,18 @@
+{
+  "name": "Kayad – Kenya's Premium Car Marketplace",
+  "short_name": "Kayad",
+  "description": "Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait-primary",
+  "lang": "en-KE",
+  "categories": ["automotive", "marketplace", "auctions"],
+  "icons": [],
+  "screenshots": [],
+  "shortcuts": [
+    { "name": "Browse Cars", "short_name": "Browse", "url": "/showroom" },
+    { "name": "Auctions", "short_name": "Auctions", "url": "/auctions" }
+  ]
+}

@@ -1,0 +1,1416 @@
+openapi: 3.0.3
+info:
+  title: KAYAD API
+  description: |
+    KAYAD - Kenya's Premium Car Marketplace API
+    
+    This API provides endpoints for managing car listings, auctions, bids, escrow transactions, and user accounts.
+    
+    ## Authentication
+    
+    Most endpoints require authentication using JWT tokens. Include the token in the Authorization header:
+    
+    `Authorization: Bearer <token>`
+    
+    ## Rate Limiting
+    
+    API requests are rate limited. Standard limits are 100 requests per minute per user.
+    
+    ## Versioning
+    
+    The API is versioned using URL path versioning (e.g., /api/v1/cars). Current version is v1.
+    
+    ## Deprecation Policy
+    
+    Deprecated endpoints will be supported for at least 6 months before removal.
+  version: 1.0.0
+  contact:
+    name: KAYAD API Support
+    email: api@kayad.space
+    url: https://kayad.space
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.kayad.space/api/v1
+    description: Production server
+  - url: https://staging-api.kayad.space/api/v1
+    description: Staging server
+  - url: http://localhost:5000/api/v1
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Cars
+    description: Car listing management
+  - name: Auctions
+    description: Auction management
+  - name: Bids
+    description: Bid management
+  - name: Escrow
+    description: Escrow transaction management
+  - name: Users
+    description: User profile management
+  - name: Analytics
+    description: Analytics and market data
+  - name: Admin
+    description: Administrative operations
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many login attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+      rateLimit:
+        window: 15m
+        max: 5
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user account
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+      rateLimit:
+        window: 1h
+        max: 3
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout current user session
+      operationId: logout
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Refresh access token using refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security: []
+
+  /cars:
+    get:
+      tags:
+        - Cars
+      summary: List cars
+      description: Get paginated list of cars with optional filters
+      operationId: listCars
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Items per page
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, sold, pending, inactive]
+          description: Filter by status
+        - name: minPrice
+          in: query
+          schema:
+            type: number
+          description: Minimum price
+        - name: maxPrice
+          in: query
+          schema:
+            type: number
+          description: Maximum price
+        - name: make
+          in: query
+          schema:
+            type: string
+          description: Filter by make
+        - name: model
+          in: query
+          schema:
+            type: string
+          description: Filter by model
+        - name: year
+          in: query
+          schema:
+            type: integer
+          description: Filter by year
+        - name: location
+          in: query
+          schema:
+            type: string
+          description: Filter by location
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [createdAt, price, mileage, year]
+            default: createdAt
+          description: Sort field
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order
+      responses:
+        '200':
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarListResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 100
+
+    post:
+      tags:
+        - Cars
+      summary: Create car listing
+      description: Create a new car listing
+      operationId: createCar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCarRequest'
+      responses:
+        '201':
+          description: Car created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - seller account required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1h
+        max: 50
+
+  /cars/{carId}:
+    get:
+      tags:
+        - Cars
+      summary: Get car details
+      description: Get detailed information about a specific car
+      operationId: getCar
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Car ID
+      responses:
+        '200':
+          description: Car details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '404':
+          description: Car not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 100
+
+    put:
+      tags:
+        - Cars
+      summary: Update car listing
+      description: Update an existing car listing
+      operationId: updateCar
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Car ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCarRequest'
+      responses:
+        '200':
+          description: Car updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - not the owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Car not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1h
+        max: 50
+
+    delete:
+      tags:
+        - Cars
+      summary: Delete car listing
+      description: Delete a car listing
+      operationId: deleteCar
+      parameters:
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Car ID
+      responses:
+        '200':
+          description: Car deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - not the owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Car not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1h
+        max: 20
+
+  /cars/search:
+    get:
+      tags:
+        - Cars
+      summary: Search cars
+      description: Full-text search for cars
+      operationId: searchCars
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Items per page
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CarListResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 50
+
+  /auctions:
+    get:
+      tags:
+        - Auctions
+      summary: List auctions
+      description: Get paginated list of auctions
+      operationId: listAuctions
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Items per page
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [upcoming, active, ended, cancelled]
+          description: Filter by status
+      responses:
+        '200':
+          description: List of auctions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionListResponse'
+        '400':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 100
+
+    post:
+      tags:
+        - Auctions
+      summary: Create auction
+      description: Create a new auction for a car
+      operationId: createAuction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuctionRequest'
+      responses:
+        '201':
+          description: Auction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - seller account required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1h
+        max: 20
+
+  /auctions/{auctionId}:
+    get:
+      tags:
+        - Auctions
+      summary: Get auction details
+      description: Get detailed information about an auction
+      operationId: getAuction
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Auction ID
+      responses:
+        '200':
+          description: Auction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuctionResponse'
+        '404':
+          description: Auction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 100
+
+  /auctions/{auctionId}/bids:
+    get:
+      tags:
+        - Bids
+      summary: List auction bids
+      description: Get all bids for an auction
+      operationId: listAuctionBids
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Auction ID
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+          description: Items per page
+      responses:
+        '200':
+          description: List of bids
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidListResponse'
+        '404':
+          description: Auction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 50
+
+    post:
+      tags:
+        - Bids
+      summary: Place bid
+      description: Place a bid on an auction
+      operationId: placeBid
+      parameters:
+        - name: auctionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Auction ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlaceBidRequest'
+      responses:
+        '201':
+          description: Bid placed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BidResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - auction not active
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Auction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 30
+
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Get user profile
+      description: Get current user's profile
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1m
+        max: 50
+
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Update current user's profile
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 1h
+        max: 20
+
+  /analytics/market-stats:
+    get:
+      tags:
+        - Analytics
+      summary: Get market statistics
+      description: Get market-wide statistics and trends
+      operationId: getMarketStats
+      responses:
+        '200':
+          description: Market statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketStatsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+      rateLimit:
+        window: 5m
+        max: 10
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token authentication
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        details:
+          type: object
+          description: Additional error details
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: User password
+
+    LoginResponse:
+      type: object
+      required:
+        - token
+        - refreshToken
+        - user
+      properties:
+        token:
+          type: string
+          description: JWT access token
+        refreshToken:
+          type: string
+          description: Refresh token
+        user:
+          $ref: '#/components/schemas/User'
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+          description: User email
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: User password
+        name:
+          type: string
+          description: User full name
+        phone:
+          type: string
+          description: User phone number
+
+    RegisterResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        message:
+          type: string
+          description: Registration message
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token
+
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - name
+        - role
+      properties:
+        id:
+          type: string
+          description: User ID
+        email:
+          type: string
+          format: email
+          description: User email
+        name:
+          type: string
+          description: User name
+        phone:
+          type: string
+          description: User phone
+        role:
+          type: string
+          enum: [user, seller, admin, inspector]
+          description: User role
+        emailVerified:
+          type: boolean
+          description: Email verification status
+        profilePicture:
+          type: string
+          description: Profile picture URL
+        location:
+          type: string
+          description: User location
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+
+    Car:
+      type: object
+      required:
+        - id
+        - title
+        - price
+        - mileage
+        - year
+        - make
+        - model
+        - status
+      properties:
+        id:
+          type: string
+          description: Car ID
+        title:
+          type: string
+          description: Car title
+        description:
+          type: string
+          description: Car description
+        price:
+          type: number
+          description: Car price in KES
+        mileage:
+          type: number
+          description: Car mileage in km
+        year:
+          type: integer
+          description: Car year
+        make:
+          type: string
+          description: Car make
+        model:
+          type: string
+          description: Car model
+        transmission:
+          type: string
+          enum: [automatic, manual]
+          description: Transmission type
+        fuelType:
+          type: string
+          description: Fuel type
+        bodyType:
+          type: string
+          description: Body type
+        color:
+          type: string
+          description: Car color
+        location:
+          type: string
+          description: Car location
+        images:
+          type: array
+          items:
+            type: string
+          description: Car image URLs
+        features:
+          type: array
+          items:
+            type: string
+          description: Car features
+        status:
+          type: string
+          enum: [active, sold, pending, inactive]
+          description: Car status
+        seller:
+          $ref: '#/components/schemas/User'
+        verification:
+          type: object
+          properties:
+            verified:
+              type: boolean
+            verifiedBy:
+              type: string
+            verifiedAt:
+              type: string
+              format: date-time
+          description: Verification status
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Update timestamp
+
+    CreateCarRequest:
+      type: object
+      required:
+        - title
+        - price
+        - mileage
+        - year
+        - make
+        - model
+        - images
+      properties:
+        title:
+          type: string
+          description: Car title
+        description:
+          type: string
+          description: Car description
+        price:
+          type: number
+          description: Car price in KES
+        mileage:
+          type: number
+          description: Car mileage in km
+        year:
+          type: integer
+          description: Car year
+        make:
+          type: string
+          description: Car make
+        model:
+          type: string
+          description: Car model
+        transmission:
+          type: string
+          enum: [automatic, manual]
+          description: Transmission type
+        fuelType:
+          type: string
+          description: Fuel type
+        bodyType:
+          type: string
+          description: Body type
+        color:
+          type: string
+          description: Car color
+        location:
+          type: string
+          description: Car location
+        images:
+          type: array
+          items:
+            type: string
+          description: Car image URLs
+        features:
+          type: array
+          items:
+            type: string
+          description: Car features
+
+    UpdateCarRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Car title
+        description:
+          type: string
+          description: Car description
+        price:
+          type: number
+          description: Car price in KES
+        mileage:
+          type: number
+          description: Car mileage in km
+        year:
+          type: integer
+          description: Car year
+        make:
+          type: string
+          description: Car make
+        model:
+          type: string
+          description: Car model
+        transmission:
+          type: string
+          enum: [automatic, manual]
+          description: Transmission type
+        fuelType:
+          type: string
+          description: Fuel type
+        bodyType:
+          type: string
+          description: Body type
+        color:
+          type: string
+          description: Car color
+        location:
+          type: string
+          description: Car location
+        images:
+          type: array
+          items:
+            type: string
+          description: Car image URLs
+        features:
+          type: array
+          items:
+            type: string
+          description: Car features
+        status:
+          type: string
+          enum: [active, sold, pending, inactive]
+          description: Car status
+
+    CarResponse:
+      type: object
+      required:
+        - car
+      properties:
+        car:
+          $ref: '#/components/schemas/Car'
+
+    CarListResponse:
+      type: object
+      required:
+        - cars
+        - pagination
+      properties:
+        cars:
+          type: array
+          items:
+            $ref: '#/components/schemas/Car'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+
+    Auction:
+      type: object
+      required:
+        - id
+        - car
+        - startTime
+        - endTime
+        - startingPrice
+        - status
+      properties:
+        id:
+          type: string
+          description: Auction ID
+        car:
+          $ref: '#/components/schemas/Car'
+        startTime:
+          type: string
+          format: date-time
+          description: Auction start time
+        endTime:
+          type: string
+          format: date-time
+          description: Auction end time
+        startingPrice:
+          type: number
+          description: Starting price in KES
+        currentBid:
+          type: number
+          description: Current highest bid
+        status:
+          type: string
+          enum: [upcoming, active, ended, cancelled]
+          description: Auction status
+        participants:
+          type: array
+          items:
+            type: string
+          description: Participant user IDs
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+
+    CreateAuctionRequest:
+      type: object
+      required:
+        - carId
+        - startTime
+        - endTime
+        - startingPrice
+      properties:
+        carId:
+          type: string
+          description: Car ID
+        startTime:
+          type: string
+          format: date-time
+          description: Auction start time
+        endTime:
+          type: string
+          format: date-time
+          description: Auction end time
+        startingPrice:
+          type: number
+          description: Starting price in KES
+
+    AuctionResponse:
+      type: object
+      required:
+        - auction
+      properties:
+        auction:
+          $ref: '#/components/schemas/Auction'
+
+    AuctionListResponse:
+      type: object
+      required:
+        - auctions
+        - pagination
+      properties:
+        auctions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Auction'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+
+    Bid:
+      type: object
+      required:
+        - id
+        - auctionId
+        - userId
+        - amount
+        - timestamp
+      properties:
+        id:
+          type: string
+          description: Bid ID
+        auctionId:
+          type: string
+          description: Auction ID
+        userId:
+          type: string
+          description: User ID
+        amount:
+          type: number
+          description: Bid amount in KES
+        timestamp:
+          type: string
+          format: date-time
+          description: Bid timestamp
+
+    PlaceBidRequest:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+          description: Bid amount in KES
+
+    BidResponse:
+      type: object
+      required:
+        - bid
+      properties:
+        bid:
+          $ref: '#/components/schemas/Bid'
+
+    BidListResponse:
+      type: object
+      required:
+        - bids
+        - pagination
+      properties:
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/Bid'
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+
+    UserProfileResponse:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User name
+        phone:
+          type: string
+          description: User phone
+        location:
+          type: string
+          description: User location
+        profilePicture:
+          type: string
+          description: Profile picture URL
+
+    MarketStatsResponse:
+      type: object
+      required:
+        - stats
+      properties:
+        stats:
+          type: object
+          properties:
+            totalCars:
+              type: integer
+              description: Total number of cars
+            activeAuctions:
+              type: integer
+              description: Number of active auctions
+            averagePrice:
+              type: number
+              description: Average car price
+            popularMakes:
+              type: array
+              items:
+                type: object
+                properties:
+                  make:
+                    type: string
+                  count:
+                    type: integer
+              description: Popular car makes
+            priceTrend:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  averagePrice:
+                    type: number
+              description: Price trend over time
