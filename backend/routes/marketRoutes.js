@@ -23,9 +23,9 @@ router.get(
   }),
 );
 
-rovalidateQuery(analyticsQuerySchema),
-  uter.get(
+router.get(
   "/trends",
+  validateQuery(analyticsQuerySchema),
   asyncHandler(async (req, res) => {
     const { brand, days = 90 } = req.query;
     const since = new Date(Date.now() - Number(days) * 86400000);

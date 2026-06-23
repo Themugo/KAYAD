@@ -5,6 +5,7 @@ import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { getPagination, withPagination } from "../middleware/apiPagination.js";
+import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { cacheDealerData, cacheAnalytics, invalidateCache } from "../middleware/apiCache.js";
 
 import Car from "../models/Car.js";
