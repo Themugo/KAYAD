@@ -23,6 +23,7 @@ import {
 } from "../controllers/featureFlagController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -62,13 +63,13 @@ router.post("/:key/toggle", adminOnly, asyncHandler(toggleFlagHandler));
 router.get("/:key/stats", adminOnly, asyncHandler(getFlagStatsHandler));
 
 // Get flags by category
-router.get("/category/:category", adminOnly, asyncHandler(getFlagsByCategoryHandler));
+router.get("/category/:category", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByCategoryHandler));
 
 // Get flags by environment
-router.get("/environment/:environment", adminOnly, asyncHandler(getFlagsByEnvironmentHandler));
+router.get("/environment/:environment", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByEnvironmentHandler));
 
 // Get flags by role
-router.get("/role/:role", adminOnly, asyncHandler(getFlagsByRoleHandler));
+router.get("/role/:role", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByRoleHandler));
 
 // Get flag categories
 router.get("/meta/categories", adminOnly, asyncHandler(getFlagCategoriesHandler));

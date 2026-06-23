@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:26:19.622Z",
+  "generated": "2026-06-23T08:27:16.622Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 186,
-    "routesWithoutValidation": 233,
-    "validationCoverage": "46.15"
+    "routesWithValidation": 198,
+    "routesWithoutValidation": 222,
+    "validationCoverage": "49.13"
   },
   "undocumentedEndpoints": [
     {
@@ -944,7 +944,7 @@
       "path": "/category/:category",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:dealerId",
@@ -1472,7 +1472,7 @@
       "path": "/user",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /evaluate/:key",
@@ -1480,7 +1480,7 @@
       "path": "/evaluate/:key",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:key",
@@ -1488,7 +1488,7 @@
       "path": "/:key",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "PUT /:key",
@@ -1496,7 +1496,7 @@
       "path": "/:key",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "DELETE /:key",
@@ -1504,7 +1504,7 @@
       "path": "/:key",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /:key/toggle",
@@ -1512,7 +1512,7 @@
       "path": "/:key/toggle",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /:key/stats",
@@ -1520,7 +1520,7 @@
       "path": "/:key/stats",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /environment/:environment",
@@ -1528,7 +1528,7 @@
       "path": "/environment/:environment",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /role/:role",
@@ -1536,7 +1536,7 @@
       "path": "/role/:role",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /meta/categories",
@@ -1544,7 +1544,7 @@
       "path": "/meta/categories",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "POST /batch/evaluate",
@@ -1552,7 +1552,7 @@
       "path": "/batch/evaluate",
       "file": "featureFlagRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /reports",
@@ -3052,17 +3052,6 @@
     "GET /my-events",
     "GET /revenue",
     "GET /user-growth",
-    "GET /user",
-    "GET /evaluate/:key",
-    "GET /:key",
-    "PUT /:key",
-    "DELETE /:key",
-    "POST /:key/toggle",
-    "GET /:key/stats",
-    "GET /environment/:environment",
-    "GET /role/:role",
-    "GET /meta/categories",
-    "POST /batch/evaluate",
     "GET /reports",
     "GET /reports/:id",
     "GET /issues",
