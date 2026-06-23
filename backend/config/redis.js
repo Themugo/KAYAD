@@ -12,7 +12,7 @@ const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
 
 // Temporarily disable Redis auto-connect for debugging
-const DISABLE_REDIS = true;
+const DISABLE_REDIS = false;
 
 let redis = null;
 let redisCircuitBreakerOpen = false;
