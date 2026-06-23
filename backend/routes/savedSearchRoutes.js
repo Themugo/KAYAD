@@ -7,6 +7,7 @@ import {
   validateQuery,
   createSavedSearchSchema,
   updateSavedSearchSchema,
+  carListQuerySchema,
 } from "../middleware/validate.js";
 import SavedSearch from "../models/SavedSearch.js";
 
