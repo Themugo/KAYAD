@@ -1,13 +1,13 @@
 {
-  "generated": "2026-06-23T08:29:34.254Z",
+  "generated": "2026-06-23T08:31:04.247Z",
   "summary": {
     "totalRoutes": 403,
     "documentedRoutes": 41,
     "undocumentedRoutes": 362,
     "documentationCoverage": "10.17",
-    "routesWithValidation": 206,
-    "routesWithoutValidation": 212,
-    "validationCoverage": "51.12"
+    "routesWithValidation": 208,
+    "routesWithoutValidation": 210,
+    "validationCoverage": "51.61"
   },
   "undocumentedEndpoints": [
     {
@@ -1992,7 +1992,7 @@
       "path": "/pulse/:carId",
       "file": "marketRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /dealer/insights",
@@ -2000,7 +2000,7 @@
       "path": "/dealer/insights",
       "file": "marketRoutes.js",
       "hasSwagger": false,
-      "hasValidation": false
+      "hasValidation": true
     },
     {
       "key": "GET /http",
@@ -3094,8 +3094,6 @@
     "GET /metrics",
     "POST /regenerate",
     "GET /admin/all",
-    "GET /pulse/:carId",
-    "GET /dealer/insights",
     "GET /http",
     "GET /database",
     "GET /replica-set",

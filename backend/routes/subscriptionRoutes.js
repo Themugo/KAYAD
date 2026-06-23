@@ -45,9 +45,10 @@ router.get("/usage-limits", protect, asyncHandler(checkUsageLimits));
 // =============================
 
 // Get all subscriptions (admin only)
-router.get("/all", protect, adminOnly, asyncHandler(getAllSubscriptions));
+router.get("/all", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getAllSubscriptions));
 
 // Get subscription analytics (admin only)
-router.get("/analytics", protect, adminOnly, asyncHandler(getSubscriptionAnalytics));
+router.get("/analytics", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getSubscriptionAnalytics));
 
+export default router;
 export default router;
