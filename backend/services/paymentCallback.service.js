@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
 import Car from "../models/Car.js";
-import { createEscrow } from "../services/escrow.service.js";
+import Escrow from "../models/Escrow.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import User from "../models/User.js";
@@ -193,13 +193,25 @@ export const handleMpesaCallback = async (callbackData) => {
         }
       }
 
-      await createEscrow({
-        car: payment.car,
-        buyer: payment.user,
-        seller: sellerId,
-        amount: payment.amount,
-        paymentId: payment._id,
-      });
+      const commission = Math.round(payment.amount * 0.05);
+      const sellerAmount = payment.amount - commission;
+      const [newEscrow] = await Escrow.create(
+        [{
+          car: payment.car,
+          buyer: payment.user,
+          seller: sellerId,
+          amount: payment.amount,
+          payment: payment._id,
+          commission,
+          sellerAmount,
+          status: "funded",
+          fundedAt: new Date(),
+          autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
+          timeline: { depositReceived: true, depositReceivedAt: new Date() },
+          history: [{ action: "Escrow created and funded", at: new Date() }],
+        }],
+        { session },
+      );
     }
 
     await sendNotification({

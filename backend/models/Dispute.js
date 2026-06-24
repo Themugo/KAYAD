@@ -1,4 +1,14 @@
+// backend/models/Dispute.js - Enterprise Dispute Management v2.0
+// ─────────────────────────────────────────────────────────────
+// Full 7-state workflow: OPEN → UNDER_REVIEW → MEDIATION →
+// RESOLVED → APPEALED → (re-enter) → CLOSED. Supports evidence
+// uploads, internal notes, mediation scheduling, resolution
+// decisions, and appeal review. Backward-compatible with v1
+// status values.
+// ─────────────────────────────────────────────────────────────
+
 import mongoose from "mongoose";
+import { STATES } from "../services/disputeStateMachine.js";
 
 const disputeSchema = new mongoose.Schema(
   {
@@ -26,6 +36,17 @@ const disputeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+      index: true,
+    },
+    paymentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Payment",
+      default: null,
+    },
 
     // =============================
     // 📋 DISPUTE DETAILS
@@ -45,43 +66,58 @@ const disputeSchema = new mongoose.Schema(
       enum: ["condition_mismatch", "delivery_issue", "payment_dispute", "fraud", "other"],
       required: true,
     },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "urgent"],
+      default: "medium",
+    },
+    amountInDispute: {
+      type: Number,
+      default: 0,
+    },
 
     // =============================
-    // 📊 DISPUTE STATUS
+    // 📊 DISPUTE STATUS (State Machine)
     // =============================
     status: {
       type: String,
-      enum: ["open", "under_review", "resolved", "appealed", "closed"],
-      default: "open",
+      enum: Object.values(STATES),
+      default: STATES.OPEN,
       index: true,
     },
 
     // =============================
-    // 📎 EVIDENCE
+    // 📎 EVIDENCE (ref array to Evidence model)
     // =============================
     evidence: [
       {
-        type: {
-          type: String,
-          enum: ["image", "pdf", "video", "inspection_report", "chat_log", "other"],
-          required: true,
-        },
-        url: {
-          type: String,
-          required: true,
-        },
-        publicId: String,
-        description: String,
-        uploadedBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        uploadedAt: {
-          type: Date,
-          default: Date.now,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Evidence",
       },
     ],
+
+    // =============================
+    // ⚖️ MEDIATION
+    // =============================
+    mediation: {
+      scheduledAt: Date,
+      completedAt: Date,
+      mediatorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      mediatorNotes: String,
+      outcome: {
+        type: String,
+        enum: ["settled", "impasse", "buyer_favored", "seller_favored", "partial"],
+      },
+      resolvedByMediation: {
+        type: Boolean,
+        default: false,
+      },
+      buyerSatisfied: Boolean,
+      sellerSatisfied: Boolean,
+    },
 
     // =============================
     // ⚖️ RESOLUTION
@@ -89,17 +125,23 @@ const disputeSchema = new mongoose.Schema(
     resolution: {
       decision: {
         type: String,
-        enum: ["partial_refund", "full_refund", "release_funds", "split_settlement"],
+        enum: ["partial_refund", "full_refund", "release_funds", "split_settlement", "dismissed"],
       },
       amount: Number,
       sellerAmount: Number,
       buyerAmount: Number,
+      platformFee: Number,
       reason: String,
       decidedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
       decidedAt: Date,
+      implementedAt: Date,
+      implemented: {
+        type: Boolean,
+        default: false,
+      },
     },
 
     // =============================
@@ -107,21 +149,7 @@ const disputeSchema = new mongoose.Schema(
     // =============================
     appeal: {
       reason: String,
-      evidence: [
-        {
-          type: {
-            type: String,
-            enum: ["image", "pdf", "video", "inspection_report", "chat_log", "other"],
-          },
-          url: String,
-          publicId: String,
-          description: String,
-          uploadedAt: {
-            type: Date,
-            default: Date.now,
-          },
-        },
-      ],
+      additionalDetails: String,
       appealedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -130,7 +158,6 @@ const disputeSchema = new mongoose.Schema(
       status: {
         type: String,
         enum: ["pending", "approved", "rejected"],
-        default: "pending",
       },
       reviewedBy: {
         type: mongoose.Schema.Types.ObjectId,
@@ -138,46 +165,92 @@ const disputeSchema = new mongoose.Schema(
       },
       reviewedAt: Date,
       reviewNotes: String,
+      appealDecision: {
+        type: String,
+        enum: ["uphold_resolution", "overturn_resolution", "modify_resolution"],
+      },
     },
 
     // =============================
-    // 📝 ADMIN NOTES
+    // 📝 INTERNAL NOTES (admin only)
     // =============================
-    adminNotes: [
+    internalNotes: [
       {
-        note: String,
-        addedBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        addedAt: {
-          type: Date,
-          default: Date.now,
-        },
+        note: { type: String, required: true },
+        addedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        addedAt: { type: Date, default: Date.now },
+        isPrivate: { type: Boolean, default: true },
       },
     ],
 
     // =============================
-    // 📊 TIMELINE
+    // 📊 AUDIT TIMELINE
     // =============================
-    openedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    timeline: [
+      {
+        action: { type: String, required: true },
+        actor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        fromStatus: String,
+        toStatus: String,
+        note: String,
+        at: { type: Date, default: Date.now },
+      },
+    ],
+    openedAt: { type: Date, default: Date.now },
     underReviewAt: Date,
+    mediationStartedAt: Date,
     resolvedAt: Date,
+    appealedAt: Date,
     closedAt: Date,
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 
-// Indexes for efficient queries
-disputeSchema.index({ escrow: 1 });
+// =============================
+// 🔗 VIRTUAL: evidenceCount
+// =============================
+disputeSchema.virtual("evidenceCount").get(function () {
+  return this.evidence?.length || 0;
+});
+
+// =============================
+// 🎯 INSTANCE METHODS
+// =============================
+disputeSchema.methods.addTimelineEntry = function ({ action, actor, fromStatus, toStatus, note }) {
+  this.timeline.push({ action, actor, fromStatus, toStatus, note, at: new Date() });
+};
+
+// =============================
+// 📊 INDEXES
+// =============================
 disputeSchema.index({ openedBy: 1, createdAt: -1 });
 disputeSchema.index({ openedAgainst: 1, createdAt: -1 });
 disputeSchema.index({ status: 1, createdAt: -1 });
 disputeSchema.index({ category: 1 });
+disputeSchema.index({ priority: 1 });
+
+// =============================
+// 🔒 SOFT DELETE
+// =============================
+disputeSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+});
+
+disputeSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+disputeSchema.statics.softDelete = async function (ids, userId) {
+  return this.updateMany(
+    { _id: { $in: ids } },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
 
 export default mongoose.models.Dispute || mongoose.model("Dispute", disputeSchema);

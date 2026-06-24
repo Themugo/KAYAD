@@ -1,9 +1,15 @@
-// backend/routes/escrowRoutes.js
+// backend/routes/escrowRoutes.js - Production v2.0 (State Machine)
+// ─────────────────────────────────────────────────────────────
+// Strict state machine escrow routes.
+// Every state-changing endpoint validates the transition via
+// escrowStateMachine before executing. Role permissions are
+// checked at both route and state machine level.
+// ─────────────────────────────────────────────────────────────
 
 import express from "express";
-import { protect, adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly, authorize } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateQuery, escrowListQuerySchema } from "../middleware/validate.js";
+import { validateObjectId } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 
@@ -11,44 +17,83 @@ import {
   getAllEscrows,
   getUserEscrows,
   getEscrowById,
+  getEscrowState,
   releaseEscrow,
   refundEscrow,
+  confirmVehicleHandler,
   confirmDelivery,
   requestRelease,
+  disputeEscrow,
+  closeEscrowHandler,
 } from "../controllers/escrowController.js";
-import Escrow from "../models/Escrow.js";
-import { getIO } from "../utils/io.js";
 
 const router = express.Router();
 
 // =============================
-// 📄 USER ESCROWS (BUYER / SELLER)
+// 📄 GET: USER ESCROWS
 // =============================
-router.get("/my", protect, validateQuery(escrowListQuerySchema), asyncHandler(getUserEscrows));
+router.get("/my", protect, asyncHandler(getUserEscrows));
 
 // =============================
-// 🧠 ADMIN: ALL ESCROWS (PAGINATED + FILTER)
+// 📄 GET: ALL ESCROWS (ADMIN)
 // =============================
-router.get(
-  "/",
-  protect,
-  adminOnly,
-  validateQuery(escrowListQuerySchema),
-  asyncHandler(async (req, res) => {
-    req.query.page = Number(req.query.page) || 1;
-    req.query.limit = Number(req.query.limit) || 20;
-
-    return getAllEscrows(req, res);
-  }),
-);
+router.get("/", protect, adminOnly, asyncHandler(getAllEscrows));
 
 // =============================
-// 🔍 GET SINGLE ESCROW
+// 🔍 GET: SINGLE ESCROW
 // =============================
 router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
 
 // =============================
-// 💰 RELEASE ESCROW (ADMIN) - Idempotent to prevent duplicate releases
+// 🔍 GET: STATE MACHINE INFO
+// =============================
+router.get("/:id/state", protect, validateObjectId, asyncHandler(getEscrowState));
+
+// =============================
+// ✅ VEHICLE CONFIRMED (BUYER)
+// =============================
+router.post(
+  "/:id/confirm-vehicle",
+  protect,
+  idempotencyCheck,
+  validateObjectId,
+  asyncHandler(confirmVehicleHandler),
+);
+
+// =============================
+// 🚚 DELIVERED (SELLER)
+// =============================
+router.post(
+  "/:id/confirm-delivery",
+  protect,
+  idempotencyCheck,
+  validateObjectId,
+  asyncHandler(confirmDelivery),
+);
+
+// =============================
+// 📋 REQUEST RELEASE (BUYER)
+// =============================
+router.post(
+  "/:id/request-release",
+  protect,
+  idempotencyCheck,
+  validateObjectId,
+  asyncHandler(requestRelease),
+);
+
+// =============================
+// ⚠️ DISPUTE (BUYER / SELLER / ADMIN)
+// =============================
+router.post(
+  "/:id/dispute",
+  protect,
+  validateObjectId,
+  asyncHandler(disputeEscrow),
+);
+
+// =============================
+// 💰 RELEASE (ADMIN)
 // =============================
 router.post(
   "/:id/release",
@@ -57,14 +102,11 @@ router.post(
   createLimiter,
   idempotencyCheck,
   validateObjectId,
-  asyncHandler(async (req, res) => {
-    req.body.adminId = req.user.id; // 🔥 audit trail
-    return releaseEscrow(req, res);
-  }),
+  asyncHandler(releaseEscrow),
 );
 
 // =============================
-// 🔁 REFUND ESCROW (ADMIN) - Idempotent to prevent duplicate refunds
+// 🔁 REFUND (ADMIN)
 // =============================
 router.post(
   "/:id/refund",
@@ -73,83 +115,27 @@ router.post(
   createLimiter,
   idempotencyCheck,
   validateObjectId,
-  asyncHandler(async (req, res) => {
-    req.body.adminId = req.user.id; // 🔥 audit trail
-    return refundEscrow(req, res);
-  }),
+  asyncHandler(refundEscrow),
 );
 
 // =============================
-// ⚠️ DISPUTE ESCROW (BUYER/SELLER INITIATED)
+// 🔒 CLOSE (ADMIN)
 // =============================
 router.post(
-  "/:id/dispute",
+  "/:id/close",
   protect,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    const { reason } = req.body;
-    if (!reason?.trim()) return res.status(400).json({ success: false, message: "Dispute reason required" });
-
-    const escrow = await Escrow.findById(req.params.id);
-    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
-
-    const userId = req.user.id;
-    const isParty = String(escrow.buyer) === userId || String(escrow.seller) === userId;
-    const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
-    if (!isParty && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
-
-    if (!["held", "pending"].includes(escrow.status)) {
-      return res.status(400).json({ success: false, message: "Escrow cannot be disputed in current state" });
-    }
-
-    escrow.status = "disputed";
-    escrow.disputeReason = reason;
-    escrow.history.push({ action: `disputed: ${reason}` });
-    await escrow.save();
-
-    if (getIO()) {
-      getIO().to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });
-      getIO().to(`user_${escrow.seller}`).emit("escrowDisputed", { escrowId: escrow._id });
-    }
-
-    res.json({ success: true, message: "Dispute raised", escrow });
-  }),
-);
-
-// =============================
-// ✅ CONFIRM DELIVERY (BUYER) - Idempotent to prevent duplicate confirmations
-// =============================
-router.post(
-  "/:id/confirm-delivery",
-  protect,
+  adminOnly,
+  createLimiter,
   idempotencyCheck,
   validateObjectId,
-  asyncHandler(async (req, res) => {
-    return confirmDelivery(req, res);
-  }),
-);
-
-// =============================
-// 📦 REQUEST RELEASE (BUYER CONFIRMS DELIVERY) - Idempotent to prevent duplicate requests
-// =============================
-router.post(
-  "/:id/request-release",
-  protect,
-  idempotencyCheck,
-  validateObjectId,
-  asyncHandler(async (req, res) => {
-    return requestRelease(req, res);
-  }),
+  asyncHandler(closeEscrowHandler),
 );
 
 // =============================
 // 🚨 FALLBACK
 // =============================
 router.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Escrow route not found",
-  });
+  res.status(404).json({ success: false, message: "Escrow route not found" });
 });
 
 export default router;

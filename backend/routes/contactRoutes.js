@@ -2,7 +2,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { submitContact, listContacts, markRead } from "../controllers/contactController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
 
@@ -13,7 +13,7 @@ const contactLimiter = rateLimit({
 });
 
 router.post("/", contactLimiter, submitContact);
-router.get("/", protect, adminOnly, listContacts);
+router.get("/", protect, adminOnly, validateQuery(analyticsQuerySchema), listContacts);
 router.patch("/:id/read", protect, adminOnly, validateObjectId, markRead);
 
 export default router;

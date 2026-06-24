@@ -1,3 +1,11 @@
+// backend/controllers/escrowController.js - Production v2.0 (State Machine)
+// ─────────────────────────────────────────────────────────────
+// Escrow controller with strict state machine transition endpoints.
+// Every state change goes through escrow.service which validates
+// transition rules, role permissions, guard conditions, and
+// commits atomically with ledger updates.
+// ─────────────────────────────────────────────────────────────
+
 import mongoose from "mongoose";
 import Escrow from "../models/Escrow.js";
 import Car from "../models/Car.js";
@@ -8,84 +16,133 @@ import { getIO } from "../utils/io.js";
 import { isValidId } from "../utils/validateId.js";
 import { findOrCreateLeadFromEscrow, updateLeadStage } from "../services/leadService.js";
 import { logEscrowReleased, logEscrowRefunded } from "../services/auditService.js";
+import {
+  confirmVehicle,
+  deliverEscrow,
+  releaseEscrow as serviceRelease,
+  refundEscrow as serviceRefund,
+  disputeEscrow as serviceDispute,
+  closeEscrow as serviceClose,
+} from "../services/escrow.service.js";
+import { STATES, getAllowedTransitions } from "../services/escrowStateMachine.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
-// 📄 GET ALL ESCROWS (ADMIN)
+// 📄 GET ALL (ADMIN)
 // =============================
 export const getAllEscrows = async (req, res) => {
   try {
-    const escrows = await Escrow.find().sort({ createdAt: -1 }).populate("car buyer seller payment").lean();
+    const { page = 1, limit = 20, status } = req.query;
+    const query = {};
+    if (status) query.status = status;
 
-    res.json({
-      success: true,
-      escrows,
-    });
+    const escrows = await Escrow.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .populate("car buyer seller payment")
+      .lean();
+
+    const total = await Escrow.countDocuments(query);
+
+    res.json({ success: true, data: escrows, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (err) {
-    console.error("❌ GET ESCROWS ERROR:", err);
+    logError("GET ESCROWS ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
   }
 };
 
 // =============================
-// 📄 GET USER ESCROWS (SECURE)
+// 📄 GET USER ESCROWS
 // =============================
 export const getUserEscrows = async (req, res) => {
   try {
-    const userId = req.user.id;
-
     const escrows = await Escrow.find({
-      $or: [{ buyer: userId }, { seller: userId }],
+      $or: [{ buyer: req.user.id }, { seller: req.user.id }],
     })
       .sort({ createdAt: -1 })
       .populate("car buyer seller payment")
       .lean();
 
-    res.json({
-      success: true,
-      escrows,
-    });
+    res.json({ success: true, data: escrows });
   } catch (err) {
-    console.error("❌ USER ESCROW ERROR:", err);
+    logError("USER ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
   }
 };
 
 // =============================
-// 🔍 GET SINGLE ESCROW (SECURE)
+// 🔍 GET SINGLE
 // =============================
 export const getEscrowById = async (req, res) => {
   try {
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
     const escrow = await Escrow.findById(req.params.id).populate("car buyer seller payment");
 
-    if (!escrow) {
-      return res.status(404).json({
-        success: false,
-        message: "Escrow not found",
-      });
-    }
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
 
-    // 🔒 ACCESS CONTROL
     const userId = req.user.id;
-    if (escrow.buyer.toString() !== userId && escrow.seller.toString() !== userId && req.user.role !== "admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized",
-      });
+    const isParty = escrow.buyer?.toString() === userId || escrow.seller?.toString() === userId;
+    if (!isParty && !["admin", "superadmin", "moderator"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    res.json({
-      success: true,
-      escrow,
-    });
+    const allowedTransitions = getAllowedTransitions(escrow.status);
+
+    res.json({ success: true, data: { ...escrow.toObject(), allowedTransitions } });
   } catch (err) {
-    console.error("❌ GET ESCROW ERROR:", err);
+    logError("GET ESCROW ERROR:", err);
     res.status(500).json({ success: false, message: "Fetch failed" });
   }
 };
 
 // =============================
-// ✅ CONFIRM DELIVERY (BUYER)
+// 🔍 GET STATE MACHINE INFO
+// =============================
+export const getEscrowState = async (req, res) => {
+  try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
+    const escrow = await Escrow.findById(req.params.id).select("status history").lean();
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    const allowedTransitions = getAllowedTransitions(escrow.status);
+
+    res.json({ success: true, data: { currentState: escrow.status, allowedTransitions, history: escrow.history } });
+  } catch (err) {
+    logError("GET ESCROW STATE ERROR:", err);
+    res.status(500).json({ success: false, message: "Fetch failed" });
+  }
+};
+
+// =============================
+// ✅ CONFIRM VEHICLE (buyer)
+// =============================
+export const confirmVehicleHandler = async (req, res) => {
+  try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    if (escrow.buyer.toString() !== req.user.id && !["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Only the buyer can confirm vehicle inspection" });
+    }
+
+    const idempotencyKey = req.idempotencyKey;
+    const updated = await confirmVehicle(escrow._id, req.user.id, { idempotencyKey });
+
+    logActionFromReq(req, "escrow.vehicle_confirmed", {
+      target: escrow._id, targetModel: "Escrow", resourceId: req.params.id,
+      details: { carId: escrow.car, amount: escrow.amount }, severity: "info",
+    });
+
+    res.json({ success: true, message: "Vehicle inspection confirmed", data: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Confirmation failed" });
+  }
+};
+
+// =============================
+// ✅ CONFIRM DELIVERY (seller/admin)
 // =============================
 export const confirmDelivery = async (req, res) => {
   try {
@@ -93,53 +150,45 @@ export const confirmDelivery = async (req, res) => {
     const escrow = await Escrow.findById(req.params.id);
     if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
 
-    if (escrow.buyer.toString() !== req.user.id && !["admin", "superadmin"].includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: "Only the buyer can confirm delivery" });
+    // Seller or admin can confirm delivery
+    if (escrow.seller.toString() !== req.user.id && !["admin", "superadmin"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Only the seller or admin can confirm delivery" });
     }
 
-    if (escrow.status !== "held") {
-      return res.status(400).json({ success: false, message: "Escrow is not in active state" });
-    }
+    const idempotencyKey = req.idempotencyKey;
+    const updated = await deliverEscrow(escrow._id, req.user.id, { idempotencyKey });
 
-    // Create or update lead from escrow
+    // Update lead
     try {
       const lead = await findOrCreateLeadFromEscrow(escrow._id);
       await updateLeadStage(lead._id, "sold", req.user.id);
     } catch (leadErr) {
-      logWarn("Failed to update lead from escrow", { error: leadErr.message });
+      logWarn("Lead update failed", { error: leadErr.message });
     }
 
-    await escrow.confirmDelivery(req.user.id, req);
-
-    // Notify seller
+    // Notify buyer
     try {
       const UserModel = (await import("../models/User.js")).default;
-      const seller = await UserModel.findById(escrow.seller).select("phone notifications");
-      if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(
-          seller.phone,
-          `Buyer confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`,
-        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
+      const buyer = await UserModel.findById(escrow.buyer).select("phone notifications");
+      if (buyer?.phone && buyer?.notifications?.sms !== false) {
+        sendSMS(buyer.phone, `Seller confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`)
+          .catch((e) => logWarn("SMS send failed:", e.message));
       }
     } catch (_) {}
 
     logActionFromReq(req, "escrow.delivery_confirmed", {
-      target: escrow._id,
-      targetModel: "Escrow",
-      resourceId: req.params.id,
-      details: { carId: escrow.car, amount: escrow.amount },
-      severity: "info",
+      target: escrow._id, targetModel: "Escrow", resourceId: req.params.id,
+      details: { carId: escrow.car, amount: escrow.amount }, severity: "info",
     });
 
-    res.json({ success: true, message: "Delivery confirmed", escrow });
+    res.json({ success: true, message: "Delivery confirmed", data: updated });
   } catch (err) {
-    console.error("❌ CONFIRM DELIVERY ERROR:", err);
-    res.status(500).json({ success: false, message: err.message || "Confirmation failed" });
+    res.status(400).json({ success: false, message: err.message || "Confirmation failed" });
   }
 };
 
 // =============================
-// 📋 REQUEST ESCROW RELEASE (BUYER)
+// 📋 REQUEST RELEASE (buyer)
 // =============================
 export const requestRelease = async (req, res) => {
   try {
@@ -150,327 +199,186 @@ export const requestRelease = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
 
-    if (escrow.status !== "held") {
-      return res.status(400).json({ success: false, message: "Escrow not active" });
-    }
-
-    escrow.history.push({ action: `Buyer requested release` });
+    escrow.history.push({ action: "Buyer requested release", by: req.user.id, at: new Date() });
     await escrow.save();
 
-    // Notify admin via socket
     if (getIO()) {
       getIO().emit("adminAlert", {
         type: "escrow_release_requested",
         message: `Buyer requested release of escrow KES ${Number(escrow.amount).toLocaleString("en-KE")} for ${escrow.car?.title || "vehicle"}`,
-        escrowId: escrow._id,
-        severity: "info",
+        escrowId: escrow._id, severity: "info",
       });
     }
 
     res.json({ success: true, message: "Release request submitted. An admin will process it shortly." });
   } catch (err) {
-    console.error("❌ REQUEST RELEASE ERROR:", err);
     res.status(500).json({ success: false, message: "Request failed" });
   }
 };
 
-// ── EMAIL NOTIFICATIONS ON ESCROW EVENTS ─────────────────────
-export const notifyEscrowReleased = async (escrow) => {
-  try {
-    const { sendEscrowReleasedEmail } = await import("../services/email.service.js");
-    const EscrowModel = (await import("../models/Escrow.js")).default;
-    const UserModel = (await import("../models/User.js")).default;
-    const populated = await EscrowModel.findById(escrow._id || escrow)
-      .populate("seller", "email name")
-      .populate("car", "title");
-    if (populated?.seller?.email) {
-      await sendEscrowReleasedEmail(populated.seller, populated, populated.car);
-    }
-    // 📱 SMS to seller
-    if (populated?.seller?._id) {
-      const seller = await UserModel.findById(populated.seller._id).select("phone notifications");
-      if (seller?.phone && seller?.notifications?.sms !== false) {
-        sendSMS(
-          seller.phone,
-          `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`,
-        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
-      }
-    }
-    // 📱 SMS to buyer (if phone known)
-    if (populated?.buyer) {
-      const buyer = await UserModel.findById(populated.buyer).select("phone notifications");
-      if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(
-          buyer.phone,
-          `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`,
-        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
-      }
-    }
-    getIO()?.to(`user_${populated?.seller?._id}`).emit("escrowReleased", {
-      escrowId: populated?._id,
-      amount: populated?.amount,
-    });
-    getIO()?.to(`user_${populated?.buyer}`).emit("escrowReleased", {
-      escrowId: populated?._id,
-      amount: populated?.amount,
-    });
-  } catch (e) {
-    console.error("notifyEscrowReleased error:", e.message);
-  }
-};
-
-// Hook: call after escrow.status = 'refunded' + save
-export const notifyEscrowRefunded = async (escrow) => {
-  try {
-    const { sendEscrowRefundedEmail } = await import("../services/email.service.js");
-    const EscrowModel = (await import("../models/Escrow.js")).default;
-    const UserModel = (await import("../models/User.js")).default;
-    const populated = await EscrowModel.findById(escrow._id || escrow)
-      .populate("buyer", "email name")
-      .populate("car", "title");
-    if (populated?.buyer?.email) {
-      await sendEscrowRefundedEmail(populated.buyer, populated, populated.car);
-    }
-    // 📱 SMS to buyer
-    if (populated?.buyer?._id) {
-      const buyer = await UserModel.findById(populated.buyer._id).select("phone notifications");
-      if (buyer?.phone && buyer?.notifications?.sms !== false) {
-        sendSMS(
-          buyer.phone,
-          `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`,
-        ).catch((e) => console.warn("⚠️ SMS send failed:", e.message));
-      }
-    }
-    getIO()?.to(`user_${populated?.buyer?._id}`).emit("escrowRefunded", {
-      escrowId: populated?._id,
-      amount: populated?.amount,
-    });
-  } catch (e) {
-    console.error("notifyEscrowRefunded error:", e.message);
-  }
-};
-
 // =============================
-// 💰 RELEASE ESCROW (ADMIN 🔥)
+// 💰 RELEASE (admin)
 // =============================
 export const releaseEscrow = async (req, res) => {
   try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
-    const escrow = await Escrow.findById(req.params.id).populate("car seller payment").session(session);
 
-    if (!escrow) {
-      throw new Error("Escrow not found");
-    }
+    const theEscrow = await Escrow.findById(req.params.id).populate("car seller payment");
+    if (!theEscrow) throw new Error("Escrow not found");
 
-    if (escrow.status !== "held") {
-      throw new Error("Escrow already processed");
-    }
+    const idempotencyKey = req.idempotencyKey;
+    const updated = await serviceRelease(theEscrow._id, req.user.id, { idempotencyKey, req });
 
-    // 🛡 Require buyer delivery confirmation or auto-release eligibility
-    if (!escrow.deliveryConfirmed && (!escrow.autoReleaseEligibleAt || escrow.autoReleaseEligibleAt > new Date())) {
-      throw new Error("Buyer has not confirmed delivery. Wait for buyer confirmation or auto-release window.");
-    }
+    const { sellerAmount, commission } = updated;
 
-    // =============================
-    // 💸 CALCULATE PLATFORM CUT
-    // =============================
-    const commissionRate = 0.05;
-    const commission = escrow.amount * commissionRate;
-    const sellerAmount = escrow.amount - commission;
+    // Notifications
+    notifyEscrowReleased(updated._id).catch((e) => logWarn("Release email failed:", e.message));
 
-    escrow.commission = commission;
-    escrow.sellerAmount = sellerAmount;
-    escrow.status = "released";
-    escrow.releasedAt = new Date();
-
-    await escrow.save({ session });
-
-    // =============================
-    // 🏁 MARK CAR SOLD
-    // =============================
-    const car = await Car.findById(escrow.car).session(session);
-
-    if (car) {
-      car.sold = true;
-      car.status = "sold";
-      car.isPaid = true;
-      await car.save({ session });
-    }
-
-    // =============================
-    // 💳 UPDATE PAYMENT
-    // =============================
-    if (escrow.payment) {
-      const payment = await Payment.findById(escrow.payment).session(session);
-
-      if (payment) {
-        payment.status = "released";
-        payment.platformFee = commission;
-        payment.dealerAmount = sellerAmount;
-        await payment.save({ session });
-      }
-    }
-
-    await session.commitTransaction();
-
-    // =============================
-    // 🔥 REALTIME UPDATE
-    // =============================
-    if (getIO()) {
-      getIO().to(escrow.car.toString()).emit("escrowReleased", {
-        escrowId: escrow._id,
-        sellerAmount,
-        commission,
-      });
-    }
-
-    // 📧 Email notification (fire-and-forget)
-    notifyEscrowReleased(escrow._id).catch((e) => console.warn("⚠️ Escrow released email failed:", e.message));
-
-    // =============================
-    // 🔥 FUTURE PAYOUT (MPESA B2C)
-    // =============================
-    console.log("💸 Pay seller:", sellerAmount);
+    getIO()?.to(theEscrow.car?._id?.toString() || theEscrow.car?.toString()).emit("escrowReleased", {
+      escrowId: updated._id, sellerAmount, commission,
+    });
 
     logActionFromReq(req, "escrow.released", {
-      target: escrow._id,
-      targetModel: "Escrow",
-      resourceId: req.params.id,
-      details: { carId: escrow.car?._id, sellerAmount, commission },
-      severity: "info",
+      target: updated._id, targetModel: "Escrow", resourceId: req.params.id,
+      details: { carId: theEscrow.car?._id, sellerAmount, commission }, severity: "info",
     });
+    await logEscrowReleased(updated, req.user, req);
 
-    // Log escrow release to audit trail
-    await logEscrowReleased(escrow, req.user, req);
-
-    res.json({
-      success: true,
-      message: "Escrow released",
-      data: { sellerAmount, commission },
-    });
+    res.json({ success: true, message: "Escrow released", data: { sellerAmount, commission } });
   } catch (err) {
-    if (session) {
-      try {
-        await session.abortTransaction();
-      } catch {
-        /* already aborted */
-      }
-      try {
-        session.endSession();
-      } catch {
-        /* already ended */
-      }
-    }
-    console.error("RELEASE ERROR:", err);
-
-    res.status(500).json({
-      success: false,
-      message: err.message || "Release failed",
-    });
+    res.status(400).json({ success: false, message: err.message || "Release failed" });
   }
 };
 
 // =============================
-// 🔁 REFUND ESCROW (ADMIN 🔥)
+// 🔁 REFUND (admin)
 // =============================
 export const refundEscrow = async (req, res) => {
   try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
 
-    const escrow = await Escrow.findById(req.params.id).populate("payment car").session(session);
-
-    if (!escrow) {
-      throw new Error("Escrow not found");
-    }
-
-    if (escrow.status !== "held") {
-      throw new Error("Cannot refund processed escrow");
-    }
-
-    const { reason } = req.body;
+    const { reason, resolution } = req.body;
     if (!reason || reason.length < 10) {
-      throw new Error("A detailed refund reason (min 10 chars) is required");
+      return res.status(400).json({ success: false, message: "A detailed refund reason (min 10 chars) is required" });
     }
 
-    escrow.refundBuyer(req.user.id, reason, req);
+    const theEscrow = await Escrow.findById(req.params.id).populate("payment car");
+    if (!theEscrow) throw new Error("Escrow not found");
 
-    await escrow.save({ session });
+    const idempotencyKey = req.idempotencyKey;
+    const updated = await serviceRefund(theEscrow._id, req.user.id, reason, { idempotencyKey, req });
 
-    // =============================
-    // 🔄 UPDATE PAYMENT
-    // =============================
-    if (escrow.payment) {
-      const payment = await Payment.findById(escrow.payment).session(session);
+    // Notifications
+    notifyEscrowRefunded(updated._id).catch((e) => logWarn("Refund email failed:", e.message));
 
-      if (payment) {
-        payment.status = "refunded";
-        await payment.save({ session });
-      }
-    }
-
-    // =============================
-    // 🔥 RESET CAR
-    // =============================
-    const car = await Car.findById(escrow.car).session(session);
-
-    if (car) {
-      car.sold = false;
-      car.isPaid = false;
-      await car.save({ session });
-    }
-
-    await session.commitTransaction();
-
-    // =============================
-    // 🔥 REALTIME UPDATE
-    // =============================
-    if (getIO()) {
-      getIO().to(escrow.car.toString()).emit("escrowRefunded", {
-        escrowId: escrow._id,
-        amount: escrow.amount,
-      });
-    }
-
-    // 📧 Email notification (fire-and-forget)
-    notifyEscrowRefunded(escrow._id).catch((e) => console.warn("⚠️ Escrow refunded email failed:", e.message));
+    getIO()?.to(theEscrow.car?._id?.toString() || theEscrow.car?.toString()).emit("escrowRefunded", {
+      escrowId: updated._id, amount: updated.amount,
+    });
 
     logActionFromReq(req, "escrow.refunded", {
-      target: escrow._id,
-      targetModel: "Escrow",
-      resourceId: req.params.id,
-      details: { carId: escrow.car, amount: escrow.amount },
-      severity: "warning",
+      target: updated._id, targetModel: "Escrow", resourceId: req.params.id,
+      details: { carId: theEscrow.car, amount: theEscrow.amount }, severity: "warning",
     });
+    await logEscrowRefunded(updated, req.user, req);
 
-    // Log escrow refund to audit trail
-    await logEscrowRefunded(escrow, req.user, req);
-
-    res.json({
-      success: true,
-      message: "Escrow refunded",
-    });
+    res.json({ success: true, message: "Escrow refunded" });
   } catch (err) {
-    if (session) {
-      try {
-        await session.abortTransaction();
-      } catch {
-        /* already aborted */
-      }
-      try {
-        session.endSession();
-      } catch {
-        /* already ended */
+    res.status(400).json({ success: false, message: err.message || "Refund failed" });
+  }
+};
+
+// =============================
+// ⚠️ DISPUTE
+// =============================
+export const disputeEscrow = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    if (!reason?.trim()) return res.status(400).json({ success: false, message: "Dispute reason required" });
+
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    const userId = req.user.id;
+    const isParty = String(escrow.buyer) === userId || String(escrow.seller) === userId;
+    const isStaff = ["admin", "superadmin", "moderator"].includes(req.user.role);
+    if (!isParty && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
+
+    const role = isStaff ? "admin" : "buyer";
+    const updated = await serviceDispute(escrow._id, userId, role, reason, { req });
+
+    if (getIO()) {
+      getIO().to(`user_${escrow.buyer}`).emit("escrowDisputed", { escrowId: escrow._id });
+      getIO().to(`user_${escrow.seller}`).emit("escrowDisputed", { escrowId: escrow._id });
+    }
+
+    res.json({ success: true, message: "Dispute raised", data: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Dispute failed" });
+  }
+};
+
+// =============================
+// 🔒 CLOSE (admin)
+// =============================
+export const closeEscrowHandler = async (req, res) => {
+  try {
+    if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
+
+    const escrow = await Escrow.findById(req.params.id);
+    if (!escrow) throw new Error("Escrow not found");
+
+    const role = ["admin", "superadmin"].includes(req.user.role) ? "admin" : "system";
+    const updated = await serviceClose(escrow._id, req.user.id, role, { req });
+
+    res.json({ success: true, message: "Escrow closed", data: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message || "Close failed" });
+  }
+};
+
+// ── NOTIFICATION HELPERS ─────────────────────────────────────
+export const notifyEscrowReleased = async (escrowRef) => {
+  try {
+    const { sendEscrowReleasedEmail } = await import("../services/email.service.js");
+    const UserModel = (await import("../models/User.js")).default;
+    const populated = await Escrow.findById(escrowRef).populate("seller", "email name").populate("car", "title");
+    if (populated?.seller?.email) await sendEscrowReleasedEmail(populated.seller, populated, populated.car);
+    if (populated?.seller?._id) {
+      const seller = await UserModel.findById(populated.seller._id).select("phone notifications");
+      if (seller?.phone && seller?.notifications?.sms !== false) {
+        sendSMS(seller.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been sent to your account. Kayad.`)
+          .catch((e) => logWarn("SMS send failed:", e.message));
       }
     }
-    console.error("REFUND ERROR:", err);
+    if (populated?.buyer) {
+      const buyer = await UserModel.findById(populated.buyer).select("phone notifications");
+      if (buyer?.phone && buyer?.notifications?.sms !== false) {
+        sendSMS(buyer.phone, `Escrow released — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been paid to the seller. Kayad.`)
+          .catch((e) => logWarn("SMS send failed:", e.message));
+      }
+    }
+    getIO()?.to(`user_${populated?.seller?._id}`).emit("escrowReleased", { escrowId: populated?._id, amount: populated?.amount });
+    getIO()?.to(`user_${populated?.buyer}`).emit("escrowReleased", { escrowId: populated?._id, amount: populated?.amount });
+  } catch (e) {
+    logWarn("notifyEscrowReleased error:", e.message);
+  }
+};
 
-    res.status(500).json({
-      success: false,
-      message: err.message || "Refund failed",
-    });
+export const notifyEscrowRefunded = async (escrowRef) => {
+  try {
+    const { sendEscrowRefundedEmail } = await import("../services/email.service.js");
+    const UserModel = (await import("../models/User.js")).default;
+    const populated = await Escrow.findById(escrowRef).populate("buyer", "email name").populate("car", "title");
+    if (populated?.buyer?.email) await sendEscrowRefundedEmail(populated.buyer, populated, populated.car);
+    if (populated?.buyer?._id) {
+      const buyer = await UserModel.findById(populated.buyer._id).select("phone notifications");
+      if (buyer?.phone && buyer?.notifications?.sms !== false) {
+        sendSMS(buyer.phone, `Escrow refunded — KES ${Number(populated.amount).toLocaleString("en-KE")} for ${populated.car?.title || "vehicle"} has been returned to your M-Pesa. Kayad.`)
+          .catch((e) => logWarn("SMS send failed:", e.message));
+      }
+    }
+    getIO()?.to(`user_${populated?.buyer?._id}`).emit("escrowRefunded", { escrowId: populated?._id, amount: populated?.amount });
+  } catch (e) {
+    logWarn("notifyEscrowRefunded error:", e.message);
   }
 };
