@@ -150,7 +150,6 @@ export function RequireDealer({ children }: RequireAuthProps) {
   const { isDealer, isAdmin, user, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
-  if (user?.status !== 'approved') return <Navigate to="/register" replace />;
   return children;
 }
 
@@ -158,7 +157,6 @@ export function RequireSeller({ children }: RequireAuthProps) {
   const { isSeller, user, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isSeller) return <Navigate to="/" replace />;
-  if (user?.status !== 'approved') return <Navigate to="/register" replace />;
   return children;
 }
 

@@ -13,6 +13,7 @@ import DealerBidsTab from './components/DealerBidsTab';
 import DealerEscrowsTab from './components/DealerEscrowsTab';
 import DealerEarningsTab from './components/DealerEarningsTab';
 import DealerPackageTab from './components/DealerPackageTab';
+import DealerVerificationProgress from './components/DealerVerificationProgress';
 import { DealerKPIRow } from './components/DealerKPIWidgets';
 import { TABS_CONFIG } from './components/DashboardWidgets';
 
@@ -97,19 +98,6 @@ export default function DealerDashboard() {
     catch { toast('Delete failed', 'error'); }
   };
 
-  if (user?.status !== 'approved' && user?.role === 'dealer') {
-    return (
-      <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
-          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 28 }}>⏳</div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.6rem', color: '#fff', marginBottom: 10 }}>Pending Approval</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>Your dealer application is under review. We'll notify you once approved — usually within 24 hours.</p>
-          <Link to="/" style={{ padding: '11px 28px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontWeight: 900, fontSize: 11, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Return Home</Link>
-        </div>
-      </div>
-    );
-  }
-
   const s = summary || {};
   const totalRevenue = s.totalRevenue || s.revenue || 0;
   const now = new Date();
@@ -174,6 +162,8 @@ export default function DealerDashboard() {
               </button>
             </div>
           </div>
+
+          {user?.status !== 'approved' && <DealerVerificationProgress user={user} />}
 
           {!user?.onboardingComplete && (
             <div style={{

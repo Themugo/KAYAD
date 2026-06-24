@@ -194,8 +194,6 @@ export const createCar = async (req, res) => {
     );
 
     if (!seller) return res.status(404).json({ success: false, message: "Seller not found" });
-    if (seller.status !== "approved")
-      return res.status(403).json({ success: false, message: "Account not yet approved" });
     const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
@@ -298,7 +296,8 @@ export const createCar = async (req, res) => {
       views: 0,
       bidsCount: 0,
       trustScore: 0,
-      status: isDemoSeller ? "active" : "pending",
+      status: isDemoSeller ? "active" : (seller.status === "approved" ? "active" : "pending"),
+      isVerifiedDealer: seller.status === "approved",
       isDemo: isDemoSeller,
     };
     if (isDemoSeller) {

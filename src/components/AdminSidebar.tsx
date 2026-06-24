@@ -35,6 +35,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
   { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
   { to: '/admin/inspections', icon: BarChart3, label: 'Inspections' },
+  { to: '/admin/dealer-verifications', icon: ShieldCheck, label: 'Dealer Verifications' },
   { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
   { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
   { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },

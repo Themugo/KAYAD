@@ -123,6 +123,7 @@ const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOv
 const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsDashboard'));
 const AdminDisputes               = lazy(() => import('./pages/admin/AdminDisputes'));
 const AuctionIntegrityPage        = lazy(() => import('./pages/admin/AuctionIntegrityPage'));
+const AdminDealerVerifications    = lazy(() => import('./pages/admin/AdminDealerVerifications'));
 const PostRegPackageSelect        = lazy(() => import('./pages/PostRegPackageSelect'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
@@ -301,6 +302,7 @@ export default function App() {
                         <Route path="/admin/disputes"                element={<SecureAdmin><AdminDisputes /></SecureAdmin>} />
                         <Route path="/admin/disputes/:id"            element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
                         <Route path="/admin/auction-integrity"      element={<SecureAdmin><AuctionIntegrityPage /></SecureAdmin>} />
+                        <Route path="/admin/dealer-verifications" element={<SecureAdmin><AdminDealerVerifications /></SecureAdmin>} />
 
                         {/* ── 404 ─────────────────────────────────────────────── */}
                         <Route path="*" element={<Public><NotFoundPage /></Public>} />

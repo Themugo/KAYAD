@@ -4,6 +4,7 @@
 // Handles document submission, OTP verification, admin review
 // ─────────────────────────────────────────────────────────────
 
+import Car from "../models/Car.js";
 import Dealer from "../models/Dealer.js";
 import DealerVerification from "../models/DealerVerification.js";
 import User from "../models/User.js";
@@ -404,11 +405,19 @@ export const approveVerification = async (req, res) => {
       await verification.save();
     }
 
+    // Publish all dealer's pending cars
+    if (verification.user) {
+      await Car.updateMany(
+        { dealer: verification.user._id || verification.user, status: "pending" },
+        { $set: { status: "active", isVerifiedDealer: true } },
+      );
+    }
+
     // Send notification to dealer
     await sendNotification({
       userId: verification.user,
       title: "Verification Approved",
-      message: "Your dealer verification has been approved. You can now create listings and start auctions.",
+      message: "Your dealer verification has been approved. Your pending listings are now live and visible to buyers.",
       type: "verification",
     });
 

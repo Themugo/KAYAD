@@ -785,6 +785,25 @@ export const adminPaymentsAPI = {
   list: (params: any) => api.get('/admin/payments', { params }).then(unwrap),
 };
 
+// ============================================================
+//  DEALER VERIFICATION — routes/verificationRoutes.js
+// ============================================================
+export const verificationAPI = {
+  submit:      (body: any)     => api.post('/verification/submit', body).then(unwrap),
+  getStatus:   ()              => api.get('/verification/status').then(unwrap),
+  requestPhoneOTP: ()          => api.post('/verification/phone/request').then(unwrap),
+  verifyPhoneOTP: (code: string) => api.post('/verification/phone/verify', { code }).then(unwrap),
+};
+
+export const adminVerificationAPI = {
+  list:        (params?: any)  => api.get('/verification/admin/all', { params }).then(unwrap),
+  getById:     (id: string)    => api.get(`/verification/admin/${id}`).then(unwrap),
+  approve:     (id: string, body?: any) => api.post(`/verification/admin/${id}/approve`, body).then(unwrap),
+  reject:      (id: string, body: any)  => api.post(`/verification/admin/${id}/reject`, body).then(unwrap),
+  suspend:     (id: string, body: any)  => api.post(`/verification/admin/${id}/suspend`, body).then(unwrap),
+  reinstate:   (id: string)    => api.post(`/verification/admin/${id}/reinstate`).then(unwrap),
+};
+
 // Utility: format KES (re-exported from helpers for backward compat)
 export { api };
 export { formatKES } from '../utils/helpers';
