@@ -14,27 +14,31 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 // Redis is enabled by default; set DISABLE_REDIS=true to disable
 const DISABLE_REDIS = process.env.DISABLE_REDIS === "true";
 
-const redisConfig = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: parseInt(process.env.REDIS_PORT || "6379"),
-  password: process.env.REDIS_PASSWORD || undefined,
-  db: parseInt(process.env.REDIS_DB || "0"),
-  maxRetriesPerRequest: 3,
-  retryStrategy: (times) => {
-    if (times > 3) {
-      logError("Redis connection failed after 3 retries");
-      return null;
-    }
-    return Math.min(times * 100, 3000);
-  },
+const redisUrl = process.env.REDIS_URL;
+const retryStrategy = (times) => {
+  if (times > 3) {
+    logError("Redis connection failed after 3 retries");
+    return null;
+  }
+  return Math.min(times * 100, 3000);
 };
 
-// Create Redis connection
-const connection = DISABLE_REDIS ? null : new IORedis(redisConfig);
+// Create Redis connection (supports REDIS_URL or REDIS_HOST/REDIS_PORT)
+const connection = DISABLE_REDIS ? null : redisUrl
+  ? new IORedis(redisUrl, { maxRetriesPerRequest: 3, retryStrategy, lazyConnect: true })
+  : new IORedis({
+      host: process.env.REDIS_HOST || "localhost",
+      port: parseInt(process.env.REDIS_PORT || "6379"),
+      password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB || "0"),
+      maxRetriesPerRequest: 3,
+      retryStrategy,
+      lazyConnect: true,
+    });
 
 if (connection) {
   connection.on("connect", () => {
-    logInfo("Redis connected", { host: redisConfig.host, port: redisConfig.port });
+    logInfo("Redis connected", { url: redisUrl ? "via REDIS_URL" : `${process.env.REDIS_HOST || "localhost"}:${process.env.REDIS_PORT || "6379"}` });
   });
 
   connection.on("error", (err) => {
@@ -275,6 +279,10 @@ export const closeWorkers = async () => {
 };
 
 export const closeConnection = async () => {
+  if (!connection) {
+    logInfo("Redis not configured — skipping close");
+    return;
+  }
   await connection.quit();
   logInfo("Redis connection closed");
 };

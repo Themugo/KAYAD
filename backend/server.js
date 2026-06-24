@@ -632,7 +632,8 @@ const connectDB = async (retries = 5, delay = 2000) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const conn = await mongoose.connect(process.env.MONGO_URI, {
-        maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "10"),
+        maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "50"),
+        minPoolSize: parseInt(process.env.MONGO_MIN_POOL_SIZE || "5"),
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
       });
@@ -664,33 +665,34 @@ const bootstrap = async () => {
     await connectDB();
     console.log("✅ Database connected");
 
-    // Temporarily disable Redis to isolate the crash
-    console.log("⚠️ Disabling Redis initialization for debugging...");
-    // await initCache(); // Redis (optional)
-    console.log("✅ Redis initialization disabled");
+    await initCache(); // Redis (optional)
 
-    // Auto-seed if no superadmin accounts exist (fresh DB)
-    try {
-      console.log("🌱 Checking if auto-seed is needed...");
-      const User = (await import("./models/User.js")).default;
-      const existing = await User.countDocuments({ role: "superadmin" });
-      if (existing === 0) {
-        console.log("🌱 Auto-seeding database...");
-        const { reseed } = await import("./seed.js");
-        const result = await reseed();
-        logInfo("Auto-seeded database", {
-          webhost: result.webhost.length,
-          admin: result.admin.length,
-          demos: result.demos.length,
-          cars: result.cars,
-        });
-        console.log("✅ Auto-seed completed");
-      } else {
-        console.log("✅ Auto-seed not needed (superadmin exists)");
+    // Auto-seed if no superadmin accounts exist (fresh DB) — skipped in production
+    if (NODE_ENV !== "production") {
+      try {
+        console.log("🌱 Checking if auto-seed is needed...");
+        const User = (await import("./models/User.js")).default;
+        const existing = await User.countDocuments({ role: "superadmin" });
+        if (existing === 0) {
+          console.log("🌱 Auto-seeding database...");
+          const { reseed } = await import("./seed.js");
+          const result = await reseed();
+          logInfo("Auto-seeded database", {
+            webhost: result.webhost.length,
+            admin: result.admin.length,
+            demos: result.demos.length,
+            cars: result.cars,
+          });
+          console.log("✅ Auto-seed completed");
+        } else {
+          console.log("✅ Auto-seed not needed (superadmin exists)");
+        }
+      } catch (seedErr) {
+        logWarn("Auto-seed skipped", { error: seedErr.message });
+        console.log("⚠️ Auto-seed skipped:", seedErr.message);
       }
-    } catch (seedErr) {
-      logWarn("Auto-seed skipped", { error: seedErr.message });
-      console.log("⚠️ Auto-seed skipped:", seedErr.message);
+    } else {
+      console.log("⏭️ Auto-seed skipped (production)");
     }
 
     try {
@@ -728,109 +730,61 @@ const bootstrap = async () => {
     }
 
     console.log("🔧 Starting background services...");
-    try {
-      await startAuctionEngine();
-      console.log("✅ Auction engine started");
-    } catch (err) {
-      logError("Failed to start auction engine", err);
-      console.log("❌ Failed to start auction engine:", err);
-    }
-
-    try {
-      startAuctionTimer(io);
-      console.log("✅ Auction timer started");
-    } catch (err) {
-      logError("Failed to start auction timer", err);
-      console.log("❌ Failed to start auction timer:", err);
-    }
-
-    try {
-      startEscrowCron();
-      console.log("✅ Escrow cron started");
-    } catch (err) {
-      logError("Failed to start escrow cron", err);
-      console.log("❌ Failed to start escrow cron:", err);
-    }
-
-    try {
-      startDisputeCron();
-      console.log("✅ Dispute cron started");
-    } catch (err) {
-      logError("Failed to start dispute cron", err);
-      console.log("❌ Failed to start dispute cron:", err);
-    }
-
-    try {
-      startAuctionReminderCron();
-      console.log("✅ Auction reminder cron started");
-    } catch (err) {
-      logError("Failed to start auction reminder cron", err);
-      console.log("❌ Failed to start auction reminder cron:", err);
-    }
-
-    try {
-      startSavedSearchCron();
-      console.log("✅ Saved search cron started");
-    } catch (err) {
-      logError("Failed to start saved search cron", err);
-      console.log("❌ Failed to start saved search cron:", err);
-    }
-
-    try {
-      startPriceAlertCron();
-      console.log("✅ Price alert cron started");
-    } catch (err) {
-      logError("Failed to start price alert cron", err);
-      console.log("❌ Failed to start price alert cron:", err);
-    }
-
-    try {
-      startHealthScoreScheduler();
-      console.log("✅ Health score scheduler started");
-    } catch (err) {
-      logError("Failed to start health score scheduler", err);
-      console.log("❌ Failed to start health score scheduler:", err);
-    }
-
-    try {
-      startMarketTrendScheduler();
-      console.log("✅ Market trend scheduler started");
-    } catch (err) {
-      logError("Failed to start market trend scheduler", err);
-      console.log("❌ Failed to start market trend scheduler:", err);
-    }
-
-    try {
-      startMarketplaceHealthScheduler();
-      console.log("✅ Marketplace health scheduler started");
-    } catch (err) {
-      logError("Failed to start marketplace health scheduler", err);
-      console.log("❌ Failed to start marketplace health scheduler:", err);
-    }
-
-    try {
-      startSliScheduler();
-      console.log("✅ Reliability/SLI scheduler started");
-    } catch (err) {
-      logError("Failed to start SLI scheduler", err);
-      console.log("❌ Failed to start SLI scheduler:", err);
-    }
-
-    try {
-      startAllReconciliationCrons();
-      console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)");
-    } catch (err) {
-      logError("Failed to start reconciliation crons", err);
-      console.log("❌ Failed to start reconciliation crons:", err);
-    }
-
-    try {
-      startIntegrityCron();
-      console.log("✅ Auction integrity cron started");
-    } catch (err) {
-      logError("Failed to start auction integrity cron", err);
-      console.log("❌ Failed to start auction integrity cron:", err);
-    }
+    // Start all non-critical services in parallel (crons, schedulers)
+    await Promise.allSettled([
+      (async () => {
+        try { await startAuctionEngine(); console.log("✅ Auction engine started"); }
+        catch (err) { logError("Failed to start auction engine", err); console.log("❌ Failed to start auction engine:", err); }
+      })(),
+      (async () => {
+        try { startAuctionTimer(io); console.log("✅ Auction timer started"); }
+        catch (err) { logError("Failed to start auction timer", err); console.log("❌ Failed to start auction timer:", err); }
+      })(),
+      (async () => {
+        try { startEscrowCron(); console.log("✅ Escrow cron started"); }
+        catch (err) { logError("Failed to start escrow cron", err); console.log("❌ Failed to start escrow cron:", err); }
+      })(),
+      (async () => {
+        try { startDisputeCron(); console.log("✅ Dispute cron started"); }
+        catch (err) { logError("Failed to start dispute cron", err); console.log("❌ Failed to start dispute cron:", err); }
+      })(),
+      (async () => {
+        try { startAuctionReminderCron(); console.log("✅ Auction reminder cron started"); }
+        catch (err) { logError("Failed to start auction reminder cron", err); console.log("❌ Failed to start auction reminder cron:", err); }
+      })(),
+      (async () => {
+        try { startSavedSearchCron(); console.log("✅ Saved search cron started"); }
+        catch (err) { logError("Failed to start saved search cron", err); console.log("❌ Failed to start saved search cron:", err); }
+      })(),
+      (async () => {
+        try { startPriceAlertCron(); console.log("✅ Price alert cron started"); }
+        catch (err) { logError("Failed to start price alert cron", err); console.log("❌ Failed to start price alert cron:", err); }
+      })(),
+      (async () => {
+        try { startHealthScoreScheduler(); console.log("✅ Health score scheduler started"); }
+        catch (err) { logError("Failed to start health score scheduler", err); console.log("❌ Failed to start health score scheduler:", err); }
+      })(),
+      (async () => {
+        try { startMarketTrendScheduler(); console.log("✅ Market trend scheduler started"); }
+        catch (err) { logError("Failed to start market trend scheduler", err); console.log("❌ Failed to start market trend scheduler:", err); }
+      })(),
+      (async () => {
+        try { startMarketplaceHealthScheduler(); console.log("✅ Marketplace health scheduler started"); }
+        catch (err) { logError("Failed to start marketplace health scheduler", err); console.log("❌ Failed to start marketplace health scheduler:", err); }
+      })(),
+      (async () => {
+        try { startSliScheduler(); console.log("✅ Reliability/SLI scheduler started"); }
+        catch (err) { logError("Failed to start SLI scheduler", err); console.log("❌ Failed to start SLI scheduler:", err); }
+      })(),
+      (async () => {
+        try { startAllReconciliationCrons(); console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)"); }
+        catch (err) { logError("Failed to start reconciliation crons", err); console.log("❌ Failed to start reconciliation crons:", err); }
+      })(),
+      (async () => {
+        try { startIntegrityCron(); console.log("✅ Auction integrity cron started"); }
+        catch (err) { logError("Failed to start auction integrity cron", err); console.log("❌ Failed to start auction integrity cron:", err); }
+      })(),
+    ]);
 
     if (process.env.REDIS_URL || process.env.REDIS_HOST) {
       try {
