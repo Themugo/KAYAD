@@ -75,6 +75,8 @@ const ChatPage             = lazy(() => import('./pages/ChatPage'));
 const NotificationsPage    = lazy(() => import('./pages/NotificationsPage'));
 const FavoritesPage        = lazy(() => import('./pages/FavoritesPage'));
 const EscrowPage           = lazy(() => import('./pages/EscrowPage'));
+const DisputesPage         = lazy(() => import('./pages/DisputesPage'));
+const DisputeDetailPage    = lazy(() => import('./pages/DisputeDetailPage'));
 const InspectorApply       = lazy(() => import('./pages/InspectorApply'));
 const InspectorDashboard   = lazy(() => import('./pages/InspectorDashboard'));
 
@@ -118,6 +120,7 @@ const ControlRoom                  = lazy(() => import('./pages/admin/ControlRoo
 const PanicRoom                    = lazy(() => import('./pages/admin/PanicRoom'));
 const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOverview'));
 const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsDashboard'));
+const AdminDisputes               = lazy(() => import('./pages/admin/AdminDisputes'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
 // Small composition helpers keep the <Routes> block tidy.
@@ -240,6 +243,8 @@ export default function App() {
                         <Route path="/notifications"       element={<Authed><NotificationsPage /></Authed>} />
                         <Route path="/favorites"           element={<User><FavoritesPage /></User>} />
                         <Route path="/escrow/:id"          element={<User><EscrowPage /></User>} />
+                        <Route path="/disputes"           element={<User><DisputesPage /></User>} />
+                        <Route path="/disputes/:id"       element={<User><DisputeDetailPage /></User>} />
 
                         {/* ── Inspector ─────────────────────────────────────── */}
                         <Route path="/inspector/apply"     element={<Authed><InspectorApply /></Authed>} />
@@ -288,6 +293,8 @@ export default function App() {
                         <Route path="/admin/panic-room"               element={<SecureAdmin><PanicRoom /></SecureAdmin>} />
                         <Route path="/admin/webhoist"                 element={<SecureAdmin><WebhoistOverview /></SecureAdmin>} />
                         <Route path="/admin/operations-dashboard"     element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
+                        <Route path="/admin/disputes"                element={<SecureAdmin><AdminDisputes /></SecureAdmin>} />
+                        <Route path="/admin/disputes/:id"            element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
 
                         {/* ── 404 ─────────────────────────────────────────────── */}
                         <Route path="*" element={<Public><NotFoundPage /></Public>} />

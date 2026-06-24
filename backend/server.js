@@ -750,6 +750,14 @@ const bootstrap = async () => {
     }
 
     try {
+      startDisputeCron();
+      console.log("✅ Dispute cron started");
+    } catch (err) {
+      logError("Failed to start dispute cron", err);
+      console.log("❌ Failed to start dispute cron:", err);
+    }
+
+    try {
       startAuctionReminderCron();
       console.log("✅ Auction reminder cron started");
     } catch (err) {

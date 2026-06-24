@@ -530,17 +530,56 @@ const _adminAPI = {
   // Branding / upload logo
   uploadLogo: (formData: FormData) => api.post('/admin/upload-logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
 
-  // Dispute resolution
+  // Dispute resolution (legacy aliases — kept for adminAPI backward compat)
   disputeGet:      (id: string)          => api.get(`/disputes/${id}`).then(unwrap),
   disputeResolve:  (id: string, body: any)    => api.post(`/disputes/${id}/resolve`, body).then(unwrap),
   disputeAddNote:  (id: string, body: any)    => api.post(`/disputes/${id}/notes`, body).then(unwrap),
-  disputeGetAll:   (params: any)      => api.get('/disputes/admin/all', { params }).then(unwrap),
+  disputeGetAll:   (params: any)      => api.get('/disputes', { params }).then(unwrap),
+  disputeStats:    ()            => api.get('/disputes/stats').then(unwrap),
 
   // Fraud analytics
   fraudAnalytics:    ()          => api.get('/fraud/analytics').then(unwrap),
   fraudGetAll:       (params: any)    => api.get('/fraud/all', { params }).then(unwrap),
   fraudUpdateStatus: (id: string, body: any)  => api.put(`/fraud/${id}/status`, body).then(unwrap),
 };
+// Dispute management — full standalone API
+export const disputeAPI = {
+  // User
+  my:           (params?: any)       => api.get('/disputes/my', { params }).then(unwrap),
+  create:       (body: any)          => api.post('/disputes', body).then(unwrap),
+
+  // Detail
+  get:          (id: string)         => api.get(`/disputes/${id}`).then(unwrap),
+
+  // Evidence
+  evidence:     (id: string)         => api.get(`/disputes/${id}/evidence`).then(unwrap),
+  uploadEvidence: (id: string, formData: FormData) =>
+    api.post(`/disputes/${id}/evidence`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
+  evidenceItem: (id: string, evidenceId: string) => api.get(`/disputes/${id}/evidence/${evidenceId}`).then(unwrap),
+  deleteEvidence: (id: string, evidenceId: string) => api.delete(`/disputes/${id}/evidence/${evidenceId}`).then(unwrap),
+  verifyEvidence: (id: string, evidenceId: string) => api.post(`/disputes/${id}/evidence/${evidenceId}/verify`).then(unwrap),
+
+  // Admin
+  all:          (params?: any)       => api.get('/disputes', { params }).then(unwrap),
+  stats:        ()                   => api.get('/disputes/stats').then(unwrap),
+  assign:       (id: string, body: any) => api.post(`/disputes/${id}/assign`, body).then(unwrap),
+  transitionTo:   (id: string, body: any) => api.patch(`/disputes/${id}/status`, body).then(unwrap),
+
+  // Internal notes
+  addNote:      (id: string, body: any) => api.post(`/disputes/${id}/notes`, body).then(unwrap),
+
+  // Mediation
+  startMediation:   (id: string, body: any) => api.post(`/disputes/${id}/mediation/start`, body).then(unwrap),
+  completeMediation: (id: string, body: any) => api.post(`/disputes/${id}/mediation/complete`, body).then(unwrap),
+
+  // Resolution
+  resolve:      (id: string, body: any) => api.post(`/disputes/${id}/resolve`, body).then(unwrap),
+
+  // Appeal
+  appeal:       (id: string, body: any) => api.post(`/disputes/${id}/appeal`, body).then(unwrap),
+  reviewAppeal: (id: string, body: any) => api.post(`/disputes/${id}/appeal/review`, body).then(unwrap),
+};
+
 // Admin & webhost are real-backend only — there is no demo admin/webhost.
 // Falling back to demo data here would show a real administrator fabricated
 // numbers, so admin endpoints always hit the live API (or surface an error).

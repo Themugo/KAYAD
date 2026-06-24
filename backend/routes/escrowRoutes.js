@@ -47,11 +47,88 @@ router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
 // =============================
 // 🔍 GET: STATE MACHINE INFO
 // =============================
+/**
+ * @swagger
+ * /api/escrow/{id}/state:
+ *   get:
+ *     summary: Get escrow state machine information
+ *     description: Retrieves the current state of an escrow and available state transitions
+ *     tags: [Escrow]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Escrow ID
+ *     responses:
+ *       200:
+ *         description: Escrow state information retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     currentState:
+ *                       type: string
+ *                     availableTransitions:
+ *                       type: array
+ *                       items:
+ *                         type: string
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Escrow not found
+ */
 router.get("/:id/state", protect, validateObjectId, asyncHandler(getEscrowState));
 
 // =============================
 // ✅ VEHICLE CONFIRMED (BUYER)
 // =============================
+/**
+ * @swagger
+ * /api/escrow/{id}/confirm-vehicle:
+ *   post:
+ *     summary: Confirm vehicle receipt (buyer)
+ *     description: Buyer confirms they have received the vehicle and it matches the description
+ *     tags: [Escrow]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Escrow ID
+ *     responses:
+ *       200:
+ *         description: Vehicle confirmed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Invalid state transition
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Escrow not found
+ */
 router.post(
   "/:id/confirm-vehicle",
   protect,
@@ -121,6 +198,43 @@ router.post(
 // =============================
 // 🔒 CLOSE (ADMIN)
 // =============================
+/**
+ * @swagger
+ * /api/escrow/{id}/close:
+ *   post:
+ *     summary: Close escrow (admin only)
+ *     description: Admin forcibly closes an escrow, typically for dispute resolution or cleanup
+ *     tags: [Escrow]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Escrow ID
+ *     responses:
+ *       200:
+ *         description: Escrow closed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - admin only
+ *       404:
+ *         description: Escrow not found
+ */
 router.post(
   "/:id/close",
   protect,

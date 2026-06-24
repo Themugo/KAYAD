@@ -17,6 +17,18 @@ import {
   escrowVaultWebhookSchema,
   releaseOtpSchema,
 } from "../validation/escrow.schema.js";
+import {
+  createDisputeSchema,
+  transitionDisputeSchema,
+  evidenceUploadSchema,
+  internalNoteSchema,
+  assignDisputeSchema,
+  mediationStartSchema,
+  mediationCompleteSchema,
+  resolveDisputeSchema,
+  submitAppealSchema,
+  reviewAppealSchema,
+} from "../validation/dispute.schema.js";
 import { createChatSchema, sendMessageSchema } from "../validation/chat.schema.js";
 import {
   orderInspectionSchema,
@@ -261,6 +273,17 @@ export {
   rejectApplicationSchema,
   // Reviews
   createReviewSchema,
+  // Dispute
+  createDisputeSchema,
+  transitionDisputeSchema,
+  evidenceUploadSchema,
+  internalNoteSchema,
+  assignDisputeSchema,
+  mediationStartSchema,
+  mediationCompleteSchema,
+  resolveDisputeSchema,
+  submitAppealSchema,
+  reviewAppealSchema,
   // Query Schemas
   carListQuerySchema,
   carSearchQuerySchema,
