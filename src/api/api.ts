@@ -402,6 +402,9 @@ const _dealerAPI = {
   // Dealer profile (used by DealerSetup.jsx)
   getProfile:   ()       => api.get('/dealer/profile').then(unwrap),
   updateProfile: (body: any)  => api.put('/dealer/profile', body).then(unwrap),
+
+  // Milestones + completion score
+  milestones:   ()       => api.get('/dealer/milestones').then(unwrap),
 };
 export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 

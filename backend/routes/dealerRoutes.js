@@ -16,7 +16,10 @@ import Chat from "../models/Chat.js";
 import Favorite from "../models/Favorite.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
+import Dealer from "../models/Dealer.js";
 import DealerTeam from "../models/DealerTeam.js";
+import DealerVerification from "../models/DealerVerification.js";
+import DealerHealthScore from "../models/DealerHealthScore.js";
 import { sendNotification } from "../services/notification.service.js";
 
 // Email service — top-level, no-ops if unavailable
@@ -266,6 +269,58 @@ router.get(
         cars,
         sold,
         active: cars - sold,
+      },
+    }    );
+  }),
+);
+
+// =============================
+// 🏆 DEALER MILESTONES + COMPLETION SCORE
+// =============================
+router.get(
+  "/milestones",
+  asyncHandler(async (req, res) => {
+    const dealerId = req.user.id;
+
+    const [totalCars, dealerProfile, verification, healthScore, totalInquiries, liveAuctions, soldAuctions] = await Promise.all([
+      Car.countDocuments({ dealer: dealerId }),
+      Dealer.findOne({ user: dealerId }),
+      DealerVerification.findOne({ user: dealerId }).select("verificationStatus submittedAt").lean(),
+      DealerHealthScore.findOne({ dealer: dealerId }).select("overallScore category").lean(),
+      Chat.countDocuments({ car: { $in: await Car.find({ dealer: dealerId }).distinct("_id") } }),
+      Car.countDocuments({ dealer: dealerId, auctionStatus: "live" }),
+      Car.countDocuments({ dealer: dealerId, auctionStatus: "sold" }),
+    ]);
+
+    const milestones = [
+      { key: "account_created", label: "Account Created", completed: true, icon: "🎉" },
+      { key: "dealership_created", label: "Dealership Created", completed: !!(dealerProfile?.businessName), icon: "🏪" },
+      { key: "first_vehicle", label: "First Vehicle Uploaded", completed: totalCars >= 1, icon: "🚗" },
+      { key: "five_vehicles", label: "Five Vehicles Uploaded", completed: totalCars >= 5, icon: "🚙" },
+      { key: "verification_submitted", label: "Verification Submitted", completed: !!verification, icon: "📄" },
+      { key: "verification_approved", label: "Verification Approved", completed: verification?.verificationStatus === "approved", icon: "✅" },
+    ];
+
+    const completedCount = milestones.filter((m) => m.completed).length;
+
+    res.json({
+      success: true,
+      milestones: {
+        items: milestones,
+        completionScore: Math.round((completedCount / milestones.length) * 100),
+        completedCount,
+        totalCount: milestones.length,
+      },
+      stats: {
+        vehiclesCount: totalCars,
+        leadsCount: totalInquiries,
+        auctionsLive: liveAuctions,
+        auctionsSold: soldAuctions,
+        verificationStatus: verification?.verificationStatus || "none",
+        profileHealth: {
+          score: healthScore?.overallScore || 0,
+          category: healthScore?.category || "unscored",
+        },
       },
     });
   }),

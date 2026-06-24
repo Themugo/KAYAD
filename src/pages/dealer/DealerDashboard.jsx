@@ -13,7 +13,7 @@ import DealerBidsTab from './components/DealerBidsTab';
 import DealerEscrowsTab from './components/DealerEscrowsTab';
 import DealerEarningsTab from './components/DealerEarningsTab';
 import DealerPackageTab from './components/DealerPackageTab';
-import DealerVerificationProgress from './components/DealerVerificationProgress';
+import DealerMilestoneTracker from './components/DealerMilestoneTracker';
 import { DealerKPIRow } from './components/DealerKPIWidgets';
 import { TABS_CONFIG } from './components/DashboardWidgets';
 
@@ -163,7 +163,7 @@ export default function DealerDashboard() {
             </div>
           </div>
 
-          {user?.status !== 'approved' && <DealerVerificationProgress user={user} />}
+          <DealerMilestoneTracker />
 
           {!user?.onboardingComplete && (
             <div style={{
