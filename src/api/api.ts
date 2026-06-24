@@ -252,6 +252,11 @@ const _authAPI = {
   verifyEmail:         (token: string) => isDemoToken() ? demoAPI.auth.verifyEmail(token) : api.get(`/auth/verify-email/${token}`).then(unwrap),
   resendVerification:  (body: any)  => isDemoToken() ? demoAPI.auth.resendVerification(body) : api.post('/auth/resend-verification', body).then(unwrap),
   updateProfile:       (body: any) => isDemoToken() ? demoAPI.auth.updateProfile(body) : api.put('/auth/profile', body).then(unwrap),
+
+  // Phone verification
+  sendOTP:       ()     => api.post('/auth/send-otp').then(unwrap),
+  verifyPhone:   (otp: string) => api.post('/auth/verify-phone', { otp }).then(unwrap),
+  phoneStatus:   ()     => api.get('/auth/phone-status').then(unwrap),
 };
 export const authAPI = withDemo(_authAPI, demoAPI.auth);
 

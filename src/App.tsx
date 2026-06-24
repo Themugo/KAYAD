@@ -62,6 +62,7 @@ const GhostCheckerInfo     = lazy(() => import('./pages/GhostCheckerInfo'));
 
 const LoginPage            = lazy(() => import('./pages/LoginPage'));
 const RegisterPage         = lazy(() => import('./pages/RegisterPage'));
+const PhoneVerifyPage      = lazy(() => import('./pages/PhoneVerifyPage'));
 const ForgotPasswordPage   = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage    = lazy(() => import('./pages/ResetPasswordPage'));
 const VerifyEmail          = lazy(() => import('./pages/VerifyEmail'));
@@ -122,6 +123,7 @@ const WebhoistOverview             = lazy(() => import('./pages/admin/WebhoistOv
 const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsDashboard'));
 const AdminDisputes               = lazy(() => import('./pages/admin/AdminDisputes'));
 const AuctionIntegrityPage        = lazy(() => import('./pages/admin/AuctionIntegrityPage'));
+const PostRegPackageSelect        = lazy(() => import('./pages/PostRegPackageSelect'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
 // Small composition helpers keep the <Routes> block tidy.
@@ -229,8 +231,9 @@ export default function App() {
 
                         {/* ── Auth ────────────────────────────────────────────── */}
                         <Route path="/login"               element={<Public><LoginPage /></Public>} />
-                        <Route path="/register"            element={<Public><RegisterPage /></Public>} />
-                        <Route path="/forgot-password"     element={<Public><ForgotPasswordPage /></Public>} />
+                        <Route path="/register"                     element={<Public><RegisterPage /></Public>} />
+                        <Route path="/verify-phone"                element={<User><PhoneVerifyPage /></User>} />
+                        <Route path="/forgot-password"             element={<Public><ForgotPasswordPage /></Public>} />
                         <Route path="/reset-password"      element={<Public><ResetPasswordPage /></Public>} />
                         <Route path="/verify-email"        element={<Public><VerifyEmail /></Public>} />
                         <Route path="/force-password-change" element={<Authed><ForcePasswordChange /></Authed>} />
@@ -266,6 +269,7 @@ export default function App() {
                         <Route path="/dealer/team"         element={<Dealer><DealerTeam /></Dealer>} />
                         <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
                         <Route path="/dealer/settings"     element={<Dealer><DealerSettings /></Dealer>} />
+                        <Route path="/dealer/choose-plan"  element={<Dealer><PostRegPackageSelect /></Dealer>} />
 
                         {/* ── Admin / Staff ─────────────────────────────────── */}
                         <Route path="/admin"                          element={<Admin><AdminDashboard /></Admin>} />

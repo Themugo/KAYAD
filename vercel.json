@@ -98,5 +98,13 @@
         }
       ]
     }
-  ]
+  ],
+  "experimentalServices": {
+    "kayad-backend": {
+      "type": "web",
+      "routePrefix": "/",
+      "framework": "vite",
+      "buildCommand": "cd backend && npm ci"
+    }
+  }
 }

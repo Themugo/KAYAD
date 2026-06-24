@@ -16,7 +16,12 @@ import {
   revokeAllSessions,
 } from "../controllers/authController.js";
 
-import { protect } from "../middleware/auth.js";
+import { protect, optionalAuth } from "../middleware/auth.js";
+import {
+  sendPhoneOTP,
+  verifyPhoneOTP,
+  checkPhoneVerification,
+} from "../controllers/phoneVerificationController.js";
 import User from "../models/User.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
@@ -639,5 +644,12 @@ router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
 router.get("/sessions", protect, asyncHandler(getSessions));
 router.delete("/sessions/:tokenId", protect, asyncHandler(revokeSession));
 router.post("/sessions/revoke-all", protect, asyncHandler(revokeAllSessions));
+
+// =============================
+// 📞 PHONE VERIFICATION
+// =============================
+router.post("/send-otp", protect, asyncHandler(sendPhoneOTP));
+router.post("/verify-phone", protect, asyncHandler(verifyPhoneOTP));
+router.get("/phone-status", protect, asyncHandler(checkPhoneVerification));
 
 export default router;

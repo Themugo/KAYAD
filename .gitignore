@@ -39,3 +39,5 @@ backend/coverage/
 
 # TypeScript incremental build
 *.tsbuildinfo
+
+.vercel

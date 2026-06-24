@@ -148,27 +148,25 @@ const notifyAdminsOfPendingSeller = async (seller) => {
 // =============================
 export const register = async (req, res) => {
   try {
-    let { name, email, password } = req.body;
+    let { name, email, password, phone } = req.body;
 
     if (!name || !email || !password) {
-      return R.error(res, "All fields required", 400);
+      return R.error(res, "Name, email, and password are required", 400);
     }
-
-    // Password complexity validation
     if (password.length < 8) {
       return R.error(res, "Password must be at least 8 characters", 400);
-    }
-    if (!/[a-z]/.test(password)) {
-      return R.error(res, "Password must contain at least one lowercase letter", 400);
     }
     if (!/[A-Z]/.test(password)) {
       return R.error(res, "Password must contain at least one uppercase letter", 400);
     }
+    if (!/[a-z]/.test(password)) {
+      return R.error(res, "Password must contain at least one lowercase letter", 400);
+    }
     if (!/\d/.test(password)) {
       return R.error(res, "Password must contain at least one number", 400);
     }
-    if (!/[@$!%*?&]/.test(password)) {
-      return R.error(res, "Password must contain at least one special character (@$!%*?&)", 400);
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      return R.error(res, "Password must contain at least one special character", 400);
     }
 
     email = email.toLowerCase().trim();
@@ -177,45 +175,10 @@ export const register = async (req, res) => {
     if (exists) {
       return R.error(res, "User already exists", 400);
     }
-    const { role: requestedRole, dealerPackage } = req.body;
-    const allowedSelfRoles =
-      process.env.NODE_ENV === "test"
-        ? ["dealer", "broker", "individual_seller", "admin"]
-        : ["dealer", "broker", "individual_seller"];
-    const role = allowedSelfRoles.includes(requestedRole) ? requestedRole : "user";
-    const isSeller = SELLER_ROLES.includes(role);
-    const config = await PlatformConfig.findOne()
-      .lean()
-      .catch(() => null);
-    // Auto-approve sellers/dealers unless an admin has explicitly turned
-    // requireDealerApproval ON. Absent config (fresh DB) = auto-approve.
-    const needsApproval = isSeller && config?.requireDealerApproval === true;
-    const selectedPackage =
-      isSeller && dealerPackage
-        ? (config?.packages || []).find((pkg) => pkg.id === dealerPackage && pkg.isActive)
-        : null;
-    const extra = isSeller
-      ? {
-          status: needsApproval ? "pending" : "approved",
-          businessName: req.body.businessName || "",
-          location: req.body.location || "",
-          dealerPackage: selectedPackage?.id || "none",
-          packageListingMax: selectedPackage?.listingMax ?? 0,
-          packageFeatures: selectedPackage?.features || [],
-          packageExpiresAt: selectedPackage?.durationDays
-            ? new Date(Date.now() + Number(selectedPackage.durationDays) * 86400000)
-            : null,
-          subscriptionStatus:
-            selectedPackage && (selectedPackage.isFree || selectedPackage.priceMonthly === 0) ? "active" : "none",
-          trialStartedAt: selectedPackage?.trialDays ? new Date() : null,
-        }
-      : {};
 
-    // Validate phone if provided (Kenyan format)
-    const rawPhone = req.body.phone || "";
+    const rawPhone = (phone || "").trim();
     const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
 
-    // Referral: look up referrer by code (guard: cannot self-refer)
     let referredBy = null;
     const referralCode = req.body.referralCode || req.query.ref;
     if (referralCode) {
@@ -225,74 +188,50 @@ export const register = async (req, res) => {
       }
     }
 
+    const role = req.body.role === "dealer" ? "dealer" : "user";
+
     const user = await User.create({
       name,
       email,
       password,
       role,
-      tokenVersion: 0,
       phone: validPhone,
-      emailVerified: false,
+      status: "approved",
+      emailVerified: true,
+      tokenVersion: 0,
       referredBy,
-      ...extra,
     });
 
-    // Credit referrer if valid
     if (referredBy) {
       const REFERRAL_BONUS = Number(process.env.REFERRAL_BONUS_KES) || 500;
       try {
         await User.findByIdAndUpdate(referredBy, {
           $inc: { credits: REFERRAL_BONUS, referralEarnings: REFERRAL_BONUS, referralCount: 1 },
         });
-        await (
-          await import("../models/Referral.js")
-        ).default.create({
+        await (await import("../models/Referral.js")).default.create({
           referrer: referredBy,
           referee: user._id,
           status: "credited",
           bonusAmount: REFERRAL_BONUS,
           creditedAt: new Date(),
         });
-        const { sendNotification } = await import("../services/notification.service.js");
-        sendNotification({
-          userId: referredBy,
-          title: "🎉 Referral Bonus!",
-          message: `You earned KES ${REFERRAL_BONUS.toLocaleString()} for referring ${name}. Thanks for spreading the word!`,
-          type: "referral",
-        }).catch((e) => console.warn("⚠️ Referral creation failed:", e.message));
       } catch (refErr) {
-        console.warn("⚠️ Referral credit failed:", refErr.message);
+        console.warn("Referral credit failed:", refErr.message);
       }
     }
 
-    // 📧 Generate email verification token
     try {
-      const verifyToken = crypto.randomBytes(32).toString("hex");
-      user.emailVerifyToken = verifyToken;
-      user.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-      await user.save();
-
-      // Send verification email (non-blocking — don't fail registration if email fails)
-      const { sendVerificationEmail, sendWelcomeEmail } = emailService;
-      if (typeof sendVerificationEmail === "function") {
-        sendVerificationEmail(user.email, user.name, verifyToken).catch((e) =>
-          console.warn("⚠️  Verification email failed:", e.message),
-        );
-      }
+      const { sendWelcomeEmail } = emailService;
       if (typeof sendWelcomeEmail === "function") {
-        sendWelcomeEmail(user).catch((e) => console.warn("⚠️  Welcome email failed:", e.message));
+        sendWelcomeEmail(user).catch(() => {});
       }
-    } catch (emailErr) {
-      console.warn("⚠️  Could not generate verify token:", emailErr.message);
-    }
-
-    if (needsApproval) {
-      notifyAdminsOfPendingSeller(user).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
+    } catch {
+      // non-blocking
     }
 
     return sendAuthResponse(res.status(201), user);
   } catch (err) {
-    console.error("❌ REGISTER ERROR:", err);
+    console.error("REGISTER ERROR:", err);
     R.error(res, "Registration failed", 500);
   }
 };

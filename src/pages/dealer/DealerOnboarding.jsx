@@ -91,8 +91,8 @@ export default function DealerOnboarding() {
         onboardingComplete: true,
       });
       if (updated) setUser(updated);
-      toast('Onboarding complete! Welcome to Kayad.', 'success');
-      navigate('/dealer');
+      toast('Onboarding complete! Choose your plan.', 'success');
+      navigate('/dealer/choose-plan');
     } catch {
       toast('Failed to save. Please try again.', 'error');
     } finally {

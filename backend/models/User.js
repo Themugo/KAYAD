@@ -129,6 +129,19 @@ const userSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    phoneOTP: {
+      type: String,
+      select: false,
+    },
+    phoneOTPExpire: {
+      type: Date,
+      select: false,
+    },
 
     avatar: {
       type: String,
@@ -367,6 +380,8 @@ userSchema.methods.toJSON = function () {
   delete obj.password;
   delete obj.resetToken;
   delete obj.resetTokenExpire;
+  delete obj.phoneOTP;
+  delete obj.phoneOTPExpire;
 
   return obj;
 };

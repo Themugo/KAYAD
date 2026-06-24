@@ -15,10 +15,7 @@ export const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: strongPassword,
   phone: z.string().optional(),
-  role: z.enum(["dealer", "broker", "individual_seller", "user", "admin"]).optional(),
-  businessName: z.string().optional(),
-  location: z.string().optional(),
-  dealerPackage: z.string().optional(),
+  role: z.enum(["dealer", "user"]).optional(),
   referralCode: z.string().optional(),
 });
 
