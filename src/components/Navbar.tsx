@@ -292,23 +292,17 @@ export default function Navbar() {
                   </button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
-                  <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    Home
-                  </Link>
-                  <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    Gallery
-                  </Link>
-                  <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-3" onClick={() => setMobileOpen(false)}>
-                    {hasLiveAuction && (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    )}
-                    <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
-                  </Link>
                   <Link to="/ghost-checker" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                     Ghost Check
+                  </Link>
+                  <Link to="/about" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    About
+                  </Link>
+                  <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    Contact
+                  </Link>
+                  <Link to="/escrow-vault" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
+                    Escrow Vault
                   </Link>
                   {isSellerRole(user?.role) && (
                     <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
@@ -323,9 +317,15 @@ export default function Navbar() {
                   <hr className="border-border my-4" />
                   {isAuth ? (
                     <>
-                      <Link to="/profile" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Profile</Link>
-                      <Link to="/dashboard" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Dashboard</Link>
-                      <Link to="/favorites" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Saved Cars</Link>
+                      <Link to="/notifications" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                        Notifications
+                        {unreadCount > 0 && (
+                          <span className="bg-gold text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                        )}
+                      </Link>
+                      <Link to="/payments" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Payments</Link>
+                      <Link to="/chat" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Messages</Link>
+                      <Link to="/disputes" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Disputes</Link>
                       <div className="pt-4">
                         <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="mobile-nav-link text-danger">
                           Sign Out

@@ -4,6 +4,7 @@ import Navbar from './Navbar';
 import Footer from './Footer';
 import CompareDrawer from './CompareDrawer';
 import DemoModeBanner from './DemoModeBanner';
+import MobileBottomNav from './MobileBottomNav';
 
 interface SiteConfig {
   fontDisplay?: string;
@@ -51,10 +52,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </a>
       <DemoModeBanner />
       <Navbar />
-      <main id="app-main-content" className="app-main" role="main" tabIndex={-1}>
+      <main id="app-main-content" className="app-main" role="main" tabIndex={-1} style={{ paddingBottom: 'var(--bottom-nav-h, 0px)' }}>
         {children}
       </main>
       <Footer />
+      <MobileBottomNav />
       <CompareDrawer />
     </div>
   );
