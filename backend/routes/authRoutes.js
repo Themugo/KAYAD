@@ -20,7 +20,7 @@ import { protect } from "../middleware/auth.js";
 import User from "../models/User.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
-import { validateAuth } from "../middleware/validate.js";
+import { validateAuth, validateResponse, authResponseSchema } from "../middleware/validate.js";
 import { accountLockout } from "../middleware/accountLockout.js";
 
 const router = express.Router();
@@ -99,7 +99,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/register", authLimiter, validateAuth, asyncHandler(register));
+router.post("/register", authLimiter, validateAuth, validateResponse(authResponseSchema), asyncHandler(register));
 
 // 🔑 LOGIN
 /**
@@ -158,10 +158,10 @@ router.post("/register", authLimiter, validateAuth, asyncHandler(register));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/login", authLimiter, accountLockout, validateAuth, asyncHandler(login));
+router.post("/login", authLimiter, accountLockout, validateAuth, validateResponse(authResponseSchema), asyncHandler(login));
 
 // 🔁 REFRESH TOKEN (CRITICAL 🔥)
-router.post("/refresh", authLimiter, asyncHandler(refreshToken));
+router.post("/refresh", authLimiter, validateResponse(authResponseSchema), asyncHandler(refreshToken));
 
 // =============================
 // 🔐 PROTECTED ROUTES

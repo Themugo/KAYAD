@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { protect, dealerOnly, adminOnly, optionalAuth } from "../middleware/auth.js";
 
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId, validateCar, validateQuery, carListQuerySchema } from "../middleware/validate.js";
+import { validateObjectId, validateCar, validateQuery, carListQuerySchema, validateResponse, carResponseSchema, carListResponseSchema } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
@@ -147,7 +147,7 @@ router.get("/demo/all", protect, asyncHandler(getDemoCars));
  *                     meta:
  *                       $ref: '#/components/schemas/PaginationMeta'
  */
-router.get("/", validateQuery(carListQuerySchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
+router.get("/", validateQuery(carListQuerySchema), validateResponse(carListResponseSchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
 
 // 🔎 GET SINGLE CAR
 /**

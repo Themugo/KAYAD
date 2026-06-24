@@ -9,7 +9,7 @@
 import express from "express";
 import { protect, adminOnly, authorize } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateResponse, escrowResponseSchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 
@@ -42,7 +42,7 @@ router.get("/", protect, adminOnly, asyncHandler(getAllEscrows));
 // =============================
 // 🔍 GET: SINGLE ESCROW
 // =============================
-router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
+router.get("/:id", protect, validateObjectId, validateResponse(escrowResponseSchema), asyncHandler(getEscrowById));
 
 // =============================
 // 🔍 GET: STATE MACHINE INFO
@@ -87,7 +87,7 @@ router.get("/:id", protect, validateObjectId, asyncHandler(getEscrowById));
  *       404:
  *         description: Escrow not found
  */
-router.get("/:id/state", protect, validateObjectId, asyncHandler(getEscrowState));
+router.get("/:id/state", protect, validateObjectId, validateResponse(escrowResponseSchema), asyncHandler(getEscrowState));
 
 // =============================
 // ✅ VEHICLE CONFIRMED (BUYER)
