@@ -293,17 +293,45 @@ router.get(
 // =============================
 // 💸 B2C CALLBACK (public, protected by IP whitelist + idempotency)
 // =============================
+// 💸 B2C CALLBACK (public, protected by IP whitelist)
+// =============================
 /**
  * @swagger
- * /api/v1/payments/b2c/callback:
+ * /api/payments/b2c/callback:
  *   post:
  *     summary: M-Pesa B2C callback
- *     description: Webhook for B2C disbursement results
+ *     description: Webhook for B2C disbursement results from M-Pesa
  *     tags: [Payments]
  *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Result:
+ *                 type: object
+ *               ResultType:
+ *                 type: string
+ *               ResultCode:
+ *                 type: integer
+ *               Reference:
+ *                 type: string
+ *               TransactionID:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Callback received
+ *         description: Callback received and processed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
  */
 router.post("/b2c/callback", mpesaIpWhitelist, idempotencyCheck, asyncHandler(b2cCallback));
 
@@ -312,15 +340,41 @@ router.post("/b2c/callback", mpesaIpWhitelist, idempotencyCheck, asyncHandler(b2
 // =============================
 /**
  * @swagger
- * /api/v1/payments/b2c/timeout:
+ * /api/payments/b2c/timeout:
  *   post:
  *     summary: M-Pesa B2C timeout
- *     description: Webhook for B2C timeout notifications
+ *     description: Webhook for B2C timeout notifications from M-Pesa
  *     tags: [Payments]
  *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               Result:
+ *                 type: object
+ *               ResultType:
+ *                 type: string
+ *               ResultCode:
+ *                 type: integer
+ *               Reference:
+ *                 type: string
+ *               TransactionID:
+ *                 type: string
  *     responses:
  *       200:
- *         description: Timeout acknowledged
+ *         description: Timeout acknowledged and processed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
  */
 router.post("/b2c/timeout", mpesaIpWhitelist, idempotencyCheck, asyncHandler(b2cTimeout));
 
