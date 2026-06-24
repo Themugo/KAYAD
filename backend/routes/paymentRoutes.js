@@ -8,11 +8,14 @@ import { paymentLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { initiatePaymentSchema } from "../validation/platform.schema.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "../middleware/mpesaSecurity.js";
+import { csrfProtection } from "../middleware/csrf.js";
 import Payment from "../models/Payment.js";
 
 import {
   initiatePayment,
   mpesaCallback,
+  b2cCallback,
+  b2cTimeout,
   checkPaymentStatus,
   getUserPayments,
 } from "../controllers/paymentController.js";
@@ -83,6 +86,7 @@ router.post(
   "/initiate",
   protect,
   paymentLimiter,
+  csrfProtection,
   idempotencyCheck,
   validate(initiatePaymentSchema),
   asyncHandler(initiatePayment),
@@ -217,7 +221,7 @@ router.get("/my", protect, validateQuery(paymentListQuerySchema), asyncHandler(g
  *                 ResultDesc:
  *                   type: string
  */
-router.post("/callback", mpesaIpWhitelist, idempotencyCheck, validateMpesaCallback, asyncHandler(mpesaCallback));
+router.post("/callback", mpesaIpWhitelist, validateMpesaCallback, idempotencyCheck, asyncHandler(mpesaCallback));
 
 // =============================
 // 🧪 DEBUG: CHECK BY CHECKOUT ID (scoped to own user)
@@ -285,6 +289,40 @@ router.get(
     });
   }),
 );
+
+// =============================
+// 💸 B2C CALLBACK (public, protected by IP whitelist + idempotency)
+// =============================
+/**
+ * @swagger
+ * /api/v1/payments/b2c/callback:
+ *   post:
+ *     summary: M-Pesa B2C callback
+ *     description: Webhook for B2C disbursement results
+ *     tags: [Payments]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Callback received
+ */
+router.post("/b2c/callback", mpesaIpWhitelist, idempotencyCheck, asyncHandler(b2cCallback));
+
+// =============================
+// ⏱️  B2C TIMEOUT (public, protected by IP whitelist)
+// =============================
+/**
+ * @swagger
+ * /api/v1/payments/b2c/timeout:
+ *   post:
+ *     summary: M-Pesa B2C timeout
+ *     description: Webhook for B2C timeout notifications
+ *     tags: [Payments]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Timeout acknowledged
+ */
+router.post("/b2c/timeout", mpesaIpWhitelist, idempotencyCheck, asyncHandler(b2cTimeout));
 
 // =============================
 // 🚨 FALLBACK

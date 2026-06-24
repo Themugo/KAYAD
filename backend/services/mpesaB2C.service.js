@@ -60,14 +60,29 @@ const getOAuthToken = async () => {
 
 // ── B2C DISBURSEMENT ─────────────────────────────────────────
 export const disburseB2C = async ({
-  phone, // recipient M-Pesa number (2547XXXXXXXX)
-  amount, // KES amount
-  escrowId, // reference
-  sellerName, // recipient name
+  phone,
+  amount,
+  escrowId,
+  sellerName,
+  idempotencyKey,
 }) => {
+  // ── DEDUP: check lastActionKey on escrow ──────────────────
+  if (escrowId && idempotencyKey) {
+    const Escrow = (await import("../models/Escrow.js")).default;
+    const escrow = await Escrow.findById(escrowId).select("lastActionKey status");
+    if (!escrow) throw new Error(`Escrow ${escrowId} not found`);
+    if (escrow.status === "released" || escrow.lasActionKey === idempotencyKey) {
+      return { success: true, idempotent: true, message: "B2C already processed for this escrow" };
+    }
+  }
+
   // ── MOCK MODE ─────────────────────────────────────────────
   if (MPESA_ENV === "sandbox" && !process.env.MPESA_B2C_INITIATOR) {
     console.log(`[B2C MOCK] Would send KES ${amount.toLocaleString()} to ${phone} for escrow ${escrowId}`);
+    if (escrowId && idempotencyKey) {
+      const Escrow = (await import("../models/Escrow.js")).default;
+      await Escrow.findByIdAndUpdate(escrowId, { lastActionKey: idempotencyKey });
+    }
     return {
       success: true,
       mock: true,
@@ -82,8 +97,8 @@ export const disburseB2C = async ({
 
   const payload = {
     InitiatorName: B2C_INITIATOR,
-    SecurityCredential: process.env.MPESA_B2C_INITIATOR_PW, // base64 of public cert
-    CommandID: "BusinessPayment", // or "SalaryPayment" / "PromotionPayment"
+    SecurityCredential: process.env.MPESA_B2C_INITIATOR_PW,
+    CommandID: "BusinessPayment",
     Amount: Math.round(amount),
     PartyA: B2C_SHORTCODE,
     PartyB: phone.replace(/^0/, "254"),
@@ -106,6 +121,12 @@ export const disburseB2C = async ({
 
   if (data.ErrorCode) {
     throw new Error(`M-Pesa B2C Error: ${data.ErrorMessage} (${data.ErrorCode})`);
+  }
+
+  // ── Record idempotency key on escrow ───────────────────────
+  if (escrowId && idempotencyKey) {
+    const Escrow = (await import("../models/Escrow.js")).default;
+    await Escrow.findByIdAndUpdate(escrowId, { lastActionKey: idempotencyKey }).catch(() => {});
   }
 
   return {

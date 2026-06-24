@@ -1,16 +1,24 @@
-// backend/services/reconciliationService.js - Production Hardened v6.0
+// backend/services/reconciliationService.js - Production v7.0
 // ─────────────────────────────────────────────────────────────
-// Enterprise payment reconciliation service for fintech platform
-// Reconciles MpesaTransaction, Payment, Escrow, Subscription, Refund, Commission, Payout
-// Detects missing callbacks, duplicate callbacks, amount mismatches, orphan transactions
-// Calculates financial integrity score and generates downloadable reports
+// Enterprise payment reconciliation engine.
+// Compares expected vs actual across all financial systems:
+//   M-Pesa → Payments, Payments → Escrow, Payments → Subscriptions,
+//   EscrowVaults, Refunds, Commissions, Payouts, Releases
+// Generates: matched / unmatched / missing / overpaid / underpaid
+// Creates per-record ReconciliationRecord items for drill-down.
 // ─────────────────────────────────────────────────────────────
 
 import MpesaTransaction from "../models/MpesaTransaction.js";
 import Payment from "../models/Payment.js";
 import Escrow from "../models/Escrow.js";
+import EscrowVault from "../models/EscrowVault.js";
 import Subscription from "../models/Subscription.js";
+import Bid from "../models/Bid.js";
+import Transaction from "../models/Transaction.js";
+import User from "../models/User.js";
 import ReconciliationReport from "../models/ReconciliationReport.js";
+import ReconciliationRecord from "../models/ReconciliationRecord.js";
+import AdminAlert from "../models/AdminAlert.js";
 import { sendNotification } from "./notification.service.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
@@ -34,66 +42,118 @@ export const runReconciliation = async (reportType, timeRange) => {
   const reconciliationStartTime = Date.now();
 
   try {
-    let totalTransactions = 0;
+    let total = 0;
     let reconciled = 0;
     let unreconciled = 0;
+    let matched = 0;
+    let unmatched = 0;
+    let missing = 0;
+    let overpaid = 0;
+    let underpaid = 0;
 
-    if (reportType === "mpesa_payment" || reportType === "full_reconciliation") {
-      const mpesaResult = await reconcileMpesaPayments(startTime, endTime, report);
-      totalTransactions += mpesaResult.total;
-      reconciled += mpesaResult.reconciled;
-      unreconciled += mpesaResult.unreconciled;
+    const financials = {
+      expectedTotal: 0,
+      actualTotal: 0,
+      overpaidTotal: 0,
+      underpaidTotal: 0,
+      missingTotal: 0,
+      feeMismatchTotal: 0,
+    };
+
+    const runType = (type) =>
+      type === reportType || reportType === "full_reconciliation";
+
+    if (runType("mpesa_payment")) {
+      const r = await reconcileMpesaPayments(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0; unmatched += r.unmatched || 0;
+      missing += r.missing || 0; overpaid += r.overpaid || 0; underpaid += r.underpaid || 0;
+      financials.expectedTotal += r.expectedTotal || 0;
+      financials.actualTotal += r.actualTotal || 0;
+      financials.overpaidTotal += r.overpaidTotal || 0;
+      financials.underpaidTotal += r.underpaidTotal || 0;
+      financials.missingTotal += r.missingTotal || 0;
     }
 
-    if (reportType === "payment_escrow" || reportType === "full_reconciliation") {
-      const escrowResult = await reconcilePaymentEscrow(startTime, endTime, report);
-      totalTransactions += escrowResult.total;
-      reconciled += escrowResult.reconciled;
-      unreconciled += escrowResult.unreconciled;
+    if (runType("payment_escrow")) {
+      const r = await reconcilePaymentEscrow(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0;
+      financials.expectedTotal += r.expectedTotal || 0;
+      financials.actualTotal += r.actualTotal || 0;
     }
 
-    if (reportType === "payment_subscription" || reportType === "full_reconciliation") {
-      const subscriptionResult = await reconcilePaymentSubscription(startTime, endTime, report);
-      totalTransactions += subscriptionResult.total;
-      reconciled += subscriptionResult.reconciled;
-      unreconciled += subscriptionResult.unreconciled;
+    if (runType("payment_subscription")) {
+      const r = await reconcilePaymentSubscription(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0;
     }
 
-    if (reportType === "refund_reconciliation" || reportType === "full_reconciliation") {
-      const refundResult = await reconcileRefunds(startTime, endTime, report);
-      totalTransactions += refundResult.total;
-      reconciled += refundResult.reconciled;
-      unreconciled += refundResult.unreconciled;
+    if (runType("escrow_vault")) {
+      const r = await reconcileEscrowVaults(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0; unmatched += r.unmatched || 0;
+      missing += r.missing || 0;
+      financials.expectedTotal += r.expectedTotal || 0;
+      financials.actualTotal += r.actualTotal || 0;
     }
 
-    if (reportType === "commission_reconciliation" || reportType === "full_reconciliation") {
-      const commissionResult = await reconcileCommissions(startTime, endTime, report);
-      totalTransactions += commissionResult.total;
-      reconciled += commissionResult.reconciled;
-      unreconciled += commissionResult.unreconciled;
+    if (runType("refund_reconciliation")) {
+      const r = await reconcileRefunds(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      overpaid += r.overpaid || 0;
+      financials.overpaidTotal += r.overpaidTotal || 0;
     }
 
-    if (reportType === "payout_reconciliation" || reportType === "full_reconciliation") {
-      const payoutResult = await reconcilePayouts(startTime, endTime, report);
-      totalTransactions += payoutResult.total;
-      reconciled += payoutResult.reconciled;
-      unreconciled += payoutResult.unreconciled;
+    if (runType("commission_reconciliation")) {
+      const r = await reconcileCommissions(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      overpaid += r.overpaid || 0; underpaid += r.underpaid || 0;
+      financials.feeMismatchTotal += r.feeMismatchTotal || 0;
     }
 
-    // Calculate financial integrity score
+    if (runType("payout_reconciliation")) {
+      const r = await reconcilePayouts(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      missing += r.missing || 0;
+      financials.missingTotal += r.missingTotal || 0;
+    }
+
+    if (runType("release_reconciliation")) {
+      const r = await reconcileReleases(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0; unmatched += r.unmatched || 0;
+    }
+
+    if (runType("expected_vs_received")) {
+      const r = await reconcileExpectedVsReceived(startTime, endTime, report);
+      total += r.total; reconciled += r.reconciled; unreconciled += r.unreconciled;
+      matched += r.matched || 0; unmatched += r.unmatched || 0;
+      missing += r.missing || 0; overpaid += r.overpaid || 0; underpaid += r.underpaid || 0;
+      financials.expectedTotal += r.expectedTotal || 0;
+      financials.actualTotal += r.actualTotal || 0;
+      financials.overpaidTotal += r.overpaidTotal || 0;
+      financials.underpaidTotal += r.underpaidTotal || 0;
+      financials.missingTotal += r.missingTotal || 0;
+    }
+
     const integrityScore = await calculateFinancialIntegrityScore(startTime, endTime, report);
-    report.financialIntegrityScore = integrityScore;
 
-    report.totalTransactions = totalTransactions;
+    report.totalTransactions = total;
     report.reconciled = reconciled;
     report.unreconciled = unreconciled;
+    report.matched = matched;
+    report.unmatched = unmatched;
+    report.missing = missing;
+    report.overpaid = overpaid;
+    report.underpaid = underpaid;
+    report.financials = financials;
+    report.financialIntegrityScore = integrityScore;
     await report.calculateSuccessRate();
     report.status = "completed";
     report.duration = Date.now() - reconciliationStartTime;
-
     await report.save();
 
-    // Send alerts for critical issues
     const criticalIssues = report.getCriticalIssues();
     if (criticalIssues.length > 0) {
       await sendAlerts(criticalIssues, report);
@@ -102,9 +162,14 @@ export const runReconciliation = async (reportType, timeRange) => {
     logInfo("Reconciliation completed", {
       reportId,
       reportType,
-      totalTransactions,
+      total,
       reconciled,
       unreconciled,
+      matched,
+      unmatched,
+      missing,
+      overpaid,
+      underpaid,
       successRate: report.successRate,
     });
 
@@ -136,72 +201,126 @@ export const reconcileMpesaPayments = async (startDate, endDate, report) => {
     let total = mpesaTransactions.length + payments.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let matched = 0;
+    let unmatched = 0;
+    let missing = 0;
+    let overpaid = 0;
+    let underpaid = 0;
+    let expectedTotal = 0;
+    let actualTotal = 0;
+    let overpaidTotal = 0;
+    let underpaidTotal = 0;
+    let missingTotal = 0;
 
-    // Detect missing callbacks
     const missingCallbacks = await detectMissingCallbacks(startDate, endDate);
-    for (const missing of missingCallbacks) {
+    for (const m of missingCallbacks) {
+      missing++;
+      missingTotal += m.amount;
+      expectedTotal += m.amount;
       await report.addIssue({
         type: "missing_callback",
         severity: "high",
-        description: `M-Pesa transaction pending for ${missing.createdAt.toISOString()}`,
-        transactionId: missing._id,
+        description: `M-Pesa transaction pending for ${m.createdAt.toISOString()}`,
+        transactionId: m._id,
         transactionModel: "MpesaTransaction",
-        amountDifference: missing.amount,
+        amountDifference: m.amount,
+      });
+      await createRecord(report._id, {
+        source: "mpesa_payment",
+        expectedType: "stk_push",
+        expectedId: m._id, expectedModel: "MpesaTransaction",
+        expectedAmount: m.amount, expectedRef: m.checkoutRequestID, expectedDate: m.createdAt,
+        outcome: "missing",
+        amountDifference: m.amount,
+        statusExpected: m.status,
       });
       unreconciled++;
     }
 
-    // Detect duplicate callbacks
-    const duplicateCallbacks = await detectDuplicateCallbacks(startDate, endDate);
-    for (const duplicate of duplicateCallbacks) {
+    const duplicates = await detectDuplicateCallbacks(startDate, endDate);
+    for (const d of duplicates) {
+      unmatched++;
       await report.addIssue({
         type: "duplicate_callback",
         severity: "medium",
-        description: `Duplicate checkoutRequestID: ${duplicate.checkoutRequestID}`,
-        transactionId: duplicate._id,
+        description: `Duplicate checkoutRequestID: ${d.checkoutRequestID}`,
+        transactionId: d._id,
         transactionModel: "Payment",
-        amountDifference: duplicate.amount,
+        amountDifference: d.amount,
+      });
+      await createRecord(report._id, {
+        source: "mpesa_payment",
+        actualType: "payment",
+        actualId: d._id, actualModel: "Payment",
+        actualAmount: d.amount,
+        outcome: "unmatched",
+        statusActual: "duplicate",
       });
       unreconciled++;
     }
 
-    // Detect amount mismatches
     const amountMismatches = await detectAmountMismatches(startDate, endDate);
-    for (const mismatch of amountMismatches) {
+    for (const m of amountMismatches) {
+      const diff = m.mpesaAmount - m.paymentAmount;
+      if (diff > 0) { overpaid++; overpaidTotal += diff; }
+      else { underpaid++; underpaidTotal += Math.abs(diff); }
+      expectedTotal += m.mpesaAmount;
+      actualTotal += m.paymentAmount;
       await report.addIssue({
         type: "amount_mismatch",
         severity: "high",
-        description: `Amount mismatch: M-Pesa ${mismatch.mpesaAmount} vs Payment ${mismatch.paymentAmount}`,
-        transactionId: mismatch.mpesaId,
+        description: `Amount mismatch: M-Pesa ${m.mpesaAmount} vs Payment ${m.paymentAmount} (${diff > 0 ? "overpaid" : "underpaid"} by ${Math.abs(diff)})`,
+        transactionId: m.mpesaId,
         transactionModel: "MpesaTransaction",
-        relatedTransactionId: mismatch.paymentId,
+        relatedTransactionId: m.paymentId,
         relatedTransactionModel: "Payment",
-        amountDifference: Math.abs(mismatch.mpesaAmount - mismatch.paymentAmount),
+        amountDifference: Math.abs(diff),
+      });
+      await createRecord(report._id, {
+        source: "mpesa_payment",
+        expectedType: "stk_push",
+        expectedId: m.mpesaId, expectedModel: "MpesaTransaction",
+        expectedAmount: m.mpesaAmount,
+        actualType: "payment",
+        actualId: m.paymentId, actualModel: "Payment",
+        actualAmount: m.paymentAmount,
+        outcome: diff > 0 ? "overpaid" : "underpaid",
+        amountDifference: diff,
       });
       unreconciled++;
     }
 
-    // Detect orphan transactions
-    const orphanTransactions = await detectOrphanTransactions(startDate, endDate);
-    for (const orphan of orphanTransactions) {
+    const orphans = await detectOrphanTransactions(startDate, endDate);
+    for (const o of orphans) {
+      unmatched++;
+      const amount = o.amount || 0;
+      if (o.model === "Payment") { actualTotal += amount; }
+      else { expectedTotal += amount; }
       await report.addIssue({
         type: "orphan_transaction",
         severity: "medium",
-        description: `Orphan ${orphan.model} without corresponding record`,
-        transactionId: orphan._id,
-        transactionModel: orphan.model,
-        amountDifference: orphan.amount,
+        description: `Orphan ${o.model} without corresponding record`,
+        transactionId: o._id,
+        transactionModel: o.model,
+        amountDifference: amount,
+      });
+      await createRecord(report._id, {
+        source: "mpesa_payment",
+        actualType: o.model === "Payment" ? "payment" : "stk_push",
+        actualId: o._id, actualModel: o.model,
+        actualAmount: amount,
+        outcome: "unmatched",
       });
       unreconciled++;
     }
 
-    // Count reconciled transactions
     reconciled = total - unreconciled;
+    matched = (payments.length + mpesaTransactions.length) - (duplicates.length + orphans.length + amountMismatches.length + missingCallbacks.length);
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, matched, unmatched, missing, overpaid, underpaid, expectedTotal, actualTotal, overpaidTotal, underpaidTotal, missingTotal };
   } catch (err) {
     logError("M-Pesa reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, unmatched: 0, missing: 0, overpaid: 0, underpaid: 0, expectedTotal: 0, actualTotal: 0, overpaidTotal: 0, underpaidTotal: 0, missingTotal: 0 };
   }
 };
 
@@ -217,11 +336,13 @@ export const reconcilePaymentEscrow = async (startDate, endDate, report) => {
     let total = escrows.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let matched = 0;
+    let expectedTotal = 0;
+    let actualTotal = 0;
 
     for (const escrow of escrows) {
-      const payment = await Payment.findOne({
-        _id: escrow.payment,
-      }).lean();
+      expectedTotal += escrow.amount;
+      const payment = await Payment.findOne({ _id: escrow.payment }).lean();
 
       if (!payment) {
         await report.addIssue({
@@ -232,12 +353,21 @@ export const reconcilePaymentEscrow = async (startDate, endDate, report) => {
           transactionModel: "Escrow",
           amountDifference: escrow.amount,
         });
+        await createRecord(report._id, {
+          source: "payment_escrow",
+          expectedType: "escrow_deposit",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.amount,
+          outcome: "missing",
+          amountDifference: escrow.amount,
+        });
         unreconciled++;
         continue;
       }
+      actualTotal += payment.amount;
 
-      // Check amount mismatch
       if (payment.amount !== escrow.amount) {
+        const diff = payment.amount - escrow.amount;
         await report.addIssue({
           type: "amount_mismatch",
           severity: "high",
@@ -246,13 +376,25 @@ export const reconcilePaymentEscrow = async (startDate, endDate, report) => {
           transactionModel: "Payment",
           relatedTransactionId: escrow._id,
           relatedTransactionModel: "Escrow",
-          amountDifference: Math.abs(payment.amount - escrow.amount),
+          amountDifference: Math.abs(diff),
+        });
+        await createRecord(report._id, {
+          source: "payment_escrow",
+          expectedType: "escrow_deposit",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.amount,
+          actualType: "payment",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: payment.amount,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
+          statusExpected: escrow.status,
+          statusActual: payment.status,
         });
         unreconciled++;
         continue;
       }
 
-      // Check status mismatch
       if (payment.status === "success" && escrow.status === "pending") {
         await report.addIssue({
           type: "orphan_transaction",
@@ -264,17 +406,44 @@ export const reconcilePaymentEscrow = async (startDate, endDate, report) => {
           relatedTransactionModel: "Escrow",
           amountDifference: 0,
         });
+        await createRecord(report._id, {
+          source: "payment_escrow",
+          expectedType: "escrow_deposit",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.amount,
+          actualType: "payment",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: payment.amount,
+          outcome: "unmatched",
+          statusExpected: escrow.status,
+          statusActual: payment.status,
+        });
         unreconciled++;
         continue;
       }
 
+      matched++;
       reconciled++;
+      await createRecord(report._id, {
+        source: "payment_escrow",
+        expectedType: "escrow_deposit",
+        expectedId: escrow._id, expectedModel: "Escrow",
+        expectedAmount: escrow.amount,
+        actualType: "payment",
+        actualId: payment._id, actualModel: "Payment",
+        actualAmount: payment.amount,
+        outcome: "matched",
+        amountDifference: 0,
+        statusMatch: true,
+        statusExpected: escrow.status,
+        statusActual: payment.status,
+      });
     }
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, matched, expectedTotal, actualTotal };
   } catch (err) {
     logError("Escrow reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, expectedTotal: 0, actualTotal: 0 };
   }
 };
 
@@ -290,6 +459,7 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
     let total = subscriptions.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let matched = 0;
 
     for (const subscription of subscriptions) {
       const payment = await Payment.findOne({
@@ -308,15 +478,23 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
           transactionModel: "Subscription",
           amountDifference: subscription.pricing.monthly,
         });
+        await createRecord(report._id, {
+          source: "subscription",
+          expectedType: "subscription_charge",
+          expectedId: subscription._id, expectedModel: "Subscription",
+          expectedAmount: subscription.pricing.monthly,
+          outcome: "missing",
+          amountDifference: subscription.pricing.monthly,
+        });
         unreconciled++;
         continue;
       }
 
-      // Check amount mismatch
       const expectedAmount =
         subscription.billingCycle === "annual" ? subscription.pricing.annual : subscription.pricing.monthly;
 
       if (payment.amount !== expectedAmount) {
+        const diff = payment.amount - expectedAmount;
         await report.addIssue({
           type: "amount_mismatch",
           severity: "medium",
@@ -325,13 +503,23 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
           transactionModel: "Payment",
           relatedTransactionId: subscription._id,
           relatedTransactionModel: "Subscription",
-          amountDifference: Math.abs(payment.amount - expectedAmount),
+          amountDifference: Math.abs(diff),
+        });
+        await createRecord(report._id, {
+          source: "subscription",
+          expectedType: "subscription_charge",
+          expectedId: subscription._id, expectedModel: "Subscription",
+          expectedAmount,
+          actualType: "payment",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: payment.amount,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
         });
         unreconciled++;
         continue;
       }
 
-      // Check status mismatch
       if (payment.status === "success" && subscription.status === "past_due") {
         await report.addIssue({
           type: "orphan_transaction",
@@ -343,39 +531,188 @@ export const reconcilePaymentSubscription = async (startDate, endDate, report) =
           relatedTransactionModel: "Subscription",
           amountDifference: 0,
         });
+        await createRecord(report._id, {
+          source: "subscription",
+          expectedType: "subscription_charge",
+          expectedId: subscription._id, expectedModel: "Subscription",
+          expectedAmount,
+          actualType: "payment",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: payment.amount,
+          outcome: "unmatched",
+          statusExpected: subscription.status,
+          statusActual: payment.status,
+        });
         unreconciled++;
         continue;
       }
 
+      matched++;
       reconciled++;
     }
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, matched };
   } catch (err) {
     logError("Subscription reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0 };
   }
 };
 
 // =============================
-// � RECONCILE REFUNDS
+// 🔄 RECONCILE ESCROW VAULTS
+// =============================
+export const reconcileEscrowVaults = async (startDate, endDate, report) => {
+  try {
+    const vaults = await EscrowVault.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    let total = vaults.length;
+    let reconciled = 0;
+    let unreconciled = 0;
+    let matched = 0;
+    let unmatched = 0;
+    let missing = 0;
+    let expectedTotal = 0;
+    let actualTotal = 0;
+
+    for (const vault of vaults) {
+      expectedTotal += vault.amount;
+
+      const txn = await Transaction.findOne({
+        escrowId: vault._id,
+        type: "escrow_deposit",
+      }).lean();
+
+      if (!txn) {
+        await report.addIssue({
+          type: "vault_balance_mismatch",
+          severity: "high",
+          description: `EscrowVault ${vault._id} has no corresponding transaction record`,
+          transactionId: vault._id,
+          transactionModel: "EscrowVault",
+          amountDifference: vault.amount,
+        });
+        await createRecord(report._id, {
+          source: "escrow_vault",
+          expectedType: "vault_funding",
+          expectedId: vault._id, expectedModel: "EscrowVault",
+          expectedAmount: vault.amount,
+          outcome: "missing",
+          amountDifference: vault.amount,
+          statusExpected: vault.status,
+        });
+        missing++;
+        unreconciled++;
+        continue;
+      }
+
+      actualTotal += txn.amount;
+
+      if (txn.amount !== vault.amount) {
+        const diff = txn.amount - vault.amount;
+        await report.addIssue({
+          type: "vault_balance_mismatch",
+          severity: "high",
+          description: `Vault amount mismatch: Transaction ${txn.amount} vs Vault ${vault.amount}`,
+          transactionId: txn._id,
+          transactionModel: "Transaction",
+          relatedTransactionId: vault._id,
+          relatedTransactionModel: "EscrowVault",
+          amountDifference: Math.abs(diff),
+        });
+        await createRecord(report._id, {
+          source: "escrow_vault",
+          expectedType: "vault_funding",
+          expectedId: vault._id, expectedModel: "EscrowVault",
+          expectedAmount: vault.amount,
+          actualType: "payment",
+          actualId: txn._id, actualModel: "Transaction",
+          actualAmount: txn.amount,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
+        });
+        unreconciled++;
+        continue;
+      }
+
+      if (vault.status === "awaiting_payment" && txn.status === "success") {
+        await report.addIssue({
+          type: "orphan_transaction",
+          severity: "medium",
+          description: `Transaction paid but vault still awaiting_payment`,
+          transactionId: txn._id,
+          transactionModel: "Transaction",
+          relatedTransactionId: vault._id,
+          relatedTransactionModel: "EscrowVault",
+          amountDifference: 0,
+        });
+        await createRecord(report._id, {
+          source: "escrow_vault",
+          expectedType: "vault_funding",
+          expectedId: vault._id, expectedModel: "EscrowVault",
+          expectedAmount: vault.amount,
+          actualType: "payment",
+          actualId: txn._id, actualModel: "Transaction",
+          actualAmount: txn.amount,
+          outcome: "unmatched",
+          statusExpected: vault.status,
+          statusActual: txn.status,
+        });
+        unmatched++;
+        unreconciled++;
+        continue;
+      }
+
+      // Check status flow consistency
+      const releaseTxn = await Transaction.findOne({
+        escrowId: vault._id,
+        type: "escrow_release",
+      }).lean();
+
+      if (vault.status === "released" && !releaseTxn) {
+        await report.addIssue({
+          type: "missing_payout",
+          severity: "high",
+          description: `Vault released but no release transaction found`,
+          transactionId: vault._id,
+          transactionModel: "EscrowVault",
+          amountDifference: vault.amount,
+        });
+        missing++;
+        unreconciled++;
+        continue;
+      }
+
+      matched++;
+      reconciled++;
+    }
+
+    return { total, reconciled, unreconciled, matched, unmatched, missing, expectedTotal, actualTotal };
+  } catch (err) {
+    logError("EscrowVault reconciliation failed", err);
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, unmatched: 0, missing: 0, expectedTotal: 0, actualTotal: 0 };
+  }
+};
+
+// =============================
+// 🔄 RECONCILE REFUNDS
 // =============================
 export const reconcileRefunds = async (startDate, endDate, report) => {
   try {
-    const refunds = await Payment.find({
+    const refundPayments = await Payment.find({
       type: "refund",
       createdAt: { $gte: startDate, $lte: endDate },
     }).lean();
 
-    let total = refunds.length;
+    let total = refundPayments.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let overpaid = 0;
+    let overpaidTotal = 0;
 
-    for (const refund of refunds) {
-      // Check if refund has corresponding original payment
-      const originalPayment = await Payment.findOne({
-        _id: refund.referenceId,
-      }).lean();
+    for (const refund of refundPayments) {
+      const originalPayment = await Payment.findOne({ _id: refund.referenceId }).lean();
 
       if (!originalPayment) {
         await report.addIssue({
@@ -386,27 +723,46 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
           transactionModel: "Payment",
           amountDifference: refund.amount,
         });
-        unreconciled++;
-        continue;
-      }
-
-      // Check if refund amount exceeds original payment
-      if (refund.amount > originalPayment.amount) {
-        await report.addIssue({
-          type: "amount_mismatch",
-          severity: "critical",
-          description: `Refund amount exceeds original payment: ${refund.amount} > ${originalPayment.amount}`,
-          transactionId: refund._id,
-          transactionModel: "Payment",
-          relatedTransactionId: originalPayment._id,
-          relatedTransactionModel: "Payment",
-          amountDifference: refund.amount - originalPayment.amount,
+        await createRecord(report._id, {
+          source: "refund",
+          actualType: "escrow_refund",
+          actualId: refund._id, actualModel: "Payment",
+          actualAmount: refund.amount,
+          outcome: "unmatched",
         });
         unreconciled++;
         continue;
       }
 
-      // Check if refund status is pending for too long
+      if (refund.amount > originalPayment.amount) {
+        const excess = refund.amount - originalPayment.amount;
+        overpaid++;
+        overpaidTotal += excess;
+        await report.addIssue({
+          type: "refund_exceeds_original",
+          severity: "critical",
+          description: `Refund amount exceeds original payment: ${refund.amount} > ${originalPayment.amount} by ${excess}`,
+          transactionId: refund._id,
+          transactionModel: "Payment",
+          relatedTransactionId: originalPayment._id,
+          relatedTransactionModel: "Payment",
+          amountDifference: excess,
+        });
+        await createRecord(report._id, {
+          source: "refund",
+          expectedType: "escrow_refund",
+          expectedId: originalPayment._id, expectedModel: "Payment",
+          expectedAmount: originalPayment.amount,
+          actualType: "escrow_refund",
+          actualId: refund._id, actualModel: "Payment",
+          actualAmount: refund.amount,
+          outcome: "overpaid",
+          amountDifference: excess,
+        });
+        unreconciled++;
+        continue;
+      }
+
       if (refund.status === "pending") {
         const hoursPending = (Date.now() - new Date(refund.createdAt).getTime()) / (1000 * 60 * 60);
         if (hoursPending > 48) {
@@ -418,6 +774,14 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
             transactionModel: "Payment",
             amountDifference: refund.amount,
           });
+          await createRecord(report._id, {
+            source: "refund",
+            actualType: "escrow_refund",
+            actualId: refund._id, actualModel: "Payment",
+            actualAmount: refund.amount,
+            outcome: "unmatched",
+            statusActual: refund.status,
+          });
           unreconciled++;
           continue;
         }
@@ -426,10 +790,10 @@ export const reconcileRefunds = async (startDate, endDate, report) => {
       reconciled++;
     }
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, overpaid, overpaidTotal };
   } catch (err) {
     logError("Refund reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, overpaid: 0, overpaidTotal: 0 };
   }
 };
 
@@ -446,36 +810,51 @@ export const reconcileCommissions = async (startDate, endDate, report) => {
     let total = payments.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let overpaid = 0;
+    let underpaid = 0;
+    let feeMismatchTotal = 0;
 
     for (const payment of payments) {
-      // Calculate expected commission (5% of amount)
       const expectedCommission = payment.amount * 0.05;
       const actualCommission = payment.platformFee;
+      const diff = actualCommission - expectedCommission;
 
-      // Check commission calculation
       if (Math.abs(actualCommission - expectedCommission) > 0.01) {
+        feeMismatchTotal += Math.abs(diff);
+        if (diff > 0) overpaid++; else underpaid++;
         await report.addIssue({
           type: "amount_mismatch",
           severity: "medium",
-          description: `Commission mismatch: Expected ${expectedCommission}, Actual ${actualCommission}`,
+          description: `Commission mismatch: Expected ${expectedCommission}, Actual ${actualCommission} (${diff > 0 ? "overcharged" : "undercharged"})`,
           transactionId: payment._id,
           transactionModel: "Payment",
-          amountDifference: Math.abs(actualCommission - expectedCommission),
+          amountDifference: Math.abs(diff),
+        });
+        await createRecord(report._id, {
+          source: "commission",
+          expectedType: "commission",
+          expectedAmount: expectedCommission,
+          actualType: "commission",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: actualCommission,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
         });
         unreconciled++;
         continue;
       }
 
-      // Check if dealerAmount is correct
       const expectedDealerAmount = payment.amount - actualCommission;
       if (Math.abs(payment.dealerAmount - expectedDealerAmount) > 0.01) {
+        const dealerDiff = payment.dealerAmount - expectedDealerAmount;
+        feeMismatchTotal += Math.abs(dealerDiff);
         await report.addIssue({
           type: "amount_mismatch",
           severity: "medium",
           description: `Dealer amount mismatch: Expected ${expectedDealerAmount}, Actual ${payment.dealerAmount}`,
           transactionId: payment._id,
           transactionModel: "Payment",
-          amountDifference: Math.abs(payment.dealerAmount - expectedDealerAmount),
+          amountDifference: Math.abs(dealerDiff),
         });
         unreconciled++;
         continue;
@@ -484,10 +863,10 @@ export const reconcileCommissions = async (startDate, endDate, report) => {
       reconciled++;
     }
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, overpaid, underpaid, feeMismatchTotal };
   } catch (err) {
     logError("Commission reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, overpaid: 0, underpaid: 0, feeMismatchTotal: 0 };
   }
 };
 
@@ -504,9 +883,10 @@ export const reconcilePayouts = async (startDate, endDate, report) => {
     let total = escrows.length;
     let reconciled = 0;
     let unreconciled = 0;
+    let missing = 0;
+    let missingTotal = 0;
 
     for (const escrow of escrows) {
-      // Check if payout was processed
       const payment = await Payment.findOne({
         referenceId: escrow._id,
         referenceModel: "Escrow",
@@ -514,6 +894,8 @@ export const reconcilePayouts = async (startDate, endDate, report) => {
       }).lean();
 
       if (!payment) {
+        missing++;
+        missingTotal += escrow.sellerAmount;
         await report.addIssue({
           type: "missing_payout",
           severity: "high",
@@ -522,12 +904,21 @@ export const reconcilePayouts = async (startDate, endDate, report) => {
           transactionModel: "Escrow",
           amountDifference: escrow.sellerAmount,
         });
+        await createRecord(report._id, {
+          source: "payout",
+          expectedType: "payout",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.sellerAmount,
+          outcome: "missing",
+          amountDifference: escrow.sellerAmount,
+          statusExpected: escrow.status,
+        });
         unreconciled++;
         continue;
       }
 
-      // Check if payout amount matches seller amount
       if (payment.amount !== escrow.sellerAmount) {
+        const diff = payment.amount - escrow.sellerAmount;
         await report.addIssue({
           type: "amount_mismatch",
           severity: "high",
@@ -536,13 +927,23 @@ export const reconcilePayouts = async (startDate, endDate, report) => {
           transactionModel: "Payment",
           relatedTransactionId: escrow._id,
           relatedTransactionModel: "Escrow",
-          amountDifference: Math.abs(payment.amount - escrow.sellerAmount),
+          amountDifference: Math.abs(diff),
+        });
+        await createRecord(report._id, {
+          source: "payout",
+          expectedType: "payout",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.sellerAmount,
+          actualType: "payout",
+          actualId: payment._id, actualModel: "Payment",
+          actualAmount: payment.amount,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
         });
         unreconciled++;
         continue;
       }
 
-      // Check if payout is still pending for too long
       if (payment.status === "pending") {
         const hoursPending = (Date.now() - new Date(escrow.releasedAt).getTime()) / (1000 * 60 * 60);
         if (hoursPending > 24) {
@@ -562,26 +963,248 @@ export const reconcilePayouts = async (startDate, endDate, report) => {
       reconciled++;
     }
 
-    return { total, reconciled, unreconciled };
+    return { total, reconciled, unreconciled, missing, missingTotal };
   } catch (err) {
     logError("Payout reconciliation failed", err);
-    return { total: 0, reconciled: 0, unreconciled: 0 };
+    return { total: 0, reconciled: 0, unreconciled: 0, missing: 0, missingTotal: 0 };
   }
 };
 
 // =============================
-// � DETECT MISSING CALLBACKS
+// 🔄 RECONCILE RELEASES
+// =============================
+export const reconcileReleases = async (startDate, endDate, report) => {
+  try {
+    const escrows = await Escrow.find({
+      releasedAt: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    const vaults = await EscrowVault.find({
+      releasedAt: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    let total = escrows.length + vaults.length;
+    let reconciled = 0;
+    let unreconciled = 0;
+    let matched = 0;
+    let unmatched = 0;
+
+    for (const escrow of escrows) {
+      const txn = await Transaction.findOne({
+        escrowId: escrow._id,
+        type: "escrow_release",
+      }).lean();
+
+      if (!txn) {
+        unmatched++;
+        await report.addIssue({
+          type: "release_mismatch",
+          severity: "high",
+          description: `Escrow released but no release transaction: ${escrow._id}`,
+          transactionId: escrow._id,
+          transactionModel: "Escrow",
+          amountDifference: escrow.amount,
+        });
+        await createRecord(report._id, {
+          source: "release",
+          expectedType: "escrow_release",
+          expectedId: escrow._id, expectedModel: "Escrow",
+          expectedAmount: escrow.amount,
+          outcome: "missing",
+          amountDifference: escrow.amount,
+          statusExpected: escrow.status,
+        });
+        unreconciled++;
+        continue;
+      }
+
+      if (txn.status !== "success") {
+        unmatched++;
+        await report.addIssue({
+          type: "release_mismatch",
+          severity: "medium",
+          description: `Release transaction not successful for escrow ${escrow._id}`,
+          transactionId: txn._id,
+          transactionModel: "Transaction",
+          relatedTransactionId: escrow._id,
+          relatedTransactionModel: "Escrow",
+          amountDifference: escrow.amount,
+        });
+        unreconciled++;
+        continue;
+      }
+
+      matched++;
+      reconciled++;
+    }
+
+    for (const vault of vaults) {
+      const txn = await Transaction.findOne({
+        escrowId: vault._id,
+        type: "escrow_release",
+      }).lean();
+
+      if (!txn) {
+        unmatched++;
+        await report.addIssue({
+          type: "release_mismatch",
+          severity: "high",
+          description: `EscrowVault released but no release transaction: ${vault._id}`,
+          transactionId: vault._id,
+          transactionModel: "EscrowVault",
+          amountDifference: vault.amount,
+        });
+        await createRecord(report._id, {
+          source: "release",
+          expectedType: "vault_release",
+          expectedId: vault._id, expectedModel: "EscrowVault",
+          expectedAmount: vault.amount,
+          outcome: "missing",
+          statusExpected: vault.status,
+        });
+        unreconciled++;
+        continue;
+      }
+
+      matched++;
+      reconciled++;
+    }
+
+    return { total, reconciled, unreconciled, matched, unmatched };
+  } catch (err) {
+    logError("Release reconciliation failed", err);
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, unmatched: 0 };
+  }
+};
+
+// =============================
+// 🔄 RECONCILE EXPECTED VS RECEIVED
+// =============================
+export const reconcileExpectedVsReceived = async (startDate, endDate, report) => {
+  try {
+    // ── Expected: Payments created (initiations) ───────────────
+    const expectedPayments = await Payment.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: { $in: ["pending", "success"] },
+    }).lean();
+
+    // ── Expected: Bids placed ──────────────────────────────────
+    const expectedBids = await Bid.find({
+      paidAt: { $gte: startDate, $lte: endDate },
+      status: "paid",
+    }).lean();
+
+    // ── Expected: Escrows created ──────────────────────────────
+    const expectedEscrows = await Escrow.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    }).lean();
+
+    // ── Actual: Successful M-Pesa transactions ─────────────────
+    const actualReceived = await MpesaTransaction.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: "success",
+    }).lean();
+
+    // ── Actual: Successful payments ────────────────────────────
+    const actualPayments = await Payment.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+      status: "success",
+      mode: "mpesa",
+    }).lean();
+
+    let total = expectedPayments.length + expectedBids.length + expectedEscrows.length + actualReceived.length;
+    let reconciled = 0;
+    let unreconciled = 0;
+    let matched = 0;
+    let unmatched = 0;
+    let missing = 0;
+    let overpaid = 0;
+    let underpaid = 0;
+    let expectedTotal = 0;
+    let actualTotal = 0;
+    let overpaidTotal = 0;
+    let underpaidTotal = 0;
+    let missingTotal = 0;
+
+    const actualMap = new Map();
+    for (const a of actualPayments) {
+      if (a.checkoutRequestId) actualMap.set(a.checkoutRequestId, a);
+    }
+
+    for (const exp of expectedPayments) {
+      expectedTotal += exp.amount;
+      if (!exp.checkoutRequestId) {
+        unmatched++;
+        continue;
+      }
+
+      const actual = actualMap.get(exp.checkoutRequestId);
+      if (!actual) {
+        missing++;
+        missingTotal += exp.amount;
+        await createRecord(report._id, {
+          source: "expected_vs_received",
+          expectedType: "payment",
+          expectedId: exp._id, expectedModel: "Payment",
+          expectedAmount: exp.amount, expectedRef: exp.checkoutRequestId,
+          expectedDate: exp.createdAt,
+          outcome: "missing",
+          amountDifference: exp.amount,
+          user: exp.user,
+          car: exp.car,
+          statusExpected: exp.status,
+        });
+        continue;
+      }
+
+      actualTotal += actual.amount;
+
+      if (actual.amount !== exp.amount) {
+        const diff = actual.amount - exp.amount;
+        if (diff > 0) { overpaid++; overpaidTotal += diff; }
+        else { underpaid++; underpaidTotal += Math.abs(diff); }
+        await createRecord(report._id, {
+          source: "expected_vs_received",
+          expectedType: "payment",
+          expectedId: exp._id, expectedModel: "Payment",
+          expectedAmount: exp.amount, expectedRef: exp.checkoutRequestId,
+          expectedDate: exp.createdAt,
+          actualType: "payment",
+          actualId: actual._id, actualModel: "Payment",
+          actualAmount: actual.amount, actualRef: actual.mpesaReceipt,
+          actualDate: actual.createdAt,
+          outcome: diff > 0 ? "overpaid" : "underpaid",
+          amountDifference: diff,
+          user: exp.user,
+          car: exp.car,
+          statusExpected: exp.status,
+          statusActual: actual.status,
+        });
+        unmatched++;
+        continue;
+      }
+
+      matched++;
+      reconciled++;
+    }
+
+    return { total, reconciled, unreconciled, matched, unmatched, missing, overpaid, underpaid, expectedTotal, actualTotal, overpaidTotal, underpaidTotal, missingTotal };
+  } catch (err) {
+    logError("Expected vs received reconciliation failed", err);
+    return { total: 0, reconciled: 0, unreconciled: 0, matched: 0, unmatched: 0, missing: 0, overpaid: 0, underpaid: 0, expectedTotal: 0, actualTotal: 0, overpaidTotal: 0, underpaidTotal: 0, missingTotal: 0 };
+  }
+};
+
+// =============================
+// 🔍 DETECT MISSING CALLBACKS
 // =============================
 export const detectMissingCallbacks = async (startDate, endDate) => {
   try {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-
-    const missingCallbacks = await MpesaTransaction.find({
+    return await MpesaTransaction.find({
       status: "pending",
       createdAt: { $lte: thirtyMinutesAgo },
     }).lean();
-
-    return missingCallbacks;
   } catch (err) {
     logError("Detect missing callbacks failed", err);
     return [];
@@ -593,7 +1216,6 @@ export const detectMissingCallbacks = async (startDate, endDate) => {
 // =============================
 export const detectDuplicateCallbacks = async (startDate, endDate) => {
   try {
-    // Find duplicate checkoutRequestIDs
     const duplicateCheckoutIds = await Payment.aggregate([
       {
         $match: {
@@ -601,19 +1223,10 @@ export const detectDuplicateCallbacks = async (startDate, endDate) => {
           checkoutRequestId: { $ne: null },
         },
       },
-      {
-        $group: {
-          _id: "$checkoutRequestId",
-          count: { $sum: 1 },
-          payments: { $push: "$_id" },
-        },
-      },
-      {
-        $match: { count: { $gt: 1 } },
-      },
+      { $group: { _id: "$checkoutRequestId", count: { $sum: 1 }, payments: { $push: "$_id" } } },
+      { $match: { count: { $gt: 1 } } },
     ]);
 
-    // Find duplicate mpesaReceipts
     const duplicateReceipts = await Payment.aggregate([
       {
         $match: {
@@ -621,36 +1234,24 @@ export const detectDuplicateCallbacks = async (startDate, endDate) => {
           mpesaReceipt: { $ne: null },
         },
       },
-      {
-        $group: {
-          _id: "$mpesaReceipt",
-          count: { $sum: 1 },
-          payments: { $push: "$_id" },
-        },
-      },
-      {
-        $match: { count: { $gt: 1 } },
-      },
+      { $group: { _id: "$mpesaReceipt", count: { $sum: 1 }, payments: { $push: "$_id" } } },
+      { $match: { count: { $gt: 1 } } },
     ]);
 
     const duplicates = [];
 
     for (const dup of duplicateCheckoutIds) {
       const payment = await Payment.findById(dup.payments[0]).lean();
-      duplicates.push({
-        _id: payment._id,
-        checkoutRequestID: dup._id,
-        amount: payment.amount,
-      });
+      if (payment) {
+        duplicates.push({ _id: payment._id, checkoutRequestID: dup._id, amount: payment.amount });
+      }
     }
 
     for (const dup of duplicateReceipts) {
       const payment = await Payment.findById(dup.payments[0]).lean();
-      duplicates.push({
-        _id: payment._id,
-        mpesaReceipt: dup._id,
-        amount: payment.amount,
-      });
+      if (payment) {
+        duplicates.push({ _id: payment._id, mpesaReceipt: dup._id, amount: payment.amount });
+      }
     }
 
     return duplicates;
@@ -666,8 +1267,6 @@ export const detectDuplicateCallbacks = async (startDate, endDate) => {
 export const detectAmountMismatches = async (startDate, endDate) => {
   try {
     const mismatches = [];
-
-    // Match MpesaTransaction with Payment by checkoutRequestID
     const mpesaTransactions = await MpesaTransaction.find({
       createdAt: { $gte: startDate, $lte: endDate },
       status: "success",
@@ -702,7 +1301,6 @@ export const detectOrphanTransactions = async (startDate, endDate) => {
   try {
     const orphans = [];
 
-    // Find Payments without corresponding MpesaTransaction
     const payments = await Payment.find({
       createdAt: { $gte: startDate, $lte: endDate },
       mode: "mpesa",
@@ -713,17 +1311,11 @@ export const detectOrphanTransactions = async (startDate, endDate) => {
       const mpesa = await MpesaTransaction.findOne({
         checkoutRequestID: payment.checkoutRequestId,
       }).lean();
-
       if (!mpesa) {
-        orphans.push({
-          _id: payment._id,
-          model: "Payment",
-          amount: payment.amount,
-        });
+        orphans.push({ _id: payment._id, model: "Payment", amount: payment.amount });
       }
     }
 
-    // Find MpesaTransactions without corresponding Payment
     const mpesaTransactions = await MpesaTransaction.find({
       createdAt: { $gte: startDate, $lte: endDate },
       status: "success",
@@ -733,13 +1325,8 @@ export const detectOrphanTransactions = async (startDate, endDate) => {
       const payment = await Payment.findOne({
         checkoutRequestId: mpesa.checkoutRequestID,
       }).lean();
-
       if (!payment) {
-        orphans.push({
-          _id: mpesa._id,
-          model: "MpesaTransaction",
-          amount: mpesa.amount,
-        });
+        orphans.push({ _id: mpesa._id, model: "MpesaTransaction", amount: mpesa.amount });
       }
     }
 
@@ -755,11 +1342,23 @@ export const detectOrphanTransactions = async (startDate, endDate) => {
 // =============================
 export const sendAlerts = async (issues, report) => {
   try {
-    const criticalIssues = issues.filter((issue) => issue.severity === "critical");
-    const highIssues = issues.filter((issue) => issue.severity === "high");
+    const criticalIssues = issues.filter((i) => i.severity === "critical");
+    const highIssues = issues.filter((i) => i.severity === "high");
 
-    // Send in-app notifications to finance team
     for (const issue of criticalIssues) {
+      await AdminAlert.create({
+        type: "payment_failure",
+        severity: "critical",
+        data: {
+          reportId: report.reportId,
+          issueType: issue.type,
+          description: issue.description,
+          transactionId: issue.transactionId,
+          amountDifference: issue.amountDifference,
+        },
+        read: false,
+      });
+
       await sendNotification({
         title: "Critical Reconciliation Issue",
         message: `${issue.type}: ${issue.description}`,
@@ -767,11 +1366,25 @@ export const sendAlerts = async (issues, report) => {
       }).catch((e) => logWarn("Failed to send notification", { error: e.message }));
     }
 
-    // Log alerts
+    for (const issue of highIssues) {
+      await AdminAlert.create({
+        type: "payment_failure",
+        severity: "warning",
+        data: {
+          reportId: report.reportId,
+          issueType: issue.type,
+          description: issue.description,
+          transactionId: issue.transactionId,
+          amountDifference: issue.amountDifference,
+        },
+        read: false,
+      });
+    }
+
     logInfo("Reconciliation alerts sent", {
       reportId: report.reportId,
-      criticalIssues: criticalIssues.length,
-      highIssues: highIssues.length,
+      critical: criticalIssues.length,
+      high: highIssues.length,
     });
 
     return { sent: criticalIssues.length + highIssues.length };
@@ -787,18 +1400,25 @@ export const sendAlerts = async (issues, report) => {
 export const resolveIssue = async (reportId, issueIndex, resolution, userId) => {
   try {
     const report = await ReconciliationReport.findOne({ reportId });
-    if (!report) {
-      throw new Error("Report not found");
-    }
+    if (!report) throw new Error("Report not found");
 
     await report.resolveIssue(issueIndex, userId, resolution.notes);
 
-    logInfo("Reconciliation issue resolved", {
-      reportId,
-      issueIndex,
-      resolvedBy: userId,
-    });
+    const record = await ReconciliationRecord.findOne({
+      report: report._id,
+      outcome: { $in: ["unmatched", "missing", "overpaid", "underpaid"] },
+      resolved: false,
+    }).sort({ createdAt: 1 });
 
+    if (record) {
+      record.resolved = true;
+      record.resolvedAt = new Date();
+      record.resolvedBy = userId;
+      record.resolutionNotes = resolution.notes;
+      await record.save();
+    }
+
+    logInfo("Reconciliation issue resolved", { reportId, issueIndex, resolvedBy: userId });
     return report;
   } catch (err) {
     logError("Resolve issue failed", err);
@@ -807,42 +1427,32 @@ export const resolveIssue = async (reportId, issueIndex, resolution, userId) => 
 };
 
 // =============================
-// 📊 CALCULATE FINANCIAL INTEGRITY SCORE
+// 📊 FINANCIAL INTEGRITY SCORE
 // =============================
 export const calculateFinancialIntegrityScore = async (startDate, endDate, report) => {
   try {
     let score = 100;
-    let issues = 0;
 
-    // Deduct points for each issue based on severity
     for (const issue of report.issues) {
-      issues++;
-      if (issue.severity === "critical") {
-        score -= 25;
-      } else if (issue.severity === "high") {
-        score -= 10;
-      } else if (issue.severity === "medium") {
-        score -= 5;
-      } else if (issue.severity === "low") {
-        score -= 1;
-      }
+      if (issue.severity === "critical") score -= 25;
+      else if (issue.severity === "high") score -= 10;
+      else if (issue.severity === "medium") score -= 5;
+      else if (issue.severity === "low") score -= 1;
     }
 
-    // Ensure score doesn't go below 0
     score = Math.max(0, score);
 
-    // Additional checks
     const negativeBalances = await detectNegativeBalances(startDate, endDate);
     if (negativeBalances.length > 0) {
       score -= negativeBalances.length * 5;
-      for (const balance of negativeBalances) {
+      for (const b of negativeBalances) {
         await report.addIssue({
           type: "negative_balance",
           severity: "high",
-          description: `Negative balance detected: ${balance.entity} ${balance.entityId}`,
-          transactionId: balance.entityId,
-          transactionModel: balance.entity,
-          amountDifference: balance.amount,
+          description: `Negative balance detected: ${b.entity} ${b.entityId}`,
+          transactionId: b.entityId,
+          transactionModel: b.entity,
+          amountDifference: b.amount,
         });
       }
     }
@@ -850,46 +1460,55 @@ export const calculateFinancialIntegrityScore = async (startDate, endDate, repor
     const unreleasedEscrows = await detectUnreleasedEscrows(startDate, endDate);
     if (unreleasedEscrows.length > 0) {
       score -= unreleasedEscrows.length * 3;
-      for (const escrow of unreleasedEscrows) {
+      for (const e of unreleasedEscrows) {
         await report.addIssue({
           type: "unreleased_escrow",
           severity: "medium",
-          description: `Escrow held for ${escrow.daysHeld} days without release`,
-          transactionId: escrow._id,
+          description: `Escrow held for ${e.daysHeld} days without release`,
+          transactionId: e._id,
           transactionModel: "Escrow",
-          amountDifference: escrow.amount,
+          amountDifference: e.amount,
         });
       }
     }
 
-    // Calculate ledger vs gateway balance
-    const ledgerGatewayMismatch = await compareLedgerVsGateway(startDate, endDate);
-    if (ledgerGatewayMismatch.mismatch > 0) {
+    const ledgerGateway = await compareLedgerVsGateway(startDate, endDate);
+    if (ledgerGateway.mismatch > 0) {
       score -= 15;
       await report.addIssue({
         type: "ledger_gateway_mismatch",
         severity: "high",
-        description: `Ledger vs gateway mismatch: ${ledgerGatewayMismatch.mismatch}`,
-        amountDifference: ledgerGatewayMismatch.mismatch,
+        description: `Ledger vs gateway mismatch: ${ledgerGateway.mismatch}`,
+        amountDifference: ledgerGateway.mismatch,
       });
     }
 
-    // Calculate escrow balance mismatch
-    const escrowBalanceMismatch = await compareEscrowBalances(startDate, endDate);
-    if (escrowBalanceMismatch.mismatch > 0) {
+    const escrowBalance = await compareEscrowBalances(startDate, endDate);
+    if (escrowBalance.mismatch > 0) {
       score -= 10;
       await report.addIssue({
         type: "escrow_balance_mismatch",
         severity: "medium",
-        description: `Escrow balance mismatch: ${escrowBalanceMismatch.mismatch}`,
-        amountDifference: escrowBalanceMismatch.mismatch,
+        description: `Escrow balance mismatch: ${escrowBalance.mismatch}`,
+        amountDifference: escrowBalance.mismatch,
+      });
+    }
+
+    const vaultBalance = await compareVaultBalances(startDate, endDate);
+    if (vaultBalance.mismatch > 0) {
+      score -= 10;
+      await report.addIssue({
+        type: "vault_balance_mismatch",
+        severity: "medium",
+        description: `Vault balance mismatch: ${vaultBalance.mismatch}`,
+        amountDifference: vaultBalance.mismatch,
       });
     }
 
     return Math.max(0, score);
   } catch (err) {
     logError("Calculate financial integrity score failed", err);
-    return 50; // Return neutral score on error
+    return 50;
   }
 };
 
@@ -900,32 +1519,20 @@ export const detectNegativeBalances = async (startDate, endDate) => {
   try {
     const negativeBalances = [];
 
-    // Check for negative payment amounts
     const negativePayments = await Payment.find({
       createdAt: { $gte: startDate, $lte: endDate },
       amount: { $lt: 0 },
     }).lean();
-
-    for (const payment of negativePayments) {
-      negativeBalances.push({
-        entityId: payment._id,
-        entity: "Payment",
-        amount: payment.amount,
-      });
+    for (const p of negativePayments) {
+      negativeBalances.push({ entityId: p._id, entity: "Payment", amount: p.amount });
     }
 
-    // Check for negative escrow amounts
     const negativeEscrows = await Escrow.find({
       createdAt: { $gte: startDate, $lte: endDate },
       amount: { $lt: 0 },
     }).lean();
-
-    for (const escrow of negativeEscrows) {
-      negativeBalances.push({
-        entityId: escrow._id,
-        entity: "Escrow",
-        amount: escrow.amount,
-      });
+    for (const e of negativeEscrows) {
+      negativeBalances.push({ entityId: e._id, entity: "Escrow", amount: e.amount });
     }
 
     return negativeBalances;
@@ -941,7 +1548,6 @@ export const detectNegativeBalances = async (startDate, endDate) => {
 export const detectUnreleasedEscrows = async (startDate, endDate) => {
   try {
     const unreleasedEscrows = [];
-
     const heldEscrows = await Escrow.find({
       status: "held",
       createdAt: { $gte: startDate, $lte: endDate },
@@ -949,8 +1555,6 @@ export const detectUnreleasedEscrows = async (startDate, endDate) => {
 
     for (const escrow of heldEscrows) {
       const daysHeld = (Date.now() - new Date(escrow.createdAt).getTime()) / (1000 * 60 * 60 * 24);
-
-      // Flag escrows held for more than 7 days
       if (daysHeld > 7) {
         unreleasedEscrows.push({
           _id: escrow._id,
@@ -972,45 +1576,19 @@ export const detectUnreleasedEscrows = async (startDate, endDate) => {
 // =============================
 export const compareLedgerVsGateway = async (startDate, endDate) => {
   try {
-    // Calculate ledger total from Payment records
     const ledgerResult = await Payment.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startDate, $lte: endDate },
-          status: "success",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" },
-        },
-      },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: "success" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
-
     const ledgerTotal = ledgerResult[0]?.total || 0;
 
-    // Calculate gateway total from MpesaTransaction records
     const gatewayResult = await MpesaTransaction.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startDate, $lte: endDate },
-          status: "success",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" },
-        },
-      },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: "success" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
-
     const gatewayTotal = gatewayResult[0]?.total || 0;
 
-    const mismatch = Math.abs(ledgerTotal - gatewayTotal);
-
-    return { ledgerTotal, gatewayTotal, mismatch };
+    return { ledgerTotal, gatewayTotal, mismatch: Math.abs(ledgerTotal - gatewayTotal) };
   } catch (err) {
     logError("Compare ledger vs gateway failed", err);
     return { ledgerTotal: 0, gatewayTotal: 0, mismatch: 0 };
@@ -1022,48 +1600,56 @@ export const compareLedgerVsGateway = async (startDate, endDate) => {
 // =============================
 export const compareEscrowBalances = async (startDate, endDate) => {
   try {
-    // Calculate total held escrow amounts
     const heldResult = await Escrow.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startDate, $lte: endDate },
-          status: "held",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" },
-        },
-      },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: "held" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
-
     const heldTotal = heldResult[0]?.total || 0;
 
-    // Calculate total corresponding payment amounts
     const paymentResult = await Payment.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: startDate, $lte: endDate },
-          referenceModel: "Escrow",
-          status: "success",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$amount" },
-        },
-      },
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, referenceModel: "Escrow", status: "success" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
-
     const paymentTotal = paymentResult[0]?.total || 0;
 
-    const mismatch = Math.abs(heldTotal - paymentTotal);
-
-    return { heldTotal, paymentTotal, mismatch };
+    return { heldTotal, paymentTotal, mismatch: Math.abs(heldTotal - paymentTotal) };
   } catch (err) {
     logError("Compare escrow balances failed", err);
     return { heldTotal: 0, paymentTotal: 0, mismatch: 0 };
   }
 };
+
+// =============================
+// 📊 COMPARE VAULT BALANCES
+// =============================
+export const compareVaultBalances = async (startDate, endDate) => {
+  try {
+    const vaultResult = await EscrowVault.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, status: { $in: ["escrow_locked", "inspection_pending", "inspection_complete", "otp_sent"] } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const vaultTotal = vaultResult[0]?.total || 0;
+
+    const txnResult = await Transaction.aggregate([
+      { $match: { createdAt: { $gte: startDate, $lte: endDate }, type: "escrow_deposit", status: "success" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const txnTotal = txnResult[0]?.total || 0;
+
+    return { vaultTotal, txnTotal, mismatch: Math.abs(vaultTotal - txnTotal) };
+  } catch (err) {
+    logError("Compare vault balances failed", err);
+    return { vaultTotal: 0, txnTotal: 0, mismatch: 0 };
+  }
+};
+
+// =============================
+// 📝 CREATE RECONCILIATION RECORD
+// =============================
+async function createRecord(reportId, data) {
+  try {
+    return await ReconciliationRecord.create({ report: reportId, ...data });
+  } catch (err) {
+    logWarn("Failed to create reconciliation record", { error: err.message });
+  }
+}

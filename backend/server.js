@@ -119,6 +119,7 @@ import { startScheduler as startHealthScoreScheduler } from "./services/dealerHe
 import { startScheduler as startMarketTrendScheduler } from "./services/marketTrendScheduler.js";
 import { startScheduler as startMarketplaceHealthScheduler } from "./services/marketplaceHealthScheduler.js";
 import { startSliScheduler } from "./services/sliScheduler.js";
+import { startAllReconciliationCrons } from "./services/reconciliationCron.js";
 import { startAllWorkers } from "./infrastructure/queues/workerManager.js";
 import { initializeQueues } from "./infrastructure/queues/index.js";
 import { initPostHog } from "./utils/posthog.js";
@@ -552,9 +553,7 @@ app.use("/api/bids", idempotencyCheck, csrfProtection, bidRoutes); // Idempotenc
 app.use("/api/dealer", dealerRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);
 
-// M-Pesa callback gets IP whitelist before routes mount
-app.use("/api/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
-app.use("/api/payments", idempotencyCheck, csrfProtection, externalTimeout, paymentRoutes); // Idempotency + CSRF for payment operations
+app.use("/api/payments", externalTimeout, paymentRoutes);
 
 app.use("/api/escrow", idempotencyCheck, csrfProtection, escrowRoutes); // Idempotency + CSRF for escrow operations
 app.use("/api/chat", chatRoutes);
@@ -569,7 +568,7 @@ app.use("/api/saved-searches", savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
 app.use("/api/inspections", inspectionRoutes);
-app.use("/api/escrow-vault", escrowVaultRoutes);
+app.use("/api/escrow-vault", idempotencyCheck, escrowVaultRoutes);
 app.use("/api/security-logs", securityLogRoutes);
 app.use("/api/sms-bidding", smsBiddingRoutes);
 app.use("/api/inspector-applications", inspectorApplicationRoutes);
@@ -803,6 +802,14 @@ const bootstrap = async () => {
     } catch (err) {
       logError("Failed to start SLI scheduler", err);
       console.log("❌ Failed to start SLI scheduler:", err);
+    }
+
+    try {
+      startAllReconciliationCrons();
+      console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)");
+    } catch (err) {
+      logError("Failed to start reconciliation crons", err);
+      console.log("❌ Failed to start reconciliation crons:", err);
     }
 
     if (process.env.REDIS_URL || process.env.REDIS_HOST) {

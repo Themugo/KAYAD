@@ -1,7 +1,8 @@
-// backend/routes/reconciliationRoutes.js - Production Hardened v1.0
+// backend/routes/reconciliationRoutes.js - Production v2.0
 // ─────────────────────────────────────────────────────────────
-// Enterprise payment reconciliation routes
-// Provides API endpoints for reconciliation dashboard and reporting
+// Enterprise reconciliation API routes.
+// Full admin dashboard, per-record drill-down, directional
+// breakdowns, alerting, and export endpoints.
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
@@ -13,10 +14,15 @@ import {
   runReconciliationReport,
   getReconciliationReports,
   getReconciliationReportById,
+  getReconciliationRecords,
+  getDirectionalBreakdown,
   resolveReconciliationIssue,
   getFinancialIntegrityScore,
   getNegativeBalances,
   getUnreleasedEscrows,
+  getReconciliationAlerts,
+  markAlertRead,
+  markAllAlertsRead,
   exportReconciliationReport,
 } from "../controllers/reconciliationController.js";
 
@@ -26,55 +32,59 @@ const router = express.Router();
 // 🔒 GLOBAL PROTECTION
 // =============================
 router.use(protect);
-router.use(allowRoles("admin", "superadmin", "finance"));
+router.use(allowRoles("admin", "superadmin", "finance", "accounts"));
 
 // =============================
-// 📊 DASHBOARD ENDPOINTS
+// 📊 DASHBOARD
 // =============================
-
-// GET /api/reconciliation/dashboard - Get reconciliation dashboard
 router.get("/dashboard", asyncHandler(getReconciliationDashboard));
-
-// GET /api/reconciliation/integrity-score - Get financial integrity score
 router.get("/integrity-score", asyncHandler(getFinancialIntegrityScore));
-
-// GET /api/reconciliation/negative-balances - Get negative balances
 router.get("/negative-balances", asyncHandler(getNegativeBalances));
-
-// GET /api/reconciliation/unreleased-escrows - Get unreleased escrows
 router.get("/unreleased-escrows", asyncHandler(getUnreleasedEscrows));
 
 // =============================
-// 🔄 RECONCILIATION ENDPOINTS
+// 📊 DIRECTIONAL BREAKDOWN
 // =============================
+router.get("/directional-breakdown", asyncHandler(getDirectionalBreakdown));
 
-// POST /api/reconciliation/run - Run reconciliation report
+// =============================
+// 🔄 RUN
+// =============================
 router.post("/run", asyncHandler(runReconciliationReport));
 
-// GET /api/reconciliation/reports - Get reconciliation reports
+// =============================
+// 📄 REPORTS
+// =============================
 router.get("/reports", asyncHandler(getReconciliationReports));
-
-// GET /api/reconciliation/reports/:id - Get reconciliation report by ID
 router.get("/reports/:id", validateObjectId, asyncHandler(getReconciliationReportById));
 
-// POST /api/reconciliation/reports/:reportId/resolve - Resolve reconciliation issue
-router.post("/reports/:reportId/resolve", validateObjectId, asyncHandler(resolveReconciliationIssue));
+// =============================
+// 📄 PER-RECORD DRILL-DOWN
+// =============================
+router.get("/reports/:reportId/records", asyncHandler(getReconciliationRecords));
 
 // =============================
-// 📄 EXPORT ENDPOINTS
+// ✅ RESOLVE ISSUE
 // =============================
+router.post("/reports/:reportId/resolve", asyncHandler(resolveReconciliationIssue));
 
-// GET /api/reconciliation/export/:reportId/:format - Export reconciliation report
+// =============================
+// 🚨 ALERTS
+// =============================
+router.get("/alerts", asyncHandler(getReconciliationAlerts));
+router.post("/alerts/:id/read", asyncHandler(markAlertRead));
+router.post("/alerts/read-all", asyncHandler(markAllAlertsRead));
+
+// =============================
+// 📄 EXPORT
+// =============================
 router.get("/export/:reportId/:format", asyncHandler(exportReconciliationReport));
 
 // =============================
 // 🚨 FALLBACK
 // =============================
 router.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Reconciliation route not found",
-  });
+  res.status(404).json({ success: false, message: "Reconciliation route not found" });
 });
 
 export default router;

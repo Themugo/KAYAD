@@ -1,16 +1,14 @@
-// backend/models/ReconciliationReport.js - Production Hardened v5.0
+// backend/models/ReconciliationReport.js - Production v6.0
 // ─────────────────────────────────────────────────────────────
-// Reconciliation report model for payment reconciliation system
-// Tracks reconciliation results and detected issues across payment systems
+// Aggregated reconciliation report snapshot.
+// Tracks summary stats, directional breakdowns (overpaid/underpaid),
+// and detailed issues across all payment/escrow/financial systems.
 // ─────────────────────────────────────────────────────────────
 
 import mongoose from "mongoose";
 
 const reconciliationReportSchema = new mongoose.Schema(
   {
-    // =============================
-    // 📋 REPORT IDENTIFICATION
-    // =============================
     reportId: {
       type: String,
       required: true,
@@ -20,79 +18,80 @@ const reconciliationReportSchema = new mongoose.Schema(
 
     reportType: {
       type: String,
-      enum: ["mpesa_payment", "payment_escrow", "payment_subscription", "full_reconciliation"],
+      enum: [
+        "mpesa_payment",
+        "payment_escrow",
+        "payment_subscription",
+        "escrow_vault",
+        "refund_reconciliation",
+        "commission_reconciliation",
+        "payout_reconciliation",
+        "release_reconciliation",
+        "expected_vs_received",
+        "full_reconciliation",
+        "dashboard",
+        "integrity_score",
+      ],
       required: true,
       index: true,
     },
 
-    // =============================
-    // ⏰ TIME RANGE
-    // =============================
-    startTime: {
-      type: Date,
-      required: true,
-    },
+    startTime: { type: Date, required: true },
+    endTime: { type: Date, required: true },
 
-    endTime: {
-      type: Date,
-      required: true,
-    },
+    // ── Summary counts ──────────────────────────────────────────
+    totalTransactions: { type: Number, default: 0 },
+    reconciled: { type: Number, default: 0 },
+    unreconciled: { type: Number, default: 0 },
+    successRate: { type: Number, default: 0, min: 0, max: 100 },
 
-    // =============================
-    // 📊 SUMMARY STATISTICS
-    // =============================
-    totalTransactions: {
-      type: Number,
-      default: 0,
-    },
+    // ── Directional breakdown ──────────────────────────────────
+    matched: { type: Number, default: 0 },
+    unmatched: { type: Number, default: 0 },
+    missing: { type: Number, default: 0 },
+    overpaid: { type: Number, default: 0 },
+    underpaid: { type: Number, default: 0 },
 
-    reconciled: {
-      type: Number,
-      default: 0,
-    },
-
-    unreconciled: {
-      type: Number,
-      default: 0,
-    },
-
-    successRate: {
-      type: Number,
-      default: 0,
-      min: 0,
-      max: 100,
-    },
-
-    // =============================
-    // ⚠️ ISSUES DETECTED
-    // =============================
+    // ── Legacy issue counters ───────────────────────────────────
     issues: {
-      missingCallbacks: {
-        type: Number,
-        default: 0,
-      },
-      duplicateCallbacks: {
-        type: Number,
-        default: 0,
-      },
-      amountMismatches: {
-        type: Number,
-        default: 0,
-      },
-      orphanTransactions: {
-        type: Number,
-        default: 0,
-      },
+      missingCallbacks: { type: Number, default: 0 },
+      duplicateCallbacks: { type: Number, default: 0 },
+      amountMismatches: { type: Number, default: 0 },
+      orphanTransactions: { type: Number, default: 0 },
     },
 
-    // =============================
-    // 📝 DETAILED ISSUES
-    // =============================
+    // ── Directional financial totals ──────────────────────────
+    financials: {
+      expectedTotal: { type: Number, default: 0 },
+      actualTotal: { type: Number, default: 0 },
+      overpaidTotal: { type: Number, default: 0 },
+      underpaidTotal: { type: Number, default: 0 },
+      missingTotal: { type: Number, default: 0 },
+      feeMismatchTotal: { type: Number, default: 0 },
+    },
+
+    // ── Detailed issues ─────────────────────────────────────────
     issueDetails: [
       {
         type: {
           type: String,
-          enum: ["missing_callback", "duplicate_callback", "amount_mismatch", "orphan_transaction"],
+          enum: [
+            "missing_callback",
+            "duplicate_callback",
+            "amount_mismatch",
+            "orphan_transaction",
+            "stuck_transaction",
+            "missing_payout",
+            "negative_balance",
+            "unreleased_escrow",
+            "ledger_gateway_mismatch",
+            "escrow_balance_mismatch",
+            "vault_balance_mismatch",
+            "release_mismatch",
+            "refund_exceeds_original",
+            "overpaid",
+            "underpaid",
+          ],
           required: true,
         },
         severity: {
@@ -100,42 +99,34 @@ const reconciliationReportSchema = new mongoose.Schema(
           enum: ["low", "medium", "high", "critical"],
           required: true,
         },
-        description: {
-          type: String,
-          required: true,
-        },
-        transactionId: {
-          type: mongoose.Schema.Types.ObjectId,
-        },
+        description: { type: String, required: true },
+        transactionId: { type: mongoose.Schema.Types.ObjectId },
         transactionModel: {
           type: String,
-          enum: ["MpesaTransaction", "Payment", "Escrow", "Subscription"],
+          enum: [
+            "MpesaTransaction",
+            "Payment",
+            "Escrow",
+            "EscrowVault",
+            "Subscription",
+            "Bid",
+            "LedgerEntry",
+            "Transaction",
+            "User",
+          ],
         },
-        relatedTransactionId: {
-          type: mongoose.Schema.Types.ObjectId,
-        },
+        relatedTransactionId: { type: mongoose.Schema.Types.ObjectId },
         relatedTransactionModel: String,
         amountDifference: Number,
-        detectedAt: {
-          type: Date,
-          default: Date.now,
-        },
-        resolved: {
-          type: Boolean,
-          default: false,
-        },
+        detectedAt: { type: Date, default: Date.now },
+        resolved: { type: Boolean, default: false },
         resolvedAt: Date,
-        resolvedBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
+        resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         resolutionNotes: String,
       },
     ],
 
-    // =============================
-    // 📋 STATUS
-    // =============================
+    // ── Status ──────────────────────────────────────────────────
     status: {
       type: String,
       enum: ["pending", "in_progress", "completed", "failed"],
@@ -143,42 +134,25 @@ const reconciliationReportSchema = new mongoose.Schema(
       index: true,
     },
 
-    // =============================
-    // 📊 METADATA
-    // =============================
+    // ── Metadata ────────────────────────────────────────────────
     generatedBy: {
       type: String,
       enum: ["system", "manual"],
       default: "system",
     },
-
-    generatedByUser: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-
-    duration: {
-      type: Number, // milliseconds
-      default: 0,
-    },
-
+    generatedByUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    duration: { type: Number, default: 0 },
     errorMessage: String,
+    financialIntegrityScore: { type: Number, default: 100, min: 0, max: 100 },
 
-    // =============================
-    // 🔗 RECONCILIATION DATA
-    // =============================
-    reconciliationData: {
-      type: mongoose.Schema.Types.Mixed,
-      default: {},
-    },
+    // ── Reconciliation data blob ────────────────────────────────
+    reconciliationData: { type: mongoose.Schema.Types.Mixed, default: {} },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
 // =============================
-// 🔥 INDEXES (PERFORMANCE)
+// 🔥 INDEXES
 // =============================
 reconciliationReportSchema.index({ reportId: 1 });
 reconciliationReportSchema.index({ reportType: 1, createdAt: -1 });
@@ -188,7 +162,7 @@ reconciliationReportSchema.index({ "issueDetails.resolved": 1 });
 reconciliationReportSchema.index({ "issueDetails.severity": 1 });
 
 // =============================
-// ⚡ METHOD: GENERATE REPORT ID
+// ⚡ GENERATE REPORT ID
 // =============================
 reconciliationReportSchema.statics.generateReportId = function () {
   const timestamp = Date.now();
@@ -197,7 +171,7 @@ reconciliationReportSchema.statics.generateReportId = function () {
 };
 
 // =============================
-// ⚡ METHOD: CALCULATE SUCCESS RATE
+// ⚡ CALCULATE SUCCESS RATE
 // =============================
 reconciliationReportSchema.methods.calculateSuccessRate = function () {
   if (this.totalTransactions === 0) {
@@ -209,7 +183,7 @@ reconciliationReportSchema.methods.calculateSuccessRate = function () {
 };
 
 // =============================
-// ⚡ METHOD: ADD ISSUE
+// ⚡ ADD ISSUE
 // =============================
 reconciliationReportSchema.methods.addIssue = function (issue) {
   this.issueDetails.push({
@@ -218,17 +192,16 @@ reconciliationReportSchema.methods.addIssue = function (issue) {
     resolved: false,
   });
 
-  // Update issue counters
   if (issue.type === "missing_callback") this.issues.missingCallbacks++;
   if (issue.type === "duplicate_callback") this.issues.duplicateCallbacks++;
   if (issue.type === "amount_mismatch") this.issues.amountMismatches++;
-  if (issue.type === "orphan_transaction") this.issues.orphanTransactions++;
+  if (["orphan_transaction", "missing_payout"].includes(issue.type)) this.issues.orphanTransactions++;
 
   return this.save();
 };
 
 // =============================
-// ⚡ METHOD: RESOLVE ISSUE
+// ⚡ RESOLVE ISSUE
 // =============================
 reconciliationReportSchema.methods.resolveIssue = function (issueIndex, userId, notes) {
   if (issueIndex < 0 || issueIndex >= this.issueDetails.length) {
@@ -245,21 +218,21 @@ reconciliationReportSchema.methods.resolveIssue = function (issueIndex, userId, 
 };
 
 // =============================
-// ⚡ METHOD: GET UNRESOLVED ISSUES
+// ⚡ GET UNRESOLVED ISSUES
 // =============================
 reconciliationReportSchema.methods.getUnresolvedIssues = function () {
   return this.issueDetails.filter((issue) => !issue.resolved);
 };
 
 // =============================
-// ⚡ METHOD: GET CRITICAL ISSUES
+// ⚡ GET CRITICAL ISSUES
 // =============================
 reconciliationReportSchema.methods.getCriticalIssues = function () {
   return this.issueDetails.filter((issue) => issue.severity === "critical" && !issue.resolved);
 };
 
 // =============================
-// ⚡ METHOD: GET SUMMARY
+// ⚡ GET SUMMARY
 // =============================
 reconciliationReportSchema.methods.getSummary = function () {
   return {
@@ -270,17 +243,21 @@ reconciliationReportSchema.methods.getSummary = function () {
     totalTransactions: this.totalTransactions,
     reconciled: this.reconciled,
     unreconciled: this.unreconciled,
+    matched: this.matched,
+    unmatched: this.unmatched,
+    missing: this.missing,
+    overpaid: this.overpaid,
+    underpaid: this.underpaid,
     successRate: this.successRate,
+    financials: this.financials,
     issues: this.issues,
+    financialIntegrityScore: this.financialIntegrityScore,
     status: this.status,
     generatedBy: this.generatedBy,
     duration: this.duration,
   };
 };
 
-// =============================
-// 🧠 SAFE EXPORT
-// =============================
 const ReconciliationReport =
   mongoose.models.ReconciliationReport || mongoose.model("ReconciliationReport", reconciliationReportSchema);
 

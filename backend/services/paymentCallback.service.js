@@ -38,19 +38,28 @@ export const handleMpesaCallback = async (callbackData) => {
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
 
-    const payment = await Payment.findOne({
-      checkoutRequestId: checkoutId,
-    }).session(session);
+    // ── Atomic claim: only one callback can claim a payment ──
+    // Uses findOneAndUpdate with processed:false filter to
+    // prevent race conditions when Safaricom retries the callback
+    // while the first request's transaction is still in-flight.
+    // After the first transaction commits, the retry will see
+    // processed:true and return here instead of reprocessing.
+    const payment = await Payment.findOneAndUpdate(
+      { checkoutRequestId: checkoutId, processed: false },
+      { $set: { processed: true } },
+      { session, new: false },
+    );
 
     if (!payment) {
-      logWarn("Payment not found", { checkoutId });
+      const existing = await Payment.findOne({ checkoutRequestId: checkoutId }).session(session);
+      if (existing && existing.status === "success") {
+        logInfo("Callback idempotent: payment already succeeded", { checkoutId });
+        await session.commitTransaction();
+        return existing;
+      }
+      logWarn("Payment not found or already claimed", { checkoutId });
       await session.abortTransaction();
       return;
-    }
-
-    if (payment.status === "success") {
-      await session.commitTransaction();
-      return payment;
     }
 
     if (!success) {

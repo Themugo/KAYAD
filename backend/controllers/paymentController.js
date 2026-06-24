@@ -5,6 +5,7 @@ import Payment from "../models/Payment.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
+import { logInfo } from "../utils/logger.js";
 
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
@@ -129,6 +130,36 @@ export const mpesaCallback = async (req, res) => {
     console.error("CALLBACK ERROR:", err);
     return res.status(500).json({ success: false, message: err.message || "Callback processing failed" });
   }
+};
+
+// =============================
+// 💸 B2C CALLBACK
+// =============================
+export const b2cCallback = async (req, res) => {
+  try {
+    const { handleB2CCallback } = await import("../services/mpesaB2C.service.js");
+    const result = await handleB2CCallback(req.body);
+    if (result.success) {
+      // Log successful disbursement
+      logInfo("B2C disbursement succeeded", {
+        conversationID: result.conversationID,
+        transactionId: result.transactionId,
+        amount: result.amount,
+      });
+    }
+    return res.json({ ResultCode: 0, ResultDesc: "Success" });
+  } catch (err) {
+    console.error("B2C CALLBACK ERROR:", err);
+    return res.json({ ResultCode: 1, ResultDesc: "Processing failed" });
+  }
+};
+
+// =============================
+// ⏱️ B2C TIMEOUT
+// =============================
+export const b2cTimeout = async (req, res) => {
+  console.warn("B2C timeout received", { body: req.body });
+  return res.json({ ResultCode: 0, ResultDesc: "Timeout acknowledged" });
 };
 
 // =============================

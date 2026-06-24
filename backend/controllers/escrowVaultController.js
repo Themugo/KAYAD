@@ -71,15 +71,21 @@ export const webhookFundsReceived = async (req, res) => {
     const { id } = req.params;
     const { bankRef, amount } = req.body;
 
-    const vault = await EscrowVault.findById(id).populate("car seller buyer");
-    if (!vault) return res.status(404).json({ success: false, message: "Vault not found" });
+    // ── Atomic claim: only one webhook can fund a vault ──────
+    const vault = await EscrowVault.findOneAndUpdate(
+      { _id: id, status: "awaiting_payment" },
+      { $set: { status: "escrow_locked", fundedAt: new Date() } },
+      { new: true },
+    ).populate("car seller buyer");
 
-    if (vault.status !== "awaiting_payment") {
-      return res.json({ success: true, message: "Already funded" });
+    if (!vault) {
+      const existing = await EscrowVault.findById(id).populate("car seller buyer");
+      if (existing && existing.status !== "awaiting_payment") {
+        return res.json({ success: true, message: "Already funded" });
+      }
+      return res.status(404).json({ success: false, message: "Vault not found" });
     }
 
-    vault.status = "escrow_locked";
-    vault.fundedAt = new Date();
     addHistory(vault, "Funds confirmed in escrow vault", vault.buyer);
     await vault.save();
 
