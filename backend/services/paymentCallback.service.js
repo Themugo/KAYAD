@@ -220,6 +220,27 @@ export const handleMpesaCallback = async (callbackData) => {
       message: `KES ${payment.amount} received successfully. Receipt: ${receipt}`,
     });
 
+    if (payment.type === "package_upgrade") {
+      const planId = payment.metadata?.planId;
+      const PLANS = {
+        starter:    { limit: 10,  name: "Starter" },
+        growth:     { limit: 30,  name: "Growth" },
+        elite:      { limit: 100, name: "Elite" },
+        enterprise: { limit: 0,   name: "Enterprise" },
+      };
+      const plan = PLANS[planId];
+      if (plan) {
+        await User.findByIdAndUpdate(payment.user, {
+          $set: {
+            dealerPackage: planId,
+            packageListingMax: plan.limit,
+            packageExpiresAt: new Date(Date.now() + 30 * 86400000),
+          },
+        }).session(session);
+        logInfo("Package upgraded via payment", { userId: payment.user, planId });
+      }
+    }
+
     await session.commitTransaction();
     session.endSession();
 

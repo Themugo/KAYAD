@@ -7,6 +7,7 @@ import { ArrowUpRight, Check } from 'lucide-react';
 export const TABS_CONFIG = [
   { id: 'overview', label: 'Overview' },
   { id: 'listings', label: 'Listings' },
+  { id: 'leads',    label: 'Leads' },
   { id: 'bids',     label: 'Bids' },
   { id: 'escrows',  label: 'Escrows' },
   { id: 'earnings', label: 'Earnings' },

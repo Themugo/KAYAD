@@ -18,6 +18,14 @@ import Message from "../models/Message.js";
 import User from "../models/User.js";
 import Dealer from "../models/Dealer.js";
 import DealerTeam from "../models/DealerTeam.js";
+import { initiatePayment } from "../services/paymentService.js";
+
+const PLANS = {
+  starter:    { price: 2500,  limit: 10,  name: "Starter" },
+  growth:     { price: 6500,  limit: 30,  name: "Growth" },
+  elite:      { price: 14000, limit: 100, name: "Elite" },
+  enterprise: { price: 0,     limit: 0,   name: "Enterprise" },
+};
 import DealerVerification from "../models/DealerVerification.js";
 import DealerHealthScore from "../models/DealerHealthScore.js";
 import { sendNotification } from "../services/notification.service.js";
@@ -110,6 +118,16 @@ router.get(
 
     if (req.query.sold === "true") filter.sold = true;
     if (req.query.active === "true") filter.sold = false;
+    if (req.query.status) filter.status = req.query.status;
+    if (req.query.search) {
+      const q = req.query.search;
+      filter.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { brand: { $regex: q, $options: "i" } },
+        { model: { $regex: q, $options: "i" } },
+        { vin: { $regex: q, $options: "i" } },
+      ];
+    }
 
     const [cars, total] = await Promise.all([
       Car.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
@@ -648,6 +666,28 @@ router.post(
 );
 
 // =============================
+// 🗑️ BULK DELETE LISTINGS
+// =============================
+router.post(
+  "/cars/bulk-delete",
+  invalidateCache("dealer"),
+  asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, message: "No IDs provided" });
+    }
+
+    const result = await Car.deleteMany({ _id: { $in: ids }, dealer: req.user.id });
+
+    await logActionFromReq(req, "bulk_delete_listings", {
+      details: { count: result.deletedCount, ids },
+    });
+
+    res.json({ success: true, deletedCount: result.deletedCount });
+  }),
+);
+
+// =============================
 // ✅ MARK LISTING AS SOLD
 // =============================
 router.patch(
@@ -938,6 +978,61 @@ router.post(
     });
 
     res.json({ success: true, newEndTime: updated.auctionEnd, extensionsUsed: extensionCount + 1 });
+  }),
+);
+
+// =============================
+// 📦 SELF-SERVICE PLAN UPGRADE
+// =============================
+router.post(
+  "/upgrade",
+  asyncHandler(async (req, res) => {
+    const { planId, phone } = req.body;
+
+    const plan = PLANS[planId];
+    if (!plan) {
+      return res.status(400).json({ success: false, message: "Invalid plan" });
+    }
+
+    if (planId === "enterprise") {
+      return res.status(400).json({ success: false, message: "Contact sales for Enterprise plan" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Check if already on this plan
+    if (user.dealerPackage === planId && user.packageExpiresAt && new Date(user.packageExpiresAt) > new Date()) {
+      return res.status(400).json({ success: false, message: "Already on this plan" });
+    }
+
+    if (!phone) {
+      return res.status(400).json({ success: false, message: "M-Pesa phone number required" });
+    }
+
+    // Initiate M-Pesa payment
+    const result = await initiatePayment({
+      userId: req.user.id,
+      type: "package_upgrade",
+      amount: plan.price,
+      phone,
+      metadata: { planId, planName: plan.name },
+    });
+
+    if (!result.success) {
+      return res.status(502).json({ success: false, message: result.message || "Payment initiation failed" });
+    }
+
+    // Signal frontend to poll for payment completion
+    res.json({
+      success: true,
+      checkoutRequestID: result.checkoutRequestID,
+      mode: result.mode,
+      message: result.mode === "mpesa" ? "STK push sent. Enter PIN on your phone." : "Mock payment — refresh to see upgrade",
+      paymentId: result.payment._id,
+    });
   }),
 );
 

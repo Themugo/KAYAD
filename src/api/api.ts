@@ -382,6 +382,7 @@ const _dealerAPI = {
   acceptBid:  (carId: string, bidId: string) => api.post(`/dealer/cars/${carId}/accept-bid`, { bidId }).then(unwrap),
   rejectBid:  (carId: string, bidId: string) => api.post(`/dealer/cars/${carId}/reject-bid`, { bidId }).then(unwrap),
   bulkStatus: (body: any)         => api.patch('/dealer/cars/bulk-status', body).then(unwrap),
+  bulkDelete: (ids: string[])     => api.post('/dealer/cars/bulk-delete', { ids }).then(unwrap),
 
   // CSV export
   exportCSV:  (params: any)       => api.get('/dealer/cars', { params, responseType: 'blob' }).then(r => r.data),
@@ -405,6 +406,14 @@ const _dealerAPI = {
 
   // Milestones + completion score
   milestones:   ()       => api.get('/dealer/milestones').then(unwrap),
+
+  // Self-service plan upgrade
+  upgrade:      (body: any) => api.post('/dealer/upgrade', body).then(unwrap),
+
+  // Leads / inquiries
+  leads:           (params?: any) => api.get('/leads', { params }).then(unwrap),
+  updateLeadStage: (leadId: string, body: any) => api.put(`/leads/${leadId}/stage`, body).then(unwrap),
+  archiveLead:     (leadId: string) => api.put(`/leads/${leadId}/archive`).then(unwrap),
 };
 export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { dealerAPI, carsAPI, adminAPI, notifAPI, escrowAPI } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Plus, ChevronRight, TrendingUp, Car, Gavel, BarChart3, Users, Shield, Bell, BadgePercent } from 'lucide-react';
+import { Plus, ChevronRight, TrendingUp, Car, Gavel, BarChart3, Users, Shield, Bell, BadgePercent, MessageSquare } from 'lucide-react';
 
 // Extracted components
 import TeamTab from './components/TeamTab';
@@ -15,12 +15,13 @@ import DealerEarningsTab from './components/DealerEarningsTab';
 import DealerPackageTab from './components/DealerPackageTab';
 import DealerMilestoneTracker from './components/DealerMilestoneTracker';
 import ReferralStats from '../../components/ReferralStats';
+import DealerLeadsTab from './components/DealerLeadsTab';
 import { DealerKPIRow } from './components/DealerKPIWidgets';
 import { TABS_CONFIG } from './components/DashboardWidgets';
 
 const TABS = TABS_CONFIG.map(t => ({
   ...t,
-  icon: { overview: BarChart3, listings: Car, bids: Gavel, escrows: Shield, earnings: TrendingUp, package: BadgePercent, team: Users }[t.id],
+  icon: { overview: BarChart3, listings: Car, leads: MessageSquare, bids: Gavel, escrows: Shield, earnings: TrendingUp, package: BadgePercent, team: Users }[t.id],
 }));
 
 export default function DealerDashboard() {
@@ -37,6 +38,7 @@ export default function DealerDashboard() {
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [trends, setTrends]       = useState({});
   const [escrowLoading, setEscrowLoading] = useState(false);
+  const [healthData, setHealthData] = useState(null);
 
   const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
   const hour = new Date().getHours();
@@ -70,7 +72,8 @@ export default function DealerDashboard() {
       adminAPI.getConfig().catch(() => ({})),
       notifAPI.list({ limit: 1, unread: true }).catch(() => ({})),
       dealerAPI.analytics({ days: 30 }).catch(() => ({})),
-    ]).then(([s, c, cfg, n, a]) => {
+      dealerAPI.milestones().catch(() => ({})),
+    ]).then(([s, c, cfg, n, a, m]) => {
       if (ignore) return;
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
@@ -79,6 +82,11 @@ export default function DealerDashboard() {
       const an = a.analytics || a.data || a;
       if (an?.conversionRates) {
         setTrends(an.conversionRates);
+      }
+      const mData = m.milestones || m;
+      const mStats = mData?.stats || m?.stats || {};
+      if (mStats?.profileHealth) {
+        setHealthData(mStats.profileHealth);
       }
     }).finally(() => { if (!ignore) setLoading(false); });
     return () => { ignore = true; };
@@ -118,9 +126,25 @@ export default function DealerDashboard() {
                   Connected
                 </span>
               </div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0 }}>
-                {greeting}, {user?.businessName || user?.name || 'Dealer'}
-              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0 }}>
+                  {greeting}, {user?.businessName || user?.name || 'Dealer'}
+                </h1>
+                {healthData && (() => {
+                  const score = healthData.score || 0;
+                  const tier = score >= 90 ? { label: 'Elite', color: '#a855f7', bg: 'rgba(168,85,247,0.15)' }
+                    : score >= 75 ? { label: 'Platinum', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' }
+                    : score >= 50 ? { label: 'Gold', color: 'var(--gold)', bg: 'rgba(212,196,168,0.15)' }
+                    : score >= 25 ? { label: 'Silver', color: '#60a5fa', bg: 'rgba(96,165,250,0.15)' }
+                    : { label: 'Bronze', color: '#d97706', bg: 'rgba(217,119,6,0.15)' };
+                  return (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 900, letterSpacing: '0.06em', background: tier.bg, color: tier.color, border: `1px solid ${tier.color}40` }}>
+                      {tier.label}
+                      <span style={{ opacity: 0.6, fontWeight: 700 }}>{score}%</span>
+                    </span>
+                  );
+                })()}
+              </div>
               <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 6 }}>
                 {user?.location || 'Nairobi, Kenya'} · {dateStr} · {cars.length} listings
               </p>
@@ -227,6 +251,10 @@ export default function DealerDashboard() {
 
             {tab === 'listings' && (
               <DealerListingsTab cars={cars} totalCars={s.totalCars} setCars={setCars} toast={toast} />
+            )}
+
+            {tab === 'leads' && (
+              <DealerLeadsTab toast={toast} />
             )}
 
             {tab === 'bids' && (
