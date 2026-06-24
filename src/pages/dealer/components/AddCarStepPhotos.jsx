@@ -62,7 +62,7 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
         <div style={{ fontSize: 48, marginBottom: 12 }}>📷</div>
         <div style={{ fontWeight: 600, marginBottom: 6 }}>Drop photos here or click to browse</div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Up to 8 images · JPG, PNG, WEBP · Drag to reorder</div>
-        <input ref={fileInputRef} id="car-images" type="file" multiple accept="image/*" onChange={handleImages} style={{ display: 'none' }} />
+        <input ref={fileInputRef} id="car-images" type="file" multiple accept="image/*" capture="environment" onChange={handleImages} style={{ display: 'none' }} />
       </div>
 
       {previews.length > 0 && (

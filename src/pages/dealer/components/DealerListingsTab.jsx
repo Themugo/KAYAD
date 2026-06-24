@@ -218,6 +218,15 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                     </button>
                   </div>
                   <button onClick={() => handleDelete(car._id)} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Delete</button>
+                  <button
+                    onClick={async () => {
+                      try { await dealerAPI.toggleWholesale(car._id, !car.wholesale); toast(car.wholesale ? 'Removed from trade' : 'Listed for dealer trade', 'success'); fetchListings(page, pageSize, search, statusFilter); } catch { toast('Failed', 'error'); }
+                    }}
+                    title={car.wholesale ? 'Dealer trade listing' : 'List for dealer trade'}
+                    style={{ padding: '6px 8px', borderRadius: 6, background: car.wholesale ? 'rgba(168,85,247,0.15)' : 'rgba(168,85,247,0.06)', border: `1px solid ${car.wholesale ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)'}`, color: car.wholesale ? '#a855f7' : 'rgba(168,85,247,0.5)', fontSize: 11, cursor: 'pointer' }}
+                  >
+                    <span role="img" aria-label="trade">{car.wholesale ? '🏪' : '📦'}</span>
+                  </button>
                 </div>
               </div>
             );

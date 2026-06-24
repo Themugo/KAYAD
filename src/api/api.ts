@@ -414,6 +414,16 @@ const _dealerAPI = {
   leads:           (params?: any) => api.get('/leads', { params }).then(unwrap),
   updateLeadStage: (leadId: string, body: any) => api.put(`/leads/${leadId}/stage`, body).then(unwrap),
   archiveLead:     (leadId: string) => api.put(`/leads/${leadId}/archive`).then(unwrap),
+
+  // Wholesale / trade
+  toggleWholesale: (carId: string, wholesale: boolean) => api.patch(`/dealer/cars/${carId}/wholesale`, { wholesale }).then(unwrap),
+  tradeListings:   (params?: any) => api.get('/dealer/trade-listings', { params }).then(unwrap),
+
+  // Pricing recommendations
+  pricingRecommendations: (body: any) => api.post('/dealer/pricing-recommendations', body).then(unwrap),
+
+  // Webhook API key
+  generateApiKey:  () => api.post('/dealer/api-key').then(unwrap),
 };
 export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 

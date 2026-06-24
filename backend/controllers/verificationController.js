@@ -8,6 +8,7 @@ import Car from "../models/Car.js";
 import Dealer from "../models/Dealer.js";
 import DealerVerification from "../models/DealerVerification.js";
 import User from "../models/User.js";
+import Referral from "../models/Referral.js";
 import { sendSMS } from "../utils/sms.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
@@ -94,6 +95,36 @@ export const submitVerification = async (req, res) => {
 
     verification.submittedAt = new Date();
     await verification.save();
+
+    // ── Referral-based instant approval ─────────────────────────
+    const userDoc = await User.findById(userId).select("referredBy").lean();
+    if (userDoc?.referredBy) {
+      const referrerDealer = await Dealer.findOne({ user: userDoc.referredBy });
+      if (referrerDealer?.approved) {
+        const referrerCars = await Car.countDocuments({ dealer: userDoc.referredBy });
+        if (referrerCars >= 5) {
+          verification.verificationStatus = "approved";
+          verification.reviewedAt = new Date();
+          verification.adminNotes = "Auto-approved via trusted referral";
+          await verification.save();
+          dealer.approved = true;
+          await dealer.save();
+          logInfo("Referral auto-approval", { userId, referredBy: userDoc.referredBy });
+
+          await Referral.findOneAndUpdate(
+            { referee: userId },
+            { $set: { status: "credited" } },
+          );
+
+          await sendNotification({
+            userId,
+            title: "Verification Approved",
+            message: "Your verification was auto-approved via trusted referral. Start listing!",
+            type: "system",
+          });
+        }
+      }
+    }
 
     logInfo("Verification submitted", { userId, dealerId: dealer._id });
 

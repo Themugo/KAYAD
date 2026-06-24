@@ -211,6 +211,26 @@ export default function DealerDashboard() {
             </div>
           )}
 
+          {user?.onboardingComplete && user?.verificationStatus && ['pending', 'under_review'].includes(user.verificationStatus) && (
+            <div style={{
+              background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)',
+              borderRadius: 10, padding: '12px 18px', marginBottom: 20,
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            }}>
+              <span style={{ fontSize: 20 }}>🕐</span>
+              <span style={{ flex: 1, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                Verification <strong style={{ color: '#f59e0b' }}>in review</strong> — you can list up to <strong style={{ color: '#fff' }}>3 cars</strong> while waiting
+              </span>
+              <Link to="/dealer/onboarding" style={{
+                padding: '8px 18px', borderRadius: 8,
+                background: '#f59e0b', color: '#000',
+                fontSize: 12, fontWeight: 700, textDecoration: 'none',
+              }}>
+                Check Status
+              </Link>
+            </div>
+          )}
+
           {/* TABS */}
           <div className="tab-bar" style={{ gap: 2 }}>
             {TABS.map(({ id, label, icon: Icon }) => (

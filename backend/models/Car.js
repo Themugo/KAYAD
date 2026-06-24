@@ -67,6 +67,8 @@ const carSchema = new mongoose.Schema(
         "Other",
       ],
     },
+    wholesale: { type: Boolean, default: false, index: true },
+    dealerOnly: { type: Boolean, default: false, index: true },
     condition: {
       type: String,
       enum: ["New", "Used", "Pre-owned", "Foreign Used", "Locally Used", "Reconditioned", "Damaged"],

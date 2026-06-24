@@ -19,6 +19,7 @@ import User from "../models/User.js";
 import Dealer from "../models/Dealer.js";
 import DealerTeam from "../models/DealerTeam.js";
 import { initiatePayment } from "../services/paymentService.js";
+import { getPricingRecommendations } from "../services/pricingRecommendationService.js";
 
 const PLANS = {
   starter:    { price: 2500,  limit: 10,  name: "Starter" },
@@ -149,7 +150,7 @@ router.get(
 );
 
 // =============================
-// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS, CONVERSION) + CACHED
+// 📊 ANALYTICS (VIEWS, BIDS, TOP CARS, CONVERSION, PRICE COMPARISON, TIME TO SELL)
 // =============================
 router.get(
   "/analytics",
@@ -160,6 +161,7 @@ router.get(
     const from = req.query.from ? new Date(req.query.from) : new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
 
     const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
+    const dealerCars = await Car.find({ dealer: dealerId }).lean();
 
     const [viewsAgg, totalBids, totalInquiries, totalFavorites, topCars] = await Promise.all([
       Car.aggregate([{ $match: { dealer: dealerId } }, { $group: { _id: null, totalViews: { $sum: "$views" } } }]),
@@ -169,12 +171,64 @@ router.get(
       Car.find({ dealer: dealerId })
         .sort({ views: -1, bidsCount: -1 })
         .limit(10)
-        .select("title views bidsCount favoritesCount currentBid price auctionStatus status")
+        .select("title views bidsCount favoritesCount currentBid price auctionStatus status createdAt")
         .lean(),
     ]);
 
     const totalViews = viewsAgg[0]?.totalViews || 0;
-    const totalCars = await Car.countDocuments({ dealer: dealerId });
+    const totalCars = dealerCars.length;
+
+    // ── Price comparison ──────────────────────────────────────
+    let priceComparison = [];
+    if (dealerCars.length > 0) {
+      const brandModelGroups = {};
+      dealerCars.forEach(c => {
+        if (c.brand && c.price) {
+          const key = `${c.brand}|${c.model || 'all'}`;
+          if (!brandModelGroups[key]) brandModelGroups[key] = { prices: [], brand: c.brand, model: c.model };
+          brandModelGroups[key].prices.push(c.price);
+        }
+      });
+      for (const [key, group] of Object.entries(brandModelGroups)) {
+        const avgPrice = Math.round(group.prices.reduce((a, b) => a + b, 0) / group.prices.length);
+        const marketMatch = await Car.aggregate([
+          { $match: { brand: group.brand, ...(group.model !== 'all' ? { model: group.model } : {}), price: { $gt: 0 } } },
+          { $group: { _id: null, avgPrice: { $avg: "$price" }, count: { $sum: 1 } } },
+        ]);
+        const marketAvg = marketMatch[0] ? Math.round(marketMatch[0].avgPrice) : null;
+        priceComparison.push({
+          brand: group.brand,
+          model: group.model,
+          dealerAvg: avgPrice,
+          marketAvg,
+          difference: marketAvg ? Math.round(((avgPrice - marketAvg) / marketAvg) * 100) : null,
+          count: group.prices.length,
+        });
+      }
+    }
+
+    // ── Time to sell ──────────────────────────────────────────
+    const soldCars = dealerCars.filter(c => c.sold && c.createdAt);
+    const timeToSellByBrand = {};
+    soldCars.forEach(c => {
+      const brand = c.brand || 'Unknown';
+      if (!timeToSellByBrand[brand]) timeToSellByBrand[brand] = { days: [], count: 0 };
+      const days = Math.max(1, Math.round((new Date(c.updatedAt || Date.now()) - new Date(c.createdAt)) / 86400000));
+      timeToSellByBrand[brand].days.push(days);
+      timeToSellByBrand[brand].count++;
+    });
+    const timeToSell = Object.entries(timeToSellByBrand).map(([brand, data]) => ({
+      brand,
+      avgDays: Math.round(data.days.reduce((a, b) => a + b, 0) / data.days.length),
+      count: data.count,
+    }));
+
+    // ── Monthly revenue ───────────────────────────────────────
+    const monthlyRevenue = await Payment.aggregate([
+      { $match: { user: dealerId, status: "success", createdAt: { $gte: from } } },
+      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, total: { $sum: "$amount" } } },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
 
     res.json({
       success: true,
@@ -190,6 +244,9 @@ router.get(
           viewsToFavorites: totalViews > 0 ? Number(((totalFavorites / totalViews) * 100).toFixed(1)) : 0,
         },
         topCars,
+        priceComparison,
+        timeToSell,
+        monthlyRevenue,
       },
     });
   }),
@@ -1033,6 +1090,57 @@ router.post(
       message: result.mode === "mpesa" ? "STK push sent. Enter PIN on your phone." : "Mock payment — refresh to see upgrade",
       paymentId: result.payment._id,
     });
+  }),
+);
+
+// =============================
+// 🔄 TOGGLE WHOLESALE
+// =============================
+router.patch(
+  "/cars/:id/wholesale",
+  asyncHandler(async (req, res) => {
+    const car = await Car.findOneAndUpdate(
+      { _id: req.params.id, dealer: req.user.id },
+      { $set: { wholesale: req.body.wholesale === true } },
+      { new: true },
+    );
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    res.json({ success: true, car });
+  }),
+);
+
+// =============================
+// 🏪 DEALER-TO-DEALER LISTINGS
+// =============================
+router.get(
+  "/trade-listings",
+  asyncHandler(async (req, res) => {
+    const { page, limit, skip } = getPagination(req);
+    const filter = { wholesale: true };
+    if (req.query.search) {
+      const q = req.query.search;
+      filter.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { brand: { $regex: q, $options: "i" } },
+        { model: { $regex: q, $options: "i" } },
+      ];
+    }
+    const [cars, total] = await Promise.all([
+      Car.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("dealer", "name businessName location").lean(),
+      Car.countDocuments(filter),
+    ]);
+    res.json({ success: true, cars, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+  }),
+);
+
+// =============================
+// 💰 PRICING RECOMMENDATIONS
+// =============================
+router.post(
+  "/pricing-recommendations",
+  asyncHandler(async (req, res) => {
+    const result = await getPricingRecommendations(req.body);
+    res.json({ success: true, ...result });
   }),
 );
 

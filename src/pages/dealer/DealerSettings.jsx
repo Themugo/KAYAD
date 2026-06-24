@@ -299,9 +299,29 @@ export default function DealerSettings() {
               </div>
             </div>
           )}
+
+          {/* ── API ACCESS ── */}
+          {tab === 'security' && (
+            <div style={{ marginTop: 32, paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>🔌 API Access</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Webhook & REST API for integrating with your systems</div>
+              </div>
+              <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 10, padding: '18px 20px', maxWidth: 480 }}>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginBottom: 14 }}>
+                  The KAYAD API lets you programmatically manage listings, sync inventory, and receive real-time webhook events 
+                  (new bids, sales, status changes). <strong style={{ color: '#fff' }}>Coming soon</strong> — we'll notify you when it's ready.
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <span style={{ padding: '8px 18px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700, cursor: 'default' }}>
+                    Generate API Key
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* SAVE BAR */}
         {tab !== 'security' && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
             <button onClick={save} disabled={saving} style={{

@@ -1,14 +1,48 @@
+import { useState, useEffect } from 'react';
+import { dealerAPI } from '../../../api/api';
+
 function Field({ label, children }) {
   return <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>;
 }
 
 export default function AddCarStepPricing({ form, set, user }) {
+  const [rec, setRec] = useState(null);
+  const [recLoading, setRecLoading] = useState(false);
+
+  useEffect(() => {
+    if (!form.brand || !form.model || !form.year || form.year < 2000) {
+      setRec(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      setRecLoading(true);
+      dealerAPI.pricingRecommendations({
+        brand: form.brand, model: form.model, year: form.year,
+        mileage: form.mileage, fuel: form.fuel,
+        transmission: form.transmission, bodyType: form.bodyType,
+      }).then(res => {
+        setRec(res.recommendation || res.data || res);
+      }).catch(() => setRec(null))
+      .finally(() => setRecLoading(false));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [form.brand, form.model, form.year, form.mileage, form.fuel, form.transmission, form.bodyType]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <h3 style={{ marginBottom: 4 }}>Pricing & Listing Mode</h3>
       <Field label="Asking Price (KES) *">
         <input className="input" type="text" inputMode="numeric" pattern="[0-9]*" placeholder="e.g. 3500000" value={form.price} onChange={e => set('price', e.target.value)} />
       </Field>
+      {recLoading && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', padding: '4px 0' }}>Analyzing market data…</div>}
+      {rec && (
+        <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 10, padding: '14px 16px', position: 'relative' }}>
+          <button onClick={() => setRec(null)} style={{ position: 'absolute', top: 6, right: 8, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 14, lineHeight: 1 }}>✕</button>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>💡 Price Suggestion</div>
+          <div style={{ fontSize: 14, fontWeight: 900, color: '#fff', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>KES {Number(rec.suggestedPrice || rec.price || 0).toLocaleString()}</div>
+          {rec.reasoning && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{rec.reasoning}</div>}
+        </div>
+      )}
 
       <div>
         <label className="input-label" style={{ marginBottom: 12, display: 'block' }}>How do you want to sell?</label>

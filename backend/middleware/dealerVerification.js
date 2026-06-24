@@ -6,6 +6,9 @@
 
 import Dealer from "../models/Dealer.js";
 import DealerVerification from "../models/DealerVerification.js";
+import User from "../models/User.js";
+import Car from "../models/Car.js";
+import Referral from "../models/Referral.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
 // =============================
@@ -47,8 +50,23 @@ export const requireDealerVerification = async (req, res, next) => {
       });
     }
 
-    // Check verification status
+    // Check verification status — progressive access for pending/under_review
     if (verification.verificationStatus !== "approved") {
+      // Progressive verification: allow listing creation if < 3 cars and not rejected
+      if (
+        ["pending", "under_review"].includes(verification.verificationStatus) &&
+        req.method === "POST" &&
+        (req.path === "/cars" || req.path.startsWith("/cars/") || req.path === "/add-car")
+      ) {
+        const carCount = await Car.countDocuments({ dealer: userId });
+        if (carCount < 3) {
+          req.dealer = dealer;
+          req.verification = verification;
+          req.progressiveAccess = true;
+          return next();
+        }
+      }
+
       return res.status(403).json({
         success: false,
         message: getVerificationMessage(verification.verificationStatus),
@@ -56,6 +74,8 @@ export const requireDealerVerification = async (req, res, next) => {
         requiresAction: getRequiredAction(verification.verificationStatus),
         verificationUrl: "/api/verification/status",
         rejectionReason: verification.rejectionReason,
+        progressiveLimit: 3,
+        progressiveUsed: verification.verificationStatus === "pending" || verification.verificationStatus === "under_review",
       });
     }
 
