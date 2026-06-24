@@ -23,6 +23,10 @@ import Referral from "../models/Referral.js";
 import Transaction from "../models/Transaction.js";
 import Chat from "../models/Chat.js";
 import MarketData from "../models/MarketData.js";
+import Contact from "../models/Contact.js";
+import SupportTicket from "../models/SupportTicket.js";
+import FraudDetection from "../models/FraudDetection.js";
+import DealerVerification from "../models/DealerVerification.js";
 import { stkPush } from "../services/mpesaService.js";
 import { sendNotification } from "../services/notification.service.js";
 
@@ -145,6 +149,10 @@ router.get(
       brokers,
       demoUsers,
       carsSold,
+      pendingReports,
+      verificationQueue,
+      supportQueue,
+      fraudAlerts,
     ] = await Promise.all([
       User.countDocuments(),
       Car.countDocuments(),
@@ -167,6 +175,10 @@ router.get(
       User.countDocuments({ role: "broker" }),
       User.countDocuments({ isDemo: true }),
       Car.countDocuments({ sold: true }),
+      Contact.countDocuments({ read: false }),
+      DealerVerification.countDocuments({ verificationStatus: { $in: ["pending", "under_review"] } }),
+      SupportTicket.countDocuments({ status: { $in: ["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated"] } }),
+      FraudDetection.countDocuments({ severity: { $in: ["critical", "high"] }, status: { $nin: ["dismissed", "action_taken"] } }),
     ]);
 
     const totalRevenue = revenueAgg[0]?.total || 0;
@@ -196,6 +208,10 @@ router.get(
         brokers,
         demoUsers,
         carsSold,
+        pendingReports,
+        verificationQueue,
+        supportQueue,
+        fraudAlerts,
       },
     });
   }),

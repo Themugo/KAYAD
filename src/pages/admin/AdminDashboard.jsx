@@ -10,6 +10,7 @@ import AdminQuickActions from './components/AdminQuickActions';
 import AdminPlatformHealth from './components/AdminPlatformHealth';
 import AdminRecentRegistrations from './components/AdminRecentRegistrations';
 import AdminModuleNav from './components/AdminModuleNav';
+import AdminOperationalOverview from './components/AdminOperationalOverview';
 
 const ROLE_CONFIG = {
   superadmin:       { label: 'Super Admin',       icon: '👑', color: 'var(--gold)' },
@@ -202,6 +203,8 @@ export default function AdminDashboard() {
         </div>
       ) : (
         <>
+          <AdminOperationalOverview stats={stats} sysHealth={sysHealth} />
+
           <AdminQuickStats stats={stats} formatValue={formatValue} />
 
           <AdminChartsRow stats={stats} />

@@ -807,6 +807,36 @@ export const adminVerificationAPI = {
   reinstate:   (id: string)    => api.post(`/verification/admin/${id}/reinstate`).then(unwrap),
 };
 
+// ============================================================
+//  SUPPORT TICKETS — routes/supportRoutes.js (/support)
+// ============================================================
+export const supportAPI = {
+  list:          (params?: any) => api.get('/support/all', { params }).then(unwrap),
+  getById:       (id: string)   => api.get(`/support/${id}`).then(unwrap),
+  updateStatus:  (id: string, body: any) => api.put(`/support/${id}/status`, body).then(unwrap),
+  analytics:     ()             => api.get('/support/analytics').then(unwrap),
+  myTickets:     (params?: any) => api.get('/support/my-tickets', { params }).then(unwrap),
+  create:        (body: any)    => api.post('/support', body).then(unwrap),
+};
+
+// ============================================================
+//  CONTACT (ADMIN) — routes/contactRoutes.js (/contact)
+// ============================================================
+export const contactAdminAPI = {
+  list:    (params?: any) => api.get('/contact', { params }).then(unwrap),
+};
+
+// ============================================================
+//  OPERATIONS QUEUES — routes/operationsRoutes.js (/operations)
+// ============================================================
+export const operationsAPI = {
+  dashboard:    ()            => api.get('/operations/dashboard').then(unwrap),
+  supportQueue: (params?: any) => api.get('/operations/support-queue', { params }).then(unwrap),
+  escrowQueue:  (params?: any) => api.get('/operations/escrow-queue', { params }).then(unwrap),
+  dealerQueue:  (params?: any) => api.get('/operations/dealer-queue', { params }).then(unwrap),
+  paymentQueue: (params?: any) => api.get('/operations/payment-queue', { params }).then(unwrap),
+};
+
 // Utility: format KES (re-exported from helpers for backward compat)
 export { api };
 export { formatKES } from '../utils/helpers';
