@@ -14,6 +14,7 @@ import DealerEscrowsTab from './components/DealerEscrowsTab';
 import DealerEarningsTab from './components/DealerEarningsTab';
 import DealerPackageTab from './components/DealerPackageTab';
 import DealerMilestoneTracker from './components/DealerMilestoneTracker';
+import ReferralStats from '../../components/ReferralStats';
 import { DealerKPIRow } from './components/DealerKPIWidgets';
 import { TABS_CONFIG } from './components/DashboardWidgets';
 
@@ -207,16 +208,21 @@ export default function DealerDashboard() {
           <>
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
-              <DealerOverview
-                summary={s}
-                cars={cars}
-                totalRevenue={totalRevenue}
-                trends={trends}
-                earnings={earnings}
-                escrows={escrows}
-                onDelete={handleDelete}
-                goToTab={setTab}
-              />
+              <>
+                <DealerOverview
+                  summary={s}
+                  cars={cars}
+                  totalRevenue={totalRevenue}
+                  trends={trends}
+                  earnings={earnings}
+                  escrows={escrows}
+                  onDelete={handleDelete}
+                  goToTab={setTab}
+                />
+                <div style={{ marginTop: 24 }}>
+                  <ReferralStats />
+                </div>
+              </>
             )}
 
             {tab === 'listings' && (

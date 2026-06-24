@@ -41,7 +41,7 @@ export default function PostRegPackageSelect() {
       });
       if (updated) setUser(updated);
       toast(`Plan selected: ${pkg?.name}`, "success");
-      navigate("/dealer/cars/new", { replace: true });
+      navigate("/dealer/add-car", { replace: true });
     } catch {
       toast("Failed to save selection", "error");
     } finally {

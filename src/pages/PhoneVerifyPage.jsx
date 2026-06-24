@@ -146,11 +146,13 @@ export default function PhoneVerifyPage() {
             )}
           </div>
 
-          <div style={{ textAlign: "center", marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            <button onClick={handleSkip} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12 }}>
-              Skip — I'll verify later
-            </button>
-          </div>
+          {user?.role !== "dealer" && (
+            <div style={{ textAlign: "center", marginTop: 12, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+              <button onClick={handleSkip} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12 }}>
+                Skip — I'll verify later
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Dealer from "../models/Dealer.js";
 import RefreshToken from "../models/RefreshToken.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -519,6 +520,15 @@ export const updateProfile = async (req, res) => {
     );
 
     if (!user) return R.notFound(res, "User not found");
+
+    // Auto-approve dealer when onboarding is completed
+    if (onboardingComplete && (user.role === "dealer" || user.role === "broker" || user.role === "individual_seller")) {
+      await Dealer.findOneAndUpdate(
+        { user: req.user.id },
+        { approved: true, verifiedAt: new Date() },
+        { upsert: true },
+      );
+    }
 
     res.json({ success: true, user: serializeUser(user) });
   } catch (err) {

@@ -1,19 +1,51 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { dealerAPI, carsAPI } from '../../../api/api';
-import { Plus, Download, Copy } from 'lucide-react';
+import { Plus, Download, Copy, Search, X } from 'lucide-react';
 import { StatusBadge, DemoBadge } from './DashboardWidgets';
+
+const STATUS_OPTS = ['', 'active', 'sold', 'pending', 'rejected'];
 
 export default function DealerListingsTab({ cars, totalCars, setCars, toast }) {
   const [sortField, setSortField] = useState('createdAt');
   const [sortDir, setSortDir] = useState('desc');
   const [selectedIds, setSelectedIds] = useState([]);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const handleDelete = async (carId) => {
     if (!confirm('Delete this listing permanently?')) return;
     try { await carsAPI.remove(carId); setCars(p => p.filter(c => c._id !== carId)); toast('Listing deleted', 'info'); }
     catch { toast('Delete failed', 'error'); }
   };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Delete ${selectedIds.length} listings permanently?`)) return;
+    let ok = 0;
+    for (const id of selectedIds) {
+      try { await carsAPI.remove(id); ok++; } catch {}
+    }
+    setCars(p => p.filter(c => !selectedIds.includes(c._id)));
+    toast(`Deleted ${ok} listing(s)`, 'info');
+    setSelectedIds([]);
+  };
+
+  const filtered = useMemo(() => {
+    let list = [...cars];
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c => (c.title?.toLowerCase()||'').includes(q) || (c.brand?.toLowerCase()||'').includes(q) || (c.model?.toLowerCase()||'').includes(q) || (c.vin||'').toLowerCase().includes(q));
+    }
+    if (statusFilter) list = list.filter(c => c.status === statusFilter || (statusFilter === 'active' && c.auctionStatus === 'live'));
+    list.sort((a, b) => {
+      const dir = sortDir === 'desc' ? -1 : 1;
+      if (sortField === 'price') return dir * ((a.price||0) - (b.price||0));
+      if (sortField === 'year') return dir * ((a.year||0) - (b.year||0));
+      if (sortField === 'views') return dir * ((a.views||0) - (b.views||0));
+      return dir * (new Date(a.createdAt||0) - new Date(b.createdAt||0));
+    });
+    return list;
+  }, [cars, search, statusFilter, sortField, sortDir]);
 
   return (
     <div>
@@ -31,7 +63,7 @@ export default function DealerListingsTab({ cars, totalCars, setCars, toast }) {
           </button>
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={() => { const csv = [['Title','Brand','Model','Year','Price','Mileage','Views','Status'], ...cars.map(c => [c.title, c.brand, c.model, c.year, c.price, c.mileage, c.views, c.status])].map(r => r.join(',')).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'listings.csv'; a.click(); }} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={() => { const csv = [['Title','Brand','Model','Year','Price','Mileage','Views','Status'], ...filtered.map(c => [c.title, c.brand, c.model, c.year, c.price, c.mileage, c.views, c.status])].map(r => r.join(',')).join('\n'); const b = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'listings.csv'; a.click(); }} style={{ padding: '10px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.6)', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Download size={13} /> CSV
           </button>
           <Link to="/dealer/add-car" style={{ padding: '10px 20px', background: 'var(--gold)', color: '#000', borderRadius: 10, fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -40,9 +72,28 @@ export default function DealerListingsTab({ cars, totalCars, setCars, toast }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-          Showing {cars.length} of {totalCars || cars.length}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, gap: 10, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 200 }}>
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)' }} />
+            <input className="input" placeholder="Search by title, brand, model, VIN..." value={search} onChange={e => setSearch(e.target.value)}
+              style={{ paddingLeft: 30, fontSize: 12, height: 34 }} />
+            {search && <X size={13} onClick={() => setSearch('')} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', color: 'rgba(255,255,255,0.25)' }} />}
+          </div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {STATUS_OPTS.map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)}
+                style={{ padding: '5px 10px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                  background: statusFilter === s ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${statusFilter === s ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+                  color: statusFilter === s ? '#000' : 'rgba(255,255,255,0.5)', }}>
+                {s || 'All'}
+              </button>
+            ))}
+          </div>
+        </div>
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', whiteSpace: 'nowrap' }}>
+          Showing {filtered.length} of {totalCars || cars.length}
         </span>
       </div>
 
@@ -57,19 +108,14 @@ export default function DealerListingsTab({ cars, totalCars, setCars, toast }) {
           <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{selectedIds.length} selected</span>
           <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'active' }).then(() => { toast('Marked active', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, cursor: 'pointer' }}>Mark Active</button>
           <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
-          <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
+            <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'pending' }).then(() => { toast('Marked pending', 'success'); setSelectedIds([]); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.2)', color: '#f97316', fontSize: 11, cursor: 'pointer' }}>Mark Pending</button>
+            <button onClick={handleBulkDelete} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', fontSize: 11, cursor: 'pointer' }}>Delete</button>
           <button onClick={() => setSelectedIds([])} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer', marginLeft: 'auto' }}>Clear</button>
         </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {[...cars].sort((a, b) => {
-          const dir = sortDir === 'desc' ? -1 : 1;
-          if (sortField === 'price') return dir * ((a.price||0) - (b.price||0));
-          if (sortField === 'year') return dir * ((a.year||0) - (b.year||0));
-          if (sortField === 'views') return dir * ((a.views||0) - (b.views||0));
-          return dir * (new Date(a.createdAt||0) - new Date(b.createdAt||0));
-        }).map(car => {
+        {filtered.map(car => {
           const img = car.images?.[0]?.url || car.images?.[0] || car.image;
           const isSelected = selectedIds.includes(car._id);
           const isLiveAuction = car.auctionStatus === 'live';

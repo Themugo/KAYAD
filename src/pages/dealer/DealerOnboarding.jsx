@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { authAPI } from '../../api/api';
-import { Check, ChevronRight, ChevronLeft, Building2, Banknote, CheckCircle } from 'lucide-react';
+import { authAPI, verificationAPI } from '../../api/api';
+import { Check, ChevronRight, ChevronLeft, Building2, Banknote, FileText, CheckCircle } from 'lucide-react';
 
 const STEPS = [
   { label: 'Business', icon: Building2 },
   { label: 'Payments', icon: Banknote },
+  { label: 'Documents', icon: FileText },
   { label: 'Review', icon: CheckCircle },
 ];
 
@@ -28,6 +29,10 @@ export default function DealerOnboarding() {
     accountNumber: '',
     paybillNumber: '',
     mpesaPhone: '',
+    idType: 'national_id',
+    idNumber: '',
+    kraPin: '',
+    businessRegNumber: '',
   });
 
   useEffect(() => {
@@ -41,6 +46,10 @@ export default function DealerOnboarding() {
       accountNumber: user.bankAccount || user.paymentDetails?.accountNumber || '',
       paybillNumber: user.paymentDetails?.paybillNumber || '',
       mpesaPhone: user.mpesaBusiness || user.paymentDetails?.mpesaPhone || '',
+      idType: 'national_id',
+      idNumber: user.idNumber || '',
+      kraPin: user.kraPin || '',
+      businessRegNumber: user.businessRegNumber || '',
     });
   }, [user]);
 
@@ -60,6 +69,11 @@ export default function DealerOnboarding() {
       if (!form.mpesaPhone.trim()) errs.mpesaPhone = 'M-Pesa phone required';
       else if (!/^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''))) errs.mpesaPhone = 'Enter valid Kenyan number (e.g. 0712345678)';
     }
+    if (step === 2) {
+      if (!form.idNumber.trim()) errs.idNumber = 'ID/Passport number required';
+      if (!form.kraPin.trim()) errs.kraPin = 'KRA PIN required';
+      else if (!/^[A-Z]\d{9}[A-Z]$/.test(form.kraPin.trim().toUpperCase())) errs.kraPin = 'Enter valid KRA PIN (e.g. A123456789Z)';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -69,10 +83,13 @@ export default function DealerOnboarding() {
     if (step === 1) {
       return form.bankName.trim() && form.accountName.trim() && form.accountNumber.trim().length >= 6 && /^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''));
     }
+    if (step === 2) {
+      return form.idNumber.trim() && /^[A-Z]\d{9}[A-Z]$/.test(form.kraPin.trim().toUpperCase());
+    }
     return true;
   };
 
-  const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, 2)); };
+  const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, 3)); };
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -91,6 +108,28 @@ export default function DealerOnboarding() {
         onboardingComplete: true,
       });
       if (updated) setUser(updated);
+
+      // Submit verification documents
+      try {
+        await verificationAPI.submit({
+          documents: {
+            governmentId: {
+              type: form.idType,
+              documentNumber: form.idNumber,
+            },
+            kraPin: {
+              pinNumber: form.kraPin.toUpperCase(),
+            },
+            businessRegistration: form.businessRegNumber ? {
+              registrationNumber: form.businessRegNumber,
+              businessName: form.businessName,
+            } : undefined,
+          },
+        });
+      } catch {
+        // Non-blocking — dealer can submit documents later
+      }
+
       toast('Onboarding complete! Choose your plan.', 'success');
       navigate('/dealer/choose-plan');
     } catch {
@@ -234,6 +273,42 @@ export default function DealerOnboarding() {
 
           {step === 2 && (
             <div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Verification Documents</h3>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 24 }}>
+                Provide your identification details for dealer verification. These will be verified by our team.
+              </p>
+              <div className="input-group" style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Type *</label>
+                <select className="input" value={form.idType} onChange={e => update('idType', e.target.value)}>
+                  <option value="national_id">National ID</option>
+                  <option value="passport">Passport</option>
+                  <option value="drivers_license">Driver's License</option>
+                </select>
+              </div>
+              <div className="input-group" style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Number *</label>
+                <input className="input" placeholder="National ID or Passport number"
+                  value={form.idNumber} onChange={e => update('idNumber', e.target.value)}
+                  style={{ borderColor: errors.idNumber ? 'var(--red)' : undefined }} />
+                {errors.idNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.idNumber}</span>}
+              </div>
+              <div className="input-group" style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>KRA PIN *</label>
+                <input className="input" placeholder="e.g. A123456789Z"
+                  value={form.kraPin} onChange={e => update('kraPin', e.target.value.toUpperCase())}
+                  style={{ borderColor: errors.kraPin ? 'var(--red)' : undefined }} />
+                {errors.kraPin && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.kraPin}</span>}
+              </div>
+              <div className="input-group">
+                <label style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Business Registration Number</label>
+                <input className="input" placeholder="Optional — e.g. BN/2024/12345"
+                  value={form.businessRegNumber} onChange={e => update('businessRegNumber', e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Review & Complete</h3>
               <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Business Profile</div>
@@ -242,7 +317,16 @@ export default function DealerOnboarding() {
                   <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>Location</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.location}</div></div>
                   {form.bio && <div style={{ gridColumn: '1 / -1' }}><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>Bio</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.bio}</div></div>}
                 </div>
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginBottom: 16 }}>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Verification Documents</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>ID Type</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.idType.replace(/_/g, ' ')}</div></div>
+                    <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>ID Number</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.idNumber}</div></div>
+                    <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>KRA PIN</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.kraPin.toUpperCase()}</div></div>
+                    {form.businessRegNumber && <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>Business Reg.</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.businessRegNumber}</div></div>}
+                  </div>
+                </div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16, marginBottom: 16 }}>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Payment Details</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     {form.bankName && <div><div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 2 }}>Bank</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.bankName}</div></div>}

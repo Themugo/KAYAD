@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+
 const BRANDS  = ['Toyota','Mercedes-Benz','BMW','Land Rover','Subaru','Mazda','Nissan','Honda','Volkswagen','Lexus','Audi','Mitsubishi','Hyundai','Kia','Ford','Jeep','Peugeot','Isuzu'];
 const BODIES  = ['SUV','Sedan','Hatchback','Pickup','Wagon','Van','Coupe','Convertible','Bus'];
 const CITIES  = ['Nairobi','Mombasa','Kisumu','Nakuru','Eldoret','Thika','Nyeri','Machakos','Meru'];
@@ -18,12 +20,24 @@ function SelectField({ label, field, form, set, options }) {
 }
 
 export default function AddCarStepBasic({ form, set }) {
+  const titledRef = useRef(false);
+
+  useEffect(() => {
+    const parts = [form.year, form.brand, form.model].filter(Boolean);
+    if (parts.length >= 2 && !titledRef.current) {
+      set('title', parts.join(' '));
+    }
+  }, [form.year, form.brand, form.model]);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <h3 style={{ marginBottom: 4 }}>Basic Information</h3>
       <Field label="Listing Title *">
         <input className="input" placeholder="e.g. 2020 Toyota Land Cruiser V8 — Excellent Condition"
-          value={form.title} onChange={e => set('title', e.target.value)} />
+          value={form.title} onChange={e => { titledRef.current = true; set('title', e.target.value); }} />
+        {!titledRef.current && [form.year, form.brand, form.model].filter(Boolean).length >= 2 && (
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Auto-generated from brand, model, year</span>
+        )}
       </Field>
       <div className="grid-2">
         <SelectField label="Brand *" field="brand" form={form} set={set} options={BRANDS} />
