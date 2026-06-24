@@ -537,10 +537,18 @@ const _adminAPI = {
   disputeGetAll:   (params: any)      => api.get('/disputes', { params }).then(unwrap),
   disputeStats:    ()            => api.get('/disputes/stats').then(unwrap),
 
-  // Fraud analytics
+    // Fraud analytics
   fraudAnalytics:    ()          => api.get('/fraud/analytics').then(unwrap),
   fraudGetAll:       (params: any)    => api.get('/fraud/all', { params }).then(unwrap),
   fraudUpdateStatus: (id: string, body: any)  => api.put(`/fraud/${id}/status`, body).then(unwrap),
+
+  // Auction Integrity — routes/auctionIntegrityRoutes.js
+  integrityDashboard: ()        => api.get('/new-admin/auction-integrity/dashboard').then(unwrap),
+  integrityFlags:     (p: any)  => api.get('/new-admin/auction-integrity', { params: p }).then(unwrap),
+  integrityFlag:      (id: string)  => api.get(`/new-admin/auction-integrity/${id}`).then(unwrap),
+  integrityUpdateFlag:(id: string, body: any) => api.patch(`/new-admin/auction-integrity/${id}/status`, body).then(unwrap),
+  integrityScan:      (body: any)   => api.post('/new-admin/auction-integrity/scan', body).then(unwrap),
+  integrityRiskProfiles: (p: any) => api.get('/new-admin/auction-integrity/risk-profiles', { params: p }).then(unwrap),
 };
 // Dispute management — full standalone API
 export const disputeAPI = {

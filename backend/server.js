@@ -99,6 +99,8 @@ import v1Routes from "./routes/v1.js";
 import v2Routes from "./routes/v2.js";
 import reliabilityRoutes from "./routes/reliabilityRoutes.js";
 import ledgerRoutes from "./routes/ledgerRoutes.js";
+import auctionIntegrityRoutes from "./routes/auctionIntegrityRoutes.js";
+import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
 import notFound from "./middleware/notFound.js";
@@ -606,6 +608,7 @@ app.use("/prometheus", fastTimeout, prometheusMetricsRoutes);
 app.use("/api/admin/queue", adminLimiter, queueRoutes);
 app.use("/api/reliability", reliabilityRoutes);
 app.use("/api/ledger", ledgerRoutes);
+app.use("/api/new-admin/auction-integrity", auctionIntegrityRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -819,6 +822,14 @@ const bootstrap = async () => {
     } catch (err) {
       logError("Failed to start reconciliation crons", err);
       console.log("❌ Failed to start reconciliation crons:", err);
+    }
+
+    try {
+      startIntegrityCron();
+      console.log("✅ Auction integrity cron started");
+    } catch (err) {
+      logError("Failed to start auction integrity cron", err);
+      console.log("❌ Failed to start auction integrity cron:", err);
     }
 
     if (process.env.REDIS_URL || process.env.REDIS_HOST) {
