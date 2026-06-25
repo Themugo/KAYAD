@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Heart, MapPin, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { formatKES } from '../api/api';
+import ReportButton from './ReportButton';
 
 interface Car {
   _id: string;
@@ -206,6 +207,10 @@ const CarCard = memo(function CarCard({
             <span className="text-gold text-sm font-medium opacity-70 group-hover:opacity-100 transition-opacity">
               View →
             </span>
+          </div>
+
+          <div onClick={e => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+            <ReportButton targetType="listing" targetId={car._id} />
           </div>
         </div>
       </Link>

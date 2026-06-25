@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { adminAPI, formatKES } from '../../api/api';
+import { adminAPI, formatKES, bulkAdminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
@@ -24,6 +24,8 @@ export default function AdminCarModeration() {
   const [hasMore, setHasMore] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [bulkAction, setBulkAction] = useState(null);
   const [sentinelRef, sentinelEntry] = useIntersectionObserver();
   const pageRef = useRef(1);
   const searchRef = useRef('');
@@ -63,6 +65,32 @@ export default function AdminCarModeration() {
       loadPage(pageRef.current, true);
     }
   }, [sentinelEntry, hasMore, loading, loadingMore, loadPage]);
+
+  const handleBulkModerate = async (action) => {
+    if (selectedIds.length === 0) return;
+    const adminNote = action === 'reject' ? prompt('Reason for rejection:') : '';
+    if (action === 'reject' && adminNote === null) return;
+    setBulkAction(action);
+    try {
+      await bulkAdminAPI.moderateCars({ carIds: selectedIds, action, adminNote });
+      toast(`${selectedIds.length} listing(s) ${action}d successfully`, 'success');
+      setCars(prev => prev.filter(c => !selectedIds.includes(c._id)));
+      setSelectedIds([]);
+    } catch { toast(`Failed to ${action} listings`, 'error'); }
+    finally { setBulkAction(null); }
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === cars.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(cars.map(c => c._id));
+    }
+  };
 
   const handleModerate = async (carId, action) => {
     const adminNote = action === 'reject' ? prompt('Reason for rejection:') : '';
@@ -114,10 +142,43 @@ export default function AdminCarModeration() {
             <p>No listings found.</p>
           </div>
         ) : (
+          <>
+          {selectedIds.length > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(212,196,168,0.08)', borderRadius: 10, marginBottom: 16 }}>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{selectedIds.length} selected</span>
+              <button
+                className="btn btn-sm"
+                style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                disabled={bulkAction !== null}
+                onClick={() => handleBulkModerate('approve')}>
+                <CheckCircle size={12} style={{ marginRight: 4 }} />
+                {bulkAction === 'approve' ? '…' : 'Approve Selected'}
+              </button>
+              <button
+                className="btn btn-sm"
+                style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                disabled={bulkAction !== null}
+                onClick={() => handleBulkModerate('reject')}>
+                <XCircle size={12} style={{ marginRight: 4 }} />
+                {bulkAction === 'reject' ? '…' : 'Reject Selected'}
+              </button>
+              <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds([])} disabled={bulkAction !== null}
+                style={{ marginLeft: 'auto', fontSize: 11 }}>
+                Clear
+              </button>
+            </div>
+          )}
+
           <div className="table-wrap">
             <table className="data-table">
               <thead>
                 <tr>
+                  <th style={{ width: 40 }}>
+                    <input type="checkbox" checked={cars.length > 0 && selectedIds.length === cars.length}
+                      onChange={toggleSelectAll}
+                      onClick={e => e.stopPropagation()}
+                      style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
+                  </th>
                   <th>Listing</th>
                   <th>Dealer</th>
                   <th>Price</th>
@@ -127,8 +188,15 @@ export default function AdminCarModeration() {
                 </tr>
               </thead>
               <tbody>
-                {cars.map(car => (
-                  <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer' }}>
+                {cars.map(car => {
+                  const isSelected = selectedIds.includes(car._id);
+                  return (
+                  <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer', opacity: isSelected ? 0.8 : 1 }}>
+                    <td onClick={e => e.stopPropagation()}>
+                      <input type="checkbox" checked={isSelected}
+                        onChange={() => toggleSelect(car._id)}
+                        style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
+                    </td>
                     <td>
                       <div style={{ fontWeight: 600 }}>{car.title || `${car.brand} ${car.model || ''}`}</div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -174,10 +242,12 @@ export default function AdminCarModeration() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
+        </>
         )}
 
         {loadingMore && (

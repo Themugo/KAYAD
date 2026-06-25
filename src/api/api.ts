@@ -839,6 +839,59 @@ export const supportAPI = {
 };
 
 // ============================================================
+//  REPORTS — routes/reportRoutes.js (/reports)
+// ============================================================
+export const reportAPI = {
+  submit:      (body: any) => api.post('/reports/submit', body).then(unwrap),
+  my:          (params?: any) => api.get('/reports/my', { params }).then(unwrap),
+  adminAll:    (params?: any) => api.get('/reports/admin/all', { params }).then(unwrap),
+  adminGet:    (id: string)  => api.get(`/reports/admin/${id}`).then(unwrap),
+  adminUpdate: (id: string, body: any) => api.patch(`/reports/admin/${id}/status`, body).then(unwrap),
+};
+
+// ============================================================
+//  FEEDBACK — routes/feedbackRoutes.js (/feedback)
+// ============================================================
+export const feedbackAPI = {
+  submit:      (body: any) => api.post('/feedback/submit', body).then(unwrap),
+  adminAll:    (params?: any) => api.get('/feedback/admin/all', { params }).then(unwrap),
+  adminUpdate: (id: string, body: any) => api.patch(`/feedback/admin/${id}/status`, body).then(unwrap),
+};
+
+// ============================================================
+//  ANNOUNCEMENTS / BROADCAST — routes/announcementRoutes.js
+// ============================================================
+export const announcementAPI = {
+  create:     (body: any)  => api.post('/announcements', body).then(unwrap),
+  send:       (id: string) => api.post(`/announcements/${id}/send`).then(unwrap),
+  list:       (params?: any) => api.get('/announcements', { params }).then(unwrap),
+  get:        (id: string) => api.get(`/announcements/${id}`).then(unwrap),
+  delete:     (id: string) => api.delete(`/announcements/${id}`).then(unwrap),
+};
+
+// ============================================================
+//  SUPPORT TICKET ADMIN — routes/supportTicketAdminRoutes.js
+// ============================================================
+export const supportTicketAdminAPI = {
+  stats:      ()            => api.get('/admin/support-tickets/stats').then(unwrap),
+  list:       (params?: any) => api.get('/admin/support-tickets', { params }).then(unwrap),
+  get:        (id: string)  => api.get(`/admin/support-tickets/${id}`).then(unwrap),
+  updateStatus: (id: string, body: any) => api.patch(`/admin/support-tickets/${id}/status`, body).then(unwrap),
+  assign:     (id: string, body: any) => api.patch(`/admin/support-tickets/${id}/assign`, body).then(unwrap),
+  addMessage: (id: string, body: any) => api.post(`/admin/support-tickets/${id}/messages`, body).then(unwrap),
+};
+
+// ============================================================
+//  BULK ADMIN — routes/bulkAdminRoutes.js
+// ============================================================
+export const bulkAdminAPI = {
+  moderateCars: (body: any) => api.post('/admin/bulk/cars/moderate', body).then(unwrap),
+  deleteCars:   (body: any) => api.post('/admin/bulk/cars/delete', body).then(unwrap),
+  exportCars:   (params?: any) => api.get('/admin/bulk/export/cars', { params, responseType: 'blob' }).then(unwrap),
+  exportUsers:  (params?: any) => api.get('/admin/bulk/export/users', { params, responseType: 'blob' }).then(unwrap),
+};
+
+// ============================================================
 //  CONTACT (ADMIN) — routes/contactRoutes.js (/contact)
 // ============================================================
 export const contactAdminAPI = {

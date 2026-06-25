@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
-  Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon,
+  Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
+  Radio,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../api/api';
@@ -31,6 +32,9 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/reviews', icon: Star, label: 'Reviews' },
   { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
   { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
+  { to: '/admin/reports', icon: Flag, label: 'Reports' },
+  { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
+  { to: '/admin/feedback', icon: MessageSquare, label: 'Feedback' },
   { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
   { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
   { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
@@ -39,6 +43,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
   { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
   { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
+  { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
   { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
   { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },

@@ -1,22 +1,30 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin } from 'lucide-react';
-import usePageMeta from '../hooks/usePageMeta';
+import { feedbackAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
-import { contactAPI } from '../api/api';
+import usePageMeta from '../hooks/usePageMeta';
+
+const TYPES = [
+  { value: 'general', label: 'General' },
+  { value: 'feedback', label: 'Feedback' },
+  { value: 'bug_report', label: 'Bug Report' },
+  { value: 'feature_request', label: 'Feature Request' },
+];
 
 export default function ContactPage() {
-  usePageMeta('Contact Us', 'Get in touch with the Kayad team. We\'re here to help with any questions about buying, selling, or auctions.');
+  usePageMeta('Contact Us', 'Send us your feedback or report an issue.');
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', type: 'general' });
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSending(true);
+    setSuccess(false);
     try {
-      await contactAPI.send(form);
-      toast('Message sent! We\'ll get back to you soon.', 'success');
-      setForm({ name: '', email: '', subject: '', message: '' });
+      await feedbackAPI.submit(form);
+      setSuccess(true);
+      setForm({ name: '', email: '', subject: '', message: '', type: 'general' });
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to send message', 'error');
     } finally {
@@ -26,65 +34,69 @@ export default function ContactPage() {
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingTop: 40 }}>
-      <div className="container" style={{ maxWidth: 1000, margin: '0 auto', padding: '60px 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+      <div className="container" style={{ maxWidth: 600, margin: '0 auto', padding: '60px 24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 12 }}>
             Get In Touch
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', margin: '0 0 16px' }}>
-            Contact <span style={{ color: 'var(--gold)' }}>Us</span>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', margin: '0 0 12px' }}>
+            We'd Love to <span style={{ color: 'var(--gold)' }}>Hear</span> From You
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, lineHeight: 1.7, maxWidth: 480, margin: '0 auto' }}>
-            Have questions? We'd love to hear from you.
+          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 14, maxWidth: 420, margin: '0 auto', lineHeight: 1.7 }}>
+            Have a question, suggestion, or issue? Send us your feedback and we'll get back to you.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40 }}>
-          <div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginBottom: 32 }}>
-              {[
-                { icon: Mail, label: 'Email', value: 'support@kayad.space', desc: 'We reply within 24 hours' },
-                { icon: Phone, label: 'Phone', value: '+254 700 000 000', desc: 'Mon-Fri, 8am-6pm EAT' },
-                { icon: MapPin, label: 'Office', value: 'Nairobi, Kenya', desc: 'Westlands, Nairobi' },
-              ].map((item, i) => (
-                <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(212,196,168,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <item.icon size={18} style={{ color: 'var(--gold)' }} />
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>{item.label}</div>
-                    <div style={{ fontSize: 15, color: '#fff', fontWeight: 600, marginBottom: 2 }}>{item.value}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>{item.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {success ? (
+          <div style={{
+            background: 'var(--card)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 16,
+            padding: 48, textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 48, marginBottom: 12 }}>✓</div>
+            <h3 style={{ margin: '0 0 8px', color: '#22c55e' }}>Thank you!</h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, margin: '0 0 20px' }}>
+              Your message has been received.
+            </p>
+            <button className="btn btn-outline" onClick={() => setSuccess(false)}>
+              Send Another Message
+            </button>
           </div>
-
+        ) : (
           <form onSubmit={handleSubmit} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: 28 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div>
-                <label htmlFor="contact-name" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Name</label>
-                <input id="contact-name" type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required placeholder="Your name" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Type</label>
+                <select value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value }))}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}>
+                  {TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
               </div>
               <div>
-                <label htmlFor="contact-email" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Email</label>
-                <input id="contact-email" type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required placeholder="you@example.com" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Name</label>
+                <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required placeholder="Your name"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label htmlFor="contact-subject" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Subject</label>
-                <input id="contact-subject" type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} required placeholder="How can we help?" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Email</label>
+                <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required placeholder="you@example.com"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
-                <label htmlFor="contact-message" style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Message</label>
-                <textarea id="contact-message" rows={4} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} required placeholder="Tell us more..." style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Subject</label>
+                <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} required placeholder="Brief subject"
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.4)', marginBottom: 6 }}>Message</label>
+                <textarea rows={5} value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} required placeholder="Tell us more..."
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', color: '#fff', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
               <button type="submit" disabled={sending} className="btn btn-gold btn-full" style={{ marginTop: 8 }}>
                 {sending ? 'Sending...' : 'Send Message'}
               </button>
             </div>
           </form>
-        </div>
+        )}
       </div>
     </div>
   );

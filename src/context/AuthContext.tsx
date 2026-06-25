@@ -207,7 +207,11 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/chats':          ['superadmin', 'admin', 'moderator'],
 };
 
-export function RequireAdminPage({ children }: RequireAuthProps) {
+interface RequireAdminPageProps extends RequireAuthProps {
+  roles?: string[];
+}
+
+export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
   const { user, isAdmin, isAuth, loading, can } = useAuth();
   const loc = useLocation();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
@@ -232,7 +236,7 @@ export function RequireAdminPage({ children }: RequireAuthProps) {
 
   // Access granted if: the role is in the page's allow-list, OR the user has been
   // assigned the permission that unlocks this page.
-  const allowedRoles = ADMIN_PAGE_ROLES[path];
+  const allowedRoles = roles || ADMIN_PAGE_ROLES[path];
   const requiredPerm = PAGE_PERMISSIONS[path];
   const roleAllows = !allowedRoles || allowedRoles.includes(user?.role || '');
   const permAllows = requiredPerm ? can(requiredPerm) : false;

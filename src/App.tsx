@@ -124,6 +124,10 @@ const OperationsDashboard         = lazy(() => import('./pages/admin/OperationsD
 const AdminDisputes               = lazy(() => import('./pages/admin/AdminDisputes'));
 const AuctionIntegrityPage        = lazy(() => import('./pages/admin/AuctionIntegrityPage'));
 const AdminDealerVerifications    = lazy(() => import('./pages/admin/AdminDealerVerifications'));
+const AdminReports                = lazy(() => import('./pages/admin/AdminReports'));
+const AdminSupportTickets         = lazy(() => import('./pages/admin/AdminSupportTickets'));
+const AdminBroadcast              = lazy(() => import('./pages/admin/AdminBroadcast'));
+const AdminFeedback               = lazy(() => import('./pages/admin/AdminFeedback'));
 const PostRegPackageSelect        = lazy(() => import('./pages/PostRegPackageSelect'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
@@ -173,8 +177,8 @@ const Admin = ({ children }) => (
 );
 
 /** Admin area with per-page role enforcement — used for sensitive pages. */
-const SecureAdmin = ({ children }) => (
-  <RequireAdminPage>
+const SecureAdmin = ({ children, roles }) => (
+  <RequireAdminPage roles={roles}>
     <AdminLayout>{children}</AdminLayout>
   </RequireAdminPage>
 );
@@ -303,6 +307,10 @@ export default function App() {
                         <Route path="/admin/disputes/:id"            element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
                         <Route path="/admin/auction-integrity"      element={<SecureAdmin><AuctionIntegrityPage /></SecureAdmin>} />
                         <Route path="/admin/dealer-verifications" element={<SecureAdmin><AdminDealerVerifications /></SecureAdmin>} />
+                        <Route path="/admin/reports" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdmin>} />
+                        <Route path="/admin/support-tickets" element={<SecureAdmin roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdmin>} />
+                        <Route path="/admin/broadcast" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdmin>} />
+                        <Route path="/admin/feedback" element={<SecureAdmin roles={["superadmin","admin"]}><AdminFeedback /></SecureAdmin>} />
 
                         {/* ── 404 ─────────────────────────────────────────────── */}
                         <Route path="*" element={<Public><NotFoundPage /></Public>} />

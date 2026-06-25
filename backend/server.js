@@ -101,7 +101,13 @@ import v2Routes from "./routes/v2.js";
 import reliabilityRoutes from "./routes/reliabilityRoutes.js";
 import ledgerRoutes from "./routes/ledgerRoutes.js";
 import auctionIntegrityRoutes from "./routes/auctionIntegrityRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
+import announcementRoutes from "./routes/announcementRoutes.js";
+import supportTicketAdminRoutes from "./routes/supportTicketAdminRoutes.js";
+import bulkAdminRoutes from "./routes/bulkAdminRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
+import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
 // ─── Error Middleware ──────────────────────────────────────────
 import notFound from "./middleware/notFound.js";
@@ -611,6 +617,11 @@ app.use("/api/admin/queue", adminLimiter, queueRoutes);
 app.use("/api/reliability", reliabilityRoutes);
 app.use("/api/ledger", ledgerRoutes);
 app.use("/api/new-admin/auction-integrity", auctionIntegrityRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/admin/support-tickets", supportTicketAdminRoutes);
+app.use("/api/admin/bulk", bulkAdminRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
@@ -785,6 +796,9 @@ const bootstrap = async () => {
       (async () => {
         try { startIntegrityCron(); console.log("✅ Auction integrity cron started"); }
         catch (err) { logError("Failed to start auction integrity cron", err); console.log("❌ Failed to start auction integrity cron:", err); }
+
+        try { startVerificationDeadlineCron(); console.log("✅ Verification deadline cron started"); }
+        catch (err) { logError("Failed to start verification deadline cron", err); console.log("❌ Failed to start verification deadline cron:", err); }
       })(),
     ]);
 

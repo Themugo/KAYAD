@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/car-detail.css';
 import BackButton from '../components/BackButton';
+import ReportButton from '../components/ReportButton';
 import DetailSkeleton from './car/components/DetailSkeleton';
 import AuctionAnnouncement from './car/components/AuctionAnnouncement';
 import InlineBidding from './car/components/InlineBidding';
@@ -641,6 +642,10 @@ export default function CarDetailPage() {
                   </div>
                 </div>
               )}
+
+              <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+                <ReportButton targetType="listing" targetId={car._id} />
+              </div>
             </div>
           </div>
 
