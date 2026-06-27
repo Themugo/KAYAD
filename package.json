@@ -79,6 +79,7 @@
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-pwa": "^0.21.1",
     "web-vitals": "^4.2.4",
+    "workbox-window": "^7.3.0",
     "wouter": "^3.3.5",
     "zod": "^3.25.76"
   }
