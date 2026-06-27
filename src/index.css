@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ============================================
    KAYAD — GLOBAL DESIGN SYSTEM v2.0
