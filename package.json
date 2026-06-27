@@ -11,6 +11,9 @@
   "private": true,
   "devDependencies": {
     "prettier": "^3.8.4",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "vite-plugin-pwa": "^0.21.1",
+    "rollup-plugin-visualizer": "^5.14.0",
+    "vite-plugin-compression": "^0.5.1"
   }
 }
