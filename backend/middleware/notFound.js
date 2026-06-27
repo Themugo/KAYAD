@@ -1,12 +1,10 @@
 // middleware/notFound.js
+import { logWarn } from "../utils/logger.js";
 
 const notFound = (req, res, next) => {
   const message = `Route not found: ${req.originalUrl}`;
 
-  // =============================
-  // 🔥 LOG (CONSISTENT WITH LOGGER)
-  // =============================
-  console.warn("🚫 NOT FOUND:", {
+  logWarn("Route not found", {
     path: req.originalUrl,
     method: req.method,
     requestId: req.requestId || "N/A",

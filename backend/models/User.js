@@ -286,6 +286,7 @@ const userSchema = new mongoose.Schema(
     // 🔐 SECURITY
     // =============================
     lastLogin: Date,
+    lastLoginAt: { type: Date, default: null, index: true },
     lastActive: { type: Date, default: null, index: true },
     loginAttempts: { type: Number, default: 0 },
     lockUntil: { type: Date, default: null },

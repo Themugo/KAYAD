@@ -16,7 +16,7 @@ import {
   createTransactionLogger,
   createFeatureLogger,
 } from "./child-logger.js";
-import { sentryTransport, configureSentry } from "./sentry-integration.js";
+import { sentryTransport } from "./sentry-integration.js";
 
 // =============================
 // 🚀 CREATE PINO LOGGER
@@ -35,14 +35,9 @@ const logger = pino(
   transports,
 );
 
-// =============================
-// 🔗 CONFIGURE SENTRY (if DSN provided)
-// =============================
-if (process.env.SENTRY_DSN) {
-  configureSentry(process.env.SENTRY_DSN, {
-    tracesSampleRate: 0.1,
-  });
-}
+// Note: Sentry.init() is already called by server.js → config/sentry.js with full
+// profiling, beforeSend filters, circuit breaker, and error queue. The Pino sentryTransport
+// below uses that already-initialized Sentry instance — no duplicate init needed.
 
 // =============================
 // 🧠 GENERATE REQUEST ID

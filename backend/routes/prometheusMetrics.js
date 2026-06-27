@@ -6,6 +6,7 @@
 
 import express from "express";
 import { getAllMetrics } from "../config/metrics.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -69,8 +70,8 @@ const convertToPrometheusFormat = (metrics) => {
   return prometheusOutput;
 };
 
-// Prometheus metrics endpoint (for scraping)
-router.get("/", async (req, res) => {
+// Prometheus metrics endpoint (for scraping) — protected by admin auth
+router.get("/", protect, adminOnly, async (req, res) => {
   try {
     const metrics = getAllMetrics();
     const prometheusOutput = convertToPrometheusFormat(metrics);

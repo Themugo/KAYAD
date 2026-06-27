@@ -1,7 +1,7 @@
 // backend/infrastructure/logging/transports.js - Production Hardened v6.0
 // ─────────────────────────────────────────────────────────────
 // Log transports for Pino
-// File rotation, error separation, console output
+// File rotation via pino-roll, error separation, console output
 // ─────────────────────────────────────────────────────────────
 
 import pino from "pino";
@@ -36,26 +36,29 @@ export const consoleTransport = pino.transport({
 });
 
 // =============================
-// 📄 FILE TRANSPORT (PRODUCTION)
+// 📄 FILE TRANSPORT WITH ROTATION (PRODUCTION)
 // =============================
-export const fileTransport = pino.transport({
-  target: "pino/file",
+const rotateOpts = {
+  target: "pino-roll",
   options: {
-    destination: path.join(logDir, "combined.log"),
+    file: path.join(logDir, "combined.log"),
+    frequency: "daily",
     mkdir: true,
   },
-});
+};
 
-// =============================
-// 🔴 ERROR FILE TRANSPORT (PRODUCTION)
-// =============================
-export const errorTransport = pino.transport({
-  target: "pino/file",
+const errorRotateOpts = {
+  target: "pino-roll",
   options: {
-    destination: path.join(logDir, "error.log"),
+    file: path.join(logDir, "error.log"),
+    frequency: "daily",
     mkdir: true,
   },
-});
+};
+
+export const fileTransport = pino.transport(rotateOpts);
+
+export const errorTransport = pino.transport(errorRotateOpts);
 
 // =============================
 // 🔄 GET TRANSPORTS
@@ -65,7 +68,7 @@ export const getTransports = () => {
     return consoleTransport;
   }
 
-  // Production: use pino.multi-stream for multiple outputs
+  // Production: use pino.multistream for multiple outputs
   return pino.multistream([
     { level: "info", stream: fileTransport },
     { level: "error", stream: errorTransport },

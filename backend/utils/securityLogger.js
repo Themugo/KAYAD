@@ -1,6 +1,16 @@
 import SecurityLog from "../models/SecurityLog.js";
 import { logError, logWarn, logInfo } from "./logger.js";
 
+// Lazy import for email — avoids circular deps
+let _sendRawEmail;
+const getSendRawEmail = async () => {
+  if (!_sendRawEmail) {
+    const mod = await import("../services/email.service.js");
+    _sendRawEmail = mod.sendRawEmail;
+  }
+  return _sendRawEmail;
+};
+
 // Security event types
 export const SECURITY_EVENTS = {
   // Authentication events
@@ -12,8 +22,8 @@ export const SECURITY_EVENTS = {
   PASSWORD_RESET: "PASSWORD_RESET",
   
   // Authorization events
-  AUTH_SUCCESS: "AUTH_SUCCESS",
-  AUTH_FAILED: "AUTH_FAILED",
+  AUTHORIZATION_SUCCESS: "AUTHORIZATION_SUCCESS",
+  AUTHORIZATION_FAILED: "AUTHORIZATION_FAILED",
   IDOR_ATTEMPT: "IDOR_ATTEMPT",
   PRIVILEGE_ESCALATION: "PRIVILEGE_ESCALATION",
   
@@ -141,22 +151,41 @@ const sendSecurityAlert = async ({ action, actor, target, ip, severity }) => {
   }
 };
 
-// SIEM integration placeholder
+// SIEM integration (logs to structured log for collection by log shippers)
 const sendToSIEM = async (data) => {
-  // Implement SIEM integration (e.g., Splunk, ELK, Datadog)
-  console.log("SIEM Alert:", JSON.stringify(data));
+  logInfo("SIEM_ALERT", { source: "security_logger", ...data });
 };
 
-// Email alert placeholder
+// Email alert for critical security events
 const sendEmailAlert = async ({ action, actor, target, ip }) => {
-  // Implement email alert using existing email service
-  console.log("Security Alert Email:", { action, actor, target, ip });
+  if (!process.env.SECURITY_ALERT_EMAIL) return;
+  try {
+    const sendRawEmail = await getSendRawEmail();
+    await sendRawEmail({
+      to: process.env.SECURITY_ALERT_EMAIL.split(","),
+      subject: `[KAYAD Security] ${action}`,
+      html: `<h2>Security Alert</h2><p>Action: ${action}</p><p>Actor: ${actor || "unknown"}</p><p>Target: ${target || "N/A"}</p><p>IP: ${ip || "N/A"}</p><p>Time: ${new Date().toISOString()}</p>`,
+    });
+  } catch {
+    logWarn("Security alert email failed");
+  }
 };
 
-// Slack alert placeholder
+// Slack webhook alert
 const sendSlackAlert = async ({ action, actor, target, ip, severity }) => {
-  // Implement Slack webhook integration
-  console.log("Slack Alert:", { action, actor, target, ip, severity });
+  const webhook = process.env.SECURITY_SLACK_WEBHOOK;
+  if (!webhook) return;
+  try {
+    await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `*[${severity.toUpperCase()}] Security Alert*\n• Action: ${action}\n• Actor: ${actor || "unknown"}\n• Target: ${target || "N/A"}\n• IP: ${ip || "N/A"}\n• Time: ${new Date().toISOString()}`,
+      }),
+    });
+  } catch {
+    logWarn("Slack security alert failed");
+  }
 };
 
 // Log retention - clean up old security logs

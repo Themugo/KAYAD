@@ -1,5 +1,6 @@
 import { Component, ReactNode } from 'react';
 import { reportError } from '../utils/posthog';
+import { reportError as reportToSentry } from '../utils/sentry';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -23,6 +24,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, info: { componentStack?: string }) {
     console.error('[Kayad] Uncaught error:', error, info);
     reportError(error, { componentStack: info?.componentStack });
+    reportToSentry(error, { componentStack: info?.componentStack });
   }
 
   handleRetry = () => {
