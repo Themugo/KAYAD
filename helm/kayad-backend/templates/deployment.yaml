@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kayad-backend.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kayad-backend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "kayad-backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "kayad-backend.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+          protocol: TCP
+        env:
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        {{- if .Values.secrets.mongoUri }}
+        - name: MONGO_URI
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: mongo-uri
+        {{- end }}
+        {{- if .Values.secrets.redisUrl }}
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: redis-url
+        {{- end }}
+        {{- if .Values.secrets.jwtSecret }}
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: jwt-secret
+        {{- end }}
+        {{- if .Values.secrets.sentryDsn }}
+        - name: SENTRY_DSN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: sentry-dsn
+        {{- end }}
+        {{- if .Values.secrets.mpesaConsumerKey }}
+        - name: MPESA_CONSUMER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: mpesa-consumer-key
+        {{- end }}
+        {{- if .Values.secrets.mpesaConsumerSecret }}
+        - name: MPESA_CONSUMER_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: mpesa-consumer-secret
+        {{- end }}
+        {{- if .Values.secrets.mpesaPasskey }}
+        - name: MPESA_PASSKEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: mpesa-passkey
+        {{- end }}
+        {{- if .Values.secrets.cloudinaryCloudName }}
+        - name: CLOUDINARY_CLOUD_NAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: cloudinary-cloud-name
+        {{- end }}
+        {{- if .Values.secrets.cloudinaryApiKey }}
+        - name: CLOUDINARY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: cloudinary-api-key
+        {{- end }}
+        {{- if .Values.secrets.cloudinaryApiSecret }}
+        - name: CLOUDINARY_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: cloudinary-api-secret
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        {{- if .Values.persistence.enabled }}
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+        {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: {{ include "kayad-backend.fullname" . }}-pvc
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

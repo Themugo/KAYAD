@@ -1,0 +1,26 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./dist",
+      "startServerCommand": "npm run preview",
+      "startServerReadyPattern": "ready in",
+      "startServerReadyTimeout": 30000,
+      "url": [
+        "http://localhost:4173"
+      ],
+      "numberOfRuns": 3
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    },
+    "lighthouseci": {
+      "assert": {
+        "preset": "lighthouse:recommended"
+      },
+      "budgetPath": "./.github/lighthouse-budget.json",
+      "collect": {
+        "chromePath": "google-chrome-stable"
+      }
+    }
+  }
+}

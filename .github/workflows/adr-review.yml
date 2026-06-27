@@ -1,0 +1,103 @@
+name: ADR Review
+
+on:
+  pull_request:
+    paths:
+      - 'docs/adr/**'
+  workflow_dispatch:
+    inputs:
+      adr_number:
+        description: 'ADR number to review'
+        required: true
+        type: string
+
+jobs:
+  adr-review:
+    name: ADR Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate ADR format
+        run: |
+          for file in docs/adr/*.md; do
+            if [ "$file" != "docs/adr/README.md" ] && [ "$file" != "docs/adr/0000-adr-template.md" ]; then
+              echo "Validating $file"
+              
+              # Check for required sections
+              if ! grep -q "## Status" "$file"; then
+                echo "Error: Missing Status section in $file"
+                exit 1
+              fi
+              
+              if ! grep -q "## Context" "$file"; then
+                echo "Error: Missing Context section in $file"
+                exit 1
+              fi
+              
+              if ! grep -q "## Decision" "$file"; then
+                echo "Error: Missing Decision section in $file"
+                exit 1
+              fi
+              
+              if ! grep -q "## Consequences" "$file"; then
+                echo "Error: Missing Consequences section in $file"
+                exit 1
+              fi
+              
+              if ! grep -q "## Alternatives Considered" "$file"; then
+                echo "Error: Missing Alternatives Considered section in $file"
+                exit 1
+              fi
+              
+              echo "✅ $file is valid"
+            fi
+          done
+
+      - name: Check ADR index
+        run: |
+          echo "Checking ADR index in README.md"
+          
+          # Extract ADR numbers from files
+          ADR_FILES=$(ls docs/adr/*.md | grep -E "000[1-9]-" | wc -l)
+          
+          # Check if README exists
+          if [ ! -f "docs/adr/README.md" ]; then
+            echo "Error: ADR index (README.md) not found"
+            exit 1
+          fi
+          
+          echo "✅ ADR index exists"
+
+      - name: Comment PR with review checklist
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ADR Review Checklist\n\nPlease review the following:\n\n- [ ] ADR follows the template format\n- [ ] Context is clearly described\n- [ ] Decision is well-defined\n- [ ] Consequences are documented (both positive and negative)\n- [ ] Alternatives are considered with reasons for rejection\n- [ ] Implementation notes are provided\n- [ ] References are included\n- [ ] ADR index is updated\n\n## Reviewers\n\nPlease assign at least 2 reviewers for this ADR.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Add reviewers
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Add default reviewers for ADR PRs
+            const reviewers = ['themugo']; // Add your team members here
+            github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: reviewers
+            });

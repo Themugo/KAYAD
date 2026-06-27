@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <!--
+    OWASP Dependency Check Suppressions File
+    
+    This file contains suppressions for false positives or acceptable vulnerabilities
+    that should not block the CI/CD pipeline.
+    
+    Each suppression should include:
+    - A clear justification
+    - The CVE or vulnerability identifier
+    - The affected file or package
+    
+    Review and update this file regularly as vulnerabilities are fixed.
+  -->
+  
+  <!-- Example suppression (uncomment and customize as needed) -->
+  <!--
+  <suppress>
+    <notes>
+      False positive: This vulnerability is not exploitable in our context
+      because we don't use the vulnerable feature.
+    </notes>
+    <cve>CVE-2021-12345</cve>
+    <packageUrl regex="true">^pkg:npm/.*</packageUrl>
+  </suppress>
+  -->
+  
+  <!-- Development dependencies (not used in production) -->
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/@types/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/@typescript-eslint/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/@vitest/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/@playwright/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Test dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/jest/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Test dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/supertest/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Test dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/mongodb-memory-server/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/nodemon/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/prettier/.*</packageUrl>
+  </suppress>
+  
+  <suppress>
+    <notes>
+      Development dependencies are not used in production builds.
+      These vulnerabilities are acceptable for development environment.
+    </notes>
+    <packageUrl regex="true">^pkg:npm/eslint/.*</packageUrl>
+  </suppress>
+  
+  <!-- Known acceptable vulnerabilities with mitigation -->
+  <!-- Add specific suppressions here with clear justifications -->
+  
+</suppressions>
