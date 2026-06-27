@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "npm run build",
+  "buildCommand": "npx vite build",
   "outputDirectory": "dist",
-  "installCommand": "npm ci",
+  "installCommand": "npx pnpm install",
   "redirects": [
     {
       "source": "/(.*)",
@@ -98,13 +98,5 @@
         }
       ]
     }
-  ],
-  "experimentalServices": {
-    "kayad-backend": {
-      "type": "web",
-      "routePrefix": "/",
-      "framework": "vite",
-      "buildCommand": "cd backend && npm ci"
-    }
-  }
+  ]
 }

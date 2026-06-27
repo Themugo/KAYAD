@@ -47,3 +47,16 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Environment secrets
+backend/.env
+.env
+
+# Vercel
+.vercel/
+
+# Logs
+logs/
+
+# Reports
+api-governance-report.json
