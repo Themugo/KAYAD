@@ -2,7 +2,6 @@
   "framework": "vite",
   "buildCommand": "npx vite build",
   "outputDirectory": "dist",
-  "installCommand": "npx pnpm install",
   "redirects": [
     {
       "source": "/(.*)",

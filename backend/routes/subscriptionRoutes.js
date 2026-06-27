@@ -51,4 +51,3 @@ router.get("/all", protect, adminOnly, validateQuery(analyticsQuerySchema), asyn
 router.get("/analytics", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getSubscriptionAnalytics));
 
 export default router;
-export default router;
