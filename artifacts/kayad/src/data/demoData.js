@@ -100,6 +100,59 @@ export const DEMO_USERS = {
     createdAt: new Date(now - 90 * DAY).toISOString(),
     tokenVersion: 0,
   },
+
+  // ── Staff / Admin accounts ────────────────────────────────────────────────
+  admin: {
+    _id: 'demo-admin-1',
+    name: 'Theo Mugo',
+    email: 'admin@kayad.com',
+    password: 'Admin@1234',
+    role: 'admin',
+    phone: '254700000001',
+    location: 'Nairobi, Kenya',
+    bio: 'KAYAD Platform Administrator',
+    emailVerified: true,
+    status: 'approved',
+    isBanned: false,
+    isStaff: true,
+    permissions: [],
+    createdAt: new Date(now - 365 * DAY).toISOString(),
+    tokenVersion: 0,
+  },
+  superadmin: {
+    _id: 'demo-superadmin-1',
+    name: 'KAYAD SuperAdmin',
+    email: 'superadmin@kayad.com',
+    password: 'SuperAdmin@1234',
+    role: 'superadmin',
+    phone: '254700000002',
+    location: 'Nairobi, Kenya',
+    bio: 'KAYAD Super Administrator — full system access',
+    emailVerified: true,
+    status: 'approved',
+    isBanned: false,
+    isStaff: true,
+    permissions: [],
+    createdAt: new Date(now - 365 * DAY).toISOString(),
+    tokenVersion: 0,
+  },
+  webhost: {
+    _id: 'demo-webhost-1',
+    name: 'Webhost Admin',
+    email: 'webhost@kayad.com',
+    password: 'Webhost@1234',
+    role: 'superadmin',
+    phone: '254700000003',
+    location: 'Nairobi, Kenya',
+    bio: 'KAYAD Webhost Administrator — platform owner',
+    emailVerified: true,
+    status: 'approved',
+    isBanned: false,
+    isStaff: true,
+    permissions: [],
+    createdAt: new Date(now - 365 * DAY).toISOString(),
+    tokenVersion: 0,
+  },
 };
 
 const DEMO_CARS_KEY = 'kayad_demo_cars';
@@ -111,7 +164,18 @@ const loadDemoCars = () => {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        // Rehydrate seed images for cars whose image arrays were stripped during
+        // a quota-exceeded compaction write. Cars edited by the dealer keep their
+        // base64 images; unedited seed cars get their Unsplash URLs back.
+        const seed = buildDemoCars();
+        const seedMap = new Map(seed.map(c => [c._id, c]));
+        return parsed.map(c => {
+          if (!c.images || c.images.length === 0) {
+            const seedCar = seedMap.get(c._id);
+            if (seedCar) return { ...c, images: seedCar.images };
+          }
+          return c;
+        });
       }
     }
   } catch { /* ignore */ }
@@ -121,7 +185,30 @@ const loadDemoCars = () => {
 const saveDemoCars = (cars) => {
   try {
     localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(cars));
-  } catch { /* ignore */ }
+  } catch (e) {
+    // QuotaExceededError: strip large base64 payloads from seed-only cars,
+    // preserving user-uploaded images on cars the dealer has actually edited.
+    if (e && (e.name === 'QuotaExceededError' || e.code === 22)) {
+      try {
+        const compact = cars.map(c => {
+          const imgs = Array.isArray(c.images) ? c.images : [];
+          const hasUserUploads = imgs.some(img => {
+            const url = typeof img === 'string' ? img : (img?.url || '');
+            return url.startsWith('data:');
+          });
+          // Keep only base64 (user-uploaded) images; drop Unsplash URLs
+          // (they will be re-seeded from buildDemoCars on next full load).
+          return hasUserUploads
+            ? { ...c, images: imgs.filter(img => {
+                const url = typeof img === 'string' ? img : (img?.url || '');
+                return url.startsWith('data:');
+              }) }
+            : { ...c, images: [] }; // seed cars: images omitted, seeded on load
+        });
+        localStorage.setItem(DEMO_CARS_KEY, JSON.stringify(compact));
+      } catch { /* truly out of space — can't persist */ }
+    }
+  }
 };
 
 let _cars = loadDemoCars();

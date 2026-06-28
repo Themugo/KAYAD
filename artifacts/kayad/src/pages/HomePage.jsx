@@ -13,6 +13,7 @@ import HomeHero from './home/components/HomeHero';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
 import HomeFeaturePillars from './home/components/HomeFeaturePillars';
 import HomeCtaSection from './home/components/HomeCtaSection';
+import AdBoard from '../components/AdBoard';
 
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
@@ -137,6 +138,8 @@ export default function HomePage() {
             <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
           </div>
         </section>
+
+        <AdBoard placement="homepage_banner" />
 
         {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 

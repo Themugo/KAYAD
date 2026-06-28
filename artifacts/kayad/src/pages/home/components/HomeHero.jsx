@@ -342,41 +342,40 @@ export default function HomeHero({ liveCount = 0, isAuth = false, user = null })
         </div>
       </motion.div>
 
-      {/* ── Right side car info card ── */}
+      {/* ── Right side car info card — compact pill ── */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -10 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.4 }}
           className="absolute z-20"
           style={{
-            bottom: 100,
-            right: 40,
-            background: 'rgba(10,10,10,0.75)',
-            border: '1px solid rgba(212,196,168,0.15)',
-            borderRadius: 14,
-            padding: '14px 18px',
-            backdropFilter: 'blur(16px)',
+            bottom: 52,
+            right: 48,
+            background: 'rgba(8,8,8,0.82)',
+            border: '1px solid rgba(212,196,168,0.18)',
+            borderRadius: 10,
+            padding: '9px 13px',
+            backdropFilter: 'blur(20px)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            minWidth: 180,
+            alignItems: 'center',
+            gap: 10,
           }}
         >
-          <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-            Featured
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
-            {car.title}
-          </div>
-          <div className="flex items-center justify-between" style={{ gap: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--gold)' }}>{car.price}</div>
-            <div className="flex items-center gap-1" style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
-              <MapPin size={9} />
-              {car.city} · {car.year}
+          <div style={{ width: 3, height: 28, borderRadius: 2, background: 'var(--gold)', flexShrink: 0 }} />
+          <div>
+            <div style={{ fontSize: 8, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 2 }}>
+              Featured
             </div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-display)', fontStyle: 'italic', lineHeight: 1.2, maxWidth: 140, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {car.title}
+            </div>
+          </div>
+          <div style={{ marginLeft: 4, textAlign: 'right' }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--gold)', lineHeight: 1 }}>{car.price}</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{car.city} · {car.year}</div>
           </div>
         </motion.div>
       </AnimatePresence>

@@ -44,6 +44,7 @@ const PrivacyPage          = lazy(() => import('./pages/PrivacyPage'));
 const ContactPage          = lazy(() => import('./pages/ContactPage'));
 const AboutPage            = lazy(() => import('./pages/AboutPage'));
 const GhostCheckerInfo     = lazy(() => import('./pages/GhostCheckerInfo'));
+const AdvertisingPage      = lazy(() => import('./pages/AdvertisingPage'));
 
 const LoginPage            = lazy(() => import('./pages/LoginPage'));
 const RegisterPage         = lazy(() => import('./pages/RegisterPage'));
@@ -209,6 +210,7 @@ export default function App() {
                         <Route path="/privacy"             element={<Public><PrivacyPage /></Public>} />
                         <Route path="/contact"             element={<Public><ContactPage /></Public>} />
                         <Route path="/about"               element={<Public><AboutPage /></Public>} />
+                        <Route path="/advertising"         element={<Public><AdvertisingPage /></Public>} />
                         <Route path="/ghost-checker"       element={<Public><GhostCheckerInfo /></Public>} />
 
                         {/* ── Auth ────────────────────────────────────────────── */}

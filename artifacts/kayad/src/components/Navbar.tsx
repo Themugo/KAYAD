@@ -147,6 +147,9 @@ export default function Navbar() {
             <Link to="/ghost-checker" className={`nav-link ${isActive('/ghost-checker') ? 'active' : ''}`}>
               Ghost Check
             </Link>
+            <Link to="/advertising" className={`nav-link ${isActive('/advertising') ? 'active' : ''}`} style={{ color: 'var(--gold)', fontWeight: 700 }}>
+              Advertise
+            </Link>
 
             {isSellerRole(user?.role) && (
               <Link to="/dealer" className={`nav-link ${isActive('/dealer') ? 'active' : ''}`}>
@@ -294,6 +297,9 @@ export default function Navbar() {
                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
                   <Link to="/ghost-checker" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                     Ghost Check
+                  </Link>
+                  <Link to="/advertising" className="mobile-nav-link" onClick={() => setMobileOpen(false)} style={{ color: 'var(--gold)', fontWeight: 700 }}>
+                    Advertise
                   </Link>
                   <Link to="/about" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
                     About

@@ -23,8 +23,8 @@ const delay = (min = 200, max = 800) =>
 // with several photos persists comfortably even on mobile (5 MB quota).
 const fileToBase64 = (file) =>
   new Promise((resolve) => {
-    const MAX_EDGE = 800;
-    const QUALITY = 0.6;
+    const MAX_EDGE = 600;
+    const QUALITY = 0.4;
     const reader = new FileReader();
     reader.onerror = () => resolve('');
     reader.onload = () => {
@@ -51,6 +51,47 @@ const fileToBase64 = (file) =>
     };
     reader.readAsDataURL(file);
   });
+
+// ─── Demo Ads ─────────────────────────────────────────────────────────────
+// Live ad data shown on the home page AdBoard when the backend is unreachable.
+const DEMO_ADS = [
+  {
+    _id: 'ad-kayad-1',
+    clientName: 'KAYAD',
+    headline: 'Sell Your Car Faster with KAYAD',
+    subline: 'List in 5 minutes • Reach 50,000+ buyers • Secure M-Pesa escrow',
+    targetLink: '/dealer/onboarding',
+    placement: 'homepage_banner',
+    imageUrl: null,
+    isActive: true,
+    isInternal: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    _id: 'ad-kayad-2',
+    clientName: 'KAYAD Auctions',
+    headline: 'Live Car Auctions — Every Week',
+    subline: 'Bid from anywhere in Kenya. Real cars. Real prices. No hidden fees.',
+    targetLink: '/auctions/calendar',
+    placement: 'homepage_banner',
+    imageUrl: null,
+    isActive: true,
+    isInternal: true,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    _id: 'ad-kayad-3',
+    clientName: 'KAYAD Ghost Checker',
+    headline: 'Check Any Car for Hidden Faults',
+    subline: 'NTSA verification · logbook check · comprehensive inspection reports',
+    targetLink: '/ghost-checker',
+    placement: 'homepage_banner',
+    imageUrl: null,
+    isActive: true,
+    isInternal: true,
+    createdAt: new Date().toISOString(),
+  },
+];
 
 // Demo session state.
 // IMPORTANT: the demo user must survive page reloads. The auth token lives in
@@ -197,6 +238,12 @@ const demoAuth = {
     await delay();
     const user = Object.values(DEMO_USERS).find(u => u.email === body.email);
     if (!user) throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
+    // Verify password — demo accounts each have a defined password field.
+    // Allow login without password only for the original buyer/dealer/broker
+    // which used no-password quick-login buttons before admin accounts were added.
+    if (user.password && body.password && user.password !== body.password) {
+      throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
+    }
     if (user.isBanned) throw { response: { status: 403, data: { message: 'Your account has been suspended' } } };
     const { password: _pw, ...safe } = user;
     setDemoUser(safe);
@@ -1354,4 +1401,39 @@ export const demoAPI = {
   },
   reviews: demoReviews,
   transactions: demoTransactions,
+
+  // ─── Ads (public + admin) ───────────────────────────────────────
+  ads: {
+    list: async (params = {}) => {
+      await delay(100, 300);
+      const placement = params?.placement;
+      const ads = DEMO_ADS.filter(a =>
+        a.isActive !== false &&
+        (!placement || a.placement === placement || a.placement === 'all')
+      );
+      return { ads, total: ads.length };
+    },
+    adminList: async () => {
+      await delay(100, 300);
+      return { ads: DEMO_ADS, total: DEMO_ADS.length };
+    },
+    create: async (body) => {
+      await delay(200, 500);
+      const ad = { ...body, _id: `ad-demo-${Date.now()}`, isActive: true, createdAt: new Date().toISOString() };
+      DEMO_ADS.push(ad);
+      return { ad };
+    },
+    update: async (id, body) => {
+      await delay(200, 400);
+      const i = DEMO_ADS.findIndex(a => a._id === id);
+      if (i >= 0) DEMO_ADS[i] = { ...DEMO_ADS[i], ...body };
+      return { ad: DEMO_ADS[i] };
+    },
+    remove: async (id) => {
+      await delay(100, 300);
+      const i = DEMO_ADS.findIndex(a => a._id === id);
+      if (i >= 0) DEMO_ADS.splice(i, 1);
+      return { message: 'Deleted' };
+    },
+  },
 };

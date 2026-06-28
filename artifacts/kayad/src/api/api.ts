@@ -18,17 +18,32 @@ const HEALTH_ENDPOINT = `${BASE}/health`;
 const DEMO_MODE_ENABLED = (import.meta.env?.VITE_ENABLE_DEMO ?? 'true') !== 'false';
 let __DEMO_MODE__ = false;
 export const isDemoMode = () => __DEMO_MODE__ && DEMO_MODE_ENABLED;
+
+/** Returns true if the admin has explicitly disabled demo fallback for this session. */
+const _isDemoForceOff = (): boolean => {
+  try { return !!localStorage.getItem('kayad_demo_force_off'); } catch { return false; }
+};
+/** Guard used before activating demo mode — respects the admin force-off flag. */
+const _canActivateDemo = (): boolean => DEMO_MODE_ENABLED && !_isDemoForceOff();
 // Force demo mode on (used by the login page's demo quick-login buttons so
 // the @demo.com accounts work instantly regardless of real-backend state).
 // Respects VITE_ENABLE_DEMO environment variable to prevent accidental activation in production.
 export const enableDemoMode = () => {
   if (DEMO_MODE_ENABLED && import.meta.env?.VITE_ENABLE_DEMO !== 'false') {
     __DEMO_MODE__ = true;
-    // Clear any existing demo user state to prevent conflicts
     try {
       localStorage.removeItem('kayad_demo_user');
+      localStorage.removeItem('kayad_demo_force_off'); // clear admin override
     } catch { /* ignore */ }
   }
+};
+
+/** Force demo mode off for the current session. Persists via localStorage flag. */
+export const disableDemoMode = () => {
+  __DEMO_MODE__ = false;
+  try {
+    localStorage.setItem('kayad_demo_force_off', '1');
+  } catch { /* ignore */ }
 };
 let _backendProbePromise: Promise<boolean> | null = null;
 let _lastProbeAt = 0;
@@ -140,9 +155,9 @@ api.interceptors.response.use(
       return api(orig);
     }
 
-    // Network error → switch to demo mode
+    // Network error → switch to demo mode (unless admin has force-disabled it)
     if (!err.response) {
-      __DEMO_MODE__ = true;
+      if (_canActivateDemo()) __DEMO_MODE__ = true;
       return Promise.reject(err);
     }
 
@@ -218,14 +233,14 @@ function withDemo<T extends Record<string, any>>(realObj: T, demoObj: Partial<T>
     (wrapped as any)[key] = async (...args: any[]) => {
       // If using a demo token, go straight to demo API — real backend will reject it
       if (demoObj?.[key] && (isDemoToken() || __DEMO_MODE__)) {
-        __DEMO_MODE__ = true;
+        if (_canActivateDemo()) __DEMO_MODE__ = true;
         return demoObj[key]!(...args);
       }
 
       try { return await realObj[key](...args); }
       catch (err) {
-        if (demoObj?.[key] && (__DEMO_MODE__ || shouldFallbackToDemo(err as AxiosError))) {
-          __DEMO_MODE__ = true;
+        if (demoObj?.[key] && (_canActivateDemo() || __DEMO_MODE__) && (__DEMO_MODE__ || shouldFallbackToDemo(err as AxiosError))) {
+          if (_canActivateDemo()) __DEMO_MODE__ = true;
           return demoObj[key]!(...args);
         }
         throw err;
@@ -757,13 +772,14 @@ export const transactionsAPI = withDemo(_transactionsAPI, demoAPI.transactions);
 // ============================================================
 //  ADS — routes/adRoutes.js (/ads) + adminRoutes.js (/admin/ads)
 // ============================================================
-export const adsAPI = {
+const _adsAPI = {
   list:       (params: any) => api.get('/ads', { params }).then(unwrap),
   adminList:  ()       => api.get('/admin/ads').then(unwrap),
   create:     (body: any)   => api.post('/admin/ads', body).then(unwrap),
   update:     (id: string, body: any) => api.put(`/admin/ads/${id}`, body).then(unwrap),
   remove:     (id: string)     => api.delete(`/admin/ads/${id}`).then(unwrap),
 };
+export const adsAPI = withDemo(_adsAPI, demoAPI.ads);
 
 // ============================================================
 //  SMS BIDDING — routes/smsBiddingRoutes.js (/sms-bidding)
