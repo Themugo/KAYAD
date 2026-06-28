@@ -8,7 +8,7 @@ import AuctionAnnouncement from './car/components/AuctionAnnouncement';
 import InlineBidding from './car/components/InlineBidding';
 import NtsaStatusCard from './car/components/NtsaStatusCard';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
-import { getMockCar } from '../data/mockCars';
+import { getDemoCar } from '../data/demoData';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
@@ -74,14 +74,14 @@ export default function CarDetailPage() {
     carsAPI.get(id)
       .then(data => {
         let c = data?.car || data?.data || data;
-        if (!c || !c._id) c = getMockCar(id);
+        if (!c || !c._id) c = getDemoCar(id);
         setCar(c);
         if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick?.(id).catch((error) => console.error('Track click failed:', error)); }
         if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch((error) => console.error('Fetch reviews failed:', error));
       })
       .catch((error) => {
         console.error('Failed to fetch car:', error);
-        const m = getMockCar(id);
+        const m = getDemoCar(id);
         setCar(m);
         if (m) setImgIdx(m.coverImage ?? 0);
       })

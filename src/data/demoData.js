@@ -389,5 +389,5 @@ export function filterDemoCars(filters = {}) {
 }
 
 export function getDemoCar(id) {
-  return _cars.find(c => c._id === id) || null;
+  return _cars.find(c => c._id === id) || _cars.find(c => id?.endsWith(c._id.replace('car-', ''))) || null;
 }

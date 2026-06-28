@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { authRole } from "../middleware/authRole.js";
+import { requireRole } from "../middleware/rbac.js";
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import Car from "../models/Car.js";
 import { getMarketPulse, getDealerInsights } from "../services/marketIntel.service.js";
@@ -50,7 +50,7 @@ router.get(
 router.get(
   "/dealer/insights",
   authenticate,
-  authRole(["dealer", "admin", "superadmin"]),
+  requireRole("dealer", "admin", "superadmin"),
   validateQuery(analyticsQuerySchema),
   asyncHandler(async (req, res) => {
     const dealerId =

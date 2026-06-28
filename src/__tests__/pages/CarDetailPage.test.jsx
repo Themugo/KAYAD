@@ -20,9 +20,9 @@ vi.mock('../../api/api', () => ({
   bidsAPI: { getForCar: vi.fn().mockResolvedValue({ bids: [] }), place: vi.fn() },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
 }));
-vi.mock('../../data/mockCars', () => ({
-  getMockCar: vi.fn().mockReturnValue({
-    _id: 'mock1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
+vi.mock('../../data/demoData', () => ({
+  getDemoCar: vi.fn().mockReturnValue({
+    _id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
     year: 2023, fuel: 'Petrol', transmission: 'Automatic',
     price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' },
   }),
