@@ -43,7 +43,7 @@ jobs:
             npm ci
             cyclonedx-npm -o sbom-backend.json
           else
-            npm ci
+            pnpm install --frozen-lockfile
             cyclonedx-npm -o sbom-frontend.json
           fi
 

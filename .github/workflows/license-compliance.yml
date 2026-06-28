@@ -38,7 +38,7 @@ jobs:
             cd backend
             npm ci
           else
-            npm ci
+            pnpm install --frozen-lockfile
           fi
 
       - name: Install License Checker
