@@ -1,5 +1,6 @@
 {
   "framework": "vite",
+  "nodeVersion": "20.x",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm exec vite build",
   "outputDirectory": "dist",
