@@ -56,7 +56,7 @@ export default function EditCarPage() {
         const loggedUserId = String(user?._id ?? user?.id ?? '').trim();
         const bothValid = carDealerId.length > 0 && loggedUserId.length > 0;
         const isOwner   = bothValid && carDealerId === loggedUserId;
-        const isDemoMgmt = c.isDemo && ['dealer', 'broker', 'individual_seller'].includes(user?.role);
+        const isDemoMgmt = c.isDemo && ['dealer', 'individual_seller'].includes(user?.role);
         if (!isOwner && !isAdmin && !isDemoMgmt) { setDenied(true); setCar(c); return; }
         setCar(c);
         setCoverImageIdx(c.coverImage ?? 0);

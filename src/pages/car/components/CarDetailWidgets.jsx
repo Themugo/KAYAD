@@ -1,7 +1,7 @@
 // src/pages/car/components/CarDetailWidgets.jsx
 // Extracted sub-components from CarDetailPage.jsx
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useCompare } from '../../../context/CompareContext';
 import { ChevronLeft, ChevronRight, Star, BarChart3 } from 'lucide-react';
 
@@ -19,6 +19,8 @@ export function GalleryImage({ car, idx, onPrev, onNext, total }) {
   const src = (!err && firstImage(car, idx)) ||
     'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1600&fit=crop';
 
+  useEffect(() => { setErr(false); setLoaded(false); }, [idx]);
+
   const handleTouchStart = useCallback((e) => { touchX.current = e.touches[0].clientX; }, []);
   const handleTouchEnd = useCallback((e) => {
     if (touchX.current === null) return;
@@ -32,7 +34,7 @@ export function GalleryImage({ car, idx, onPrev, onNext, total }) {
     <div className="car-detail-gallery"
       onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {!loaded && <div className="gallery-shimmer" />}
-      <img src={src} onError={() => setErr(true)} onLoad={() => setLoaded(true)} alt={car?.title || 'Vehicle'} decoding="async"
+      <img key={idx} src={src} onError={() => setErr(true)} onLoad={() => setLoaded(true)} alt={car?.title || 'Vehicle'} decoding="async"
         style={{ opacity: loaded ? 1 : 0.3, transition: 'opacity 0.5s ease' }} />
 
       <div className="gallery-overlay" />

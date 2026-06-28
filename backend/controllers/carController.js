@@ -207,7 +207,7 @@ export const createCar = async (req, res) => {
     const monetisationOff = config?.freeMarket !== false || config?.waivePayments === true;
 
     const isDealer = seller.role === "dealer";
-    const isSeller = seller.role === "broker" || seller.role === "individual_seller";
+    const isSeller = seller.role === "individual_seller";
     const currentListingCount = isDemoSeller ? 0 : await Car.countDocuments({ dealer: req.user.id });
 
     // Determine if user is allowed to create a listing (without incrementing yet)
@@ -438,7 +438,7 @@ export const updateCar = async (req, res) => {
     // Permission rules:
     //   • Owner always edits their own car
     //   • Demo dealers can edit demo cars
-    //   • Staff can edit demo cars ONLY — never real dealer/broker/seller listings
+    //   • Staff can edit demo cars ONLY — never real dealer/seller listings
     const canEdit = isOwner || (car.isDemo && (isDealer || isStaff));
     if (!canEdit) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });

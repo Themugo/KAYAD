@@ -28,7 +28,7 @@ const DEALER_LINKS: LinkItem[] = [
 // Only show onboarding link when the dealer hasn't completed onboarding
 const ONBOARDING_LINK: LinkItem = { to: '/dealer/onboarding', icon: Award, label: 'Onboarding' };
 
-const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'];
+const SELLER_ROLES = ['dealer', 'individual_seller'];
 
 interface DealerSidebarProps {
   mobileOpen: boolean;

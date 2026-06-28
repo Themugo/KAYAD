@@ -143,7 +143,7 @@ export default function CarDetailPage() {
   const dealer = car?.dealer;
   const dv = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
 
-  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'broker' || dealer.role === 'user' || !dealer.role;
+  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'user' || !dealer.role;
   const isDealerSeller = dealer?.role === 'dealer';
 
   // ═══ INLINE BIDDING ═══
@@ -566,16 +566,14 @@ export default function CarDetailPage() {
                   )}
 
                 <div className="cta-group">
-                  {car.allowBuy && (isP2P || isDealerSeller) ? (
-                    car.escrowEnabled !== false ? (
-                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
-                        <Lock size={15} /> Buy via Escrow
-                      </button>
-                    ) : (
-                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-buynow">
-                        <ShieldCheck size={15} /> Buy Now
-                      </button>
-                    )
+                  {car.allowBuy && isP2P ? (
+                    <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
+                      <Lock size={15} /> Buy via Escrow
+                    </button>
+                  ) : car.allowBuy && isDealerSeller ? (
+                    <button onClick={() => handleBuy('escrow')} className="cta-primary cta-buynow">
+                      <ShieldCheck size={15} /> Buy Now
+                    </button>
                   ) : null}
 
                   {dv.chatEnabled && !car.chatDisabled && (

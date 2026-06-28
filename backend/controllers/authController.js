@@ -34,7 +34,7 @@ const STAFF_ROLES = [
   "ad_manager",
   "moderator",
 ];
-const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
+const SELLER_ROLES = ["dealer", "individual_seller"];
 
 const isOwnerEmail = (email) =>
   OWNER_EMAILS.includes(
@@ -523,7 +523,7 @@ export const updateProfile = async (req, res) => {
     if (!user) return R.notFound(res, "User not found");
 
     // Auto-approve dealer when onboarding is completed
-    if (onboardingComplete && (user.role === "dealer" || user.role === "broker" || user.role === "individual_seller")) {
+    if (onboardingComplete && (user.role === "dealer" || user.role === "individual_seller")) {
       await Dealer.findOneAndUpdate(
         { user: req.user.id },
         { approved: true, verifiedAt: new Date() },

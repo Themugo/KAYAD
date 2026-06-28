@@ -332,9 +332,9 @@ const demoAuth = {
 const demoDealerCars = (userId) => {
   const user = getDemoUser();
   // The flagship dealer demo (Nairobi Auto Hub) manages the whole sample
-  // catalogue so it can showcase editing every demo car. The broker demo
-  // (Grace Wanjiku) stays scoped to its OWN listings so the two accounts are
-  // clearly distinct. Admins/superadmins see everything.
+  // catalogue so it can showcase editing every demo car. The individual seller
+  // demo (Grace Wanjiku) stays scoped to its OWN listings so the two accounts
+  // are clearly distinct. Admins/superadmins see everything.
   const seesAll = userId === 'demo-dealer-1' || ['admin', 'superadmin'].includes(user?.role);
   if (seesAll) return DEMO_CARS;
   return DEMO_CARS.filter(c => c.dealer?._id === userId);
@@ -373,8 +373,8 @@ const demoCars = {
   create: async (formData) => {
     await delay(500, 1200);
     const user = getDemoUser();
-    if (!user || !['dealer', 'broker', 'individual_seller', 'admin', 'superadmin'].includes(user.role)) {
-      throw { response: { status: 403, data: { message: 'Only dealers, brokers, and sellers can create listings' } } };
+    if (!user || !['dealer', 'individual_seller', 'admin', 'superadmin'].includes(user.role)) {
+      throw { response: { status: 403, data: { message: 'Only dealers and sellers can create listings' } } };
     }
       const images = [];
       try {

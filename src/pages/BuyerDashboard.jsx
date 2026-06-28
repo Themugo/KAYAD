@@ -10,7 +10,7 @@ import BuyerEscrowsTab from './buyer/components/BuyerEscrowsTab';
 import BuyerBidsTab from './buyer/components/BuyerBidsTab';
 
 export default function BuyerDashboard() {
-  const { user, isDealer, isBroker, isAdmin, logout } = useAuth();
+  const { user, isDealer, isAdmin, logout } = useAuth();
   const { connected } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,9 +27,9 @@ export default function BuyerDashboard() {
   const [tab,        setTab]        = useState('overview');
 
   useEffect(() => {
-    if (isDealer || isBroker) { navigate('/dealer', { replace: true }); return; }
+    if (isDealer) { navigate('/dealer', { replace: true }); return; }
     if (isAdmin) { navigate('/admin', { replace: true }); return; }
-  }, [isDealer, isBroker, isAdmin, navigate]);
+  }, [isDealer, isAdmin, navigate]);
 
   useEffect(() => {
     let hadError = false;
@@ -75,7 +75,7 @@ export default function BuyerDashboard() {
     tryFetchBids();
   }, []);
 
-  if (isDealer || isBroker || isAdmin) return null;
+  if (isDealer || isAdmin) return null;
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';

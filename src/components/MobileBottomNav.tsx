@@ -63,27 +63,36 @@ export default function MobileBottomNav() {
             style={{
               flex: 1, display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
-              gap: 1, textDecoration: 'none', position: 'relative',
-              color: isActive ? 'var(--gold)' : 'rgba(255,255,255,0.35)',
-              fontSize: 10, fontWeight: 600, letterSpacing: '0.02em',
-              transition: 'color 0.15s',
-              paddingTop: isSell ? 0 : 4,
+              gap: 2, textDecoration: 'none', position: 'relative',
+              color: isActive ? 'var(--gold)' : 'rgba(255,255,255,0.3)',
+              fontSize: 9, fontWeight: 700, letterSpacing: '0.04em',
+              transition: 'color 0.2s',
+              paddingTop: isSell ? 0 : 6,
             }}
           >
             {isSell ? (
               <div style={{
                 width: 48, height: 48, borderRadius: '50%',
-                background: 'var(--gold)', marginTop: -16,
+                background: 'var(--gold)', marginTop: -20, marginBottom: 2,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: isActive ? '0 0 20px rgba(212,196,168,0.4)' : '0 4px 12px rgba(0,0,0,0.3)',
-                transition: 'box-shadow 0.15s',
+                boxShadow: isActive ? '0 0 24px rgba(212,196,168,0.5)' : '0 6px 16px rgba(0,0,0,0.4)',
+                transition: 'box-shadow 0.2s, transform 0.2s',
               }}>
                 <tab.icon size={22} style={{ color: '#000' }} />
               </div>
             ) : (
-              <tab.icon size={22} />
+              <>
+                <tab.icon size={20} style={{ position: 'relative', top: isActive ? 0 : 0 }} />
+                {isActive && (
+                  <span style={{
+                    position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                    width: 16, height: 2, borderRadius: 2,
+                    background: 'var(--gold)',
+                  }} />
+                )}
+              </>
             )}
-            <span>{isSell ? 'Sell' : tab.label}</span>
+            <span style={{ marginTop: isSell ? 0 : 1 }}>{isSell ? 'Sell' : tab.label}</span>
           </Link>
         );
       })}

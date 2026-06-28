@@ -199,13 +199,13 @@ export const adminOnly = (req, res, next) => {
 };
 
 // =============================
-// 🧑‍💼 DEALER & BROKER (ADMIN INCLUDED)
+// 🧑‍💼 DEALER & SELLER (ADMIN INCLUDED)
 // =============================
 export const dealerOnly = (req, res, next) => {
   if (!req.user || ![...SELLER_ROLES, ...STAFF_ROLES].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
-      message: "Dealer, broker, or seller access only",
+      message: "Dealer or seller access only",
     });
   }
 

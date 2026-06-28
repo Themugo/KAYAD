@@ -114,7 +114,7 @@ const platformConfigSchema = new mongoose.Schema(
           features: ["priority_search", "featured_homepage", "api", "dedicated_support"],
           description: "Custom enterprise plan",
         },
-        // Seller (individual / broker) packages
+        // Seller (individual) packages
         // Seller packages — first vehicle always free
         {
           id: "seller_basic",

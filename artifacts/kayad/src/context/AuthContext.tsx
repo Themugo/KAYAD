@@ -20,7 +20,6 @@ interface AuthContextValue {
   isAdmin: boolean;
   isDealer: boolean;
   isSuperAdmin: boolean;
-  isBroker: boolean;
   isSeller: boolean;
   isMarketing: boolean;
   isTechSupport: boolean;
@@ -94,7 +93,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAdmin       = STAFF_ROLES.includes(user?.role as any);
   const isDealer      = user?.role === 'dealer';
-  const isBroker      = user?.role === 'broker';
   const isSeller      = isSellerRole(user?.role);
   const isSuperAdmin  = user?.role === 'superadmin';
   const isMarketing   = user?.role === 'marketing';
@@ -113,11 +111,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo(() => ({
     user, loading,
     isAuth, isEmailVerified,
-    isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
+    isAdmin, isDealer, isSuperAdmin, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
     login, register, logout, setUser,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>

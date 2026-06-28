@@ -143,7 +143,7 @@ export default function CarDetailPage() {
   const dealer = car?.dealer;
   const dv = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
 
-  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'broker' || dealer.role === 'user' || !dealer.role;
+  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'user' || !dealer.role;
   const isDealerSeller = dealer?.role === 'dealer';
 
   // ═══ INLINE BIDDING ═══

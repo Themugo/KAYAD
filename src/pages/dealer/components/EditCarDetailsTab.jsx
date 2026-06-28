@@ -93,12 +93,12 @@ export default function EditCarDetailsTab({ form, set }) {
                 </button>
               ))}
               {form.allowBuy && (
-                <button onClick={() => set('escrowEnabled', !form.escrowEnabled)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', borderRadius: 9, border: form.escrowEnabled ? '1px solid rgba(212,196,168,0.3)' : '1px solid rgba(255,255,255,0.07)', background: form.escrowEnabled ? 'rgba(212,196,168,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'all 0.2s' }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 5, border: form.escrowEnabled ? '1.5px solid var(--gold)' : '1.5px solid rgba(255,255,255,0.2)', background: form.escrowEnabled ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {form.escrowEnabled && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>x</span>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', borderRadius: 9, border: '1px solid rgba(212,196,168,0.3)', background: 'rgba(212,196,168,0.07)' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 5, border: '1.5px solid var(--gold)', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>x</span>
                   </div>
-                  <span style={{ fontSize: 13, color: form.escrowEnabled ? '#fff' : 'rgba(255,255,255,0.5)', fontWeight: form.escrowEnabled ? 600 : 400 }}>Escrow Protection</span>
-                </button>
+                  <span style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>Escrow Protection</span>
+                </div>
               )}
             </FieldGroup>
           </div>

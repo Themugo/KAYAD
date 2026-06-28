@@ -129,7 +129,6 @@ export function requireAtLeast(minRole) {
   const hierarchy = [
     "user",
     "dealer",
-    "broker",
     "ghost_checker",
     "moderator",
     "ad_manager",

@@ -68,7 +68,6 @@ const userSchema = new mongoose.Schema(
       enum: [
         "user",
         "dealer",
-        "broker",
         "admin",
         "superadmin",
         "escrow_officer",
