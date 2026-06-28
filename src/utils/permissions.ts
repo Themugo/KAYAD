@@ -124,7 +124,11 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/inspector-applications": PERM.MANAGE_INSPECTIONS,
   "/admin/security-log":  PERM.VIEW_LOGS,
   "/admin/ads":           PERM.MANAGE_ADS,
-  "/admin/settings":      PERM.MANAGE_PLATFORM,
+  "/admin/settings":              PERM.MANAGE_PLATFORM,
+  "/admin/operations-dashboard":  PERM.VIEW_ANALYTICS,
+  "/admin/disputes":              PERM.MANAGE_ESCROW,
+  "/admin/auction-integrity":     PERM.MANAGE_AUCTIONS,
+  "/admin/dealer-verifications":  PERM.MANAGE_STAFF,
 };
 
 // Superadmin-only pages — never unlocked by a granted permission.

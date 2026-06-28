@@ -54,7 +54,7 @@ export function getPostAuthPath(user: User | undefined, fallback = '/'): string 
   if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
-    if (user?.status !== 'approved') return safeFallback;
+    if (user?.status !== 'approved') return '/dealer/onboarding';
     return '/dealer';
   }
   if (user?.role === 'user') {

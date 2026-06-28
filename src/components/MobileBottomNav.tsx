@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Search, PlusCircle, Trophy, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { isSellerRole } from '../utils/authRoutes';
 import useMediaQuery from '../hooks/useMediaQuery';
 
 const ACCOUNT_PREFIXES = ['/profile', '/dashboard', '/favorites', '/payments', '/chat', '/notifications', '/escrow', '/disputes', '/inspector'];
@@ -33,7 +34,7 @@ export default function MobileBottomNav() {
     },
     {
       key: 'sell',
-      to: user?.role === 'dealer' ? '/dealer/add-car' : '/register?role=dealer',
+      to: isSellerRole(user?.role) ? '/dealer/add-car' : '/register?role=dealer',
       icon: PlusCircle, label: 'Sell', active: active.sell,
       highlight: true,
     },
