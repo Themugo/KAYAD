@@ -6,6 +6,12 @@ import { carsAPI, escrowAPI } from '../api/api';
 import { Car, TrendingUp, Users, Shield, Clock, DollarSign, Plus, Eye, MessageCircle } from 'lucide-react';
 import CartyGrid from '../components/CartyGrid';
 import BackButton from '../components/BackButton';
+import GlassCard from '../components/dashboard/GlassCard';
+import KPICard from '../components/dashboard/KPICard';
+import StatRow from '../components/dashboard/StatRow';
+import ActivityFeed from '../components/dashboard/ActivityFeed';
+import QuickActions from '../components/dashboard/QuickActions';
+import DataTable from '../components/dashboard/DataTable';
 
 export default function PrivateSellerDashboard() {
   const { user } = useAuth();
@@ -63,158 +69,143 @@ export default function PrivateSellerDashboard() {
   }
 
   return (
-    <div className="page">
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1200 }}>
-        <div style={{ marginBottom: 32 }}>
-          <BackButton fallback="/dashboard" />
-          <div className="section-eyebrow">Private Seller Hub</div>
-          <h2>Welcome, {user?.name?.split(' ')[0]}</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>
+    <div className="page" style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '40px 0 36px',
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
+          <BackButton fallback="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 12, padding: 0 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
+              Private Seller Hub
+            </span>
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.6rem)', color: '#fff', margin: 0 }}>
+            Welcome, <span style={{ color: 'var(--gold)' }}>{user?.name?.split(' ')[0] || 'Seller'}</span>
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 8 }}>
             Manage your vehicle listings and track sales
           </p>
         </div>
+      </div>
 
-        {/* Quick Actions */}
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3 mb-8">
-          <Link
-            to="/sell"
-            className="card p-6 flex items-center gap-4 hover:border-gold/30 transition-all no-underline"
-          >
-            <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-              <Plus size={24} className="text-gold" />
-            </div>
-            <div>
-              <h3 className="font-display font-bold text-white text-base mb-1">List a Vehicle</h3>
-              <p className="text-white/50 text-xs">Create a new listing</p>
-            </div>
-          </Link>
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 28px' }}>
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+            <div className="spinner" />
+          </div>
+        ) : (
+          <>
+            {/* KPI Row */}
+            <StatRow style={{ marginBottom: 32 }}>
+              <KPICard
+                title="Active Listings"
+                value={stats?.activeListings || 0}
+                icon={Car}
+                trend={12}
+                color="gold"
+              />
+              <KPICard
+                title="Sold Vehicles"
+                value={stats?.soldListings || 0}
+                icon={DollarSign}
+                trend={8}
+                color="green"
+              />
+              <KPICard
+                title="Total Views"
+                value={stats?.totalViews || 0}
+                icon={Eye}
+                trend={15}
+                color="blue"
+              />
+              <KPICard
+                title="Total Revenue"
+                value={`KES ${(escrows.reduce((sum, e) => sum + (e.amount || 0), 0)).toLocaleString()}`}
+                icon={TrendingUp}
+                trend={20}
+                color="gold"
+              />
+            </StatRow>
 
-          <Link
-            to="/seller/listings"
-            className="card p-6 flex items-center gap-4 hover:border-gold/30 transition-all no-underline"
-          >
-            <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-              <Car size={24} className="text-gold" />
+            {/* Quick Actions */}
+            <div style={{ marginBottom: 32 }}>
+              <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
+              <QuickActions 
+                actions={[
+                  { id: '1', label: 'List a Vehicle', icon: Plus, to: '/sell', color: 'gold' as const },
+                  { id: '2', label: 'My Listings', icon: Car, to: '/seller', color: 'gold' as const },
+                  { id: '3', label: 'View Analytics', icon: TrendingUp, to: '/seller/analytics', color: 'blue' as const },
+                ]} 
+              />
             </div>
-            <div>
-              <h3 className="font-display font-bold text-white text-base mb-1">My Listings</h3>
-              <p className="text-white/50 text-xs">{stats?.activeListings || 0} active listings</p>
-            </div>
-          </Link>
 
-          <Link
-            to="/seller/escrows"
-            className="card p-6 flex items-center gap-4 hover:border-gold/30 transition-all no-underline"
-          >
-            <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-              <Shield size={24} className="text-gold" />
-            </div>
-            <div>
-              <h3 className="font-display font-bold text-white text-base mb-1">Escrow</h3>
-              <p className="text-white/50 text-xs">{stats?.pendingEscrows || 0} pending transactions</p>
-            </div>
-          </Link>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid gap-4 grid-cols-2 md:grid-cols-4 mb-8">
-          <div className="card p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Car size={16} className="text-gold" />
-              <span className="text-white/40 text-xs uppercase tracking-wider">Active Listings</span>
-            </div>
-            <p className="font-display font-black text-white text-3xl">
-              {stats?.activeListings || 0}
-            </p>
-          </div>
-          <div className="card p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <DollarSign size={16} className="text-gold" />
-              <span className="text-white/40 text-xs uppercase tracking-wider">Sold</span>
-            </div>
-            <p className="font-display font-black text-white text-3xl">
-              {stats?.soldListings || 0}
-            </p>
-          </div>
-          <div className="card p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Eye size={16} className="text-gold" />
-              <span className="text-white/40 text-xs uppercase tracking-wider">Total Views</span>
-            </div>
-            <p className="font-display font-black text-white text-3xl">
-              {stats?.totalViews || 0}
-            </p>
-          </div>
-          <div className="card p-6">
-            <div className="flex items-center gap-2 mb-2">
-              <MessageCircle size={16} className="text-gold" />
-              <span className="text-white/40 text-xs uppercase tracking-wider">Inquiries</span>
-            </div>
-            <p className="font-display font-black text-white text-3xl">
-              {stats?.totalInquiries || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* Recent Listings */}
-        <div style={{ marginBottom: 32 }}>
-          <div className="flex items-end justify-between mb-4">
-            <h3 className="font-display font-bold text-white text-xl">Recent Listings</h3>
-            <Link to="/seller/listings" className="text-gold text-sm font-bold no-underline">View All →</Link>
-          </div>
-          {listings.length > 0 ? (
-            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-              {listings.slice(0, 4).map(car => (
-                <CartyGrid key={car._id} car={car} isMobile={false} />
-              ))}
-            </div>
-          ) : (
-            <div className="card p-12 text-center">
-              <Car size={48} className="text-white/20 mx-auto mb-4" />
-              <h3 className="font-display font-bold text-white text-lg mb-2">No Listings Yet</h3>
-              <p className="text-white/50 text-sm mb-6">Start selling by listing your first vehicle</p>
-              <Link to="/sell" className="btn btn-gold">List Your First Vehicle</Link>
-            </div>
-          )}
-        </div>
-
-        {/* Recent Escrow Transactions */}
-        <div>
-          <div className="flex items-end justify-between mb-4">
-            <h3 className="font-display font-bold text-white text-xl">Escrow Transactions</h3>
-            <Link to="/seller/escrows" className="text-gold text-sm font-bold no-underline">View All →</Link>
-          </div>
-          {escrows.length > 0 ? (
-            <div className="card">
-              {escrows.slice(0, 3).map(escrow => (
-                <div key={escrow._id} className="p-4 border-b border-white/[0.04] last:border-0">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-display font-bold text-white text-sm mb-1">
-                        {escrow.car?.title || escrow.carName || 'Vehicle'}
-                      </p>
-                      <p className="text-white/50 text-xs">
-                        {escrow.buyer?.name || escrow.buyerName || 'Buyer'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-display font-bold text-gold text-sm">
-                        KES {(escrow.amount || 0).toLocaleString()}
-                      </p>
-                      <p className="text-white/40 text-xs capitalize">{escrow.status}</p>
-                    </div>
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+              {/* Listings Performance Table */}
+              <div className="lg:col-span-2">
+                <GlassCard>
+                  <div className="flex items-end justify-between mb-4">
+                    <h3 className="font-display font-bold text-white text-lg">Listings Performance</h3>
+                    <Link to="/seller" className="text-gold text-sm font-bold no-underline">View All →</Link>
                   </div>
+                  <DataTable
+                    columns={[
+                      { key: 'title', label: 'Vehicle' },
+                      { key: 'status', label: 'Status', render: (val) => (
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                          val === 'sold' ? 'bg-green-500/20 text-green-400' : val === 'active' ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-white/40'
+                        }`}>
+                          {val}
+                        </span>
+                      )},
+                      { key: 'views', label: 'Views' },
+                      { key: 'inquiries', label: 'Inquiries' },
+                    ]}
+                    data={listings.slice(0, 5)}
+                    emptyMessage="No listings yet"
+                  />
+                </GlassCard>
+              </div>
+
+              {/* Activity Feed */}
+              <div className="lg:col-span-1">
+                <ActivityFeed 
+                  activities={[
+                    { id: '1', icon: Car, title: 'Listing created', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' as const },
+                    { id: '2', icon: MessageCircle, title: 'New inquiry', description: 'Mazda CX-5 - Buyer interested', timestamp: '5h ago', color: 'blue' as const },
+                    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3.1M', timestamp: '1d ago', color: 'green' as const },
+                  ]}
+                />
+              </div>
+            </div>
+
+            {/* Recent Listings */}
+            <div style={{ marginTop: 32 }}>
+              <div className="flex items-end justify-between mb-4">
+                <h3 className="font-display font-bold text-white text-xl">Recent Listings</h3>
+                <Link to="/seller" className="text-gold text-sm font-bold no-underline">View All →</Link>
+              </div>
+              {listings.length > 0 ? (
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                  {listings.slice(0, 4).map(car => (
+                    <CartyGrid key={car._id} car={car} isMobile={false} />
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <GlassCard>
+                  <div className="text-center py-12">
+                    <Car size={48} className="text-white/20 mx-auto mb-4" />
+                    <h3 className="font-display font-bold text-white text-lg mb-2">No Listings Yet</h3>
+                    <p className="text-white/50 text-sm mb-6">Start selling by listing your first vehicle</p>
+                    <Link to="/sell" className="btn btn-gold">List Your First Vehicle</Link>
+                  </div>
+                </GlassCard>
+              )}
             </div>
-          ) : (
-            <div className="card p-12 text-center">
-              <Shield size={48} className="text-white/20 mx-auto mb-4" />
-              <h3 className="font-display font-bold text-white text-lg mb-2">No Transactions Yet</h3>
-              <p className="text-white/50 text-sm">Your escrow transactions will appear here</p>
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

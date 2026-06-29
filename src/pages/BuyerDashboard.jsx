@@ -5,9 +5,13 @@ import { useSocket } from '../context/SocketContext';
 import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI, bidsAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import BackButton from '../components/BackButton';
-import BuyerOverviewTab from './buyer/components/BuyerOverviewTab';
-import BuyerEscrowsTab from './buyer/components/BuyerEscrowsTab';
-import BuyerBidsTab from './buyer/components/BuyerBidsTab';
+import GlassCard from '../components/dashboard/GlassCard';
+import KPICard from '../components/dashboard/KPICard';
+import StatRow from '../components/dashboard/StatRow';
+import ActivityFeed from '../components/dashboard/ActivityFeed';
+import QuickActions from '../components/dashboard/QuickActions';
+import { DollarSign, Shield, Gavel, Heart, Car, Clock, MessageCircle, TrendingUp } from 'lucide-react';
+import CartyGrid from '../components/CartyGrid';
 
 export default function BuyerDashboard() {
   const { user, isDealer, isAdmin, logout } = useAuth();
@@ -80,14 +84,33 @@ export default function BuyerDashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
+  // Calculate KPIs
+  const totalSpent = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+  const activeEscrows = escrows.filter(e => e.status === 'pending' || e.status === 'active').length;
+  const wonAuctions = myBids.filter(b => b.status === 'won').length;
+
+  // Activity feed data
+  const activities = [
+    { id: '1', icon: Heart, title: 'Added to favorites', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' as const },
+    { id: '2', icon: Gavel, title: 'Placed bid', description: 'Mazida CX-5 - KES 2,500,000', timestamp: '5h ago', color: 'blue' as const },
+    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3,100,000', timestamp: '1d ago', color: 'green' as const },
+  ];
+
+  // Quick actions
+  const quickActions = [
+    { id: '1', label: 'Browse Showroom', icon: Car, to: '/showroom', color: 'gold' as const },
+    { id: '2', label: 'View Auctions', icon: Gavel, to: '/auctions', color: 'blue' as const },
+    { id: '3', label: 'My Favorites', icon: Heart, to: '/favorites', color: 'gold' as const },
+  ];
+
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      {/* ── HEADER ── */}
+    <div className="page" style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+      {/* Header */}
       <div style={{
         background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
-        borderBottom: '1px solid var(--border)', padding: '40px 0 36px',
+        borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '40px 0 36px',
       }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
           <BackButton fallback="/" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 12, padding: 0 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
@@ -109,60 +132,114 @@ export default function BuyerDashboard() {
           <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 8 }}>
             Browse, bid, and buy with escrow protection
           </p>
-          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-            <Link to="/" style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 11, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-              Home
-            </Link>
-            <button onClick={async () => { await logout(); navigate('/'); }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)', color: 'rgba(239,68,68,0.7)', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              Sign Out
-            </button>
-          </div>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 32px' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 28px' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
             <div className="spinner" />
           </div>
         ) : (
           <>
-            {/* ── TAB BAR ── */}
-            <div className="tab-bar" style={{ marginBottom: 28, paddingBottom: 2 }}>
-              {['overview', 'escrows', 'bids'].map(t => (
-                <button key={t} onClick={() => setTab(t)} style={{
-                  padding: '10px 20px', borderRadius: '10px 10px 0 0', border: 'none',
-                  background: tab === t ? 'rgba(212,196,168,0.08)' : 'transparent',
-                  color: tab === t ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
-                  fontWeight: tab === t ? 700 : 500, fontSize: 13, cursor: 'pointer',
-                  transition: 'all 0.2s', textTransform: 'capitalize',
-                  borderBottom: tab === t ? '2px solid var(--gold)' : '2px solid transparent',
-                  marginBottom: -2,
-                }}>
-                  {t === 'overview' ? 'Overview' : t === 'escrows' ? 'Escrows' : 'My Bids'}
-                </button>
-              ))}
+            {/* KPI Row */}
+            <StatRow style={{ marginBottom: 32 }}>
+              <KPICard
+                title="Total Spent"
+                value={`KES ${totalSpent.toLocaleString()}`}
+                icon={DollarSign}
+                trend={12}
+                color="gold"
+              />
+              <KPICard
+                title="Active Escrows"
+                value={activeEscrows}
+                icon={Shield}
+                trend={5}
+                color="green"
+              />
+              <KPICard
+                title="Won Auctions"
+                value={wonAuctions}
+                icon={Gavel}
+                trend={8}
+                color="blue"
+              />
+              <KPICard
+                title="Saved Vehicles"
+                value={favorites.length}
+                icon={Heart}
+                trend={15}
+                color="gold"
+              />
+            </StatRow>
+
+            {/* Quick Actions */}
+            <div style={{ marginBottom: 32 }}>
+              <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
+              <QuickActions actions={quickActions} />
             </div>
 
-            {tab === 'overview' && (
-              <BuyerOverviewTab
-                favorites={favorites}
-                escrows={escrows}
-                payments={payments}
-                myBids={myBids}
-                chats={chats}
-                watchlist={watchlist}
-                trending={trending}
-                trendingLoading={trendingLoading}
-                onSetTab={setTab}
-              />
-            )}
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
+              {/* Activity Feed */}
+              <div className="lg:col-span-2">
+                <ActivityFeed activities={activities} />
+              </div>
 
-            {tab === 'escrows' && <BuyerEscrowsTab escrows={escrows} />}
+              {/* Watchlist */}
+              <div className="lg:col-span-1">
+                <GlassCard>
+                  <h3 className="font-display font-bold text-white text-lg mb-4">Trending Vehicles</h3>
+                  {trendingLoading ? (
+                    <div className="text-center py-8">
+                      <div className="spinner" />
+                    </div>
+                  ) : trending.length > 0 ? (
+                    <div className="space-y-3">
+                      {trending.slice(0, 4).map(car => (
+                        <Link key={car._id} to={`/car/${car._id}`} className="block no-underline">
+                          <div className="flex gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
+                            <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                              <img src={car.images?.[0] || car.coverImage} alt={car.title} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-medium text-xs truncate">{car.title}</p>
+                              <p className="text-gold font-bold text-xs">KES {(car.price || 0).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-white/40 text-sm text-center py-8">No trending vehicles</p>
+                  )}
+                </GlassCard>
+              </div>
+            </div>
 
-            {tab === 'bids' && <BuyerBidsTab myBids={myBids} bidLoading={bidLoading} />}
+            {/* Favorites */}
+            <div style={{ marginTop: 32 }}>
+              <div className="flex items-end justify-between mb-4">
+                <h3 className="font-display font-bold text-white text-xl">Your Favorites</h3>
+                <Link to="/favorites" className="text-gold text-sm font-bold no-underline">View All →</Link>
+              </div>
+              {favorites.length > 0 ? (
+                <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                  {favorites.slice(0, 4).map(car => (
+                    <CartyGrid key={car._id} car={car} isMobile={false} />
+                  ))}
+                </div>
+              ) : (
+                <GlassCard>
+                  <div className="text-center py-12">
+                    <Heart size={48} className="text-white/20 mx-auto mb-4" />
+                    <h3 className="font-display font-bold text-white text-lg mb-2">No Favorites Yet</h3>
+                    <p className="text-white/50 text-sm mb-6">Start saving vehicles you're interested in</p>
+                    <Link to="/showroom" className="btn btn-gold">Browse Showroom</Link>
+                  </div>
+                </GlassCard>
+              )}
+            </div>
           </>
         )}
       </div>
