@@ -20,7 +20,7 @@
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kayad.space wss://api.kayad.space; frame-ancestors 'none'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kayad.space wss://api.kayad.space; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
         }
       ]
     },
@@ -36,5 +36,18 @@
   "env": {
     "BASE_PATH": "/",
     "NODE_ENV": "production"
+  }
+}
+    "VITE_WEBHOST_EMAIL": "owner@kayad.space",
+    "VITE_SOCKET_URL": "https://api.kayad.space",
+    "VITE_APP_NAME": "Kayad",
+    "VITE_APP_VERSION": "2.0.0",
+    "VITE_ENABLE_CHAT": "true",
+    "VITE_ENABLE_ESCROW": "true",
+    "VITE_ENABLE_AUCTIONS": "true",
+    "VITE_ENABLE_COMPARE": "true",
+    "VITE_ENABLE_REVIEWS": "true",
+    "VITE_ENABLE_DEMO": "false",
+    "VITE_POSTHOG_HOST": "https://us.i.posthog.com"
   }
 }
