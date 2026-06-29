@@ -1806,8 +1806,9 @@ router.get(
   asyncHandler(async (req, res) => {
     const { brand, model, year, page = 1, limit = 20 } = req.query;
     const filter = {};
-    if (brand) filter.brand = { $regex: brand, $options: "i" };
-    if (model) filter.model = { $regex: model, $options: "i" };
+    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (brand) filter.brand = { $regex: escapeRegex(brand), $options: "i" };
+    if (model) filter.model = { $regex: escapeRegex(model), $options: "i" };
     if (year) filter.year = Number(year);
 
     const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);

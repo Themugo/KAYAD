@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, optionalAuth } from "../middleware/auth.js";
+import { STAFF_ROLES } from "../config/roles.js";
 import { validateObjectId, validateQuery, userListQuerySchema } from "../middleware/validate.js";
 import { getPagination } from "../middleware/apiPagination.js";
 import { cacheUserData, invalidateCache } from "../middleware/apiCache.js";
@@ -88,9 +89,12 @@ router.put(
 router.get(
   "/:id",
   validateObjectId,
-  optionalAuth,
+  protect,
   cacheUserData,
   asyncHandler(async (req, res) => {
+    if (req.params.id !== req.user.id && !STAFF_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Access denied" });
+    }
     const user = await User.findById(req.params.id)
       .select("name email avatar businessName location phone role dealerRating bio createdAt verifiedBuyer")
       .lean();

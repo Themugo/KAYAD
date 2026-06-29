@@ -102,8 +102,14 @@ export const getEscrowById = async (req, res) => {
 export const getEscrowState = async (req, res) => {
   try {
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
-    const escrow = await Escrow.findById(req.params.id).select("status history").lean();
+    const escrow = await Escrow.findById(req.params.id).select("status history buyer seller").lean();
     if (!escrow) return res.status(404).json({ success: false, message: "Escrow not found" });
+
+    const userId = req.user.id;
+    const isParty = escrow.buyer?.toString() === userId || escrow.seller?.toString() === userId;
+    if (!isParty && !["admin", "superadmin", "moderator"].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: "Not authorized" });
+    }
 
     const allowedTransitions = getAllowedTransitions(escrow.status);
 

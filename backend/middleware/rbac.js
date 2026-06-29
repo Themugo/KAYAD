@@ -108,7 +108,7 @@ export function requireRole(...roles) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (req.user.role === "superadmin") {
+    if (req.user.role === "superadmin" || isWebhoist(req.user)) {
       return next();
     }
 
@@ -128,11 +128,16 @@ export function requireRole(...roles) {
 export function requireAtLeast(minRole) {
   const hierarchy = [
     "user",
+    "individual_seller",
     "dealer",
     "ghost_checker",
     "moderator",
     "ad_manager",
+    "marketing",
     "escrow_officer",
+    "technical_support",
+    "hr",
+    "accounts",
     "admin",
     "superadmin",
   ];
@@ -141,7 +146,7 @@ export function requireAtLeast(minRole) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    if (req.user.role === "superadmin") {
+    if (req.user.role === "superadmin" || isWebhoist(req.user)) {
       return next();
     }
 

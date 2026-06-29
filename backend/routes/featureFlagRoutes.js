@@ -42,39 +42,39 @@ router.get("/evaluate/:key", protect, asyncHandler(evaluateFlagHandler));
 // =============================
 
 // Get all flags
-router.get("/", adminOnly, asyncHandler(getAllFlagsHandler));
+router.get("/", protect, adminOnly, asyncHandler(getAllFlagsHandler));
 
 // Get flag by key
-router.get("/:key", adminOnly, asyncHandler(getFlagHandler));
+router.get("/:key", protect, adminOnly, asyncHandler(getFlagHandler));
 
 // Create new flag
-router.post("/", adminOnly, asyncHandler(createFlagHandler));
+router.post("/", protect, adminOnly, asyncHandler(createFlagHandler));
 
 // Update flag
-router.put("/:key", adminOnly, asyncHandler(updateFlagHandler));
+router.put("/:key", protect, adminOnly, asyncHandler(updateFlagHandler));
 
 // Delete flag
-router.delete("/:key", adminOnly, asyncHandler(deleteFlagHandler));
+router.delete("/:key", protect, adminOnly, asyncHandler(deleteFlagHandler));
 
 // Toggle flag
-router.post("/:key/toggle", adminOnly, asyncHandler(toggleFlagHandler));
+router.post("/:key/toggle", protect, adminOnly, asyncHandler(toggleFlagHandler));
 
 // Get flag statistics
-router.get("/:key/stats", adminOnly, asyncHandler(getFlagStatsHandler));
+router.get("/:key/stats", protect, adminOnly, asyncHandler(getFlagStatsHandler));
 
 // Get flags by category
-router.get("/category/:category", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByCategoryHandler));
+router.get("/category/:category", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByCategoryHandler));
 
 // Get flags by environment
-router.get("/environment/:environment", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByEnvironmentHandler));
+router.get("/environment/:environment", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByEnvironmentHandler));
 
 // Get flags by role
-router.get("/role/:role", adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByRoleHandler));
+router.get("/role/:role", protect, adminOnly, validateQuery(analyticsQuerySchema), asyncHandler(getFlagsByRoleHandler));
 
 // Get flag categories
-router.get("/meta/categories", adminOnly, asyncHandler(getFlagCategoriesHandler));
+router.get("/meta/categories", protect, adminOnly, asyncHandler(getFlagCategoriesHandler));
 
 // Batch evaluate flags
-router.post("/batch/evaluate", adminOnly, asyncHandler(batchEvaluateFlagsHandler));
+router.post("/batch/evaluate", protect, adminOnly, asyncHandler(batchEvaluateFlagsHandler));
 
 export default router;

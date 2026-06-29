@@ -18,7 +18,7 @@ import {
   getOrganizationStatsHandler,
   getPlatformOrganizationStatsHandler,
 } from "../controllers/organizationController.js";
-import { adminOnly, authenticate } from "../middleware/auth.js";
+import { protect, adminOnly, authenticate } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
@@ -29,15 +29,16 @@ const router = express.Router();
 // =============================
 
 // Get platform organization stats
-router.get("/platform-stats", adminOnly, asyncHandler(getPlatformOrganizationStatsHandler));
+router.get("/platform-stats", protect, adminOnly, asyncHandler(getPlatformOrganizationStatsHandler));
 
 // Create organization (admin only for now)
-router.post("/", adminOnly, asyncHandler(createOrganizationHandler));
+router.post("/", protect, adminOnly, asyncHandler(createOrganizationHandler));
 
 // Get all organizations (admin only)
 router.get(
   "/",
   validateQuery(analyticsQuerySchema),
+  protect,
   adminOnly,
   asyncHandler(async (req, res) => {
     // This would need to be implemented in the controller
@@ -56,7 +57,7 @@ router.get("/:id", authenticate, validateObjectId, asyncHandler(getOrganizationH
 router.put("/:id", authenticate, validateObjectId, asyncHandler(updateOrganizationHandler));
 
 // Delete organization (admin only)
-router.delete("/:id", adminOnly, validateObjectId, asyncHandler(deleteOrganizationHandler));
+router.delete("/:id", protect, adminOnly, validateObjectId, asyncHandler(deleteOrganizationHandler));
 
 // Get organization users
 router.get("/:id/users", authenticate, validateObjectId, asyncHandler(getOrganizationUsersHandler));

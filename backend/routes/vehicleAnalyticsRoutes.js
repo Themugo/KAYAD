@@ -72,9 +72,9 @@ router.get("/market/dealer/:dealerId", protect, validateObjectId, asyncHandler(g
 // =============================
 
 // Regenerate analytics
-router.post("/market/regenerate", adminOnly, asyncHandler(regenerateAnalytics));
+router.post("/market/regenerate", protect, adminOnly, asyncHandler(regenerateAnalytics));
 
 // Get all analytics records
-router.get("/market/admin/all", adminOnly, asyncHandler(getAllAnalytics));
+router.get("/market/admin/all", protect, adminOnly, asyncHandler(getAllAnalytics));
 
 export default router;

@@ -69,21 +69,31 @@ const sanitizeObject = (obj, depth = 0) => {
   return obj;
 };
 
+const sanitizeStrings = (obj) => {
+  if (!obj || typeof obj !== "object") return;
+  for (const key of Object.keys(obj)) {
+    if (typeof obj[key] === "string") {
+      obj[key] = DOMPurify.sanitize(obj[key]);
+    } else if (typeof obj[key] === "object") {
+      sanitizeStrings(obj[key]);
+    }
+  }
+};
+
 export const xssProtection = () => (req, res, next) => {
   if (req.body && typeof req.body === "object") {
     for (const key of Object.keys(req.body)) {
       if (XSS_SKIP_FIELDS.has(key)) continue;
       if (RICH_TEXT_FIELDS.has(key) && typeof req.body[key] === "string") {
-        // Use relaxed config for rich text fields
         req.body[key] = DOMPurify.sanitize(req.body[key], DOMPurifyConfig);
       } else if (typeof req.body[key] === "string") {
-        // Strict sanitization for regular fields
         req.body[key] = DOMPurify.sanitize(req.body[key]);
       } else if (typeof req.body[key] === "object") {
         sanitizeObject(req.body[key]);
       }
     }
   }
+  sanitizeStrings(req.query);
   next();
 };
 

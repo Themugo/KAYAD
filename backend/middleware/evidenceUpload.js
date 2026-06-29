@@ -23,6 +23,49 @@ const ALLOWED_TYPES = {
   chat_log: ["application/pdf", "text/plain", "text/csv", "application/json"],
 };
 
+const MAGIC_BYTES = {
+  jpeg: [0xFF, 0xD8, 0xFF],
+  png: [0x89, 0x50, 0x4E, 0x47],
+  webp: [0x52, 0x49, 0x46, 0x46],
+  gif: [0x47, 0x49, 0x46, 0x38],
+  heic: [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70, 0x6D, 0x69, 0x66, 0x33],
+  pdf: [0x25, 0x50, 0x44, 0x46],
+  mp4: [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70],
+  webm: [0x1A, 0x45, 0xDF, 0xA3],
+  avi: [0x52, 0x49, 0x46, 0x46],
+};
+
+const EXT_BY_MIME = {
+  "image/jpeg": "jpeg",
+  "image/png": "png",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/heic": "heic",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mp4",
+  "video/x-msvideo": "avi",
+  "application/pdf": "pdf",
+  "application/msword": null,
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": null,
+  "application/vnd.ms-excel": null,
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": null,
+  "text/plain": null,
+  "text/csv": null,
+  "application/json": null,
+};
+
+function validateMagicBytes(filePath, mimeType) {
+  const ext = EXT_BY_MIME[mimeType];
+  if (!ext || !MAGIC_BYTES[ext]) return true;
+  const expected = MAGIC_BYTES[ext];
+  const fd = fs.openSync(filePath, "r");
+  const buffer = Buffer.alloc(expected.length);
+  fs.readSync(fd, buffer, 0, expected.length, 0);
+  fs.closeSync(fd);
+  return expected.every((byte, i) => buffer[i] === byte);
+}
+
 const ALLOWED_MIMES = Object.values(ALLOWED_TYPES).flat();
 const MAX_SIZES = {
   image: 10 * 1024 * 1024,
@@ -48,12 +91,16 @@ const storage = multer.diskStorage({
   },
 });
 
+const ALLOWED_TYPE_KEYS = Object.keys(ALLOWED_TYPES);
+
 const fileFilter = (req, file, cb) => {
-  if (ALLOWED_MIMES.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error(`File type ${file.mimetype} is not supported for evidence upload`), false);
+  if (req.body.type && !ALLOWED_TYPE_KEYS.includes(req.body.type)) {
+    return cb(new Error(`Invalid evidence type: ${req.body.type}`), false);
   }
+  if (!ALLOWED_MIMES.includes(file.mimetype)) {
+    return cb(new Error(`File type ${file.mimetype} is not supported for evidence upload`), false);
+  }
+  cb(null, true);
 };
 
 const getMaxSize = (req) => {
@@ -76,6 +123,23 @@ export const uploadEvidenceFields = uploadEvidence.fields([
 ]);
 
 export const uploadEvidenceSingle = uploadEvidence.single("file");
+
+// Validate magic bytes for image/video/pdf files after upload
+export const validateEvidenceContent = (req, res, next) => {
+  const files = [];
+  if (req.file) files.push(req.file);
+  if (req.files) {
+    if (Array.isArray(req.files)) files.push(...req.files);
+    else Object.values(req.files).forEach((arr) => files.push(...arr));
+  }
+  for (const file of files) {
+    if (!validateMagicBytes(file.path, file.mimetype)) {
+      files.forEach((f) => { try { fs.unlinkSync(f.path); } catch {} });
+      return res.status(400).json({ success: false, message: `File content does not match declared type for ${file.originalname}` });
+    }
+  }
+  next();
+};
 
 export const handleEvidenceUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {

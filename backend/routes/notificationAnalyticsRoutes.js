@@ -20,7 +20,7 @@ import {
   getRetryQueueHandler,
   processRetryQueueHandler,
 } from "../controllers/notificationAnalyticsController.js";
-import { adminOnly } from "../middleware/auth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -31,42 +31,42 @@ const router = express.Router();
 // =============================
 
 // Get delivery statistics
-router.get("/delivery-stats", adminOnly, asyncHandler(getDeliveryStatsHandler));
+router.get("/delivery-stats", protect, adminOnly, asyncHandler(getDeliveryStatsHandler));
 
 // Get channel statistics
-router.get("/channel-stats", adminOnly, asyncHandler(getChannelStatsHandler));
+router.get("/channel-stats", protect, adminOnly, asyncHandler(getChannelStatsHandler));
 
 // Get failure analysis
-router.get("/failure-analysis", adminOnly, asyncHandler(getFailureAnalysisHandler));
+router.get("/failure-analysis", protect, adminOnly, asyncHandler(getFailureAnalysisHandler));
 
 // Get engagement metrics
-router.get("/engagement-metrics", adminOnly, asyncHandler(getEngagementMetricsHandler));
+router.get("/engagement-metrics", protect, adminOnly, asyncHandler(getEngagementMetricsHandler));
 
 // Get retry statistics
-router.get("/retry-stats", adminOnly, asyncHandler(getRetryStatsHandler));
+router.get("/retry-stats", protect, adminOnly, asyncHandler(getRetryStatsHandler));
 
 // Get user notification stats
-router.get("/user/:userId/stats", adminOnly, asyncHandler(getUserStatsHandler));
+router.get("/user/:userId/stats", protect, adminOnly, asyncHandler(getUserStatsHandler));
 
 // Get platform notification stats
-router.get("/platform-stats", adminOnly, asyncHandler(getPlatformStatsHandler));
+router.get("/platform-stats", protect, adminOnly, asyncHandler(getPlatformStatsHandler));
 
 // Generate delivery report
-router.get("/delivery-report", adminOnly, asyncHandler(generateDeliveryReportHandler));
+router.get("/delivery-report", protect, adminOnly, asyncHandler(generateDeliveryReportHandler));
 
 // Get notification trends
-router.get("/trends", adminOnly, asyncHandler(getNotificationTrendsHandler));
+router.get("/trends", protect, adminOnly, asyncHandler(getNotificationTrendsHandler));
 
 // Retry specific notification
-router.post("/retry/:auditId", adminOnly, asyncHandler(retryNotificationHandler));
+router.post("/retry/:auditId", protect, adminOnly, asyncHandler(retryNotificationHandler));
 
 // Bulk retry notifications
-router.post("/bulk-retry", adminOnly, asyncHandler(bulkRetryNotificationsHandler));
+router.post("/bulk-retry", protect, adminOnly, asyncHandler(bulkRetryNotificationsHandler));
 
 // Get retry queue
-router.get("/retry-queue", adminOnly, asyncHandler(getRetryQueueHandler));
+router.get("/retry-queue", protect, adminOnly, asyncHandler(getRetryQueueHandler));
 
 // Process retry queue
-router.post("/process-retry-queue", adminOnly, asyncHandler(processRetryQueueHandler));
+router.post("/process-retry-queue", protect, adminOnly, asyncHandler(processRetryQueueHandler));
 
 export default router;

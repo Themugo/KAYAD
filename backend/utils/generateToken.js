@@ -46,7 +46,7 @@ export const generateRefreshToken = (user) => {
 // =============================
 export const verifyToken = (token, secret) => {
   try {
-    return jwt.verify(token, secret || getAccess());
+    return jwt.verify(token, secret || getAccess(), { algorithms: ["HS256"] });
   } catch {
     return null;
   }

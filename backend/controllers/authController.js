@@ -343,7 +343,7 @@ export const refreshToken = async (req, res) => {
     let decoded;
 
     try {
-      decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET, { algorithms: ["HS256"] });
     } catch (err) {
       // Expired or invalid refresh tokens are rejected — no fallback
       const msg =

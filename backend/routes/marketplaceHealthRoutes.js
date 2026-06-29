@@ -38,15 +38,15 @@ router.get("/alerts", asyncHandler(getAlertsHandler));
 // =============================
 
 // Resolve alert
-router.post("/alerts/:alertId/resolve", adminOnly, validateObjectId, asyncHandler(resolveAlert));
+router.post("/alerts/:alertId/resolve", protect, adminOnly, validateObjectId, asyncHandler(resolveAlert));
 
 // Get detailed metrics
-router.get("/metrics", adminOnly, asyncHandler(getDetailedMetrics));
+router.get("/metrics", protect, adminOnly, asyncHandler(getDetailedMetrics));
 
 // Regenerate health snapshot
-router.post("/regenerate", adminOnly, asyncHandler(regenerateHealth));
+router.post("/regenerate", protect, adminOnly, asyncHandler(regenerateHealth));
 
 // Get all health records
-router.get("/admin/all", adminOnly, asyncHandler(getAllHealthRecords));
+router.get("/admin/all", protect, adminOnly, asyncHandler(getAllHealthRecords));
 
 export default router;

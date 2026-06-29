@@ -15,6 +15,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken";
 import { dirname, resolve } from "path";
@@ -343,6 +344,21 @@ app.use(compression());
 
 // ─── BODY PARSERS ─────────────────────────────────────────────
 app.use(cookieParser());
+
+// ─── SESSION (for CSRF) ─────────────────────────────────────
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || "fallback-secret-change-me",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    },
+  }),
+);
 
 // ─── API VERSION DETECTION ───────────────────────────────────
 import apiVersionMiddleware from "./middleware/apiVersion.js";

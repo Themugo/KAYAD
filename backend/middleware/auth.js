@@ -84,7 +84,7 @@ export const protect = async (req, res, next) => {
     }
 
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
     } catch (err) {
       logError("TOKEN VERIFY FAILED", { error: err.message });
 
@@ -202,6 +202,7 @@ export const adminOnly = (req, res, next) => {
 // 🧑‍💼 DEALER & SELLER (ADMIN INCLUDED)
 // =============================
 export const dealerOnly = (req, res, next) => {
+  if (req.user?.effectiveRole === "webhoist") return next();
   if (!req.user || ![...SELLER_ROLES, ...STAFF_ROLES].includes(req.user.role)) {
     return res.status(403).json({
       success: false,
@@ -217,6 +218,7 @@ export const dealerOnly = (req, res, next) => {
 // =============================
 export const allowRoles = (...roles) => {
   return (req, res, next) => {
+    if (req.user?.effectiveRole === "webhoist") return next();
     if (!req.user || !roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
@@ -242,7 +244,7 @@ export const optionalAuth = async (req, res, next) => {
 
     if (!process.env.JWT_SECRET) return next();
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
 
     const user = await User.findById(decoded.id).select("-password").lean();
 

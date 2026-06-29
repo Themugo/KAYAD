@@ -53,18 +53,18 @@ router.post(
 // =============================
 
 // Recalculate listing quality
-router.post("/car/:carId/recalculate", adminOnly, validateObjectId, asyncHandler(recalculateListingQualityHandler));
+router.post("/car/:carId/recalculate", protect, adminOnly, validateObjectId, asyncHandler(recalculateListingQualityHandler));
 
 // Get platform quality stats
-router.get("/platform/stats", adminOnly, asyncHandler(getPlatformQualityStatsHandler));
+router.get("/platform/stats", protect, adminOnly, asyncHandler(getPlatformQualityStatsHandler));
 
 // Get quality trends
-router.get("/platform/trends", adminOnly, asyncHandler(getQualityTrendsHandler));
+router.get("/platform/trends", protect, adminOnly, asyncHandler(getQualityTrendsHandler));
 
 // Get low quality listings
-router.get("/platform/low-quality", adminOnly, asyncHandler(getLowQualityListingsHandler));
+router.get("/platform/low-quality", protect, adminOnly, asyncHandler(getLowQualityListingsHandler));
 
 // Get quality benchmarks
-router.get("/platform/benchmarks", adminOnly, asyncHandler(getQualityBenchmarksHandler));
+router.get("/platform/benchmarks", protect, adminOnly, asyncHandler(getQualityBenchmarksHandler));
 
 export default router;

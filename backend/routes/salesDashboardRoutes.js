@@ -2,7 +2,7 @@
 // Sales Dashboard routes
 
 import express from "express";
-import { protect, salesOnly } from "../middleware/auth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
   getSalesDashboard,
@@ -17,13 +17,13 @@ const router = express.Router();
 // =============================
 
 // Full dashboard (sales only)
-router.get("/", protect, salesOnly, getSalesDashboard);
+router.get("/", protect, adminOnly, getSalesDashboard);
 
 // Dealer performance
-router.get("/dealers/:dealerId", protect, salesOnly, validateObjectId, getDealerPerformance);
-router.get("/dealers", protect, salesOnly, getDealerPerformance);
+router.get("/dealers/:dealerId", protect, adminOnly, validateObjectId, getDealerPerformance);
+router.get("/dealers", protect, adminOnly, getDealerPerformance);
 
 // Revenue metrics
-router.get("/revenue", protect, salesOnly, getRevenueMetrics);
+router.get("/revenue", protect, adminOnly, getRevenueMetrics);
 
 export default router;

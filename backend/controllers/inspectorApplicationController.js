@@ -87,6 +87,10 @@ export const approveApplication = async (req, res) => {
       return res.status(400).json({ success: false, message: `Already ${application.status}` });
     }
 
+    if (application.user?.toString() === req.user.id) {
+      return res.status(403).json({ success: false, message: "Cannot approve your own application" });
+    }
+
     application.status = "approved";
     application.reviewedBy = req.user.id;
     application.reviewedAt = new Date();

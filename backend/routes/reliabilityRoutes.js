@@ -3,7 +3,7 @@
 
 import { Router } from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 import {
   computeSli,
   computeAllSlis,
