@@ -81,6 +81,15 @@ const DisputeDetailPage    = lazy(() => import('./pages/DisputeDetailPage'));
 const InspectorApply       = lazy(() => import('./pages/InspectorApply'));
 const InspectorDashboard   = lazy(() => import('./pages/InspectorDashboard'));
 
+// ─── Private Seller pages ───────────────────────────────────────────────
+const PrivateSellerDashboard = lazy(() => import('./pages/PrivateSellerDashboard'));
+const PrivateSellerAddCar   = lazy(() => import('./pages/PrivateSellerAddCar'));
+const PrivateSellerOnboarding = lazy(() => import('./pages/PrivateSellerOnboarding'));
+const PrivateSellerProfile  = lazy(() => import('./pages/PrivateSellerProfile'));
+const SellerAnalytics        = lazy(() => import('./pages/seller/SellerAnalytics'));
+const SellerGuide            = lazy(() => import('./pages/seller/SellerGuide'));
+const SellerSupport          = lazy(() => import('./pages/seller/SellerSupport'));
+
 // ─── Dealer pages ───────────────────────────────────────────────────────
 const DealerDashboard      = lazy(() => import('./pages/dealer/DealerDashboard'));
 const DealerOnboarding     = lazy(() => import('./pages/dealer/DealerOnboarding'));
@@ -275,6 +284,15 @@ export default function App() {
                         <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
                         <Route path="/dealer/settings"     element={<Dealer><DealerSettings /></Dealer>} />
                         <Route path="/dealer/choose-plan"  element={<Dealer><PostRegPackageSelect /></Dealer>} />
+
+                        {/* ── Private Seller ─────────────────────────────────── */}
+                        <Route path="/seller"              element={<RequireAuth><AppLayout><PrivateSellerDashboard /></AppLayout></RequireAuth>} />
+                        <Route path="/seller/onboarding"   element={<RequireAuth><AppLayout><PrivateSellerOnboarding /></AppLayout></RequireAuth>} />
+                        <Route path="/sell"                element={<RequireAuth><AppLayout><PrivateSellerAddCar /></AppLayout></RequireAuth>} />
+                        <Route path="/seller/profile"       element={<RequireAuth><AppLayout><PrivateSellerProfile /></AppLayout></RequireAuth>} />
+                        <Route path="/seller/analytics"     element={<RequireAuth><AppLayout><SellerAnalytics /></AppLayout></RequireAuth>} />
+                        <Route path="/seller/guide"         element={<RequireAuth><AppLayout><SellerGuide /></AppLayout></RequireAuth>} />
+                        <Route path="/seller/support"       element={<RequireAuth><AppLayout><SellerSupport /></AppLayout></RequireAuth>} />
 
                         {/* ── Admin / Staff ─────────────────────────────────── */}
                         <Route path="/admin"                          element={<Admin><AdminDashboard /></Admin>} />

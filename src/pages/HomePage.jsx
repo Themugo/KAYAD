@@ -180,6 +180,9 @@ export default function HomePage() {
         {/* 6.5 Private Seller Section */}
         <PrivateSellerSection />
 
+        {/* 6.6 Seller Success Stories */}
+        <SellerSuccessStories />
+
         {/* 7. Advertisement Zone A */}
         <div className="max-w-[1400px] mx-auto px-7 py-6">
           <AdvertisementBanner
@@ -234,4 +237,5 @@ export default function HomePage() {
       </div>
     </>
   );
+}
 }
