@@ -13,6 +13,6 @@ router.get("/", protect, adminOnly, validateQuery(ledgerQuerySchema), ledgerCont
 router.post("/", protect, adminOnly, validate(recordEntrySchema), ledgerController.createLedgerEntry);
 router.get("/seed", protect, adminOnly, ledgerController.seedAccounts);
 router.get("/:id", protect, adminOnly, validateObjectId, ledgerController.getLedgerEntry);
-router.post("/:id/reverse", auth, adminAuth, validateObjectId, validate(reverseEntrySchema), ledgerController.reverseLedgerEntry);
+router.post("/:id/reverse", protect, adminOnly, validateObjectId, validate(reverseEntrySchema), ledgerController.reverseLedgerEntry);
 
 export default router;

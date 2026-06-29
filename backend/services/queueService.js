@@ -1,6 +1,6 @@
 import { Queue, Worker } from "bullmq";
-import { sendNotification } from "./notificationService.js";
-import { initRedis, getRedisClient } from "./redisCacheService.js";
+import { sendNotification } from "./notification.service.js";
+import { initRedis, getRedisClient } from "../config/redis.js";
 import { logInfo, logWarn, logError, logDebug } from "../utils/logger.js";
 
 // =============================

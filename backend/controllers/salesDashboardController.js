@@ -6,7 +6,7 @@ import User from "../models/User.js";
 import Escrow from "../models/Escrow.js";
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
-import { protect, salesOnly } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 // =============================

@@ -1,8 +1,8 @@
 {
   "framework": null,
   "installCommand": "npm install -g pnpm && pnpm install",
-  "buildCommand": "pnpm --filter @workspace/kayad run build",
-  "outputDirectory": "artifacts/kayad/dist/public",
+  "buildCommand": "pnpm exec vite build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://api.kayad.space/api/$1" },
     { "source": "/socket.io/(.*)", "destination": "https://api.kayad.space/socket.io/$1" },

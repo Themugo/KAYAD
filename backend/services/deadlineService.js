@@ -37,3 +37,5 @@ export const checkVerificationDeadlines = async () => {
 
   return { reminded: stale.length, expired: autoClose.length };
 };
+
+export const startVerificationDeadlineCron = checkVerificationDeadlines;

@@ -300,6 +300,10 @@ if (redis && !DISABLE_REDIS) {
 // =============================
 // 🧹 CLEANUP
 // =============================
+export const initRedis = async () => redis;
+
+export const getRedisClient = () => redis;
+
 export const closeRedis = async () => {
   stopHealthMonitoring();
   if (redis) {
