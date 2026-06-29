@@ -35,9 +35,9 @@
   ],
   "env": {
     "BASE_PATH": "/",
-    "NODE_ENV": "production"
-  }
-}
+    "NODE_ENV": "production",
+    "VITE_PLATFORM_NAME": "KAYAD",
+    "VITE_DOMAIN": "kayad.space",
     "VITE_WEBHOST_EMAIL": "owner@kayad.space",
     "VITE_SOCKET_URL": "https://api.kayad.space",
     "VITE_APP_NAME": "Kayad",
