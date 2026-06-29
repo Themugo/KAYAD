@@ -16,6 +16,7 @@ import HomeFeaturePillars from './home/components/HomeFeaturePillars';
 import HomeCtaSection from './home/components/HomeCtaSection';
 import DealerSpotlight from './home/components/DealerSpotlight';
 import PrivateSellerSpotlight from './home/components/PrivateSellerSpotlight';
+import PrivateSellerSection from './home/components/PrivateSellerSection';
 import FeaturedDealers from './home/components/FeaturedDealers';
 import VehicleCategories from './home/components/VehicleCategories';
 import Testimonials from './home/components/Testimonials';
@@ -175,6 +176,9 @@ export default function HomePage() {
 
         {/* 6. Private Seller Spotlight */}
         <PrivateSellerSpotlight sellers={topSellers.slice(0, 3)} />
+
+        {/* 6.5 Private Seller Section */}
+        <PrivateSellerSection />
 
         {/* 7. Advertisement Zone A */}
         <div className="max-w-[1400px] mx-auto px-7 py-6">
