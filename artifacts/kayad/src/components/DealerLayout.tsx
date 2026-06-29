@@ -6,8 +6,7 @@ import { Bell, ChevronRight, Home, Menu } from 'lucide-react';
 
 const ROLE_LABELS: Record<string, string> = {
   dealer: 'Dealer',
-  broker: 'Broker',
-  individual_seller: 'Individual Seller',
+  individual_seller: 'Private Seller',
 };
 
 const SEGMENT_LABELS: Record<string, string> = {

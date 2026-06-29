@@ -20,6 +20,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   isDealer: boolean;
   isSuperAdmin: boolean;
+  /** @deprecated broker role removed — kept as false for backward compat */
   isBroker: boolean;
   isSeller: boolean;
   isMarketing: boolean;
@@ -94,7 +95,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAdmin       = STAFF_ROLES.includes(user?.role as any);
   const isDealer      = user?.role === 'dealer';
-  const isBroker      = user?.role === 'broker';
+  const isBroker      = false; // broker role removed
   const isSeller      = isSellerRole(user?.role);
   const isSuperAdmin  = user?.role === 'superadmin';
   const isMarketing   = user?.role === 'marketing';

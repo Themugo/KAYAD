@@ -239,8 +239,8 @@ const demoAuth = {
     const user = Object.values(DEMO_USERS).find(u => u.email === body.email);
     if (!user) throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
     // Verify password — demo accounts each have a defined password field.
-    // Allow login without password only for the original buyer/dealer/broker
-    // which used no-password quick-login buttons before admin accounts were added.
+    // Allow login without password only for original quick-login accounts
+    // (buyer/dealer) before admin accounts with explicit passwords were added.
     if (user.password && body.password && user.password !== body.password) {
       throw { response: { status: 401, data: { message: 'Invalid email or password' } } };
     }
@@ -332,9 +332,8 @@ const demoAuth = {
 const demoDealerCars = (userId) => {
   const user = getDemoUser();
   // The flagship dealer demo (Nairobi Auto Hub) manages the whole sample
-  // catalogue so it can showcase editing every demo car. The broker demo
-  // (Grace Wanjiku) stays scoped to its OWN listings so the two accounts are
-  // clearly distinct. Admins/superadmins see everything.
+  // catalogue so it can showcase editing every demo car. Private seller demo
+  // (Grace Wanjiku) stays scoped to its OWN listings. Admins/superadmins see everything.
   const seesAll = userId === 'demo-dealer-1' || ['admin', 'superadmin'].includes(user?.role);
   if (seesAll) return DEMO_CARS;
   return DEMO_CARS.filter(c => c.dealer?._id === userId);
@@ -373,7 +372,7 @@ const demoCars = {
   create: async (formData) => {
     await delay(500, 1200);
     const user = getDemoUser();
-    if (!user || !['dealer', 'broker', 'individual_seller', 'admin', 'superadmin'].includes(user.role)) {
+    if (!user || !['dealer', 'individual_seller', 'admin', 'superadmin'].includes(user.role)) {
       throw { response: { status: 403, data: { message: 'Only dealers, brokers, and sellers can create listings' } } };
     }
       const images = [];

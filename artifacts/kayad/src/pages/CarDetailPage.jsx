@@ -143,7 +143,8 @@ export default function CarDetailPage() {
   const dealer = car?.dealer;
   const dv = dealer?.visibility || { showPhone: true, showEmail: true, showLocation: true, chatEnabled: true };
 
-  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'broker' || dealer.role === 'user' || !dealer.role;
+  // Private sellers use escrow; dealers use their own direct process
+  const isP2P = !dealer || dealer.role === 'individual_seller' || dealer.role === 'user' || !dealer.role;
   const isDealerSeller = dealer?.role === 'dealer';
 
   // ═══ INLINE BIDDING ═══
@@ -566,17 +567,18 @@ export default function CarDetailPage() {
                   )}
 
                 <div className="cta-group">
-                  {car.allowBuy && (isP2P || isDealerSeller) ? (
-                    car.escrowEnabled !== false ? (
-                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
-                        <Lock size={15} /> Buy via Escrow
-                      </button>
-                    ) : (
-                      <button onClick={() => handleBuy('escrow')} className="cta-primary cta-buynow">
-                        <ShieldCheck size={15} /> Buy Now
-                      </button>
-                    )
-                  ) : null}
+                  {/* Private sellers → escrow is mandatory (protection against scams) */}
+                  {car.allowBuy && isP2P && (
+                    <button onClick={() => handleBuy('escrow')} className="cta-primary cta-escrow">
+                      <Lock size={15} /> Buy via Escrow
+                    </button>
+                  )}
+                  {/* Dealers → direct purchase through their own process (showroom / invoice) */}
+                  {car.allowBuy && isDealerSeller && (
+                    <button onClick={() => handleBuy('direct')} className="cta-primary cta-buynow">
+                      <ShieldCheck size={15} /> Buy Now
+                    </button>
+                  )}
 
                   {dv.chatEnabled && !car.chatDisabled && (
                     <button onClick={handleChat} disabled={startingChat} className="cta-secondary">

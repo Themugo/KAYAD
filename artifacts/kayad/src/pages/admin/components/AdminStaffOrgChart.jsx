@@ -3,7 +3,7 @@ import { useState } from 'react';
 const ORG = [
   { role: 'superadmin', title: 'Super Admin', icon: '👑', color: 'var(--gold)', bg: 'rgba(212,196,168,0.1)', desc: 'Full platform control. Manages all staff, config, and financials.', level: 0, canCreate: false },
   { role: 'admin', title: 'Admin', icon: '⚙️', color: '#3b82f6', bg: 'rgba(59,130,246,0.08)', desc: 'Platform-wide oversight — users, cars, auctions, transactions.', level: 1 },
-  { role: 'hr', title: 'HR Manager', icon: '👥', color: '#f97316', bg: 'rgba(249,115,22,0.08)', desc: 'Approves dealers and brokers. Manages seller onboarding.', level: 2 },
+  { role: 'hr', title: 'HR Manager', icon: '👥', color: '#f97316', bg: 'rgba(249,115,22,0.08)', desc: 'Approves dealers and private sellers. Manages seller onboarding.', level: 2 },
   { role: 'accounts', title: 'Accounts & Finance', icon: '💰', color: '#22c55e', bg: 'rgba(34,197,94,0.08)', desc: 'Payments, escrows, reconciliation and financial reports.', level: 2 },
   { role: 'escrow_officer', title: 'Escrow Officer', icon: '🔒', color: '#06b6d4', bg: 'rgba(6,182,212,0.08)', desc: 'Manages escrow releases and individual seller payment oversight.', level: 2 },
   { role: 'marketing', title: 'Marketing', icon: '📢', color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)', desc: 'Ad campaigns, banners, homepage content and promotions.', level: 2 },

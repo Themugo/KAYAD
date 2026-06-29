@@ -29,7 +29,6 @@ export type Permission = typeof PERM[keyof typeof PERM];
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   user:               [],
   individual_seller:  [PERM.MANAGE_CARS],
-  broker:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   dealer:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   ghost_checker:      [PERM.MANAGE_INSPECTIONS, PERM.VIEW_ANALYTICS],
   moderator:          [PERM.MANAGE_MODERATION, PERM.VIEW_LOGS],

@@ -35,7 +35,7 @@ if (!basePath && !isBuildContext) {
 }
 
 export default defineConfig({
-  base: basePath,
+  base: basePath || '/',
   plugins: [
     react(),
     tailwindcss(),

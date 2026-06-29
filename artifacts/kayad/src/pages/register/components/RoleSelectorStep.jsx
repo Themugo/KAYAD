@@ -2,10 +2,27 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
 const ROLES = [
-  { val: 'user', icon: '👤', title: 'Car Buyer', desc: 'Browse listings, bid on auctions, buy securely.' },
-  { val: 'dealer', icon: '🏪', title: 'Car Dealer', desc: 'Showroom business. List your inventory at scale, sell on behalf of owners, run live auctions.', badge: 'Business' },
-  { val: 'broker', icon: '🤝', title: 'Broker', desc: 'Middleman with no showroom. Help private owners sell their used cars and earn commission.', badge: 'Commission' },
-  { val: 'individual_seller', icon: '🚗', title: 'Private Seller', desc: 'Selling your own car? List it properly — first listing free, no business account needed.', badge: 'Free' },
+  {
+    val: 'user',
+    icon: '👤',
+    title: 'Car Buyer',
+    desc: 'Browse the full gallery, bid in auctions, and buy securely with M-Pesa escrow. No approval needed — get started instantly.',
+    badge: 'Instant',
+  },
+  {
+    val: 'dealer',
+    icon: '🏪',
+    title: 'Car Dealer',
+    desc: 'Verified showroom or car lot? List your full inventory, run live auctions, and access dealer analytics. Reviewed by our team within 24 hrs.',
+    badge: 'Business',
+  },
+  {
+    val: 'individual_seller',
+    icon: '🚗',
+    title: 'Private Seller',
+    desc: 'Selling your own car(s)? First listing is free. Every sale is escrow-protected — buyers only release funds once they confirm the vehicle.',
+    badge: 'Free',
+  },
 ];
 
 export default function RoleSelectorStep({ onSelectRole }) {

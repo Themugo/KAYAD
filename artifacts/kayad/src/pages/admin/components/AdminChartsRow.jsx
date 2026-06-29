@@ -33,8 +33,7 @@ export default function AdminChartsRow({ stats }) {
             data={[
               { name: 'Dealers',            count: Number(s.totalDealers) || 0,      color: 'var(--gold)' },
               { name: 'Individual Sellers', count: Number(s.individualSellers) || 0, color: '#3b82f6' },
-              { name: 'Brokers',            count: Number(s.brokers) || 0,           color: '#a855f7' },
-              { name: 'Buyers & Others',    count: Math.max((Number(s.totalUsers) || 0) - ((Number(s.totalDealers) || 0) + (Number(s.individualSellers) || 0) + (Number(s.brokers) || 0)), 0), color: '#22c55e' },
+              { name: 'Buyers & Others',    count: Math.max((Number(s.totalUsers) || 0) - ((Number(s.totalDealers) || 0) + (Number(s.individualSellers) || 0)), 0), color: '#22c55e' },
             ]}
           />
         </div>

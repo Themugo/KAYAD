@@ -78,7 +78,7 @@ export default function ProfilePage() {
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   })();
 
-  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', broker: 'badge-orange', user: 'badge-blue' };
+  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', individual_seller: 'badge-green', user: 'badge-blue' };
 
   return (
     <div className="page">
@@ -100,8 +100,8 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
               <h2 style={{ fontSize: '1.4rem' }}>{user?.name}</h2>
               <span className={`badge ${roleColor[user?.role] || 'badge-muted'}`}>{user?.role}</span>
-              {(user?.role === 'dealer' || user?.role === 'broker') && user?.status === 'approved' && <span className="badge badge-green">✓ Verified</span>}
-              {(user?.role === 'dealer' || user?.role === 'broker') && user?.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
+              {(user?.role === 'dealer' || user?.role === 'individual_seller') && user?.status === 'approved' && <span className="badge badge-green">✓ Verified</span>}
+              {(user?.role === 'dealer' || user?.role === 'individual_seller') && user?.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 6 }}>{user?.email}</div>
             <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>

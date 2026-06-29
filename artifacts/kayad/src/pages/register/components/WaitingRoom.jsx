@@ -3,7 +3,7 @@ import { Clock, Mail, ShieldCheck } from 'lucide-react';
 import { isDemoMode } from '../../../api/api';
 
 export default function WaitingRoom({ user, onLogout }) {
-  const isSellerPending = user?.role === 'dealer' || user?.role === 'broker' || user?.role === 'individual_seller';
+  const isSellerPending = user?.role === 'dealer' || user?.role === 'individual_seller';
   const statusSteps = isSellerPending
     ? [
       { icon: '✅', label: 'Account created', done: true },
