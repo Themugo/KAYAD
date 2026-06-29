@@ -115,6 +115,7 @@ import {
 const bidSchema = z.object({
   amount: z.number().positive("Bid must be positive").max(100_000_000),
   phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Safaricom number starting with 2547"),
+  maxBid: z.number().positive("Max bid must be positive").optional(),
 });
 
 export const validate = (schema) => (req, res, next) => {

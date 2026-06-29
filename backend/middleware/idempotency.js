@@ -112,16 +112,22 @@ export const idempotencyCheck = async (req, res, next) => {
       if (bankRef) {
         idempotencyKey = `vault_funded_${bankRef}`;
       }
+    } else if (operationType === "bid") {
+      const userId = req.user?.id || "";
+      const carId = req.params?.id || "";
+      const amount = req.body?.amount || 0;
+      // time-windowed key: same user + car + amount within 5s window gets the same key
+      const windowMs = 5000;
+      const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
+      idempotencyKey = `bid_${userId}_${carId}_${amount}_${windowStart}`;
     }
   }
 
   if (!idempotencyKey) {
-    logWarn("No idempotency key provided for request", {
-      method: req.method,
-      path: req.path,
-      userId: req.user?.id,
-    });
-    return next();
+    // For non-critical paths, generate a random key to ensure idempotency
+    if (req.user?.id) {
+      idempotencyKey = generateIdempotencyKey("auto");
+    }
   }
 
   try {

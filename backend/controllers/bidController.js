@@ -169,7 +169,7 @@ export const getAuctionBids = async (req, res) => {
 
     const bids = await Bid.find({
       carId,
-      status: "paid",
+      status: { $in: ["paid", "pending"] },
     })
       .populate("user", "name verifiedBuyer")
       .sort({ amount: -1 })
@@ -182,6 +182,7 @@ export const getAuctionBids = async (req, res) => {
         amount: b.amount,
         bidderTag: b.bidderTag,
         isVerifiedBuyer: b.user?.verifiedBuyer || false,
+        confirmed: b.status === "paid",
         time: b.createdAt,
       })),
     });
@@ -234,6 +235,15 @@ export const placeBid = async (req, res) => {
       });
     }
 
+    if (car.highestBidder?.toString() === userId) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({
+        success: false,
+        message: "You are already the highest bidder",
+      });
+    }
+
     // =============================
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================
@@ -278,7 +288,7 @@ export const placeBid = async (req, res) => {
     }
 
     const highest = await Bid.getHighestBid(carId);
-    const currentBid = highest?.amount || car.currentBid || car.price;
+    const currentBid = Math.max(highest?.amount || 0, car.currentBid || 0) || car.price || 0;
 
     // 📏 Enforce minimum bid increment
     const minIncrement = currentBid < 100000 ? 1000 : currentBid < 500000 ? 5000 : currentBid < 2000000 ? 10000 : 25000;
@@ -641,7 +651,7 @@ export const endAuction = async (req, res) => {
       winner: car.winner,
     });
   } catch (err) {
-    logError("Failed to get car bids", err);
-    res.status(500).json({ success: false, message: "Failed to get car bids" });
+    logError("Failed to end auction", err);
+    res.status(500).json({ success: false, message: "Failed to end auction" });
   }
 };

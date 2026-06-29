@@ -7,14 +7,15 @@ import { validateObjectId, validateCar, validateQuery, carListQuerySchema, valid
 
 import upload, { handleUploadError } from "../middleware/upload.js";
 import MarketData from "../models/MarketData.js";
-import { uploadLimiter, bidLimiter, createLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
 import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
 import { trackCarSearch } from "../middleware/searchTracking.js";
 import { trackVehicleSearchLatency } from "../middleware/searchLatencyTracking.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
-import { STAFF_ROLES } from "../config/roles.js";
+import { STAFF_ROLES, PERM } from "../config/roles.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
+import { requirePermission } from "../middleware/rbac.js";
 
 import {
   getCars,
@@ -22,7 +23,6 @@ import {
   createCar,
   updateCar,
   deleteCar,
-  placeBid,
   getDemoCars,
   deleteCarImage,
   addCarImages,
@@ -283,11 +283,6 @@ router.post(
 );
 
 // =============================
-// ⚡ BIDDING SYSTEM
-// =============================
-router.post("/:id/bid", protect, bidLimiter, validateObjectId, invalidateCache("cache:*"), asyncHandler(placeBid));
-
-// =============================
 // 📈 PRICE HISTORY
 // =============================
 router.get(
@@ -463,6 +458,7 @@ router.post(
   "/admin/:id/start",
   protect,
   adminOnly,
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id);
@@ -498,6 +494,7 @@ router.post(
   "/admin/:id/end",
   protect,
   adminOnly,
+  requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.id);

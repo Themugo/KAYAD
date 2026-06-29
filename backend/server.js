@@ -518,11 +518,21 @@ io.on("connection", (socket) => {
     return bucket.count > 10;
   };
 
-  socket.on("joinAuction", (carId) => {
+  socket.on("joinAuction", async (carId) => {
     if (isRateLimited("joinAuction")) return;
     if (isValidId(carId)) {
       socket.join(String(carId));
       socket.join(`car_${carId}`);
+      const Car = (await import("./models/Car.js")).default;
+      const car = await Car.findById(carId).select("currentBid auctionEnd auctionStatus highestBidder").lean();
+      if (car) {
+        socket.emit("auctionResync", {
+          carId,
+          currentBid: car.currentBid,
+          auctionEnd: car.auctionEnd,
+          auctionStatus: car.auctionStatus,
+        });
+      }
     }
   });
 

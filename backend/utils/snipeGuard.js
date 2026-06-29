@@ -15,12 +15,12 @@ export const applySnipingProtection = async (car) => {
   const end = new Date(car.auctionEnd).getTime();
   const remaining = end - now;
   if (remaining > 0 && remaining < SNIPE_WINDOW_MS) {
-    const extendedCount = (car.extendedCount || 0) + 1;
-    if (extendedCount > MAX_EXTENSIONS) return false;
-    const totalExtended = extendedCount * EXTENSION_MS;
+    const extensionCount = (car.extensionCount || 0) + 1;
+    if (extensionCount > MAX_EXTENSIONS) return false;
+    const totalExtended = extensionCount * EXTENSION_MS;
     if (totalExtended > MAX_TOTAL_EXTENSION_MS_CALC) return false;
     car.auctionEnd = new Date(end + EXTENSION_MS);
-    car.extendedCount = extendedCount;
+    car.extensionCount = extensionCount;
     await car.save();
     const carId = car._id.toString();
     emitAuctionExtended(carId, car.auctionEnd);

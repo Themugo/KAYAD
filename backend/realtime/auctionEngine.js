@@ -331,6 +331,12 @@ export const startAuctionEngine = async () => {
 // 🏁 END AUCTION
 // =============================
 export const endAuction = async (roomId) => {
+  // 🧹 clear stale timer immediately
+  if (localTimers.has(roomId)) {
+    clearTimeout(localTimers.get(roomId));
+    localTimers.delete(roomId);
+  }
+
   try {
     const auction = await Auction.findOne({ roomId });
 
