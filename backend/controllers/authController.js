@@ -189,7 +189,7 @@ export const register = async (req, res) => {
       }
     }
 
-    const role = req.body.role === "dealer" ? "dealer" : "user";
+    const role = req.body.role === "dealer" || req.body.role === "individual_seller" ? req.body.role : "user";
 
     const user = await User.create({
       name,

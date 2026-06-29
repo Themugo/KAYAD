@@ -13,6 +13,7 @@ export default function RegisterPage() {
 
   const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
   const [wantToSell, setWantToSell] = useState(params.get("sell") === "1");
+  const [sellerType, setSellerType] = useState(params.get("role") === "individual_seller" ? "individual_seller" : "dealer");
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
 
@@ -35,7 +36,7 @@ export default function RegisterPage() {
         email: form.email.toLowerCase().trim(),
         password: form.password,
         phone: form.phone.trim(),
-        role: wantToSell ? "dealer" : "user",
+        role: wantToSell ? sellerType : "user",
       };
       const refCode = params.get("ref") || "";
       if (refCode) body.referralCode = refCode;
@@ -90,6 +91,28 @@ export default function RegisterPage() {
               <input type="checkbox" checked={wantToSell} onChange={(e) => setWantToSell(e.target.checked)} style={{ width: 18, height: 18 }} />
               <span style={{ fontSize: 13, color: "var(--text-muted)" }}>I also want to sell cars</span>
             </label>
+
+            {wantToSell && (
+              <div style={{ marginTop: 12, padding: 12, background: "rgba(212,196,168,0.08)", borderRadius: 8, border: "1px solid rgba(212,196,168,0.15)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gold)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Seller Type</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <input type="radio" name="sellerType" value="dealer" checked={sellerType === "dealer"} onChange={(e) => setSellerType(e.target.value)} style={{ width: 16, height: 16 }} />
+                    <div>
+                      <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>Registered Dealer</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Business with multiple vehicles, verified dealer benefits</div>
+                    </div>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <input type="radio" name="sellerType" value="individual_seller" checked={sellerType === "individual_seller"} onChange={(e) => setSellerType(e.target.value)} style={{ width: 16, height: 16 }} />
+                    <div>
+                      <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>Private Seller</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Individual selling personal vehicle, escrow protection included</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
 
             <button className="btn btn-gold btn-full btn-lg" type="submit" disabled={loading} style={{ marginTop: 4 }}>
               {loading ? <><span className="spinner" style={{ width: 18, height: 18 }} /> Creating account...</> : "Create Account"}

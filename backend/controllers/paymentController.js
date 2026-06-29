@@ -57,14 +57,18 @@ export const initiatePayment = async (req, res) => {
       phone,
     });
 
-    // Create Escrow record only for private sellers (individual_seller) with escrow enabled
+    // Create Escrow record for private sellers (individual_seller) - MANDATORY
+    // Private sellers cannot disable escrow; it's enforced for all their transactions
     if (normalizedType === "escrow" && result.payment?._id) {
       const Car = (await import("../models/Car.js")).default;
       const User = (await import("../models/User.js")).default;
       const car = await Car.findById(carId).select("escrowEnabled dealer").session(session);
       const sellerUser = car ? await User.findById(car.dealer).select("role").session(session) : null;
       const isPrivateSeller = sellerUser && sellerUser.role === "individual_seller";
-      if (car && car.escrowEnabled !== false && isPrivateSeller) {
+      
+      // For private sellers, escrow is MANDATORY - cannot be disabled
+      // For dealers, escrow is optional based on car.escrowEnabled
+      if (car && isPrivateSeller) {
         const Escrow = (await import("../models/Escrow.js")).default;
         const escrow = await Escrow.create([{
           car: carId,
