@@ -29,13 +29,14 @@ export default function HomePage() {
     let cancelled = false;
     const fetchCars = async () => {
       try {
-        const data = await carsAPI.list({ page: 1, limit: 50, sort: '' });
+        // Optimized: Fetch only what we need (20 cars instead of 50)
+        const data = await carsAPI.list({ page: 1, limit: 20, sort: '-createdAt' });
         if (cancelled) return;
         let all = data.cars || data.data || [];
         
         if (all.length === 0) {
           enableDemoMode();
-          const retry = await carsAPI.list({ page: 1, limit: 50, sort: '' });
+          const retry = await carsAPI.list({ page: 1, limit: 20, sort: '-createdAt' });
           if (cancelled) return;
           all = retry.cars || retry.data || [];
         }
@@ -69,8 +70,11 @@ export default function HomePage() {
           buyNow: nonAuction.filter(c => c.allowBuy !== false).length,
           brands: [...new Set(all.map(c => c.brand))].length,
         });
-      } catch {
-        if (!cancelled) toast('Could not load vehicles. Check your connection.', 'warning');
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to fetch vehicles:', err);
+          toast('Could not load vehicles. Check your connection.', 'warning');
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
