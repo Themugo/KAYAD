@@ -405,6 +405,34 @@ vehicleValuationSchema.statics.getPriceTrend = async function (carId) {
   };
 };
 
+vehicleValuationSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+vehicleValuationSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+vehicleValuationSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+vehicleValuationSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+vehicleValuationSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 // =============================
 // 🧠 SAFE EXPORT
 // =============================

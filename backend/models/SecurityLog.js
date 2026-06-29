@@ -15,7 +15,7 @@ const securityLogSchema = new mongoose.Schema(
     severity: { type: String, enum: ["info", "warning", "critical"], default: "info" },
     timestamp: { type: Date, default: Date.now, index: true },
   },
-  { timestamps: false },
+  { timestamps: true },
 );
 
 securityLogSchema.pre("save", function (next) {

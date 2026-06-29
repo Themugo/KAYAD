@@ -94,6 +94,7 @@ const carSchema = new mongoose.Schema(
     dealer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
       index: true,
     },
     isDemo: {
@@ -197,20 +198,14 @@ const carSchema = new mongoose.Schema(
     vin: {
       type: String,
       trim: true,
-      index: true,
-      sparse: true,
     },
     chassisNumber: {
       type: String,
       trim: true,
-      index: true,
-      sparse: true,
     },
     registrationNumber: {
       type: String,
       trim: true,
-      index: true,
-      sparse: true,
     },
 
     // =============================
@@ -378,6 +373,12 @@ carSchema.post("findOneAndDelete", async function (doc) {
     const Favorite = mongoose.model("Favorite");
     const Review = mongoose.model("Review");
     const Chat = mongoose.model("Chat");
+    const Auction = mongoose.model("Auction");
+    const Lead = mongoose.model("Lead");
+    const Dispute = mongoose.model("Dispute");
+    const EscrowVault = mongoose.model("EscrowVault");
+    const VehicleValuation = mongoose.model("VehicleValuation");
+    const ReconciliationRecord = mongoose.model("ReconciliationRecord");
 
     // Soft-delete car's bids
     await Bid.updateMany({ carId: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
@@ -393,6 +394,24 @@ carSchema.post("findOneAndDelete", async function (doc) {
 
     // Soft-delete car's chats
     await Chat.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's auction
+    await Auction.updateMany({ carId: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's leads
+    await Lead.updateMany({ vehicle: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's disputes
+    await Dispute.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's escrow vaults
+    await EscrowVault.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's vehicle valuations
+    await VehicleValuation.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
+
+    // Soft-delete car's reconciliation records
+    await ReconciliationRecord.updateMany({ car: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc.dealer } });
   } catch (err) {
     console.error("❌ CASCADE DELETE ERROR FOR CAR:", err);
   }

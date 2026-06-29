@@ -129,4 +129,32 @@ escrowAnomalySchema.index({ targetUser: 1, category: 1 });
 escrowAnomalySchema.index({ riskScore: -1 });
 escrowAnomalySchema.index({ createdAt: -1 });
 
+escrowAnomalySchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+escrowAnomalySchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+escrowAnomalySchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+escrowAnomalySchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+escrowAnomalySchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 export default mongoose.models.EscrowAnomaly || mongoose.model("EscrowAnomaly", escrowAnomalySchema);

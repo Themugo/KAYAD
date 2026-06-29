@@ -161,6 +161,34 @@ reconciliationReportSchema.index({ startTime: 1, endTime: 1 });
 reconciliationReportSchema.index({ "issueDetails.resolved": 1 });
 reconciliationReportSchema.index({ "issueDetails.severity": 1 });
 
+reconciliationReportSchema.add({
+  deletedAt: { type: Date, default: null, index: true },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+reconciliationReportSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+reconciliationReportSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+reconciliationReportSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+reconciliationReportSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 // =============================
 // ⚡ GENERATE REPORT ID
 // =============================

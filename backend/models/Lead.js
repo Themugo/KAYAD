@@ -379,6 +379,34 @@ leadSchema.statics.getLeadPipeline = async function (dealerId) {
   return pipeline;
 };
 
+leadSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+leadSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+leadSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+leadSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+leadSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 // =============================
 // 🧠 SAFE EXPORT
 // =============================

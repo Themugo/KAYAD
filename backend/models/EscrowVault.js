@@ -38,7 +38,9 @@ const escrowVaultSchema = new mongoose.Schema(
         by: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       },
     ],
-    lastActionKey: String,
+    lastActionKey: { type: String, index: true },
+    deletedAt: { type: Date, default: null },
+    deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true },
 );
@@ -46,5 +48,29 @@ const escrowVaultSchema = new mongoose.Schema(
 escrowVaultSchema.index({ buyer: 1, createdAt: -1 });
 escrowVaultSchema.index({ seller: 1, createdAt: -1 });
 escrowVaultSchema.index({ car: 1 });
+escrowVaultSchema.index({ deletedAt: 1 });
+
+escrowVaultSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+escrowVaultSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+escrowVaultSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+escrowVaultSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
 
 export default mongoose.model("EscrowVault", escrowVaultSchema);

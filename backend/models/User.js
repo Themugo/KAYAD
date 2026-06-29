@@ -126,7 +126,6 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
-      index: true,
     },
     phoneVerified: {
       type: Boolean,
@@ -486,6 +485,18 @@ userSchema.post("findOneAndDelete", async function (doc) {
     const Favorite = mongoose.model("Favorite");
     const Review = mongoose.model("Review");
     const RefreshToken = mongoose.model("RefreshToken");
+    const Lead = mongoose.model("Lead");
+    const EscrowVault = mongoose.model("EscrowVault");
+    const Dispute = mongoose.model("Dispute");
+    const Evidence = mongoose.model("Evidence");
+    const AuctionIntegrityFlag = mongoose.model("AuctionIntegrityFlag");
+    const AuctionRiskProfile = mongoose.model("AuctionRiskProfile");
+    const EscrowAnomaly = mongoose.model("EscrowAnomaly");
+    const EscrowRiskScore = mongoose.model("EscrowRiskScore");
+    const ReconciliationRecord = mongoose.model("ReconciliationRecord");
+    const ReconciliationReport = mongoose.model("ReconciliationReport");
+    const LeadActivity = mongoose.model("LeadActivity");
+    const SupportTicket = mongoose.model("SupportTicket");
 
     // Soft-delete user's cars
     await Car.updateMany({ dealer: doc._id }, { $set: { deletedAt: new Date(), deletedBy: doc._id } });
@@ -522,6 +533,78 @@ userSchema.post("findOneAndDelete", async function (doc) {
 
     // Revoke all refresh tokens
     await RefreshToken.updateMany({ user: doc._id }, { $set: { isRevoked: true, revokedAt: new Date() } });
+
+    // Soft-delete user's leads (as buyer or dealer)
+    await Lead.updateMany(
+      { $or: [{ buyer: doc._id }, { dealer: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete user's escrow vaults (as buyer or seller)
+    await EscrowVault.updateMany(
+      { $or: [{ buyer: doc._id }, { seller: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete user's disputes (as opener, against, or assignee)
+    await Dispute.updateMany(
+      { $or: [{ openedBy: doc._id }, { openedAgainst: doc._id }, { assignedTo: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete user's evidence uploads
+    await Evidence.updateMany(
+      { $or: [{ uploadedBy: doc._id }, { reviewedBy: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete auction integrity flags
+    await AuctionIntegrityFlag.updateMany(
+      { $or: [{ flaggedBy: doc._id }, { reviewedBy: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete auction risk profiles
+    await AuctionRiskProfile.updateMany(
+      { user: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete escrow anomalies
+    await EscrowAnomaly.updateMany(
+      { $or: [{ flaggedBy: doc._id }, { reviewedBy: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete escrow risk scores
+    await EscrowRiskScore.updateMany(
+      { user: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete reconciliation records
+    await ReconciliationRecord.updateMany(
+      { $or: [{ user: doc._id }, { resolvedBy: doc._id }] },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete reconciliation reports
+    await ReconciliationReport.updateMany(
+      { generatedByUser: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete lead activities
+    await LeadActivity.updateMany(
+      { actor: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
+
+    // Soft-delete support tickets
+    await SupportTicket.updateMany(
+      { user: doc._id },
+      { $set: { deletedAt: new Date(), deletedBy: doc._id } },
+    );
   } catch (err) {
     logError("CASCADE DELETE ERROR FOR USER", { error: err.message });
   }

@@ -108,6 +108,34 @@ reconciliationRecordSchema.index({ report: 1, source: 1, outcome: 1 });
 reconciliationRecordSchema.index({ expectedId: 1, expectedModel: 1 });
 reconciliationRecordSchema.index({ actualId: 1, actualModel: 1 });
 
+reconciliationRecordSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+reconciliationRecordSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+reconciliationRecordSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+reconciliationRecordSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+reconciliationRecordSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 const ReconciliationRecord =
   mongoose.models.ReconciliationRecord || mongoose.model("ReconciliationRecord", reconciliationRecordSchema);
 

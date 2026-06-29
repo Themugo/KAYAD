@@ -122,5 +122,33 @@ integrityFlagSchema.index({ targetUser: 1, category: 1 });
 integrityFlagSchema.index({ riskScore: -1 });
 integrityFlagSchema.index({ createdAt: -1 });
 
+integrityFlagSchema.add({
+  deletedAt: { type: Date, default: null },
+  deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+integrityFlagSchema.statics.softDelete = async function (ids, userId) {
+  const idArray = Array.isArray(ids) ? ids : [ids];
+  return this.updateMany(
+    { _id: { $in: idArray }, deletedAt: null },
+    { $set: { deletedAt: new Date(), deletedBy: userId } },
+  );
+};
+
+integrityFlagSchema.pre(/^find/, function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+integrityFlagSchema.pre("findOneAndUpdate", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
+integrityFlagSchema.pre("countDocuments", function (next) {
+  if (this.getQuery().deletedAt === undefined) this.where({ deletedAt: null });
+  next();
+});
+
 export default mongoose.models.AuctionIntegrityFlag ||
   mongoose.model("AuctionIntegrityFlag", integrityFlagSchema);
