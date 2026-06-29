@@ -52,7 +52,7 @@ export default function PostRegPackageSelect() {
   const handleSkip = () => {
     setSelected("starter");
     toast("Started with Starter plan — upgrade anytime", "info");
-    navigate("/dealer/cars/new", { replace: true });
+    navigate("/dealer/add-car", { replace: true });
   };
 
   return (

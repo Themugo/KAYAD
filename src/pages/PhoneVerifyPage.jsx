@@ -85,7 +85,7 @@ export default function PhoneVerifyPage() {
   };
 
   const handleSkip = () => {
-    if (user?.role === "dealer") {
+    if (user?.role === "dealer" || user?.role === "individual_seller") {
       navigate("/dealer/onboarding", { replace: true });
     } else {
       navigate("/dashboard", { replace: true });
