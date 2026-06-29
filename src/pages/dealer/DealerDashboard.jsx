@@ -240,11 +240,60 @@ export default function DealerDashboard() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 32px' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 28px' }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : (
           <>
+            {/* KPI Row - Only show on overview tab */}
+            {tab === 'overview' && (
+              <StatRow style={{ marginBottom: 32 }}>
+                <KPICard
+                  title="Total Listings"
+                  value={cars.length}
+                  icon={Car}
+                  trend={12}
+                  color="gold"
+                />
+                <KPICard
+                  title="Active Auctions"
+                  value={s.activeAuctions || 0}
+                  icon={Gavel}
+                  trend={8}
+                  color="blue"
+                />
+                <KPICard
+                  title="Total Revenue"
+                  value={`KES ${totalRevenue.toLocaleString()}`}
+                  icon={TrendingUp}
+                  trend={15}
+                  color="gold"
+                />
+                <KPICard
+                  title="Conversion Rate"
+                  value={`${trends?.overall || 0}%`}
+                  icon={BarChart3}
+                  trend={5}
+                  color="green"
+                />
+              </StatRow>
+            )}
+
+            {/* Quick Actions - Only show on overview tab */}
+            {tab === 'overview' && (
+              <div style={{ marginBottom: 32 }}>
+                <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
+                <QuickActions 
+                  actions={[
+                    { id: '1', label: 'Add Vehicle', icon: Plus, to: '/dealer/add-car', color: 'gold' },
+                    { id: '2', label: 'Create Auction', icon: Gavel, to: '/dealer/auctions', color: 'blue' },
+                    { id: '3', label: 'View Analytics', icon: BarChart3, to: '/dealer/analytics', color: 'gold' },
+                    { id: '4', label: 'Manage Team', icon: Users, to: '/dealer/team', color: 'green' },
+                  ]} 
+                />
+              </div>
+            )}
+
             {/* ── OVERVIEW ── */}
             {tab === 'overview' && (
               <>
@@ -265,28 +314,46 @@ export default function DealerDashboard() {
             )}
 
             {tab === 'listings' && (
-              <DealerListingsTab cars={cars} totalCars={s.totalCars} setCars={setCars} toast={toast} />
+              <GlassCard>
+                <DealerListingsTab cars={cars} totalCars={s.totalCars} setCars={setCars} toast={toast} />
+              </GlassCard>
             )}
 
             {tab === 'leads' && (
-              <DealerLeadsTab toast={toast} />
+              <GlassCard>
+                <DealerLeadsTab toast={toast} />
+              </GlassCard>
             )}
 
             {tab === 'bids' && (
-              <DealerBidsTab bids={bids} setBids={setBids} toast={toast} />
+              <GlassCard>
+                <DealerBidsTab bids={bids} setBids={setBids} toast={toast} />
+              </GlassCard>
             )}
 
             {tab === 'escrows' && (
-              <DealerEscrowsTab escrows={escrows} escrowLoading={escrowLoading} onRefresh={fetchEscrows} />
+              <GlassCard>
+                <DealerEscrowsTab escrows={escrows} escrowLoading={escrowLoading} onRefresh={fetchEscrows} />
+              </GlassCard>
             )}
 
-            {tab === 'earnings' && <DealerEarningsTab earnings={earnings} />}
+            {tab === 'earnings' && (
+              <GlassCard>
+                <DealerEarningsTab earnings={earnings} />
+              </GlassCard>
+            )}
 
-            {tab === 'package' && <DealerPackageTab user={user} listingsCount={cars.length} />}
+            {tab === 'package' && (
+              <GlassCard>
+                <DealerPackageTab user={user} listingsCount={cars.length} />
+              </GlassCard>
+            )}
 
             {/* ── TEAM ── */}
             {tab === 'team' && (
-              <TeamTab user={user} toast={toast} />
+              <GlassCard>
+                <TeamTab user={user} toast={toast} />
+              </GlassCard>
             )}
           </>
         )}

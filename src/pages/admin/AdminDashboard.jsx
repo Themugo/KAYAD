@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI, formatKES } from '../../api/api';
 import { Settings, AlertTriangle, RefreshCw, Gavel, Activity, Users, Car, DollarSign, Lock, Megaphone, UserCheck, ClipboardCheck, Star, Gift, MessageSquare, TrendingUp, BarChart3 } from 'lucide-react';
+import GlassCard from '../../components/dashboard/GlassCard';
+import KPICard from '../../components/dashboard/KPICard';
+import StatRow from '../../components/dashboard/StatRow';
+import ActivityFeed from '../../components/dashboard/ActivityFeed';
+import QuickActions from '../../components/dashboard/QuickActions';
 import AdminQuickStats from './components/AdminQuickStats';
 import AdminChartsRow from './components/AdminChartsRow';
 import AdminAlertsPanel from './components/AdminAlertsPanel';
@@ -150,76 +155,129 @@ export default function AdminDashboard() {
   const roleLabel = (r) => ({ dealer: 'Dealer', individual_seller: 'Individual', user: 'Buyer' }[r] || (r ? r.replace(/_/g, ' ') : 'User'));
 
   return (
-    <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px 32px 48px' }}>
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
-              <span style={{ fontSize: 14 }}>{rc.icon}</span>
-              <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{rc.label}</span>
-            </div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.6vw,2.2rem)', color: '#fff', margin: 0 }}>
-              {greeting}, <span style={{ color: 'var(--gold)' }}>{user?.name?.split(' ')[0] || 'Admin'}</span>
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Admin Control Room · {new Date().toLocaleDateString('en-KE', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
-            </p>
-            {lastRefresh && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                <RefreshCw size={10} style={{ color: 'var(--text-muted)' }} />
-                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                  Data refreshed {lastRefresh.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                </span>
+    <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+      {/* HEADER */}
+      <div style={{
+        background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '40px 0 36px',
+      }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
+                <span style={{ fontSize: 14 }}>{rc.icon}</span>
+                <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{rc.label}</span>
               </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button onClick={fetchData} disabled={loading} style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: loading ? 0.5 : 1 }}>
-              <RefreshCw size={13} /> Refresh
-            </button>
-            <Link to="/admin/settings" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)', color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Settings size={13} /> Settings
-            </Link>
-            {(role === 'superadmin' || role === 'admin') && (
-              <Link to="/admin/panic-room" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--red)', fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <AlertTriangle size={13} /> Panic Room
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.6rem)', color: '#fff', margin: 0 }}>
+                {greeting}, <span style={{ color: 'var(--gold)' }}>{user?.name?.split(' ')[0] || 'Admin'}</span>
+              </h1>
+              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 4 }}>
+                Admin Control Room · {new Date().toLocaleDateString('en-KE', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}
+              </p>
+              {lastRefresh && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                  <RefreshCw size={10} style={{ color: 'rgba(255,255,255,0.4)' }} />
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>
+                    Data refreshed {lastRefresh.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <button onClick={fetchData} disabled={loading} style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: loading ? 0.5 : 1 }}>
+                <RefreshCw size={13} /> Refresh
+              </button>
+              <Link to="/admin/settings" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Settings size={13} /> Settings
               </Link>
-            )}
-            <Link to="/" style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-              Home
-            </Link>
-            <button onClick={async () => { await logout(); window.location.href = '/'; }} style={{ padding: '8px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)', color: 'rgba(239,68,68,0.7)', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              Sign Out
-            </button>
+              {(role === 'superadmin' || role === 'admin') && (
+                <Link to="/admin/panic-room" style={{ padding: '8px 16px', borderRadius: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--red)', fontSize: 12, fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <AlertTriangle size={13} /> Panic Room
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="spinner" />
-        </div>
-      ) : (
-        <>
-          <AdminOperationalOverview stats={stats} sysHealth={sysHealth} />
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 28px' }}>
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
+        ) : (
+          <>
+            {/* KPI Row */}
+            <StatRow style={{ marginBottom: 32 }}>
+              <KPICard
+                title="Total Users"
+                value={stats?.totalUsers || 0}
+                icon={Users}
+                trend={12}
+                color="gold"
+              />
+              <KPICard
+                title="Active Sellers"
+                value={stats?.activeSellers || 0}
+                icon={UserCheck}
+                trend={8}
+                color="green"
+              />
+              <KPICard
+                title="Total Listings"
+                value={stats?.totalListings || 0}
+                icon={Car}
+                trend={15}
+                color="blue"
+              />
+              <KPICard
+                title="Platform Revenue"
+                value={`KES ${(stats?.revenue || 0).toLocaleString()}`}
+                icon={DollarSign}
+                trend={20}
+                color="gold"
+              />
+            </StatRow>
 
-          <AdminQuickStats stats={stats} formatValue={formatValue} />
+            {/* Quick Actions */}
+            <div style={{ marginBottom: 32 }}>
+              <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
+              <QuickActions 
+                actions={[
+                  { id: '1', label: 'Manage Users', icon: Users, to: '/admin/users', color: 'gold' },
+                  { id: '2', label: 'Dealer Approvals', icon: UserCheck, to: '/admin/sellers', color: 'green' },
+                  { id: '3', label: 'Moderation Queue', icon: ClipboardCheck, to: '/admin/moderation', color: 'blue' },
+                  { id: '4', label: 'View Reports', icon: BarChart3, to: '/admin/market-data', color: 'gold' },
+                ]} 
+              />
+            </div>
 
-          <AdminChartsRow stats={stats} />
+            <AdminOperationalOverview stats={stats} sysHealth={sysHealth} />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 16, marginBottom: 28 }} className="admin-3col">
-            <AdminAlertsPanel alerts={alerts} onMarkRead={handleMarkRead} onMarkAllRead={handleMarkAllRead} />
-            <AdminQuickActions />
-            <AdminPlatformHealth sysHealth={sysHealth} />
-          </div>
+            <AdminQuickStats stats={stats} formatValue={formatValue} />
 
-          <AdminRecentRegistrations recentUsers={recentUsers} roleLabel={roleLabel} />
+            <AdminChartsRow stats={stats} />
 
-          <AdminModuleNav links={links} />
-        </>
-      )}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', gap: 16, marginBottom: 28 }} className="admin-3col">
+              <GlassCard>
+                <AdminAlertsPanel alerts={alerts} onMarkRead={handleMarkRead} onMarkAllRead={handleMarkAllRead} />
+              </GlassCard>
+              <GlassCard>
+                <AdminQuickActions />
+              </GlassCard>
+              <GlassCard>
+                <AdminPlatformHealth sysHealth={sysHealth} />
+              </GlassCard>
+            </div>
+
+            <GlassCard>
+              <AdminRecentRegistrations recentUsers={recentUsers} roleLabel={roleLabel} />
+            </GlassCard>
+
+            <GlassCard>
+              <AdminModuleNav links={links} />
+            </GlassCard>
+          </>
+        )}
+      </div>
     </div>
   );
 }
