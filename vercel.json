@@ -1,7 +1,7 @@
 {
   "framework": null,
-  "installCommand": "npm install -g pnpm && pnpm install",
-  "buildCommand": "pnpm exec vite build",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "https://api.kayad.space/api/$1" },
