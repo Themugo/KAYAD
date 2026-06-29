@@ -135,9 +135,9 @@ function DemoModeControl() {
               ['Super Admin', 'superadmin@kayad.com', 'SuperAdmin@1234'],
               ['Admin', 'admin@kayad.com', 'Admin@1234'],
               ['Webhost', 'webhost@kayad.com', 'Webhost@1234'],
-              ['Dealer', 'dealer@demo.com', 'dealer123'],
-              ['Buyer', 'buyer@demo.com', 'buyer123'],
-              ['Broker', 'broker@demo.com', 'broker123'],
+              ['Dealer', 'dealer@demo.com', 'Kayad@Demo2026!'],
+              ['Private Seller', 'seller@demo.com', 'Seller@1234'],
+              ['Buyer', 'buyer@demo.com', 'Kayad@Demo2026!'],
             ].map(([role, email, password]) => (
               <tr key={email}>
                 <td style={{ padding: '3px 0', fontWeight: 600 }}>{role}</td>

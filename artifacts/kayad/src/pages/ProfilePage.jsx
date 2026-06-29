@@ -78,7 +78,7 @@ export default function ProfilePage() {
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   })();
 
-  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', user: 'badge-blue' };
+  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', individual_seller: 'badge-green', user: 'badge-blue' };
 
   return (
     <div className="page">

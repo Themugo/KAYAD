@@ -78,14 +78,16 @@ export const DEMO_USERS = {
     reviewCount: 42,
     tokenVersion: 0,
   },
+  // individual_seller — private person selling their own car(s), escrow mandatory
   individual_seller: {
-    _id: 'demo-individual-1',
+    _id: 'demo-seller-1',
     name: 'Grace Wanjiku',
-    email: 'individual@demo.com',
+    email: 'seller@demo.com',
+    password: 'Seller@1234',
     role: 'individual_seller',
     phone: '254745678901',
     location: 'Kilimani, Nairobi',
-    bio: 'Individual car seller. All transactions protected by escrow.',
+    bio: 'Private seller. All my transactions are protected by KAYAD escrow.',
     emailVerified: true,
     status: 'approved',
     isBanned: false,
@@ -359,7 +361,7 @@ export const DEMO_ADMIN_USERS = [
   { _id:'admin-target-3', name:'Sarah Chebet', email:'sarah@example.com', role:'dealer', isBanned:true, approved:true, businessName:'Chebet Motors', createdAt:new Date(now-60*DAY).toISOString(), lastLogin:new Date(now-10*DAY).toISOString() },
   { _id:'admin-target-4', name:'Michael Kiplagat', email:'michael@example.com', role:'user', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-7*DAY).toISOString() },
   { _id:'demo-dealer-1', name:'Peter Kamau', email:'dealer@demo.com', role:'dealer', isBanned:false, approved:true, businessName:'Nairobi Auto Hub Ltd', createdAt:new Date(now-180*DAY).toISOString(), lastLogin:new Date(now-0.1*DAY).toISOString() },
-  { _id:'demo-individual-1', name:'Grace Wanjiku', email:'individual@demo.com', role:'individual_seller', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-0.3*DAY).toISOString() },
+  { _id:'demo-seller-1', name:'Grace Wanjiku', email:'seller@demo.com', role:'individual_seller', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-0.3*DAY).toISOString() },
   { _id:DEMO_USERS.buyer._id, name:'James Kariuki', email:'buyer@demo.com', role:'user', isBanned:false, approved:true, createdAt:new Date(now-30*DAY).toISOString(), lastLogin:new Date(now-0.2*DAY).toISOString() },
 ];
 

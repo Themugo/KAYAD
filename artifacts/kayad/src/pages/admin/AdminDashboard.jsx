@@ -147,7 +147,7 @@ export default function AdminDashboard() {
   const formatValue = (val, isKes) =>
     isKes ? formatKES(val) : Number(val || 0).toLocaleString('en-KE');
 
-  const roleLabel = (r) => ({ dealer: 'Dealer', individual_seller: 'Individual', user: 'Buyer' }[r] || (r ? r.replace(/_/g, ' ') : 'User'));
+  const roleLabel = (r) => ({ dealer: 'Dealer', individual_seller: 'Private Seller', user: 'Buyer' }[r] || (r ? r.replace(/_/g, ' ') : 'User'));
 
   return (
     <div style={{ maxWidth: 1300, margin: '0 auto', padding: '28px 32px 48px' }}>
