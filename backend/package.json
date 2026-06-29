@@ -22,7 +22,10 @@
     "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --coverage",
     "backup": "node scripts/backup.js",
     "backup:status": "node scripts/backup.js status",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "monitor": "node scripts/deploymentMonitor.js monitor",
+    "health-check": "node scripts/deploymentMonitor.js check",
+    "notify-deployment": "node scripts/deploymentMonitor.js notify"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",
