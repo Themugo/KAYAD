@@ -2,9 +2,9 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Shield, Clock, Award } from 'lucide-react';
-import LazyImage from '../../components/LazyImage';
-import { carsAPI } from '../../api/api';
-import CarCard from '../../components/CarCard';
+import LazyImage from '../../../components/LazyImage';
+import { carsAPI } from '../../../api/api';
+import CarCard from '../../../components/CarCard';
 
 export default function HomeHero({ liveCount, isAuth, user }) {
   const [featuredCars, setFeaturedCars] = useState([]);
