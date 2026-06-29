@@ -433,6 +433,14 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 .glow-gold { box-shadow: 0 0 30px var(--gold-glow-strong); }
 .text-gold { color: var(--gold); }
 .text-gold-light { color: var(--gold-light); }
+.bg-gold { background: var(--gold); }
+.border-gold { border-color: var(--gold); }
+.accent-gold { accent-color: var(--gold); }
+
+/* Gradient utilities using CSS variables */
+.from-gold { --tw-gradient-from: var(--gold); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+.via-gold { --tw-gradient-stops: var(--tw-gradient-from), var(--gold), var(--tw-gradient-to); }
+.to-gold { --tw-gradient-to: var(--gold); }
 
 /* Price flash animation */
 @keyframes priceFlash {

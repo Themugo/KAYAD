@@ -87,24 +87,24 @@ export default function HomePage() {
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-        <div className="transition-opacity duration-500" style={{ opacity: loading ? 0.6 : 1 }}>
-          <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
-        </div>
+        <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
 
         <HomeLiveTicker count={liveCount} />
 
-        <section className="border-y border-white/4 transition-opacity duration-600" style={{ opacity: loading ? 0.4 : 1 }}>
-          <div className="max-w-[1400px] mx-auto px-7 grid gap-px home-stats-grid" style={{ background: 'rgba(255,255,255,0.03)' }}>
-            <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
-            <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
-            <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />
-            <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
+        <section className="border-t border-b border-white/[0.04]">
+          <div className="max-w-[1400px] mx-auto px-7">
+            <div className="grid gap-px home-stats-grid" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
+              <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
+              <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />
+              <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
+            </div>
           </div>
         </section>
 
         {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 
-        <section className="transition-opacity duration-600" style={{ padding: liveAuctions.length > 0 ? '24px 0' : '32px 0 24px', opacity: loading ? 0.4 : 1 }}>
+        <section style={{ padding: liveAuctions.length > 0 ? '24px 0' : '32px 0 24px' }}>
           <div className="max-w-[1400px] mx-auto px-7">
             <div className="flex items-end justify-between mb-4">
               <div>
