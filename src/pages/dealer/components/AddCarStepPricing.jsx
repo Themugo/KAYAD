@@ -79,14 +79,14 @@ export default function AddCarStepPricing({ form, set, user }) {
         </div>
       </div>
 
-      {user?.role === 'dealer' && form.allowBuy && (
-        <div onClick={() => set('escrowEnabled', !form.escrowEnabled)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${form.escrowEnabled ? 'rgba(212,196,168,0.2)' : 'var(--border)'}`, borderRadius: 10, cursor: 'pointer' }}>
+      {user?.role === 'individual_seller' && form.allowBuy && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(212,196,168,0.2)', borderRadius: 10 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>🛡️ Escrow Protection</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{form.escrowEnabled ? 'Payment held in escrow until buyer confirms receipt' : 'Buyer pays directly — no escrow holding'}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Payment held in escrow until buyer confirms receipt</div>
           </div>
-          <div style={{ width: 44, height: 24, borderRadius: 12, background: form.escrowEnabled ? 'var(--gold)' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-            <span style={{ position: 'absolute', top: 3, left: form.escrowEnabled ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: form.escrowEnabled ? '#000' : 'rgba(255,255,255,0.5)', transition: 'left 0.2s' }} />
+          <div style={{ width: 44, height: 24, borderRadius: 12, background: 'var(--gold)', position: 'relative', flexShrink: 0 }}>
+            <span style={{ position: 'absolute', top: 3, left: 23, width: 18, height: 18, borderRadius: '50%', background: '#000' }} />
           </div>
         </div>
       )}

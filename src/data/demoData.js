@@ -78,11 +78,11 @@ export const DEMO_USERS = {
     reviewCount: 42,
     tokenVersion: 0,
   },
-  broker: {
-    _id: 'demo-broker-1',
+  individual_seller: {
+    _id: 'demo-individual-seller-1',
     name: 'Grace Wanjiku',
-    email: 'broker@demo.com',
-    role: 'broker',
+    email: 'individual@demo.com',
+    role: 'individual_seller',
     phone: '254745678901',
     location: 'Kilimani, Nairobi',
     bio: 'Individual car seller. All transactions protected by escrow.',
@@ -208,8 +208,8 @@ export const DEMO_ESCROWS = [
   { _id:'esc-2', buyer:{_id:'other-buyer-1',name:'Mary Wanjiku'}, seller:ADMIN_DEALER, car:{title:'Mazda CX-5 2023'}, amount:3600000, status:'released', releasedAt:new Date(now-10*DAY).toISOString(), createdAt:new Date(now-20*DAY).toISOString(), history:[{action:'created', at:new Date(now-20*DAY).toISOString()},{action:'funded', at:new Date(now-19*DAY).toISOString()},{action:'buyer_requested_release', at:new Date(now-11*DAY).toISOString()},{action:'released', at:new Date(now-10*DAY).toISOString()}] },
   { _id:'esc-3', buyer:{_id:'other-buyer-2',name:'John Ochieng'}, seller:ADMIN_DEALER, car:{title:'Mercedes-Benz GLE 350d 2022'}, amount:12000000, status:'released', releasedAt:new Date(now-5*DAY).toISOString(), createdAt:new Date(now-15*DAY).toISOString(), history:[{action:'created', at:new Date(now-15*DAY).toISOString()},{action:'funded', at:new Date(now-14*DAY).toISOString()},{action:'buyer_requested_release', at:new Date(now-6*DAY).toISOString()},{action:'released', at:new Date(now-5*DAY).toISOString()}] },
   { _id:'esc-4', buyer:DEMO_USERS.buyer, seller:ADMIN_DEALER, car:{title:'BMW X5 M Sport 2020'}, amount:4100000, status:'pending', createdAt:new Date(now-0.1*DAY).toISOString(), history:[{action:'created', at:new Date(now-0.1*DAY).toISOString()}] },
-  { _id:'esc-5', buyer:{_id:'other-buyer-3',name:'Kevin Mwangi'}, seller:DEMO_USERS.broker, car:{title:'Mazda Demio 2019'}, amount:890000, status:'held', createdAt:new Date(now-0.5*DAY).toISOString(), history:[{action:'created', at:new Date(now-0.5*DAY).toISOString()},{action:'funded', at:new Date(now-0.4*DAY).toISOString()}] },
-  { _id:'esc-6', buyer:DEMO_USERS.buyer, seller:DEMO_USERS.broker, car:{title:'Toyota Vitz 2020'}, amount:1250000, status:'released', releasedAt:new Date(now-15*DAY).toISOString(), createdAt:new Date(now-25*DAY).toISOString(), history:[{action:'created', at:new Date(now-25*DAY).toISOString()},{action:'funded', at:new Date(now-24*DAY).toISOString()},{action:'buyer_requested_release', at:new Date(now-16*DAY).toISOString()},{action:'released', at:new Date(now-15*DAY).toISOString()}] },
+  { _id:'esc-5', buyer:{_id:'other-buyer-3',name:'Kevin Mwangi'}, seller:DEMO_USERS.individual_seller, car:{title:'Mazda Demio 2019'}, amount:890000, status:'held', createdAt:new Date(now-0.5*DAY).toISOString(), history:[{action:'created', at:new Date(now-0.5*DAY).toISOString()},{action:'funded', at:new Date(now-0.4*DAY).toISOString()}] },
+  { _id:'esc-6', buyer:DEMO_USERS.buyer, seller:DEMO_USERS.individual_seller, car:{title:'Toyota Vitz 2020'}, amount:1250000, status:'released', releasedAt:new Date(now-15*DAY).toISOString(), createdAt:new Date(now-25*DAY).toISOString(), history:[{action:'created', at:new Date(now-25*DAY).toISOString()},{action:'funded', at:new Date(now-24*DAY).toISOString()},{action:'buyer_requested_release', at:new Date(now-16*DAY).toISOString()},{action:'released', at:new Date(now-15*DAY).toISOString()}] },
 ];
 
 export const DEMO_NOTIFICATIONS = [
@@ -272,7 +272,7 @@ export const DEMO_ADMIN_USERS = [
   { _id:'admin-target-3', name:'Sarah Chebet', email:'sarah@example.com', role:'dealer', isBanned:true, approved:true, businessName:'Chebet Motors', createdAt:new Date(now-60*DAY).toISOString(), lastLogin:new Date(now-10*DAY).toISOString() },
   { _id:'admin-target-4', name:'Michael Kiplagat', email:'michael@example.com', role:'user', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-7*DAY).toISOString() },
   { _id:'demo-dealer-1', name:'Peter Kamau', email:'dealer@demo.com', role:'dealer', isBanned:false, approved:true, businessName:'Nairobi Auto Hub Ltd', createdAt:new Date(now-180*DAY).toISOString(), lastLogin:new Date(now-0.1*DAY).toISOString() },
-  { _id:'demo-broker-1', name:'Grace Wanjiku', email:'broker@demo.com', role:'broker', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-0.3*DAY).toISOString() },
+  { _id:'demo-individual-seller-1', name:'Grace Wanjiku', email:'individual@demo.com', role:'individual_seller', isBanned:false, approved:true, createdAt:new Date(now-90*DAY).toISOString(), lastLogin:new Date(now-0.3*DAY).toISOString() },
   { _id:DEMO_USERS.buyer._id, name:'James Kariuki', email:'buyer@demo.com', role:'user', isBanned:false, approved:true, createdAt:new Date(now-30*DAY).toISOString(), lastLogin:new Date(now-0.2*DAY).toISOString() },
 ];
 
@@ -389,5 +389,5 @@ export function filterDemoCars(filters = {}) {
 }
 
 export function getDemoCar(id) {
-  return _cars.find(c => c._id === id) || null;
+  return _cars.find(c => c._id === id) || _cars.find(c => id?.endsWith(c._id.replace('car-', ''))) || null;
 }

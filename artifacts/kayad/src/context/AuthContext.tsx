@@ -20,8 +20,11 @@ interface AuthContextValue {
   isAdmin: boolean;
   isDealer: boolean;
   isSuperAdmin: boolean;
+<<<<<<< HEAD
   /** @deprecated broker role removed — kept as false for backward compat */
   isBroker: boolean;
+=======
+>>>>>>> 8112d5a9517f6fafed2de467c613792e6961722f
   isSeller: boolean;
   isMarketing: boolean;
   isTechSupport: boolean;
@@ -95,7 +98,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAdmin       = STAFF_ROLES.includes(user?.role as any);
   const isDealer      = user?.role === 'dealer';
+<<<<<<< HEAD
   const isBroker      = false; // broker role removed
+=======
+>>>>>>> 8112d5a9517f6fafed2de467c613792e6961722f
   const isSeller      = isSellerRole(user?.role);
   const isSuperAdmin  = user?.role === 'superadmin';
   const isMarketing   = user?.role === 'marketing';
@@ -114,11 +120,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo(() => ({
     user, loading,
     isAuth, isEmailVerified,
-    isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
+    isAdmin, isDealer, isSuperAdmin, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
     login, register, logout, setUser,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>

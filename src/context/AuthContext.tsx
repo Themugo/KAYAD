@@ -20,7 +20,7 @@ interface AuthContextValue {
   isAdmin: boolean;
   isDealer: boolean;
   isSuperAdmin: boolean;
-  isBroker: boolean;
+
   isSeller: boolean;
   isMarketing: boolean;
   isTechSupport: boolean;
@@ -94,7 +94,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAdmin       = STAFF_ROLES.includes(user?.role as any);
   const isDealer      = user?.role === 'dealer';
-  const isBroker      = user?.role === 'broker';
   const isSeller      = isSellerRole(user?.role);
   const isSuperAdmin  = user?.role === 'superadmin';
   const isMarketing   = user?.role === 'marketing';
@@ -113,11 +112,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value = useMemo(() => ({
     user, loading,
     isAuth, isEmailVerified,
-    isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
+    isAdmin, isDealer, isSuperAdmin, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
     login, register, logout, setUser,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>
@@ -154,7 +153,7 @@ export function RequireDealer({ children }: RequireAuthProps) {
 }
 
 export function RequireSeller({ children }: RequireAuthProps) {
-  const { isSeller, user, loading } = useAuth();
+  const { isSeller, loading } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isSeller) return <Navigate to="/" replace />;
   return children;
@@ -205,6 +204,11 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/reviews':        ['superadmin', 'admin', 'moderator'],
   '/admin/referrals':      ['superadmin', 'admin'],
   '/admin/chats':          ['superadmin', 'admin', 'moderator'],
+  '/admin/operations-dashboard': ['superadmin', 'admin'],
+  '/admin/disputes':             ['superadmin', 'admin', 'escrow_officer'],
+  '/admin/auction-integrity':    ['superadmin', 'admin'],
+  '/admin/dealer-verifications': ['superadmin', 'admin'],
+  '/admin/inspector-applications': ['superadmin', 'admin'],
 };
 
 interface RequireAdminPageProps extends RequireAuthProps {
@@ -219,12 +223,14 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
   if (!isAdmin) return <Navigate to="/" replace />;
 
   const path = loc.pathname;
+  // For dynamic routes (e.g. /admin/disputes/:id), try parent path
+  const parentPath = '/' + path.split('/').slice(1, -1).join('/');
 
   // Superadmin sees everything
   if (user?.role === 'superadmin') return children;
 
   // Superadmin-only pages are never unlocked by a granted permission
-  if (SUPERADMIN_ONLY.has(path)) {
+  if (SUPERADMIN_ONLY.has(path) || SUPERADMIN_ONLY.has(parentPath)) {
     return (
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>
         <div style={{ fontSize:'4rem' }}>🔒</div>
@@ -236,8 +242,9 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
 
   // Access granted if: the role is in the page's allow-list, OR the user has been
   // assigned the permission that unlocks this page.
-  const allowedRoles = roles || ADMIN_PAGE_ROLES[path];
-  const requiredPerm = PAGE_PERMISSIONS[path];
+  // Fall back to parent path for dynamic routes like /admin/disputes/:id
+  const allowedRoles = roles || ADMIN_PAGE_ROLES[path] || ADMIN_PAGE_ROLES[parentPath];
+  const requiredPerm = PAGE_PERMISSIONS[path] || PAGE_PERMISSIONS[parentPath];
   const roleAllows = !allowedRoles || allowedRoles.includes(user?.role || '');
   const permAllows = requiredPerm ? can(requiredPerm) : false;
 

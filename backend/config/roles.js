@@ -8,8 +8,7 @@
 export const ROLE_HIERARCHY = [
   "user", // 0 — basic authenticated user
   "individual_seller", // 1 — private party seller
-  "broker", // 2 — vehicle broker
-  "dealer", // 3 — registered dealer
+  "dealer", // 2 — registered dealer
   "ghost_checker", // 4 — can inspect/ghost-check vehicles
   "moderator", // 5 — content moderator
   "ad_manager", // 6 — manages ads & placements
@@ -40,7 +39,7 @@ export const STAFF_ROLES = [
 ];
 
 // ─── Seller Roles (can list cars for sale) ──────────────────
-export const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
+export const SELLER_ROLES = ["dealer", "individual_seller"];
 
 // ─── Dealer Team Sub-Roles (inside a dealer org) ─────────────
 export const TEAM_ROLES = {
@@ -73,7 +72,6 @@ export const PERM = {
 export const ROLE_PERMISSIONS = {
   user: [],
   individual_seller: [PERM.MANAGE_CARS],
-  broker: [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   dealer: [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   ghost_checker: [PERM.MANAGE_INSPECTIONS, PERM.VIEW_ANALYTICS],
   moderator: [PERM.MANAGE_MODERATION, PERM.VIEW_LOGS],

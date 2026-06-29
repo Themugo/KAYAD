@@ -146,7 +146,6 @@ router.get(
       pendingReviews,
       activeAlerts,
       individualSellers,
-      brokers,
       demoUsers,
       carsSold,
       pendingReports,
@@ -172,7 +171,6 @@ router.get(
       Bid.countDocuments({ status: "pending" }),
       AdminAlert.countDocuments({ read: false }),
       User.countDocuments({ role: "individual_seller" }),
-      User.countDocuments({ role: "broker" }),
       User.countDocuments({ isDemo: true }),
       Car.countDocuments({ sold: true }),
       Contact.countDocuments({ read: false }),
@@ -205,7 +203,6 @@ router.get(
         pendingReviews,
         activeAlerts,
         individualSellers,
-        brokers,
         demoUsers,
         carsSold,
         pendingReports,
@@ -232,10 +229,10 @@ router.get(
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
     if (req.query.seller === "true") {
-      filter.role = { $in: ["dealer", "broker", "individual_seller"] };
+      filter.role = { $in: ["dealer", "individual_seller"] };
     }
     if (req.query.pendingApproval === "true") {
-      filter.role = { $in: ["dealer", "broker", "individual_seller"] };
+      filter.role = { $in: ["dealer", "individual_seller"] };
       filter.approved = false;
     }
     if (req.query.isDemo === "true") filter.isDemo = true;
@@ -1414,8 +1411,8 @@ router.post(
 
     const filter =
       dealerIds?.length > 0
-        ? { _id: { $in: dealerIds }, role: { $in: ["dealer", "broker", "individual_seller"] } }
-        : { role: { $in: ["dealer", "broker", "individual_seller"] }, approved: true };
+        ? { _id: { $in: dealerIds }, role: { $in: ["dealer", "individual_seller"] } }
+        : { role: { $in: ["dealer", "individual_seller"] }, approved: true };
 
     const result = await User.updateMany(filter, {
       $set: {

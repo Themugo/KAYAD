@@ -11,7 +11,7 @@ export const STAFF_ROLES = [
   'ghost_checker',
 ] as const;
 
-export const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'] as const;
+export const SELLER_ROLES = ['dealer', 'individual_seller'] as const;
 
 const AUTH_PATHS = new Set([
   '/login',
@@ -54,8 +54,7 @@ export function getPostAuthPath(user: User | undefined, fallback = '/'): string 
   if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
-    if (user?.status !== 'approved') return safeFallback;
-    if (user?.role === 'broker') return '/dealer'; // Broker uses same dashboard as dealer
+    if (user?.status !== 'approved') return '/dealer/onboarding';
     return '/dealer';
   }
   if (user?.role === 'user') {

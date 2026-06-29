@@ -160,7 +160,7 @@ const Authed = ({ children }) => (
   </RequireAuth>
 );
 
-/** Seller area (dealer / broker / individual_seller). */
+/** Seller area (dealer / individual_seller). */
 const Dealer = ({ children }) => (
   <RequireAuth>
     <RequireSeller>

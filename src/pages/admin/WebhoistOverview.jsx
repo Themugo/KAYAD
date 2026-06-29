@@ -42,8 +42,7 @@ export default function WebhoistOverview() {
   const composition = [
     { name: 'Dealers',            count: s.totalDealers ?? 0,      color: 'var(--gold)' },
     { name: 'Individual Sellers', count: s.individualSellers ?? 0, color: '#3b82f6' },
-    { name: 'Brokers',            count: s.brokers ?? 0,           color: '#a855f7' },
-    { name: 'Buyers & Others',    count: Math.max((s.totalUsers ?? 0) - ((s.totalDealers ?? 0) + (s.individualSellers ?? 0) + (s.brokers ?? 0)), 0), color: '#22c55e' },
+    { name: 'Buyers & Others',    count: Math.max((s.totalUsers ?? 0) - ((s.totalDealers ?? 0) + (s.individualSellers ?? 0)), 0), color: '#22c55e' },
   ];
 
   const glance = [

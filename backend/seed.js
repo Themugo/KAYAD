@@ -475,7 +475,7 @@ export async function reseed() {
       name: "Demo Seller",
       email: "seller@kayad.space",
       password: process.env.SEED_SELLER_PW || devFallback("SEED_SELLER_PW"),
-      role: "broker",
+      role: "individual_seller",
       approved: true,
       businessName: "Private Seller",
       mustChangePassword: true,

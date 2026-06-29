@@ -131,6 +131,10 @@ escrowSchema.methods.transitionTo = async function (nextStatus, userId, role, op
     throw new Error(`Escrow is in terminal state ${this.status}; no transitions allowed`);
   }
 
+  if (options.idempotencyKey && this.lastActionKey === options.idempotencyKey) {
+    return this;
+  }
+
   const validation = validateTransition(this.status, nextStatus, role, this);
   if (!validation.allowed) {
     throw new Error(validation.reason);
@@ -266,6 +270,18 @@ escrowSchema.methods.openDispute = async function (userId, reason, req) {
 };
 
 escrowSchema.methods.autoRelease = async function (req) {
+  if (this.status === STATES.DELIVERED) {
+    if (!this.deliveryConfirmedAt) return null;
+    const deliverCutoff = new Date(Date.now() - 3 * 86_400_000);
+    if (this.deliveryConfirmedAt > deliverCutoff) return null;
+    this.autoReleased = true;
+    return this.transitionTo(STATES.RELEASED, null, "system", {
+      req,
+      autoReleased: true,
+      source: "cron",
+      label: "Auto-released after delivery — buyer did not dispute",
+    });
+  }
   if (this.status !== STATES.FUNDED && this.status !== STATES.VEHICLE_CONFIRMED) return null;
   if (this.autoReleaseEligibleAt && new Date() < this.autoReleaseEligibleAt) return null;
   this.autoReleased = true;

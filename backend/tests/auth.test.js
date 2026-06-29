@@ -196,45 +196,6 @@ describeWithDb("🔑 Authentication", () => {
   });
 
   // =============================
-  // 🤝 BROKER LOGIN TESTS
-  // =============================
-  test("POST /api/auth/register — creates broker with approved status", async () => {
-    const brokerUser = {
-      name: "Test Broker",
-      email: `broker-${Date.now()}@gari.test`,
-      password: "Test@12345",
-      role: "broker",
-      location: "Nairobi",
-    };
-
-    const res = await request(app).post("/api/auth/register").send(brokerUser).expect(201);
-    expect(res.body.success).toBe(true);
-    expect(res.body.user.role).toBe("broker");
-    expect(res.body.user.status).toBe("approved");
-  });
-
-  test("POST /api/auth/login — broker with approved status can login", async () => {
-    const brokerUser = {
-      name: "Approved Broker",
-      email: `approved-broker-${Date.now()}@gari.test`,
-      password: "Test@12345",
-      role: "broker",
-      location: "Nairobi",
-    };
-
-    await request(app).post("/api/auth/register").send(brokerUser).expect(201);
-
-    const loginRes = await request(app)
-      .post("/api/auth/login")
-      .send({ email: brokerUser.email, password: brokerUser.password })
-      .expect(200);
-
-    expect(loginRes.body.success).toBe(true);
-    expect(loginRes.body.user.role).toBe("broker");
-    expect(loginRes.body.user.status).toBe("approved");
-  });
-
-  // =============================
   // 👑 ADMIN LOGIN TESTS
   // =============================
   test("POST /api/auth/register — creates admin user in test mode", async () => {

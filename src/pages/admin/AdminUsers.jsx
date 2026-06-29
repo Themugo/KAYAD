@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const ROLE_BADGE  = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red' };
 const ROLE_ICON   = { user: '👤', dealer: '🏪', admin: '🔑' };
-const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'];
+const SELLER_ROLES = ['dealer', 'individual_seller'];
 
 export default function AdminUsers() {
   const { toast } = useToast();

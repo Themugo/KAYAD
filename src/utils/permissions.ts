@@ -29,7 +29,6 @@ export type Permission = typeof PERM[keyof typeof PERM];
 export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   user:               [],
   individual_seller:  [PERM.MANAGE_CARS],
-  broker:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   dealer:             [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS],
   ghost_checker:      [PERM.MANAGE_INSPECTIONS, PERM.VIEW_ANALYTICS],
   moderator:          [PERM.MANAGE_MODERATION, PERM.VIEW_LOGS],
@@ -125,7 +124,11 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/inspector-applications": PERM.MANAGE_INSPECTIONS,
   "/admin/security-log":  PERM.VIEW_LOGS,
   "/admin/ads":           PERM.MANAGE_ADS,
-  "/admin/settings":      PERM.MANAGE_PLATFORM,
+  "/admin/settings":              PERM.MANAGE_PLATFORM,
+  "/admin/operations-dashboard":  PERM.VIEW_ANALYTICS,
+  "/admin/disputes":              PERM.MANAGE_ESCROW,
+  "/admin/auction-integrity":     PERM.MANAGE_AUCTIONS,
+  "/admin/dealer-verifications":  PERM.MANAGE_STAFF,
 };
 
 // Superadmin-only pages — never unlocked by a granted permission.

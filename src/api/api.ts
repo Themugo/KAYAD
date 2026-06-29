@@ -557,14 +557,7 @@ const _adminAPI = {
   // Branding / upload logo
   uploadLogo: (formData: FormData) => api.post('/admin/upload-logo', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
 
-  // Dispute resolution (legacy aliases — kept for adminAPI backward compat)
-  disputeGet:      (id: string)          => api.get(`/disputes/${id}`).then(unwrap),
-  disputeResolve:  (id: string, body: any)    => api.post(`/disputes/${id}/resolve`, body).then(unwrap),
-  disputeAddNote:  (id: string, body: any)    => api.post(`/disputes/${id}/notes`, body).then(unwrap),
-  disputeGetAll:   (params: any)      => api.get('/disputes', { params }).then(unwrap),
-  disputeStats:    ()            => api.get('/disputes/stats').then(unwrap),
-
-    // Fraud analytics
+  // Fraud analytics
   fraudAnalytics:    ()          => api.get('/fraud/analytics').then(unwrap),
   fraudGetAll:       (params: any)    => api.get('/fraud/all', { params }).then(unwrap),
   fraudUpdateStatus: (id: string, body: any)  => api.put(`/fraud/${id}/status`, body).then(unwrap),
@@ -686,8 +679,6 @@ const _savedSearchAPI = {
   create: (body: any)         => api.post('/saved-searches', body).then(unwrap),
   update: (id: string, body: any)     => api.put(`/saved-searches/${id}`, body).then(unwrap),
   remove: (id: string)           => api.delete(`/saved-searches/${id}`).then(unwrap),
-  // Backward-compatible aliases used by some pages.
-  delete: (id: string)           => api.delete(`/saved-searches/${id}`).then(unwrap),
   toggleAlerts: async (id: string, enabled?: boolean) => {
     const body = enabled === undefined ? {} : { notifyOnNewMatch: enabled };
     return api.put(`/saved-searches/${id}`, body).then(unwrap);

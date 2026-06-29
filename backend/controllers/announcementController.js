@@ -4,7 +4,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 import AuditLog from "../models/AuditLog.js";
 
-const SELLER_ROLES = ["dealer", "broker", "individual_seller"];
+const SELLER_ROLES = ["dealer", "individual_seller"];
 const BATCH_SIZE = 1000;
 
 export const createAnnouncement = async (req, res) => {

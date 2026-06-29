@@ -40,7 +40,7 @@ export default function DealerDashboard() {
   const [escrowLoading, setEscrowLoading] = useState(false);
   const [healthData, setHealthData] = useState(null);
 
-  const canManageDemoCars = ['dealer', 'broker', 'individual_seller'].includes(user?.role);
+  const canManageDemoCars = ['dealer', 'individual_seller'].includes(user?.role);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 

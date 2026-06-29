@@ -257,7 +257,7 @@ export const refundEscrow = async (req, res) => {
   try {
     if (!isValidId(req.params.id)) return res.status(400).json({ success: false, message: "Invalid escrow ID" });
 
-    const { reason, resolution } = req.body;
+    const { reason } = req.body;
     if (!reason || reason.length < 10) {
       return res.status(400).json({ success: false, message: "A detailed refund reason (min 10 chars) is required" });
     }
