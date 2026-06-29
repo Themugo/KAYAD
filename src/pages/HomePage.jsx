@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
+import AdvertisementBanner from '../components/AdvertisementBanner';
 import { useState, useEffect } from 'react';
 import { carsAPI, enableDemoMode } from '../api/api';
 import { useToast } from '../context/ToastContext';
@@ -13,6 +14,12 @@ import HomeHero from './home/components/HomeHero';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
 import HomeFeaturePillars from './home/components/HomeFeaturePillars';
 import HomeCtaSection from './home/components/HomeCtaSection';
+import DealerSpotlight from './home/components/DealerSpotlight';
+import PrivateSellerSpotlight from './home/components/PrivateSellerSpotlight';
+import FeaturedDealers from './home/components/FeaturedDealers';
+import VehicleCategories from './home/components/VehicleCategories';
+import Testimonials from './home/components/Testimonials';
+import Partners from './home/components/Partners';
 
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
@@ -24,6 +31,8 @@ export default function HomePage() {
   const [liveAuctions, setLiveAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
+  const [featuredDealers, setFeaturedDealers] = useState([]);
+  const [topSellers, setTopSellers] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,7 +100,20 @@ export default function HomePage() {
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+        {/* 1. Hero */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
+
+        {/* 2. Sponsor Banner Area */}
+        <div className="max-w-[1400px] mx-auto px-7 py-6">
+          <AdvertisementBanner
+            type="image"
+            imageUrl="https://via.placeholder.com/1400x120?text=Sponsor+Banner"
+            position="horizontal"
+            size="large"
+            linkUrl="/advertising"
+            altText="Sponsor Banner"
+          />
+        </div>
 
         <HomeLiveTicker count={liveCount} />
 
@@ -106,9 +128,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
-
-        <section style={{ padding: liveAuctions.length > 0 ? '24px 0' : '32px 0 24px' }}>
+        {/* 3. Featured Inventory */}
+        <section style={{ padding: '32px 0 24px' }}>
           <div className="max-w-[1400px] mx-auto px-7">
             <div className="flex items-end justify-between mb-4">
               <div>
@@ -146,26 +167,64 @@ export default function HomePage() {
           </div>
         </section>
 
-        {!loading && recent.length > 0 && (
-          <section className="pb-12 animate-[fadeIn_0.6s_ease]">
-            <div className="max-w-[1400px] mx-auto px-7">
-              <div className="flex items-end justify-between mb-4">
-                <div>
-                  <div className="text-[8px] text-white/18 font-bold tracking-[0.18em] uppercase mb-1">The Gallery</div>
-                  <h2 className="font-display font-black italic text-[clamp(1.1rem,2vw,1.5rem)] text-white leading-none m-0">
-                    Recent <span className="text-white/35">Arrivals</span>
-                  </h2>
-                </div>
-                <Link to="/showroom" className="text-[10px] text-white/30 font-bold no-underline transition-colors duration-200 hover:text-white/60"
-                >Browse All →</Link>
-              </div>
-              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
-                {recent.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
-              </div>
-            </div>
-          </section>
-        )}
+        {/* 4. Live Auctions */}
+        {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 
+        {/* 5. Dealer Spotlight */}
+        <DealerSpotlight dealers={featuredDealers.slice(0, 3)} />
+
+        {/* 6. Private Seller Spotlight */}
+        <PrivateSellerSpotlight sellers={topSellers.slice(0, 3)} />
+
+        {/* 7. Advertisement Zone A */}
+        <div className="max-w-[1400px] mx-auto px-7 py-6">
+          <AdvertisementBanner
+            type="image"
+            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+A"
+            position="horizontal"
+            size="large"
+            linkUrl="/advertising"
+            altText="Advertisement Zone A"
+          />
+        </div>
+
+        {/* 8. Featured Dealers */}
+        <FeaturedDealers dealers={featuredDealers.slice(0, 4)} />
+
+        {/* 9. Advertisement Zone B */}
+        <div className="max-w-[1400px] mx-auto px-7 py-6">
+          <AdvertisementBanner
+            type="image"
+            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+B"
+            position="horizontal"
+            size="large"
+            linkUrl="/advertising"
+            altText="Advertisement Zone B"
+          />
+        </div>
+
+        {/* 10. Vehicle Categories */}
+        <VehicleCategories />
+
+        {/* 11. Advertisement Zone C */}
+        <div className="max-w-[1400px] mx-auto px-7 py-6">
+          <AdvertisementBanner
+            type="image"
+            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+C"
+            position="horizontal"
+            size="large"
+            linkUrl="/advertising"
+            altText="Advertisement Zone C"
+          />
+        </div>
+
+        {/* 12. Testimonials */}
+        <Testimonials />
+
+        {/* 13. Partners */}
+        <Partners />
+
+        {/* 14. Feature Pillars & CTA */}
         <HomeFeaturePillars />
         <HomeCtaSection isAuth={isAuth} />
       </div>
