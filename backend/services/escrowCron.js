@@ -38,12 +38,17 @@ const notify = async (userId, title, message, type = "escrow") => {
 // ── AUTO-RELEASE ────────────────────────────────────────────
 // Finds escrows stuck in funded/vehicle_confirmed beyond the
 // auto-release window and transitions them to RELEASED.
+// Also handles DELIVERED escrows where buyer hasn't disputed
+// within 3 days of delivery confirmation.
 const runAutoRelease = async () => {
   const cutoff = new Date(Date.now() - RELEASE_DAYS * 86_400_000);
+  const deliverCutoff = new Date(Date.now() - 3 * 86_400_000);
 
   const stale = await Escrow.find({
-    status: { $in: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED] },
-    createdAt: { $lte: cutoff },
+    $or: [
+      { status: { $in: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED] }, createdAt: { $lte: cutoff } },
+      { status: STATES.DELIVERED, deliveryConfirmedAt: { $lte: deliverCutoff } },
+    ],
   }).populate("buyer seller car");
 
   if (stale.length === 0) return;
@@ -78,11 +83,13 @@ const runAutoRelease = async () => {
 // Warns parties when escrow is approaching auto-release.
 const runDisputeWarnings = async () => {
   const warningDate = new Date(Date.now() - (RELEASE_DAYS - 2) * 86_400_000);
+  const deliverWarningDate = new Date(Date.now() - 1 * 86_400_000);
 
   const approaching = await Escrow.find({
-    status: { $in: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED] },
-    createdAt: { $lte: warningDate },
-    warningSent: { $ne: true },
+    $or: [
+      { status: { $in: [STATES.FUNDED, STATES.VEHICLE_CONFIRMED] }, createdAt: { $lte: warningDate }, warningSent: { $ne: true } },
+      { status: STATES.DELIVERED, deliveryConfirmedAt: { $lte: deliverWarningDate }, warningSent: { $ne: true } },
+    ],
   }).populate("buyer seller car");
 
   for (const escrow of approaching) {
@@ -90,20 +97,35 @@ const runDisputeWarnings = async () => {
       await Escrow.findByIdAndUpdate(escrow._id, { warningSent: true });
       const carTitle = escrow.car?.title || "a vehicle";
 
-      if (escrow.buyer?._id) {
-        await notify(escrow.buyer._id, "⚠️ Escrow Expiring Soon",
-          `Your escrow for ${carTitle} will auto-release in 2 days. Have you inspected the vehicle? Contact admin if you have an issue.`);
+      if (escrow.status === STATES.DELIVERED) {
+        if (escrow.buyer?._id) {
+          await notify(escrow.buyer._id, "⚠️ Escrow Auto-Release Tomorrow",
+            `Delivery for ${carTitle} was confirmed. Funds will auto-release tomorrow unless you raise a dispute.`);
+        }
+        if (escrow.seller?._id) {
+          await notify(escrow.seller._id, "⚠️ Escrow Auto-Release Tomorrow",
+            `Funds for ${carTitle} will auto-release tomorrow.`);
+        }
+        getIO()?.to("admins").emit("notification", {
+          title: "Escrow Approaching Auto-Release (DELIVERED)",
+          message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (KES ${escrow.amount}) was delivered and will auto-release tomorrow.`,
+          type: "escrow",
+        });
+      } else {
+        if (escrow.buyer?._id) {
+          await notify(escrow.buyer._id, "⚠️ Escrow Expiring Soon",
+            `Your escrow for ${carTitle} will auto-release in 2 days. Have you inspected the vehicle? Contact admin if you have an issue.`);
+        }
+        if (escrow.seller?._id) {
+          await notify(escrow.seller._id, "⚠️ Escrow Expiring Soon",
+            `Escrow for ${carTitle} will auto-release in 2 days. Ensure delivery is confirmed.`);
+        }
+        getIO()?.to("admins").emit("notification", {
+          title: "Escrow Approaching Auto-Release",
+          message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (KES ${escrow.amount}) releases in 2 days.`,
+          type: "escrow",
+        });
       }
-      if (escrow.seller?._id) {
-        await notify(escrow.seller._id, "⚠️ Escrow Expiring Soon",
-          `Escrow for ${carTitle} will auto-release in 2 days. Ensure delivery is confirmed.`);
-      }
-
-      getIO()?.to("admins").emit("notification", {
-        title: "Escrow Approaching Auto-Release",
-        message: `Escrow #${escrow._id.toString().slice(-8)} for ${carTitle} (KES ${escrow.amount}) releases in 2 days.`,
-        type: "escrow",
-      });
 
       logInfo("Warning sent", { escrowId: escrow._id });
     } catch (err) {

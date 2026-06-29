@@ -37,9 +37,14 @@ const extractOperationType = (path) => {
   if (path.includes("/escrow") && path.includes("/release")) return "escrow_release";
   if (path.includes("/escrow") && path.includes("/refund")) return "escrow_refund";
   if (path.includes("/escrow") && path.includes("/confirm")) return "escrow_confirm_delivery";
+  if (path.includes("/escrow") && path.includes("/dispute")) return "escrow_dispute";
   if (path.includes("/escrow-vault") && path.includes("/release")) return "escrow_vault_release";
   if (path.includes("/escrow-vault") && path.includes("/funded")) return "escrow_vault_funded";
   if (path.includes("/escrow-vault") && path.includes("/refund")) return "escrow_vault_refund";
+  if (path.includes("/escrow-vault") && path.includes("/init")) return "escrow_vault_init";
+  if (path.includes("/escrow-vault") && path.includes("/inspection-complete")) return "escrow_vault_inspection";
+  if (path.includes("/escrow-vault") && path.includes("/request-otp")) return "escrow_vault_request_otp";
+  if (path.includes("/escrow-vault") && path.includes("/admin-confirm-funding")) return "escrow_vault_admin_confirm";
   if (path.includes("/bid")) return "bid";
   if (path.includes("/auction")) return "auction_end";
   if (path.includes("/verification")) {
@@ -120,6 +125,24 @@ export const idempotencyCheck = async (req, res, next) => {
       const windowMs = 5000;
       const windowStart = Math.floor(Date.now() / windowMs) * windowMs;
       idempotencyKey = `bid_${userId}_${carId}_${amount}_${windowStart}`;
+    } else if (operationType === "escrow_vault_init") {
+      const carId = req.params?.id || "";
+      const buyerId = req.user?.id || "";
+      if (carId && buyerId) {
+        idempotencyKey = `vault_init_${buyerId}_${carId}`;
+      }
+    } else if (operationType === "escrow_dispute") {
+      const escrowId = req.params?.id || "";
+      const userId = req.user?.id || "";
+      const reason = req.body?.reason || "";
+      const reasonHash = crypto.createHash("sha256").update(reason).digest("hex").slice(0, 8);
+      idempotencyKey = `escrow_dispute_${escrowId}_${userId}_${reasonHash}`;
+    } else if (operationType === "escrow_vault_release") {
+      const vaultId = req.params?.id || "";
+      const otp = req.body?.otp || "";
+      if (vaultId && otp) {
+        idempotencyKey = `vault_release_${vaultId}_${crypto.createHash("sha256").update(otp).digest("hex").slice(0, 12)}`;
+      }
     }
   }
 

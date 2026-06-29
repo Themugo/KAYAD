@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import Car from "../models/Car.js";
 import EscrowVault from "../models/EscrowVault.js";
 import { sendOTP, verifyOTP } from "../services/otpService.js";
@@ -273,6 +273,11 @@ export const releaseWithOtp = async (req, res) => {
     const vault = await EscrowVault.findById(id).populate("buyer seller car");
     if (!vault) return res.status(404).json({ success: false, message: "Vault not found" });
 
+    const idempotencyKey = req.idempotencyKey;
+    if (idempotencyKey && vault.lastActionKey === idempotencyKey) {
+      return res.json({ success: true, message: "Already released", vault });
+    }
+
     if (vault.buyer._id.toString() !== userId) {
       return res.status(403).json({ success: false, message: "Only the buyer can release funds" });
     }
@@ -292,7 +297,9 @@ export const releaseWithOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "OTP expired. Request a new one." });
     }
 
-    if (vault.releaseOtp !== hashOtp(otp)) {
+    const otpHash = hashOtp(otp);
+    const storedHash = vault.releaseOtp || "";
+    if (storedHash.length !== otpHash.length || !crypto.timingSafeEqual(Buffer.from(storedHash), Buffer.from(otpHash))) {
       vault.otpAttempts += 1;
       await vault.save();
       return res.status(400).json({ success: false, message: "Invalid OTP" });
@@ -302,6 +309,7 @@ export const releaseWithOtp = async (req, res) => {
     vault.releasedAt = new Date();
     vault.releaseOtp = undefined;
     vault.otpExpiry = undefined;
+    if (idempotencyKey) vault.lastActionKey = idempotencyKey;
     addHistory(vault, "Funds released to seller by buyer OTP confirmation", userId);
     await vault.save();
 

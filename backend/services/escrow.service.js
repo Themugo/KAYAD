@@ -110,6 +110,10 @@ export const confirmVehicle = async (escrowId, userId, { idempotencyKey } = {}) 
     const escrow = await Escrow.findById(escrowId).session(session);
     if (!escrow) throw new Error("Escrow not found");
 
+    if (String(escrow.buyer) !== userId) {
+      throw new Error("Only the buyer can confirm vehicle");
+    }
+
     if (escrow.lastActionKey === idempotencyKey) {
       await session.commitTransaction();
       session.endSession();

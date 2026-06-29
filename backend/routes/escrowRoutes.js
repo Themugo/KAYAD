@@ -7,7 +7,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
-import { protect, adminOnly, authorize } from "../middleware/auth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateResponse, escrowResponseSchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
@@ -165,6 +165,7 @@ router.post(
 router.post(
   "/:id/dispute",
   protect,
+  idempotencyCheck,
   validateObjectId,
   asyncHandler(disputeEscrow),
 );
