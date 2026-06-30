@@ -79,25 +79,48 @@ export default function DisputeDetailPage() {
   const timeline = dispute.timeline || [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <Link to={isAdmin ? '/admin/disputes' : '/disputes'} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 mb-4">
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 28px', background: '#0a0a0a', minHeight: '100vh' }}>
+      {/* Back Link */}
+      <Link to={isAdmin ? '/admin/disputes' : '/disputes'} style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13,
+        color: 'rgba(255,255,255,0.4)', textDecoration: 'none', marginBottom: 20,
+        transition: 'color 0.2s',
+      }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--gold)'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+      >
         <ArrowLeft size={14} /> {isAdmin ? 'All Disputes' : 'My Disputes'}
       </Link>
 
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-2xl">{meta.icon}</span>
-            <h1 className="text-xl font-bold text-gray-100">{dispute.title}</h1>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${meta.bg} ${meta.color} ${meta.border}`}>{meta.label}</span>
+      {/* Header */}
+      <div style={{ marginBottom: 32, position: 'relative' }}>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
+          opacity: 0.5,
+        }} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ fontSize: 32 }}>{meta.icon}</span>
+            <div>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.6rem,3vw,2.2rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+                {dispute.title}
+              </h1>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+                {CATEGORY_LABELS[dispute.category] || dispute.category} · Opened {timeAgo(dispute.openedAt)} · <span style={{ color: 'var(--gold)', fontWeight: 600 }}>KES {dispute.amountInDispute?.toLocaleString('en-KE')}</span>
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-500 mt-1">
-            {CATEGORY_LABELS[dispute.category] || dispute.category} · Opened {timeAgo(dispute.openedAt)} · KES {dispute.amountInDispute?.toLocaleString('en-KE')}
-          </p>
+          <span style={{
+            padding: '8px 16px', borderRadius: 9999, fontSize: 12, fontWeight: 700,
+            background: `${meta.color.replace('text-', '')}20`, color: meta.color.replace('text-', ''),
+            border: `1px solid ${meta.color.replace('text-', '')}40`,
+          }}>{meta.label}</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-6 border-b border-gray-700">
+      {/* Tabs */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.08)', overflowX: 'auto' }}>
         {[
           { key: 'overview', label: 'Overview', icon: <Activity size={14} /> },
           { key: 'evidence', label: `Evidence (${evidence.length})`, icon: <Shield size={14} /> },
@@ -108,40 +131,67 @@ export default function DisputeDetailPage() {
           ...(isAdmin && ['under_review', 'mediation', 'appealed'].includes(dispute.status) ? [{ key: 'resolution', label: 'Resolve', icon: <Gavel size={14} /> }] : []),
         ].map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition ${tab === t.key ? 'text-gold border-gold' : 'text-gray-500 border-transparent hover:text-gray-300'}`}>
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px',
+              fontSize: 13, fontWeight: 600, border: 'none', background: 'transparent',
+              color: tab === t.key ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
+              borderBottom: `2px solid ${tab === t.key ? 'var(--gold)' : 'transparent'}`,
+              cursor: 'pointer', transition: 'all 0.2s', whiteSpace: 'nowrap',
+            }}
+            onMouseEnter={e => { if (tab !== t.key) e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+            onMouseLeave={e => { if (tab !== t.key) e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
+          >
             {t.icon} {t.label}
           </button>
         ))}
       </div>
 
       {tab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-gray-200 mb-2">Description</h3>
-              <p className="text-sm text-gray-400 whitespace-pre-wrap">{dispute.description}</p>
+        <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(0, 1fr))' }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', padding: 20, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 12 }}>Description</h3>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>{dispute.description}</p>
             </div>
 
             {dispute.resolution?.decidedAt && (
-              <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-green-400 mb-2">Resolution</h3>
-                <p className="text-sm text-gray-400">Decision: <span className="text-gray-200">{dispute.resolution.decision}</span></p>
-                <p className="text-sm text-gray-400">Amount: <span className="text-gray-200">KES {Number(dispute.resolution.amount || dispute.amountInDispute).toLocaleString('en-KE')}</span></p>
-                {dispute.resolution.reason && <p className="text-sm text-gray-400 mt-1">{dispute.resolution.reason}</p>}
+              <div style={{ borderRadius: 12, border: '1px solid rgba(34,197,94,0.2)', background: 'rgba(34,197,94,0.05)', padding: 20 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#22C55E', marginBottom: 12 }}>Resolution</h3>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Decision: <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>{dispute.resolution.decision}</span></p>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>Amount: <span style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600 }}>KES {Number(dispute.resolution.amount || dispute.amountInDispute).toLocaleString('en-KE')}</span></p>
+                {dispute.resolution.reason && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 8 }}>{dispute.resolution.reason}</p>}
               </div>
             )}
           </div>
 
-          <div className="space-y-4">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 space-y-3">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Details</h3>
-              <div className="space-y-2 text-sm">
-                <div><span className="text-gray-500">Dispute ID</span><p className="text-gray-200 text-xs font-mono">{dispute._id}</p></div>
-                {dispute.escrow && <div><span className="text-gray-500">Escrow Amount</span><p className="text-gray-200">KES {Number(dispute.escrow.amount || dispute.amountInDispute).toLocaleString('en-KE')}</p></div>}
-                <div><span className="text-gray-500">Priority</span><p className="text-gray-200 capitalize">{dispute.priority}</p></div>
-                {dispute.assignedTo && <div><span className="text-gray-500">Assigned To</span><p className="text-gray-200">{dispute.assignedTo.name || dispute.assignedTo}</p></div>}
-                <div><span className="text-gray-500">Opened By</span><p className="text-gray-200">{dispute.openedBy?.name || 'Unknown'}</p></div>
-                <div><span className="text-gray-500">Against</span><p className="text-gray-200">{dispute.openedAgainst?.name || 'Unknown'}</p></div>
+          <div style={{ minWidth: 0, maxWidth: 400 }}>
+            <div style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', padding: 20 }}>
+              <h3 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>Details</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Dispute ID</span>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', fontFamily: 'monospace', margin: 0 }}>{dispute._id}</p>
+                </div>
+                {dispute.escrow && <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Escrow Amount</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>KES {Number(dispute.escrow.amount || dispute.amountInDispute).toLocaleString('en-KE')}</p>
+                </div>}
+                <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Priority</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0, textTransform: 'capitalize' }}>{dispute.priority}</p>
+                </div>
+                {dispute.assignedTo && <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Assigned To</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>{dispute.assignedTo.name || dispute.assignedTo}</p>
+                </div>}
+                <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Opened By</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>{dispute.openedBy?.name || 'Unknown'}</p>
+                </div>
+                <div>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: 4 }}>Against</span>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', margin: 0 }}>{dispute.openedAgainst?.name || 'Unknown'}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -156,21 +206,21 @@ export default function DisputeDetailPage() {
       )}
 
       {tab === 'timeline' && (
-        <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-          <div className="relative pl-6 space-y-4">
+        <div style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', padding: 20 }}>
+          <div style={{ position: 'relative', paddingLeft: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
             {timeline.map((entry, i) => (
-              <div key={i} className="relative">
-                {i < timeline.length - 1 && <div className="absolute left-[-14px] top-4 bottom-[-16px] w-px bg-gray-700" />}
-                <div className="absolute left-[-18px] top-1.5 w-2.5 h-2.5 rounded-full bg-gold border-2 border-gray-900" />
-                <p className="text-sm text-gray-200">{entry.action}</p>
-                <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
+              <div key={i} style={{ position: 'relative' }}>
+                {i < timeline.length - 1 && <div style={{ position: 'absolute', left: -20, top: 8, bottom: -24, width: 2, background: 'rgba(255,255,255,0.08)' }} />}
+                <div style={{ position: 'absolute', left: -24, top: 4, width: 10, height: 10, borderRadius: '50%', background: 'var(--gold)', border: '2px solid #0a0a0a' }} />
+                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.9)', fontWeight: 500, margin: '0 0 4px 0' }}>{entry.action}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
                   {entry.actor && <span>{typeof entry.actor === 'object' ? entry.actor.name : entry.actor}</span>}
                   <span>{timeAgo(entry.at)}</span>
-                  {entry.note && <span className="text-gray-600">— {entry.note}</span>}
+                  {entry.note && <span style={{ color: 'rgba(255,255,255,0.3)' }}>— {entry.note}</span>}
                 </div>
               </div>
             ))}
-            {timeline.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No timeline entries</p>}
+            {timeline.length === 0 && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: '40px 0' }}>No timeline entries</p>}
           </div>
         </div>
       )}

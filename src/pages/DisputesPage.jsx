@@ -63,59 +63,114 @@ export default function DisputesPage() {
   if (loading) return <LoadingPage />;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-gray-100">Disputes</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage your disputes</p>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '40px 28px', background: '#0a0a0a', minHeight: '100vh' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 36, position: 'relative' }}>
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
+          opacity: 0.5,
+        }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Shield size={24} style={{ color: '#0A1628' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
+              Dispute Center
+            </div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+              My Disputes
+            </h1>
+          </div>
         </div>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 12, maxWidth: 600, lineHeight: 1.6 }}>
+          Track and manage your disputes with full transparency and real-time updates
+        </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
+      {/* Filters */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 4 }}>
           {['all', 'open', 'under_review', 'mediation', 'resolved', 'appealed', 'closed'].map(s => (
             <button key={s} onClick={() => setFilter(s)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${filter === s ? 'bg-gold text-black' : 'text-gray-400 hover:text-gray-200'}`}>
+              style={{
+                padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
+                background: filter === s ? 'var(--gold)' : 'transparent',
+                color: filter === s ? '#0A1628' : 'rgba(255,255,255,0.5)',
+                border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => { if (filter !== s) e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+              onMouseLeave={e => { if (filter !== s) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
+            >
               {STATUS_META[s]?.label || s}
             </button>
           ))}
         </div>
-        <div className="relative flex-1 max-w-xs ml-auto">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
           <input type="text" placeholder="Search disputes..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gold" />
+            style={{
+              width: '100%', paddingLeft: 36, paddingRight: 12, padding: '10px 12px 10px 36px',
+              borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              color: '#fff', fontSize: 13, outline: 'none', transition: 'all 0.2s',
+            }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+            onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+          />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16">
-          <Shield size={48} className="mx-auto text-gray-600 mb-4" />
-          <p className="text-gray-400 text-lg">No disputes found</p>
-          <p className="text-gray-600 text-sm mt-2">Go to your escrows to open a dispute if needed</p>
+        <div style={{ textAlign: 'center', padding: '80px 20px', borderRadius: 12, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: 16, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
+          }}>
+            <Shield size={32} style={{ color: 'var(--gold)' }} />
+          </div>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No disputes found</p>
+          <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Go to your escrows to open a dispute if needed</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {filtered.map(d => {
             const meta = STATUS_META[d.status] || { label: d.status, badge: 'bg-gray-500/20 text-gray-400', icon: '❓' };
+            const statusColor = d.status === 'open' ? '#F59E0B' : d.status === 'under_review' ? '#3B82F6' : d.status === 'mediation' ? '#8B5CF6' : d.status === 'resolved' ? '#22C55E' : d.status === 'appealed' ? '#F97316' : '#6B7280';
             return (
-              <Link key={d._id} to={`/disputes/${d._id}`}
-                className="block bg-gray-900 border border-gray-700 rounded-lg p-4 hover:border-gray-600 transition group">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-lg">{meta.icon}</span>
-                      <h3 className="text-sm font-semibold text-gray-200 truncate">{d.title}</h3>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${meta.badge}`}>{meta.label}</span>
+              <Link key={d._id} to={`/disputes/${d._id}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(255,255,255,0.02)', padding: 16,
+                  transition: 'all 0.2s', cursor: 'pointer',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                        <span style={{ fontSize: 20 }}>{meta.icon}</span>
+                        <h3 style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.9)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</h3>
+                        <span style={{
+                          padding: '4px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700,
+                          background: `${statusColor}20`, color: statusColor, border: `1px solid ${statusColor}40`,
+                        }}>{meta.label}</span>
+                      </div>
+                      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.description}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+                        <span>{CATEGORY_LABELS[d.category] || d.category}</span>
+                        <span style={{ color: 'var(--gold)', fontWeight: 600 }}>KES {d.amountInDispute?.toLocaleString('en-KE')}</span>
+                        <span>{timeAgo(d.createdAt)}</span>
+                        {d.evidenceCount > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Shield size={12} /> {d.evidenceCount} file{d.evidenceCount !== 1 ? 's' : ''}</span>}
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 line-clamp-1">{d.description}</p>
-                    <div className="flex items-center gap-3 mt-2 text-xs text-gray-600">
-                      <span>{CATEGORY_LABELS[d.category] || d.category}</span>
-                      <span>KES {d.amountInDispute?.toLocaleString('en-KE')}</span>
-                      <span>{timeAgo(d.createdAt)}</span>
-                      {d.evidenceCount > 0 && <span>{d.evidenceCount} file{d.evidenceCount !== 1 ? 's' : ''}</span>}
-                    </div>
+                    <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 18 }}>→</span>
                   </div>
-                  <span className="text-gray-600 group-hover:text-gray-400 transition">→</span>
                 </div>
               </Link>
             );
