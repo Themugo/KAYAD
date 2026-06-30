@@ -82,6 +82,7 @@ export default function Navbar() {
     : '/register?sell=1';
 
   const NAV_LINKS = [
+    { to: '/', label: 'Home' },
     { to: '/showroom', label: 'Buy Cars' },
     { to: '/auctions/calendar', label: 'Live Auctions', badge: hasLiveAuction ? 'live' : null },
     { to: '/escrow-vault', label: 'Escrow Vault' },
@@ -228,11 +229,6 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto px-5 py-6 space-y-1">
-                  <Link to={sellLink} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gold/10 border border-gold/20 text-gold font-bold text-sm no-underline mb-5"
-                    onClick={() => setMobileOpen(false)}>
-                    <PlusCircle size={18} /> List Your Vehicle
-                  </Link>
-
                   <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Home</Link>
                   <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Buy Cars</Link>
                   <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>

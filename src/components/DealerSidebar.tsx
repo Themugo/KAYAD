@@ -2,7 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, PlusCircle, Gavel, TrendingUp,
-  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList, X,
+  DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList, X, Home, ExternalLink,
   LucideIcon,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ interface LinkItem {
 }
 
 const DEALER_LINKS: LinkItem[] = [
+  { to: '/', icon: Home, label: 'Home', end: true },
   { to: '/dealer', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/dealer/add-car', icon: PlusCircle, label: 'Add Listing' },
   { to: '/dealer/auction-setup', icon: Gavel, label: 'Auction Setup' },
@@ -128,17 +129,28 @@ export default function DealerSidebar({ mobileOpen, onToggle }: DealerSidebarPro
         ))}
       </div>
 
-      {/* Brand badge at bottom */}
-      {!collapsed && (
-        <div style={{
-          padding: '12px 18px',
+      {/* Back to site */}
+      <NavLink
+        to="/"
+        end
+        style={({ isActive }) => ({
+          display: 'flex', alignItems: 'center', gap: 10,
+          padding: collapsed ? '10px 0' : '8px 18px',
+          margin: '1px 6px', borderRadius: 8,
+          textDecoration: 'none',
+          fontSize: 12, fontWeight: 600,
+          color: 'rgba(255,255,255,0.35)',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          whiteSpace: 'nowrap',
+          transition: 'all 0.15s',
           borderTop: '1px solid rgba(255,255,255,0.04)',
-          fontSize: 10, color: 'rgba(255,255,255,0.2)',
-          letterSpacing: '0.1em', textTransform: 'uppercase',
-        }}>
-          <span style={{ color: 'var(--gold)' }}>◆</span> Kayad Marketplace
-        </div>
-      )}
+          paddingTop: 12, marginTop: 4,
+        })}
+        title="Back to main site"
+      >
+        <ExternalLink size={collapsed ? 18 : 16} style={{ flexShrink: 0 }} />
+        {!collapsed && <span>Back to Site</span>}
+      </NavLink>
     </div>
     </>
   );

@@ -242,6 +242,7 @@ export default function App() {
                         <Route path="/contact"           element={<Public><ContactPage /></Public>} />
                         <Route path="/about"             element={<Public><AboutPage /></Public>} />
                         <Route path="/ghost-checker"   element={<Public><GhostCheckerInfo /></Public>} />
+                        <Route path="/pre-inspection"   element={<Public><GhostCheckerInfo /></Public>} />
 
                         {/* ── Auth ────────────────────────────────────────────── */}
                         <Route path="/login"               element={<Public><LoginPage /></Public>} />
