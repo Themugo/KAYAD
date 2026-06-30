@@ -28,6 +28,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Kayad" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.svg" sizes="192x192" />
@@ -45,8 +47,13 @@
 
     <!-- Initial background colour so the page doesn't flash white before React mounts -->
     <style>
-      html, body { background: #050505; color: #fff; margin: 0; }
+      html, body { background: #050505; color: #fff; margin: 0; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
       #root { min-height: 100vh; }
+      @media (prefers-color-scheme: light) {
+        html, body { background: #050505; color: #fff; }
+      }
+      * { -webkit-tap-highlight-color: transparent; }
+      button, a { -webkit-tap-highlight-color: rgba(212, 196, 168, 0.2); }
     </style>
 
     <!-- Google Analytics — loaded dynamically by src/lib/analytics.js -->

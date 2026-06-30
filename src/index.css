@@ -894,3 +894,157 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     border-radius: var(--radius);
   }
 }
+
+/* ─────── MOBILE-FIRST OPTIMIZATIONS (Phase 23) ─────── */
+
+/* Safe area insets for notched devices (iPhone X+) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-top: max(0px, env(safe-area-inset-top));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Improved touch feedback for interactive elements */
+@media (hover: none) and (pointer: coarse) {
+  button, a, .btn, .nav-link, .mobile-nav-link, .tab-btn {
+    -webkit-tap-highlight-color: rgba(212, 196, 168, 0.3);
+  }
+  
+  button:active, a:active, .btn:active {
+    transform: scale(0.97);
+    opacity: 0.8;
+  }
+}
+
+/* Mobile-specific font scaling for better readability */
+@media (max-width: 480px) {
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  input, textarea, select {
+    font-size: 16px; /* Prevents iOS auto-zoom on focus */
+  }
+}
+
+/* Smooth scrolling with momentum on iOS */
+@media (max-width: 768px) {
+  html {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Mobile-optimized modal positioning */
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 16px;
+    align-items: flex-end; /* Sheet-style on mobile */
+  }
+  
+  .modal-box {
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Mobile-friendly form inputs */
+@media (max-width: 768px) {
+  .input {
+    padding: 14px 16px;
+    font-size: 16px;
+  }
+  
+  .input:focus {
+    transform: scale(1.01);
+  }
+}
+
+/* Optimized image loading for mobile */
+@media (max-width: 768px) {
+  img {
+    content-visibility: auto;
+  }
+}
+
+/* Mobile-specific spacing adjustments */
+@media (max-width: 480px) {
+  .section-spacing {
+    padding: 32px 0;
+  }
+  
+  .element-spacing {
+    margin-bottom: 16px;
+  }
+}
+
+/* Improved mobile navigation */
+@media (max-width: 768px) {
+  .mobile-menu-panel {
+    width: 85%;
+    max-width: 320px;
+    border-radius: 0;
+  }
+  
+  .mobile-nav-link {
+    padding: 16px 20px;
+    font-size: 16px;
+  }
+}
+
+/* Mobile-optimized card layouts */
+@media (max-width: 480px) {
+  .card {
+    border-radius: var(--radius);
+  }
+  
+  .card-auction-enter {
+    border-radius: 0 0 var(--radius) 0;
+  }
+}
+
+/* Touch-friendly dropdowns and selects */
+@media (max-width: 768px) {
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23D4C4A8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095.3c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+}
+
+/* Mobile-optimized loading states */
+@media (max-width: 768px) {
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2.5px;
+  }
+  
+  .loading-center {
+    min-height: 200px;
+  }
+}
+
+/* Prevent text selection on mobile for better app-like feel */
+@media (max-width: 768px) {
+  .btn, .nav-link, .mobile-nav-link, .tab-btn {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* Mobile-specific badge sizing */
+@media (max-width: 480px) {
+  .badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+}
