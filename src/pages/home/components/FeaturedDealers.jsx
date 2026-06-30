@@ -59,7 +59,7 @@ export default function FeaturedDealers({ dealers = [] }) {
                         )}
                       </div>
                     </div>
-                    {i === 0 && <Award size={16} className="text-gold" />}
+                    {d.isSponsored ? <span className="text-[8px] font-bold tracking-widest text-gold uppercase bg-gold/10 px-2 py-0.5 rounded-full">Sponsored</span> : i === 0 && <Award size={16} className="text-gold" />}
                   </div>
 
                   <div className="flex items-center gap-3 mb-3 flex-wrap">

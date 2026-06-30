@@ -17,7 +17,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10, width: 'fit-content' }}>
             <span style={{ fontSize: 14 }}>🔍</span>
-            <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Ghost Checker Dashboard</span>
+            <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Inspector Dashboard</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
             <div>
@@ -25,7 +25,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                 {greeting}, <span style={{ color: 'var(--gold)' }}>{user?.name?.split(' ')[0] || 'Inspector'}</span>
               </h1>
               <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, margin: 0 }}>
-                Ghost Check hub · {new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · {tasks.length} tasks
+                Inspection hub · {new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} · {tasks.length} tasks
               </p>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>

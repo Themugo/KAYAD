@@ -8,7 +8,7 @@ const ROLE_LABELS: Record<string, string> = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
   technical_support: 'Tech Support', hr: 'HR', accounts: 'Accounts',
   escrow_officer: 'Escrow Officer', ad_manager: 'Ad Manager', moderator: 'Moderator',
-  ghost_checker: 'Ghost Checker',
+  ghost_checker: 'Inspector',
 };
 
 interface AdminLayoutProps {

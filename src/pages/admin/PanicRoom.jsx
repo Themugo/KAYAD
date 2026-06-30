@@ -24,10 +24,10 @@ const KILL_SWITCHES = [
     killLabel: 'BLOCK REGISTRATIONS', recoverLabel: 'Open Registrations',
   },
   {
-    id: 'ghost_check', label: 'Ghost Check Detection', icon: ShieldOff,
+    id: 'ghost_check', label: 'Pre-Inspection Detection', icon: ShieldOff,
     desc: 'Disables automated ghost account detection checks.',
     killColor: '#f97316', killBg: 'rgba(249,115,22,0.05)', killBorder: 'rgba(249,115,22,0.3)',
-    killLabel: 'DISABLE GHOST CHECK', recoverLabel: 'Enable Ghost Check',
+    killLabel: 'DISABLE PRE-INSPECTION', recoverLabel: 'Enable Pre-Inspection',
   },
   {
     id: 'escrows', label: 'Escrow Transactions', icon: Shield,

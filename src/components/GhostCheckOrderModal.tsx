@@ -68,7 +68,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
             <ShieldCheck size={24} style={{ color: 'var(--gold)' }} />
           </div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: '#fff', margin: '0 0 8px' }}>Sign In Required</h3>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, lineHeight: 1.6 }}>You need to be signed in to order a Ghost Check inspection. It's quick and free to create an account.</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, lineHeight: 1.6 }}>You need to be signed in to order a Pre-Inspection. It's quick and free to create an account.</p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
             <Link to={`/login?redirect=/cars/${carId}`} style={{ padding: '10px 22px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontWeight: 800, fontSize: 11, textDecoration: 'none' }}>Sign In</Link>
             <button onClick={handleClose} style={{ padding: '10px 22px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', borderRadius: 9999, fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
@@ -95,7 +95,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
             }}>
               <ShieldCheck size={28} style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
             </div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: '#fff', margin: '0 0 4px' }}>Ghost Check Complete</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: '#fff', margin: '0 0 4px' }}>Pre-Inspection Complete</h3>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
               <Star size={16} fill="currentColor" style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
               <span style={{ fontSize: 28, fontWeight: 900, color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{score}/100</span>
@@ -118,7 +118,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <ShieldCheck size={16} style={{ color: 'var(--gold)' }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Ghost Check Inspection</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Pre-Inspection</span>
           </div>
           <button onClick={handleClose} style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <X size={14} />
@@ -198,7 +198,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
 
               <div style={{ background: 'rgba(212,196,168,0.04)', border: '1px solid rgba(212,196,168,0.1)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Ghost Check Fee</span>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Inspection Fee</span>
                   <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{formatKES(GHOST_CHECK_FEE)}</span>
                 </div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>Paid once per vehicle via M-Pesa</div>
@@ -290,7 +290,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
               </div>
               <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: '#fff', margin: '0 0 4px' }}>Order Placed!</h3>
               <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6, marginBottom: 16, maxWidth: 320, margin: '0 auto 16px' }}>
-                Your Ghost Check request has been submitted. An inspector will be assigned within 24 hours. You'll receive a notification when the report is ready.
+                Your Pre-Inspection request has been submitted. An inspector will be assigned within 24 hours. You'll receive a notification when the report is ready.
               </p>
               <div style={{ background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.1)', borderRadius: 10, padding: 14, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left' }}>
                 <Clock size={16} style={{ color: '#22c55e', flexShrink: 0 }} />
@@ -309,7 +309,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
         {/* Footer */}
         <div style={{ padding: '12px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.15)' }}>
-            Powered by Kayad Ghost Check
+            Powered by Kayad Pre-Inspection
           </span>
           <Link to="/ghost-checker" style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>Learn more →</Link>
         </div>

@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
-import { Star, Shield, TrendingUp, MessageCircle } from 'lucide-react';
+import { Shield, CheckCircle, Gavel, Lock, Search, Star } from 'lucide-react';
 
-const METRICS = [
-  { icon: Star, value: '4.8 / 5', label: 'Average Rating', sub: 'From 2,400+ verified reviews' },
-  { icon: Shield, value: '100%', label: 'Escrow Satisfaction', sub: 'Zero unresolved disputes' },
-  { icon: TrendingUp, value: '8,500+', label: 'Completed Transactions', sub: 'Across Kenya' },
-  { icon: MessageCircle, value: '98%', label: 'Seller Response Rate', sub: 'Within 2 hours' },
+const CAPABILITIES = [
+  { icon: Lock, title: 'Escrow Protection', desc: 'Every transaction is secured by our mandatory escrow system. Funds are held until you confirm delivery.' },
+  { icon: CheckCircle, title: 'Verified Dealers', desc: 'All dealers are KRA-vetted, phone-verified, and rated by real buyers on every completed sale.' },
+  { icon: Search, title: 'Pre-Inspection', desc: 'Order a 150-point forensic inspection on any vehicle. Know exactly what you\'re buying before you pay.' },
+  { icon: Gavel, title: 'Live Auctions', desc: 'Real-time bidding with countdown timers. Place bids from your phone and win premium vehicles.' },
+  { icon: Shield, title: 'Secure Payments', desc: 'Pay via M-Pesa STK push or bank transfer. All payments are tracked and receipted.' },
+  { icon: Star, title: 'Buyer Protection', desc: 'Dedicated dispute resolution team. If something goes wrong, we mediate and protect your funds.' },
 ];
 
 export default function Testimonials() {
@@ -15,27 +17,26 @@ export default function Testimonials() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-1.5 mb-2">
             <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
-              Trust Metrics
+              Why KAYAD
             </span>
           </div>
           <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
-            Why Kenya Trusts <span className="text-gold">KAYAD</span>
+            Built for Trust. <span className="text-gold">Powered by Technology.</span>
           </h2>
         </div>
-        <div className="grid gap-4 md:grid-cols-4">
-          {METRICS.map((m, i) => (
+        <div className="grid gap-4 md:grid-cols-3">
+          {CAPABILITIES.map((c, i) => (
             <motion.div
-              key={m.label}
+              key={c.title}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="rounded-xl p-6 text-center border"
+              transition={{ delay: i * 0.06 }}
+              className="rounded-xl p-6 border"
               style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}
             >
-              <m.icon size={22} className="text-gold" style={{ margin: '0 auto 10px' }} />
-              <div className="font-display font-black italic text-2xl text-white mb-1">{m.value}</div>
-              <div className="text-sm text-white/80 font-medium mb-0.5">{m.label}</div>
-              <div className="text-xs text-white/40">{m.sub}</div>
+              <c.icon size={20} className="text-gold" style={{ marginBottom: 10 }} />
+              <h3 className="font-display font-bold text-white text-sm mb-1.5">{c.title}</h3>
+              <p className="text-xs text-white/45 leading-relaxed">{c.desc}</p>
             </motion.div>
           ))}
         </div>

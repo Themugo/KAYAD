@@ -60,7 +60,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
             <ShieldCheck size={20} style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
           </div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Ghost Check Report Available</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Pre-Inspection Report Available</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
               <Star size={12} fill="currentColor" style={{ color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }} />
               <span style={{ fontSize: 14, fontWeight: 900, color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444' }}>{score}/100</span>
@@ -69,7 +69,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
           </div>
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-          {inspection.inspectorNotes || `${inspection.checklist?.length || 0} inspection points checked by ${inspection.inspector?.name || 'a certified Ghost Checker'}.`}
+          {inspection.inspectorNotes || `${inspection.checklist?.length || 0} inspection points checked by ${inspection.inspector?.name || 'a certified Inspector'}.`}
         </div>
       </div>
     );
@@ -91,12 +91,12 @@ export default function InspectionButton({ carId, location, onInspectionComplete
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
           <div>
             <h4 style={{ color: pendingOrder ? '#60a5fa' : '#34d399', fontWeight: 700, fontSize: 13, margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <ShieldCheck size={13} /> Ghost Check
+              <ShieldCheck size={13} /> Pre-Inspection
             </h4>
             <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4, lineHeight: 1.5 }}>
               {pendingOrder
                 ? `Status: ${pendingOrder.status?.replace(/_/g, ' ') || 'Processing'} — an inspection is already in progress for this vehicle.`
-                : `Can't inspect ${location || 'the vehicle'} in person? Send a certified Ghost Checker for a 150-point forensic assessment.`
+                : `Can't inspect ${location || 'the vehicle'} in person? Send a certified inspector for a 150-point forensic assessment.`
               }
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
 
         {!user ? (
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', padding: 8 }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Sign in to order a Ghost Check</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Sign in to order an Inspection</span>
           </div>
         ) : (
           <button onClick={() => setShowModal(true)}
@@ -128,7 +128,7 @@ export default function InspectionButton({ carId, location, onInspectionComplete
             {pendingOrder ? (
               <><Clock size={13} /> Track Inspection Status <ChevronRight size={12} /></>
             ) : (
-              <><Eye size={13} /> Order Ghost Check — {formatKES(2500)}</>
+              <><Eye size={13} /> Order Inspection — {formatKES(2500)}</>
             )}
           </button>
         )}

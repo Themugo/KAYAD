@@ -3,30 +3,30 @@ import { ShieldCheck, Search, QrCode, FileText, CheckCircle, Clock, Lock, Smartp
 
 const STEPS = [
   { icon: Search, title: '1. Find a Vehicle', desc: 'Browse our showroom and find a car you\'re interested in. Every listing includes photos, specs, and seller details.' },
-  { icon: QrCode, title: '2. Order a Ghost Check', desc: 'Click "Order Inspection" on any car page. Enter your M-Pesa number to pay the KES 2,500 inspection fee via M-Pesa STK push.' },
+  { icon: QrCode, title: '2. Order a Pre-Inspection', desc: 'Click "Order Inspection" on any car page. Enter your M-Pesa number to pay the KES 2,500 inspection fee via M-Pesa STK push.' },
   { icon: Smartphone, title: '3. Confirm Payment', desc: 'Check your phone for the M-Pesa prompt. Enter your PIN to confirm. You\'ll receive an instant payment confirmation and receipt.' },
-  { icon: Users, title: '4. Inspector Assigned', desc: 'Within 24 hours, a certified Kayad inspector (Ghost Checker) is assigned to your order. You\'ll get a notification with their details.' },
+  { icon: Users, title: '4. Inspector Assigned', desc: 'Within 24 hours, a certified Kayad inspector is assigned to your order. You\'ll get a notification with their details.' },
   { icon: FileText, title: '5. 150-Point Inspection', desc: 'The inspector conducts a comprehensive 150-point assessment covering engine, transmission, brakes, electrical, body, interior, and more.' },
   { icon: CheckCircle, title: '6. Report Delivered', desc: 'You receive a detailed digital inspection report with scores, photos, and condition ratings — directly in your dashboard and via notification.' },
 ];
 
 const FEATURES = [
   { icon: ShieldCheck, title: 'Fraud Prevention', desc: 'Detect odometer rollback, accident damage, chassis number tampering, and fake logbooks before you pay.' },
-  { icon: Star, title: 'Certified Inspectors', desc: 'All Ghost Checkers are vetted, trained, and certified by Kayad. Each inspector carries a verified digital badge.' },
+  { icon: Star, title: 'Certified Inspectors', desc: 'All Inspectors are vetted, trained, and certified by Kayad. Each inspector carries a verified digital badge.' },
   { icon: Lock, title: 'Escrow Protection', desc: 'Inspect before you pay. If you buy via escrow, funds are held securely until you confirm the vehicle matches the report.' },
   { icon: Clock, title: '48-Hour Turnaround', desc: 'Most inspections are completed and reported within 48 hours of payment confirmation. Express options available.' },
 ];
 
 const PRICING = [
-  { name: 'Standard Ghost Check', price: 'KES 2,500', desc: '150-point inspection, digital report, condition rating, inspector notes', popular: true },
-  { name: 'Premium Ghost Check', price: 'KES 5,000', desc: 'Everything in Standard + photo gallery, video walkthrough, NTSA database check', popular: false },
-  { name: 'Express Ghost Check', price: 'KES 7,500', desc: 'Everything in Premium + 24-hour turnaround, priority inspector dispatch', popular: false },
+  { name: 'Standard Inspection', price: 'KES 2,500', desc: '150-point inspection, digital report, condition rating, inspector notes', popular: true },
+  { name: 'Premium Inspection', price: 'KES 5,000', desc: 'Everything in Standard + photo gallery, video walkthrough, NTSA database check', popular: false },
+  { name: 'Express Inspection', price: 'KES 7,500', desc: 'Everything in Premium + 24-hour turnaround, priority inspector dispatch', popular: false },
 ];
 
 const FAQ = [
-  { q: 'What is a Ghost Checker?', a: 'A Ghost Checker is a Kayad-certified vehicle inspector who independently assesses a car you\'re interested in buying. They provide an unbiased 150-point inspection report so you know exactly what you\'re getting.' },
-  { q: 'Who performs the inspection?', a: 'All inspections are performed by vetted and certified Ghost Checkers — automotive professionals with proven experience in vehicle diagnostics, mechanics, and bodywork assessment.' },
-  { q: 'How is the inspector assigned?', a: 'Once your payment is confirmed, our dispatch system assigns the nearest available Ghost Checker based on the vehicle\'s location. You\'ll receive their name and contact info.' },
+  { q: 'What is an Inspector?', a: 'An Inspector is a Kayad-certified vehicle inspector who independently assesses a car you\'re interested in buying. They provide an unbiased 150-point inspection report so you know exactly what you\'re getting.' },
+  { q: 'Who performs the inspection?', a: 'All inspections are performed by vetted and certified Inspectors — automotive professionals with proven experience in vehicle diagnostics, mechanics, and bodywork assessment.' },
+  { q: 'How is the inspector assigned?', a: 'Once your payment is confirmed, our dispatch system assigns the nearest available Inspector based on the vehicle\'s location. You\'ll receive their name and contact info.' },
   { q: 'Can I be present during the inspection?', a: 'Yes! Buyers are welcome to attend. The inspector will coordinate a convenient time with both you and the seller.' },
   { q: 'What does the inspection cover?', a: 'The 150-point checklist covers 15 categories: Engine, Transmission, Brakes, Suspension, Steering, Electrical, Body & Paint, Interior, Tyres & Wheels, Air Conditioning, Cooling System, Exhaust, Fuel System, Lighting, and Safety Equipment.' },
   { q: 'How do I pay?', a: 'Payment is via M-Pesa STK push (Kenya). Enter your M-Pesa registered phone number, and we\'ll send a payment request directly to your phone. Enter your PIN to confirm.' },
@@ -52,13 +52,13 @@ export default function GhostCheckerInfo() {
             <Search size={28} style={{ color: 'var(--gold)' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12 }}>
-            <span style={{ padding: '3px 10px', borderRadius: 9999, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.15)', fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Ghost Check</span>
+            <span style={{ padding: '3px 10px', borderRadius: 9999, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.15)', fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Pre-Inspection</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(2rem, 4vw, 3.2rem)', color: '#fff', margin: '0 0 16px', lineHeight: 1.15 }}>
             Know Exactly What<br />You're Buying
           </h1>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.45)', lineHeight: 1.8, maxWidth: 560, margin: '0 auto 28px' }}>
-            Every used car has a story. A Ghost Check reveals the truth — before you hand over your money.
+            Every used car has a story. A Pre-Inspection reveals the truth — before you hand over your money.
             Our certified inspectors perform a forensic 150-point assessment so you buy with confidence, not hope.
           </p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -78,7 +78,7 @@ export default function GhostCheckerInfo() {
         <div id="how-it-works" style={{ padding: '64px 0' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' }}>The Process</span>
-            <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#fff', margin: '8px 0' }}>How Ghost Checking Works</h2>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#fff', margin: '8px 0' }}>How Pre-Inspection Works</h2>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', maxWidth: 440, margin: '0 auto' }}>Six simple steps from discovery to delivery</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -208,7 +208,7 @@ export default function GhostCheckerInfo() {
           borderTop: '1px solid var(--border)',
         }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'clamp(1.4rem, 2.5vw, 1.8rem)', color: '#fff', margin: '0 0 8px' }}>Ready to Buy With Confidence?</h2>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>Browse our showroom and order a Ghost Check on any vehicle you're interested in.</p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24, maxWidth: 400, margin: '0 auto 24px' }}>Browse our showroom and order a Pre-Inspection on any vehicle you're interested in.</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/showroom" style={{ padding: '13px 32px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontWeight: 800, fontSize: 12, letterSpacing: '0.04em', textDecoration: 'none' }}>Browse Showroom →</Link>
             <Link to="/about" style={{ padding: '13px 32px', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.6)', borderRadius: 9999, fontWeight: 700, fontSize: 12, textDecoration: 'none' }}>Learn More About Kayad</Link>

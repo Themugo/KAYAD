@@ -82,7 +82,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>
-                150-Point Ghost Check
+                150-Point Inspection
               </span>
               <button onClick={() => setActiveTask(null)} style={{
                 padding: '4px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -272,7 +272,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
           onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
           onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
         >
-          <FileText size={16} /> Submit Ghost Check Report ({Math.round((passed / total) * 100)}%)
+          <FileText size={16} /> Submit Inspection Report ({Math.round((passed / total) * 100)}%)
         </button>
         <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
           <Keyboard size={10} /> Tip: Press Ctrl+S to submit quickly
