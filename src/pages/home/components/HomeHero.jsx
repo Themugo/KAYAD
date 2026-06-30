@@ -109,14 +109,18 @@ export default function HomeHero({ liveCount, isAuth, user }) {
       <div className="absolute inset-0 z-10 flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 w-full">
           <div className="max-w-xl">
-            <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-              className="font-display font-black italic text-[clamp(1.8rem,4.2vw,3.2rem)] leading-[0.95] uppercase text-white tracking-[-0.02em] mb-4">
-              Drive Your Dream
-              <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Today</span>
-            </motion.h1>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
+              className="mb-6">
+              <h1 className="font-display font-black italic text-[clamp(2rem,4.5vw,3.5rem)] leading-[0.95] uppercase text-white tracking-[-0.02em] mb-2">
+                Kenya's
+                <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Premium Car</span>
+                Marketplace
+              </h1>
+              <div className="h-1 w-24 bg-gradient-to-r from-gold to-transparent rounded-full" />
+            </motion.div>
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
               className="text-white/70 text-[clamp(0.9rem,1.5vw,1.1rem)] font-medium mb-6 max-w-lg leading-relaxed">
-              East Africa's Most Trusted Automotive Marketplace
+              Live Bidding • Secure Escrow • M-Pesa Payments
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
