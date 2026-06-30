@@ -194,7 +194,7 @@ export default function ErrorState({
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.color = 'var(--gold)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
             >
-              <Home size={16} Go to Home />
+              <Home size={16} /> Go to Home
             </button>
           )}
         </div>

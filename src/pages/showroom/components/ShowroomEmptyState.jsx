@@ -1,10 +1,6 @@
 import { FilterX } from 'lucide-react';
 
-interface ShowroomEmptyStateProps {
-  onClear: () => void;
-}
-
-export default function ShowroomEmptyState({ onClear }: ShowroomEmptyStateProps) {
+export default function ShowroomEmptyState({ onClear }) {
   return (
     <div style={{
       textAlign: 'center',

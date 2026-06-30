@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { timeAgo, formatDate } from '../utils/helpers';
 import { ShieldCheck, X } from 'lucide-react';
 import EscrowTimeline from '../components/EscrowTimeline';
+import EmptyState from '../components/EmptyState';
 
 const STATUS_META = {
   pending:  { label: 'Pending',  badge: 'badge-orange', icon: '⏳', desc: 'Awaiting payment confirmation.' },
