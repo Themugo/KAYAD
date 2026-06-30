@@ -1,79 +1,38 @@
-import { Component, ReactNode } from 'react';
-import { reportError } from '../utils/posthog';
-import { reportError as reportToSentry } from '../utils/sentry';
+﻿// src/components/ErrorBoundary.tsx
+import { Component, ReactNode } from "react";
+import { logError } from "../utils/logger";
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
+interface Props { children: ReactNode; fallback?: ReactNode; }
+interface State { hasError: boolean; error?: Error; }
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-}
+export default class ErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false };
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: { componentStack?: string }) {
-    console.error('[Kayad] Uncaught error:', error, info);
-    reportError(error, { componentStack: info?.componentStack });
-    reportToSentry(error, { componentStack: info?.componentStack });
+  componentDidCatch(error: Error, info: { componentStack: string }) {
+    logError("React ErrorBoundary caught", { error: error.message, componentStack: info.componentStack });
   }
-
-  handleRetry = () => {
-    this.setState({ hasError: false, error: null });
-  };
 
   render() {
     if (this.state.hasError) {
       return (
-        <div role="alert" style={{
-          minHeight: '100vh', display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          background: 'var(--bg)', padding: 24, textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 64, marginBottom: 20 }} aria-hidden="true">💥</div>
-          <h2 style={{ marginBottom: 12 }}>Something went wrong</h2>
-          <p style={{ color: 'var(--text-muted)', maxWidth: 400, marginBottom: 28, lineHeight: 1.6 }}>
-            An unexpected error occurred. You can try reloading this section or go back to the homepage.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              className="btn btn-gold"
-              aria-label="Go to homepage"
-              onClick={() => { this.setState({ hasError: false, error: null }); window.location.href = '/'; }}
-            >
-              Go Home
-            </button>
-            <button
-              className="btn btn-outline"
-              aria-label="Try again"
-              onClick={this.handleRetry}
-            >
-              Try Again
-            </button>
-            <button className="btn btn-outline" aria-label="Reload page" onClick={() => window.location.reload()}>
-              Reload Page
-            </button>
+        this.props.fallback ?? (
+          <div className="min-h-[60vh] flex items-center justify-center p-6">
+            <div className="text-center max-w-md">
+              <h2 className="text-2xl font-display text-gold mb-2">Something went wrong</h2>
+              <p className="text-text-muted mb-4">{this.state.error?.message ?? "An unexpected error occurred."}</p>
+              <button
+                onClick={() => location.reload()}
+                className="px-4 py-2 bg-gold text-bg rounded-lg font-semibold"
+              >
+                Reload Page
+              </button>
+            </div>
           </div>
-          {import.meta.env.MODE === 'development' && this.state.error && (
-            <pre style={{
-              marginTop: 28, padding: 16, background: 'var(--surface)', borderRadius: 8,
-              fontSize: 11, color: 'var(--red)', textAlign: 'left', maxWidth: 600,
-              overflow: 'auto', border: '1px solid rgba(239,68,68,0.2)',
-            }}>
-              {this.state.error.toString()}
-              {this.state.error.stack && `\n\n${this.state.error.stack}`}
-            </pre>
-          )}
-        </div>
+        )
       );
     }
     return this.props.children;
