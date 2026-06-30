@@ -294,10 +294,65 @@ export default function CarDetailPage() {
         <BackButton fallback="/showroom" label="Back" />
       </div>
 
+      {/* Trust Strip */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        padding: '12px 16px',
+        background: 'rgba(212,196,168,0.05)',
+        border: '1px solid rgba(212,196,168,0.15)',
+        borderRadius: 12,
+        marginBottom: 24,
+        flexWrap: 'wrap',
+      }}>
+        {[
+          { icon: ShieldCheck, label: 'Verified Listing', show: car?.isVerifiedDealer },
+          { icon: Lock, label: 'Escrow Protected', show: isP2P || car?.escrowEnabled !== false },
+          { icon: Star, label: 'Featured', show: car?.isPromoted },
+          { icon: Zap, label: 'Live Auction', show: isLive },
+          { icon: CheckCircle, label: 'NTSA Verified', show: car?.ntsaVerified },
+        ].filter(item => item.show).map((item, i) => (
+          <div key={i} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 11,
+            fontWeight: 600,
+            color: 'var(--gold)',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}>
+            <item.icon size={12} />
+            {item.label}
+          </div>
+        ))}
+      </div>
+
       <div className="detail-grid">
 
         {/* ═══════ LEFT COLUMN ═══════ */}
         <div className="detail-left">
+
+          {/* Vehicle Header */}
+          <div style={{ marginBottom: 20 }}>
+            <h1 className="detail-title" style={{ fontSize: 'clamp(1.5rem,3vw,2.2rem)', marginBottom: 8 }}>{car.title}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 14, color: 'var(--gold)', fontWeight: 700 }}>
+                KES {Number(price).toLocaleString()}
+              </span>
+              {car.location?.city && (
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <MapPin size={12} /> {car.location.city}
+                </span>
+              )}
+              {car.year && (
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Calendar size={12} /> {car.year}
+                </span>
+              )}
+            </div>
+          </div>
 
           {/* Gallery */}
           <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} onExpand={() => setShowGallery(true)} />
@@ -374,38 +429,6 @@ export default function CarDetailPage() {
             </div>
           )}
 
-          {/* Title Bar */}
-          <div className="detail-titlebar">
-            <h1 className="detail-title">{car.title}</h1>
-            <div className="detail-meta">
-              {car.location?.city && (
-                <span className="detail-meta-item">
-                  <MapPin size={12} className="detail-meta-icon" />{car.location.city}
-                </span>
-              )}
-              {car.year && (
-                <span className="detail-meta-item">
-                  <Calendar size={12} className="detail-meta-icon" />{car.year}
-                </span>
-              )}
-              {car.mileage && (
-                <span className="detail-meta-item">
-                  <Gauge size={12} className="detail-meta-icon" />{(car.mileage/1000).toFixed(0)}k km
-                </span>
-              )}
-              {car.fuel && (
-                <span className="detail-meta-item">
-                  <Fuel size={12} className="detail-meta-icon" />{car.fuel}
-                </span>
-              )}
-              {car.transmission && (
-                <span className="detail-meta-item">
-                  <Settings2 size={12} className="detail-meta-icon" />{car.transmission}
-                </span>
-              )}
-            </div>
-          </div>
-
           {/* Specs Grid */}
           <div className="detail-section">
             <div className="detail-section-label">Full Specifications</div>
@@ -422,6 +445,55 @@ export default function CarDetailPage() {
               <SpecItem icon={Settings2} label="Engine" value={car.engine} delay={360} />
               <SpecItem icon={Settings2} label="Drivetrain" value={car.drivetrain} delay={400} />
               <SpecItem icon={MapPin} label="Location" value={car.location?.city} delay={440} />
+            </div>
+          </div>
+
+          {/* Vehicle Overview */}
+          <div className="detail-section">
+            <div className="detail-section-label">Vehicle Overview</div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 16,
+            }}>
+              <div style={{
+                padding: 16,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12,
+              }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Views</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.views || 0}</div>
+              </div>
+              <div style={{
+                padding: 16,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12,
+              }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Saved</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.favoritesCount || 0}</div>
+              </div>
+              <div style={{
+                padding: 16,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12,
+              }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bids</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.bidsCount || 0}</div>
+              </div>
+              <div style={{
+                padding: 16,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12,
+              }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Listed</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>
+                  {car.createdAt ? new Date(car.createdAt).toLocaleDateString() : 'Recently'}
+                </div>
+              </div>
             </div>
           </div>
 
