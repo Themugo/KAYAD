@@ -20,12 +20,21 @@ export default function HomeHero({ liveCount, isAuth, user }) {
   useEffect(() => {
     const fetchHeroImages = async () => {
       try {
-        // Priority 1: Admin featured hero vehicles (showOnHero flag)
-        // Priority 2: Featured/promoted vehicles
-        // Priority 3: Random active vehicles with images
+        // Priority 1: Admin-selected Hero Vehicles (showOnHero flag)
+        // Priority 2: Featured Vehicles (isPromoted flag)
+        // Priority 3: Random Active Listings with images
         const data = await carsAPI.list({ page: 1, limit: 10, sort: '-createdAt' });
         const cars = data.cars || data.data || [];
-        const withImages = cars
+        
+        // Filter for hero vehicles first
+        const heroVehicles = cars.filter(c => c.showOnHero);
+        const featuredVehicles = cars.filter(c => c.isPromoted && !c.showOnHero);
+        const regularVehicles = cars.filter(c => !c.showOnHero && !c.isPromoted);
+        
+        // Build image list in priority order
+        const priorityList = [...heroVehicles, ...featuredVehicles, ...regularVehicles];
+        
+        const withImages = priorityList
           .filter(c => c.images && c.images.length > 0 && c.images[0])
           .map(c => {
             const img = c.images[0];
@@ -105,13 +114,17 @@ export default function HomeHero({ liveCount, isAuth, user }) {
               Drive Your Dream
               <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Today</span>
             </motion.h1>
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
+              className="text-white/70 text-[clamp(0.9rem,1.5vw,1.1rem)] font-medium mb-6 max-w-lg leading-relaxed">
+              East Africa's Most Trusted Automotive Marketplace
+            </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
               className="flex items-center gap-3 flex-wrap">
-              <Link to="/showroom" className="px-7 py-3.5 bg-gold text-black font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-gold/90 transition-all duration-300 shadow-lg shadow-gold/20 no-underline">Browse Cars</Link>
-              <Link to="/auctions/calendar" className="px-7 py-3.5 bg-white/8 backdrop-blur-md border border-white/20 text-white font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-white/18 transition-all duration-300 no-underline">Live Auctions</Link>
+              <Link to="/showroom" className="px-8 py-4 bg-gold text-black font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-gold/90 transition-all duration-300 shadow-lg shadow-gold/20 no-underline">Browse Cars</Link>
+              <Link to="/auctions/calendar" className="px-8 py-4 bg-white/8 backdrop-blur-md border border-white/20 text-white font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-white/18 transition-all duration-300 no-underline">Live Auctions</Link>
               <Link to={isAuth ? '/seller' : '/register?sell=1&role=individual_seller'}
-                className="px-7 py-3.5 bg-transparent border border-gold/30 text-gold font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-gold/8 transition-all duration-300 no-underline">Sell Your Car</Link>
+                className="px-8 py-4 bg-transparent border border-gold/30 text-gold font-bold text-sm uppercase tracking-[0.08em] rounded-full hover:bg-gold/8 transition-all duration-300 no-underline">Sell Your Car</Link>
             </motion.div>
           </div>
         </div>

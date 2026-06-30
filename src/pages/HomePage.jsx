@@ -119,6 +119,7 @@ export default function HomePage() {
 
         {!loading && (
           <>
+            {/* 3. Featured Collection */}
             <SectionWrapper>
               <div className="max-w-[1400px] mx-auto px-7">
                 <div className="flex items-end justify-between mb-6">
@@ -138,13 +139,7 @@ export default function HomePage() {
                   <Link to="/showroom" className="section-link">View All →</Link>
                 </div>
 
-                {loading ? (
-                  <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="aspect-[4/3] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
-                    ))}
-                  </div>
-                ) : displayCars.length > 0 ? (
+                {displayCars.length > 0 ? (
                   <div className="grid gap-5 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                     {displayCars.map(car => (
                       <div key={car._id} className="premium-card">
@@ -161,9 +156,16 @@ export default function HomePage() {
               </div>
             </SectionWrapper>
 
+            {/* 4. Live Auctions */}
             <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />
+
+            {/* 5. Private Seller */}
             <PrivateSellerSection />
+
+            {/* 6. Dealer Network */}
             <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
+
+            {/* 7. Marketplace Ecosystem */}
             <Partners />
           </>
         )}

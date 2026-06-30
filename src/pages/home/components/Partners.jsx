@@ -40,6 +40,9 @@ export default function Partners() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Dynamic partner system - fetches from admin config
+    // Only shows formally onboarded partners (published: true)
+    // Admin can create, edit, publish, unpublish, archive via admin panel
     partnersAPI.list()
       .then(data => setPartners(Array.isArray(data) ? data.filter(p => p.published !== false) : []))
       .catch(() => setPartners([]))
@@ -64,24 +67,27 @@ export default function Partners() {
   };
 
   return (
-    <section className="py-8 md:py-10 border-t border-white/[0.04] overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-7 mb-6">
+    <section className="section-spacing border-t border-white/[0.04]">
+      <div className="max-w-[1400px] mx-auto px-7 mb-8">
         <div className="text-center">
           <div className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase mb-2" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
             Ecosystem
           </div>
-          <h2 className="font-display font-black italic text-[clamp(1.1rem,2vw,1.5rem)] text-white leading-none m-0">
+          <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
             Marketplace <span className="text-gold">Ecosystem</span>
           </h2>
+          <p className="text-white/40 text-xs mt-2 max-w-lg mx-auto">
+            Trusted partners for inspections, financing, insurance, logistics, and dealer associations
+          </p>
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-7 space-y-6">
+      <div className="max-w-[1400px] mx-auto px-7 space-y-8">
         {Object.entries(byCategory).map(([cat, items]) => (
           <div key={cat}>
-            <h3 className="text-[9px] font-bold tracking-[0.15em] uppercase text-white/30 mb-3 flex items-center gap-2">
+            <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase text-white/50 mb-4 flex items-center gap-2">
               {CATEGORY_LABELS[cat] || cat}
-              <span className="text-white/10 text-[8px]">({items.length})</span>
+              <span className="text-white/20 text-[9px]">({items.length})</span>
             </h3>
             <div className="flex flex-wrap gap-3">
               {items.map((p, i) => <PartnerCard key={`${p.name}-${i}`} p={p} />)}

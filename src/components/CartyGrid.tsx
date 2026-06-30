@@ -34,16 +34,20 @@ interface Car {
   createdAt?: string;
   ntsaVerified?: boolean;
   isDemo?: boolean;
+  isPromoted?: boolean;
+  escrowEnabled?: boolean;
+  dealer?: { name?: string; logo?: string; _id?: string };
+  seller?: { name?: string; avatar?: string; _id?: string };
 }
 
-function firstImage(car: Car): string | null {
+function firstImage(car: Car): string | undefined {
   if (car.image) return car.image;
   const imgs = car.images || [];
   for (const img of imgs) {
     if (typeof img === 'string' && img) return img;
     if (typeof img === 'object' && img?.url) return img.url;
   }
-  return null;
+  return undefined;
 }
 
 interface CarGridItemProps {
@@ -67,12 +71,14 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   const isScheduled = auctionStartTime > now;
   const isOnAuction = isLiveNow || isScheduled;
   const isLiveAuction = isLiveNow;
+  const isPromoted = car.isPromoted;
 
   const detailTo = `/cars/${car._id}`;
   const auctionTo = `/auction/${car._id}`;
-  const img = firstImage(car);
+  const img = firstImage(car) || undefined;
   const city = typeof car.location === 'string' ? car.location : (car.location?.city || 'Nairobi');
   const price = Number(car.currentBid || car.price || 0);
+  const sellerName = car.dealer?.name || car.seller?.name || 'Private Seller';
 
   const fuelIcon = car.fuel?.toLowerCase() === 'diesel' ? '🛢️'
                  : car.fuel?.toLowerCase() === 'electric' ? '⚡' : '⛽';
@@ -209,20 +215,34 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
       className="group relative"
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
+      style={isPromoted ? {
+        border: '1px solid rgba(212,196,168,0.3)',
+        boxShadow: '0 0 20px rgba(212,196,168,0.1)',
+      } : {}}
     >
-      <div className="card h-full flex flex-col overflow-hidden">
+      <div className="card h-full flex flex-col overflow-hidden rounded-xl" style={isPromoted ? { background: 'linear-gradient(135deg, rgba(212,196,168,0.05) 0%, var(--card) 100%)' } : {}}>
+        {/* Promoted badge */}
+        {isPromoted && (
+          <div className="absolute top-3 right-3 z-30">
+            <span className="text-[8px] font-bold tracking-widest text-gold uppercase bg-gold/10 px-2.5 py-1 rounded-full border border-gold/20 backdrop-blur-md">
+              Featured
+            </span>
+          </div>
+        )}
+
         {/* Image */}
         <Link to={detailTo} className="block">
-          <div className="car-img-wrap relative">
+          <div className="car-img-wrap relative" style={{ height: isPromoted ? '220px' : '200px' }}>
             <LazyImage
               src={img}
               fallback={FALLBACK}
               alt={car.title}
-              className="w-full h-full"
+              className="w-full h-full object-cover"
+              style={{ objectFit: 'cover' }}
             />
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-20">
               {isLiveNow && (
                 <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
                   style={{ background: 'rgba(239,68,68,0.92)', color: '#fff', backdropFilter: 'blur(4px)' }}>
@@ -232,6 +252,12 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               )}
               {isScheduled && (
                 <div className="badge badge-gold text-[9px]" style={{ backdropFilter: 'blur(4px)' }}>Upcoming</div>
+              )}
+              {car.escrowEnabled && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold"
+                  style={{ background: 'rgba(34,197,94,0.92)', color: '#fff', backdropFilter: 'blur(4px)' }}>
+                  Escrow
+                </div>
               )}
               {car.isDemo && (
                 <span style={{
@@ -262,6 +288,11 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
             <h3 className="font-semibold text-[15px] leading-snug mb-2 line-clamp-1 group-hover:text-gold transition-colors" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>
               {car.title}
             </h3>
+
+            {/* Dealer/Seller info */}
+            <div className="flex items-center gap-2 text-xs text-white/50 mb-2">
+              <span className="font-medium text-white/70">{sellerName}</span>
+            </div>
 
             <div className="flex items-center gap-3 text-xs text-text-muted mb-3">
               {car.mileage && (
@@ -313,6 +344,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
         className={`absolute top-3 right-3 z-20 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border opacity-0 group-hover:opacity-100 ${
           isCompared ? 'bg-gold text-black border-gold opacity-100' : 'bg-black/60 text-white border-white/20 hover:border-gold'
         }`}
+        style={isPromoted ? { top: '3.5rem' } : {}}
       >
         <BarChart3 size={15} />
       </button>
