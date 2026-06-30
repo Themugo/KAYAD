@@ -691,7 +691,7 @@ export default function CarDetailPage() {
 
           {/* Inspection */}
           <InspectionButton carId={car._id} location={car.location?.city || dealer?.location} />
-          <Link to="/ghost-checker" style={{ display: 'block', fontSize: 11, color: 'var(--gold)', textDecoration: 'none', marginTop: -8, marginBottom: 8, opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}>
+          <Link to="/pre-inspection" style={{ display: 'block', fontSize: 11, color: 'var(--gold)', textDecoration: 'none', marginTop: -8, marginBottom: 8, opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}>
             Learn about Pre-Inspection →
           </Link>
 

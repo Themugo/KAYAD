@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { escrowVaultAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -89,7 +89,6 @@ export default function EscrowVaultPortal() {
   const { id } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [vault, setVault] = useState(null);
   const [vaults, setVaults] = useState([]);
   const [loading, setLoading] = useState(!!id);
@@ -187,8 +186,6 @@ export default function EscrowVaultPortal() {
   );
 
   const currentIdx = vault ? STEPS.indexOf(vault.status) : -1;
-  const isBuyer = vault?.buyer?._id === user?.id || vault?.buyer === user?.id;
-  const isSeller = vault?.seller?._id === user?.id || vault?.seller === user?.id;
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>

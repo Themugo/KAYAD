@@ -112,7 +112,7 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-4 text-sm font-medium">
             {NAV_LINKS.map(({ to, label, badge }) => (
-              <Link key={to} to={to} className={`nav-link ${isActive(to.replace('?dealer=true', '')) ? 'active' : ''}`}>
+              <Link key={to} to={to} className={`nav-link ${isActive(to) ? 'active' : ''}`}>
                 {badge === 'live' && (
                   <span className="relative flex h-2 w-2 mr-1.5 inline-flex">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
