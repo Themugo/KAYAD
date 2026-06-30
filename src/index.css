@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 /* ============================================
    KAYAD — GLOBAL DESIGN SYSTEM v2.0
@@ -457,6 +458,85 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 .from-gold { --tw-gradient-from: var(--gold); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
 .via-gold { --tw-gradient-stops: var(--tw-gradient-from), var(--gold), var(--tw-gradient-to); }
 .to-gold { --tw-gradient-to: var(--gold); }
+.via-gold-light { --tw-gradient-stops: var(--tw-gradient-from), var(--gold-light), var(--tw-gradient-to); }
+.to-gold-dark { --tw-gradient-to: var(--gold-dark); }
+.from-gold-dark { --tw-gradient-from: var(--gold-dark); --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to); }
+
+/* ─────── CRITICAL PAGE/LAYOUT UTILITIES ─────── */
+.page {
+  min-height: 100vh;
+  padding-bottom: var(--bottom-nav-h, 0px);
+}
+
+.loading-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  width: 100%;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.08);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spinner-rotate 0.7s linear infinite;
+}
+
+@keyframes spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+.price-tag {
+  font-weight: 700;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.gold-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 16px 0;
+  opacity: 0.3;
+}
+
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(192,192,192,0.12);
+  border-radius: var(--radius-lg);
+}
+
+.car-img-placeholder {
+  background: linear-gradient(135deg, var(--surface), var(--card));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.1);
+}
+
+/* nav-link: base definition for desktop (outside media query) */
+.nav-link {
+  color: rgba(255,255,255,0.55);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-link:hover {
+  color: var(--gold);
+  background: rgba(212,196,168,0.06);
+}
+.nav-link.active {
+  color: var(--gold);
+  background: rgba(212,196,168,0.1);
+}
 
 /* Price flash animation */
 @keyframes priceFlash {

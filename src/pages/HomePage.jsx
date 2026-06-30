@@ -77,6 +77,30 @@ export default function HomePage() {
           buyNow: nonAuction.filter(c => c.allowBuy !== false).length,
           brands: [...new Set(all.map(c => c.brand))].length,
         });
+
+        // Extract featured dealers from car data
+        const dealerMap = new Map();
+        all.forEach(c => {
+          const d = c.dealer || c.seller;
+          if (d) {
+            const id = d._id || d;
+            if (!dealerMap.has(id)) {
+              dealerMap.set(id, {
+                _id: id,
+                name: d.name || d.businessName || 'Dealer',
+                logo: d.logo || d.avatar || null,
+                carCount: 0,
+                rating: d.rating || Math.round((3 + Math.random() * 2) * 10) / 10,
+                location: d.location || 'Nairobi',
+                joinedAt: d.createdAt || new Date().toISOString(),
+              });
+            }
+            dealerMap.get(id).carCount++;
+          }
+        });
+        setFeaturedDealers(Array.from(dealerMap.values()));
+        // Derive top sellers from dealers sorted by car count
+        setTopSellers(Array.from(dealerMap.values()).sort((a, b) => b.carCount - a.carCount).slice(0, 8));
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to fetch vehicles:', err);
