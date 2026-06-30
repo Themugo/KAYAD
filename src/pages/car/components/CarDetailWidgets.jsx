@@ -22,8 +22,8 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onExpand }) {
   const handleTouchEnd = useCallback((e) => {
     if (touchX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
-    if (dx > 50) onPrev();
-    else if (dx < -50) onNext();
+    if (dx > 60) onPrev();
+    else if (dx < -60) onNext();
     touchX.current = null;
   }, [onPrev, onNext]);
 
