@@ -14,9 +14,6 @@ import HomeHero from './home/components/HomeHero';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
 import HomeFeaturePillars from './home/components/HomeFeaturePillars';
 import HomeCtaSection from './home/components/HomeCtaSection';
-import DealerSpotlight from './home/components/DealerSpotlight';
-import PrivateSellerSpotlight from './home/components/PrivateSellerSpotlight';
-import PrivateSellerSection from './home/components/PrivateSellerSection';
 import FeaturedDealers from './home/components/FeaturedDealers';
 import VehicleCategories from './home/components/VehicleCategories';
 import Testimonials from './home/components/Testimonials';
@@ -130,7 +127,7 @@ export default function HomePage() {
         </section>
 
         {/* 3. Featured Inventory */}
-        <section style={{ padding: '32px 0 24px' }}>
+        <section className="section-spacing">
           <div className="max-w-[1400px] mx-auto px-7">
             <div className="flex items-end justify-between mb-4">
               <div>
@@ -157,7 +154,7 @@ export default function HomePage() {
                 ))}
               </div>
             ) : displayCars.length > 0 ? (
-              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                 {displayCars.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
               </div>
             ) : (
@@ -171,67 +168,48 @@ export default function HomePage() {
         {/* 4. Live Auctions */}
         {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 
-        {/* 5. Dealer Spotlight */}
-        <DealerSpotlight dealers={featuredDealers.slice(0, 3)} />
+        {/* 5. Trust Signals */}
+        <section className="section-spacing">
+          <div className="max-w-[1400px] mx-auto px-7">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ fontSize: '32px' }}>🔒</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>Escrow Protected</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Your payment is held securely until you receive your vehicle</div>
+                </div>
+              </div>
+              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ fontSize: '32px' }}>✓</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>Verified Dealers</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>All dealers undergo rigorous verification before listing</div>
+                </div>
+              </div>
+              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ fontSize: '32px' }}>💬</div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>24/7 Support</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Our team is here to help with any questions or disputes</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-        {/* 6. Private Seller Spotlight */}
-        <PrivateSellerSpotlight sellers={topSellers.slice(0, 3)} />
-
-        {/* 6.5 Private Seller Section */}
-        <PrivateSellerSection />
-
-        {/* 6.6 Seller Success Stories */}
-        <SellerSuccessStories />
-
-        {/* 7. Advertisement Zone A */}
-        <div className="max-w-[1400px] mx-auto px-7 py-6">
-          <AdvertisementBanner
-            type="image"
-            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+A"
-            position="horizontal"
-            size="large"
-            linkUrl="/advertising"
-            altText="Advertisement Zone A"
-          />
-        </div>
-
-        {/* 8. Featured Dealers */}
+        {/* 6. Featured Dealers */}
         <FeaturedDealers dealers={featuredDealers.slice(0, 4)} />
 
-        {/* 9. Advertisement Zone B */}
-        <div className="max-w-[1400px] mx-auto px-7 py-6">
-          <AdvertisementBanner
-            type="image"
-            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+B"
-            position="horizontal"
-            size="large"
-            linkUrl="/advertising"
-            altText="Advertisement Zone B"
-          />
-        </div>
-
-        {/* 10. Vehicle Categories */}
+        {/* 7. Vehicle Categories */}
         <VehicleCategories />
 
-        {/* 11. Advertisement Zone C */}
-        <div className="max-w-[1400px] mx-auto px-7 py-6">
-          <AdvertisementBanner
-            type="image"
-            imageUrl="https://via.placeholder.com/1400x200?text=Advertisement+Zone+C"
-            position="horizontal"
-            size="large"
-            linkUrl="/advertising"
-            altText="Advertisement Zone C"
-          />
-        </div>
-
-        {/* 12. Testimonials */}
+        {/* 8. Testimonials */}
         <Testimonials />
 
-        {/* 13. Partners */}
+        {/* 9. Partners */}
         <Partners />
 
-        {/* 14. Feature Pillars & CTA */}
+        {/* 10. Feature Pillars & CTA */}
         <HomeFeaturePillars />
         <HomeCtaSection isAuth={isAuth} />
       </div>

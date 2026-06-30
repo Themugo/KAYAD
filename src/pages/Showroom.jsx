@@ -100,7 +100,7 @@ export default function Showroom() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const gridCols = 'repeat(auto-fill, minmax(min(100%, 270px), 1fr))';
+  const gridCols = 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))';
 
   // ─── Local UI state ────────────────────────────────────────────────────
   const [cars, setCars]                 = useState([]);
@@ -398,6 +398,7 @@ export default function Showroom() {
                 onChange={setKeywordInput}
                 size="sm"
                 placeholder="Search make, model, keyword…"
+                style={{ minHeight: isMobile ? '44px' : '40px' }}
               />
             </div>
 
@@ -424,18 +425,19 @@ export default function Showroom() {
                     aria-selected={isActive}
                     onClick={() => onFilterChange('category', c.value)}
                     style={{
-                      padding: '7px 16px',
+                      padding: isMobile ? '10px 16px' : '7px 16px',
                       borderRadius: 9999,
                       border: `1px solid ${isActive ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.08)'}`,
                       background: isActive ? 'rgba(212,196,168,0.10)' : 'rgba(255,255,255,0.02)',
                       color: isActive ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.55)',
-                      fontSize: 12, fontWeight: 700,
+                      fontSize: isMobile ? 13 : 12, fontWeight: 700,
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       letterSpacing: '0.04em',
                       fontFamily: 'var(--font-body, sans-serif)',
                       whiteSpace: 'nowrap',
                       flexShrink: 0,
+                      minHeight: isMobile ? '44px' : 'auto',
                     }}
                     onMouseEnter={e => {
                       if (!isActive) {
@@ -469,18 +471,19 @@ export default function Showroom() {
                   onChange={e => setSortBy(e.target.value)}
                   aria-label="Sort results"
                   style={{
-                    padding: '8px 28px 8px 12px',
+                    padding: isMobile ? '12px 28px 12px 12px' : '8px 28px 8px 12px',
                     borderRadius: 8,
                     border: '1px solid rgba(255,255,255,0.08)',
                     background: 'rgba(255,255,255,0.02)',
                     color: 'rgba(255,255,255,0.85)',
-                    fontSize: 12,
+                    fontSize: isMobile ? 13 : 12,
                     fontWeight: 600,
                     cursor: 'pointer',
                     outline: 'none',
                     appearance: 'none',
                     WebkitAppearance: 'none',
                     fontFamily: 'var(--font-body, sans-serif)',
+                    minHeight: isMobile ? '44px' : 'auto',
                   }}
                 >
                   {SORT_OPTIONS.map(o => (
@@ -512,12 +515,13 @@ export default function Showroom() {
                   aria-label="Grid view"
                   aria-pressed={viewMode === 'grid'}
                   style={{
-                    padding: '6px 9px', borderRadius: 6, border: 'none',
+                    padding: isMobile ? '10px 12px' : '6px 9px', borderRadius: 6, border: 'none',
                     background: viewMode === 'grid' ? 'rgba(212,196,168,0.12)' : 'transparent',
                     color: viewMode === 'grid' ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.45)',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     display: 'flex', alignItems: 'center',
+                    minHeight: isMobile ? '44px' : 'auto',
                   }}
                 >
                   <LayoutGrid size={14} />
@@ -528,12 +532,13 @@ export default function Showroom() {
                   aria-label="List view"
                   aria-pressed={viewMode === 'list'}
                   style={{
-                    padding: '6px 9px', borderRadius: 6, border: 'none',
+                    padding: isMobile ? '10px 12px' : '6px 9px', borderRadius: 6, border: 'none',
                     background: viewMode === 'list' ? 'rgba(212,196,168,0.12)' : 'transparent',
                     color: viewMode === 'list' ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.45)',
                     cursor: 'pointer',
                     transition: 'all 0.15s ease',
                     display: 'flex', alignItems: 'center',
+                    minHeight: isMobile ? '44px' : 'auto',
                   }}
                 >
                   <List size={14} />
@@ -873,7 +878,7 @@ export default function Showroom() {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: gridCols,
-                  gap: isMobile ? 12 : 18,
+                  gap: isMobile ? 16 : 24,
                 }}>
                   {cars.map((car, i) => {
                     const num = (page - 1) * 12 + i + 1;
