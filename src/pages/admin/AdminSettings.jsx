@@ -95,7 +95,7 @@ export default function AdminSettings() {
           lineHeight: c.lineHeight ?? DEFAULTS.lineHeight,
           listingFee: c.listingFee ?? 1000,
           auctionRegistrationFee: c.auctionRegistrationFee ?? 2000,
-          ghostCheckFee: c.ghostCheckFee ?? 2500,
+          inspectionFee: c.inspectionFee ?? 2500,
           commissionPercentage: c.commissionPercentage ?? 2,
           platformVat: c.platformVat ?? 16,
           buyerPremiumPct: c.buyerPremiumPct ?? 0,
@@ -157,7 +157,7 @@ export default function AdminSettings() {
         Object.assign(body, {
           listingFee: Number(config.listingFee || 0),
           auctionRegistrationFee: Number(config.auctionRegistrationFee || 0),
-          ghostCheckFee: Number(config.ghostCheckFee || 0),
+          inspectionFee: Number(config.inspectionFee || 0),
           commissionPercentage: Number(config.commissionPercentage || 0),
           platformVat: Number(config.platformVat || 0),
           buyerPremiumPct: Number(config.buyerPremiumPct || 0),

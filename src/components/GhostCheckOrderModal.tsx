@@ -5,7 +5,7 @@ import { useToast } from '../context/ToastContext';
 import { Star, ShieldCheck, Smartphone, CheckCircle, Clock, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const GHOST_CHECK_FEE = 2500;
+const INSPECTION_FEE = 2500;
 
 type InspectionOrder = {
   car?: string | { _id?: string };
@@ -199,7 +199,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
               <div style={{ background: 'rgba(212,196,168,0.04)', border: '1px solid rgba(212,196,168,0.1)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                   <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Inspection Fee</span>
-                  <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{formatKES(GHOST_CHECK_FEE)}</span>
+                  <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{formatKES(INSPECTION_FEE)}</span>
                 </div>
                 <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>Paid once per vehicle via M-Pesa</div>
               </div>
@@ -250,7 +250,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
                 </div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: '#fff', margin: '0 0 4px' }}>Confirm Payment</h3>
                 <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-                  An M-Pesa payment request of <strong style={{ color: '#fff' }}>{formatKES(GHOST_CHECK_FEE)}</strong> will be sent to <strong style={{ color: 'var(--gold)' }}>+254 {phone}</strong>
+                  An M-Pesa payment request of <strong style={{ color: '#fff' }}>{formatKES(INSPECTION_FEE)}</strong> will be sent to <strong style={{ color: 'var(--gold)' }}>+254 {phone}</strong>
                 </p>
               </div>
 
@@ -275,7 +275,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
                     textTransform: 'uppercase', letterSpacing: '0.06em',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   }}>
-                  {ordering ? 'Sending Payment Request...' : `Pay ${formatKES(GHOST_CHECK_FEE)} via M-Pesa`}
+                  {ordering ? 'Sending Payment Request...' : `Pay ${formatKES(INSPECTION_FEE)} via M-Pesa`}
                 </button>
                 <button onClick={() => setStep('check')} disabled={ordering}
                   style={{ padding: '12px 20px', borderRadius: 8, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: 11, cursor: ordering ? 'not-allowed' : 'pointer' }}>

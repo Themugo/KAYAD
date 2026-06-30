@@ -194,7 +194,7 @@ export default function InspectorDashboard() {
     }
   };
 
-  if (!user || user.role !== 'ghost_checker') {
+  if (!user || user.role !== 'inspector') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>

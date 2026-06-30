@@ -27,7 +27,7 @@ const ROLE_CONFIG = {
   escrow_officer:   { label: 'Escrow Officer',     icon: '🔒', color: '#22c55e' },
   ad_manager:       { label: 'Ad Manager',         icon: '📢', color: '#8b5cf6' },
   moderator:        { label: 'Moderator',          icon: '🛡', color: '#3b82f6' },
-  ghost_checker:    { label: 'Inspector',          icon: '🔍', color: '#22c55e' },
+  inspector:        { label: 'Inspector',          icon: '🔍', color: '#22c55e' },
 };
 
 const ROLE_LINKS = {
@@ -92,7 +92,7 @@ const ROLE_LINKS = {
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'Content review' },
     { to:'/admin/users',        icon: Users,        label:'Users',          desc:'Accounts' },
   ],
-  ghost_checker: [
+  inspector: [
     { to:'/admin/inspections',  icon: ClipboardCheck,label:'Inspections',   desc:'Vehicle inspection orders' },
     { to:'/admin/ntsa-queue',   icon: Car,          label:'NTSA Queue',     desc:'Verification queue' },
     { to:'/admin/cars',         icon: Car,          label:'Listings',       desc:'Vehicle listings' },

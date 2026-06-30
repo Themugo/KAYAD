@@ -8,7 +8,7 @@ export const STAFF_ROLES = [
   'escrow_officer',
   'ad_manager',
   'moderator',
-  'ghost_checker',
+  'inspector',
 ] as const;
 
 export const SELLER_ROLES = ['dealer', 'individual_seller'] as const;
@@ -51,7 +51,7 @@ export function safeRedirectPath(path: string, fallback = '/'): string {
 export function getPostAuthPath(user: User | undefined, fallback = '/'): string {
   const safeFallback = safeRedirectPath(fallback, '/');
   if (user?.mustChangePassword) return '/force-password-change';
-  if (user?.role === 'ghost_checker') return '/inspector';
+  if (user?.role === 'inspector') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
   if (isSellerRole(user?.role)) {
     if (user?.status !== 'approved') return '/dealer/onboarding';

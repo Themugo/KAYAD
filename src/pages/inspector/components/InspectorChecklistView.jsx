@@ -17,7 +17,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
   useEffect(() => {
     const timer = setTimeout(() => {
       const data = { checklist, notes, condition };
-      localStorage.setItem(`ghost_check_${activeTask._id}`, JSON.stringify(data));
+      localStorage.setItem(`inspection_${activeTask._id}`, JSON.stringify(data));
       setLastSaved(new Date());
     }, 2000);
     return () => clearTimeout(timer);
@@ -25,7 +25,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
 
   // Load saved state on mount
   useEffect(() => {
-    const saved = localStorage.getItem(`ghost_check_${activeTask._id}`);
+    const saved = localStorage.getItem(`inspection_${activeTask._id}`);
     if (saved) {
       try {
         const data = JSON.parse(saved);
