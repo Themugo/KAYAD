@@ -30,6 +30,7 @@ export default function AddCarPage() {
   const [coverImage, setCoverImage] = useState(0);
   const [step, setStep]       = useState(1);
   const [limitModal, setLimitModal] = useState(null);
+  const [completed, setCompleted] = useState({});
 
   const [form, setForm] = useState({
     title: '', brand: '', model: '', year: '',
@@ -133,7 +134,10 @@ export default function AddCarPage() {
             ) : <div />}
 
             {step < 4 ? (
-              <button className="btn btn-gold" onClick={() => setStep(s => s + 1)}>Continue →</button>
+              <button className="btn btn-gold" onClick={() => {
+                setCompleted(c => ({ ...c, step: true }));
+                setStep(s => s + 1);
+              }}>Continue →</button>
             ) : (
               <button className="btn btn-gold btn-lg" onClick={handleSubmit} disabled={loading}>
                 {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Publishing...</> : '🚗 Publish Listing'}
