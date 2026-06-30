@@ -50,99 +50,188 @@ export default function MonetizationCenter() {
   const promoted = featured.filter(c => c.isPromoted);
 
   return (
-    <div style={{ padding: '32px 28px', maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#fff', margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <DollarSign size={22} style={{ color: 'var(--gold)' }} /> Monetization Center
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, margin: 0 }}>Manage featured content, sponsorships, and homepage promotions</p>
+    <div style={{ padding: '40px 28px', maxWidth: 1400, margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 36, position: 'relative' }}>
+        {/* Decorative accent */}
+        <div style={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
+          opacity: 0.5,
+        }} />
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: 'linear-gradient(135deg, var(--gold), #e6c288)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <DollarSign size={24} style={{ color: '#0A1628' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
+              Admin Hub
+            </div>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+              Monetization Center
+            </h1>
+          </div>
+        </div>
+        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 12, maxWidth: 600, lineHeight: 1.6 }}>
+          Manage featured content, sponsorships, and homepage promotions to drive revenue and engagement
+        </p>
       </div>
 
-      <div className="grid gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
-        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Star size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Hero Vehicles</h3>
+      {/* Configuration Cards */}
+      <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', marginBottom: 32 }}>
+        {[
+          { icon: Star, label: 'Hero Vehicles', desc: 'Vehicle IDs shown in homepage hero slider', value: heroCarIds, onChange: setHeroCarIds, placeholder: 'carId1, carId2, carId3', color: '#F59E0B' },
+          { icon: Crown, label: 'Sponsored Vehicles', desc: 'Vehicle IDs marked as sponsored', value: sponsorCarIds, onChange: setSponsorCarIds, placeholder: 'carId1, carId2', color: '#8B5CF6' },
+          { icon: Shield, label: 'Sponsored Dealers', desc: 'Dealer IDs to show as sponsored', value: sponsorDealers, onChange: setSponsorDealers, placeholder: 'dealerId1, dealerId2', color: '#3B82F6' },
+          { icon: Crown, label: 'Featured Dealers', desc: 'Dealer IDs shown as #1 in Top-Rated section', value: featuredDealerIds, onChange: setFeaturedDealerIds, placeholder: 'dealerId1, dealerId2', color: '#22C55E' },
+        ].map((item, i) => (
+          <div key={i} style={{
+            borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.02)', padding: 20,
+            transition: 'all 0.2s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: `${item.color}20`, border: `1px solid ${item.color}40`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <item.icon size={18} style={{ color: item.color }} />
+              </div>
+              <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: '#fff' }}>
+                {item.label}
+              </h3>
+            </div>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: '0 0 14px', lineHeight: 1.5 }}>
+              {item.desc}
+            </p>
+            <input
+              value={item.value}
+              onChange={e => item.onChange(e.target.value)}
+              placeholder={item.placeholder}
+              style={{
+                width: '100%', padding: '12px 14px', borderRadius: 8,
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff', fontSize: 13, transition: 'all 0.2s',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+            />
           </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Vehicle IDs shown in homepage hero slider (comma-separated)</p>
-          <input value={heroCarIds} onChange={e => setHeroCarIds(e.target.value)} placeholder="carId1, carId2, carId3" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
-        </div>
-
-        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Crown size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Sponsored Vehicles</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Vehicle IDs marked as sponsored (comma-separated)</p>
-          <input value={sponsorCarIds} onChange={e => setSponsorCarIds(e.target.value)} placeholder="carId1, carId2" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
-        </div>
-
-        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Shield size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Sponsored Dealers</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Dealer IDs to show as sponsored (comma-separated)</p>
-          <input value={sponsorDealers} onChange={e => setSponsorDealers(e.target.value)} placeholder="dealerId1, dealerId2" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
-        </div>
-
-        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <Crown size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Featured Dealers</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Dealer IDs shown as #1 in Top-Rated Dealers section (comma-separated, ordered by priority)</p>
-          <input value={featuredDealerIds} onChange={e => setFeaturedDealerIds(e.target.value)} placeholder="dealerId1, dealerId2" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
-        </div>
+        ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 16, marginTop: 24 }}>
-        <button onClick={handleSaveConfig} disabled={saving} className="btn btn-gold" style={{ padding: '10px 28px', borderRadius: 10, fontWeight: 700 }}>
-          {saving ? 'Saving...' : 'Save Settings'}
+      {/* Save Button */}
+      <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+        <button
+          onClick={handleSaveConfig}
+          disabled={saving}
+          style={{
+            padding: '12px 32px', borderRadius: 10, fontWeight: 700, fontSize: 14,
+            background: 'linear-gradient(135deg, var(--gold), #e6c288)',
+            color: '#0A1628', border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s', opacity: saving ? 0.6 : 1,
+          }}
+          onMouseEnter={e => { if (!saving) e.currentTarget.style.opacity = '0.9'; }}
+          onMouseLeave={e => { if (!saving) e.currentTarget.style.opacity = '1'; }}
+        >
+          {saving ? <><div className="spinner" style={{ width: 16, height: 16, display: 'inline-block', marginRight: 8 }} /> Saving...</> : 'Save Settings'}
         </button>
       </div>
 
-      <div className="grid gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', marginTop: 32 }}>
-        <Link to="/admin/ads" className="no-underline rounded-xl border p-6 block transition-all hover:border-gold/30" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Megaphone size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Homepage Ads</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Manage banner ads, sponsored placements, and promotional campaigns →</p>
-        </Link>
-
-        <Link to="/admin/settings" className="no-underline rounded-xl border p-6 block transition-all hover:border-gold/30" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Settings size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Platform Config</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>System settings, branding, and global platform configuration →</p>
-        </Link>
-
-        <Link to="/admin/cars" className="no-underline rounded-xl border p-6 block transition-all hover:border-gold/30" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Car size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Featured Vehicles</h3>
-          </div>
-          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Manage all vehicle listings and toggle featured status →</p>
-        </Link>
+      {/* Quick Links */}
+      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', marginTop: 40 }}>
+        {[
+          { icon: Megaphone, label: 'Homepage Ads', desc: 'Manage banner ads, sponsored placements, and promotional campaigns', to: '/admin/ads', color: '#8B5CF6' },
+          { icon: Settings, label: 'Platform Config', desc: 'System settings, branding, and global platform configuration', to: '/admin/settings', color: '#3B82F6' },
+          { icon: Car, label: 'Featured Vehicles', desc: 'Manage all vehicle listings and toggle featured status', to: '/admin/cars', color: '#22C55E' },
+        ].map((item, i) => (
+          <Link key={i} to={item.to} style={{ textDecoration: 'none' }}>
+            <div style={{
+              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08),
+              background: 'rgba(255,255,255,0.02)', padding: 20,
+              transition: 'all 0.2s', cursor: 'pointer',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = `${item.color}40`; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: `${item.color}20`, border: `1px solid ${item.color}40`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <item.icon size={16} style={{ color: item.color }} />
+                </div>
+                <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>
+                  {item.label}
+                </h3>
+              </div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', margin: 0, lineHeight: 1.5 }}>
+                {item.desc} →
+              </p>
+            </div>
+          </Link>
+        ))}
       </div>
 
+      {/* Featured Vehicles Preview */}
       {promoted.length > 0 && (
-        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)', marginTop: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <TrendingUp size={16} style={{ color: 'var(--gold)' }} />
-            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Currently Featured ({promoted.length})</h3>
+        <div style={{
+          borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.02)', padding: 24, marginTop: 40,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: 'rgba(212,196,168,0.15)', border: '1px solid rgba(212,196,168,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: '#fff' }}>
+                  Currently Featured
+                </h3>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '4px 0 0 0' }}>
+                  {promoted.length} vehicles promoted across the platform
+                </p>
+              </div>
+            </div>
+            <Link to="/admin/cars" style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>
+              Manage All →
+            </Link>
           </div>
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', display: 'grid' }}>
+          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {promoted.slice(0, 12).map(car => (
-              <div key={car._id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="w-10 h-8 rounded overflow-hidden flex-shrink-0">
+              <div key={car._id} style={{
+                display: 'flex', alignItems: 'center', gap: 12, padding: '10px',
+                borderRadius: 8, background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.04)',
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'; }}
+              >
+                <div style={{ width: 56, height: 40, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
                   <img src={car.images?.[0] || car.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
-                <div className="min-w-0">
-                  <div className="text-xs text-white font-medium truncate">{car.title}</div>
-                  <div className="text-[9px] text-gold">KES {(car.price || 0).toLocaleString()}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.9)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {car.title}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, marginTop: 2 }}>
+                    KES {(car.price || 0).toLocaleString()}
+                  </div>
                 </div>
               </div>
             ))}
