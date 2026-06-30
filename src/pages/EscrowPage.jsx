@@ -218,12 +218,12 @@ export default function EscrowPage() {
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
         ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔒</div>
-            <h3>No escrow records</h3>
-            <p>When you buy a car via M-Pesa, your payment is protected here until you receive it.</p>
-            <Link to="/" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars →</Link>
-          </div>
+          <EmptyState
+            icon="🔒"
+            title="No escrow records"
+            description="When you buy a car via M-Pesa, your payment is protected here until you receive it."
+            action={{ label: 'Browse Cars', onClick: () => window.location.href = '/' }}
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {filtered.map(e => {

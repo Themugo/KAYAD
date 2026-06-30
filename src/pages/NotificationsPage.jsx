@@ -108,11 +108,12 @@ export default function NotificationsPage() {
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
         ) : notifs.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔔</div>
-            <h3>No notifications</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>You're all caught up!</p>
-          </div>
+          <EmptyState
+            icon="🔔"
+            title="No notifications"
+            description="You're all caught up! We'll notify you when there's something important."
+            size="sm"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {notifs.map((n, i) => {

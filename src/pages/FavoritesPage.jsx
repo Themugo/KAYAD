@@ -92,12 +92,12 @@ export default function FavoritesPage() {
 
         {/* Cars Grid */}
         {cars.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">❤️</div>
-            <h3>No saved cars yet</h3>
-            <p>Tap the heart on any listing to save it here for later.</p>
-            <Link to="/" className="btn btn-gold" style={{ marginTop: 16 }}>Browse Cars</Link>
-          </div>
+          <EmptyState
+            icon="❤️"
+            title="No saved cars yet"
+            description="Tap the heart on any listing to save it here for later."
+            action={{ label: 'Browse Cars', onClick: () => window.location.href = '/' }}
+          />
         ) : (
           <div className="car-grid">
             {sorted.map(car => (

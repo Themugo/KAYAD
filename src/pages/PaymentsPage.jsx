@@ -103,11 +103,12 @@ export default function PaymentsPage() {
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
         ) : filtered.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">💳</div>
-            <h3>{filter === 'all' && typeFilter === 'all' ? 'No payments yet' : 'No matching payments'}</h3>
-            <p>Your M-Pesa transactions appear here after placing bids or buying cars.</p>
-          </div>
+          <EmptyState
+            icon="💳"
+            title={filter === 'all' && typeFilter === 'all' ? 'No payments yet' : 'No matching payments'}
+            description="Your M-Pesa transactions appear here after placing bids or buying cars."
+            action={{ label: 'Browse Cars', onClick: () => window.location.href = '/' }}
+          />
         ) : (
           <div className="card">
             <div className="table-wrap">

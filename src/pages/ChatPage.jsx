@@ -244,7 +244,12 @@ export default function ChatPage() {
 
           <div className="chat-list">
             {filteredChats.length === 0 ? (
-              <div className="chat-empty">{search ? 'No conversations match your search' : 'No conversations yet'}</div>
+              <EmptyState
+                icon="💬"
+                title={search ? 'No conversations match your search' : 'No conversations yet'}
+                description={search ? 'Try adjusting your search terms to find what you\'re looking for.' : 'Start a conversation with a dealer or seller to discuss a vehicle.'}
+                size="sm"
+              />
             ) : filteredChats.map(chat => {
               const other = otherParticipant(chat);
               const isActive = chat._id === active;
