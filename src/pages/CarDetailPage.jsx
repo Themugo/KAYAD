@@ -12,6 +12,7 @@ import { getDemoCar } from '../data/demoData';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
+import { useSocket } from '../context/SocketContext';
 import PaymentModal from '../components/PaymentModal';
 import InspectionButton from '../components/InspectionButton';
 import TcoCalculator from '../components/TcoCalculator';
@@ -28,7 +29,7 @@ import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
   Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
   Star, Eye, Bookmark, Zap, Award, Lock, Pin, TrendingUp,
-  CheckCircle, AlertTriangle, Clock, BarChart3, Phone, Mail
+  CheckCircle, AlertTriangle, Clock, BarChart3, Phone, Mail, X
 } from 'lucide-react';
 
 // Extracted sub-components
@@ -69,7 +70,10 @@ export default function CarDetailPage() {
   const [ntsaStatus, setNtsaStatus] = useState(null);
   const [ntsaLoading, setNtsaLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const [showBidConfirm, setShowBidConfirm] = useState(false);
+  const [outbidAlert, setOutbidAlert] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const { on, connected } = useSocket();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,16 +159,29 @@ export default function CarDetailPage() {
   const [bidPlacing, setBidPlacing] = useState(false);
   const [bidError, setBidError] = useState('');
   const [countdown, setCountdown] = useState('');
+  const bidHistoryRef = useRef([]);
+
+  // Reserve status calculation
+  const reserveMet = !car?.reservePrice || (car.currentBid || car.price || 0) >= car.reservePrice;
+  const showReserve = car?.reservePrice > 0 && car.reserveMode !== 'hidden';
 
   useEffect(() => {
     if (!car?._id || !isLive) return;
     const fetchBids = () => {
-      bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch((error) => console.error('Failed to fetch bids:', error));
+      bidsAPI.getForCar(car._id).then(d => {
+        setBidHistory(d?.bids || []);
+        bidHistoryRef.current = d?.bids || [];
+      }).catch((error) => console.error('Failed to fetch bids:', error));
     };
     fetchBids();
     const iv = setInterval(fetchBids, 8000);
     return () => clearInterval(iv);
   }, [car?._id, isLive]);
+
+  // Sync bidHistoryRef
+  useEffect(() => {
+    bidHistoryRef.current = bidHistory;
+  }, [bidHistory]);
 
   useEffect(() => {
     if (!isLive || !car?.auctionEnd) return;
@@ -182,20 +199,67 @@ export default function CarDetailPage() {
     return () => clearInterval(iv);
   }, [isLive, car?.auctionEnd]);
 
-  const handlePlaceBid = async () => {
+  const handleShowBidConfirm = () => {
     if (!isAuth) { navigate(`/login?redirect=/cars/${id}`); return; }
-    if (!bidAmount || bidAmount <= (car.currentBid || car.startingBid || 0)) {
-      setBidError('Bid must be higher than current bid');
+    const minBid = (car.currentBid || car.startingBid || 0) + 5000;
+    if (!bidAmount || bidAmount < minBid) {
+      setBidError(`Bid must be at least KES ${minBid.toLocaleString()}`);
       return;
     }
+    setShowBidConfirm(true);
+  };
+
+  const handlePlaceBid = async () => {
+    setShowBidConfirm(false);
     setBidPlacing(true); setBidError('');
     try {
       await bidsAPI.place(car._id, { amount: bidAmount });
       setCar(c => ({ ...c, currentBid: bidAmount, bidsCount: (c?.bidsCount || 0) + 1 }));
+      toast('Bid placed successfully!', 'success');
       bidsAPI.getForCar(car._id).then(d => setBidHistory(d?.bids || [])).catch((error) => console.error('Failed to fetch bids after placement:', error));
     } catch (e) { setBidError(e?.response?.data?.message || 'Bid failed'); }
     finally { setBidPlacing(false); }
   };
+
+  // Real-time bid events via socket
+  useEffect(() => {
+    if (!on || !isLive) return;
+    const offBid = on('newBid', (data) => {
+      if (data.carId !== id) return;
+      setCar(c => ({ ...c, currentBid: data.amount, bidsCount: (c?.bidsCount || 0) + 1 }));
+      setBidHistory(prev => [data, ...prev].slice(0, 30));
+      const minNext = data.amount + 5000;
+      setBidAmount(minNext);
+
+      // Outbid check
+      if (isAuth && data.userId && data.userId !== user?._id && data.userId !== user?.id) {
+        const myBids = bidHistoryRef.current.filter(b => String(b.userId) === String(user._id));
+        if (myBids.length > 0) {
+          setOutbidAlert(true);
+          setTimeout(() => setOutbidAlert(false), 5000);
+          toast('📢 You\'ve been outbid! Place a higher bid to stay ahead.', 'info', { duration: 5000 });
+        }
+      }
+    });
+
+    const offEnd = on('auctionEnded', (data) => {
+      if (data.carId !== id) return;
+      const isWinner = data.winner && (String(data.winner) === String(user?._id) || String(data.winner) === String(user?.id));
+      if (isWinner) {
+        toast('🏆 You won the auction! Congratulations!', 'success');
+      } else {
+        toast('🏁 Auction has ended.', 'info');
+      }
+    });
+
+    const offExt = on('auctionExtended', (data) => {
+      if (data.carId !== id) return;
+      setCar(prev => ({ ...prev, auctionEnd: data.newEndTime }));
+      toast('⏱ Auction extended by 2 min due to late bidding!', 'info');
+    });
+
+    return () => { offBid(); offEnd(); offExt(); };
+  }, [id, on, isLive, isAuth, user]);
 
   const handleBuy = (type) => {
     if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }
@@ -714,10 +778,17 @@ export default function CarDetailPage() {
                       bidAmount={bidAmount}
                       onBidAmountChange={v => setBidAmount(v)}
                       onPlaceBid={handlePlaceBid}
+                      onShowConfirm={handleShowBidConfirm}
                       bidPlacing={bidPlacing}
                       bidError={bidError}
                       bidHistory={bidHistory}
                       countdown={countdown}
+                      isAuth={isAuth}
+                      reserveMet={reserveMet}
+                      showReserve={showReserve}
+                      bidCount={car.bidsCount}
+                      currentBid={car.currentBid}
+                      startingBid={car.startingBid}
                     />
                   )}
 
@@ -948,6 +1019,97 @@ export default function CarDetailPage() {
             'success'
           )}
         />
+      )}
+
+      {showBidConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          backdropFilter: 'blur(4px)',
+        }}>
+          <div style={{
+            background: 'var(--card)', border: '1px solid var(--border)',
+            borderRadius: 16, padding: 24, maxWidth: 420, width: '100%',
+            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+            animation: 'fadeInUp 0.3s ease',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>
+                Confirm Your Bid
+              </div>
+              <button 
+                onClick={() => setShowBidConfirm(false)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 16, lineHeight: 1.6 }}>
+              You are about to place a bid of <strong style={{ color: 'var(--gold)' }}>KES {Number(bidAmount).toLocaleString()}</strong> on {car.title}.
+              <br /><br />
+              This is a binding bid. If you win the auction, you'll be required to complete the purchase through escrow.
+            </div>
+            <div style={{ 
+              padding: 12, borderRadius: 8, background: 'rgba(212,196,168,0.08)', 
+              border: '1px solid rgba(212,196,168,0.15)', marginBottom: 16 
+            }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Your Bid</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>
+                KES {Number(bidAmount).toLocaleString()}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={handlePlaceBid}
+                disabled={bidPlacing}
+                style={{
+                  flex: 1, padding: '14px', borderRadius: 10, background: 'var(--gold)',
+                  color: '#000', border: 'none', fontSize: 13, fontWeight: 800,
+                  cursor: bidPlacing ? 'wait' : 'pointer', textTransform: 'uppercase',
+                  transition: 'all 0.2s', opacity: bidPlacing ? 0.6 : 1,
+                }}
+              >
+                {bidPlacing ? 'Processing...' : 'Confirm Bid'}
+              </button>
+              <button
+                onClick={() => setShowBidConfirm(false)}
+                disabled={bidPlacing}
+                style={{
+                  flex: 1, padding: '14px', borderRadius: 10, background: 'transparent',
+                  color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)',
+                  fontSize: 13, fontWeight: 600, cursor: bidPlacing ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Outbid Alert Toast */}
+      {outbidAlert && (
+        <div style={{
+          position: 'fixed', top: 20, right: 20, zIndex: 10000,
+          padding: '12px 16px', borderRadius: 10,
+          background: 'rgba(239,68,68,0.95)', backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(239,68,68,0.3)',
+          display: 'flex', alignItems: 'center', gap: 10,
+          animation: 'slideInRight 0.4s ease',
+          boxShadow: '0 10px 30px rgba(239,68,68,0.3)',
+        }}>
+          <AlertTriangle size={18} style={{ color: '#fff' }} />
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>
+            You've been outbid!
+          </div>
+          <button 
+            onClick={() => setOutbidAlert(false)}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', marginLeft: 8 }}
+          >
+            <X size={16} />
+          </button>
+        </div>
       )}
     </div>
     </>
