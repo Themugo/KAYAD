@@ -91,16 +91,16 @@ export default function BuyerDashboard() {
 
   // Activity feed data
   const activities = [
-    { id: '1', icon: Heart, title: 'Added to favorites', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' as const },
-    { id: '2', icon: Gavel, title: 'Placed bid', description: 'Mazida CX-5 - KES 2,500,000', timestamp: '5h ago', color: 'blue' as const },
-    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3,100,000', timestamp: '1d ago', color: 'green' as const },
+    { id: '1', icon: Heart, title: 'Added to favorites', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' },
+    { id: '2', icon: Gavel, title: 'Placed bid', description: 'Mazida CX-5 - KES 2,500,000', timestamp: '5h ago', color: 'blue' },
+    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3,100,000', timestamp: '1d ago', color: 'green' },
   ];
 
   // Quick actions
   const quickActions = [
-    { id: '1', label: 'Browse Showroom', icon: Car, to: '/showroom', color: 'gold' as const },
-    { id: '2', label: 'View Auctions', icon: Gavel, to: '/auctions', color: 'blue' as const },
-    { id: '3', label: 'My Favorites', icon: Heart, to: '/favorites', color: 'gold' as const },
+    { id: '1', label: 'Browse Showroom', icon: Car, to: '/showroom', color: 'gold' },
+    { id: '2', label: 'View Auctions', icon: Gavel, to: '/auctions', color: 'blue' },
+    { id: '3', label: 'My Favorites', icon: Heart, to: '/favorites', color: 'gold' },
   ];
 
   return (

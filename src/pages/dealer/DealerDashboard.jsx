@@ -252,28 +252,28 @@ export default function DealerDashboard() {
                   title="Total Listings"
                   value={cars.length}
                   icon={Car}
-                  trend={12}
+                  trend={trends?.listingGrowth}
                   color="gold"
                 />
                 <KPICard
                   title="Active Auctions"
                   value={s.activeAuctions || 0}
                   icon={Gavel}
-                  trend={8}
+                  trend={trends?.auctionGrowth}
                   color="blue"
                 />
                 <KPICard
                   title="Total Revenue"
                   value={`KES ${totalRevenue.toLocaleString()}`}
                   icon={TrendingUp}
-                  trend={15}
+                  trend={trends?.revenueGrowth}
                   color="gold"
                 />
                 <KPICard
                   title="Conversion Rate"
                   value={`${trends?.overall || 0}%`}
                   icon={BarChart3}
-                  trend={5}
+                  trend={trends?.conversionGrowth}
                   color="green"
                 />
               </StatRow>

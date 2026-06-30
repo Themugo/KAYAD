@@ -260,6 +260,7 @@ export default function EscrowVaultPortal() {
                     maxLength={4}
                     placeholder="0000"
                     value={otp}
+                    autoComplete="one-time-code"
                     onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     style={{ fontSize: 24, textAlign: 'center', letterSpacing: 8 }}
                   />

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import usePageMeta from "../hooks/usePageMeta";
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [sellerType, setSellerType] = useState(params.get("role") === "individual_seller" ? "individual_seller" : "dealer");
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     if (isAuth) navigate("/dashboard", { replace: true });
@@ -25,10 +27,14 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 8) {
-      toast("Password must be at least 8 characters", "error");
+    const newErrors = {};
+    if (form.password.length < 8) newErrors.password = "At least 8 characters";
+    if (!/^07[0-9]{8}$/.test(form.phone.replace(/\s/g, ''))) newErrors.phone = "Enter a valid Safaricom number (0712 345 678)";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
+    setErrors({});
     setLoading(true);
     try {
       const body = {
@@ -64,27 +70,45 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div className="input-group">
               <label className="input-label">Full Name</label>
-              <input className="input" type="text" placeholder="John Doe" value={form.name} onChange={(e) => set("name", e.target.value)} required autoComplete="name" />
+              <input className="input" type="text" placeholder="John Doe" value={form.name} onChange={(e) => { set("name", e.target.value); setErrors(p => ({ ...p, name: '' })); }} required autoComplete="name" />
+              {errors.name && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.name}</span>}
             </div>
 
             <div className="input-group">
               <label className="input-label">Email</label>
-              <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => set("email", e.target.value)} required autoComplete="email" />
+              <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => { set("email", e.target.value); setErrors(p => ({ ...p, email: '' })); }} required autoComplete="email" />
+              {errors.email && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.email}</span>}
             </div>
 
             <div className="input-group">
               <label className="input-label">Password</label>
               <div style={{ position: "relative" }}>
-                <input className="input" type={showPwd ? "text" : "password"} placeholder="At least 8 characters" value={form.password} onChange={(e) => set("password", e.target.value)} required autoComplete="new-password" style={{ paddingRight: 44 }} />
-                <button type="button" onClick={() => setShowPwd(!showPwd)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 16 }}>
-                  {showPwd ? "🙈" : "👁"}
+                <input className="input" type={showPwd ? "text" : "password"} placeholder="At least 8 characters" value={form.password} onChange={(e) => { set("password", e.target.value); setErrors(p => ({ ...p, password: '' })); }} required autoComplete="new-password" style={{ paddingRight: 44 }} />
+                <button type="button" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? "Hide password" : "Show password"} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", display: "flex" }}>
+                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {errors.password && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.password}</span>}
+              {form.password && !errors.password && (
+                <div style={{ marginTop: 6 }}>
+                  <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{
+                      height: '100%', borderRadius: 2, transition: 'all 0.3s',
+                      width: `${Math.min(100, form.password.length * 10)}%`,
+                      background: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#22c55e',
+                    }} />
+                  </div>
+                  <div style={{ fontSize: 11, color: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#22c55e', marginTop: 3 }}>
+                    {form.password.length < 6 ? 'Weak' : form.password.length < 10 ? 'Fair' : 'Strong'}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="input-group">
               <label className="input-label">Phone (M-Pesa)</label>
-              <input className="input" type="tel" placeholder="0712 345 678" value={form.phone} onChange={(e) => set("phone", e.target.value)} required autoComplete="tel" />
+              <input className="input" type="tel" placeholder="0712 345 678" value={form.phone} onChange={(e) => { set("phone", e.target.value); setErrors(p => ({ ...p, phone: '' })); }} required autoComplete="tel" />
+              {errors.phone && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.phone}</span>}
             </div>
 
             <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", margin: "4px 0" }}>

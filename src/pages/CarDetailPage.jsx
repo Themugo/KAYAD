@@ -23,6 +23,7 @@ import { VehicleStructuredData, BreadcrumbStructuredData } from '../components/S
 import SEOHead from '../components/SEOHead';
 import { generateVehicleMetadata } from '../utils/seoService';
 import usePageMeta from '../hooks/usePageMeta';
+import useMediaQuery from '../hooks/useMediaQuery';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
   Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
@@ -67,6 +68,7 @@ export default function CarDetailPage() {
   const [ntsaStatus, setNtsaStatus] = useState(null);
   const [ntsaLoading, setNtsaLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -271,7 +273,6 @@ export default function CarDetailPage() {
   );
 
   const price = car.currentBid || car.price || 0;
-  const priceStr = price >= 1e6 ? `${(price/1e6).toFixed(2)}M` : `${(price/1000).toFixed(0)}K`;
 
   const isScheduled = car?.auctionStatus === 'scheduled';
   const showAuctionCard = isLive || isScheduled;
@@ -279,7 +280,7 @@ export default function CarDetailPage() {
   return (
     <>
       {seoMetadata && <SEOHead metadata={seoMetadata} />}
-      <div className="car-detail-page">
+      <div className="car-detail-page" style={isMobile ? { paddingBottom: 80 } : undefined}>
       <VehicleStructuredData car={car} />
       <BreadcrumbStructuredData items={[
       { name: 'Home', url: '/' },
@@ -521,7 +522,7 @@ export default function CarDetailPage() {
                 <div className="price-box-label">
                   {isLive && car.currentBid > 0 ? 'Current Bid' : isP2P || car.escrowEnabled !== false ? 'Escrow Price' : 'Buy Now Price'}
                 </div>
-                <div className="price-box-amount">KES {priceStr}</div>
+                <div className="price-box-amount">{formatKES(price)}</div>
                 {isLive && car.currentBid > 0 && (
                   <div className="price-box-starting">Starting: KES {(car.price / 1000).toFixed(0)}K</div>
                 )}
@@ -703,6 +704,77 @@ export default function CarDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Mobile sticky bottom bar */}
+      {isMobile && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+          background: 'rgba(5,5,5,0.96)',
+          backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          padding: '10px 16px',
+          paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {isLive && car.currentBid > 0 ? 'Current Bid' : isLive ? 'Starting Bid' : 'Price'}
+            </div>
+            <div style={{
+              fontSize: 18, fontWeight: 700, color: 'var(--gold)',
+              fontFamily: 'var(--font-display, "Cormorant Garamond", serif)',
+              fontStyle: 'italic',
+            }}>
+              {formatKES(price)}
+            </div>
+          </div>
+          {isOwner ? (
+            <Link to={`/dealer/edit/${car._id}`} style={{
+              padding: '10px 20px', borderRadius: 8,
+              background: 'var(--gold)', color: '#000',
+              fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              whiteSpace: 'nowrap', flexShrink: 0,
+            }}>
+              Edit Listing
+            </Link>
+          ) : (
+            <>
+              {car.allowBuy && (
+                <button onClick={() => handleBuy('escrow')} style={{
+                  padding: '10px 20px', borderRadius: 8,
+                  background: 'var(--gold)', color: '#000',
+                  fontSize: 13, fontWeight: 700, border: 'none',
+                  cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+                }}>
+                  {isP2P ? 'Buy via Escrow' : 'Buy Now'}
+                </button>
+              )}
+              {dv.chatEnabled && !car.chatDisabled && (
+                <button onClick={handleChat} style={{
+                  width: 40, height: 40, borderRadius: 8,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', flexShrink: 0,
+                  color: 'rgba(255,255,255,0.5)',
+                }}>
+                  <MessageCircle size={18} />
+                </button>
+              )}
+              <button onClick={handleFav} style={{
+                width: 40, height: 40, borderRadius: 8,
+                background: isFav ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${isFav ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', flexShrink: 0,
+                color: isFav ? '#ef4444' : 'rgba(255,255,255,0.5)',
+              }}>
+                <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
+              </button>
+            </>
+          )}
+        </div>
+      )}
 
       {showGallery && (
         <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />

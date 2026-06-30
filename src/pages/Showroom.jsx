@@ -60,11 +60,12 @@ const CATEGORY_PILLS = [
 ];
 
 const SORT_OPTIONS = [
-  { value: 'default',    label: 'Curated' },
-  { value: 'newest',     label: 'Newest first' },
-  { value: 'price_asc',  label: 'Price ↑' },
-  { value: 'price_desc', label: 'Price ↓' },
-  { value: 'views_desc', label: 'Most viewed' },
+  { value: 'default',       label: 'Curated' },
+  { value: 'newest',        label: 'Newest first' },
+  { value: 'ending_soon',   label: 'Ending soonest' },
+  { value: 'price_asc',     label: 'Price ↑' },
+  { value: 'price_desc',    label: 'Price ↓' },
+  { value: 'views_desc',    label: 'Most viewed' },
 ];
 
 const FILTER_LABELS = {
@@ -121,7 +122,7 @@ export default function Showroom() {
 
   // Local mirror of the keyword for snappy typing; debounced before going to URL.
   const [keywordInput, setKeywordInput] = useState(searchParams.get('keyword') || '');
-  const debouncedKeyword = useDebouncedValue(keywordInput, 300);
+  const debouncedKeyword = useDebouncedValue(keywordInput, 150);
 
   const socket    = useSocket();
   const { toast } = useToast();
@@ -263,6 +264,14 @@ export default function Showroom() {
   useEffect(() => {
     if (sentinelEntry?.isIntersecting && hasMore && !loading) setPage(p => p + 1);
   }, [sentinelEntry, hasMore, loading]);
+
+  // Close saved menu on outside click
+  useEffect(() => {
+    if (!showSavedMenu) return;
+    const handleClick = () => setShowSavedMenu(false);
+    document.addEventListener('click', handleClick, { once: true });
+    return () => document.removeEventListener('click', handleClick);
+  }, [showSavedMenu]);
 
   // ─── Saved searches actions ───────────────────────────────────────────
   const handleSaveSearch = async () => {
@@ -880,41 +889,40 @@ export default function Showroom() {
                   gridTemplateColumns: gridCols,
                   gap: isMobile ? 16 : 24,
                 }}>
-                  {cars.map((car, i) => {
-                    const num = (page - 1) * 12 + i + 1;
-                    return (
-                      <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ flexShrink: 0, width: 28, textAlign: 'center', fontFamily: 'var(--font-display,serif)', fontStyle: 'italic', fontWeight: 900, fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>{num}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}><CartyGrid car={car} isMobile={isMobile} /></div>
+                  {cars.map(car => (
+                      <div key={car._id}>
+                        <CartyGrid car={car} isMobile={isMobile} />
                       </div>
-                    );
-                  })}
+                    ))}
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {cars.map((car, i) => {
-                    const num = (page - 1) * 12 + i + 1;
-                    return (
-                      <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ flexShrink: 0, width: 28, textAlign: 'center', fontFamily: 'var(--font-display,serif)', fontStyle: 'italic', fontWeight: 900, fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1 }}>{num}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}><CartyGrid car={car} listView isMobile={isMobile} /></div>
+                  {cars.map(car => (
+                      <div key={car._id}>
+                        <CartyGrid car={car} listView isMobile={isMobile} />
                       </div>
-                    );
-                  })}
+                    ))}
                 </div>
               )}
 
-              {/* Infinite scroll sentinel */}
+              {/* Infinite scroll sentinel + Load More fallback */}
               {hasMore && (
-                <div
-                  ref={sentinelRef}
-                  style={{
-                    display: 'flex', justifyContent: 'center',
-                    padding: 32, color: 'rgba(255,255,255,0.4)',
-                  }}
-                >
-                  <Loader size={18} className="spin" />
-                </div>
+                <>
+                  <div
+                    ref={sentinelRef}
+                    style={{
+                      display: 'flex', justifyContent: 'center',
+                      padding: 32, color: 'rgba(255,255,255,0.4)',
+                    }}
+                  >
+                    <Loader size={18} className="spin" />
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '0 0 32px' }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => setPage(p => p + 1)}>
+                      Load More
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </main>

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { carsAPI, escrowAPI } from '../api/api';
+import { timeAgo } from '../utils/helpers';
 import { Car, TrendingUp, Users, Shield, Clock, DollarSign, Plus, Eye, MessageCircle } from 'lucide-react';
 import CartyGrid from '../components/CartyGrid';
 import BackButton from '../components/BackButton';
@@ -135,9 +136,9 @@ export default function PrivateSellerDashboard() {
               <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
               <QuickActions 
                 actions={[
-                  { id: '1', label: 'List a Vehicle', icon: Plus, to: '/sell', color: 'gold' as const },
-                  { id: '2', label: 'My Listings', icon: Car, to: '/seller', color: 'gold' as const },
-                  { id: '3', label: 'View Analytics', icon: TrendingUp, to: '/seller/analytics', color: 'blue' as const },
+                  { id: '1', label: 'List a Vehicle', icon: Plus, to: '/sell', color: 'gold' },
+                  { id: '2', label: 'My Listings', icon: Car, to: '/seller', color: 'gold' },
+                  { id: '3', label: 'View Analytics', icon: TrendingUp, to: '/seller/analytics', color: 'blue' },
                 ]} 
               />
             </div>
@@ -172,11 +173,20 @@ export default function PrivateSellerDashboard() {
               {/* Activity Feed */}
               <div className="lg:col-span-1">
                 <ActivityFeed 
-                  activities={[
-                    { id: '1', icon: Car, title: 'Listing created', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' as const },
-                    { id: '2', icon: MessageCircle, title: 'New inquiry', description: 'Mazda CX-5 - Buyer interested', timestamp: '5h ago', color: 'blue' as const },
-                    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3.1M', timestamp: '1d ago', color: 'green' as const },
-                  ]}
+                  activities={
+                    listings.length > 0
+                      ? listings.slice(0, 5).map(l => ({
+                          id: l._id,
+                          icon: l.status === 'sold' ? Shield : Car,
+                          title: l.status === 'sold' ? 'Vehicle Sold' : 'Active Listing',
+                          description: l.title || `${l.brand || ''} ${l.model || ''}`,
+                          timestamp: l.createdAt ? timeAgo(l.createdAt) : '',
+                          color: l.status === 'sold' ? 'green' : 'gold',
+                        }))
+                      : [
+                          { id: 'welcome', icon: Car, title: 'Welcome to Kayad', description: 'List your first vehicle to get started', timestamp: '', color: 'gold' },
+                        ]
+                  }
                 />
               </div>
             </div>

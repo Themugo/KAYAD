@@ -25,7 +25,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return () => { document.body.style.overflow = ''; };
   }, [sidebarOpen]);
 
-  if (loading) return null;
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [loc.pathname]);
+
+  if (loading) return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#050505', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="spinner" />
+    </div>
+  );
 
   if (!isAuth) {
     return <Navigate to="/login" state={{ from: loc }} replace />;
@@ -53,12 +62,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <button
               className="sidebar-toggle-btn"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, marginRight: 4 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, marginRight: 4 }}
             >
               <Menu size={18} />
             </button>
             <span style={{ color: 'var(--gold)', fontWeight: 700 }}>Kayad</span>
-            {segments.map((seg, i) => (
+            {segments.length === 0 ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <ChevronRight size={12} />
+                <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600 }}>Dashboard</span>
+              </span>
+            ) : segments.map((seg, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <ChevronRight size={12} />
                 <span style={{

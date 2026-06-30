@@ -98,6 +98,10 @@ export default function EscrowPage() {
 
   // Real-time escrow updates
   useEffect(() => {
+    const offFunded = on('escrowFunded', data => {
+      setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'held' } : e));
+      toast('💰 Payment confirmed! Funds are now held in escrow.', 'success');
+    });
     const offRelease = on('escrowReleased', data => {
       setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'released', releasedAt: new Date().toISOString() } : e));
       toast('✅ Escrow released! Seller has been paid.', 'success');
@@ -110,7 +114,7 @@ export default function EscrowPage() {
       setEscrows(prev => prev.map(e => e._id === data.escrowId ? { ...e, status: 'disputed' } : e));
       toast('⚠️ Escrow disputed. Admin has been notified.', 'info');
     });
-    return () => { offRelease(); offRefund(); offDisputed(); };
+    return () => { offFunded(); offRelease(); offRefund(); offDisputed(); };
   }, [on]);
 
   const filtered = tab === 'all' ? escrows : escrows.filter(e => e.status === tab);

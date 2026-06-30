@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Car, Truck, Motorcycle, SUV } from 'lucide-react';
+import { Car, Truck, Bike, CarFront } from 'lucide-react';
 
 const CATEGORIES = [
   {
@@ -12,7 +12,7 @@ const CATEGORIES = [
   },
   {
     name: 'SUVs',
-    icon: <SUV size={32} />,
+    icon: <CarFront size={32} />,
     count: 89,
     image: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?auto=format&fit=crop&w=400&q=80',
     link: '/showroom?category=suv',
@@ -26,7 +26,7 @@ const CATEGORIES = [
   },
   {
     name: 'Motorcycles',
-    icon: <Motorcycle size={32} />,
+    icon: <Bike size={32} />,
     count: 67,
     image: 'https://images.unsplash.com/photo-1558981806-ec527fa84f39?auto=format&fit=crop&w=400&q=80',
     link: '/showroom?category=motorcycle',
