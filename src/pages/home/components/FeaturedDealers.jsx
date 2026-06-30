@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Star, Shield, CheckCircle, TrendingUp, MapPin, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, Shield, CheckCircle, TrendingUp, MapPin, Award, Crown } from 'lucide-react';
+import { adminAPI } from '../../../api/api';
 
 function TrustBadge({ score }) {
   if (!score) return null;
@@ -17,8 +19,27 @@ function TrustBadge({ score }) {
 }
 
 export default function FeaturedDealers({ dealers = [] }) {
+  const [featuredIds, setFeaturedIds] = useState([]);
+
+  useEffect(() => {
+    adminAPI.getConfig()
+      .then(cfg => setFeaturedIds(cfg.featuredDealerIds || []))
+      .catch(() => {});
+  }, []);
+
   if (dealers.length === 0) return null;
-  const top = dealers.slice(0, 3);
+
+  let ordered = [...dealers];
+  if (featuredIds.length > 0) {
+    const featured = [];
+    const rest = [];
+    ordered.forEach(d => {
+      if (featuredIds.includes(d._id)) featured.push(d);
+      else rest.push(d);
+    });
+    ordered = [...featured, ...rest];
+  }
+  const top = ordered.slice(0, 3);
 
   return (
     <section className="section-spacing border-t border-white/[0.04]">
@@ -59,7 +80,15 @@ export default function FeaturedDealers({ dealers = [] }) {
                         )}
                       </div>
                     </div>
-                    {d.isSponsored ? <span className="text-[8px] font-bold tracking-widest text-gold uppercase bg-gold/10 px-2 py-0.5 rounded-full">Sponsored</span> : i === 0 && <Award size={16} className="text-gold" />}
+                    {d.isSponsored ? (
+                      <span className="text-[8px] font-bold tracking-widest text-gold uppercase bg-gold/10 px-2 py-0.5 rounded-full">Sponsored</span>
+                    ) : i === 0 ? (
+                      featuredIds.length > 0 ? (
+                        <Crown size={16} className="text-gold" />
+                      ) : (
+                        <Award size={16} className="text-gold" />
+                      )
+                    ) : null}
                   </div>
 
                   <div className="flex items-center gap-3 mb-3 flex-wrap">

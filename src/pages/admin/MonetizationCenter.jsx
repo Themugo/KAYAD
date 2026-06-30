@@ -13,6 +13,7 @@ export default function MonetizationCenter() {
   const [heroCarIds, setHeroCarIds] = useState('');
   const [sponsorCarIds, setSponsorCarIds] = useState('');
   const [sponsorDealers, setSponsorDealers] = useState('');
+  const [featuredDealerIds, setFeaturedDealerIds] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function MonetizationCenter() {
       setHeroCarIds((cfg.heroCarIds || []).join(', '));
       setSponsorCarIds((cfg.sponsorCarIds || []).join(', '));
       setSponsorDealers((cfg.sponsorDealers || []).join(', '));
+      setFeaturedDealerIds((cfg.featuredDealerIds || []).join(', '));
     }).finally(() => setLoading(false));
   }, []);
 
@@ -36,7 +38,8 @@ export default function MonetizationCenter() {
       const heroIds = heroCarIds.split(',').map(s => s.trim()).filter(Boolean);
       const sponsorIds = sponsorCarIds.split(',').map(s => s.trim()).filter(Boolean);
       const dealerIds = sponsorDealers.split(',').map(s => s.trim()).filter(Boolean);
-      await adminAPI.updateConfig({ ...config, heroCarIds: heroIds, sponsorCarIds: sponsorIds, sponsorDealers: dealerIds });
+      const featuredDealers = featuredDealerIds.split(',').map(s => s.trim()).filter(Boolean);
+      await adminAPI.updateConfig({ ...config, heroCarIds: heroIds, sponsorCarIds: sponsorIds, sponsorDealers: dealerIds, featuredDealerIds: featuredDealers });
       toast('Monetization settings saved', 'success');
     } catch { toast('Failed to save', 'error'); }
     finally { setSaving(false); }
@@ -81,6 +84,15 @@ export default function MonetizationCenter() {
           </div>
           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Dealer IDs to show as sponsored (comma-separated)</p>
           <input value={sponsorDealers} onChange={e => setSponsorDealers(e.target.value)} placeholder="dealerId1, dealerId2" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
+        </div>
+
+        <div className="rounded-xl border p-6" style={{ background: 'var(--card)', borderColor: 'rgba(255,255,255,0.06)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+            <Crown size={16} style={{ color: 'var(--gold)' }} />
+            <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: '#fff' }}>Featured Dealers</h3>
+          </div>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', margin: '0 0 12px' }}>Dealer IDs shown as #1 in Top-Rated Dealers section (comma-separated, ordered by priority)</p>
+          <input value={featuredDealerIds} onChange={e => setFeaturedDealerIds(e.target.value)} placeholder="dealerId1, dealerId2" className="monetize-input" style={{ width: '100%', padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 12 }} />
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Shield, Lock, Gavel, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import LazyImage from '../../../components/LazyImage';
 import { carsAPI } from '../../../api/api';
 
@@ -99,29 +99,12 @@ export default function HomeHero({ liveCount, isAuth, user }) {
 
       <div className="absolute inset-0 z-10 flex items-center">
         <div className="max-w-[1400px] mx-auto px-6 w-full">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-5 mb-6 flex-wrap">
-              <div className="flex items-center gap-1.5 text-white/70"><Shield size={16} className="text-gold" /><span className="text-xs font-medium">Escrow Protected</span></div>
-              <div className="flex items-center gap-1.5 text-white/70"><Lock size={16} className="text-gold" /><span className="text-xs font-medium">Verified Dealers</span></div>
-              <div className="flex items-center gap-1.5 text-white/70"><Gavel size={16} className="text-gold" /><span className="text-xs font-medium">Live Bidding</span></div>
-              <div className="flex items-center gap-1.5 text-white/70"><CheckCircle size={16} className="text-gold" /><span className="text-xs font-medium">Pre-Inspection</span></div>
-            </div>
-
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
-              className="text-gold/70 text-sm font-semibold tracking-[0.15em] uppercase mb-3">
-              East Africa's Most Trusted Automotive Marketplace
-            </motion.p>
-
+          <div className="max-w-xl">
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
               className="font-display font-black italic text-[clamp(1.8rem,4.2vw,3.2rem)] leading-[0.95] uppercase text-white tracking-[-0.02em] mb-4">
               Drive Your Dream
               <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Today</span>
             </motion.h1>
-
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
-              className="text-white/60 text-base mb-8 max-w-xl">
-              Verified dealers. Live auctions. Secure escrow. Pre-inspection on every vehicle.
-            </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
               className="flex items-center gap-3 flex-wrap">

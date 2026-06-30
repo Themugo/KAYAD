@@ -33,7 +33,6 @@ export default function Footer() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {[
                 { to: '/showroom', label: 'All Vehicles' },
-                { to: '/showroom?dealer=true', label: 'Dealers' },
                 { to: '/auctions/calendar', label: 'Live Auctions' },
                 { to: '/showroom?category=suv', label: 'SUVs' },
                 { to: '/showroom?category=sedan', label: 'Sedans' },
