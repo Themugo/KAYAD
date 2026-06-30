@@ -9,7 +9,7 @@ import GlassCard from '../components/dashboard/GlassCard';
 import KPICard from '../components/dashboard/KPICard';
 import StatRow from '../components/dashboard/StatRow';
 import QuickActions from '../components/dashboard/QuickActions';
-import { DollarSign, Shield, Gavel, Heart, Car, MessageCircle, TrendingUp, Clock, Eye } from 'lucide-react';
+import { DollarSign, Shield, Gavel, Heart, Car, MessageCircle, TrendingUp, Clock, Eye, ChevronRight } from 'lucide-react';
 import CartyGrid from '../components/CartyGrid';
 
 export default function BuyerDashboard() {
@@ -120,37 +120,54 @@ export default function BuyerDashboard() {
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : (
           <>
-            <StatRow style={{ marginBottom: 36 }}>
-              <KPICard title="Total Spent" value={`KES ${totalSpent.toLocaleString()}`} icon={DollarSign} trend={null} color="gold" />
-              <KPICard title="Active Escrows" value={activeEscrows} icon={Shield} trend={null} color="green" />
-              <KPICard title="Won Auctions" value={wonAuctions} icon={Gavel} trend={null} color="blue" />
-              <KPICard title="Saved Vehicles" value={favorites.length} icon={Heart} trend={null} color="gold" />
+            <StatRow style={{ marginBottom: 40 }}>
+              <KPICard title="Total Spent" value={`KES ${totalSpent.toLocaleString()}`} icon={DollarSign} trend={null} color="gold" description="Lifetime purchases" />
+              <KPICard title="Active Escrows" value={activeEscrows} icon={Shield} trend={null} color="green" description="Protected transactions" />
+              <KPICard title="Won Auctions" value={wonAuctions} icon={Gavel} trend={null} color="blue" description="Successful bids" />
+              <KPICard title="Saved Vehicles" value={favorites.length} icon={Heart} trend={null} color="gold" description="Watchlist & favorites" />
             </StatRow>
 
-            <div style={{ marginBottom: 36 }}>
-              <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
+            <div style={{ marginBottom: 40 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <div style={{ width: 4, height: 20, background: 'var(--gold)', borderRadius: 2 }} />
+                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: '#fff', margin: 0 }}>
+                  Quick Actions
+                </h3>
+              </div>
               <QuickActions actions={quickActions} />
             </div>
 
-            <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
-              <div className="lg:col-span-2">
+            <div style={{ display: 'grid', gap: 32, gridTemplateColumns: 'repeat(auto-fit, minmax(0, 1fr))' }}>
+              <div style={{ minWidth: 0 }}>
                 <GlassCard>
-                  <h3 className="font-display font-bold text-white text-lg mb-4">Trending Vehicles</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                    <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: '#fff', margin: 0 }}>
+                      Trending Vehicles
+                    </h3>
+                  </div>
                   {trendingLoading ? (
-                    <div className="text-center py-8"><div className="spinner" /></div>
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}><div className="spinner" /></div>
                   ) : trending.length > 0 ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
+                    <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
                       {trending.slice(0, 4).map(car => (
-                        <Link key={car._id} to={`/car/${car._id}`} className="block no-underline group">
-                          <div className="flex gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
-                            <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                              <img src={car.images?.[0] || car.coverImage} alt={car.title} className="w-full h-full object-cover" loading="lazy" />
+                        <Link key={car._id} to={`/car/${car._id}`} style={{ textDecoration: 'none' }}>
+                          <div style={{
+                            display: 'flex', gap: 12, padding: 12, borderRadius: 10,
+                            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
+                            transition: 'all 0.2s',
+                          }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'; }}
+                          >
+                            <div style={{ width: 80, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                              <img src={car.images?.[0] || car.coverImage} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white font-medium text-xs truncate">{car.title}</p>
-                              <p className="text-gold font-bold text-xs">KES {(car.price || 0).toLocaleString()}</p>
-                              <p className="text-white/30 text-[10px] mt-1">
-                                <Eye size={10} className="inline mr-1" />{car.views || 0} views
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: 12, margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</p>
+                              <p style={{ color: 'var(--gold)', fontWeight: 700, fontSize: 13, margin: '0 0 6px 0' }}>KES {(car.price || 0).toLocaleString()}</p>
+                              <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 11, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <Eye size={10} /> {car.views || 0} views
                               </p>
                             </div>
                           </div>
@@ -158,31 +175,36 @@ export default function BuyerDashboard() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-white/40 text-sm text-center py-8">No trending vehicles</p>
+                    <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, textAlign: 'center', padding: '40px 0' }}>No trending vehicles</p>
                   )}
                 </GlassCard>
               </div>
 
-              <div className="lg:col-span-1 space-y-6">
+              <div style={{ minWidth: 0, maxWidth: 400 }}>
                 <GlassCard>
-                  <h3 className="font-display font-bold text-white text-lg mb-4">At a Glance</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
-                      <span className="text-xs text-white/40 flex items-center gap-2"><MessageCircle size={12} /> Messages</span>
-                      <span className="text-sm font-semibold text-white">{chats.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
-                      <span className="text-xs text-white/40 flex items-center gap-2"><Clock size={12} /> Saved Searches</span>
-                      <span className="text-sm font-semibold text-white">{watchlist.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
-                      <span className="text-xs text-white/40 flex items-center gap-2"><Heart size={12} /> Favorites</span>
-                      <span className="text-sm font-semibold text-white">{favorites.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <span className="text-xs text-white/40 flex items-center gap-2"><TrendingUp size={12} /> Watched Cars</span>
-                      <span className="text-sm font-semibold text-white">{watchlist.length}</span>
-                    </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                    <Clock size={18} style={{ color: 'var(--gold)' }} />
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: '#fff', margin: 0 }}>
+                      At a Glance
+                    </h3>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                    {[
+                      { icon: MessageCircle, label: 'Messages', value: chats.length, color: '#3B82F6' },
+                      { icon: Clock, label: 'Saved Searches', value: watchlist.length, color: '#F59E0B' },
+                      { icon: Heart, label: 'Favorites', value: favorites.length, color: '#EF4444' },
+                      { icon: TrendingUp, label: 'Watched Cars', value: watchlist.length, color: '#22C55E' },
+                    ].map((item, i) => (
+                      <div key={i} style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '12px 0', borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                      }}>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <item.icon size={14} style={{ color: item.color }} /> {item.label}
+                        </span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{item.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </GlassCard>
               </div>
