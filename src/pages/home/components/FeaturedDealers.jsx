@@ -1,28 +1,24 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Star, MapPin, Shield, Award, Crown, TrendingUp } from 'lucide-react';
-import LazyImage from '../../../components/LazyImage';
+import { Star, Shield, CheckCircle, TrendingUp, MapPin, Award } from 'lucide-react';
 
-function DealerBadge({ tier }) {
-  if (tier === 'premium') {
-    return (
-      <div className="absolute top-3 right-3 bg-gold rounded-full p-1.5 shadow-lg shadow-gold/30">
-        <Crown size={14} className="text-black" />
-      </div>
-    );
-  }
-  if (tier === 'featured') {
-    return (
-      <div className="absolute top-3 right-3 bg-white/10 backdrop-blur-sm rounded-full p-1.5 border border-white/20">
-        <Award size={14} className="text-gold" />
-      </div>
-    );
-  }
-  return null;
+function TrustBadge({ score }) {
+  if (!score) return null;
+  return (
+    <div className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase"
+      style={{
+        background: score >= 90 ? 'rgba(34,197,94,0.12)' : score >= 70 ? 'rgba(212,196,168,0.12)' : 'rgba(239,68,68,0.12)',
+        color: score >= 90 ? 'var(--success)' : score >= 70 ? 'var(--gold)' : 'var(--danger)',
+      }}
+    >
+      <Shield size={9} />
+      {score}% Trust
+    </div>
+  );
 }
 
 export default function FeaturedDealers({ dealers = [] }) {
   if (dealers.length === 0) return null;
+  const top = dealers.slice(0, 3);
 
   return (
     <section className="section-spacing border-t border-white/[0.04]">
@@ -30,72 +26,78 @@ export default function FeaturedDealers({ dealers = [] }) {
         <div className="flex items-end justify-between mb-6">
           <div>
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
-                Premium
-              </span>
-              <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Dealer Network</span>
+              <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Trusted Network</span>
             </div>
             <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
-              Trusted <span className="text-gold">Partners</span>
+              Top-Rated <span className="text-gold">Dealers</span>
             </h2>
           </div>
-          <div className="flex items-center gap-3">
-            <Link to="/register?role=dealer" className="section-link">Become a Partner →</Link>
-          </div>
+          <Link to="/showroom" className="section-link">View All →</Link>
         </div>
 
-        <div className="grid gap-5 rgrid rgrid-4">
-          {dealers.map((dealer, index) => (
-            <motion.div
-              key={dealer._id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 }}
-            >
-              <Link to={`/dealer/${dealer._id}`} className="block no-underline group">
-                <div className="relative rounded-xl overflow-hidden bg-white/5 border border-white/10 hover:border-gold/30 transition-all duration-300 hover:shadow-lg hover:shadow-gold/10 h-full">
-                  <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gold/8 to-transparent">
-                    <LazyImage
-                      src={dealer.logo || '/placeholder-dealer.jpg'}
-                      alt={dealer.name}
-                      className="w-full h-full object-contain p-8 transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <DealerBadge tier={index === 0 ? 'premium' : 'featured'} />
-                    {index === 0 && (
-                      <div className="absolute top-3 left-3 bg-gold/90 rounded-full px-2 py-0.5">
-                        <span className="text-[8px] text-black font-extrabold tracking-wider">TOP</span>
+        <div className="grid gap-4 md:grid-cols-3">
+          {top.map((d, i) => (
+            <Link key={d._id} to={`/dealer/${d._id}`} className="block no-underline group">
+              <div className="rounded-xl overflow-hidden border transition-all duration-300 h-full"
+                style={{
+                  background: 'var(--card)',
+                  borderColor: i === 0 ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="p-5">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gold/20 to-gold/5 flex items-center justify-center text-lg font-bold text-gold border border-gold/20">
+                        {(d.name || 'D')[0]}
                       </div>
+                      <div>
+                        <div className="font-display font-bold text-white text-sm">{d.name}</div>
+                        {d.location && (
+                          <div className="flex items-center gap-1 text-white/40 text-xs mt-0.5">
+                            <MapPin size={10} /> {d.location}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {i === 0 && <Award size={16} className="text-gold" />}
+                  </div>
+
+                  <div className="flex items-center gap-3 mb-3 flex-wrap">
+                    {d.rating && (
+                      <div className="flex items-center gap-1 text-xs">
+                        <Star size={11} className="text-gold" fill="var(--gold)" />
+                        <span className="text-white font-semibold">{d.rating}</span>
+                      </div>
+                    )}
+                    {d.trustScore && <TrustBadge score={d.trustScore} />}
+                    {d.yearsActive && (
+                      <span className="text-xs text-white/40">{d.yearsActive} yrs active</span>
                     )}
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="font-display font-bold text-white text-sm mb-2 text-center truncate">
-                      {dealer.name}
-                    </h3>
-
-                    <div className="flex items-center justify-center gap-3 text-white/40 text-xs mb-3">
-                      <div className="flex items-center gap-1">
-                        <Star size={11} className="text-gold" />
-                        <span className="text-gold font-semibold">{dealer.rating || '4.5'}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <MapPin size={11} />
-                        <span>{dealer.location || 'Kenya'}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp size={11} />
-                        <span>{dealer.carCount || 0} cars</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-center gap-1 bg-gold/8 rounded-lg px-3 py-2 border border-gold/10">
-                      <Shield size={11} className="text-gold" />
-                      <span className="text-[10px] text-gold font-bold tracking-wide">Verified Partner</span>
-                    </div>
+                  <div className="flex items-center gap-3 text-xs text-white/40">
+                    {d.completedSales > 0 && (
+                      <span className="flex items-center gap-1">
+                        <CheckCircle size={10} className="text-success" /> {d.completedSales} sold
+                      </span>
+                    )}
+                    {d.carCount > 0 && (
+                      <span className="flex items-center gap-1">
+                        <TrendingUp size={10} /> {d.carCount} listed
+                      </span>
+                    )}
                   </div>
                 </div>
-              </Link>
-            </motion.div>
+
+                <div className="px-5 pb-4">
+                  <div className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-[10px] font-bold tracking-wide"
+                    style={{ background: 'rgba(212,196,168,0.08)', color: 'var(--gold)' }}
+                  >
+                    <Shield size={11} /> Verified Dealer
+                  </div>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

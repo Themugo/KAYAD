@@ -8,20 +8,18 @@ import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
-import HomeAnimatedStat from './home/components/HomeAnimatedStat';
 import HomeHero from './home/components/HomeHero';
+import TrustBar from './home/components/TrustBar';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
-import HomeFeaturePillars from './home/components/HomeFeaturePillars';
-import HomeCtaSection from './home/components/HomeCtaSection';
 import FeaturedDealers from './home/components/FeaturedDealers';
+import PrivateSellerSection from './home/components/PrivateSellerSection';
 import VehicleCategories from './home/components/VehicleCategories';
 import Testimonials from './home/components/Testimonials';
 import Partners from './home/components/Partners';
-import PrivateSellerSection from './home/components/PrivateSellerSection';
-import { Shield, Lock, MessageCircle } from 'lucide-react';
+import TransactionStats from './home/components/TransactionStats';
 
 export default function HomePage() {
-  usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
+  usePageMeta('Home', 'East Africa\'s most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.');
   const { isAuth, user } = useAuth();
   const { toast } = useToast();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -91,7 +89,9 @@ export default function HomePage() {
                 carCount: 0,
                 rating: d.rating || Math.round((3 + Math.random() * 2) * 10) / 10,
                 location: d.location || 'Nairobi',
-                joinedAt: d.createdAt || new Date().toISOString(),
+                trustScore: d.trustScore || Math.floor(70 + Math.random() * 25),
+                completedSales: d.totalTransactions || Math.floor(Math.random() * 50),
+                yearsActive: d.yearsActive || Math.floor(1 + Math.random() * 8),
               });
             }
             dealerMap.get(id).carCount++;
@@ -120,59 +120,13 @@ export default function HomePage() {
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-        {/* 1. Hero */}
+        {/* 1. Hero Slider */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
 
-        {/* 2. Trust Bar — stats + trust signals merged */}
-        <section className="border-y border-white/[0.04]">
-          <div className="max-w-[1400px] mx-auto px-7 py-6">
-            <div className="grid gap-px home-stats-grid mb-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
-              <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
-              <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />
-              <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
-            </div>
-            <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
-                <Shield size={20} className="text-[#22C55E]" />
-                <div>
-                  <div className="text-sm font-semibold text-white">Escrow Protected</div>
-                  <div className="text-xs text-white/40">Funds held until delivery confirmed</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)' }}>
-                <Lock size={20} className="text-gold" />
-                <div>
-                  <div className="text-sm font-semibold text-white">Verified Dealers</div>
-                  <div className="text-xs text-white/40">KRA-vetted and buyer-rated</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.15)' }}>
-                <MessageCircle size={20} className="text-[#60A5FA]" />
-                <div>
-                  <div className="text-sm font-semibold text-white">24/7 Support</div>
-                  <div className="text-xs text-white/40">Dedicated dispute resolution team</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        {/* 2. Trust Bar */}
+        <TrustBar />
 
-        {/* 3. Sponsored Content */}
-        <section className="section-spacing">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <AdvertisementBanner
-              type="image"
-              imageUrl="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80"
-              position="horizontal"
-              size="medium"
-              linkUrl="/showroom"
-              altText="Featured Dealers"
-            />
-          </div>
-        </section>
-
-        {/* 4. Featured Inventory — Premium Showcase */}
+        {/* 3. Featured Collection */}
         <section className="section-spacing">
           <div className="max-w-[1400px] mx-auto px-7">
             <div className="flex items-end justify-between mb-6">
@@ -215,27 +169,54 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* 5. Live Auctions */}
+        {/* 4. Live Auctions */}
         {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
 
-        {/* 6. Featured Dealers */}
-        <FeaturedDealers dealers={featuredDealers.slice(0, 4)} />
-
-        {/* 7. Private Seller Section */}
+        {/* 5. Private Seller */}
         <PrivateSellerSection />
 
-        {/* 8. Vehicle Categories */}
+        {/* 6. Dealer Network */}
+        <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
+
+        {/* 7. Sponsored Content — Zone A (below auctions) */}
+        <section className="section-spacing">
+          <div className="max-w-[1400px] mx-auto px-7">
+            <AdvertisementBanner
+              type="image"
+              imageUrl="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80"
+              position="horizontal" size="medium"
+              linkUrl="/showroom"
+              altText="Featured Dealers"
+              zone="A"
+            />
+          </div>
+        </section>
+
+        {/* 8. Categories */}
         <VehicleCategories />
 
-        {/* 9. Testimonials */}
+        {/* 9. Transaction Statistics */}
+        <TransactionStats />
+
+        {/* 10. Trust Metrics (Testimonials) */}
         <Testimonials />
 
-        {/* 10. Partners */}
+        {/* 11. Partners */}
         <Partners />
 
-        {/* 11. Feature Pillars & CTA */}
-        <HomeFeaturePillars />
-        <HomeCtaSection isAuth={isAuth} />
+        {/* 12. Sponsored — Zone C (before footer) */}
+        <section className="section-spacing">
+          <div className="max-w-[1400px] mx-auto px-7">
+            <AdvertisementBanner
+              type="image"
+              imageUrl="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1400&q=80"
+              position="horizontal" size="medium"
+              linkUrl="/showroom"
+              altText="Premium Vehicles"
+              zone="C"
+            />
+          </div>
+        </section>
       </div>
     </>
   );

@@ -300,26 +300,55 @@ export default function CarDetailPage() {
         <div className="detail-left">
 
           {/* Gallery */}
-          <div onClick={() => setShowGallery(true)} style={{ cursor: 'zoom-in' }}>
-            <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} />
-          </div>
+          <GalleryImage car={car} idx={imgIdx} onPrev={prevImg} onNext={nextImg} total={total} onExpand={() => setShowGallery(true)} />
 
-          {/* Thumbnails */}
+          {/* Thumbnail Strip */}
           {total > 1 && (
-            <div className="detail-thumbnails">
+            <div className="detail-thumbnails" style={{
+              display: 'flex', gap: 6, marginTop: 8, overflow: 'auto',
+              paddingBottom: 4,
+            }}>
               {images.map((img, i) => {
                 const src = typeof img === 'string' ? img : img?.url;
                 const isActive = i === imgIdx;
                 const isCover = i === (car.coverImage ?? 0);
                 return (
-                  <div key={i} className="thumb-wrap">
-                    <div className={`thumb ${isActive ? 'thumb-active' : ''}`} onClick={() => setImgIdx(i)}>
-                      {src && <img src={src} alt={car?.title || ''} loading="lazy" decoding="async" />}
-                    </div>
+                  <div key={i} style={{ position: 'relative', flexShrink: 0 }}>
+                    <button onClick={() => setImgIdx(i)}
+                      style={{
+                        width: 72, height: 52, borderRadius: 6, overflow: 'hidden',
+                        border: isActive ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.08)',
+                        padding: 0, cursor: 'pointer', background: '#111',
+                        opacity: isActive ? 1 : 0.55,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {src && <img src={src} alt="" loading="lazy" decoding="async"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    </button>
+                    {isCover && (
+                      <span style={{
+                        position: 'absolute', top: -4, right: -4,
+                        background: 'var(--gold)', color: '#000',
+                        borderRadius: '50%', width: 14, height: 14,
+                        fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: 700,
+                      }}>★</span>
+                    )}
                     {canManage && (
                       <button onClick={() => handleSetCover(i)} title="Set as cover"
-                        className={`thumb-pin ${isCover ? 'thumb-pin-active' : ''}`}>
-                        <Pin size={8} />
+                        style={{
+                          position: 'absolute', bottom: -4, right: -4,
+                          width: 16, height: 16, borderRadius: '50%',
+                          background: isCover ? 'var(--gold)' : 'rgba(255,255,255,0.1)',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          color: isCover ? '#000' : 'rgba(255,255,255,0.5)',
+                          cursor: 'pointer', display: 'flex',
+                          alignItems: 'center', justifyContent: 'center',
+                          fontSize: 7,
+                        }}
+                      >
+                        <Pin size={7} />
                       </button>
                     )}
                   </div>
