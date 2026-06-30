@@ -5,9 +5,9 @@
  * Usage: node scripts/deployment-validation.js
  */
 
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
+import fs from 'fs';
+import path from 'path';
+import https from 'https';
 
 // ANSI color codes for terminal output
 const colors = {

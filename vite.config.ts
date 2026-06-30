@@ -115,7 +115,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
-          // Vendor chunks
+          // Vendor chunks - avoid circular dependencies
           if (id.includes('node_modules')) {
             if (id.includes('react') || id.includes('react-dom')) {
               return 'react-vendor';
@@ -144,6 +144,7 @@ export default defineConfig({
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
             }
+            // Return all other node_modules to vendor to avoid circular dependencies
             return 'vendor';
           }
           // App chunks

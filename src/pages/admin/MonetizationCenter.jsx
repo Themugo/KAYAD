@@ -156,7 +156,7 @@ export default function MonetizationCenter() {
         ].map((item, i) => (
           <Link key={i} to={item.to} style={{ textDecoration: 'none' }}>
             <div style={{
-              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08),
+              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
               background: 'rgba(255,255,255,0.02)', padding: 20,
               transition: 'all 0.2s', cursor: 'pointer',
             }}
