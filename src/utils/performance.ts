@@ -171,7 +171,7 @@ export function preloadResource(href: string, as: string): void {
 /**
  * Measure component render time
  */
-export function useRenderTime(componentName: string): void {
+export function useRenderTime(componentName: string): () => void {
   if (typeof performance !== 'undefined') {
     const start = performance.now();
     return () => {
