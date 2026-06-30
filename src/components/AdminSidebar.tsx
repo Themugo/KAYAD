@@ -43,6 +43,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
   { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
   { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
+  { to: '/admin/monetization', icon: DollarSign, label: 'Monetization' },
   { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
   { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },

@@ -82,11 +82,12 @@ export default function Navbar() {
     : '/register?sell=1';
 
   const NAV_LINKS = [
-    { to: '/', label: 'Home' },
     { to: '/showroom', label: 'Buy Cars' },
     { to: '/auctions/calendar', label: 'Live Auctions', badge: hasLiveAuction ? 'live' : null },
     { to: '/escrow-vault', label: 'Escrow Vault' },
     { to: '/pre-inspection', label: 'Pre-Inspection' },
+    { to: '/showroom?dealer=true', label: 'Dealers' },
+    { to: '/contact', label: 'Support' },
   ];
 
   return (
@@ -233,6 +234,8 @@ export default function Navbar() {
                   </Link>
                   <Link to="/escrow-vault" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Escrow Vault</Link>
                   <Link to="/pre-inspection" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Pre-Inspection</Link>
+                  <Link to="/showroom?dealer=true" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Dealers</Link>
+                  <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Support</Link>
 
                   <Link to={sellLink} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gold/10 border border-gold/20 text-gold font-bold text-sm no-underline my-3"
                     onClick={() => setMobileOpen(false)}>

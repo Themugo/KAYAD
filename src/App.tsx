@@ -137,6 +137,7 @@ const AdminReports                = lazy(() => import('./pages/admin/AdminReport
 const AdminSupportTickets         = lazy(() => import('./pages/admin/AdminSupportTickets'));
 const AdminBroadcast              = lazy(() => import('./pages/admin/AdminBroadcast'));
 const AdminFeedback               = lazy(() => import('./pages/admin/AdminFeedback'));
+const MonetizationCenter          = lazy(() => import('./pages/admin/MonetizationCenter'));
 const PostRegPackageSelect        = lazy(() => import('./pages/PostRegPackageSelect'));
 
 // ─── Layout wrappers ────────────────────────────────────────────────────
@@ -315,6 +316,7 @@ export default function App() {
                         <Route path="/admin/inspector-applications"   element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
                         <Route path="/admin/security-log"             element={<SecureAdmin><AdminSecurityLog /></SecureAdmin>} />
                         <Route path="/admin/ads"                      element={<SecureAdmin><AdManager /></SecureAdmin>} />
+                        <Route path="/admin/monetization"            element={<SecureAdmin><MonetizationCenter /></SecureAdmin>} />
                         <Route path="/admin/settings"                 element={<SecureAdmin><AdminSettings /></SecureAdmin>} />
                         <Route path="/admin/staff"                    element={<SecureAdmin><AdminStaff /></SecureAdmin>} />
                         <Route path="/admin/staff-permissions"        element={<SecureAdmin><AdminStaffPermissions /></SecureAdmin>} />

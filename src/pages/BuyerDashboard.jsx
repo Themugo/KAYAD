@@ -2,33 +2,30 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI, bidsAPI } from '../api/api';
+import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import BackButton from '../components/BackButton';
 import GlassCard from '../components/dashboard/GlassCard';
 import KPICard from '../components/dashboard/KPICard';
 import StatRow from '../components/dashboard/StatRow';
-import ActivityFeed from '../components/dashboard/ActivityFeed';
 import QuickActions from '../components/dashboard/QuickActions';
-import { DollarSign, Shield, Gavel, Heart, Car, Clock, MessageCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, Shield, Gavel, Heart, Car, MessageCircle, TrendingUp, Clock, Eye } from 'lucide-react';
 import CartyGrid from '../components/CartyGrid';
 
 export default function BuyerDashboard() {
-  const { user, isDealer, isAdmin, logout } = useAuth();
+  const { user, isDealer, isAdmin } = useAuth();
   const { connected } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [favorites,  setFavorites]  = useState([]);
-  const [escrows,    setEscrows]    = useState([]);
-  const [payments,   setPayments]   = useState([]);
-  const [myBids,     setMyBids]     = useState([]);
-  const [chats,      setChats]      = useState([]);
-  const [watchlist,  setWatchlist]  = useState([]);
-  const [trending,   setTrending]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [bidLoading, setBidLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+  const [escrows, setEscrows] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [myBids, setMyBids] = useState([]);
+  const [chats, setChats] = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [trendingLoading, setTrendingLoading] = useState(true);
-  const [tab,        setTab]        = useState('overview');
 
   useEffect(() => {
     if (isDealer) { navigate('/dealer', { replace: true }); return; }
@@ -37,9 +34,7 @@ export default function BuyerDashboard() {
 
   useEffect(() => {
     let hadError = false;
-    const withFallback = (p, fallback) => {
-      return p.catch(() => { hadError = true; return fallback; });
-    };
+    const withFallback = (p, fallback) => p.catch(() => { hadError = true; return fallback; });
     Promise.all([
       withFallback(favoritesAPI.list(), { favorites: [] }),
       withFallback(escrowAPI.mine(), { escrows: [] }),
@@ -56,7 +51,6 @@ export default function BuyerDashboard() {
     }).finally(() => setLoading(false));
   }, []);
 
-  // Fetch trending cars
   useEffect(() => {
     carsAPI.list({ sort: 'views', limit: 6 })
       .then(data => setTrending(data.cars || []))
@@ -64,17 +58,12 @@ export default function BuyerDashboard() {
       .finally(() => setTrendingLoading(false));
   }, []);
 
-  // Attempt to fetch user's bids — fall back gracefully if no endpoint exists
   useEffect(() => {
     const tryFetchBids = async () => {
       try {
         const res = await fetch('/api/bids/my', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          setMyBids(data.bids || data || []);
-        }
-      } catch { /* fallback */ }
-      setBidLoading(false);
+        if (res.ok) { const data = await res.json(); setMyBids(data.bids || data || []); }
+      } catch { }
     };
     tryFetchBids();
   }, []);
@@ -84,19 +73,12 @@ export default function BuyerDashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // Calculate KPIs
   const totalSpent = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
   const activeEscrows = escrows.filter(e => e.status === 'pending' || e.status === 'active').length;
   const wonAuctions = myBids.filter(b => b.status === 'won').length;
+  const unreadChats = chats.filter(c => c.unreadCount > 0).length;
+  const totalViews = favorites.reduce((sum, f) => sum + (f.views || 0), 0);
 
-  // Activity feed data
-  const activities = [
-    { id: '1', icon: Heart, title: 'Added to favorites', description: 'Toyota Land Cruiser Prado', timestamp: '2h ago', color: 'gold' },
-    { id: '2', icon: Gavel, title: 'Placed bid', description: 'Mazida CX-5 - KES 2,500,000', timestamp: '5h ago', color: 'blue' },
-    { id: '3', icon: Shield, title: 'Escrow initiated', description: 'Subaru Forester - KES 3,100,000', timestamp: '1d ago', color: 'green' },
-  ];
-
-  // Quick actions
   const quickActions = [
     { id: '1', label: 'Browse Showroom', icon: Car, to: '/showroom', color: 'gold' },
     { id: '2', label: 'View Auctions', icon: Gavel, to: '/auctions', color: 'blue' },
@@ -105,7 +87,6 @@ export default function BuyerDashboard() {
 
   return (
     <div className="page" style={{ background: '#0a0a0a', minHeight: '100vh' }}>
-      {/* Header */}
       <div style={{
         background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)',
         borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '40px 0 36px',
@@ -118,9 +99,8 @@ export default function BuyerDashboard() {
             </span>
             <span style={{
               width: 6, height: 6, borderRadius: '50%',
-              background: connected ? 'var(--green)' : 'var(--red)',
+              background: connected ? '#22c55e' : '#ef4444',
               display: 'inline-block',
-              animation: connected ? 'pulse-dot 1.5s infinite' : 'none',
             }} />
             <span style={{ fontSize: 9, color: connected ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.6)', fontWeight: 600 }}>
               {connected ? 'Connected' : 'Offline'}
@@ -137,74 +117,41 @@ export default function BuyerDashboard() {
 
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 28px' }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-            <div className="spinner" />
-          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : (
           <>
-            {/* KPI Row */}
-            <StatRow style={{ marginBottom: 32 }}>
-              <KPICard
-                title="Total Spent"
-                value={`KES ${totalSpent.toLocaleString()}`}
-                icon={DollarSign}
-                trend={12}
-                color="gold"
-              />
-              <KPICard
-                title="Active Escrows"
-                value={activeEscrows}
-                icon={Shield}
-                trend={5}
-                color="green"
-              />
-              <KPICard
-                title="Won Auctions"
-                value={wonAuctions}
-                icon={Gavel}
-                trend={8}
-                color="blue"
-              />
-              <KPICard
-                title="Saved Vehicles"
-                value={favorites.length}
-                icon={Heart}
-                trend={15}
-                color="gold"
-              />
+            <StatRow style={{ marginBottom: 36 }}>
+              <KPICard title="Total Spent" value={`KES ${totalSpent.toLocaleString()}`} icon={DollarSign} trend={null} color="gold" />
+              <KPICard title="Active Escrows" value={activeEscrows} icon={Shield} trend={null} color="green" />
+              <KPICard title="Won Auctions" value={wonAuctions} icon={Gavel} trend={null} color="blue" />
+              <KPICard title="Saved Vehicles" value={favorites.length} icon={Heart} trend={null} color="gold" />
             </StatRow>
 
-            {/* Quick Actions */}
-            <div style={{ marginBottom: 32 }}>
+            <div style={{ marginBottom: 36 }}>
               <h3 className="font-display font-bold text-white text-lg mb-4">Quick Actions</h3>
               <QuickActions actions={quickActions} />
             </div>
 
-            <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
-              {/* Activity Feed */}
+            <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                <ActivityFeed activities={activities} />
-              </div>
-
-              {/* Watchlist */}
-              <div className="lg:col-span-1">
                 <GlassCard>
                   <h3 className="font-display font-bold text-white text-lg mb-4">Trending Vehicles</h3>
                   {trendingLoading ? (
-                    <div className="text-center py-8">
-                      <div className="spinner" />
-                    </div>
+                    <div className="text-center py-8"><div className="spinner" /></div>
                   ) : trending.length > 0 ? (
-                    <div className="space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
                       {trending.slice(0, 4).map(car => (
-                        <Link key={car._id} to={`/car/${car._id}`} className="block no-underline">
+                        <Link key={car._id} to={`/car/${car._id}`} className="block no-underline group">
                           <div className="flex gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
-                            <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                              <img src={car.images?.[0] || car.coverImage} alt={car.title} className="w-full h-full object-cover" />
+                            <div className="w-20 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                              <img src={car.images?.[0] || car.coverImage} alt={car.title} className="w-full h-full object-cover" loading="lazy" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-white font-medium text-xs truncate">{car.title}</p>
                               <p className="text-gold font-bold text-xs">KES {(car.price || 0).toLocaleString()}</p>
+                              <p className="text-white/30 text-[10px] mt-1">
+                                <Eye size={10} className="inline mr-1" />{car.views || 0} views
+                              </p>
                             </div>
                           </div>
                         </Link>
@@ -215,31 +162,45 @@ export default function BuyerDashboard() {
                   )}
                 </GlassCard>
               </div>
+
+              <div className="lg:col-span-1 space-y-6">
+                <GlassCard>
+                  <h3 className="font-display font-bold text-white text-lg mb-4">At a Glance</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs text-white/40 flex items-center gap-2"><MessageCircle size={12} /> Messages</span>
+                      <span className="text-sm font-semibold text-white">{chats.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs text-white/40 flex items-center gap-2"><Clock size={12} /> Saved Searches</span>
+                      <span className="text-sm font-semibold text-white">{watchlist.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-white/[0.04]">
+                      <span className="text-xs text-white/40 flex items-center gap-2"><Heart size={12} /> Favorites</span>
+                      <span className="text-sm font-semibold text-white">{favorites.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-xs text-white/40 flex items-center gap-2"><TrendingUp size={12} /> Watched Cars</span>
+                      <span className="text-sm font-semibold text-white">{watchlist.length}</span>
+                    </div>
+                  </div>
+                </GlassCard>
+              </div>
             </div>
 
-            {/* Favorites */}
-            <div style={{ marginTop: 32 }}>
-              <div className="flex items-end justify-between mb-4">
-                <h3 className="font-display font-bold text-white text-xl">Your Favorites</h3>
-                <Link to="/favorites" className="text-gold text-sm font-bold no-underline">View All →</Link>
-              </div>
-              {favorites.length > 0 ? (
+            {favorites.length > 0 && (
+              <div style={{ marginTop: 36 }}>
+                <div className="flex items-end justify-between mb-4">
+                  <h3 className="font-display font-bold text-white text-xl">Your Favorites</h3>
+                  <Link to="/favorites" className="text-gold text-sm font-bold no-underline">View All →</Link>
+                </div>
                 <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                   {favorites.slice(0, 4).map(car => (
                     <CartyGrid key={car._id} car={car} isMobile={false} />
                   ))}
                 </div>
-              ) : (
-                <GlassCard>
-                  <div className="text-center py-12">
-                    <Heart size={48} className="text-white/20 mx-auto mb-4" />
-                    <h3 className="font-display font-bold text-white text-lg mb-2">No Favorites Yet</h3>
-                    <p className="text-white/50 text-sm mb-6">Start saving vehicles you're interested in</p>
-                    <Link to="/showroom" className="btn btn-gold">Browse Showroom</Link>
-                  </div>
-                </GlassCard>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>

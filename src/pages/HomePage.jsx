@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import CartyGrid from '../components/CartyGrid';
-import AdvertisementBanner from '../components/AdvertisementBanner';
 import { useState, useEffect } from 'react';
 import { carsAPI, enableDemoMode } from '../api/api';
 import { useToast } from '../context/ToastContext';
@@ -13,10 +12,7 @@ import TrustBar from './home/components/TrustBar';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
 import FeaturedDealers from './home/components/FeaturedDealers';
 import PrivateSellerSection from './home/components/PrivateSellerSection';
-import VehicleCategories from './home/components/VehicleCategories';
-import Testimonials from './home/components/Testimonials';
 import Partners from './home/components/Partners';
-import TransactionStats from './home/components/TransactionStats';
 
 export default function HomePage() {
   usePageMeta('Home', 'East Africa\'s most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.');
@@ -27,9 +23,7 @@ export default function HomePage() {
   const [recent, setRecent] = useState([]);
   const [liveAuctions, setLiveAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(null);
   const [featuredDealers, setFeaturedDealers] = useState([]);
-  const [topSellers, setTopSellers] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,13 +62,6 @@ export default function HomePage() {
         setLiveAuctions(live.slice(0, 4));
         setFeatured([...nonAuction.filter(c => c.isPromoted), ...nonAuction.filter(c => !c.isPromoted)].slice(0, 4));
         setRecent(nonAuction.slice(0, 8));
-        setStats({
-          totalCars: all.length,
-          liveAuctions: live.length,
-          upcoming: upcoming.length,
-          buyNow: nonAuction.filter(c => c.allowBuy !== false).length,
-          brands: [...new Set(all.map(c => c.brand))].length,
-        });
 
         const dealerMap = new Map();
         all.forEach(c => {
@@ -98,7 +85,6 @@ export default function HomePage() {
           }
         });
         setFeaturedDealers(Array.from(dealerMap.values()));
-        setTopSellers(Array.from(dealerMap.values()).sort((a, b) => b.carCount - a.carCount).slice(0, 8));
       } catch (err) {
         if (!cancelled) {
           console.error('Failed to fetch vehicles:', err);
@@ -113,110 +99,80 @@ export default function HomePage() {
   }, []);
 
   const displayCars = loading ? [] : (featured.length > 0 ? featured : recent);
-  const liveCount = stats?.liveAuctions || liveAuctions.length || 0;
+  const liveCount = liveAuctions.length;
+
+  const SectionWrapper = ({ children, className = '' }) => (
+    <section className={`section-spacing ${className}`}>
+      {children}
+    </section>
+  );
 
   return (
     <>
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-        {/* 1. Hero Slider */}
+        {/* Order for mobile: Hero → TrustBar → Featured → Auctions → Sell → Dealers → Partners */}
+        {/* Order for desktop: same, just wider layout */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
-
-        {/* 2. Trust Bar */}
         <TrustBar />
 
-        {/* 3. Featured Collection */}
-        <section className="section-spacing">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <div className="flex items-center gap-1.5 mb-1">
-                  {featured.length > 0 && (
-                    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
-                      Featured
-                    </span>
-                  )}
-                  <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Premium Collection</span>
-                </div>
-                <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
-                  Elite <span className="text-gold">Selection</span>
-                </h2>
-              </div>
-              <Link to="/showroom" className="section-link">View All →</Link>
-            </div>
-
-            {loading ? (
-              <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="aspect-[4/3] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
-                ))}
-              </div>
-            ) : displayCars.length > 0 ? (
-              <div className="grid gap-5 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-                {displayCars.map(car => (
-                  <div key={car._id} className="premium-card">
-                    <CartyGrid car={car} isMobile={isMobile} />
+        {!loading && (
+          <>
+            <SectionWrapper>
+              <div className="max-w-[1400px] mx-auto px-7">
+                <div className="flex items-end justify-between mb-6">
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      {featured.length > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
+                          Featured
+                        </span>
+                      )}
+                      <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Premium Collection</span>
+                    </div>
+                    <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
+                      Elite <span className="text-gold">Selection</span>
+                    </h2>
                   </div>
-                ))}
+                  <Link to="/showroom" className="section-link">View All →</Link>
+                </div>
+
+                {loading ? (
+                  <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="aspect-[4/3] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+                    ))}
+                  </div>
+                ) : displayCars.length > 0 ? (
+                  <div className="grid gap-5 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                    {displayCars.map(car => (
+                      <div key={car._id} className="premium-card">
+                        <CartyGrid car={car} isMobile={isMobile} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-16 text-white/20 text-sm">
+                    <p className="mb-3">No vehicles in the premium collection yet</p>
+                    <Link to="/showroom" className="text-gold no-underline font-semibold">Browse the gallery →</Link>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-16 text-white/20 text-sm">
-                <p className="mb-3">No vehicles in the premium collection yet</p>
-                <Link to="/showroom" className="text-gold no-underline font-semibold">Browse the gallery →</Link>
-              </div>
-            )}
+            </SectionWrapper>
+
+            <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />
+            <PrivateSellerSection />
+            <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
+            <Partners />
+          </>
+        )}
+
+        {loading && (
+          <div className="flex justify-center py-20">
+            <div className="spinner" />
           </div>
-        </section>
-
-        {/* 4. Live Auctions */}
-        {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
-
-        {/* 5. Private Seller */}
-        <PrivateSellerSection />
-
-        {/* 6. Dealer Network */}
-        <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
-
-        {/* 7. Sponsored Content — Zone A (below auctions) */}
-        <section className="section-spacing">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <AdvertisementBanner
-              type="image"
-              imageUrl="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80"
-              position="horizontal" size="medium"
-              linkUrl="/showroom"
-              altText="Featured Dealers"
-              zone="A"
-            />
-          </div>
-        </section>
-
-        {/* 8. Categories */}
-        <VehicleCategories />
-
-        {/* 9. Transaction Statistics */}
-        <TransactionStats />
-
-        {/* 10. Trust Metrics (Testimonials) */}
-        <Testimonials />
-
-        {/* 11. Partners */}
-        <Partners />
-
-        {/* 12. Sponsored — Zone C (before footer) */}
-        <section className="section-spacing">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <AdvertisementBanner
-              type="image"
-              imageUrl="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1400&q=80"
-              position="horizontal" size="medium"
-              linkUrl="/showroom"
-              altText="Premium Vehicles"
-              zone="C"
-            />
-          </div>
-        </section>
+        )}
       </div>
     </>
   );

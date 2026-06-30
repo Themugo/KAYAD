@@ -107,10 +107,15 @@ export default function HomeHero({ liveCount, isAuth, user }) {
               <div className="flex items-center gap-1.5 text-white/70"><CheckCircle size={16} className="text-gold" /><span className="text-xs font-medium">Pre-Inspection</span></div>
             </div>
 
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.15 }}
+              className="text-gold/70 text-sm font-semibold tracking-[0.15em] uppercase mb-3">
+              East Africa's Most Trusted Automotive Marketplace
+            </motion.p>
+
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}
-              className="font-display font-black italic text-[clamp(2rem,5vw,4rem)] leading-[0.95] uppercase text-white tracking-[-0.02em] mb-4">
-              East Africa's Most Trusted
-              <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Automotive Marketplace</span>
+              className="font-display font-black italic text-[clamp(1.8rem,4.2vw,3.2rem)] leading-[0.95] uppercase text-white tracking-[-0.02em] mb-4">
+              Drive Your Dream
+              <span className="block text-gold" style={{ textShadow: '0 0 40px rgba(212,196,168,0.4)' }}>Today</span>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
