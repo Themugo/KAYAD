@@ -34,6 +34,46 @@ export default defineConfig({
             purpose: 'any maskable'
           }
         ]
+      },
+      workbox: {
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cloudinary-images',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          }
+        ]
       }
     }),
     // Bundle analysis
@@ -70,6 +110,8 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
+    target: 'es2015',
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
@@ -96,7 +138,26 @@ export default defineConfig({
             if (id.includes('posthog')) {
               return 'analytics-vendor';
             }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons-vendor';
+            }
             return 'vendor';
+          }
+          // App chunks
+          if (id.includes('src/pages')) {
+            return 'pages';
+          }
+          if (id.includes('src/components')) {
+            return 'components';
+          }
+          if (id.includes('src/context')) {
+            return 'context';
+          }
+          if (id.includes('src/api')) {
+            return 'api';
           }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -104,7 +165,11 @@ export default defineConfig({
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    // Optimize chunk loading
+    commonjsOptions: {
+      transformMixedEsModules: true
+    }
   },
 
 });
