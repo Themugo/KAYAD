@@ -521,6 +521,102 @@ export default function CarDetailPage() {
             </div>
           )}
 
+          {/* Inspection Status */}
+          <div className="detail-section">
+            <div className="detail-section-label">Inspection Status</div>
+            <NtsaStatusCard
+              car={car}
+              ntsaStatus={ntsaStatus}
+              ntsaLoading={ntsaLoading}
+              canManage={canManage}
+              onRequestNtsa={handleRequestNtsa}
+            />
+          </div>
+
+          {/* Escrow Status */}
+          {(isP2P || car?.escrowEnabled !== false) && (
+            <div className="detail-section">
+              <div className="detail-section-label">Escrow Protection</div>
+              <div style={{
+                padding: 16,
+                background: 'rgba(34,197,94,0.05)',
+                border: '1px solid rgba(34,197,94,0.2)',
+                borderRadius: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8,
+                    background: 'rgba(34,197,94,0.15)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Lock size={16} style={{ color: '#22C55E' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Escrow Protected</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Secure payment protection</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                  Your payment is held securely in escrow until you confirm receipt of the vehicle. Funds are only released to the seller after your approval, ensuring a safe transaction.
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Auction Status */}
+          {showAuctionCard && (
+            <div className="detail-section">
+              <div className="detail-section-label">Auction Status</div>
+              <div style={{
+                padding: 16,
+                background: isLive ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)',
+                border: isLive ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(245,158,11,0.2)',
+                borderRadius: 12,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8,
+                      background: isLive ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Zap size={16} style={{ color: isLive ? '#EF4444' : '#F59E0B' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                        {isLive ? 'Live Auction' : 'Scheduled Auction'}
+                      </div>
+                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                        {isLive ? 'Bidding in progress' : 'Auction scheduled'}
+                      </div>
+                    </div>
+                  </div>
+                  {isLive && countdown && (
+                    <div style={{
+                      fontSize: 12, fontWeight: 700, color: '#EF4444',
+                      fontFamily: 'var(--font-display)', fontStyle: 'italic',
+                    }}>
+                      {countdown}
+                    </div>
+                  )}
+                </div>
+                {isLive && car.currentBid > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Current Bid</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--gold)' }}>
+                      KES {Number(car.currentBid).toLocaleString()}
+                    </span>
+                  </div>
+                )}
+                {car.bidsCount > 0 && (
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                    {car.bidsCount} bid{car.bidsCount !== 1 ? 's' : ''} placed
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Dealer Profile */}
           {dealer && (
             <div className="detail-card">
@@ -589,36 +685,11 @@ export default function CarDetailPage() {
         {/* ═══════ RIGHT COLUMN (Sticky Sidebar) ═══════ */}
         <div className="detail-sidebar">
 
-          <AuctionAnnouncement car={car} />
-
           {/* Price Card */}
           <div className="price-card">
             <div className="price-card-accent" />
 
             <div className="price-card-body">
-              {/* Badges */}
-              <div className="price-badges">
-                {car.isVerifiedDealer && (
-                  <span className="badge badge-blue"><ShieldCheck size={10} /> Verified</span>
-                )}
-                {car.isPromoted && (
-                  <span className="badge badge-gold"><Star size={10} /> Featured</span>
-                )}
-                {isLive && (
-                  <span className="badge badge-red"><Zap size={10} /> Live Auction</span>
-                )}
-                {isP2P && (
-                  <span className="badge badge-green"><Lock size={10} /> P2P Escrow</span>
-                )}
-              </div>
-
-              <h2 className="price-card-title">{car.title}</h2>
-              {car.location?.city && (
-                <div className="price-card-location">
-                  <MapPin size={11} className="price-card-location-icon" />{car.location.city}
-                </div>
-              )}
-
               {/* Pricing */}
               <div className="price-box">
                 <div className="price-box-label">
@@ -628,24 +699,6 @@ export default function CarDetailPage() {
                 {isLive && car.currentBid > 0 && (
                   <div className="price-box-starting">Starting: KES {(car.price / 1000).toFixed(0)}K</div>
                 )}
-                {car.bidsCount > 0 && (
-                  <div className="price-box-bids">{car.bidsCount} bid{car.bidsCount !== 1 ? 's' : ''} placed</div>
-                )}
-              </div>
-
-              {/* Stats row */}
-              <div className="price-stats">
-                {[
-                  { Icon: Eye, val: car.views || 0, label: 'Views' },
-                  { Icon: Heart, val: car.favoritesCount || 0, label: 'Saved' },
-                  { Icon: Zap, val: car.bidsCount || 0, label: 'Bids' },
-                ].map(({ Icon, val, label }) => (
-                  <div key={label} className="price-stat-item">
-                    <div className="price-stat-icon"><Icon size={14} /></div>
-                    <div className="price-stat-val">{val}</div>
-                    <div className="price-stat-label">{label}</div>
-                  </div>
-                ))}
               </div>
 
               {/* CTAs */}
@@ -750,40 +803,20 @@ export default function CarDetailPage() {
             </div>
           </div>
 
-          <NtsaStatusCard
-            car={car}
-            ntsaStatus={ntsaStatus}
-            ntsaLoading={ntsaLoading}
-            canManage={canManage}
-            onRequestNtsa={handleRequestNtsa}
-          />
-
           {/* Compare */}
           <CompareToggle car={car} />
 
-          {/* Inspection */}
-          <InspectionButton carId={car._id} location={car.location?.city || dealer?.location} />
-          <Link to="/pre-inspection" style={{ display: 'block', fontSize: 11, color: 'var(--gold)', textDecoration: 'none', marginTop: -8, marginBottom: 8, opacity: 0.7 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0.7'}>
-            Learn about Pre-Inspection →
-          </Link>
-
-          {/* TCO */}
-          <TcoCalculator vehicle={car} />
-
-          {/* Market Valuation */}
-          <MarketValuationMatrix
-            carId={car._id}
-            carPrice={car.price || car.currentBid}
-            carBrand={car.brand}
-            carModel={car.model}
-            carYear={car.year}
-          />
-
-          {/* Price History */}
-          <PriceHistoryChart carId={car._id} currentPrice={car.price} />
-
-          {/* Market Pulse (SokoAI) */}
-          <MarketPulse carId={car._id} carPrice={car.price || car.currentBid} carBrand={car.brand} carYear={car.year} />
+          {/* Location */}
+          {car.location?.city && (
+            <div className="sidebar-block">
+              <div className="sidebar-block-label">Location</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+                <MapPin size={14} style={{ color: 'var(--gold)' }} />
+                {car.location.city}
+                {car.location.region && `, ${car.location.region}`}
+              </div>
+            </div>
+          )}
 
           {/* Dealer Mini Card */}
           {dealer && (
@@ -804,6 +837,24 @@ export default function CarDetailPage() {
               </div>
             </div>
           )}
+
+          {/* TCO */}
+          <TcoCalculator vehicle={car} />
+
+          {/* Market Valuation */}
+          <MarketValuationMatrix
+            carId={car._id}
+            carPrice={car.price || car.currentBid}
+            carBrand={car.brand}
+            carModel={car.model}
+            carYear={car.year}
+          />
+
+          {/* Price History */}
+          <PriceHistoryChart carId={car._id} currentPrice={car.price} />
+
+          {/* Market Pulse (SokoAI) */}
+          <MarketPulse carId={car._id} carPrice={car.price || car.currentBid} carBrand={car.brand} carYear={car.year} />
         </div>
       </div>
 
