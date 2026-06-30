@@ -98,6 +98,14 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
     return { brand, location, body, fuel, transmission, color };
   }, [cars]);
 
+  // Quick filters - popular combinations
+  const quickFilters = [
+    { label: 'Under 1M KES', filters: { priceMax: '1000000' }, count: cars.filter(c => c.price <= 1000000).length },
+    { label: 'Toyota SUVs', filters: { brand: 'Toyota', body: 'suv' }, count: cars.filter(c => c.brand === 'Toyota' && c.bodyType?.toLowerCase() === 'suv').length },
+    { label: 'Recent Models', filters: { yearMin: '2020' }, count: cars.filter(c => c.year >= 2020).length },
+    { label: 'Low Mileage', filters: { mileageMax: '50000' }, count: cars.filter(c => c.mileage <= 50000).length },
+  ];
+
   const activeFilter   = filters.filter   || 'all';
   const brandFilter    = filters.brand    || '';
   const locationFilter = filters.location || '';
@@ -189,6 +197,29 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
               <span style={{ fontSize: 12, opacity: 0.7 }}>{icon}</span>{label}
             </span>
           </Chip>
+        ))}
+      </Section>
+
+      {/* ── QUICK FILTERS ── */}
+      <Section title="Quick Filters" defaultOpen={false} count={0}>
+        {quickFilters.map((qf, i) => (
+          <button key={i} onClick={() => {
+            Object.entries(qf.filters).forEach(([k, v]) => onFilterChange(k, v));
+          }} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            width: '100%', padding: '10px 18px',
+            background: 'transparent',
+            border: 'none', borderLeft: '2px solid transparent',
+            color: 'rgba(255,255,255,0.55)',
+            fontSize: 14, fontWeight: 500,
+            cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}
+          >
+            <span>{qf.label}</span>
+            <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 500 }}>{qf.count}</span>
+          </button>
         ))}
       </Section>
 
