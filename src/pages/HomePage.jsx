@@ -9,7 +9,6 @@ import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import HomeAnimatedStat from './home/components/HomeAnimatedStat';
-import HomeLiveTicker from './home/components/HomeLiveTicker';
 import HomeHero from './home/components/HomeHero';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
 import HomeFeaturePillars from './home/components/HomeFeaturePillars';
@@ -18,6 +17,8 @@ import FeaturedDealers from './home/components/FeaturedDealers';
 import VehicleCategories from './home/components/VehicleCategories';
 import Testimonials from './home/components/Testimonials';
 import Partners from './home/components/Partners';
+import PrivateSellerSection from './home/components/PrivateSellerSection';
+import { Shield, Lock, MessageCircle } from 'lucide-react';
 
 export default function HomePage() {
   usePageMeta('Home', 'Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.');
@@ -36,37 +37,36 @@ export default function HomePage() {
     let cancelled = false;
     const fetchCars = async () => {
       try {
-        // Optimized: Fetch only what we need (20 cars instead of 50)
         const data = await carsAPI.list({ page: 1, limit: 20, sort: '-createdAt' });
         if (cancelled) return;
         let all = data.cars || data.data || [];
-        
+
         if (all.length === 0) {
           enableDemoMode();
           const retry = await carsAPI.list({ page: 1, limit: 20, sort: '-createdAt' });
           if (cancelled) return;
           all = retry.cars || retry.data || [];
         }
-        
+
         const now = Date.now();
         const live = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           const e = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
           return s > 0 && e > 0 && s <= now && e > now;
         });
-        
+
         const upcoming = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           return s > now;
         }).sort((a, b) => new Date(a.auctionStartTime) - new Date(b.auctionStartTime));
-        
+
         const nonAuction = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
           const e = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
           const isLive = s > 0 && e > 0 && s <= now && e > now;
           return !isLive && !(s > now);
         });
-        
+
         setLiveAuctions(live.slice(0, 4));
         setFeatured([...nonAuction.filter(c => c.isPromoted), ...nonAuction.filter(c => !c.isPromoted)].slice(0, 4));
         setRecent(nonAuction.slice(0, 8));
@@ -78,7 +78,6 @@ export default function HomePage() {
           brands: [...new Set(all.map(c => c.brand))].length,
         });
 
-        // Extract featured dealers from car data
         const dealerMap = new Map();
         all.forEach(c => {
           const d = c.dealer || c.seller;
@@ -99,7 +98,6 @@ export default function HomePage() {
           }
         });
         setFeaturedDealers(Array.from(dealerMap.values()));
-        // Derive top sellers from dealers sorted by car count
         setTopSellers(Array.from(dealerMap.values()).sort((a, b) => b.carCount - a.carCount).slice(0, 8));
       } catch (err) {
         if (!cancelled) {
@@ -125,35 +123,59 @@ export default function HomePage() {
         {/* 1. Hero */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
 
-        {/* 2. Sponsor Banner Area */}
-        <div className="max-w-[1400px] mx-auto px-7 py-6">
-          <AdvertisementBanner
-            type="image"
-            imageUrl="https://via.placeholder.com/1400x120?text=Sponsor+Banner"
-            position="horizontal"
-            size="large"
-            linkUrl="/advertising"
-            altText="Sponsor Banner"
-          />
-        </div>
-
-        <HomeLiveTicker count={liveCount} />
-
-        <section className="border-t border-b border-white/[0.04]">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <div className="grid gap-px home-stats-grid" style={{ background: 'rgba(255,255,255,0.03)' }}>
+        {/* 2. Trust Bar — stats + trust signals merged */}
+        <section className="border-y border-white/[0.04]">
+          <div className="max-w-[1400px] mx-auto px-7 py-6">
+            <div className="grid gap-px home-stats-grid mb-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
               <HomeAnimatedStat label="Cars Listed" value={stats ? `${stats.totalCars}` : '-'} />
               <HomeAnimatedStat label="Brands" value={stats ? `${stats.brands}` : '-'} />
               <HomeAnimatedStat label="Live Auctions" value={stats ? `${stats.liveAuctions}` : '-'} />
               <HomeAnimatedStat label="Buy Now" value={stats ? `${stats.buyNow}` : '-'} />
             </div>
+            <div className="grid gap-3 grid-cols-1 md:grid-cols-3">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)' }}>
+                <Shield size={20} className="text-[#22C55E]" />
+                <div>
+                  <div className="text-sm font-semibold text-white">Escrow Protected</div>
+                  <div className="text-xs text-white/40">Funds held until delivery confirmed</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)' }}>
+                <Lock size={20} className="text-gold" />
+                <div>
+                  <div className="text-sm font-semibold text-white">Verified Dealers</div>
+                  <div className="text-xs text-white/40">KRA-vetted and buyer-rated</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.15)' }}>
+                <MessageCircle size={20} className="text-[#60A5FA]" />
+                <div>
+                  <div className="text-sm font-semibold text-white">24/7 Support</div>
+                  <div className="text-xs text-white/40">Dedicated dispute resolution team</div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* 3. Featured Inventory */}
+        {/* 3. Sponsored Content */}
         <section className="section-spacing">
           <div className="max-w-[1400px] mx-auto px-7">
-            <div className="flex items-end justify-between mb-4">
+            <AdvertisementBanner
+              type="image"
+              imageUrl="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1400&q=80"
+              position="horizontal"
+              size="medium"
+              linkUrl="/showroom"
+              altText="Featured Dealers"
+            />
+          </div>
+        </section>
+
+        {/* 4. Featured Inventory — Premium Showcase */}
+        <section className="section-spacing">
+          <div className="max-w-[1400px] mx-auto px-7">
+            <div className="flex items-end justify-between mb-6">
               <div>
                 <div className="flex items-center gap-1.5 mb-1">
                   {featured.length > 0 && (
@@ -161,79 +183,57 @@ export default function HomePage() {
                       Featured
                     </span>
                   )}
-                  <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">From The Gallery</span>
+                  <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Premium Collection</span>
                 </div>
-                <h2 className="font-display font-black italic text-[clamp(1.1rem,2vw,1.5rem)] text-white leading-none m-0">
+                <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
                   Elite <span className="text-gold">Selection</span>
                 </h2>
               </div>
-              <Link to="/showroom" className="text-[11px] font-bold no-underline tracking-[0.06em] flex items-center gap-1 transition-colors duration-200 hover:text-gold" style={{ color: 'rgba(212,196,168,0.7)' }}
-              >Full Gallery →</Link>
+              <Link to="/showroom" className="section-link">View All →</Link>
             </div>
 
             {loading ? (
-              <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}>
+              <div className="grid gap-4 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="aspect-[16/11] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+                  <div key={i} className="aspect-[4/3] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
                 ))}
               </div>
             ) : displayCars.length > 0 ? (
-              <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-                {displayCars.map(car => <CartyGrid key={car._id} car={car} isMobile={isMobile} />)}
+              <div className="grid gap-5 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+                {displayCars.map(car => (
+                  <div key={car._id} className="premium-card">
+                    <CartyGrid car={car} isMobile={isMobile} />
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-white/20 text-xs">
-                No vehicles yet — <Link to="/showroom" className="text-gold no-underline">browse the gallery</Link>
+              <div className="text-center py-16 text-white/20 text-sm">
+                <p className="mb-3">No vehicles in the premium collection yet</p>
+                <Link to="/showroom" className="text-gold no-underline font-semibold">Browse the gallery →</Link>
               </div>
             )}
           </div>
         </section>
 
-        {/* 4. Live Auctions */}
+        {/* 5. Live Auctions */}
         {!loading && <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />}
-
-        {/* 5. Trust Signals */}
-        <section className="section-spacing">
-          <div className="max-w-[1400px] mx-auto px-7">
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ fontSize: '32px' }}>🔒</div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>Escrow Protected</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Your payment is held securely until you receive your vehicle</div>
-                </div>
-              </div>
-              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ fontSize: '32px' }}>✓</div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>Verified Dealers</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>All dealers undergo rigorous verification before listing</div>
-                </div>
-              </div>
-              <div style={{ padding: '24px', borderRadius: '16px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ fontSize: '32px' }}>💬</div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>24/7 Support</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>Our team is here to help with any questions or disputes</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* 6. Featured Dealers */}
         <FeaturedDealers dealers={featuredDealers.slice(0, 4)} />
 
-        {/* 7. Vehicle Categories */}
+        {/* 7. Private Seller Section */}
+        <PrivateSellerSection />
+
+        {/* 8. Vehicle Categories */}
         <VehicleCategories />
 
-        {/* 8. Testimonials */}
+        {/* 9. Testimonials */}
         <Testimonials />
 
-        {/* 9. Partners */}
+        {/* 10. Partners */}
         <Partners />
 
-        {/* 10. Feature Pillars & CTA */}
+        {/* 11. Feature Pillars & CTA */}
         <HomeFeaturePillars />
         <HomeCtaSection isAuth={isAuth} />
       </div>

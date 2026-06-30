@@ -34,7 +34,7 @@ export function GalleryImage({ car, idx, onPrev, onNext, total }) {
     <div className="car-detail-gallery"
       onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {!loaded && <div className="gallery-shimmer" />}
-      <img key={idx} src={src} onError={() => setErr(true)} onLoad={() => setLoaded(true)} alt={car?.title || 'Vehicle'} decoding="async"
+      <img key={idx} src={src} onError={() => setErr(true)} onLoad={() => setLoaded(true)} alt={car?.title || 'Vehicle'} decoding="async" fetchpriority="high"
         style={{ opacity: loaded ? 1 : 0.3, transition: 'opacity 0.5s ease' }} />
 
       <div className="gallery-overlay" />

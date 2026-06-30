@@ -28,12 +28,13 @@ import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
   Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
   Star, Eye, Bookmark, Zap, Award, Lock, Pin, TrendingUp,
-  CheckCircle, AlertTriangle, Clock, BarChart3
+  CheckCircle, AlertTriangle, Clock, BarChart3, Phone, Mail
 } from 'lucide-react';
 
 // Extracted sub-components
 import { firstImage, GalleryImage, SpecItem, CompareToggle } from './car/components/CarDetailWidgets';
 import CarDetailReviews from './car/components/CarDetailReviews';
+import SimilarCars from './car/components/SimilarCars';
 
 export default function CarDetailPage() {
   const { id } = useParams();
@@ -455,10 +456,10 @@ export default function CarDetailPage() {
                       <span className="dealer-contact-item"><MapPin size={11} className="contact-icon" />{dealer.location}</span>
                     )}
                     {dealer.phone && dv.showPhone && (
-                      <span className="dealer-contact-item"><span className="contact-emoji">📞</span>{dealer.phone}</span>
+                      <span className="dealer-contact-item"><Phone size={11} className="contact-icon" />{dealer.phone}</span>
                     )}
                     {dealer.email && dv.showEmail && (
-                      <span className="dealer-contact-item"><span className="contact-emoji">✉️</span>{dealer.email}</span>
+                      <span className="dealer-contact-item"><Mail size={11} className="contact-icon" />{dealer.email}</span>
                     )}
                   </div>
                   {dealer.escrowMandatory && (
@@ -534,14 +535,14 @@ export default function CarDetailPage() {
               {/* Stats row */}
               <div className="price-stats">
                 {[
-                  { icon: '👁', val: car.views || 0, label: 'Views' },
-                  { icon: '❤️', val: car.favoritesCount || 0, label: 'Saved' },
-                  { icon: '⚡', val: car.bidsCount || 0, label: 'Bids' },
-                ].map(s => (
-                  <div key={s.label} className="price-stat-item">
-                    <div className="price-stat-icon">{s.icon}</div>
-                    <div className="price-stat-val">{s.val}</div>
-                    <div className="price-stat-label">{s.label}</div>
+                  { Icon: Eye, val: car.views || 0, label: 'Views' },
+                  { Icon: Heart, val: car.favoritesCount || 0, label: 'Saved' },
+                  { Icon: Zap, val: car.bidsCount || 0, label: 'Bids' },
+                ].map(({ Icon, val, label }) => (
+                  <div key={label} className="price-stat-item">
+                    <div className="price-stat-icon"><Icon size={14} /></div>
+                    <div className="price-stat-val">{val}</div>
+                    <div className="price-stat-label">{label}</div>
                   </div>
                 ))}
               </div>
@@ -600,7 +601,7 @@ export default function CarDetailPage() {
                       <MessageCircle size={13} /> WhatsApp
                     </button>
                     <button onClick={() => { navigator.clipboard?.writeText(window.location.href); toast('Link copied!', 'success'); }} className="cta-fav" style={{ fontSize: 11, flex: 1 }}>
-                      📋 Copy link
+                      <span className="contact-emoji">📋</span> Copy link
                     </button>
                   </div>
 
@@ -779,6 +780,9 @@ export default function CarDetailPage() {
       {showGallery && (
         <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
       )}
+
+      {/* Similar Cars */}
+      {car && !loading && <SimilarCars carId={car._id} brand={car.brand} />}
 
       {showPayModal && (
         <PaymentModal

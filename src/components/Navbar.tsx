@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +8,7 @@ import { carsAPI } from '../api/api';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Menu, X, LogOut } from 'lucide-react';
+import { Bell, Menu, X, LogOut, PlusCircle, Search } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuth, isAdmin, logout } = useAuth();
@@ -25,14 +24,13 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hasLiveAuction, setHasLiveAuction] = useState(false);
 
-  // Check for live auctions on mount + every 60s
   useEffect(() => {
     const check = () => {
       carsAPI.list({ limit: 50, category: 'all' })
         .then(data => {
           const all = data.cars || data.data || [];
           const now = Date.now();
-          setHasLiveAuction(all.some((c: any) => {
+          setHasLiveAuction(all.some((c) => {
             const start = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
             const end = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
             return start > 0 && end > 0 && start <= now && end > now;
@@ -45,19 +43,17 @@ export default function Navbar() {
     return () => clearInterval(iv);
   }, []);
 
-  const dropRef = useRef<HTMLDivElement>(null);
+  const dropRef = useRef(null);
 
-  // Close menus on route change
   useEffect(() => {
     setMobileOpen(false);
     setUserDrop(false);
     setNotifDrop(false);
   }, [loc.pathname]);
 
-  // Click outside handler
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
+    const handleClickOutside = (e) => {
+      if (dropRef.current && !dropRef.current.contains(e.target)) {
         setUserDrop(false);
         setNotifDrop(false);
       }
@@ -66,13 +62,11 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Prevent body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  // Scroll effect
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -84,18 +78,21 @@ export default function Navbar() {
     navigate('/');
   };
 
-
-  const isActive = (path: string) => {
+  const isActive = (path) => {
     if (path === '/') return loc.pathname === '/';
     return loc.pathname === path || loc.pathname.startsWith(path + '/');
   };
 
+  const sellLink = isAuth
+    ? (isSellerRole(user?.role) ? '/dealer/add-car' : '/sell')
+    : '/register?sell=1';
+
   return (
     <>
-      <nav 
+      <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled 
-            ? 'bg-black/95 backdrop-blur-2xl border-b border-border shadow-2xl' 
+          scrolled
+            ? 'bg-black/95 backdrop-blur-2xl border-b border-border shadow-2xl'
             : 'bg-gradient-to-b from-black/90 to-transparent backdrop-blur-xl'
         }`}
         aria-label="Main navigation"
@@ -104,15 +101,15 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 flex-shrink-0 group">
             {branding?.logoType === 'image' && branding?.logoUrl ? (
-              <img 
-                src={branding.logoUrl} 
-                alt={branding.logoText || 'KAYAD'} 
-                className="h-11 w-auto object-contain" 
+              <img
+                src={branding.logoUrl}
+                alt={branding.logoText || 'KAYAD'}
+                className="h-11 w-auto object-contain"
                 decoding="async"
               />
             ) : (
               <>
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold via-gold-light to-gold-dark flex items-center justify-center shadow-gold text-black text-3xl font-bold transition-transform group-hover:scale-105">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-gold via-gold-light to-gold-dark flex items-center justify-center shadow-gold text-black text-3xl font-bold transition-transform group-hover:scale-105">
                   {(branding?.logoText || 'K')[0]}
                 </div>
                 <span className="font-display text-3xl font-bold tracking-tighter text-white">
@@ -125,32 +122,28 @@ export default function Navbar() {
           <div className="flex-1" />
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          <div className="hidden md:flex items-center gap-4 text-sm font-medium">
             <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
               Home
             </Link>
 
             <Link to="/showroom" className={`nav-link ${isActive('/showroom') ? 'active' : ''}`}>
-              Gallery
+              Browse
             </Link>
-            
-            <Link to="/auctions/calendar" className="nav-link flex items-center gap-2">
+
+            <Link to="/auctions/calendar" className="nav-link flex items-center gap-1.5">
               {hasLiveAuction && (
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
               )}
-              <span>Auctions{hasLiveAuction ? <span style={{ fontSize: 9, marginLeft: 3, color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em' }}>LIVE</span> : ''}</span>
-            </Link>
-
-            <Link to="/ghost-checker" className={`nav-link ${isActive('/ghost-checker') ? 'active' : ''}`}>
-              Ghost Check
+              Auctions
             </Link>
 
             {isSellerRole(user?.role) && (
               <Link to="/dealer" className={`nav-link ${isActive('/dealer') ? 'active' : ''}`}>
-                Dealer Hub
+                Dashboard
               </Link>
             )}
 
@@ -159,22 +152,35 @@ export default function Navbar() {
                 Admin
               </Link>
             )}
+
+            {/* Sell CTA */}
+            <Link to={sellLink} className="nav-sell-btn flex items-center gap-1.5">
+              <PlusCircle size={14} />
+              Sell
+            </Link>
           </div>
 
           {/* Right Section */}
-          <div ref={dropRef} className="flex items-center gap-3">
+          <div ref={dropRef} className="flex items-center gap-2">
             {isAuth ? (
               <>
-                {/* Notifications */}
+                <button
+                  onClick={() => navigate('/showroom')}
+                  className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors"
+                  aria-label="Search"
+                >
+                  <Search size={20} className="text-white/60" />
+                </button>
+
                 <div className="relative">
                   <button
                     onClick={() => { setNotifDrop(!notifDrop); setUserDrop(false); }}
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors relative"
+                    className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors relative"
                     aria-label="Notifications"
                   >
-                    <Bell size={22} />
+                    <Bell size={20} />
                     {unreadCount > 0 && (
-                      <span className="absolute top-2 right-2 w-5 h-5 bg-gold text-black text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-bg">
+                      <span className="absolute top-1.5 right-1.5 w-4.5 h-4.5 bg-gold text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-bg">
                         {unreadCount > 9 ? '9+' : unreadCount}
                       </span>
                     )}
@@ -184,18 +190,17 @@ export default function Navbar() {
                   </AnimatePresence>
                 </div>
 
-                {/* User Menu */}
                 <div className="relative">
                   <button
                     onClick={() => { setUserDrop(!userDrop); setNotifDrop(false); }}
-                    className="flex items-center gap-3 bg-surface border border-border hover:border-gold pl-2 pr-4 py-2 rounded-2xl transition-all"
+                    className="flex items-center gap-2.5 bg-surface border border-border hover:border-gold pl-2 pr-3.5 py-1.5 rounded-2xl transition-all"
                   >
-                    <div className="w-9 h-9 bg-gradient-to-br from-gold to-gold-dark rounded-xl flex items-center justify-center text-black font-bold text-sm">
+                    <div className="w-8 h-8 bg-gradient-to-br from-gold to-gold-dark rounded-xl flex items-center justify-center text-black font-bold text-sm">
                       {initials(user?.name || user?.email)}
                     </div>
                     <div className="hidden sm:block text-left">
                       <div className="text-sm font-semibold text-white leading-none">{user?.name?.split(' ')[0]}</div>
-                      <div className="text-[10px] text-text-muted capitalize">{user?.role}</div>
+                      <div className="text-[10px] text-text-muted capitalize">{user?.role?.replace('_', ' ')}</div>
                     </div>
                   </button>
 
@@ -207,18 +212,17 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 mt-3 w-64 glass rounded-3xl shadow-2xl py-2 z-50 border border-border"
                       >
-                        {/* User Info */}
                         <div className="px-6 py-4 border-b border-border">
                           <div className="font-semibold">{user?.name}</div>
                           <div className="text-sm text-text-muted">{user?.email}</div>
                         </div>
 
-                        {/* Menu Links */}
                         <div className="py-2">
                           {[
                             { to: '/profile', label: 'Profile' },
                             { to: '/dashboard', label: 'Dashboard' },
                             { to: '/favorites', label: 'Saved Cars' },
+                            { to: '/chat', label: 'Messages' },
                             ...(isSellerRole(user?.role) ? [{ to: '/dealer', label: 'Dealer Hub' }] : []),
                             ...(isAdmin ? [{ to: '/admin', label: 'Admin Panel' }] : []),
                           ].map(({ to, label }) => (
@@ -248,25 +252,29 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link to="/login" className="btn btn-outline px-6">Sign In</Link>
-                <Link to="/register" className="btn btn-gold px-6">Join Free</Link>
+              <div className="flex items-center gap-2.5">
+                <Link to="/showroom" className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors" aria-label="Search">
+                  <Search size={20} className="text-white/60" />
+                </Link>
+                <Link to="/login" className="btn btn-outline px-5 text-xs">Sign In</Link>
+                <Link to={sellLink} className="nav-sell-btn flex items-center gap-1.5 text-xs px-4 py-2">
+                  <PlusCircle size={13} />
+                  Sell
+                </Link>
               </div>
             )}
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-3 hover:bg-surface rounded-2xl transition-colors"
+              className="lg:hidden p-2.5 hover:bg-surface rounded-2xl transition-colors"
               aria-label="Toggle menu"
             >
-              {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -285,36 +293,42 @@ export default function Navbar() {
               onClick={e => e.stopPropagation()}
             >
               <div className="flex flex-col h-full">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: '0.1em' }}>Menu</span>
-                  <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-3 hover:bg-surface rounded-xl transition-colors" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', padding: 12 }}>
-                    <X size={24} />
+                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+                  <span className="text-xs font-bold text-white/50 tracking-[0.1em] uppercase">Menu</span>
+                  <button onClick={() => setMobileOpen(false)} aria-label="Close menu" className="p-2.5 hover:bg-surface rounded-xl transition-colors" style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer' }}>
+                    <X size={22} />
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6">
-                  <Link to="/ghost-checker" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    Ghost Check
+
+                <div className="flex-1 overflow-y-auto px-5 py-6 space-y-1">
+                  {/* Sell CTA at top */}
+                  <Link to={sellLink} className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-gold/10 border border-gold/20 text-gold font-bold text-sm no-underline mb-5"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <PlusCircle size={18} />
+                    List Your Vehicle
                   </Link>
-                  <Link to="/about" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    About
+
+                  <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Home</Link>
+                  <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Browse Cars</Link>
+                  <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+                    Auctions
+                    {hasLiveAuction && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
                   </Link>
-                  <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    Contact
-                  </Link>
-                  <Link to="/escrow-vault" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                    Escrow Vault
-                  </Link>
+                  <Link to="/ghost-checker" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Ghost Check</Link>
+                  <Link to="/about" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>About</Link>
+                  <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Contact</Link>
+                  <Link to="/escrow-vault" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Escrow Vault</Link>
+
                   {isSellerRole(user?.role) && (
-                    <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                      Dealer Hub
-                    </Link>
+                    <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Dealer Hub</Link>
                   )}
                   {isAdmin && (
-                    <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>
-                      Admin
-                    </Link>
+                    <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Admin Panel</Link>
                   )}
+
                   <hr className="border-border my-4" />
+
                   {isAuth ? (
                     <>
                       <Link to="/notifications" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>
@@ -326,6 +340,7 @@ export default function Navbar() {
                       <Link to="/payments" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Payments</Link>
                       <Link to="/chat" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Messages</Link>
                       <Link to="/disputes" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Disputes</Link>
+                      <Link to="/favorites" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Saved Cars</Link>
                       <div className="pt-4">
                         <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="mobile-nav-link text-danger">
                           Sign Out
