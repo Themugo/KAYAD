@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, ShieldCheck } from 'lucide-react';
 import LazyImage from '../../../components/LazyImage';
 import { carsAPI } from '../../../api/api';
 
@@ -11,9 +10,14 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1920&q=80',
 ];
 
+const TRUST_INDICATORS = [
+  'Escrow Protected',
+  '150-Point Inspection',
+  'Verified Dealers',
+];
+
 export default function HomeHero({ liveCount, isAuth, user }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
   const [images, setImages] = useState(FALLBACK_IMAGES);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
@@ -23,11 +27,7 @@ export default function HomeHero({ liveCount, isAuth, user }) {
       try {
         const data = await carsAPI.list({ page: 1, limit: 10, sort: '-createdAt' });
         const cars = data.cars || data.data || [];
-        const heroVehicles = cars.filter(c => c.showOnHero);
-        const featuredVehicles = cars.filter(c => c.isPromoted && !c.showOnHero);
-        const regularVehicles = cars.filter(c => !c.showOnHero && !c.isPromoted);
-        const priorityList = [...heroVehicles, ...featuredVehicles, ...regularVehicles];
-        const withImages = priorityList
+        const withImages = cars
           .filter(c => c.images && c.images.length > 0 && c.images[0])
           .map(c => { const img = c.images[0]; return typeof img === 'string' ? img : img?.url; })
           .filter(Boolean);
@@ -38,31 +38,16 @@ export default function HomeHero({ liveCount, isAuth, user }) {
   }, []);
 
   useEffect(() => {
+    if (images.length <= 1) return;
     const interval = setInterval(() => {
-      setDirection(1);
       setCurrentIndex(prev => (prev + 1) % images.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [images.length]);
 
-  const slideVariants = {
-    enter: (direction) => ({ x: direction > 0 ? 800 : -800, opacity: 0, scale: 1.08 }),
-    center: { x: 0, opacity: 1, scale: 1, transition: { x: { type: 'spring', stiffness: 250, damping: 25 }, opacity: { duration: 0.6 }, scale: { duration: 0.6 } } },
-    exit: (direction) => ({ x: direction < 0 ? 800 : -800, opacity: 0, scale: 1.08, transition: { x: { type: 'spring', stiffness: 250, damping: 25 }, opacity: { duration: 0.4 }, scale: { duration: 0.4 } } }),
-  };
-
-  const paginate = useCallback((newDirection) => {
-    setDirection(newDirection);
-    setCurrentIndex(prev => {
-      if (newDirection === 1) return (prev + 1) % images.length;
-      return (prev - 1 + images.length) % images.length;
-    });
+  const paginate = useCallback((dir) => {
+    setCurrentIndex(prev => (prev + dir + images.length) % images.length);
   }, [images.length]);
-
-  const goToSlide = useCallback((index) => {
-    setDirection(index > currentIndex ? 1 : -1);
-    setCurrentIndex(index);
-  }, [currentIndex]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -70,80 +55,166 @@ export default function HomeHero({ liveCount, isAuth, user }) {
   };
 
   return (
-    <section className="home-hero-section relative overflow-hidden" style={{ height: '85vh', minHeight: '560px' }}>
-      <div className="absolute inset-0">
-        <AnimatePresence initial={false} custom={direction} mode="wait">
-          <motion.div key={currentIndex} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" className="absolute inset-0">
-            <LazyImage src={images[currentIndex]} alt="Premium vehicle" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      <button onClick={() => paginate(-1)} className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 items-center justify-center" aria-label="Previous">
-        <ChevronLeft size={20} />
-      </button>
-      <button onClick={() => paginate(1)} className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 items-center justify-center" aria-label="Next">
-        <ChevronRight size={20} />
-      </button>
-
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {images.map((_, i) => (
-          <button key={i} onClick={() => goToSlide(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-gold w-8' : 'bg-white/20 w-1.5 hover:bg-white/40'}`}
-            aria-label={`Slide ${i + 1}`} />
-        ))}
-      </div>
-
-      <div className="absolute inset-0 z-10 flex items-center">
-        <div className="max-w-[1400px] mx-auto px-8 w-full">
-          <div className="max-w-2xl">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="mb-6">
-              <h1 className="font-display font-black italic text-[clamp(2.2rem,5vw,4.2rem)] leading-[0.9] uppercase text-white tracking-[-0.02em] mb-4">
-                Kenya's Premium
-                <span className="block text-gold" style={{ textShadow: '0 0 50px rgba(212,196,168,0.3)' }}>Car Marketplace</span>
+    <section className="home-hero-section" style={{
+      height: '85vh', minHeight: '560px', position: 'relative', overflow: 'hidden',
+      background: 'var(--bg)',
+    }}>
+      <div className="max-w-[1400px] mx-auto h-full" style={{ padding: '0 48px' }}>
+        <div className="flex h-full items-center" style={{ gap: 'clamp(24px, 4vw, 64px)' }}>
+          {/* ─── LEFT: Content ─── */}
+          <div className="hero-content" style={{ flex: '0 0 50%', maxWidth: '580px', zIndex: 2, position: 'relative' }}>
+            <div>
+              <h1 className="font-display font-black italic" style={{
+                fontSize: 'clamp(2rem, 4vw, 3.6rem)',
+                lineHeight: 1.05,
+                color: '#fff',
+                marginBottom: '16px',
+                letterSpacing: '-0.02em',
+              }}>
+                Buy and Sell Vehicles<br />
+                <span style={{ color: 'var(--gold)' }}>With Complete Confidence</span>
               </h1>
-              <p className="text-white/50 text-[clamp(0.9rem,1.2vw,1.05rem)] max-w-lg leading-relaxed" style={{ fontFamily: 'var(--font-body)' }}>
+              <p className="font-body" style={{
+                fontSize: 'clamp(0.9rem, 1.1vw, 1.05rem)',
+                color: 'rgba(255,255,255,0.5)',
+                lineHeight: 1.7,
+                marginBottom: '28px',
+                maxWidth: '480px',
+              }}>
                 Every transaction secured by mandatory escrow. East Africa's most trusted way to buy and sell premium vehicles.
               </p>
-            </motion.div>
+            </div>
 
-            <motion.form onSubmit={handleSearch} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-              className="relative mb-8 max-w-lg"
-            >
-              <div className="flex items-center rounded-full overflow-hidden" style={{ background: 'rgba(15,15,15,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <Search size={16} className="ml-4 text-white/30 flex-shrink-0" />
-                <input type="text" placeholder="Search by make, model, or keyword..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 bg-transparent border-none text-white text-sm py-3.5 px-3 outline-none placeholder-white/25" />
-                <button type="submit" className="bg-gold hover:bg-gold/90 text-black text-xs font-bold uppercase tracking-[0.08em] px-6 py-3.5 rounded-full mx-1 transition-all duration-200 flex-shrink-0 cursor-pointer border-none">
+            <form onSubmit={handleSearch} style={{ marginBottom: '24px' }}>
+              <div className="flex items-center" style={{
+                background: 'rgba(15,15,15,0.8)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '100px',
+                overflow: 'hidden',
+                maxWidth: '520px',
+              }}>
+                <Search size={16} style={{ marginLeft: '18px', color: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+                <input type="text" placeholder="Search by make, model, or keyword..." value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: '14px',
+                    padding: '14px 14px', outline: 'none',
+                  }}
+                  className="hero-search-input" />
+                <button type="submit" style={{
+                  background: 'var(--gold)', color: '#000', border: 'none', cursor: 'pointer',
+                  fontWeight: 700, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase',
+                  padding: '10px 24px', borderRadius: '100px', marginRight: '4px', flexShrink: 0,
+                  transition: 'opacity 0.2s',
+                }} onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                   onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
                   Search
                 </button>
               </div>
-            </motion.form>
+            </form>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
-              <Link to="/showroom" className="btn-gold px-8 py-3.5 rounded-full text-sm uppercase tracking-[0.08em] no-underline text-center">
-                Browse Cars
+            <div className="flex items-center gap-3" style={{ marginBottom: '32px' }}>
+              <Link to="/showroom" className="btn-gold" style={{
+                padding: '14px 36px', borderRadius: '100px', fontSize: '13px',
+                fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
+                textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
+              }}>
+                Browse Vehicles
               </Link>
-              {liveCount > 0 && (
-                <Link to="/auctions/calendar" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border border-white/15 text-white text-sm uppercase tracking-[0.08em] rounded-full hover:bg-white/8 transition-all duration-300 no-underline font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  {liveCount} Live Auction{liveCount !== 1 ? 's' : ''}
-                </Link>
-              )}
-            </motion.div>
+              <Link to="/sell" className="btn-outline-gold" style={{
+                padding: '14px 36px', borderRadius: '100px', fontSize: '13px',
+                fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase',
+                textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px',
+                border: '1px solid rgba(212,196,168,0.25)', color: 'var(--gold)',
+                transition: 'all 0.2s',
+              }} onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,196,168,0.08)'; }}
+                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}>
+                Sell Your Vehicle
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-5 flex-wrap">
+              {TRUST_INDICATORS.map(text => (
+                <div key={text} className="flex items-center gap-1.5">
+                  <ShieldCheck size={14} style={{ color: 'rgba(212,196,168,0.5)' }} />
+                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ─── RIGHT: Image Slider ─── */}
+          <div className="hero-slider" style={{ flex: '0 0 50%', position: 'relative', height: '70%', borderRadius: '16px', overflow: 'hidden', background: '#0A0A0A' }}>
+            {images.map((src, i) => (
+              <div key={i} style={{
+                position: 'absolute', inset: 0,
+                opacity: i === currentIndex ? 1 : 0,
+                transition: 'opacity 0.8s ease, transform 0.8s ease',
+                transform: i === currentIndex ? 'scale(1)' : 'scale(1.05)',
+              }}>
+                <LazyImage src={src} alt={`Vehicle ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            ))}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(0,0,0,0.2), transparent)' }} />
+            {images.length > 1 && (
+              <>
+                <button onClick={() => paginate(-1)} style={{
+                  position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)',
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s',
+                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
+                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'} aria-label="Previous">
+                  <ChevronLeft size={16} />
+                </button>
+                <button onClick={() => paginate(1)} style={{
+                  position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
+                  width: '36px', height: '36px', borderRadius: '50%',
+                  background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.2s',
+                }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.6)'}
+                   onMouseLeave={e => e.currentTarget.style.background = 'rgba(0,0,0,0.4)'} aria-label="Next">
+                  <ChevronRight size={16} />
+                </button>
+                <div style={{ position: 'absolute', bottom: '14px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px' }}>
+                  {images.map((_, i) => (
+                    <button key={i} onClick={() => setCurrentIndex(i)}
+                      style={{
+                        width: i === currentIndex ? '24px' : '6px', height: '6px', borderRadius: '3px',
+                        border: 'none', cursor: 'pointer', transition: 'all 0.3s',
+                        background: i === currentIndex ? 'var(--gold)' : 'rgba(255,255,255,0.2)',
+                      }} aria-label={`Slide ${i + 1}`} />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       <style>{`
-        @media (max-width: 1024px) { .home-hero-section { height: 70vh !important; min-height: 480px !important; } }
-        @media (max-width: 768px) { .home-hero-section { height: 65vh !important; min-height: 420px !important; } }
-        @media (max-width: 480px) {
-          .home-hero-section { height: 75vh !important; min-height: 460px !important; }
-          .home-hero-section .px-8 { padding-left: 16px !important; padding-right: 16px !important; }
+        @media (max-width: 1024px) {
+          .home-hero-section { height: 75vh !important; min-height: 500px !important; }
+          .home-hero-section > div { padding: 0 24px !important; }
         }
+        @media (max-width: 768px) {
+          .home-hero-section { height: auto !important; min-height: 0 !important; }
+          .home-hero-section .flex { flex-direction: column !important; gap: 0 !important; }
+          .hero-content { flex: none !important; max-width: 100% !important; padding: 48px 0 32px; }
+          .hero-slider { flex: none !important; width: 100% !important; height: 320px !important; border-radius: 12px !important; margin-bottom: 32px; }
+          .hero-search-input { font-size: 13px !important; }
+        }
+        @media (max-width: 480px) {
+          .hero-content { padding: 36px 0 24px; }
+          .hero-slider { height: 240px !important; }
+          .home-hero-section > div { padding: 0 16px !important; }
+        }
+        .btn-outline-gold:hover { background: rgba(212,196,168,0.08) !important; }
       `}</style>
     </section>
   );
