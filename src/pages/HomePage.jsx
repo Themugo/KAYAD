@@ -8,14 +8,17 @@ import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import HomeHero from './home/components/HomeHero';
+import VehicleCategories from './home/components/VehicleCategories';
 import TrustBar from './home/components/TrustBar';
+import TransactionStats from './home/components/TransactionStats';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
-import FeaturedDealers from './home/components/FeaturedDealers';
+import Testimonials from './home/components/Testimonials';
 import PrivateSellerSection from './home/components/PrivateSellerSection';
+import FeaturedDealers from './home/components/FeaturedDealers';
 import Partners from './home/components/Partners';
 
 export default function HomePage() {
-  usePageMeta('Home', 'East Africa\'s most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.');
+  usePageMeta('Home', "East Africa's most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.");
   const { isAuth, user } = useAuth();
   const { toast } = useToast();
   const isMobile = useMediaQuery('(max-width: 768px)');
@@ -46,11 +49,6 @@ export default function HomePage() {
           const e = c.auctionEnd ? new Date(c.auctionEnd).getTime() : 0;
           return s > 0 && e > 0 && s <= now && e > now;
         });
-
-        const upcoming = all.filter(c => {
-          const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
-          return s > now;
-        }).sort((a, b) => new Date(a.auctionStartTime) - new Date(b.auctionStartTime));
 
         const nonAuction = all.filter(c => {
           const s = c.auctionStartTime ? new Date(c.auctionStartTime).getTime() : 0;
@@ -112,14 +110,21 @@ export default function HomePage() {
       <WebSiteStructuredData />
       <BreadcrumbStructuredData items={[{ name: 'Home', url: '/' }]} />
       <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-        {/* Order for mobile: Hero → TrustBar → Featured → Auctions → Sell → Dealers → Partners */}
-        {/* Order for desktop: same, just wider layout */}
+        {/* 1. Hero */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
+
+        {/* 2. Vehicle Categories */}
+        <VehicleCategories />
+
+        {/* 3. Trust & Security */}
         <TrustBar />
 
         {!loading && (
           <>
-            {/* 3. Featured Collection */}
+            {/* 4. Platform Statistics */}
+            <TransactionStats />
+
+            {/* 5. Featured Collection */}
             <SectionWrapper>
               <div className="max-w-[1400px] mx-auto px-7">
                 <div className="flex items-end justify-between mb-6">
@@ -156,16 +161,19 @@ export default function HomePage() {
               </div>
             </SectionWrapper>
 
-            {/* 4. Live Auctions */}
+            {/* 6. Live Auctions */}
             <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />
 
-            {/* 5. Private Seller */}
+            {/* 7. Testimonials / Trust features */}
+            <Testimonials />
+
+            {/* 8. Private Seller */}
             <PrivateSellerSection />
 
-            {/* 6. Dealer Network */}
+            {/* 9. Dealer Network */}
             <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
 
-            {/* 7. Marketplace Ecosystem */}
+            {/* 10. Marketplace Ecosystem */}
             <Partners />
           </>
         )}
