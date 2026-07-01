@@ -354,17 +354,7 @@ export default function CarDetailPage() {
       </div>
 
       {/* Trust Strip */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 16,
-        padding: '12px 16px',
-        background: 'rgba(212,196,168,0.05)',
-        border: '1px solid rgba(212,196,168,0.15)',
-        borderRadius: 12,
-        marginBottom: 24,
-        flexWrap: 'wrap',
-      }}>
+      <div className="trust-strip">
         {[
           { icon: ShieldCheck, label: 'Verified Listing', show: car?.isVerifiedDealer },
           { icon: Lock, label: 'Escrow Protected', show: isP2P || car?.escrowEnabled !== false },
@@ -372,17 +362,8 @@ export default function CarDetailPage() {
           { icon: Zap, label: 'Live Auction', show: isLive },
           { icon: CheckCircle, label: 'NTSA Verified', show: car?.ntsaVerified },
         ].filter(item => item.show).map((item, i) => (
-          <div key={i} style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 11,
-            fontWeight: 600,
-            color: 'var(--gold)',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-          }}>
-            <item.icon size={12} />
+          <div key={i} className="trust-strip-item">
+            <item.icon size={11} />
             {item.label}
           </div>
         ))}
@@ -394,20 +375,28 @@ export default function CarDetailPage() {
         <div className="detail-left">
 
           {/* Vehicle Header */}
-          <div style={{ marginBottom: 20 }}>
-            <h1 className="detail-title" style={{ fontSize: 'clamp(1.5rem,3vw,2.2rem)', marginBottom: 8 }}>{car.title}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 14, color: 'var(--gold)', fontWeight: 700 }}>
+          <div>
+            <h1 style={{
+              fontFamily: 'var(--font-display)', fontStyle: 'italic',
+              fontSize: 'clamp(1.5rem,3vw,2.2rem)',
+              fontWeight: 800, color: '#fff', lineHeight: 1.1,
+              margin: '0 0 10px',
+            }}>{car.title}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <span style={{
+                fontSize: 15, color: 'var(--gold)', fontWeight: 700,
+                letterSpacing: '0.02em',
+              }}>
                 KES {Number(price).toLocaleString()}
               </span>
               {car.location?.city && (
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <MapPin size={12} /> {car.location.city}
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <MapPin size={12} style={{ color: 'var(--gold)' }} /> {car.location.city}
                 </span>
               )}
               {car.year && (
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <Calendar size={12} /> {car.year}
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Calendar size={12} style={{ color: 'var(--gold)' }} /> {car.year}
                 </span>
               )}
             </div>
@@ -481,10 +470,11 @@ export default function CarDetailPage() {
                 </div>
               </div>
               <button onClick={handleTogglePromote} disabled={promoting}
-                className={`owner-btn-feature ${car.isPromoted ? 'owner-btn-unfeature' : ''}`}>
-                {car.isPromoted ? <><TrendingUp size={13} /> Unfeature</> : <><Star size={13} /> Feature</>}
+                className="owner-btn"
+                style={car.isPromoted ? { background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' } : {}}>
+                <TrendingUp size={13} /> {car.isPromoted ? 'Unfeature' : 'Feature'}
               </button>
-              <Link to={`/dealer/edit/${car._id}`} className="owner-btn-edit">Edit</Link>
+              <Link to={`/dealer/edit/${car._id}`} className="owner-btn">Edit</Link>
             </div>
           )}
 
@@ -508,48 +498,28 @@ export default function CarDetailPage() {
           </div>
 
           {/* Vehicle Overview */}
-          <div className="detail-section">
+          <div>
             <div className="detail-section-label">Vehicle Overview</div>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 16,
+              gap: 12,
             }}>
-              <div style={{
-                padding: 16,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
-              }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Views</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.views || 0}</div>
+              <div className="stat-card">
+                <div>Views</div>
+                <div className="stat-card-val">{car.views || 0}</div>
               </div>
-              <div style={{
-                padding: 16,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
-              }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Saved</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.favoritesCount || 0}</div>
+              <div className="stat-card">
+                <div>Saved</div>
+                <div className="stat-card-val">{car.favoritesCount || 0}</div>
               </div>
-              <div style={{
-                padding: 16,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
-              }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bids</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#fff' }}>{car.bidsCount || 0}</div>
+              <div className="stat-card">
+                <div>Bids</div>
+                <div className="stat-card-val">{car.bidsCount || 0}</div>
               </div>
-              <div style={{
-                padding: 16,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12,
-              }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Listed</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>
+              <div className="stat-card">
+                <div>Listed</div>
+                <div className="stat-card-val" style={{ fontSize: 15, fontWeight: 600 }}>
                   {car.createdAt ? new Date(car.createdAt).toLocaleDateString() : 'Recently'}
                 </div>
               </div>
@@ -559,9 +529,7 @@ export default function CarDetailPage() {
           {/* Description */}
           {car.description && (
             <div className="detail-description">
-              <div className="desc-accent" />
-              <div className="desc-glow" />
-              <div className="desc-label">About This Vehicle</div>
+              <div className="detail-section-label">About This Vehicle</div>
               <p className="desc-text">{car.description}</p>
             </div>
           )}
@@ -594,28 +562,26 @@ export default function CarDetailPage() {
 
           {/* Escrow Status */}
           {(isP2P || car?.escrowEnabled !== false) && (
-            <div className="detail-section">
+            <div>
               <div className="detail-section-label">Escrow Protection</div>
-              <div style={{
-                padding: 16,
-                background: 'rgba(34,197,94,0.05)',
-                border: '1px solid rgba(34,197,94,0.2)',
-                borderRadius: 12,
+              <div className="info-card" style={{
+                background: 'rgba(34,197,94,0.04)',
+                border: '1px solid rgba(34,197,94,0.18)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: 'rgba(34,197,94,0.15)',
+                    width: 34, height: 34, borderRadius: 8,
+                    background: 'rgba(34,197,94,0.12)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Lock size={16} style={{ color: '#22C55E' }} />
+                    <Lock size={15} style={{ color: '#22C55E' }} />
                   </div>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>Escrow Protected</div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Secure payment protection</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', lineHeight: 1.65 }}>
                   Your payment is held securely in escrow until you confirm receipt of the vehicle. Funds are only released to the seller after your approval, ensuring a safe transaction.
                 </div>
               </div>
@@ -624,22 +590,20 @@ export default function CarDetailPage() {
 
           {/* Auction Status */}
           {showAuctionCard && (
-            <div className="detail-section">
+            <div>
               <div className="detail-section-label">Auction Status</div>
-              <div style={{
-                padding: 16,
-                background: isLive ? 'rgba(239,68,68,0.05)' : 'rgba(245,158,11,0.05)',
-                border: isLive ? '1px solid rgba(239,68,68,0.2)' : '1px solid rgba(245,158,11,0.2)',
-                borderRadius: 12,
+              <div className="info-card" style={{
+                background: isLive ? 'rgba(239,68,68,0.04)' : 'rgba(245,158,11,0.04)',
+                border: isLive ? '1px solid rgba(239,68,68,0.18)' : '1px solid rgba(245,158,11,0.18)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{
-                      width: 32, height: 32, borderRadius: 8,
-                      background: isLive ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+                      width: 34, height: 34, borderRadius: 8,
+                      background: isLive ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Zap size={16} style={{ color: isLive ? '#EF4444' : '#F59E0B' }} />
+                      <Zap size={15} style={{ color: isLive ? '#EF4444' : '#F59E0B' }} />
                     </div>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
@@ -660,7 +624,7 @@ export default function CarDetailPage() {
                   )}
                 </div>
                 {isLive && car.currentBid > 0 && (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Current Bid</span>
                     <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--gold)' }}>
                       KES {Number(car.currentBid).toLocaleString()}
@@ -886,16 +850,21 @@ export default function CarDetailPage() {
 
           {/* Dealer Mini Card */}
           {dealer && (
-            <div className="sidebar-dealer-card">
-              <div className="sidebar-dealer-label">Listed By</div>
-              <div className="sidebar-dealer-row">
-                <div className="sidebar-dealer-avatar">
+            <div className="sidebar-block">
+              <div className="sidebar-block-label">Listed By</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+                  background: 'rgba(212,196,168,0.12)', color: 'var(--gold)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 800, fontSize: 14,
+                }}>
                   {(dealer.name || 'D')[0]}
                 </div>
                 <div>
-                  <div className="sidebar-dealer-name">{dealer.name || 'Dealer'}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{dealer.name || 'Dealer'}</div>
                   {dealer.dealerRating && (
-                    <div className="sidebar-dealer-rating">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
                       <Star size={10} fill="currentColor" /> {dealer.dealerRating}/5
                     </div>
                   )}
