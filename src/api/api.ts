@@ -183,5 +183,9 @@ function withDemo<T extends Record<string, any>>(realObj: T, demoObj: Partial<T>
   return wrapped;
 }
 
+// Export shared utilities for api.exports.ts
+export { api, unwrap, withDemo };
+export default api;
+
 // Re-export all API modules (unchanged shape from your original)
 export * from "./api.exports";
