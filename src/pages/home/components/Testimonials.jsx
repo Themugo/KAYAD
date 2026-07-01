@@ -1,43 +1,40 @@
-import { motion } from 'framer-motion';
-import { Shield, CheckCircle, Gavel, Lock, Search, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Shield, Search, CheckCircle, Gavel } from 'lucide-react';
 
-const CAPABILITIES = [
-  { icon: Lock, title: 'Escrow Protection', desc: 'Every transaction is secured by our mandatory escrow system. Funds are held until you confirm delivery.' },
-  { icon: CheckCircle, title: 'Verified Dealers', desc: 'All dealers are KRA-vetted, phone-verified, and rated by real buyers on every completed sale.' },
-  { icon: Search, title: 'Pre-Inspection', desc: 'Order a 150-point forensic inspection on any vehicle. Know exactly what you\'re buying before you pay.' },
-  { icon: Gavel, title: 'Live Auctions', desc: 'Real-time bidding with countdown timers. Place bids from your phone and win premium vehicles.' },
-  { icon: Shield, title: 'Secure Payments', desc: 'Pay via M-Pesa STK push or bank transfer. All payments are tracked and receipted.' },
-  { icon: Star, title: 'Buyer Protection', desc: 'Dedicated dispute resolution team. If something goes wrong, we mediate and protect your funds.' },
+const FEATURES = [
+  { icon: Shield, title: 'Escrow Protection', desc: 'Funds held securely until you confirm delivery. Every transaction fully protected.', link: '/escrow' },
+  { icon: Search, title: 'Pre-Inspection', desc: '150-point forensic inspection on every vehicle. Know exactly what you\'re buying.', link: '/pre-inspection' },
+  { icon: CheckCircle, title: 'Verified Dealers', desc: 'KRA-vetted, phone-verified dealers with real buyer ratings and transaction history.', link: '/showroom' },
+  { icon: Gavel, title: 'Live Auctions', desc: 'Real-time bidding with countdown timers. Bid from anywhere in Kenya.', link: '/auctions/calendar' },
 ];
 
-export default function Testimonials() {
+export default function WhyKayad() {
   return (
-    <section className="section-spacing border-t border-white/[0.04]">
-      <div className="max-w-[1400px] mx-auto px-7">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-1.5 mb-2">
-            <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
-              Why KAYAD
-            </span>
-          </div>
-          <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
-            Built for Trust. <span className="text-gold">Powered by Technology.</span>
+    <section className="py-16 md:py-20">
+      <div className="max-w-[1200px] mx-auto px-8">
+        <div className="text-center mb-12">
+          <h2 className="font-display font-black italic text-[clamp(1.6rem,3vw,2.4rem)] text-white leading-none mb-3">
+            Why <span className="text-gold">KAYAD</span>
           </h2>
+          <p className="text-sm text-white/40 max-w-lg mx-auto" style={{ fontFamily: 'var(--font-body)' }}>
+            Built for trust. Powered by technology.
+          </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {CAPABILITIES.map((c, i) => (
-            <motion.div
-              key={c.title}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="rounded-xl p-6 border"
-              style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}
-            >
-              <c.icon size={20} className="text-gold" style={{ marginBottom: 10 }} />
-              <h3 className="font-display font-bold text-white text-sm mb-1.5">{c.title}</h3>
-              <p className="text-xs text-white/45 leading-relaxed">{c.desc}</p>
-            </motion.div>
+        <div className="grid md:grid-cols-4 gap-6">
+          {FEATURES.map((f) => (
+            <Link key={f.title} to={f.link} className="group no-underline">
+              <div className="rounded-xl p-6 border text-center h-full transition-all duration-300 hover:border-gold/30 group-hover:-translate-y-1"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+              >
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300"
+                  style={{ background: 'rgba(212,196,168,0.08)' }}
+                >
+                  <f.icon size={20} className="text-gold/80 group-hover:text-gold transition-colors duration-300" />
+                </div>
+                <h3 className="font-display font-bold text-white text-sm mb-2">{f.title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{f.desc}</p>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

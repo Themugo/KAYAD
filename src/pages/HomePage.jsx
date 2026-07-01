@@ -8,14 +8,11 @@ import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import HomeHero from './home/components/HomeHero';
-import VehicleCategories from './home/components/VehicleCategories';
-import TrustBar from './home/components/TrustBar';
-import TransactionStats from './home/components/TransactionStats';
+import MarketStats from './home/components/TrustBar';
 import HomeLiveAuctions from './home/components/HomeLiveAuctions';
-import Testimonials from './home/components/Testimonials';
-import PrivateSellerSection from './home/components/PrivateSellerSection';
+import WhyKayad from './home/components/Testimonials';
 import FeaturedDealers from './home/components/FeaturedDealers';
-import Partners from './home/components/Partners';
+import FinalCta from './home/components/FinalCta';
 
 export default function HomePage() {
   usePageMeta('Home', "East Africa's most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.");
@@ -23,7 +20,6 @@ export default function HomePage() {
   const { toast } = useToast();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [featured, setFeatured] = useState([]);
-  const [recent, setRecent] = useState([]);
   const [liveAuctions, setLiveAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [featuredDealers, setFeaturedDealers] = useState([]);
@@ -57,9 +53,8 @@ export default function HomePage() {
           return !isLive && !(s > now);
         });
 
-        setLiveAuctions(live.slice(0, 4));
-        setFeatured([...nonAuction.filter(c => c.isPromoted), ...nonAuction.filter(c => !c.isPromoted)].slice(0, 4));
-        setRecent(nonAuction.slice(0, 8));
+        setLiveAuctions(live.slice(0, 6));
+        setFeatured([...nonAuction.filter(c => c.isPromoted), ...nonAuction.filter(c => !c.isPromoted)].slice(0, 6));
 
         const dealerMap = new Map();
         all.forEach(c => {
@@ -96,14 +91,8 @@ export default function HomePage() {
     return () => { cancelled = true; };
   }, []);
 
-  const displayCars = loading ? [] : (featured.length > 0 ? featured : recent);
+  const displayCars = loading || featured.length === 0 ? [] : featured;
   const liveCount = liveAuctions.length;
-
-  const SectionWrapper = ({ children, className = '' }) => (
-    <section className={`section-spacing ${className}`}>
-      {children}
-    </section>
-  );
 
   return (
     <>
@@ -113,70 +102,52 @@ export default function HomePage() {
         {/* 1. Hero */}
         <HomeHero liveCount={liveCount} isAuth={isAuth} user={user} />
 
-        {/* 2. Vehicle Categories */}
-        <VehicleCategories />
-
-        {/* 3. Trust & Security */}
-        <TrustBar />
+        {/* 2. Marketplace Statistics */}
+        <MarketStats />
 
         {!loading && (
           <>
-            {/* 4. Platform Statistics */}
-            <TransactionStats />
-
-            {/* 5. Featured Collection */}
-            <SectionWrapper>
-              <div className="max-w-[1400px] mx-auto px-7">
-                <div className="flex items-end justify-between mb-6">
-                  <div>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      {featured.length > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[8px] text-gold font-bold tracking-[0.12em] uppercase" style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}>
-                          Featured
-                        </span>
-                      )}
-                      <span className="text-[8px] text-white/20 font-semibold tracking-[0.14em] uppercase">Premium Collection</span>
-                    </div>
-                    <h2 className="font-display font-black italic text-[clamp(1.3rem,2.8vw,2.2rem)] text-white leading-none m-0">
-                      Elite <span className="text-gold">Selection</span>
+            {/* 3. Featured Vehicles */}
+            {displayCars.length > 0 && (
+              <section className="py-14 md:py-18">
+                <div className="max-w-[1200px] mx-auto px-8">
+                  <div className="text-center mb-10">
+                    <h2 className="font-display font-black italic text-[clamp(1.4rem,2.5vw,2rem)] text-white leading-none mb-2">
+                      Featured <span className="text-gold">Vehicles</span>
                     </h2>
+                    <p className="text-xs text-white/40">Premium selection of verified vehicles</p>
                   </div>
-                  <Link to="/showroom" className="section-link">View All →</Link>
-                </div>
-
-                {displayCars.length > 0 ? (
                   <div className="grid gap-5 md:gap-6" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
                     {displayCars.map(car => (
-                      <div key={car._id} className="premium-card">
-                        <CartyGrid car={car} isMobile={isMobile} />
-                      </div>
+                      <CartyGrid key={car._id} car={car} isMobile={isMobile} />
                     ))}
                   </div>
-                ) : (
-                  <div className="text-center py-16 text-white/20 text-sm">
-                    <p className="mb-3">No vehicles in the premium collection yet</p>
-                    <Link to="/showroom" className="text-gold no-underline font-semibold">Browse the gallery →</Link>
+                  <div className="text-center mt-8">
+                    <Link to="/showroom" className="inline-flex items-center gap-2 btn btn-outline px-8 py-3 rounded-full text-sm uppercase tracking-[0.08em] no-underline">
+                      View All Vehicles
+                    </Link>
                   </div>
-                )}
-              </div>
-            </SectionWrapper>
+                </div>
+              </section>
+            )}
 
-            {/* 6. Live Auctions */}
-            <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />
+            {/* 4. Why KAYAD */}
+            <WhyKayad />
 
-            {/* 7. Testimonials / Trust features */}
-            <Testimonials />
+            {/* 5. Featured Auctions */}
+            {liveAuctions.length > 0 && (
+              <HomeLiveAuctions cars={liveAuctions} isMobile={isMobile} />
+            )}
 
-            {/* 8. Private Seller */}
-            <PrivateSellerSection />
-
-            {/* 9. Dealer Network */}
-            <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
-
-            {/* 10. Marketplace Ecosystem */}
-            <Partners />
+            {/* 6. Dealer Showcase */}
+            {featuredDealers.length > 0 && (
+              <FeaturedDealers dealers={featuredDealers.slice(0, 3)} />
+            )}
           </>
         )}
+
+        {/* 7. Final CTA */}
+        <FinalCta />
 
         {loading && (
           <div className="flex justify-center py-20">
