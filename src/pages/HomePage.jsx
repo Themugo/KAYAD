@@ -8,10 +8,6 @@ import { WebSiteStructuredData, BreadcrumbStructuredData } from '../components/S
 import HomeHero from './home/components/HomeHero';
 import TrustSection from './home/components/TrustBar';
 import FeaturedMarketplace from './home/components/FeaturedMarketplace';
-import BuyingJourney from './home/components/BuyingJourney';
-import WhyKayad from './home/components/Testimonials';
-import PlatformPreview from './home/components/PlatformPreview';
-import FinalCta from './home/components/FinalCta';
 
 export default function HomePage() {
   usePageMeta('Home', "East Africa's most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.");
@@ -71,18 +67,6 @@ export default function HomePage() {
 
         {/* 3. Featured Marketplace */}
         {!loading && <FeaturedMarketplace cars={featured} />}
-
-        {/* 4. Buying Journey */}
-        <BuyingJourney />
-
-        {/* 5. Why KAYAD */}
-        <WhyKayad />
-
-        {/* 6. Platform Preview */}
-        <PlatformPreview />
-
-        {/* 7. Final CTA */}
-        <FinalCta />
 
         {loading && (
           <div className="flex justify-center py-20">
