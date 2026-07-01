@@ -13,19 +13,25 @@ const COLOR_MAP = {
   Maroon:'#7B0000',Pearl:'#F0EAD6',Navy:'#1E3A5F',Teal:'#14B8A6',
 };
 
-function Section({ title, children, defaultOpen = true, count }) {
+function Section({ title, children, defaultOpen = true, count, active }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div style={{ marginBottom: 4 }}>
       <button onClick={() => setOpen(!open)} style={{
         display: 'flex', alignItems: 'center', width: '100%',
         background: 'none', border: 'none', cursor: 'pointer',
-        padding: '10px 16px', gap: 8,
+        padding: '12px 16px 10px', gap: 8,
       }}>
+        <div style={{
+          width: 3, height: 16, borderRadius: 2, flexShrink: 0,
+          background: active ? 'var(--gold)' : 'transparent',
+          transition: 'background 0.2s',
+        }} />
         <span style={{
-          flex: 1, textAlign: 'left', fontSize: 12.5, fontWeight: 700,
-          textTransform: 'uppercase', letterSpacing: '0.14em',
-          color: 'rgba(255,255,255,0.55)',
+          flex: 1, textAlign: 'left', fontSize: 12, fontWeight: 700,
+          textTransform: 'uppercase', letterSpacing: '0.12em',
+          color: active ? 'var(--gold)' : 'rgba(255,255,255,0.55)',
+          transition: 'color 0.2s',
         }}>{title}</span>
         {count > 0 && (
           <span style={{
@@ -39,7 +45,7 @@ function Section({ title, children, defaultOpen = true, count }) {
           transition: 'transform 0.2s', flexShrink: 0,
         }} />
       </button>
-      {open && <div style={{ paddingBottom: 8 }}>{children}</div>}
+      {open && <div style={{ padding: '0 0 10px' }}>{children}</div>}
       <div style={{ height: 1, background: 'rgba(255,255,255,0.04)', margin: '0 16px' }} />
     </div>
   );
@@ -186,7 +192,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </div>
 
       {/* ── CATEGORY ── */}
-      <Section title="Category" count={cars.length}>
+      <Section title="Category" count={cars.length} active={activeFilter !== 'all'}>
         {[
           { id: 'all',     label: 'All Vehicles',  count: cars.length,                                                               icon: '◈' },
           { id: 'auction', label: 'Live Auctions',  count: cars.filter(c=>c.auctionStatus==='live'||c.allowBid).length,              icon: '⚡' },
@@ -224,7 +230,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── MAKE / BRAND ── */}
-      <Section title="Make" count={brandFilter ? 1 : 0}>
+      <Section title="Make" count={brandFilter ? 1 : 0} active={!!brandFilter}>
         <div style={{ padding: '0 16px 8px' }}>
           <div style={{ position: 'relative' }}>
             <Search size={12} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.25)', pointerEvents: 'none' }} />
@@ -258,7 +264,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── PRICE ── */}
-      <Section title="Price (KES)" count={(priceMin||priceMax)?1:0}>
+      <Section title="Price (KES)" count={(priceMin||priceMax)?1:0} active={!!(priceMin||priceMax)}>
         <div style={{ padding: '0 16px 10px', display: 'flex', gap: 8 }}>
           <RangeInput placeholder="Min" value={priceMin} onChange={v => onFilterChange('priceMin', v)} />
           <span style={{ color: 'rgba(255,255,255,0.2)', alignSelf: 'center', fontSize: 12 }}>–</span>
@@ -278,7 +284,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── YEAR ── */}
-      <Section title="Year" count={(yearMin||yearMax)?1:0}>
+      <Section title="Year" count={(yearMin||yearMax)?1:0} active={!!(yearMin||yearMax)}>
         <div style={{ padding: '0 16px 4px', display: 'flex', gap: 8 }}>
           <RangeInput placeholder="From" value={yearMin} onChange={v => onFilterChange('yearMin', v)} />
           <span style={{ color: 'rgba(255,255,255,0.2)', alignSelf: 'center', fontSize: 12 }}>–</span>
@@ -287,7 +293,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── LOCATION ── */}
-      <Section title="Location" count={locationFilter?1:0}>
+      <Section title="Location" count={locationFilter?1:0} active={!!locationFilter}>
         <Chip active={!locationFilter} onClick={() => onFilterChange('location','')} count={cars.length}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><span style={{ fontSize: 12, opacity:0.5 }}>◈</span>All Kenya</span>
         </Chip>
@@ -297,28 +303,28 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── BODY TYPE ── */}
-      <Section title="Body Type" count={bodyFilter?1:0}>
+      <Section title="Body Type" count={bodyFilter?1:0} active={!!bodyFilter}>
         {BODIES.map(b => (
           <Chip key={b} active={bodyFilter===b.toLowerCase()} onClick={() => onFilterChange('body',b.toLowerCase())} count={counts.body[b]||0}>{b}</Chip>
         ))}
       </Section>
 
       {/* ── FUEL ── */}
-      <Section title="Fuel" count={fuelFilter?1:0}>
+      <Section title="Fuel" count={fuelFilter?1:0} active={!!fuelFilter}>
         {FUELS.map(f => (
           <Chip key={f} active={fuelFilter===f.toLowerCase()} onClick={() => onFilterChange('fuel',f.toLowerCase())} count={counts.fuel[f]||0}>{f}</Chip>
         ))}
       </Section>
 
       {/* ── TRANSMISSION ── */}
-      <Section title="Transmission" count={transFilter?1:0}>
+      <Section title="Transmission" count={transFilter?1:0} active={!!transFilter}>
         {TRANSMISSIONS.map(t => (
           <Chip key={t} active={transFilter===t.toLowerCase()} onClick={() => onFilterChange('transmission',t.toLowerCase())} count={counts.transmission[t]||0}>{t}</Chip>
         ))}
       </Section>
 
       {/* ── MILEAGE ── */}
-      <Section title="Mileage (KM)" count={(mileageMin||mileageMax)?1:0}>
+      <Section title="Mileage (KM)" count={(mileageMin||mileageMax)?1:0} active={!!(mileageMin||mileageMax)}>
         <div style={{ padding: '0 16px 4px', display: 'flex', gap: 8 }}>
           <RangeInput placeholder="Min" value={mileageMin} onChange={v => onFilterChange('mileageMin',v)} />
           <span style={{ color: 'rgba(255,255,255,0.2)', alignSelf: 'center', fontSize: 12 }}>–</span>
@@ -327,7 +333,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── COLOR ── */}
-      <Section title="Colour" count={colorFilter?1:0}>
+      <Section title="Colour" count={colorFilter?1:0} active={!!colorFilter}>
         <div style={{ padding: '4px 16px 8px', display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {Object.entries(COLOR_MAP).map(([name, hex]) => {
             const active = colorFilter === name.toLowerCase();

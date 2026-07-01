@@ -872,13 +872,7 @@ export default function Showroom() {
                   gap: isMobile ? 12 : 18,
                 }}>
                   {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} style={{
-                      background: 'rgba(255,255,255,0.02)',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      borderRadius: 14,
-                      aspectRatio: '4/3',
-                      animation: 'pulse 1.4s ease-in-out infinite',
-                    }} />
+                    <div key={i} className="skeleton-thumbnail skeleton" style={{ borderRadius: 14, minHeight: 180 }} />
                   ))}
                 </div>
               ) : cars.length === 0 ? (
@@ -908,17 +902,11 @@ export default function Showroom() {
               {/* Infinite scroll sentinel + Load More fallback */}
               {hasMore && (
                 <>
-                  <div
-                    ref={sentinelRef}
-                    style={{
-                      display: 'flex', justifyContent: 'center',
-                      padding: 32, color: 'rgba(255,255,255,0.4)',
-                    }}
-                  >
-                    <Loader size={18} className="spin" />
+                  <div ref={sentinelRef} className="loading-center" style={{ padding: 32 }}>
+                    <div className="spinner" />
                   </div>
                   <div style={{ textAlign: 'center', padding: '0 0 32px' }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => setPage(p => p + 1)}>
+                    <button className="btn btn-soft btn-sm" onClick={() => setPage(p => p + 1)}>
                       Load More
                     </button>
                   </div>
