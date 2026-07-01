@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { notifAPI, formatKES } from '../api/api';
 import { useNotifications } from '../context/NotificationContext';
 import { timeAgo, formatDate } from '../utils/helpers';
+import EmptyState from '../components/EmptyState';
 
 const TYPE_ICONS = {
   bid: '💰', payment: '💳', escrow: '🔒', chat: '💬', auction: '🔨', system: '⚙️', info: '📌', referral: '🎁',

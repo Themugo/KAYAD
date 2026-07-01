@@ -12,6 +12,7 @@ import MarketValuationMatrix from '../components/MarketValuationMatrix';
 import GalleryModal from '../components/GalleryModal';
 import usePageMeta from '../hooks/usePageMeta';
 import SEOHead from '../components/SEOHead';
+import NotFoundState from '../components/NotFoundState';
 import { generateAuctionMetadata } from '../utils/seoService';
 import { ChevronLeft, ChevronRight, Eye, Star, CheckCircle } from 'lucide-react';
 import '../styles/auction-live.css';
@@ -301,7 +302,7 @@ export default function AuctionLivePage() {
   const leaderboard = Object.values(biddersMap).sort((a, b) => b.amount - a.amount).slice(0, 8);
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
-  if (!car) return <div className="page loading-center"><h3>Auction not found</h3></div>;
+  if (!car) return <NotFoundState title="Auction Not Found" message="This auction doesn't exist or has ended." actions={[{ label: 'Browse Auctions', to: '/auctions/calendar' }, { label: 'Go Home', to: '/' }]} />;
 
   return (
     <>

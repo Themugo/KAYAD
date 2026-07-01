@@ -5,6 +5,7 @@ import CarCard from '../components/CarCard';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
 import { Bell, BellOff } from 'lucide-react';
+import EmptyState from '../components/EmptyState';
 
 export default function FavoritesPage() {
   const { toast } = useToast();

@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { paymentsAPI, formatKES } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import { timeAgo, copyToClipboard } from '../utils/helpers';
+import EmptyState from '../components/EmptyState';
 
 const STATUS_BADGE = { success: 'badge-green', pending: 'badge-orange', failed: 'badge-red', cancelled: 'badge-muted' };
 const STATUS_ICON  = { success: '✅', pending: '⏳', failed: '❌', cancelled: '—' };

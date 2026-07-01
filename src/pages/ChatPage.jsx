@@ -4,6 +4,7 @@ import { chatAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
+import EmptyState from '../components/EmptyState';
 
 const userIdOf = (u) => u?.id || u?._id;
 

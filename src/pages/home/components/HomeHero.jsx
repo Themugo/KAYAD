@@ -70,7 +70,7 @@ export default function HomeHero({ liveCount, isAuth, user }) {
   };
 
   return (
-    <section className="relative overflow-hidden" style={{ height: '85vh', minHeight: '560px' }}>
+    <section className="home-hero-section relative overflow-hidden" style={{ height: '85vh', minHeight: '560px' }}>
       <div className="absolute inset-0">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div key={currentIndex} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" className="absolute inset-0">
@@ -81,10 +81,10 @@ export default function HomeHero({ liveCount, isAuth, user }) {
         </AnimatePresence>
       </div>
 
-      <button onClick={() => paginate(-1)} className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 flex items-center justify-center" aria-label="Previous">
+      <button onClick={() => paginate(-1)} className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 items-center justify-center" aria-label="Previous">
         <ChevronLeft size={20} />
       </button>
-      <button onClick={() => paginate(1)} className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 flex items-center justify-center" aria-label="Next">
+      <button onClick={() => paginate(1)} className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/8 backdrop-blur-md border border-white/15 text-white hover:bg-white/20 transition-all duration-300 items-center justify-center" aria-label="Next">
         <ChevronRight size={20} />
       </button>
 
@@ -122,12 +122,12 @@ export default function HomeHero({ liveCount, isAuth, user }) {
               </div>
             </motion.form>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex items-center gap-4 flex-wrap">
-              <Link to="/showroom" className="btn-gold px-8 py-3.5 rounded-full text-sm uppercase tracking-[0.08em] no-underline">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.4 }} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+              <Link to="/showroom" className="btn-gold px-8 py-3.5 rounded-full text-sm uppercase tracking-[0.08em] no-underline text-center">
                 Browse Cars
               </Link>
               {liveCount > 0 && (
-                <Link to="/auctions/calendar" className="inline-flex items-center gap-2 px-8 py-3.5 border border-white/15 text-white text-sm uppercase tracking-[0.08em] rounded-full hover:bg-white/8 transition-all duration-300 no-underline font-bold">
+                <Link to="/auctions/calendar" className="inline-flex items-center justify-center gap-2 px-8 py-3.5 border border-white/15 text-white text-sm uppercase tracking-[0.08em] rounded-full hover:bg-white/8 transition-all duration-300 no-underline font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                   {liveCount} Live Auction{liveCount !== 1 ? 's' : ''}
                 </Link>
@@ -138,9 +138,12 @@ export default function HomeHero({ liveCount, isAuth, user }) {
       </div>
 
       <style>{`
-        @media (max-width: 1024px) { section { height: 70vh !important; min-height: 480px !important; } }
-        @media (max-width: 768px) { section { height: 60vh !important; min-height: 440px !important; } }
-        @media (max-width: 480px) { section { height: 75vh !important; min-height: 500px !important; } }
+        @media (max-width: 1024px) { .home-hero-section { height: 70vh !important; min-height: 480px !important; } }
+        @media (max-width: 768px) { .home-hero-section { height: 65vh !important; min-height: 420px !important; } }
+        @media (max-width: 480px) {
+          .home-hero-section { height: 75vh !important; min-height: 460px !important; }
+          .home-hero-section .px-8 { padding-left: 16px !important; padding-right: 16px !important; }
+        }
       `}</style>
     </section>
   );

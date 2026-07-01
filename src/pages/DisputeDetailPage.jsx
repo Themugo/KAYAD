@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { timeAgo, formatDate } from '../utils/helpers';
 import { ArrowLeft, Shield, Clock, User, AlertTriangle, Gavel, RotateCcw, Activity } from 'lucide-react';
+import NotFoundState from '../components/NotFoundState';
 import { LoadingPage } from '../components/LoadingPage';
 import EvidenceUpload from '../components/EvidenceUpload';
 import EvidenceTimeline from '../components/EvidenceTimeline';
@@ -67,13 +68,7 @@ export default function DisputeDetailPage() {
   }, [on, id]);
 
   if (loading) return <LoadingPage />;
-  if (!dispute) return (
-    <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-      <Shield size={48} className="mx-auto text-gray-600 mb-4" />
-      <p className="text-gray-400">Dispute not found</p>
-      <Link to="/disputes" className="text-gold text-sm mt-2 inline-block">← Back to disputes</Link>
-    </div>
-  );
+  if (!dispute) return <NotFoundState title="Dispute Not Found" message="This dispute doesn't exist or has been closed." actions={[{ label: 'Back to Disputes', to: '/disputes' }, { label: 'Go Home', to: '/' }]} />;
 
   const meta = STATUS_META[dispute.status] || { label: dispute.status, color: 'text-gray-400', icon: '❓' };
   const timeline = dispute.timeline || [];

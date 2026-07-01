@@ -4,6 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
+import PageLoader from '../components/PageLoader';
 import {
   getEffectivePermissions,
   userHasPermission,
@@ -140,35 +141,35 @@ interface RequireAuthProps {
 export function RequireAuth({ children }: RequireAuthProps) {
   const { isAuth, loading } = useAuth();
   const loc = useLocation();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (loading) return <PageLoader label="Checking access" />;
   if (!isAuth) return <Navigate to="/login" state={{ from: loc }} replace />;
   return children;
 }
 
 export function RequireDealer({ children }: RequireAuthProps) {
   const { isDealer, isAdmin, user, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (loading) return <PageLoader label="Checking access" />;
   if (!isDealer && !isAdmin) return <Navigate to="/" replace />;
   return children;
 }
 
 export function RequireSeller({ children }: RequireAuthProps) {
   const { isSeller, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (loading) return <PageLoader label="Checking access" />;
   if (!isSeller) return <Navigate to="/" replace />;
   return children;
 }
 
 export function RequireEmailVerified({ children }: RequireAuthProps) {
   const { isEmailVerified, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (loading) return <PageLoader label="Checking access" />;
   if (!isEmailVerified) return <Navigate to="/login?verify=required" replace />;
   return children;
 }
 
 export function RequireAdmin({ children }: RequireAuthProps) {
   const { isAdmin, isAuth, loading } = useAuth();
-  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (loading) return <PageLoader label="Checking access" />;
   if (!isAuth) return <Navigate to="/login" replace />;
   if (!isAdmin) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', gap:'1rem', textAlign:'center', padding:'2rem' }}>

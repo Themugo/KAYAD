@@ -38,6 +38,7 @@ import { BrandingProvider } from './context/BrandingContext';
 
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoadingPage } from './components/LoadingPage';
+import PageLoader from './components/PageLoader';
 import AppLayout from './components/AppLayout';
 import AdminLayout from './components/AdminLayout';
 import DealerLayout from './components/DealerLayout';
@@ -150,7 +151,7 @@ const Public = ({ children }) => {
   const { loading } = useAuth();
   const loc = useLocation();
   const isAuthRoute = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].includes(loc.pathname);
-  if (loading && isAuthRoute) return <AppLayout><div className="loading-center"><div className="spinner"/></div></AppLayout>;
+  if (loading && isAuthRoute) return <AppLayout><PageLoader label="Loading" /></AppLayout>;
   return <AppLayout>{children}</AppLayout>;
 };
 

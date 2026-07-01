@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { Shield, Banknote, CheckCircle, Search, Lock, ArrowRight, ExternalLink } from 'lucide-react';
+import NotFoundState from '../components/NotFoundState';
 
 const STATUS_LABELS = {
   awaiting_payment:    { label: 'Awaiting Bank Transfer', icon: '🏦', color: 'var(--gold)' },
@@ -175,15 +176,7 @@ export default function EscrowVaultPortal() {
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
-  if (!vault) return (
-    <div className="page">
-      <div className="container" style={{ paddingTop: 40, textAlign: 'center' }}>
-        <h3>Vault not found</h3>
-        <p style={{ color: 'var(--text-muted)', marginTop: 8 }}>This escrow transaction doesn't exist or you don't have access to it.</p>
-        <Link to="/escrow-vault" className="btn btn-outline" style={{ marginTop: 16 }}>Back to Vault</Link>
-      </div>
-    </div>
-  );
+  if (!vault) return <NotFoundState title="Vault Not Found" message="This escrow transaction doesn't exist or you don't have access to it." actions={[{ label: 'Back to Vault', to: '/escrow-vault' }, { label: 'Go Home', to: '/' }]} />;
 
   const currentIdx = vault ? STEPS.indexOf(vault.status) : -1;
 

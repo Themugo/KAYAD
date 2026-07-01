@@ -111,6 +111,9 @@ export default function Navbar() {
           <div className="flex-1" />
 
           <div className="hidden md:flex items-center gap-4 text-sm font-medium">
+            <button onClick={() => navigate('/showroom')} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors flex-shrink-0" aria-label="Search">
+              <Search size={16} className="text-white/40 hover:text-gold transition-colors" />
+            </button>
             {NAV_LINKS.map(({ to, label, badge }) => (
               <Link key={to} to={to} className={`nav-link ${isActive(to) ? 'active' : ''}`}>
                 {badge === 'live' && (
@@ -131,16 +134,13 @@ export default function Navbar() {
           </div>
 
           <div ref={dropRef} className="flex items-center gap-2">
-            {isAuth ? (
-              <>
-                <button onClick={() => navigate('/showroom')} className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors" aria-label="Search">
-                  <Search size={20} className="text-white/60" />
-                </button>
-
-                <div className="relative">
+              {isAuth ? (
+                <>
+                  <div className="relative">
                   <button onClick={() => { setNotifDrop(!notifDrop); setUserDrop(false); }}
-                    className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors relative" aria-label="Notifications">
-                    <Bell size={20} />
+                    className={`w-10 h-10 flex items-center justify-center rounded-2xl transition-colors relative ${unreadCount > 0 ? 'bg-gold/8' : 'hover:bg-surface'}`} aria-label="Notifications"
+                    style={unreadCount > 0 ? { boxShadow: '0 0 20px rgba(212,196,168,0.15)' } : {}}>
+                    <Bell size={20} className={unreadCount > 0 ? 'text-gold' : ''} />
                     {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-4.5 h-4.5 bg-gold text-black text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-bg">{unreadCount > 9 ? '9+' : unreadCount}</span>}
                   </button>
                   <AnimatePresence>{notifDrop && <NotificationCenter onClose={() => setNotifDrop(false)} />}</AnimatePresence>
@@ -192,15 +192,12 @@ export default function Navbar() {
               </>
             ) : (
               <div className="flex items-center gap-2.5">
-                <button onClick={() => navigate('/showroom')} className="w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-surface transition-colors" aria-label="Search">
-                  <Search size={20} className="text-white/60" />
-                </button>
                 <Link to="/login" className="btn btn-outline px-5 text-xs">Sign In</Link>
               </div>
             )}
 
             <button onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2.5 hover:bg-surface rounded-2xl transition-colors" aria-label="Toggle menu">
+              className="md:hidden p-2.5 hover:bg-surface rounded-2xl transition-colors" aria-label="Toggle menu">
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -224,52 +221,74 @@ export default function Navbar() {
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto px-5 py-6 space-y-1">
-                  <Link to="/" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Home</Link>
-                  <Link to="/showroom" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Buy Cars</Link>
-                  <Link to="/auctions/calendar" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                    Live Auctions
-                    {hasLiveAuction && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />}
-                  </Link>
-                  <Link to="/escrow-vault" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Escrow Vault</Link>
-                  <Link to="/pre-inspection" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Pre-Inspection</Link>
-                  <Link to="/contact" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Support</Link>
+                <motion.div variants={{ show: { transition: { staggerChildren: 0.04 } } }} initial="hidden" animate="show"
+                  className="flex-1 overflow-y-auto px-5 py-6 space-y-1">
+                  {[
+                    { to: '/', label: 'Home' },
+                    { to: '/showroom', label: 'Buy Cars' },
+                    { to: '/auctions/calendar', label: 'Live Auctions', badge: hasLiveAuction ? 'live' : null },
+                    { to: '/escrow-vault', label: 'Escrow Vault' },
+                    { to: '/pre-inspection', label: 'Pre-Inspection' },
+                    { to: '/contact', label: 'Support' },
+                  ].map(({ to, label, badge }) => (
+                    <motion.div key={to} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                      <Link to={to} className={`mobile-nav-link flex items-center gap-2 ${isActive(to) ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>
+                        {badge === 'live' && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />}
+                        {label}
+                      </Link>
+                    </motion.div>
+                  ))}
 
-                  <Link to={sellLink} className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gold/10 border border-gold/20 text-gold font-bold text-sm no-underline my-3"
-                    onClick={() => setMobileOpen(false)}>
-                    <PlusCircle size={16} /> Sell
-                  </Link>
+                  <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                    <Link to={sellLink}
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gold/10 border border-gold/20 text-gold font-bold text-sm no-underline my-3"
+                      onClick={() => setMobileOpen(false)}>
+                      <PlusCircle size={16} /> Sell
+                    </Link>
+                  </motion.div>
 
-                  <hr className="border-border my-4" />
+                  <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}>
+                    <hr className="border-border my-4" />
+                  </motion.div>
 
                   {isSellerRole(user?.role) && (
-                    <Link to="/dealer" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Dealer Hub</Link>
+                    <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                      <Link to="/dealer" className={`mobile-nav-link ${isActive('/dealer') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>Dealer Hub</Link>
+                    </motion.div>
                   )}
                   {isAdmin && (
-                    <Link to="/admin" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Admin Panel</Link>
+                    <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                      <Link to="/admin" className={`mobile-nav-link ${isActive('/admin') ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>Admin Panel</Link>
+                    </motion.div>
                   )}
 
                   {isAuth ? (
-                    <>
-                      <Link to="/notifications" className="mobile-nav-link flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                        Notifications
-                        {unreadCount > 0 && <span className="bg-gold text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{unreadCount > 9 ? '9+' : unreadCount}</span>}
-                      </Link>
-                      <Link to="/payments" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Payments</Link>
-                      <Link to="/chat" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Messages</Link>
-                      <Link to="/disputes" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Disputes</Link>
-                      <Link to="/favorites" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>Saved Cars</Link>
-                      <div className="pt-4">
-                        <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="mobile-nav-link text-danger">Sign Out</button>
-                      </div>
-                    </>
+                    <motion.div variants={{ show: { transition: { staggerChildren: 0.03 } } }} initial="hidden" animate="show">
+                      {[
+                        { to: '/notifications', label: 'Notifications', badge: unreadCount > 0 ? unreadCount : null },
+                        { to: '/payments', label: 'Payments' },
+                        { to: '/chat', label: 'Messages' },
+                        { to: '/disputes', label: 'Disputes' },
+                        { to: '/favorites', label: 'Saved Cars' },
+                      ].map(({ to, label, badge }) => (
+                        <motion.div key={to} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                          <Link to={to} className={`mobile-nav-link flex items-center gap-2 ${isActive(to) ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>
+                            {label}
+                            {badge && <span className="bg-gold text-black text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto">{badge > 9 ? '9+' : badge}</span>}
+                          </Link>
+                        </motion.div>
+                      ))}
+                      <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }} className="pt-4">
+                        <button onClick={() => { handleLogout(); setMobileOpen(false); }} className="mobile-nav-link text-danger w-full text-left">Sign Out</button>
+                      </motion.div>
+                    </motion.div>
                   ) : (
-                    <div className="flex flex-col gap-3 pt-2">
+                    <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }} className="flex flex-col gap-3 pt-2">
                       <Link to="/login" className="btn btn-outline w-full text-center" onClick={() => setMobileOpen(false)}>Sign In</Link>
                       <Link to="/register" className="btn btn-gold w-full text-center" onClick={() => setMobileOpen(false)}>Join Free</Link>
-                    </div>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </motion.div>

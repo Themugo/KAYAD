@@ -855,6 +855,19 @@ h3 { font-size: clamp(1.35rem, 2.5vw, 1.75rem); }
 .nav-link.active {
   color: var(--gold);
   background: rgba(212,196,168,0.1);
+  position: relative;
+}
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+  box-shadow: 0 0 12px var(--gold-glow-strong);
 }
 
 /* Price flash animation */
@@ -1366,3 +1379,10 @@ img, video, canvas, svg { max-width: 100%; height: auto; }
     padding: 3px 10px;
   }
 }
+
+/* Tighten container padding on very small screens */
+@media (max-width: 420px) {
+  .container { padding-left: 14px !important; padding-right: 14px !important; }
+}
+
+

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Search, PlusCircle, Trophy, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +11,12 @@ export default function MobileBottomNav() {
   const { user, isAuth } = useAuth();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width: 767px)');
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isMobile) { root.style.setProperty('--bottom-nav-h', '64px'); }
+    else { root.style.setProperty('--bottom-nav-h', '0px'); }
+  }, [isMobile]);
 
   const path = location.pathname;
 

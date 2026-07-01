@@ -7,6 +7,7 @@ import DetailSkeleton from './car/components/DetailSkeleton';
 import AuctionAnnouncement from './car/components/AuctionAnnouncement';
 import InlineBidding from './car/components/InlineBidding';
 import NtsaStatusCard from './car/components/NtsaStatusCard';
+import NotFoundState from '../components/NotFoundState';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
 import { getDemoCar } from '../data/demoData';
 import { useAuth } from '../context/AuthContext';
@@ -329,13 +330,7 @@ export default function CarDetailPage() {
 
   if (loading) return <DetailSkeleton />;
 
-  if (!car) return (
-    <div className="page-notfound">
-      <div className="notfound-icon">Not Found</div>
-      <p>This vehicle has been removed or sold.</p>
-      <Link to="/showroom" className="notfound-back">Back to Gallery</Link>
-    </div>
-  );
+  if (!car) return <NotFoundState title="Vehicle Not Found" message="This vehicle has been removed or sold." actions={[{ label: 'Back to Showroom', to: '/showroom' }, { label: 'Go Home', to: '/' }]} />;
 
   const price = car.currentBid || car.price || 0;
 
