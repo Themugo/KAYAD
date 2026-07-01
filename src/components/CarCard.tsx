@@ -1,7 +1,7 @@
 // src/components/CarCard.tsx
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Clock } from 'lucide-react';
+import { Heart, MapPin, Clock, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { formatKES } from '../api/api';
 import ReportButton from './ReportButton';
@@ -9,6 +9,7 @@ import ReportButton from './ReportButton';
 interface Car {
   _id: string;
   title: string;
+  brand?: string;
   images?: Array<{ url?: string } | string>;
   coverImage?: number;
   auctionStartTime?: string;
@@ -67,13 +68,13 @@ const CarCard = memo(function CarCard({
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       className="card group relative overflow-hidden h-full flex flex-col"
     >
       <Link to={linkTo} className="flex flex-col h-full">
         {/* Image Section */}
-        <div className="car-img-wrap relative">
+        <div className="relative aspect-[16/10] overflow-hidden">
           {!imgLoaded && (
             <div className="absolute inset-0 bg-surface flex items-center justify-center z-10">
               <span className="text-4xl opacity-30">🚗</span>
@@ -87,42 +88,35 @@ const CarCard = memo(function CarCard({
               loading="lazy"
               decoding="async"
               onLoad={() => setImgLoaded(true)}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <div className="car-img-placeholder flex items-center justify-center h-full text-6xl opacity-40">
+            <div className="flex items-center justify-center h-full text-6xl opacity-40">
               🚗
             </div>
           )}
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
-          {/* Badges */}
+          {/* Status Badges */}
           {isLiveNow && (
-            <div className="absolute top-3 left-3">
-              <span className="badge badge-gold flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider"
-                style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
-                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
-                LIVE
-              </span>
-            </div>
+            <span className="absolute top-3 left-3 badge-gold text-[10px] flex items-center gap-1.5"
+              style={{ background: 'rgba(239,68,68,0.9)', color: '#fff' }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />
+              LIVE
+            </span>
           )}
           {isScheduled && (
-            <div className="absolute top-3 left-3">
-              <span className="badge badge-gold flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-bold tracking-wider">
-                Upcoming
-              </span>
-            </div>
+            <span className="absolute top-3 left-3 badge-gold text-[10px]">Upcoming</span>
           )}
           {car.isDemo && (
-            <div className="absolute top-3 right-3">
-              <span style={{
-                fontSize: 8, fontWeight: 800, letterSpacing: '0.08em',
-                background: 'rgba(249,115,22,0.85)', color: '#fff',
-                padding: '2px 6px', borderRadius: 4,
-              }}>DEMO</span>
-            </div>
+            <span style={{
+              position: 'absolute', top: 8, right: 8,
+              background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
+              borderRadius: 5, padding: '2px 7px', zIndex: 5,
+              fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em',
+            }}>DEMO</span>
           )}
 
           {/* Favorite Button */}
@@ -133,83 +127,55 @@ const CarCard = memo(function CarCard({
                 e.stopPropagation();
                 onFavorite(car._id);
               }}
-              className="absolute top-3 right-3 p-2.5 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full transition-all hover:scale-110 z-20"
+              className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/50 z-20"
             >
               <Heart
-                size={18}
+                size={14}
                 className={`transition-colors duration-200 ${
                   isFavorited 
                     ? 'fill-red-500 text-red-500' 
-                    : 'text-white hover:text-red-400'
+                    : 'text-white'
                 }`}
               />
             </button>
           )}
+
+          {/* Price Overlay */}
+          <div className="absolute bottom-3 left-3">
+            <p className="text-white font-display text-base font-semibold drop-shadow-lg">
+              {formatKES(currentPrice || 0)}
+            </p>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-5 flex flex-col">
-          <h3 className="text-lg font-semibold leading-tight mb-3 line-clamp-2 group-hover:text-gold transition-colors">
+        <div className="flex-1 p-4 flex flex-col">
+          {/* Year & Brand */}
+          <p className="text-text-muted text-xs mb-0.5">{car.year} {car.brand}</p>
+
+          {/* Title */}
+          <h3 className="font-display text-sm font-semibold text-text group-hover:text-gold transition-colors line-clamp-1 mb-1">
             {car.title}
           </h3>
 
-          {/* Quick Specs */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {car.year && (
-              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
-                {car.year}
-              </span>
-            )}
-            {car.fuel && (
-              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
-                {car.fuel}
-              </span>
-            )}
-            {car.mileage && (
-              <span className="text-xs px-3 py-1 bg-surface rounded-md text-text-muted">
-                {Number(car.mileage).toLocaleString()} km
+          {/* Dealer Name */}
+          {sellerName && (
+            <p className="text-text-dim text-xs mb-2">{sellerName}</p>
+          )}
+
+          {/* Specs Row */}
+          <div className="mt-auto pt-3 border-t border-border flex items-center justify-between text-xs text-text-muted">
+            <span>{car.mileage ? `${Number(car.mileage).toLocaleString()} km` : '-'}</span>
+            <span className="capitalize">{car.fuel || '-'}</span>
+            {isBank && (
+              <span className="flex items-center gap-1 text-success">
+                <CheckCircle2 className="w-3 h-3" />
+                Verified
               </span>
             )}
           </div>
 
-          {/* Location */}
-          {car.location?.city && (
-            <div className="flex items-center gap-1.5 text-text-muted text-sm mb-4">
-              <MapPin size={15} />
-              <span>{car.location.city}</span>
-            </div>
-          )}
-
-          <div className="gold-line my-2" />
-
-          {/* Seller Info */}
-          {(sellerName || isBank) && (
-            <div className="flex items-center gap-1.5 text-xs text-text-muted mb-2">
-              {isBank && <span className="badge badge-blue text-[9px] px-2 py-0.5">Bank</span>}
-              {sellerName && <span>{sellerName}</span>}
-            </div>
-          )}
-
-          {/* Price & Action */}
-          <div className="mt-auto flex items-end justify-between">
-            <div>
-              <p className="price-tag text-2xl font-bold text-gold-light">
-                {formatKES(currentPrice || 0)}
-              </p>
-              {isOnAuction && (
-                <div className="flex items-center gap-1 text-xs text-text-muted mt-1">
-                  <Clock size={14} />
-                  <span>{car.currentBid && car.currentBid > 0 ? 'Current Bid' : 'Starting Bid'}</span>
-                </div>
-              )}
-            </div>
-
-            <span className="text-gold text-sm font-medium opacity-70 group-hover:opacity-100 transition-opacity">
-              View →
-            </span>
-          </div>
-
-          <div onClick={e => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+          <div onClick={e => { e.preventDefault(); e.stopPropagation(); }} style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
             <ReportButton targetType="listing" targetId={car._id} />
           </div>
         </div>

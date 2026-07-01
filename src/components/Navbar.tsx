@@ -8,7 +8,7 @@ import { carsAPI } from '../api/api';
 import { initials } from '../utils/helpers';
 import { isSellerRole } from '../utils/authRoutes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Menu, X, LogOut, PlusCircle, Search } from 'lucide-react';
+import { Bell, Menu, X, LogOut, PlusCircle, Search, ChevronDown, Car, Gavel, Shield, HelpCircle } from 'lucide-react';
 
 export default function Navbar() {
   const { user, isAuth, isAdmin, logout } = useAuth();
@@ -23,6 +23,7 @@ export default function Navbar() {
   const [notifDrop, setNotifDrop] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hasLiveAuction, setHasLiveAuction] = useState(false);
+  const [showBuyMenu, setShowBuyMenu] = useState(false);
 
   useEffect(() => {
     const check = () => {
@@ -81,9 +82,14 @@ export default function Navbar() {
     ? (isSellerRole(user?.role) ? '/dealer/add-car' : '/sell')
     : '/register?sell=1';
 
+  const buyMenuItems = [
+    { to: '/showroom', label: 'All Vehicles', icon: Search },
+    { to: '/auctions/calendar', label: 'Live Auctions', icon: Gavel },
+    { to: '/showroom?category=suv', label: 'SUVs', icon: Car },
+    { to: '/showroom?category=sedan', label: 'Sedans', icon: Car },
+  ];
+
   const NAV_LINKS = [
-    { to: '/showroom', label: 'Buy Cars' },
-    { to: '/auctions/calendar', label: 'Live Auctions', badge: hasLiveAuction ? 'live' : null },
     { to: '/escrow-vault', label: 'Escrow Vault' },
     { to: '/pre-inspection', label: 'Pre-Inspection' },
     { to: '/contact', label: 'Support' },
@@ -110,21 +116,46 @@ export default function Navbar() {
 
           <div className="flex-1" />
 
-          <div className="hidden md:flex items-center gap-4 text-sm font-medium">
-            <button onClick={() => navigate('/showroom')} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors flex-shrink-0" aria-label="Search">
-              <Search size={16} className="text-white/40 hover:text-gold transition-colors" />
-            </button>
-            {NAV_LINKS.map(({ to, label, badge }) => (
-              <Link key={to} to={to} className={`nav-link ${isActive(to) ? 'active' : ''}`}>
-                {badge === 'live' && (
-                  <span className="relative flex h-2 w-2 mr-1.5 inline-flex">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
-                  </span>
-                )}
+          <div className="hidden lg:flex items-center gap-1 text-sm font-medium">
+            {/* Buy Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowBuyMenu(!showBuyMenu)}
+                onBlur={() => setTimeout(() => setShowBuyMenu(false), 150)}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-1 ${
+                  location.pathname.includes('showroom') || location.pathname.includes('auction')
+                    ? 'text-gold bg-gold-muted'
+                    : 'text-text-muted hover:text-text hover:bg-white/5'
+                }`}
+              >
+                Buy Cars
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showBuyMenu ? 'rotate-180' : ''}`} />
+              </button>
+              {showBuyMenu && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-card border border-border rounded-lg shadow-lg py-1 animate-fade-in z-50">
+                  {buyMenuItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-white/5 transition-colors"
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {NAV_LINKS.map(({ to, label }) => (
+              <Link key={to} to={to} className={`px-4 py-2 rounded-lg transition-colors ${isActive(to) ? 'text-gold bg-gold-muted' : 'text-text-muted hover:text-text hover:bg-white/5'}`}>
                 {label}
               </Link>
             ))}
+
+            <button onClick={() => navigate('/showroom')} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors flex-shrink-0" aria-label="Search">
+              <Search size={16} className="text-white/40 hover:text-gold transition-colors" />
+            </button>
 
             {isAdmin && <Link to="/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`}>Admin</Link>}
 
@@ -225,16 +256,23 @@ export default function Navbar() {
                   className="flex-1 overflow-y-auto px-5 py-6 space-y-1">
                   {[
                     { to: '/', label: 'Home' },
-                    { to: '/showroom', label: 'Buy Cars' },
-                    { to: '/auctions/calendar', label: 'Live Auctions', badge: hasLiveAuction ? 'live' : null },
-                    { to: '/escrow-vault', label: 'Escrow Vault' },
-                    { to: '/pre-inspection', label: 'Pre-Inspection' },
-                    { to: '/contact', label: 'Support' },
-                  ].map(({ to, label, badge }) => (
+                  ].map(({ to, label }) => (
                     <motion.div key={to} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
                       <Link to={to} className={`mobile-nav-link flex items-center gap-2 ${isActive(to) ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>
-                        {badge === 'live' && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />}
                         {label}
+                      </Link>
+                    </motion.div>
+                  ))}
+
+                  <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}>
+                    <div className="px-4 py-2 text-xs font-medium text-text-dim uppercase tracking-wider mb-2">Buy</div>
+                  </motion.div>
+
+                  {buyMenuItems.map((item) => (
+                    <motion.div key={item.to} variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }}>
+                      <Link to={item.to} className={`mobile-nav-link flex items-center gap-2 ${isActive(item.to) ? 'active' : ''}`} onClick={() => setMobileOpen(false)}>
+                        <item.icon className="w-4 h-4" />
+                        {item.label}
                       </Link>
                     </motion.div>
                   ))}
