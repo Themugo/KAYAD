@@ -10,7 +10,7 @@ import TrustSection from './home/components/TrustBar';
 import FeaturedMarketplace from './home/components/FeaturedMarketplace';
 
 export default function HomePage() {
-  usePageMeta('Home', "East Africa's most trusted automotive marketplace. Buy, sell and bid on premium cars in Kenya with secure escrow payments.");
+  usePageMeta('Home', "East Africa's Trusted Marketplace. Buy, sell and auction vehicles with confidence. Every transaction protected through escrow, verified dealers and professional inspections.");
   const { isAuth, user } = useAuth();
   const { toast } = useToast();
   const isMobile = useMediaQuery('(max-width: 768px)');

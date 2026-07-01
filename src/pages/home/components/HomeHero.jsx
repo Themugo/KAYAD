@@ -3,8 +3,9 @@ import { ShieldCheck } from 'lucide-react';
 
 const TRUST_INDICATORS = [
   'Escrow Protected',
-  '150-Point Inspection',
+  'Pre-Inspected',
   'Verified Dealers',
+  'Live Auction',
 ];
 
 export default function HomeHero({ liveCount, isAuth, user }) {
@@ -26,8 +27,7 @@ export default function HomeHero({ liveCount, isAuth, user }) {
                 marginBottom: '16px',
                 letterSpacing: '-0.02em',
               }}>
-                Buy and Sell Vehicles<br />
-                <span style={{ color: 'var(--gold)' }}>With Complete Confidence</span>
+                Drive Your Dream
               </h1>
               <p className="font-body" style={{
                 fontSize: 'clamp(0.9rem, 1.1vw, 1.05rem)',
@@ -36,7 +36,7 @@ export default function HomeHero({ liveCount, isAuth, user }) {
                 marginBottom: '32px',
                 maxWidth: '580px',
               }}>
-                Every transaction secured by mandatory escrow. East Africa's most trusted way to buy and sell premium vehicles.
+                Buy, sell and auction vehicles with confidence. Every transaction protected through escrow, verified dealers and professional inspections.
               </p>
             </div>
 

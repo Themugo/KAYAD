@@ -1,10 +1,10 @@
 import { ShieldCheck, FileCheck, Search, Ban } from 'lucide-react';
 
 const TRUST_CARDS = [
-  { icon: ShieldCheck, title: 'Verified Listings', desc: 'Every vehicle is vetted for authenticity.' },
-  { icon: FileCheck, title: 'Escrow Protection', desc: 'Funds held securely until delivery confirmed.' },
-  { icon: Search, title: 'Professional Inspection', desc: '150-point forensic inspection on every vehicle.' },
-  { icon: Ban, title: 'Fraud Prevention', desc: 'Multi-layer verification and fraud detection.' },
+  { icon: FileCheck, title: 'Escrow Protected', desc: 'Funds held securely until delivery confirmed.' },
+  { icon: Search, title: 'Pre-Inspected', desc: 'Professional inspection on every vehicle.' },
+  { icon: ShieldCheck, title: 'Verified Dealers', desc: 'KRA-verified and phone-verified dealers only.' },
+  { icon: Ban, title: 'Live Auction', desc: 'Real-time bidding on premium vehicles.' },
 ];
 
 export default function TrustSection() {

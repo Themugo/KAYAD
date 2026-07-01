@@ -83,7 +83,7 @@ export default function Navbar() {
     : '/register?sell=1';
 
   const buyMenuItems = [
-    { to: '/showroom', label: 'All Vehicles', icon: Search },
+    { to: '/showroom', label: 'Buy Cars', icon: Search },
     { to: '/auctions/calendar', label: 'Live Auctions', icon: Gavel },
     { to: '/showroom?category=suv', label: 'SUVs', icon: Car },
     { to: '/showroom?category=sedan', label: 'Sedans', icon: Car },
