@@ -1,25 +1,24 @@
 import { Link } from 'react-router-dom';
 import usePageMeta from '../hooks/usePageMeta';
+import '../styles/about.css';
 
 export default function AboutPage() {
   usePageMeta('About Us', 'Learn about Kayad - Kenya\'s premium automotive marketplace with live auctions, verified dealers, and secure escrow payments.');
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', paddingTop: 40 }}>
-      <div className="container" style={{ maxWidth: 800, margin: '0 auto', padding: '60px 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 12 }}>
-            About Kayad
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: 'clamp(2rem, 4vw, 3rem)', color: '#fff', margin: '0 0 16px' }}>
-            Kenya's <span style={{ color: 'var(--gold)' }}>Premium</span> Car Marketplace
+    <div className="about-page">
+      <div className="about-container">
+        <div className="about-header">
+          <div className="about-overline">About Kayad</div>
+          <h1 className="about-title">
+            Kenya's <span className="about-title-gold">Premium</span> Car Marketplace
           </h1>
-          <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15, lineHeight: 1.7, maxWidth: 560, margin: '0 auto' }}>
+          <p className="about-subtitle">
             We're building the most trusted platform for buying and selling vehicles in East Africa.
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+        <div className="about-cards">
           {[
             {
               title: 'Our Mission',
@@ -42,19 +41,17 @@ export default function AboutPage() {
               icon: '✅',
             },
           ].map((item, i) => (
-            <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, padding: '28px 32px', display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(212,196,168,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
-                {item.icon}
-              </div>
+            <div key={i} className="about-card">
+              <div className="about-card-icon">{item.icon}</div>
               <div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: '1.3rem', color: '#fff', margin: '0 0 8px' }}>{item.title}</h3>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, margin: 0 }}>{item.desc}</p>
+                <h3 className="about-card-title">{item.title}</h3>
+                <p className="about-card-desc">{item.desc}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 56 }}>
+        <div className="about-cta">
           <Link to="/showroom" className="btn btn-gold">Explore the Gallery</Link>
         </div>
       </div>

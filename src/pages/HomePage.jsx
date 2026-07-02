@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, FileCheck, UserCheck, Gavel, MapPin, Gauge } from 'lucide-react';
 import { carsAPI, formatKES } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
+import '../styles/home.css';
 
 function shuffle(arr) {
   const a = [...arr];
@@ -68,41 +69,26 @@ export default function HomePage() {
   const safeSlide = slides.length > 0 ? currentSlide % slides.length : 0;
 
   return (
-    <div>
-      <style>{`
-        .fc-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); }
-        @media (min-width: 640px) { .fc-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
-        @media (min-width: 1024px) { .fc-grid { grid-template-columns: repeat(4, 1fr); } }
-      `}</style>
-
+    <div className="home-page">
       {/* ═══ HERO — Fullscreen slideshow ═══ */}
-      <section style={{ position: 'relative', height: 340, overflow: 'hidden' }}>
+      <section className="hero-section">
         {slides.map((slide, i) => (
-          <div key={i} style={{
-            position: 'absolute', inset: 0,
-            transition: 'all 1s ease-out',
-            opacity: i === safeSlide ? 1 : 0,
-            transform: i === safeSlide ? 'scale(1)' : 'scale(1.03)',
-          }}>
-            <img src={slide.image} alt={slide.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div key={i} className={`hero-slide ${i === safeSlide ? 'hero-slide-active' : 'hero-slide-hidden'}`}>
+            <img src={slide.image} alt={slide.label} className="hero-slide-img" />
           </div>
         ))}
 
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)' }} />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)' }} />
+        <div className="hero-overlay-right" />
+        <div className="hero-overlay-bottom" />
 
-        <div className="section-container" style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: 16 }}>
-          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 500 }}>
-            East Africa's Trusted Car Marketplace
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, lineHeight: 1.05, fontSize: 'clamp(2rem, 5vw, 3.25rem)', margin: 0 }}>
-            <span style={{ color: '#fff' }}>Drive Your </span>
+        <div className="section-container hero-content">
+          <p className="hero-overline">East Africa's Trusted Car Marketplace</p>
+          <h1 className="hero-heading">
+            <span className="hero-heading-white">Drive Your </span>
             <span className="gradient-text">Dream Today</span>
           </h1>
-          <p style={{ marginTop: 10, color: 'rgba(255,255,255,0.45)', fontSize: 13, maxWidth: 280 }}>
-            Buy, sell and auction vehicles with confidence.
-          </p>
-          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <p className="hero-subtitle">Buy, sell and auction vehicles with confidence.</p>
+          <div className="hero-actions">
             <Link to="/showroom" className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gold text-bg text-sm font-medium hover:bg-gold-light transition-colors">
               Browse Cars <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -112,22 +98,17 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div style={{ position: 'absolute', bottom: 20, right: 24, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
+        <div className="hero-slide-dots">
           {slides.map((_, i) => (
             <button key={i} onClick={() => setCurrentSlide(i)}
-              style={{
-                height: 3, borderRadius: 9999, border: 'none', padding: 0, cursor: 'pointer',
-                transition: 'all 0.3s',
-                background: i === safeSlide ? 'var(--gold)' : 'rgba(255,255,255,0.25)',
-                width: i === safeSlide ? 24 : 8,
-              }}
+              className={`hero-dot ${i === safeSlide ? 'hero-dot-active' : 'hero-dot-inactive'}`}
             />
           ))}
         </div>
       </section>
 
       {/* ═══ TRUST STRIP ═══ */}
-      <section style={{ background: '#0D0D0D' }}>
+      <section className="trust-strip">
         <div className="section-container">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
             {trustItems.map((item, i) => (
@@ -145,9 +126,9 @@ export default function HomePage() {
 
       {/* ═══ FEATURED VEHICLES — compact gallery style ═══ */}
       {!loading && featuredCars.length > 0 && (
-        <section style={{ padding: '64px 0' }}>
+        <section className="featured-section">
           <div className="section-container">
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 28 }}>
+            <div className="featured-header">
               <div>
                 <h2 className="section-heading">Featured Vehicles</h2>
                 <p className="section-subheading">Premium selection from verified dealers.</p>
@@ -159,36 +140,29 @@ export default function HomePage() {
 
             <div className="fc-grid">
               {featuredCars.map(car => (
-                <Link key={car._id} to={`/cars/${car._id}`}
-                  className="group block rounded-lg overflow-hidden border border-white/[0.07] hover:border-gold/20 transition-all duration-300 hover:shadow-[0_6px_24px_rgba(212,196,168,0.1)]"
-                  style={{ background: '#111111' }}
-                >
-                  <div className="relative h-28 sm:h-32 overflow-hidden">
+                <Link key={car._id} to={`/cars/${car._id}`} className="featured-card">
+                  <div className="featured-card-img-wrap">
                     <img
                       src={car.images?.[0]?.url || car.images?.[0] || 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg'}
                       alt={car.title}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="featured-card-img"
                       loading="lazy"
                     />
                   </div>
-                  <div style={{ padding: '10px' }}>
-                    <h3 className="font-display text-[13px] font-semibold text-white/90 leading-snug line-clamp-1" style={{ margin: 0 }}>
-                      {car.title}
-                    </h3>
-                    {car.dealer?.name && (
-                      <p className="text-white/30 text-[10px] mt-0.5 truncate">{car.dealer.name}</p>
-                    )}
-                    <p className="mt-1.5 font-display text-[13px] font-semibold italic gradient-text">{formatKES(car.price)}</p>
-                    <div className="mt-1.5 pt-1.5 border-t border-white/[0.06] flex items-center gap-2 text-white/35 text-[10px]">
-                      <span className="flex items-center gap-0.5">
-                        <Gauge className="w-2.5 h-2.5" />
+                  <div className="featured-card-body">
+                    <h3 className="featured-card-title">{car.title}</h3>
+                    {car.dealer?.name && <p className="featured-card-dealer">{car.dealer.name}</p>}
+                    <p className="featured-card-price gradient-text">{formatKES(car.price)}</p>
+                    <div className="featured-card-footer">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Gauge style={{ width: 10, height: 10 }} />
                         {car.mileage ? `${Number(car.mileage).toLocaleString()} km` : '-'}
                       </span>
                       <span className="capitalize">{car.fuel || car.fuel_type || '-'}</span>
                       {car.location?.city && (
-                        <span className="flex items-center gap-0.5 ml-auto overflow-hidden">
-                          <MapPin className="w-2.5 h-2.5" />
-                          <span className="truncate max-w-[48px]">{car.location.city}</span>
+                        <span className="featured-card-location">
+                          <MapPin style={{ width: 10, height: 10 }} />
+                          <span>{car.location.city}</span>
                         </span>
                       )}
                     </div>
@@ -197,7 +171,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="mt-8 text-center sm:hidden">
+            <div className="featured-mobile-cta">
               <Link to="/showroom" className="btn-outline">Browse All Vehicles</Link>
             </div>
           </div>

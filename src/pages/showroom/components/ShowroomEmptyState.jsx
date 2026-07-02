@@ -2,19 +2,9 @@ import { FilterX } from 'lucide-react';
 
 export default function ShowroomEmptyState({ onClear }) {
   return (
-    <div className="empty-state" style={{
-      borderRadius: 16,
-      background: 'rgba(255,255,255,0.02)',
-      border: '1px solid rgba(255,255,255,0.06)',
-    }}>
-      <div style={{
-        width: 72, height: 72, borderRadius: 16,
-        background: 'rgba(212,196,168,0.1)',
-        border: '1px solid rgba(212,196,168,0.2)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 20px',
-      }}>
-        <FilterX size={36} style={{ color: 'var(--gold)' }} />
+    <div className="empty-state">
+      <div className="empty-state-icon-box">
+        <FilterX size={36} className="empty-state-icon-svg" />
       </div>
       <div className="badge badge-ghost" style={{ marginBottom: 14 }}>
         Empty Gallery

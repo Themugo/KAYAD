@@ -51,6 +51,7 @@ import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import ShowroomEmptyState from './showroom/components/ShowroomEmptyState';
+import '../styles/showroom.css';
 
 // ─── Constants ───────────────────────────────────────────────────────────
 const CATEGORY_PILLS = [
@@ -331,53 +332,14 @@ export default function Showroom() {
         { name: 'Showroom', url: '/showroom' },
       ]} />
 
-      <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)' }}>
+      <div className="showroom-page">
         {/* ── Editorial hero ─────────────────────────────────────────── */}
-        <section style={{
-          position: 'relative',
-          padding: isMobile ? '32px 0 24px' : '56px 0 40px',
-          background:
-            'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,196,168,0.10), transparent),' +
-            'radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212,196,168,0.04), transparent),' +
-            'var(--bg, #050505)',
-          overflow: 'hidden',
-        }}>
-          {/* top hairline */}
-          <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-            background: 'linear-gradient(90deg, transparent, rgba(212,196,168,0.25), transparent)',
-          }} />
-          <div className="container" style={{ textAlign: 'center', maxWidth: 720, margin: '0 auto' }}>
-            <div style={{
-              fontSize: 10,
-              color: 'var(--gold, #D4C4A8)',
-              fontWeight: 700,
-              letterSpacing: '0.22em',
-              textTransform: 'uppercase',
-              marginBottom: 10,
-            }}>
-              Kenya's Premium Automotive Gallery
-            </div>
-            <h1 style={{
-              fontFamily: 'var(--font-display, "Cormorant Garamond", Georgia, serif)',
-              fontWeight: 900,
-              fontStyle: 'italic',
-              fontSize: 'clamp(2.2rem, 5vw, 3.4rem)',
-              lineHeight: 1,
-              color: '#fff',
-              margin: '0 0 14px',
-              letterSpacing: '-0.02em',
-            }}>
-              The Gallery
-            </h1>
-            <p style={{
-              fontSize: 13,
-              color: 'rgba(255,255,255,0.45)',
-              maxWidth: 480,
-              margin: '0 auto',
-              lineHeight: 1.6,
-              fontFamily: 'var(--font-body, "DM Sans", sans-serif)',
-            }}>
+        <section className={`showroom-hero ${isMobile ? 'showroom-hero-mobile' : 'showroom-hero-desktop'}`}>
+          <div className="showroom-hero-hairline" />
+          <div className="container showroom-hero-inner">
+            <div className="showroom-hero-overline">Kenya's Premium Automotive Gallery</div>
+            <h1 className="showroom-hero-title">The Gallery</h1>
+            <p className="showroom-hero-sub">
               Curated listings, transparent pricing, escrow-backed transactions.
               Every vehicle independently verifiable.
             </p>
@@ -385,23 +347,10 @@ export default function Showroom() {
         </section>
 
         {/* ── Sticky command bar ──────────────────────────────────────── */}
-        <div style={{
-          position: 'sticky', top: 0, zIndex: 30,
-          background: 'rgba(5,5,5,0.85)',
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-        }}>
-          <div className="container" style={{
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: isMobile ? 'stretch' : 'center',
-            gap: isMobile ? 10 : 14,
-            padding: isMobile ? '14px 16px' : '14px 0',
-          }}>
-            {/* Search — flexible, takes priority */}
-            <div style={{ flex: isMobile ? 'unset' : '1 1 280px', minWidth: 0, maxWidth: 360 }}>
+        <div className="command-bar">
+          <div className={`container ${isMobile ? 'command-bar-inner-mobile' : 'command-bar-inner-desktop'}`}>
+            {/* Search */}
+            <div className={`command-bar-search ${isMobile ? 'command-bar-search-mobile' : ''}`}>
               <SearchBar
                 value={keywordInput}
                 onChange={setKeywordInput}
@@ -411,18 +360,11 @@ export default function Showroom() {
               />
             </div>
 
-            {/* Category pills — single source of truth from URL */}
+            {/* Category pills */}
             <div
               role="tablist"
               aria-label="Listing category"
-              style={{
-                display: 'flex', gap: 6,
-                overflowX: isMobile ? 'auto' : 'visible',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                padding: isMobile ? '2px 0' : 0,
-                margin: isMobile ? '0 -2px' : 0,
-              }}
+              className={`category-pills ${isMobile ? 'category-pills-mobile' : 'category-pills-desktop'}`}
             >
               {CATEGORY_PILLS.map(c => {
                 const isActive = activeFilter === c.value;
@@ -433,33 +375,7 @@ export default function Showroom() {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => onFilterChange('category', c.value)}
-                    style={{
-                      padding: isMobile ? '10px 16px' : '7px 16px',
-                      borderRadius: 9999,
-                      border: `1px solid ${isActive ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.08)'}`,
-                      background: isActive ? 'rgba(212,196,168,0.10)' : 'rgba(255,255,255,0.02)',
-                      color: isActive ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.55)',
-                      fontSize: isMobile ? 13 : 12, fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      letterSpacing: '0.04em',
-                      fontFamily: 'var(--font-body, sans-serif)',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      minHeight: isMobile ? '44px' : 'auto',
-                    }}
-                    onMouseEnter={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.borderColor = 'rgba(212,196,168,0.3)';
-                        e.currentTarget.style.color = '#fff';
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                        e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
-                      }
-                    }}
+                    className={`pill-btn ${isMobile ? 'pill-btn-mobile' : 'pill-btn-desktop'} ${isActive ? 'pill-btn-active' : 'pill-btn-inactive'}`}
                   >
                     {c.label}
                   </button>
@@ -467,33 +383,15 @@ export default function Showroom() {
               })}
             </div>
 
-            {/* Right rail — sort, view, filter */}
-            <div style={{
-              display: 'flex', gap: 8, alignItems: 'center',
-              marginLeft: isMobile ? 0 : 'auto',
-              flexShrink: 0,
-            }}>
+            {/* Right rail */}
+            <div className={`command-rail ${isMobile ? 'command-rail-mobile' : 'command-rail-desktop'}`}>
               {/* Sort */}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div className="sort-wrap">
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value)}
                   aria-label="Sort results"
-                  style={{
-                    padding: isMobile ? '12px 28px 12px 12px' : '8px 28px 8px 12px',
-                    borderRadius: 8,
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.02)',
-                    color: 'rgba(255,255,255,0.85)',
-                    fontSize: isMobile ? 13 : 12,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    outline: 'none',
-                    appearance: 'none',
-                    WebkitAppearance: 'none',
-                    fontFamily: 'var(--font-body, sans-serif)',
-                    minHeight: isMobile ? '44px' : 'auto',
-                  }}
+                  className={`sort-select ${isMobile ? 'sort-select-mobile' : 'sort-select-desktop'}`}
                 >
                   {SORT_OPTIONS.map(o => (
                     <option key={o.value} value={o.value} style={{ background: '#0c0c0c' }}>
@@ -501,37 +399,17 @@ export default function Showroom() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={12} style={{
-                  position: 'absolute', right: 9,
-                  pointerEvents: 'none',
-                  color: 'rgba(255,255,255,0.45)',
-                }} />
+                <ChevronDown size={12} className="sort-chevron" />
               </div>
 
               {/* View toggle */}
-              <div
-                role="group" aria-label="Layout"
-                style={{
-                  display: 'flex', gap: 2,
-                  background: 'rgba(255,255,255,0.02)',
-                  padding: 3, borderRadius: 8,
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
+              <div role="group" aria-label="Layout" className="view-toggle">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
                   aria-label="Grid view"
                   aria-pressed={viewMode === 'grid'}
-                  style={{
-                    padding: isMobile ? '10px 12px' : '6px 9px', borderRadius: 6, border: 'none',
-                    background: viewMode === 'grid' ? 'rgba(212,196,168,0.12)' : 'transparent',
-                    color: viewMode === 'grid' ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.45)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    display: 'flex', alignItems: 'center',
-                    minHeight: isMobile ? '44px' : 'auto',
-                  }}
+                  className={`view-btn ${isMobile ? 'view-btn-mobile' : 'view-btn-desktop'} ${viewMode === 'grid' ? 'view-btn-active' : 'view-btn-inactive'}`}
                 >
                   <LayoutGrid size={14} />
                 </button>
@@ -540,34 +418,18 @@ export default function Showroom() {
                   onClick={() => setViewMode('list')}
                   aria-label="List view"
                   aria-pressed={viewMode === 'list'}
-                  style={{
-                    padding: isMobile ? '10px 12px' : '6px 9px', borderRadius: 6, border: 'none',
-                    background: viewMode === 'list' ? 'rgba(212,196,168,0.12)' : 'transparent',
-                    color: viewMode === 'list' ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.45)',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                    display: 'flex', alignItems: 'center',
-                    minHeight: isMobile ? '44px' : 'auto',
-                  }}
+                  className={`view-btn ${isMobile ? 'view-btn-mobile' : 'view-btn-desktop'} ${viewMode === 'list' ? 'view-btn-active' : 'view-btn-inactive'}`}
                 >
                   <List size={14} />
                 </button>
               </div>
 
-              {/* Filter button — opens sidebar on mobile only */}
+              {/* Filter button — mobile only */}
               {isMobile && (
                 <button
                   type="button"
                   onClick={() => setMobileFilterOpen(true)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '8px 12px', borderRadius: 8,
-                    background: anyFilterActive ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${anyFilterActive ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                    color: anyFilterActive ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.85)',
-                    fontSize: 12, fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
+                  className={`filter-btn-mobile ${anyFilterActive ? 'filter-btn-mobile-active' : 'filter-btn-mobile-inactive'}`}
                 >
                   <SlidersHorizontal size={13} />
                   Filter{anyFilterActive ? ` · ${activeFilters.length}` : ''}
@@ -577,77 +439,33 @@ export default function Showroom() {
           </div>
         </div>
 
-        {/* ── Active-filter band (renders only when needed) ─────────────── */}
+        {/* ── Active-filter band ──────────────────────────────────────── */}
         {(anyFilterActive || savedSearches.length > 0) && (
-          <div className="container" style={{
-            display: 'flex', flexWrap: 'wrap', alignItems: 'center',
-            gap: 8,
-            padding: isMobile ? '12px 16px' : '14px 0',
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
-          }}>
-            {/* Result count — premium italic */}
-            <div style={{
-              fontFamily: 'var(--font-display, serif)',
-              fontStyle: 'italic',
-              fontWeight: 700,
-              fontSize: 15,
-              color: '#fff',
-              marginRight: 8,
-            }}>
-              {loading && cars.length === 0
-                ? '…'
-                : `${totalCount.toLocaleString()} ${totalCount === 1 ? 'vehicle' : 'vehicles'}`}
+          <div className={`container filter-band ${isMobile ? 'filter-band-mobile' : 'filter-band-desktop'}`}>
+            <div className="filter-band-result-count">
+              {loading && cars.length === 0 ? '…' : `${totalCount.toLocaleString()} ${totalCount === 1 ? 'vehicle' : 'vehicles'}`}
             </div>
 
-            {/* Filter chips with × */}
+            {/* Filter chips */}
             {activeFilters.map(([key, value]) => (
-              <span
-                key={key}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '5px 10px',
-                  borderRadius: 9999,
-                  background: 'rgba(212,196,168,0.08)',
-                  border: '1px solid rgba(212,196,168,0.18)',
-                  fontSize: 11, fontWeight: 600,
-                  color: 'rgba(255,255,255,0.85)',
-                  fontFamily: 'var(--font-body, sans-serif)',
-                }}
-              >
-                <span style={{ color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: 9 }}>
-                  {FILTER_LABELS[key] || key}
-                </span>
+              <span key={key} className="filter-chip">
+                <span className="filter-chip-label">{FILTER_LABELS[key] || key}</span>
                 <span>{value}</span>
                 <button
                   type="button"
                   onClick={() => onFilterChange(key, '')}
                   aria-label={`Remove ${FILTER_LABELS[key] || key} filter`}
-                  style={{
-                    background: 'none', border: 'none', padding: 0,
-                    color: 'rgba(212,196,168,0.7)',
-                    cursor: 'pointer', display: 'flex', lineHeight: 1,
-                  }}
+                  className="filter-chip-remove"
                 >
                   <X size={11} />
                 </button>
               </span>
             ))}
 
-            {/* Right cluster: save / saved / clear */}
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center' }}>
+            {/* Right cluster */}
+            <div className="filter-band-right">
               {anyFilterActive && (
-                <button
-                  type="button"
-                  onClick={() => setShowSavePrompt(true)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    background: 'rgba(212,196,168,0.06)',
-                    border: '1px solid rgba(212,196,168,0.18)',
-                    borderRadius: 8, padding: '5px 11px',
-                    color: 'var(--gold, #D4C4A8)',
-                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                  }}
-                >
+                <button type="button" onClick={() => setShowSavePrompt(true)} className="filter-band-btn btn-save">
                   <Bookmark size={12} /> Save
                 </button>
               )}
@@ -659,69 +477,24 @@ export default function Showroom() {
                     onClick={() => setShowSavedMenu(p => !p)}
                     aria-expanded={showSavedMenu}
                     aria-haspopup="menu"
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      background: showSavedMenu ? 'rgba(212,196,168,0.08)' : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${showSavedMenu ? 'rgba(212,196,168,0.2)' : 'rgba(255,255,255,0.08)'}`,
-                      borderRadius: 8, padding: '5px 11px',
-                      color: showSavedMenu ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.7)',
-                      fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                    }}
+                    className={`${showSavedMenu ? 'btn-saved-active' : 'btn-saved-inactive'}`}
                   >
                     Saved · {savedSearches.length}
                     <ChevronDown size={11} style={{ transform: showSavedMenu ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                   </button>
 
                   {showSavedMenu && (
-                    <div
-                      role="menu"
-                      style={{
-                        position: 'absolute',
-                        top: 'calc(100% + 6px)',
-                        right: 0,
-                        minWidth: 260, maxWidth: 360,
-                        background: '#0c0c0c',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        borderRadius: 10,
-                        boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-                        overflow: 'hidden',
-                        zIndex: 40,
-                      }}
-                    >
+                    <div role="menu" className="saved-menu">
                       {savedSearches.map(s => (
-                        <div
-                          key={s._id}
-                          style={{
-                            display: 'flex', alignItems: 'center', gap: 8,
-                            padding: '10px 12px',
-                            borderBottom: '1px solid rgba(255,255,255,0.04)',
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => handleRestoreSavedSearch(s)}
-                            style={{
-                              flex: 1,
-                              background: 'transparent', border: 'none',
-                              color: 'rgba(255,255,255,0.85)',
-                              fontSize: 12, fontWeight: 600,
-                              textAlign: 'left', cursor: 'pointer',
-                              padding: 0,
-                              fontFamily: 'var(--font-body, sans-serif)',
-                            }}
-                          >
+                        <div key={s._id} className="saved-menu-item">
+                          <button type="button" onClick={() => handleRestoreSavedSearch(s)} className="saved-menu-restore">
                             {s.name}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleToggleAlert(s)}
                             aria-label={(s.notify ?? s.alertsEnabled) ? 'Disable alerts' : 'Enable alerts'}
-                            style={{
-                              background: 'transparent', border: 'none',
-                              cursor: 'pointer', display: 'flex',
-                              color: (s.notify ?? s.alertsEnabled) ? 'var(--gold, #D4C4A8)' : 'rgba(255,255,255,0.3)',
-                              padding: 2,
-                            }}
+                            className={`saved-menu-action ${(s.notify ?? s.alertsEnabled) ? 'saved-menu-alert-on' : 'saved-menu-alert-off'}`}
                           >
                             {(s.notify ?? s.alertsEnabled) ? <Bell size={13} /> : <BellOff size={13} />}
                           </button>
@@ -729,11 +502,7 @@ export default function Showroom() {
                             type="button"
                             onClick={() => handleDeleteSaved(s)}
                             aria-label="Delete saved search"
-                            style={{
-                              background: 'transparent', border: 'none',
-                              cursor: 'pointer', display: 'flex',
-                              color: 'rgba(255,255,255,0.3)', padding: 2,
-                            }}
+                            className="saved-menu-action saved-menu-delete"
                           >
                             <Trash2 size={13} />
                           </button>
@@ -745,25 +514,7 @@ export default function Showroom() {
               )}
 
               {anyFilterActive && (
-                <button
-                  type="button"
-                  onClick={() => onFilterChange('clear')}
-                  style={{
-                    background: 'transparent',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    borderRadius: 8, padding: '5px 11px',
-                    color: 'rgba(255,255,255,0.55)',
-                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.55)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                  }}
-                >
+                <button type="button" onClick={() => onFilterChange('clear')} className="btn-clear">
                   Clear all
                 </button>
               )}
@@ -773,39 +524,19 @@ export default function Showroom() {
 
         {/* ── Save-search prompt ────────────────────────────────────── */}
         {showSavePrompt && (
-          <div className="container" style={{ padding: isMobile ? '12px 16px 0' : '12px 0 0' }}>
-            <div style={{
-              background: '#0c0c0c',
-              border: '1px solid rgba(212,196,168,0.18)',
-              borderRadius: 10,
-              padding: '12px 14px',
-              display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-            }}>
-              <Bookmark size={14} style={{ color: 'var(--gold, #D4C4A8)', flexShrink: 0 }} />
+          <div className={`container ${isMobile ? 'save-prompt-wrap-mobile' : 'save-prompt-wrap'}`}>
+            <div className="save-prompt-card">
+              <Bookmark size={14} className="save-prompt-icon" />
               <input
                 value={saveName}
                 onChange={e => setSaveName(e.target.value)}
                 placeholder="Name this search…"
                 autoFocus
                 onKeyDown={e => { if (e.key === 'Enter') handleSaveSearch(); }}
-                style={{
-                  flex: 1, minWidth: 160,
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 6, padding: '7px 10px',
-                  color: '#fff', fontSize: 12, outline: 'none',
-                  fontFamily: 'var(--font-body, sans-serif)',
-                }}
+                className="save-prompt-input"
               />
               <button type="button" onClick={handleSaveSearch} className="btn btn-gold btn-sm">Save</button>
-              <button
-                type="button"
-                onClick={() => { setShowSavePrompt(false); setSaveName(''); }}
-                style={{
-                  background: 'transparent', border: 'none',
-                  color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 11,
-                }}
-              >
+              <button type="button" onClick={() => { setShowSavePrompt(false); setSaveName(''); }} className="save-prompt-cancel">
                 Cancel
               </button>
             </div>
@@ -813,14 +544,10 @@ export default function Showroom() {
         )}
 
         {/* ── Body: sidebar + grid ─────────────────────────────────── */}
-        <div style={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          paddingTop: 8,
-        }}>
-          {/* Desktop / tablet sidebar */}
+        <div className={`showroom-body ${isMobile ? 'showroom-body-mobile' : 'showroom-body-desktop'}`}>
+          {/* Desktop sidebar */}
           {!isMobile && (
-            <aside style={{ flexShrink: 0 }}>
+            <aside className="showroom-sidebar-desktop">
               <SearchSidebar
                 cars={cars}
                 filters={filters}
@@ -831,23 +558,11 @@ export default function Showroom() {
             </aside>
           )}
 
-          {/* Mobile bottom-sheet sidebar */}
+          {/* Mobile filter drawer */}
           {isMobile && mobileFilterOpen && (
             <>
-              <div
-                role="presentation"
-                onClick={() => setMobileFilterOpen(false)}
-                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 99 }}
-              />
-              <div style={{
-                position: 'fixed', top: 0, left: 0, bottom: 0,
-                width: '85%', maxWidth: 320,
-                background: '#0a0a0a',
-                zIndex: 100,
-                overflowY: 'auto',
-                boxShadow: '4px 0 40px rgba(0,0,0,0.6)',
-                animation: 'slideInLeft 0.25s ease',
-              }}>
+              <div role="presentation" onClick={() => setMobileFilterOpen(false)} className="mobile-filter-overlay" />
+              <div className="mobile-filter-drawer">
                 <SearchSidebar
                   cars={cars}
                   filters={filters}
@@ -862,15 +577,11 @@ export default function Showroom() {
           )}
 
           {/* Grid / list area */}
-          <main style={{ flex: 1, minWidth: 0, padding: isMobile ? '4px 16px 48px' : '8px 0 64px' }}>
-            <div className="container" style={{ padding: isMobile ? 0 : '0 0 0 24px' }}>
-              {/* Loading state for first page */}
+          <main className={`showroom-main ${isMobile ? 'showroom-main-mobile' : 'showroom-main-desktop'}`}>
+            <div className={`container showroom-main-inner ${!isMobile ? 'showroom-main-inner-desktop' : ''}`}>
+              {/* Loading state */}
               {loading && cars.length === 0 ? (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: gridCols,
-                  gap: isMobile ? 12 : 18,
-                }}>
+                <div className={`showroom-skeleton ${isMobile ? 'showroom-skeleton-mobile' : ''}`}>
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="skeleton-thumbnail skeleton" style={{ borderRadius: 14, minHeight: 180 }} />
                   ))}
@@ -878,34 +589,30 @@ export default function Showroom() {
               ) : cars.length === 0 ? (
                 <ShowroomEmptyState onClear={() => onFilterChange('clear')} />
               ) : viewMode === 'grid' ? (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: gridCols,
-                  gap: isMobile ? 16 : 24,
-                }}>
+                <div className={`car-grid ${isMobile ? 'car-grid-mobile' : ''}`}>
                   {cars.map(car => (
-                      <div key={car._id}>
-                        <CartyGrid car={car} isMobile={isMobile} />
-                      </div>
-                    ))}
+                    <div key={car._id}>
+                      <CartyGrid car={car} isMobile={isMobile} />
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="car-list">
                   {cars.map(car => (
-                      <div key={car._id}>
-                        <CartyGrid car={car} listView isMobile={isMobile} />
-                      </div>
-                    ))}
+                    <div key={car._id}>
+                      <CartyGrid car={car} listView isMobile={isMobile} />
+                    </div>
+                  ))}
                 </div>
               )}
 
-              {/* Infinite scroll sentinel + Load More fallback */}
+              {/* Infinite scroll */}
               {hasMore && (
                 <>
-                  <div ref={sentinelRef} className="loading-center" style={{ padding: 32 }}>
+                  <div ref={sentinelRef} className="loading-center showroom-sentinel">
                     <div className="spinner" />
                   </div>
-                  <div style={{ textAlign: 'center', padding: '0 0 32px' }}>
+                  <div className="showroom-load-more">
                     <button className="btn btn-soft btn-sm" onClick={() => setPage(p => p + 1)}>
                       Load More
                     </button>
