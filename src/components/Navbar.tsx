@@ -31,15 +31,15 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 bg-[#0D0D0D] border-b border-white/[0.07]">
       <div className="section-container">
-        <div className="flex items-center h-14 gap-8">
+        <div className="flex items-center h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <Car className="w-5 h-5 text-gold" />
             <span className="font-display text-lg font-semibold gradient-text tracking-wide">KAYAD</span>
           </Link>
 
-          {/* Desktop nav — pushed right, flush with actions */}
-          <div className="hidden lg:flex items-center gap-0.5 ml-auto">
+          {/* Desktop right group — pushed to far right */}
+          <div className="hidden lg:flex items-center gap-3 ml-auto">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
@@ -53,10 +53,7 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
-          </div>
-
-          {/* Desktop actions */}
-          <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-white/[0.07] shrink-0">
+            <div className="w-px h-5 bg-white/[0.07]" />
             <Link
               to={sellLink}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition-all"
