@@ -39,7 +39,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop — nav links + actions */}
-          <div className="hidden lg:flex items-center gap-0.5">
+          <div className="hidden lg:flex items-center gap-6">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
