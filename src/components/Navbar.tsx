@@ -31,37 +31,37 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 bg-[#0D0D0D] border-b border-white/[0.07]">
       <div className="section-container">
-        <div className="flex items-center justify-between h-14">
-          {/* Logo */}
+        <div className="flex items-center h-14 relative">
+          {/* Logo - far left */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <Car className="w-5 h-5 text-gold" />
             <span className="font-display text-lg font-semibold gradient-text tracking-wide">KAYAD</span>
           </Link>
 
-          {/* Desktop — nav links + actions */}
-          <div className="hidden lg:flex items-center gap-6">
+          {/* Desktop — centered */}
+          <div className="hidden lg:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
+                className={`text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
                   isActive(item.to)
-                    ? 'text-gold bg-gold/[0.1]'
-                    : 'text-white/50 hover:text-white/90 hover:bg-white/[0.05]'
+                    ? 'text-gold'
+                    : 'text-white/50 hover:text-white/90'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
 
-            <div className="w-px h-4 bg-white/[0.06] mx-2" />
+            <div className="w-px h-4 bg-white/[0.08]" />
 
             <Link
               to={sellLink}
-              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
+              className={`text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
                 isActive(sellLink)
-                  ? 'text-gold bg-gold/[0.1]'
-                  : 'text-white/60 hover:text-gold hover:bg-gold/[0.08]'
+                  ? 'text-gold'
+                  : 'text-white/55 hover:text-gold'
               }`}
             >
               Sell
@@ -69,14 +69,14 @@ export default function Navbar() {
 
             {isAuth ? (
               <>
-                <Link to="/dashboard" className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap tracking-wide">
+                <Link to="/dashboard" className="text-[13px] font-medium text-white/50 hover:text-white/90 transition-colors whitespace-nowrap tracking-wide">
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 rounded-md text-white/35 hover:text-white/70 hover:bg-white/[0.05] transition-colors"
+                  className="text-[13px] font-medium text-white/35 hover:text-white/70 transition-colors whitespace-nowrap tracking-wide"
                 >
-                  <LogOut className="w-4 h-4" />
+                  Sign Out
                 </button>
               </>
             ) : (
@@ -89,10 +89,10 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile toggle */}
+          {/* Mobile toggle - far right */}
           <button
             onClick={() => setOpen(!open)}
-            className="lg:hidden p-1.5 text-white/55 hover:text-white transition-colors"
+            className="lg:hidden p-1.5 text-white/55 hover:text-white transition-colors ml-auto"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
