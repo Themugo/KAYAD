@@ -38,8 +38,8 @@ export default function Navbar() {
             <span className="font-display text-lg font-semibold gradient-text tracking-wide">KAYAD</span>
           </Link>
 
-          {/* Desktop — centered */}
-          <div className="hidden lg:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
+          {/* Desktop — flush right */}
+          <div className="hidden lg:flex items-center gap-6 absolute right-0">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
