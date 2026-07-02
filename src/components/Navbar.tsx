@@ -82,7 +82,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center px-4 py-1.5 rounded-md text-[13px] font-medium bg-gold text-bg hover:bg-gold-light transition-colors whitespace-nowrap"
+                className="inline-flex items-center justify-center px-4 py-1.5 rounded-md text-[13px] font-medium bg-gold text-bg border border-white/10 hover:bg-gold-light hover:border-white/20 shadow-sm transition-all whitespace-nowrap"
               >
                 Sign In
               </Link>
