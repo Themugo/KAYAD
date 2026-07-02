@@ -118,12 +118,12 @@ export function SpecItem({ icon: Icon, label, value, delay = 0 }) {
 }
 
 export function CompareToggle({ car }) {
-  const { compareList, addToCompare, removeFromCompare } = useCompare();
+  const { compareIds, addCar, removeCar } = useCompare();
   if (!car) return null;
-  const isIn = compareList.some(c => c._id === car._id);
+  const isIn = compareIds.includes(car._id);
   return (
     <div className="sidebar-block">
-      <button onClick={() => isIn ? removeFromCompare(car._id) : addToCompare(car)}
+      <button onClick={() => isIn ? removeCar(car._id) : addCar(car._id)}
         className={`sidebar-block-btn ${isIn ? 'sidebar-block-btn-active' : ''}`}>
         <BarChart3 size={14} />
         {isIn ? 'Remove from Compare' : 'Add to Compare'}
