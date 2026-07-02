@@ -31,15 +31,15 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 inset-x-0 z-50 bg-[#0D0D0D] border-b border-white/[0.07]">
       <div className="section-container">
-        <div className="flex items-center h-14">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0 group">
             <Car className="w-5 h-5 text-gold" />
             <span className="font-display text-lg font-semibold gradient-text tracking-wide">KAYAD</span>
           </Link>
 
-          {/* Desktop right group — pushed to far right */}
-          <div className="hidden lg:flex items-center gap-3 ml-auto">
+          {/* Desktop — all items flush right */}
+          <div className="hidden lg:flex items-center gap-2">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
@@ -53,31 +53,36 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <div className="w-px h-5 bg-white/[0.07]" />
             <Link
               to={sellLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium text-white/70 hover:text-white border border-white/15 hover:border-white/30 transition-all"
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap ${
+                isActive(sellLink)
+                  ? 'text-gold bg-gold/[0.1]'
+                  : 'text-white/55 hover:text-white/90 hover:bg-white/[0.05]'
+              }`}
             >
-              <Plus className="w-3.5 h-3.5" />
               Sell
             </Link>
             {isAuth ? (
               <>
-                <Link to="/dashboard" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium text-white/55 hover:text-white hover:bg-white/[0.05] transition-colors">
-                  <User className="w-3.5 h-3.5" />
+                <Link to="/dashboard" className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/55 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap">
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 rounded-md text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-colors"
+                  className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/55 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap"
                 >
-                  <LogOut className="w-4 h-4" />
+                  Sign Out
                 </button>
               </>
             ) : (
               <Link
                 to="/login"
-                className="inline-flex items-center justify-center px-4 py-1.5 rounded-md text-[13px] font-medium bg-gold text-bg hover:bg-gold-light transition-colors"
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap ${
+                  isActive('/login')
+                    ? 'text-gold bg-gold/[0.1]'
+                    : 'text-white/55 hover:text-white/90 hover:bg-white/[0.05]'
+                }`}
               >
                 Sign In
               </Link>
@@ -87,7 +92,7 @@ export default function Navbar() {
           {/* Mobile toggle */}
           <button
             onClick={() => setOpen(!open)}
-            className="lg:hidden ml-auto p-1.5 text-white/55 hover:text-white transition-colors"
+            className="lg:hidden p-1.5 text-white/55 hover:text-white transition-colors"
           >
             {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
