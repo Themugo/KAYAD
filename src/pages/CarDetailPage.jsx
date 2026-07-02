@@ -382,7 +382,7 @@ export default function CarDetailPage() {
               fontWeight: 800, color: '#fff', lineHeight: 1.1,
               margin: '0 0 10px',
             }}>{car.title}</h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div className="vh-meta">
               <span style={{
                 fontSize: 15, color: 'var(--gold)', fontWeight: 700,
                 letterSpacing: '0.02em',
@@ -390,13 +390,13 @@ export default function CarDetailPage() {
                 KES {Number(price).toLocaleString()}
               </span>
               {car.location?.city && (
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <MapPin size={12} style={{ color: 'var(--gold)' }} /> {car.location.city}
+                <span className="vh-meta-item">
+                  <MapPin size={12} className="vh-meta-icon" /> {car.location.city}
                 </span>
               )}
               {car.year && (
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <Calendar size={12} style={{ color: 'var(--gold)' }} /> {car.year}
+                <span className="vh-meta-item">
+                  <Calendar size={12} className="vh-meta-icon" /> {car.year}
                 </span>
               )}
             </div>
@@ -407,10 +407,7 @@ export default function CarDetailPage() {
 
           {/* Thumbnail Strip */}
           {total > 1 && (
-            <div className="detail-thumbnails" style={{
-              display: 'flex', gap: 6, marginTop: 8, overflow: 'auto',
-              paddingBottom: 4,
-            }}>
+            <div className="detail-thumbnails">
               {images.map((img, i) => {
                 const src = typeof img === 'string' ? img : img?.url;
                 const isActive = i === imgIdx;
@@ -418,37 +415,26 @@ export default function CarDetailPage() {
                 return (
                   <div key={i} style={{ position: 'relative', flexShrink: 0 }}>
                     <button onClick={() => setImgIdx(i)}
+                      className="thumb-btn"
                       style={{
-                        width: 72, height: 52, borderRadius: 6, overflow: 'hidden',
                         border: isActive ? '2px solid var(--gold)' : '2px solid rgba(255,255,255,0.08)',
-                        padding: 0, cursor: 'pointer', background: '#111',
                         opacity: isActive ? 1 : 0.55,
-                        transition: 'all 0.2s',
                       }}
                     >
-                      {src && <img src={src} alt="" loading="lazy" decoding="async"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                      {src && <img src={src} alt="" loading="lazy" decoding="async" />}
                     </button>
                     {isCover && (
-                      <span style={{
-                        position: 'absolute', top: -4, right: -4,
-                        background: 'var(--gold)', color: '#000',
-                        borderRadius: '50%', width: 14, height: 14,
-                        fontSize: 7, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: 700,
-                      }}>★</span>
+                      <span className="thumb-badge" style={{ background: 'var(--gold)', color: '#000' }}>★</span>
                     )}
                     {canManage && (
                       <button onClick={() => handleSetCover(i)} title="Set as cover"
+                        className="thumb-badge"
                         style={{
-                          position: 'absolute', bottom: -4, right: -4,
-                          width: 16, height: 16, borderRadius: '50%',
+                          top: 'auto', bottom: -4,
                           background: isCover ? 'var(--gold)' : 'rgba(255,255,255,0.1)',
                           border: '1px solid rgba(255,255,255,0.2)',
                           color: isCover ? '#000' : 'rgba(255,255,255,0.5)',
-                          cursor: 'pointer', display: 'flex',
-                          alignItems: 'center', justifyContent: 'center',
-                          fontSize: 7,
+                          cursor: 'pointer', fontSize: 7,
                         }}
                       >
                         <Pin size={7} />
@@ -470,8 +456,7 @@ export default function CarDetailPage() {
                 </div>
               </div>
               <button onClick={handleTogglePromote} disabled={promoting}
-                className="owner-btn"
-                style={car.isPromoted ? { background: 'rgba(239,68,68,0.1)', color: '#ef4444', borderColor: 'rgba(239,68,68,0.2)' } : {}}>
+                className={`owner-btn ${car.isPromoted ? 'owner-btn-danger' : ''}`}>
                 <TrendingUp size={13} /> {car.isPromoted ? 'Unfeature' : 'Feature'}
               </button>
               <Link to={`/dealer/edit/${car._id}`} className="owner-btn">Edit</Link>
@@ -500,11 +485,7 @@ export default function CarDetailPage() {
           {/* Vehicle Overview */}
           <div>
             <div className="detail-section-label">Vehicle Overview</div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 12,
-            }}>
+            <div className="stat-grid">
               <div className="stat-card">
                 <div>Views</div>
                 <div className="stat-card-val">{car.views || 0}</div>
@@ -573,6 +554,7 @@ export default function CarDetailPage() {
                     width: 34, height: 34, borderRadius: 8,
                     background: 'rgba(34,197,94,0.12)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
                   }}>
                     <Lock size={15} style={{ color: '#22C55E' }} />
                   </div>
@@ -597,31 +579,32 @@ export default function CarDetailPage() {
                 border: isLive ? '1px solid rgba(239,68,68,0.18)' : '1px solid rgba(245,158,11,0.18)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 34, height: 34, borderRadius: 8,
-                      background: isLive ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <Zap size={15} style={{ color: isLive ? '#EF4444' : '#F59E0B' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 34, height: 34, borderRadius: 8,
+                    background: isLive ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Zap size={15} style={{ color: isLive ? '#EF4444' : '#F59E0B' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+                      {isLive ? 'Live Auction' : 'Scheduled Auction'}
                     </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                        {isLive ? 'Live Auction' : 'Scheduled Auction'}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
-                        {isLive ? 'Bidding in progress' : 'Auction scheduled'}
-                      </div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>
+                      {isLive ? 'Bidding in progress' : 'Auction scheduled'}
                     </div>
                   </div>
-                  {isLive && countdown && (
-                    <div style={{
-                      fontSize: 12, fontWeight: 700, color: '#EF4444',
-                      fontFamily: 'var(--font-display)', fontStyle: 'italic',
-                    }}>
-                      {countdown}
-                    </div>
-                  )}
+                </div>
+                {isLive && countdown && (
+                  <div style={{
+                    fontSize: 'clamp(0.75rem, 1.2vw, 0.9rem)', fontWeight: 700, color: '#EF4444',
+                    fontFamily: 'var(--font-display)', fontStyle: 'italic',
+                  }}>
+                    {countdown}
+                  </div>
+                )}
                 </div>
                 {isLive && car.currentBid > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -895,68 +878,37 @@ export default function CarDetailPage() {
 
       {/* Mobile sticky bottom bar */}
       {isMobile && (
-        <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
-          background: 'rgba(5,5,5,0.96)',
-          backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          padding: '10px 16px',
-          paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
-          display: 'flex', alignItems: 'center', gap: 12,
-        }}>
+        <div className="mobile-sticky-bar">
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            <div className="mobile-sticky-price-label">
               {isLive && car.currentBid > 0 ? 'Current Bid' : isLive ? 'Starting Bid' : 'Price'}
             </div>
-            <div style={{
-              fontSize: 18, fontWeight: 700, color: 'var(--gold)',
-              fontFamily: 'var(--font-display, "Cormorant Garamond", serif)',
-              fontStyle: 'italic',
-            }}>
+            <div className="mobile-sticky-price">
               {formatKES(price)}
             </div>
           </div>
           {isOwner ? (
-            <Link to={`/dealer/edit/${car._id}`} style={{
-              padding: '10px 20px', borderRadius: 8,
-              background: 'var(--gold)', color: '#000',
-              fontSize: 13, fontWeight: 700, textDecoration: 'none',
-              whiteSpace: 'nowrap', flexShrink: 0,
-            }}>
+            <Link to={`/dealer/edit/${car._id}`} className="mobile-sticky-btn mobile-sticky-btn-primary" style={{ textDecoration: 'none' }}>
               Edit Listing
             </Link>
           ) : (
             <>
               {car.allowBuy && (
-                <button onClick={() => handleBuy('escrow')} style={{
-                  padding: '10px 20px', borderRadius: 8,
-                  background: 'var(--gold)', color: '#000',
-                  fontSize: 13, fontWeight: 700, border: 'none',
-                  cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-                }}>
+                <button onClick={() => handleBuy('escrow')} className="mobile-sticky-btn mobile-sticky-btn-primary">
                   {isP2P ? 'Buy via Escrow' : 'Buy Now'}
                 </button>
               )}
               {dv.chatEnabled && !car.chatDisabled && (
-                <button onClick={handleChat} style={{
-                  width: 40, height: 40, borderRadius: 8,
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', flexShrink: 0,
-                  color: 'rgba(255,255,255,0.5)',
-                }}>
+                <button onClick={handleChat} className="mobile-sticky-btn-secondary">
                   <MessageCircle size={18} />
                 </button>
               )}
-              <button onClick={handleFav} style={{
-                width: 40, height: 40, borderRadius: 8,
-                background: isFav ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
-                border: `1px solid ${isFav ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                cursor: 'pointer', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', flexShrink: 0,
-                color: isFav ? '#ef4444' : 'rgba(255,255,255,0.5)',
-              }}>
+              <button onClick={handleFav} className="mobile-sticky-fav"
+                style={{
+                  background: isFav ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${isFav ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                  color: isFav ? '#ef4444' : 'rgba(255,255,255,0.5)',
+                }}>
                 <Heart size={18} fill={isFav ? 'currentColor' : 'none'} />
               </button>
             </>
@@ -986,65 +938,28 @@ export default function CarDetailPage() {
       )}
 
       {showBidConfirm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-          backdropFilter: 'blur(4px)',
-        }}>
-          <div style={{
-            background: 'var(--card)', border: '1px solid var(--border)',
-            borderRadius: 16, padding: 24, maxWidth: 420, width: '100%',
-            boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-            animation: 'fadeInUp 0.3s ease',
-          }}>
+        <div className="bid-modal-overlay">
+          <div className="bid-modal-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>
-                Confirm Your Bid
-              </div>
-              <button 
-                onClick={() => setShowBidConfirm(false)}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
-              >
+              <div className="bid-modal-title">Confirm Your Bid</div>
+              <button onClick={() => setShowBidConfirm(false)} className="bid-modal-close">
                 <X size={20} />
               </button>
             </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', marginBottom: 16, lineHeight: 1.6 }}>
+            <div className="bid-modal-body">
               You are about to place a bid of <strong style={{ color: 'var(--gold)' }}>KES {Number(bidAmount).toLocaleString()}</strong> on {car.title}.
               <br /><br />
               This is a binding bid. If you win the auction, you'll be required to complete the purchase through escrow.
             </div>
-            <div style={{ 
-              padding: 12, borderRadius: 8, background: 'rgba(212,196,168,0.08)', 
-              border: '1px solid rgba(212,196,168,0.15)', marginBottom: 16 
-            }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Your Bid</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--gold)', fontFamily: 'var(--font-display)' }}>
-                KES {Number(bidAmount).toLocaleString()}
-              </div>
+            <div className="bid-modal-amount-box">
+              <div className="bid-modal-amount-label">Your Bid</div>
+              <div className="bid-modal-amount">KES {Number(bidAmount).toLocaleString()}</div>
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={handlePlaceBid}
-                disabled={bidPlacing}
-                style={{
-                  flex: 1, padding: '14px', borderRadius: 10, background: 'var(--gold)',
-                  color: '#000', border: 'none', fontSize: 13, fontWeight: 800,
-                  cursor: bidPlacing ? 'wait' : 'pointer', textTransform: 'uppercase',
-                  transition: 'all 0.2s', opacity: bidPlacing ? 0.6 : 1,
-                }}
-              >
+            <div className="bid-modal-actions">
+              <button onClick={handlePlaceBid} disabled={bidPlacing} className="bid-modal-confirm">
                 {bidPlacing ? 'Processing...' : 'Confirm Bid'}
               </button>
-              <button
-                onClick={() => setShowBidConfirm(false)}
-                disabled={bidPlacing}
-                style={{
-                  flex: 1, padding: '14px', borderRadius: 10, background: 'transparent',
-                  color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)',
-                  fontSize: 13, fontWeight: 600, cursor: bidPlacing ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.2s',
-                }}
-              >
+              <button onClick={() => setShowBidConfirm(false)} disabled={bidPlacing} className="bid-modal-cancel">
                 Cancel
               </button>
             </div>
@@ -1054,23 +969,13 @@ export default function CarDetailPage() {
 
       {/* Outbid Alert Toast */}
       {outbidAlert && (
-        <div style={{
-          position: 'fixed', top: 20, right: 20, zIndex: 10000,
-          padding: '12px 16px', borderRadius: 10,
-          background: 'rgba(239,68,68,0.95)', backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(239,68,68,0.3)',
-          display: 'flex', alignItems: 'center', gap: 10,
-          animation: 'slideInRight 0.4s ease',
-          boxShadow: '0 10px 30px rgba(239,68,68,0.3)',
-        }}>
-          <AlertTriangle size={18} style={{ color: '#fff' }} />
+        <div className="outbid-toast">
+          <AlertTriangle size={18} style={{ color: '#fff', flexShrink: 0 }} />
           <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>
             You've been outbid!
           </div>
-          <button 
-            onClick={() => setOutbidAlert(false)}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', marginLeft: 8 }}
-          >
+          <button onClick={() => setOutbidAlert(false)}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', marginLeft: 8, flexShrink: 0 }}>
             <X size={16} />
           </button>
         </div>

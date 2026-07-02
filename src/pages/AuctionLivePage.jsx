@@ -310,43 +310,19 @@ export default function AuctionLivePage() {
       <div className="auction-live-page">
       {confetti && <ConfettiOverlay />}
       {showBidConfirm && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-        }}>
-          <div style={{
-            background: 'var(--card)', border: '1px solid var(--border)',
-            borderRadius: 16, padding: 24, maxWidth: 400, width: '100%',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
-              Confirm Your Bid
-            </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 16, lineHeight: 1.5 }}>
-              You are about to place a bid of <strong style={{ color: 'var(--gold)' }}>{formatKES(Number(bidAmount))}</strong> on {car.title}.
+        <div className="bid-confirm-overlay">
+          <div className="bid-confirm-card">
+            <div className="bid-confirm-title">Confirm Your Bid</div>
+            <div className="bid-confirm-desc">
+              You are about to place a bid of <strong className="bid-confirm-gold">{formatKES(Number(bidAmount))}</strong> on {car.title}.
               <br /><br />
               A 5% commitment fee ({formatKES(Math.ceil(Number(bidAmount) * 0.05))}) will be sent via M-Pesa to the dealer.
             </div>
-            <div style={{ display: 'flex', gap: 10, flexDirection: 'column' }}>
-              <button
-                onClick={confirmBid}
-                disabled={placing}
-                style={{
-                  padding: '12px', borderRadius: 10, background: 'var(--gold)',
-                  color: '#000', border: 'none', fontSize: 13, fontWeight: 800,
-                  cursor: placing ? 'wait' : 'pointer', textTransform: 'uppercase',
-                }}
-              >
+            <div className="bid-confirm-actions">
+              <button onClick={confirmBid} disabled={placing} className="btn-confirm-primary">
                 {placing ? 'Processing...' : 'Confirm & Place Bid'}
               </button>
-              <button
-                onClick={() => setShowBidConfirm(false)}
-                style={{
-                  padding: '12px', borderRadius: 10, background: 'transparent',
-                  color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                  fontSize: 12, fontWeight: 600, cursor: 'pointer',
-                }}
-              >
+              <button onClick={() => setShowBidConfirm(false)} className="btn-confirm-secondary">
                 Cancel
               </button>
             </div>
@@ -357,21 +333,20 @@ export default function AuctionLivePage() {
 
         {/* ─── Header ─── */}
         <div className="auction-live-header">
-          <BackButton fallback="/showroom" label="Back" className="" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 12, display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0 }} />
-          <span style={{ color: 'var(--border)', fontSize: 10 }}>·</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <BackButton fallback="/showroom" label="Back" className="header-back-link" />
+          <span className="header-separator">·</span>
+          <div className="header-title-area">
             {auctionLive ? (
               <span className="badge badge-green"><span className="live-dot" /> LIVE AUCTION</span>
             ) : (
               <span className="badge badge-muted">Auction Ended</span>
             )}
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{car.title}</span>
+            <span className="header-title">{car.title}</span>
           </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Viewers */}
+          <div className="header-right">
             <ViewersCounter />
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)' }} />
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{connected ? 'Live' : 'Reconnecting...'}</span>
+            <div className="header-connection-dot" style={{ background: connected ? 'var(--green)' : 'var(--red)' }} />
+            <span className="header-connection-label">{connected ? 'Live' : 'Reconnecting...'}</span>
           </div>
         </div>
 
@@ -385,7 +360,7 @@ export default function AuctionLivePage() {
                 {totalImages > 0 ? (
                   <img src={firstImgSrc(imgIdx) || firstImgSrc(0)} alt={car.title} decoding="async" />
                 ) : (
-                  <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 60, color: 'var(--text-dim)' }}>🚗</div>
+                  <div className="car-img-placeholder">🚗</div>
                 )}
               </div>
               {totalImages > 1 && (
@@ -396,35 +371,20 @@ export default function AuctionLivePage() {
                 </>
               )}
               {car.isDemo && (
-                <div style={{
-                  position: 'absolute', top: 8, right: 8,
-                  background: 'rgba(251,191,36,0.92)', backdropFilter: 'blur(8px)',
-                  borderRadius: 5, padding: '2px 7px', zIndex: 5,
-                }}>
-                  <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.04em' }}>🧪 DEMO</span>
+                <div className="badge-overlay badge-overlay-demo">
+                  <span className="badge-overlay-text">🧪 DEMO</span>
                 </div>
               )}
               {car.isPromoted && (
-                <div style={{
-                  position: 'absolute', top: 8, left: 8,
-                  background: 'rgba(212,196,168,0.92)', backdropFilter: 'blur(8px)',
-                  borderRadius: 5, padding: '2px 8px', zIndex: 5,
-                  display: 'flex', alignItems: 'center', gap: 4,
-                }}>
+                <div className="badge-overlay badge-overlay-featured">
                   <Star size={9} style={{ color: '#0A1628' }} />
-                  <span style={{ fontSize: 8, color: '#0A1628', fontWeight: 800, letterSpacing: '0.06em' }}>FEATURED</span>
+                  <span className="badge-overlay-featured-text">FEATURED</span>
                 </div>
               )}
               {/* Countdown overlay on image */}
               {car.auctionEnd && auctionLive && (
-                <div style={{
-                  position: 'absolute', bottom: 10, left: 10,
-                  background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-                  borderRadius: 10, padding: '8px 12px',
-                  display: 'flex', flexDirection: 'column', gap: 5,
-                  zIndex: 5,
-                }}>
-                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Ends In</span>
+                <div className="countdown-overlay">
+                  <span className="countdown-overlay-label">Ends In</span>
                   <CountdownDisplay endTime={car.auctionEnd} size="sm" />
                 </div>
               )}
@@ -432,20 +392,12 @@ export default function AuctionLivePage() {
 
             {/* Thumbnails */}
             {totalImages > 1 && (
-              <div style={{
-                display: 'flex', gap: 8, marginBottom: 16, overflow: 'auto',
-                paddingBottom: 4,
-              }}>
+              <div className="thumbnail-strip">
                 {auctionImages.map((img, i) => {
                   const src = typeof img === 'string' ? img : img?.url;
                   return (
-                    <div key={i} onClick={() => setImgIdx(i)} style={{
-                      width: 72, height: 52, borderRadius: 6, overflow: 'hidden',
-                      border: i === imgIdx ? '2px solid var(--gold)' : '2px solid transparent',
-                      flexShrink: 0, cursor: 'pointer', transition: 'border 0.2s',
-                      opacity: i === imgIdx ? 1 : 0.5,
-                    }}>
-                      {src && <img src={src} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                    <div key={i} onClick={() => setImgIdx(i)} className={`thumbnail-item ${i === imgIdx ? 'active' : 'inactive'}`}>
+                      {src && <img src={src} alt="" loading="lazy" decoding="async" className="thumbnail-img" />}
                     </div>
                   );
                 })}
@@ -463,7 +415,7 @@ export default function AuctionLivePage() {
                   { label: 'Mileage', val: car.mileage ? `${Number(car.mileage).toLocaleString()} km` : null },
                   { label: 'Location', val: car.location?.city },
                 ].filter(s => s.val).map(s => (
-                  <div key={s.label}>
+                  <div key={s.label} className="auction-spec-item">
                     <div className="auction-spec-item-label">{s.label}</div>
                     <div className="auction-spec-item-value">{s.val}</div>
                   </div>
@@ -473,18 +425,13 @@ export default function AuctionLivePage() {
 
             {/* Description & Features */}
             {car.description && (
-              <div className="card" style={{ padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, marginBottom: 8 }}>About This Vehicle</div>
-                <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.6, margin: 0 }}>{car.description}</p>
+              <div className="card desc-section">
+                <div className="desc-title">About This Vehicle</div>
+                <p className="desc-text">{car.description}</p>
                 {car.features?.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                  <div className="feature-tags">
                     {car.features.map((f, i) => (
-                      <span key={i} style={{
-                        fontSize: 10, padding: '3px 8px', borderRadius: 4,
-                        background: 'rgba(212,196,168,0.08)', color: 'var(--text-muted)',
-                        border: '1px solid rgba(212,196,168,0.1)',
-                        display: 'flex', alignItems: 'center', gap: 4,
-                      }}>
+                      <span key={i} className="feature-tag">
                         <CheckCircle size={8} /> {f}
                       </span>
                     ))}
@@ -494,48 +441,30 @@ export default function AuctionLivePage() {
             )}
 
             {/* ═══ LIVE ACTIVITY FEED ═══ */}
-            <div className="card" style={{ marginBottom: 14, overflow: 'hidden' }}>
-              <div style={{
-                padding: '12px 16px', borderBottom: '1px solid var(--border)',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{
-                    display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
-                    background: '#ef4444', animation: 'pulse 1.5s infinite',
-                  }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Live Activity</span>
+            <div className="card live-activity-section">
+              <div className="live-activity-header">
+                <div className="live-activity-header-left">
+                  <span className="live-activity-dot" />
+                  <span className="live-activity-header-text">Live Activity</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--text-muted)' }}>
+                <div className="live-activity-stats">
                   <span><Eye size={11} style={{ display: 'inline', marginRight: 2 }} />{liveViewers} watching</span>
                   <span>👥 {bidCount} bids</span>
                 </div>
               </div>
-              <div ref={spectatorRef} style={{
-                maxHeight: 200, overflowY: 'auto', padding: '6px 0',
-                background: 'rgba(0,0,0,0.15)',
-              }}>
+              <div ref={spectatorRef} className="live-activity-feed">
                 {bids.length === 0 ? (
-                  <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
-                    No activity yet. Waiting for first bid...
-                  </div>
+                  <div className="live-activity-empty">No activity yet. Waiting for first bid...</div>
                 ) : (
                   bids.slice(0, 20).map((bid, i) => {
                     const isTop = i === 0;
                     return (
-                      <div key={bid._id || i} style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '5px 16px', fontSize: 11,
-                        borderBottom: '1px solid rgba(255,255,255,0.03)',
-                        animation: 'slideInRight 0.3s ease both',
-                        background: isTop ? 'rgba(212,196,168,0.04)' : 'transparent',
-                      }}>
-                        <span style={{ fontSize: 14 }}>{isTop ? '⚡' : '💰'}</span>
-                        <span style={{ flex: 1, color: 'var(--text-muted)' }}>
-                          <strong style={{ color: '#fff' }}>{bid.bidderTag || `Bidder #${bids.length - i}`}</strong>
-                          {' '}placed a bid
+                      <div key={bid._id || i} className={`live-activity-event${isTop ? ' top' : ''}`}>
+                        <span className="activity-event-icon">{isTop ? '⚡' : '💰'}</span>
+                        <span className="activity-event-name">
+                          <strong>{bid.bidderTag || `Bidder #${bids.length - i}`}</strong> placed a bid
                         </span>
-                        <span style={{ fontWeight: 700, color: isTop ? 'var(--gold-light)' : 'var(--text)', fontSize: 12 }}>
+                        <span className="activity-event-amount" style={{ color: isTop ? 'var(--gold-light)' : 'var(--text)' }}>
                           {formatKES(bid.amount)}
                         </span>
                       </div>
@@ -543,11 +472,7 @@ export default function AuctionLivePage() {
                   })
                 )}
               </div>
-              <div style={{
-                padding: '8px 16px', borderTop: '1px solid var(--border)',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                fontSize: 10, color: 'var(--text-muted)',
-              }}>
+              <div className="live-activity-footer">
                 <span>🔴 Live — {formatTime(new Date().toISOString())}</span>
                 <span>{bids.length} activity events</span>
               </div>
@@ -555,14 +480,7 @@ export default function AuctionLivePage() {
 
             {/* ═══ SPECTATOR JOIN ═══ */}
             {!isAuth && !spectatorMode && (
-              <div style={{
-                marginBottom: 14, padding: 16,
-                borderRadius: 'var(--radius-lg)',
-                background: 'linear-gradient(135deg, rgba(212,196,168,0.08), rgba(212,196,168,0.02))',
-                border: '1px solid rgba(212,196,168,0.15)',
-                textAlign: 'center',
-                animation: 'fadeInUp 0.5s ease',
-              }}>
+              <div className="spectator-join-card">
                 <div style={{ fontSize: 28, marginBottom: 6 }}>🎥</div>
                 <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Join the Live Show</div>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4, margin: '0 0 10px' }}>
@@ -579,12 +497,7 @@ export default function AuctionLivePage() {
             )}
 
             {spectatorMode && (
-              <div style={{
-                marginBottom: 14, padding: 12, borderRadius: 'var(--radius-lg)',
-                background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)',
-                display: 'flex', alignItems: 'center', gap: 8,
-                animation: 'fadeInUp 0.4s ease',
-              }}>
+              <div className="spectator-badge">
                 <span style={{ fontSize: 20, lineHeight: 1 }}>👁</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#22c55e' }}>You're watching live</div>
@@ -592,15 +505,12 @@ export default function AuctionLivePage() {
                     Spectator · {liveViewers} others watching
                   </div>
                 </div>
-                <span style={{
-                  display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
-                  background: '#22c55e', animation: 'pulse 1.5s infinite',
-                }} />
+                <span className="spectator-live-dot" />
               </div>
             )}
 
             {/* Market Valuation */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="bid-history-card">
               <MarketValuationMatrix
                 carId={id}
                 carPrice={car.price || currentBid}
@@ -621,58 +531,36 @@ export default function AuctionLivePage() {
               </div>
               <div ref={bidListRef} className="bid-history-list">
                 {bids.length === 0 ? (
-                  <div style={{ padding: '28px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-                    No bids yet — be the first!
-                  </div>
+                  <div className="bid-empty">No bids yet — be the first!</div>
                 
                   ) : bids.map((bid, i) => {
                     const color = hashColor(bid.bidderTag || `#${bidCount - i}`);
                     const isNew = i === 0 && bidFlash;
+                    const anim = isNew ? 'slideInRight 0.35s ease both, bidGlow 0.8s ease both' : 'fadeInDown 0.3s ease both';
                     return (
-                      <div key={bid._id || i} className="bid-row" style={{
-                        animation: isNew ? 'slideInRight 0.35s ease both, bidGlow 0.8s ease both' : 'fadeInDown 0.3s ease both',
-                        background: isNew ? 'rgba(212,196,168,0.06)' : 'transparent',
-                      }}>
+                      <div key={bid._id || i} className={`bid-row${isNew ? ' bid-row-highlight' : ''}`} style={{ animation: anim }}>
                         {isNew && <PriceParticles active={priceParticles} />}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{
-                            width: 30, height: 30, borderRadius: '50%',
+                        <div className="bidder-info-col">
+                          <div className="bid-row-avatar" style={{
                             background: i === 0 ? 'var(--gold)' : color,
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 10, fontWeight: 800,
                             color: i === 0 ? '#0A1628' : '#fff',
-                            flexShrink: 0,
-                            transition: 'transform 0.2s',
                             transform: isNew ? 'scale(1.12)' : 'scale(1)',
                           }}>
                             {i === 0 ? '👑' : getAvatarInitials(bid.bidderTag || `Bidder ${bidCount - i}`).slice(0, 2)}
                           </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: i === 0 ? 'var(--gold-light)' : 'var(--text)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <div className="bidder-details">
+                            <div className={`bidder-name-row ${i === 0 ? 'bidder-name-lead' : 'bidder-name-normal'}`}>
                               {bid.bidderTag || `Bidder #${bidCount - i}`}
-                              {bid.isVerifiedBuyer && (
-                                <span style={{
-                                  fontSize: 8, padding: '1px 5px', borderRadius: 3,
-                                  background: 'rgba(59,130,246,0.15)', color: '#3B82F6',
-                                  fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
-                                }}>✓ Buyer</span>
-                              )}
+                              {bid.isVerifiedBuyer && <span className="bidder-tag">✓ Buyer</span>}
                             </div>
-                            <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
+                            <div className="bidder-time">{formatTime(bid.createdAt)}</div>
                           </div>
                         </div>
-                        <div style={{ textAlign: 'right', marginLeft: 'auto' }}>
-                          <div style={{
-                            fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '0.9rem',
-                            color: i === 0 ? 'var(--gold-light)' : 'var(--text)',
-                            transition: 'transform 0.2s',
-                            transform: isNew ? 'scale(1.08)' : 'scale(1)',
-                          }}>
+                        <div className="bidder-amount-col">
+                          <div className={`bidder-amount-text ${i === 0 ? 'bidder-amount-lead' : 'bidder-amount-normal'}`} style={{ transform: isNew ? 'scale(1.08)' : 'scale(1)' }}>
                             {formatKES(bid.amount)}
                           </div>
-                          {bid.mpesaPaid && (
-                            <span style={{ fontSize: 9, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
-                          )}
+                          {bid.mpesaPaid && <span className="bidder-mpesa-confirmed">✓ M-Pesa confirmed</span>}
                         </div>
                       </div>
                     );
@@ -686,31 +574,13 @@ export default function AuctionLivePage() {
 
               {/* Reserve Indicator */}
               {car.reservePrice > 0 && car.reserveMode === 'visible' && (
-                <div style={{
-                  marginBottom: 12, padding: '8px 14px', borderRadius: 8,
-                  background: reserveMet ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)',
-                  border: `1px solid ${reserveMet ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  fontSize: 12, fontWeight: 600,
-                  color: reserveMet ? '#22c55e' : '#ef4444',
-                  transition: 'all 0.5s',
-                }}>
-                  <span style={{
-                    display: 'inline-block',
-                    animation: reserveMet ? 'pulse 1.5s infinite' : 'none',
-                  }}>{reserveMet ? '✅' : '🔒'}</span>
+                <div className={`reserve-bar ${reserveMet ? 'reserve-bar-met' : 'reserve-bar-not-met'}`}>
+                  <span style={{ animation: reserveMet ? 'pulse 1.5s infinite' : 'none' }}>{reserveMet ? '✅' : '🔒'}</span>
                   <span>{reserveMet ? 'Reserve Met' : 'Reserve Not Yet Met'}</span>
                 </div>
               )}
               {car.reservePrice > 0 && car.reserveMode === 'hidden' && !reserveMet && (
-                <div style={{
-                  marginBottom: 12, padding: '8px 14px', borderRadius: 8,
-                  background: 'rgba(239,68,68,0.08)',
-                  border: '1px solid rgba(239,68,68,0.2)',
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  fontSize: 12, fontWeight: 600,
-                  color: '#ef4444',
-                }}>
+                <div className="reserve-bar reserve-bar-not-met">
                   <span>🔒</span>
                   <span>Reserve Not Yet Met</span>
                 </div>
@@ -722,7 +592,7 @@ export default function AuctionLivePage() {
               }}>
                 {bidFlash && <PriceParticles active={priceParticles} />}
                 <div style={{ textAlign: 'center', marginBottom: 14 }}>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
+                  <div className="current-bid-label">
                     {bidCount > 0 ? 'Current Leading Bid' : 'Starting Price'}
                   </div>
                   <div className="current-bid-amount" style={{
@@ -731,25 +601,19 @@ export default function AuctionLivePage() {
                   }}>
                     {formatKES(currentBid || car.price)}
                   </div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
+                  <div className="bid-count-text">
                     {bidCount} bid{bidCount !== 1 ? 's' : ''}
                   </div>
                 </div>
 
                 {/* Going Once/Twice/Thrice */}
                 {auctionPhase && (
-                  <div style={{
-                    textAlign: 'center', marginBottom: 12, padding: '6px 0',
-                    animation: 'pulse 1s infinite',
-                  }}>
-                    <span style={{
-                      display: 'inline-block', padding: '4px 16px', borderRadius: 6,
-                      fontWeight: 800, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.08em',
-                      background: auctionPhase === 'going_once' ? 'rgba(251,191,36,0.15)' :
-                                  auctionPhase === 'going_twice' ? 'rgba(251,191,36,0.2)' :
-                                  'rgba(239,68,68,0.2)',
-                      color: auctionPhase === 'going_thrice' ? '#ef4444' : '#f59e0b',
-                    }}>
+                  <div className="phase-wrapper">
+                    <span className={`auction-phase-badge ${
+                      auctionPhase === 'going_once' ? 'auction-phase-once' :
+                      auctionPhase === 'going_twice' ? 'auction-phase-twice' :
+                      'auction-phase-thrice'
+                    }`}>
                       {auctionPhase === 'going_once' ? '⏳ Going Once...' :
                        auctionPhase === 'going_twice' ? '⏳ Going Twice...' :
                        '🔔 Going Thrice...!'}
@@ -759,26 +623,20 @@ export default function AuctionLivePage() {
 
                 {/* Countdown */}
                 {car.auctionEnd && (
-                  <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700 }}>
-                      {isEnding ? (
-                        <span style={{ color: '#ef4444', fontWeight: 800 }}>● Auction Ending</span>
-                      ) : 'Time Remaining'}
+                  <div className="countdown-section">
+                    <div className="countdown-section-label">
+                      {isEnding ? <span className="ending-label">● Auction Ending</span> : 'Time Remaining'}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <div className="countdown-row">
                       <CountdownDisplay endTime={car.auctionEnd} size="lg" />
                     </div>
-                    {extended && (
-                      <div style={{ marginTop: 12, display: 'inline-flex', padding: '6px 12px', background: 'rgba(212,196,168,0.15)', borderRadius: 6, fontSize: 12, color: 'var(--gold)', animation: 'slideInRight 0.4s ease both' }}>
-                        ⏱ Extended by 2 min
-                      </div>
-                    )}
+                    {extended && <div className="extended-badge">⏱ Extended by 2 min</div>}
                   </div>
                 )}
 
                 {/* Bid increment chips */}
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Quick Amounts</div>
+                  <div className="quick-amounts-label">Quick Amounts</div>
                   <div className="quick-bid-chips">
                     {[minBid, minBid + 10000, minBid + 25000, minBid + 50000].map(amt => (
                       <button
@@ -793,7 +651,7 @@ export default function AuctionLivePage() {
                 </div>
 
                 {/* Bid Amount Input */}
-                <div className="input-group" style={{ marginBottom: 10 }}>
+                <div className="input-group bid-input-section">
                   <label className="input-label" style={{ fontSize: 11 }}>Your Bid (KES)</label>
                   <input
                     className="input"
@@ -803,18 +661,14 @@ export default function AuctionLivePage() {
                     onChange={e => setBidAmount(e.target.value)}
                     min={minBid}
                   />
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    Minimum: {formatKES(minBid)}
-                  </div>
+                  <div className="bid-input-footer">Minimum: {formatKES(minBid)}</div>
                 </div>
 
                 {/* Proxy Bid — Max Cap */}
-                <div className="input-group" style={{ marginBottom: 10 }}>
-                  <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+                <div className="input-group bid-input-section">
+                  <label className="input-label auto-bid-label">
                     Max Auto-Bid (optional)
-                    <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 400 }}>
-                      — Bid4U: we bid up to this cap
-                    </span>
+                    <span className="auto-bid-sub">— Bid4U: we bid up to this cap</span>
                   </label>
                   <input
                     className="input"
@@ -824,13 +678,11 @@ export default function AuctionLivePage() {
                     onChange={e => setMaxBid(e.target.value)}
                     min={minBid}
                   />
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    Leave empty for a manual bid only
-                  </div>
+                  <div className="bid-input-footer-sm">Leave empty for a manual bid only</div>
                 </div>
 
                 {/* M-Pesa Phone */}
-                <div className="input-group" style={{ marginBottom: 16 }}>
+                <div className="input-group mpesa-section">
                   <label className="input-label" style={{ fontSize: 11 }}>M-Pesa Number (Bid Commitment)</label>
                   <div className="mpesa-wrap">
                     <span className="mpesa-prefix">🇰🇪</span>
@@ -841,30 +693,23 @@ export default function AuctionLivePage() {
                       onChange={e => setPhone(e.target.value)}
                     />
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    Small commitment fee sent directly to dealer
-                  </div>
+                  <div className="bid-input-footer">Small commitment fee sent directly to dealer</div>
                 </div>
 
                 {auctionLive && !isOwner ? (
                   <button
-                    className="btn btn-gold btn-full btn-lg"
+                    className="btn btn-gold btn-full btn-lg place-bid-btn"
                     onClick={handlePlaceBid}
                     disabled={placing || !bidAmount || Number(bidAmount) < minBid}
-                    style={{
-                      animation: isEnding ? 'pulse 1s infinite' : 'none',
-                      fontSize: 13, padding: '11px 20px',
-                    }}
+                    style={{ animation: isEnding ? 'pulse 1s infinite' : 'none' }}
                   >
                     {placing ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Placing...</> : '⚡ Place Bid'}
                   </button>
                 ) : isOwner ? (
-                  <div style={{ textAlign: 'center', padding: 10, color: 'var(--text-muted)', fontSize: 12 }}>
-                    You cannot bid on your own listing.
-                  </div>
+                  <div className="owner-notice">You cannot bid on your own listing.</div>
                 ) : (
-                  <div style={{ textAlign: 'center', padding: 10, background: 'rgba(239,68,68,0.05)', borderRadius: 6 }}>
-                    <span style={{ color: 'var(--red)', fontSize: 12 }}>This auction has ended.</span>
+                  <div className="end-notice">
+                    <span className="end-notice-text">This auction has ended.</span>
                   </div>
                 )}
               </div>
@@ -875,20 +720,20 @@ export default function AuctionLivePage() {
                   <div className="leaderboard-title">
                     <span>🏆</span> Bidder Leaderboard
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  <div>
                     {leaderboard.map((b, i) => (
-                      <div key={b.tag} className="leaderboard-row" style={{
-                        borderBottom: i < leaderboard.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-                      }}>
-                        <div className="leaderboard-rank" style={{
-                          color: i === 0 ? 'var(--gold)' : i < 3 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.2)',
-                        }}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
+                      <div key={b.tag} className="leaderboard-row">
+                        <div className={`leaderboard-rank ${
+                          i === 0 ? 'leaderboard-rank-gold' :
+                          i < 3 ? 'leaderboard-rank-silver' :
+                          'leaderboard-rank-muted'
+                        }`}>{i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`}</div>
                         <div className="leaderboard-avatar" style={{ background: hashColor(b.tag) }}>
                           {getAvatarInitials(b.tag).slice(0, 2)}
                         </div>
                         <div className="leaderboard-name">
                           {b.tag}
-                          {b.isVerified && <span style={{ color: '#3B82F6', marginLeft: 3, fontSize: 9 }}>✓</span>}
+                          {b.isVerified && <span className="leaderboard-name-verified">✓</span>}
                         </div>
                         <div className="leaderboard-amount">
                           <div className="leaderboard-amount-value">{formatKES(b.amount)}</div>
@@ -901,27 +746,25 @@ export default function AuctionLivePage() {
               )}
 
               {/* Escrow info */}
-              <div className="card" style={{ padding: 14 }}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 4 }}>🔒 How Bidding Works</strong>
-                  <p style={{ margin: '2px 0' }}>1. Place your bid + M-Pesa commitment to the dealer.</p>
-                  <p style={{ margin: '2px 0' }}>2. If you win, full payment goes into <strong>escrow</strong>.</p>
-                  <p style={{ margin: '2px 0' }}>3. Escrow releases when car is received & confirmed.</p>
+              <div className="card escrow-card">
+                <div className="escrow-text">
+                  <strong className="escrow-title">🔒 How Bidding Works</strong>
+                  <p className="escrow-step">1. Place your bid + M-Pesa commitment to the dealer.</p>
+                  <p className="escrow-step">2. If you win, full payment goes into <strong className="escrow-strong">escrow</strong>.</p>
+                  <p className="escrow-step">3. Escrow releases when car is received & confirmed.</p>
                 </div>
               </div>
 
               {/* Dealer */}
               {car.dealer && (
-                <div className="card" style={{ padding: 14, marginTop: 10 }}>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Seller</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700, fontSize: 13 }}>
-                      {(car.dealer?.name || 'D')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 13 }}>{car.dealer?.name}</div>
+                <div className="card dealer-mini-card">
+                  <div className="dealer-mini-label">Seller</div>
+                  <div className="dealer-mini-body">
+                    <div className="dealer-mini-avatar">{(car.dealer?.name || 'D')[0].toUpperCase()}</div>
+                    <div className="dealer-mini-info">
+                      <div className="dealer-mini-name">{car.dealer?.name}</div>
                       {car.dealer?.dealerRating && (
-                        <div style={{ color: 'var(--gold)', fontSize: 11 }}>★ {car.dealer.dealerRating}/5</div>
+                        <div className="dealer-mini-rating">★ {car.dealer.dealerRating}/5</div>
                       )}
                     </div>
                   </div>
@@ -930,12 +773,12 @@ export default function AuctionLivePage() {
 
               {/* SMS Bidding Agent */}
               {auctionLive && isAuth && (
-                <div className="card" style={{ padding: 14, marginTop: 10 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                    <span style={{ fontSize: 16 }}>💬</span>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>SMS Proxy Agent</span>
+                <div className="card sms-agent-card">
+                  <div className="sms-agent-header">
+                    <span className="sms-agent-icon">💬</span>
+                    <span className="sms-agent-title">SMS Proxy Agent</span>
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>
+                  <p className="sms-agent-desc">
                     Get outbid alerts via SMS. Reply with <strong>BID 4.3M</strong> to counter without opening the app.
                   </p>
                   {!smsRegistered ? (
@@ -958,9 +801,9 @@ export default function AuctionLivePage() {
                     </button>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-                        <span style={{ color: 'var(--green)', fontSize: 11 }}>✅ SMS active</span>
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      <div className="sms-status">
+                        <span className="sms-status-active">✅ SMS active</span>
+                        <span className="sms-status-label">
                           {smsSubscribed ? ' — Subscribed to this auction' : ''}
                         </span>
                       </div>
