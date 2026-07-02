@@ -38,51 +38,51 @@ export default function Navbar() {
             <span className="font-display text-lg font-semibold gradient-text tracking-wide">KAYAD</span>
           </Link>
 
-          {/* Desktop — all items flush right */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Desktop — nav links + actions */}
+          <div className="hidden lg:flex items-center gap-0.5">
             {NAV_LINKS.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
                   isActive(item.to)
                     ? 'text-gold bg-gold/[0.1]'
-                    : 'text-white/55 hover:text-white/90 hover:bg-white/[0.05]'
+                    : 'text-white/50 hover:text-white/90 hover:bg-white/[0.05]'
                 }`}
               >
                 {item.label}
               </Link>
             ))}
+
+            <div className="w-px h-4 bg-white/[0.06] mx-2" />
+
             <Link
               to={sellLink}
-              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap tracking-wide ${
                 isActive(sellLink)
                   ? 'text-gold bg-gold/[0.1]'
-                  : 'text-white/55 hover:text-white/90 hover:bg-white/[0.05]'
+                  : 'text-white/60 hover:text-gold hover:bg-gold/[0.08]'
               }`}
             >
               Sell
             </Link>
+
             {isAuth ? (
               <>
-                <Link to="/dashboard" className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/55 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap">
+                <Link to="/dashboard" className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/50 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap tracking-wide">
                   Dashboard
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="px-3 py-1.5 rounded-md text-[13px] font-medium text-white/55 hover:text-white/90 hover:bg-white/[0.05] transition-colors whitespace-nowrap"
+                  className="p-1.5 rounded-md text-white/35 hover:text-white/70 hover:bg-white/[0.05] transition-colors"
                 >
-                  Sign Out
+                  <LogOut className="w-4 h-4" />
                 </button>
               </>
             ) : (
               <Link
                 to="/login"
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors whitespace-nowrap ${
-                  isActive('/login')
-                    ? 'text-gold bg-gold/[0.1]'
-                    : 'text-white/55 hover:text-white/90 hover:bg-white/[0.05]'
-                }`}
+                className="inline-flex items-center justify-center px-4 py-1.5 rounded-md text-[13px] font-medium bg-gold text-bg hover:bg-gold-light transition-colors whitespace-nowrap"
               >
                 Sign In
               </Link>

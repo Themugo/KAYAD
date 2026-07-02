@@ -1,10 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Shield, FileCheck, UserCheck, Gavel, MapPin, Gauge } from 'lucide-react';
 import { carsAPI, formatKES } from '../api/api';
 import usePageMeta from '../hooks/usePageMeta';
 
-const heroSlides = [
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const fallbackSlides = [
   { image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg', label: 'Executive Sedan' },
   { image: 'https://images.pexels.com/photos/1201610/pexels-photo-1201610.jpeg', label: 'Luxury SUV' },
   { image: 'https://images.pexels.com/photos/6279348/pexels-photo-6279348.jpeg', label: 'Premium Pickup' },
@@ -21,26 +30,42 @@ const trustItems = [
 export default function HomePage() {
   usePageMeta('Home', "East Africa's most trusted car marketplace.");
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [heroSlides, setHeroSlides] = useState(fallbackSlides);
   const [featuredCars, setFeaturedCars] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
+  const timerRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     carsAPI.list({ page: 1, limit: 8, sort: '-createdAt', featured: true })
       .then(res => {
         if (cancelled) return;
-        setFeaturedCars(res?.cars || res?.data || []);
+        const cars = res?.cars || res?.data || [];
+        setFeaturedCars(cars);
+        const withImages = cars.filter(c => c.images?.[0]?.url || c.images?.[0]);
+        if (withImages.length >= 3) {
+          const picks = shuffle(withImages).slice(0, 6);
+          setHeroSlides(picks.map(c => ({
+            image: c.images[0]?.url || c.images[0],
+            label: c.title,
+          })));
+        }
       })
       .catch(() => { if (!cancelled) setFeaturedCars([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
+  const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
+
   useEffect(() => {
-    const interval = setInterval(() => setCurrentSlide(prev => (prev + 1) % heroSlides.length), 5000);
-    return () => clearInterval(interval);
-  }, []);
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setCurrentSlide(p => (p + 1) % slides.length), 5000);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [slides.length]);
+
+  const safeSlide = slides.length > 0 ? currentSlide % slides.length : 0;
 
   return (
     <div>
@@ -51,26 +76,20 @@ export default function HomePage() {
       `}</style>
 
       {/* ═══ HERO — Fullscreen slideshow ═══ */}
-      <section style={{ position: 'relative', height: 320, overflow: 'hidden' }}>
-        {heroSlides.map((slide, i) => (
+      <section style={{ position: 'relative', height: 340, overflow: 'hidden' }}>
+        {slides.map((slide, i) => (
           <div key={i} style={{
             position: 'absolute', inset: 0,
             transition: 'all 1s ease-out',
-            opacity: i === currentSlide ? 1 : 0,
-            transform: i === currentSlide ? 'scale(1)' : 'scale(1.03)',
+            opacity: i === safeSlide ? 1 : 0,
+            transform: i === safeSlide ? 'scale(1)' : 'scale(1.03)',
           }}>
             <img src={slide.image} alt={slide.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         ))}
 
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)',
-        }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%, rgba(0,0,0,0.3) 100%)' }} />
 
         <div className="section-container" style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingBottom: 16 }}>
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 12, fontWeight: 500 }}>
@@ -84,24 +103,23 @@ export default function HomePage() {
             Buy, sell and auction vehicles with confidence.
           </p>
           <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link to="/showroom" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 20px', borderRadius: 8, background: 'var(--gold)', color: 'var(--bg)', fontSize: 13, fontWeight: 500, textDecoration: 'none', transition: 'background 0.2s' }}>
-              Browse Cars <ArrowRight size={14} />
+            <Link to="/showroom" className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-gold text-bg text-sm font-medium hover:bg-gold-light transition-colors">
+              Browse Cars <ArrowRight className="w-3.5 h-3.5" />
             </Link>
-            <Link to="/sell" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 8, color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 500, border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none', transition: 'all 0.2s' }}>
+            <Link to="/sell" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-white/70 hover:text-white text-sm font-medium border border-white/20 hover:border-white/35 transition-all">
               Sell a Vehicle
             </Link>
           </div>
         </div>
 
-        {/* Slide dots */}
         <div style={{ position: 'absolute', bottom: 20, right: 24, display: 'flex', alignItems: 'center', gap: 6, zIndex: 10 }}>
-          {heroSlides.map((_, i) => (
+          {slides.map((_, i) => (
             <button key={i} onClick={() => setCurrentSlide(i)}
               style={{
                 height: 3, borderRadius: 9999, border: 'none', padding: 0, cursor: 'pointer',
                 transition: 'all 0.3s',
-                background: i === currentSlide ? 'var(--gold)' : 'rgba(255,255,255,0.25)',
-                width: i === currentSlide ? 24 : 8,
+                background: i === safeSlide ? 'var(--gold)' : 'rgba(255,255,255,0.25)',
+                width: i === safeSlide ? 24 : 8,
               }}
             />
           ))}
@@ -113,11 +131,11 @@ export default function HomePage() {
         <div className="section-container">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
             {trustItems.map((item, i) => (
-              <div key={item.title} className="flex items-center gap-2.5 px-4 py-3.5">
-                <item.icon className="w-3.5 h-3.5 text-gold shrink-0" />
+              <div key={item.title} className="flex items-center gap-3 px-5 py-4">
+                <item.icon className="w-4 h-4 text-gold shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-white/80 text-[11px] font-medium leading-tight">{item.title}</p>
-                  <p className="text-white/30 text-[10px] leading-snug mt-0.5 truncate hidden sm:block">{item.desc}</p>
+                  <p className="text-white/85 text-[12px] font-medium leading-tight">{item.title}</p>
+                  <p className="text-white/35 text-[11px] leading-snug mt-0.5 truncate hidden sm:block">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -154,7 +172,7 @@ export default function HomePage() {
                     />
                   </div>
                   <div style={{ padding: '10px' }}>
-                    <h3 className="font-display text-[13px] font-semibold text-white/90 group-hover:text-white transition-colors truncate leading-snug" style={{ margin: 0 }}>
+                    <h3 className="font-display text-[13px] font-semibold text-white/90 leading-snug line-clamp-1" style={{ margin: 0 }}>
                       {car.title}
                     </h3>
                     {car.dealer?.name && (
