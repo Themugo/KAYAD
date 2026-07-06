@@ -4,6 +4,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
 import { uploadImage, uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { uploadLimiter } from "../middleware/rateLimiter.js";
+import { getUploadRecord } from "../services/sqlUploadStore.js";
 
 const router = express.Router();
 
@@ -69,6 +70,29 @@ router.post(
         card: r.card || r.url,
       })),
     });
+  }),
+);
+
+router.get(
+  "/:id",
+  protect,
+  asyncHandler(async (req, res) => {
+    const record = getUploadRecord(req.params.id);
+    if (!record) {
+      return res.status(404).json({ success: false, message: "Upload not found" });
+    }
+
+    if (!record.content) {
+      if (record.url) {
+        return res.redirect(record.url);
+      }
+      return res.status(404).json({ success: false, message: "Upload content unavailable" });
+    }
+
+    res.setHeader("Content-Type", record.mimeType || "application/octet-stream");
+    res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(record.originalName || "upload")}"`);
+    res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    res.send(record.content);
   }),
 );
 

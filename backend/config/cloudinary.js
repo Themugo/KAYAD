@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { v2 as cloudinary } from "cloudinary";
 import { IMAGE_VARIANTS, QUALITY_PRESETS } from "./imageProcessing.js";
+import { createUploadRecord, deleteUploadRecord } from "../services/sqlUploadStore.js";
 
 // =============================
 // 🔐 CONFIG
@@ -109,6 +111,24 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
     }
 
     const publicId = result.public_id;
+    const buffer = file.buffer ? Buffer.from(file.buffer) : file.path ? readFileSync(file.path) : null;
+    const storageRecord = createUploadRecord({
+      originalName: file.originalname || file.name || "upload",
+      mimeType: file.mimetype || result.resource_type || "application/octet-stream",
+      size: file.size || result.bytes || (buffer ? buffer.length : null),
+      folder,
+      provider: "cloudinary",
+      storagePath: file.path || null,
+      publicId,
+      url: result.secure_url,
+      thumb: cloudinary.url(publicId, { transformation: T.thumb }),
+      content: buffer,
+      metadata: {
+        source: file.buffer ? "memory" : file.path ? "disk" : "unknown",
+        resourceType: result.resource_type,
+        format: result.format,
+      },
+    });
 
     return {
       public_id: publicId,
@@ -131,6 +151,8 @@ export const uploadImage = async (file, folder = "kayad/cars", options = {}) => 
       height: result.height,
       format: result.format,
       bytes: result.bytes,
+      storageId: storageRecord.id,
+      storageProvider: "sql+cloudinary",
     };
   } catch (err) {
     console.error("❌ CLOUDINARY ERROR:", err);
@@ -154,6 +176,7 @@ export const deleteImage = async (publicId) => {
     await cloudinary.uploader.destroy(publicId, {
       invalidate: true,
     });
+    deleteUploadRecord(publicId);
   } catch (err) {
     console.error("❌ DELETE ERROR:", err.message);
   }
