@@ -61,3 +61,5 @@ logs/
 # Reports
 api-governance-report.json
 .aider*
+
+.vercel
