@@ -1,0 +1,82 @@
+import crypto from "crypto";
+import axios from "axios";
+import User from "../models/User.js";
+import { logInfo } from "../utils/logger.js";
+
+const AT_API_KEY = process.env.AT_API_KEY;
+const AT_USERNAME = process.env.AT_USERNAME || "kayad";
+const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@kayad.space";
+
+const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
+
+const retry = async (fn, retries = 2, delay = 1000) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delay * attempt));
+    }
+  }
+};
+
+const sendSMS = async (to, message) => {
+  if (AT_API_KEY) {
+    try {
+      await retry(() =>
+        axios.post(
+          "https://api.africastalking.com/version1/messaging",
+          {
+            username: AT_USERNAME,
+            to,
+            message,
+          },
+          { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } },
+        ),
+      );
+      return;
+    } catch (err) {
+      console.error("SMS error:", err.message);
+    }
+  }
+  logInfo(`OTP sent via SMS to ${to.slice(0, -4)}****`);
+};
+
+const sendEmail = async (to, subject, text) => {
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      const { default: sgMail } = await import("@sendgrid/mail");
+      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      await retry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }));
+      return;
+    } catch (err) {
+      console.error("Email error:", err.message);
+    }
+  }
+  logInfo(`OTP email to ${to}: ${subject}`);
+};
+
+export const sendOTP = async (user, channel = "sms") => {
+  const otp = Math.floor(1000 + Math.random() * 9000);
+  user.otpHash = hashOtp(otp);
+  user.otpExpiry = Date.now() + 600000;
+  await user.save();
+
+  if (channel === "sms" && user.phone) {
+    await sendSMS(user.phone, `Your KAYAD verification code is: ${otp}`);
+  } else if (user.email) {
+    await sendEmail(user.email, "Verify your KAYAD Account", `Your KAYAD verification code is: ${otp}`);
+  }
+
+  return otp;
+};
+
+export const verifyOTP = async (user, otp) => {
+  if (!user.otpHash || !user.otpExpiry) return false;
+  if (Date.now() > user.otpExpiry) return false;
+  if (user.otpHash !== hashOtp(otp)) return false;
+  user.otpHash = undefined;
+  user.otpExpiry = undefined;
+  await user.save();
+  return true;
+};

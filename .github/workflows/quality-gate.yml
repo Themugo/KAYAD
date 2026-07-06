@@ -1,0 +1,59 @@
+name: Quality Gate
+
+on:
+  workflow_call:
+    outputs:
+      passed:
+        description: Whether quality checks passed
+        value: ${{ jobs.quality.outputs.passed }}
+
+jobs:
+  quality:
+    name: Quality Checks
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [frontend, backend]
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: ${{ matrix.target == 'backend' && 'npm' || 'pnpm' }}
+          cache-dependency-path: ${{ matrix.target == 'backend' && 'backend/package-lock.json' || 'pnpm-lock.yaml' }}
+
+      - name: Install dependencies
+        run: ${{ matrix.target == 'backend' && 'npm ci' || 'pnpm install --frozen-lockfile' }}
+        working-directory: ${{ matrix.target == 'backend' && './backend' || '.' }}
+
+      - name: Run linter
+        run: npm run lint
+        working-directory: ${{ matrix.target == 'backend' && './backend' || '.' }}
+
+      - name: Run format check
+        if: matrix.target == 'backend'
+        run: npm run format:check
+        working-directory: ./backend
+
+      - name: Type check
+        if: matrix.target == 'frontend'
+        run: npm run type-check
+
+      - name: Build
+        if: matrix.target == 'frontend'
+        run: npm run build
+
+      - name: Mark as passed
+        id: check
+        run: echo "passed=true" >> $GITHUB_OUTPUT

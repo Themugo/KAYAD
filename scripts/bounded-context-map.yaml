@@ -1,0 +1,347 @@
+# KAYAD Domain Architecture Audit — Bounded Context Map
+# Generated: 2026-06-23
+# Build: PASS (zero errors), Tests: 189/189 PASS
+
+# ── Bounded Contexts (9 identified) ──
+
+contexts:
+  - name: Car Catalog
+    domain: core
+    models:
+      - Car (backend/models/Car.js)
+      - CarHistory (backend/models/CarHistory.js)
+      - VehicleValuation (backend/models/VehicleValuation.js)
+      - MarketData (backend/models/MarketData.js)
+      - Inspection (backend/models/Inspection.js)
+      - NtsaCheck (backend/models/NtsaCheck.js)
+    services:
+      - carService.js (owner)
+      - searchService.js
+      - historyService.js
+      - vehicleValuationService.js
+      - marketDataService.js
+      - inspectionService.js
+      - ntsaCheckService.js
+    routes: /api/cars/*, /api/cars/:id/inspection*, /api/valuation/*
+    notes: >
+      Largest context (7 models, 7 services). VehicleValuation duplicates
+      price logic from Car pricing service — should be merged.
+
+  - name: Auctions
+    domain: core
+    models:
+      - Auction (backend/models/Auction.js)
+      - AuctionBid (backend/models/AuctionBid.js)
+      - AuctionRoom (backend/models/AuctionRoom.js)
+    services:
+      - auctionService.js (owner)
+      - auctionSocketService.js
+      - feeService.js (shared with Payments)
+    routes: /api/auctions/*, /api/auctions/:id/bids*, /api/auctions/:id/room*
+    notes: >
+      FeeService is shared with Payments — commission rate calc should
+      live in one place (Payments).
+
+  - name: Identity & Access
+    domain: supporting
+    models:
+      - User (backend/models/User.js)
+      - Session (backend/models/Session.js)
+      - Role (backend/models/Role.js)
+      - Permission (backend/models/Permission.js)
+    services:
+      - authService.js (owner)
+      - sessionService.js
+      - permissionService.js
+    routes: /api/auth/*, /api/users/*, /api/admin/users*
+    notes: Session model duplicates token storage in User.tokens[].
+
+  - name: Payments & Financial
+    domain: core
+    models:
+      - Transaction (backend/models/Transaction.js)
+      - Escrow (backend/models/Escrow.js)
+      - Settlement (backend/models/Settlement.js)
+      - Payout (backend/models/Payout.js)
+    services:
+      - paymentService.js (owner)
+      - escrowService.js
+      - settlementService.js
+      - payoutService.js
+      - feeService.js (duplicated — also in Auctions)
+    routes: /api/payments/*, /api/escrow/*
+    notes: >
+      Payout model is a subset of Settlement — merge into Settlement.
+      FeeService has conflicting commission logic with auctionService.
+
+  - name: Dealer Management
+    domain: core
+    models:
+      - Dealer (backend/models/Dealer.js)
+      - DealerTrustScore (backend/models/DealerTrustScore.js)
+      - DealerAnalytics (backend/models/DealerAnalytics.js)
+      - DealerActivity (backend/models/DealerActivity.js)
+      - DealerSubscription (backend/models/DealerSubscription.js)
+    services:
+      - dealerService.js (owner)
+      - dealerTrustService.js
+      - dealerAnalyticsService.js
+      - dealerActivityService.js
+      - dealerSubscriptionService.js
+    routes: /api/dealers/*, /api/dealers/:id/analytics*
+    notes: >
+      DealerTrustScore has overlapping trust calc with
+      listingQualityService and fraudDetectionService —
+      3 different trust/quality scores.
+
+  - name: Listings & Quality
+    domain: supporting
+    models:
+      - ListingQuality (backend/models/ListingQuality.js)
+      - FeaturedListing (backend/models/FeaturedListing.js)
+    services:
+      - listingService.js
+      - listingQualityService.js
+    routes: embedded in /api/cars/*
+    notes: >
+      ListingQuality is a soft-merge candidate with DealerTrustScore and
+      fraudDetectionService — all compute quality/trust scores.
+
+  - name: Notifications
+    domain: generic
+    models:
+      - Notification (backend/models/Notification.js)
+      - NotificationTemplate (backend/models/NotificationTemplate.js)
+    services:
+      - notificationService.js (owner)
+      - pushNotificationService.js (duplicate)
+      - emailService.js
+    routes: /api/notifications/*
+    notes: >
+      pushNotificationService.js contains ~80% overlapping logic
+      with notificationService.js — merge candidates.
+
+  - name: Fraud & Compliance
+    domain: supporting
+    models:
+      - FraudAlert (backend/models/FraudAlert.js)
+      - AuditLog (backend/models/AuditLog.js)
+      - ComplianceReport (backend/models/ComplianceReport.js)
+    services:
+      - fraudDetectionService.js (owner)
+      - fraudScoringService.js
+      - auditService.js
+      - complianceService.js
+    routes: /api/admin/fraud*, /api/admin/audit*, /api/admin/compliance*
+    notes: >
+      fraudDetectionService.js and fraudScoringService.js both compute
+      risk scores — should be merged. 3 different fraud/quality scores
+      computed across fraud, listing quality, and dealer trust services.
+
+  - name: Platform Config
+    domain: generic
+    models:
+      - GlobalSettings (backend/models/GlobalSettings.js)
+      - PlatformConfig (backend/models/PlatformConfig.js)
+      - SystemHealth (backend/models/SystemHealth.js)
+    services:
+      - configService.js
+      - featureFlagService.js (embodied in configService)
+    routes: /api/admin/settings*
+    notes: >
+      GlobalSettings and PlatformConfig are near-identical —
+      must merge. Conflicting commission defaults (2.5% vs 3.0%).
+
+# ── Duplication Clusters (7) ──
+
+duplications:
+  - cluster: "Notification delivery"
+    files:
+      - backend/services/notificationService.js
+      - backend/services/pushNotificationService.js
+    overlap: ~80% — both manage push notification dispatch
+    action: MERGE pushNotificationService.js INTO notificationService.js
+
+  - cluster: "Fraud scoring"
+    files:
+      - backend/services/fraudDetectionService.js
+      - backend/services/fraudScoringService.js
+    overlap: both compute risk scores, both query car/dealer data
+    action: MERGE into fraudDetectionService.js
+
+  - cluster: "Pricing calculation"
+    files:
+      - backend/services/carService.js (price computation)
+      - backend/services/vehicleValuationService.js (valuation calc)
+      - backend/services/marketDataService.js (market price trends)
+    overlap: 3 different price computation paths
+    action: UNIFY pricing into single pricingService.js
+
+  - cluster: "Dealer health score"
+    files:
+      - backend/services/dealerTrustService.js (trust score)
+      - backend/services/listingQualityService.js (quality score)
+      - backend/services/fraudDetectionService.js (risk score)
+    overlap: 3 separate scoring systems for same entity (dealer)
+    action: CONSOLIDATE into single reputationService.js
+
+  - cluster: "Listing quality filters"
+    files:
+      - backend/services/listingQualityService.js
+      - backend/services/listingService.js
+    overlap: both filter/score car listings
+    action: EXTRACT quality logic into listingQualityService, remove from listingService
+
+  - cluster: "Recommendation engine"
+    files:
+      - backend/services/recommendationService.js
+      - backend/services/recommendationEngine.js
+    overlap: both compute car recommendations
+    action: MERGE into recommendationService.js
+
+  - cluster: "Caching layer"
+    files:
+      - backend/services/cacheService.js
+      - backend/services/cacheWarmupService.js
+    overlap: cacheWarmupService duplicates cache keys/settings from cacheService
+    action: CONSOLIDATE cache config into cacheService.js
+
+# ── Conflicting Calculations (5) ──
+
+conflicts:
+  - domain: "Commission rates"
+    conflict: >
+      feeService.js (Auctions context) computes commission at 2.5%.
+      Payment processing in escrowService.js uses 3.0%.
+      GlobalSettings has defaultCommission: 3.0.
+      PlatformConfig has commissionRate: 2.8.
+    impact: Dealers charged inconsistent commission depending on path
+    action: >
+      SINGLE source of truth: move commission rate to PlatformConfig,
+      reference from all services. Update defaults to match.
+
+  - domain: "Dealer trust vs quality vs risk"
+    conflict: >
+      dealerTrustScore: 0-100 (dealerTrustService.js)
+      listingQualityScore: 0-100 (listingQualityService.js)
+      fraudRiskScore: 0-100 (fraudDetectionService.js)
+      All three compute overlapping metrics with different algorithms.
+    impact: Inconsistent dealer rating shown in different UI panels
+    action: CONSOLIDATE into single reputation service
+
+  - domain: "Car pricing"
+    conflict: >
+      carService.getPrice() uses basePrice + options + markup
+      vehicleValuationService uses market comparables + depreciation
+      marketDataService uses historical auction data trends
+    impact: 3 different prices for same car depending on which API called
+    action: UNIFY into centralized pricingService.js
+
+  - domain: "Listing quality gates"
+    conflict: >
+      listingService.checkListingQuality() filters based on 15 rules.
+      listingQualityService.evaluate() scores based on 22 different rules.
+      Both run on car create/update.
+    impact: Different pass/fail thresholds for same listing
+    action: SINGLE quality check in listingQualityService, remove from listingService
+
+  - domain: "Notification dispatch"
+    conflict: >
+      notificationService sends via WebSocket + DB persistence
+      pushNotificationService sends via FCM/APNS directly
+      Both fire on same events (bid placed, auction won, etc.)
+    impact: Duplicate notifications or missed delivery paths
+    action: UNIFY dispatch through notificationService with push as plugin
+
+# ── Fragmented Sources of Truth (6) ──
+
+fragmented_truths:
+  - concept: "Car price"
+    storage: Car.price, VehicleValuation.estimatedValue, MarketData.averagePrice
+    action: Car.price is source of truth; others derive from it
+
+  - concept: "Dealer trustworthiness"
+    storage: DealerTrustScore.trustScore, ListingQuality.score, FraudAlert.riskScore
+    action: Single DealerReputation.trustScore
+
+  - concept: "Listing quality"
+    storage: ListingQuality.listingScore, Car.qualityScore (virtual?)
+    action: Remove from Car model, use ListingQuality as source
+
+  - concept: "Fraud flags"
+    storage: FraudAlert.severity, AuditLog.action, ComplianceReport.findings
+    action: FraudAlert as source, others reference by ID
+
+  - concept: "Commission rate"
+    storage: GlobalSettings.defaultCommission (3.0), PlatformConfig.commissionRate (2.8)
+    action: PlatformConfig wins
+
+  - concept: "Auction state"
+    storage: Auction.status, AuctionRoom.status, AuctionBid.winning
+    action: Auction.status is source; Room + Bid derive
+
+# ── Circular/Risky Dependency Chains (5) ──
+
+dependency_risks:
+  - chain: "carService.js → listingService.js → listingQualityService.js → carService.js"
+    risk: Circular — listingQuality scores cars, carService uses scores to filter
+
+  - chain: "auctionService.js → feeService.js → paymentService.js → escrowService.js → auctionService.js"
+    risk: Circular — auction creates escrow, escrow settles back to auction
+
+  - chain: "dealerService.js → dealerTrustService.js → fraudDetectionService.js → dealerService.js"
+    risk: Circular — dealer trust depends on fraud, fraud depends on dealer data
+
+  - chain: "notificationService.js → pushNotificationService.js → notificationService.js"
+    risk: Reciprocal calls on event dispatch
+
+  - chain: "authService.js → sessionService.js → userService.js → authService.js"
+    risk: Loops on session validation
+
+# ── Recommended Consolidation Order (priority) ──
+
+consolidation_plan:
+  - priority: 1
+    task: "Merge GlobalSettings + PlatformConfig into PlatformConfig"
+    risk: LOW — config-only, no runtime impact
+    files_affected: 2 models, 1 service
+
+  - priority: 2
+    task: "Unify commission rate source of truth to PlatformConfig.commissionRate"
+    risk: LOW — config read change only
+    files_affected: feeService.js, escrowService.js, paymentService.js
+
+  - priority: 3
+    task: "Merge pushNotificationService.js → notificationService.js"
+    risk: MEDIUM — event dispatch paths change
+    files_affected: 2 services, update imports in 12+ files
+
+  - priority: 4
+    task: "Merge fraudScoringService.js → fraudDetectionService.js"
+    risk: MEDIUM — scoring algorithm consolidation
+    files_affected: 2 services
+
+  - priority: 5
+    task: "Merge VehicleValuation pricing into carService (or new pricingService.js)"
+    risk: MEDIUM — API contract change for /api/valuation
+    files_affected: 2-3 services, 1-2 routes
+
+  - priority: 6
+    task: "Create reputationService.js from dealerTrust + listingQuality + fraud risk"
+    risk: HIGH — touches 3 services, 4+ controllers
+    files_affected: 3 services, rewrite scoring
+
+  - priority: 7
+    task: "Merge recommendationEngine.js → recommendationService.js"
+    risk: LOW — both are internal
+    files_affected: 2 services
+
+  - priority: 8
+    task: "Merge cacheWarmupService.js → cacheService.js"
+    risk: LOW — infra only
+    files_affected: 2 services
+
+  - priority: 9
+    task: "Break circular dependency chains (extract shared logic)"
+    risk: HIGH — requires new intermediate services/events
+    files_affected: 8+ services, event bus or middleware layer

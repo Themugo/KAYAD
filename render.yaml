@@ -1,0 +1,199 @@
+# render.yaml — Kayad Backend
+# Deploy on Render: Connect GitHub repo → Render auto-detects this file
+
+services:
+  - type: web
+    name: kayad-backend
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: cd backend && npm install && mkdir -p uploads
+    startCommand: cd backend && mkdir -p uploads && node server.js
+    healthCheckPath: /health/live
+    autoDeploy: true
+    disk:
+      name: uploads
+      mountPath: /app/backend/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: SESSION_SECRET
+        sync: false
+      - key: CUSTOM_DOMAIN
+        value: "kayad.space"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://kayad.space
+      - key: EXTRA_CORS_ORIGINS
+        sync: false
+      - key: WEBHOIST_EMAIL
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: MPESA_ENV
+        value: production
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        value: https://api.kayad.space/api/payments/callback
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kayad-redis
+          property: connectionString
+      - key: REDIS_HOST
+        value: 127.0.0.1
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: notifications@kayad.space
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: ESCROW_ACCOUNT_NUMBER
+        sync: false
+      - key: ESCROW_BANK_NAME
+        value: Equity Bank Kenya
+      - key: ADMIN_EMAIL
+        value: admin@kayad.space
+      - key: ADMIN_PHONE
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: APP_VERSION
+        value: 2.0.0
+      - key: APP_NAME
+        value: Kayad
+
+  # Worker service for background jobs
+  - type: worker
+    name: kayad-worker
+    env: node
+    region: oregon
+    plan: standard
+    buildCommand: cd backend && npm install && mkdir -p uploads
+    startCommand: cd backend && mkdir -p uploads && node scripts/startWorkers.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromService:
+          type: web
+          name: kayad-backend
+          property: MONGO_URI
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: kayad-backend
+          property: JWT_SECRET
+      - key: REFRESH_TOKEN_SECRET
+        fromService:
+          type: web
+          name: kayad-backend
+          property: REFRESH_TOKEN_SECRET
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kayad-redis
+          property: connectionString
+      - key: POSTHOG_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend
+          property: POSTHOG_API_KEY
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: SENTRY_DSN
+        fromService:
+          type: web
+          name: kayad-backend
+          property: SENTRY_DSN
+      - key: SENDGRID_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend
+          property: SENDGRID_API_KEY
+      - key: EMAIL_FROM
+        value: notifications@kayad.space
+      - key: AT_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend
+          property: AT_API_KEY
+      - key: AT_USERNAME
+        fromService:
+          type: web
+          name: kayad-backend
+          property: AT_USERNAME
+      - key: CLOUDINARY_CLOUD_NAME
+        fromService:
+          type: web
+          name: kayad-backend
+          property: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend
+          property: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+        fromService:
+          type: web
+          name: kayad-backend
+          property: CLOUDINARY_API_SECRET
+      - key: APP_VERSION
+        value: 2.0.0
+      - key: APP_NAME
+        value: Kayad
+
+# Redis instance for distributed operations
+databases:
+  - name: kayad-redis
+    databaseName: kayad_redis
+    user: kayad
+    region: oregon
+    plan: standard

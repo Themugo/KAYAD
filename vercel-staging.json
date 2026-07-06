@@ -1,0 +1,53 @@
+{
+  "framework": null,
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://kayad-backend-staging.onrender.com/api/$1" },
+    { "source": "/socket.io/(.*)", "destination": "https://kayad-backend-staging.onrender.com/socket.io/$1" },
+    { "source": "/uploads/(.*)", "destination": "https://kayad-backend-staging.onrender.com/uploads/$1" },
+    { "source": "/((?!assets|favicon|robots|sw\\.js).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://kayad-backend-staging.onrender.com wss://kayad-backend-staging.onrender.com; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    }
+  ],
+  "env": {
+    "BASE_PATH": "/",
+    "NODE_ENV": "staging",
+    "VITE_PLATFORM_NAME": "KAYAD Staging",
+    "VITE_DOMAIN": "staging.kayad.space",
+    "VITE_WEBHOST_EMAIL": "staging@kayad.space",
+    "VITE_SOCKET_URL": "wss://kayad-backend-staging.onrender.com",
+    "VITE_APP_NAME": "Kayad Staging",
+    "VITE_APP_VERSION": "2.0.0-staging",
+    "VITE_ENABLE_CHAT": "true",
+    "VITE_ENABLE_ESCROW": "true",
+    "VITE_ENABLE_AUCTIONS": "true",
+    "VITE_ENABLE_COMPARE": "true",
+    "VITE_ENABLE_REVIEWS": "true",
+    "VITE_ENABLE_DEMO": "true",
+    "VITE_POSTHOG_HOST": "https://us.i.posthog.com"
+  }
+}

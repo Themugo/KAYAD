@@ -1,0 +1,244 @@
+/* ============================================================
+   KAYAD — Layout Components
+   Mobile bottom nav, search sidebar, and shared layout elements
+   ============================================================ */
+
+/* ---- Mobile Bottom Nav ---- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 999;
+  background: #0a0a0a;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: stretch;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: 64px;
+}
+.bottom-nav-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; text-decoration: none; position: relative;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+  transition: color 0.2s;
+  padding-top: 6px;
+}
+.bottom-nav-tab-sell { padding-top: 0; }
+.bottom-nav-tab-active { color: var(--gold); }
+.bottom-nav-tab-inactive { color: rgba(255,255,255,0.3); }
+
+.bottom-nav-sell-btn {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--gold); margin-top: -20px; margin-bottom: 2px;
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.bottom-nav-sell-btn-active {
+  box-shadow: 0 0 24px rgba(212,196,168,0.5);
+}
+.bottom-nav-sell-btn-inactive {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+.bottom-nav-sell-icon { color: #000; }
+.bottom-nav-active-indicator {
+  position: absolute; top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 16px; height: 2px; border-radius: 2px;
+  background: var(--gold);
+}
+.bottom-nav-label { margin-top: 1px; }
+.bottom-nav-label-sell { margin-top: 0; }
+
+/* ---- Search Sidebar ---- */
+.search-sidebar {
+  flex-shrink: 0; background: #070707;
+  overflow-y: auto;
+}
+.search-sidebar-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212,196,168,0.15) transparent;
+}
+.search-sidebar-mobile {
+  width: 100%; height: 100%; position: relative;
+  border-right: none;
+}
+.search-sidebar-desktop {
+  width: 272px; height: calc(100vh - 100px); position: sticky; top: 88px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ---- Sidebar Header ---- */
+.search-sidebar-header {
+  position: sticky; top: 0; z-index: 10;
+  background: #070707;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.search-sidebar-header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.search-sidebar-header-left { display: flex; align-items: center; gap: 8px; }
+.search-sidebar-close-btn {
+  background: none; border: none; color: rgba(255,255,255,0.4);
+  cursor: pointer; display: flex; padding: 2px; margin-right: 4px;
+}
+.search-sidebar-title {
+  font-size: 15px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #fff;
+}
+.search-sidebar-badge {
+  background: var(--gold); color: #000;
+  font-size: 9px; font-weight: 900; border-radius: 9999px;
+  padding: 2px 7px; min-width: 18px; text-align: center;
+}
+.search-sidebar-reset-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 9999px; padding: 4px 10px;
+  font-size: 10px; color: rgba(239,68,68,0.8); font-weight: 700; cursor: pointer;
+  transition: all 0.2s;
+}
+.search-sidebar-reset-btn:hover {
+  background: rgba(239,68,68,0.15); color: #ef4444;
+}
+
+/* ---- Section ---- */
+.search-section { margin-bottom: 4px; }
+.search-section-btn {
+  display: flex; align-items: center; width: 100%;
+  background: none; border: none; cursor: pointer;
+  padding: 12px 16px 10px; gap: 8px;
+}
+.search-section-accent {
+  width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0;
+  transition: background 0.2s;
+}
+.search-section-accent-active { background: var(--gold); }
+.search-section-accent-inactive { background: transparent; }
+.search-section-label {
+  flex: 1; text-align: left; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  transition: color 0.2s;
+}
+.search-section-label-active { color: var(--gold); }
+.search-section-label-inactive { color: rgba(255,255,255,0.55); }
+.search-section-count-badge {
+  background: rgba(212,196,168,0.15); color: var(--gold);
+  font-size: 10px; font-weight: 800; border-radius: 9999px; padding: 2px 8px;
+}
+.search-section-chevron {
+  color: rgba(255,255,255,0.2);
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.search-section-chevron-open { transform: rotate(180deg); }
+.search-section-chevron-closed { transform: none; }
+.search-section-body { padding: 0 0 10px; }
+.search-section-divider {
+  height: 1px; background: rgba(255,255,255,0.04); margin: 0 16px;
+}
+
+/* ---- Chip ---- */
+.search-chip {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 10px 18px;
+  border: none; border-left: 2px solid transparent;
+  font-size: 14.5px; cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.search-chip-active {
+  background: rgba(212,196,168,0.1);
+  border-left-color: var(--gold);
+  color: var(--gold); font-weight: 700;
+}
+.search-chip-inactive {
+  background: transparent;
+  border-left-color: transparent;
+  color: rgba(255,255,255,0.55); font-weight: 500;
+}
+.search-chip-inactive:hover {
+  background: rgba(255,255,255,0.03); color: #fff;
+}
+.search-chip-inner { display: flex; align-items: center; gap: 7px; }
+.search-chip-icon { font-size: 12px; opacity: 0.7; }
+.search-chip-icon-all { font-size: 12px; opacity: 0.5; }
+.search-chip-count {
+  font-size: 12px; color: rgba(255,255,255,0.3); font-weight: 500;
+}
+.search-chip-category { font-size: 14; font-weight: 500; }
+
+/* ---- Quick filter button ---- */
+.search-quick-filter-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 10px 18px;
+  background: transparent; border: none; border-left: 2px solid transparent;
+  color: rgba(255,255,255,0.55);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s; text-align: left;
+}
+.search-quick-filter-btn:hover {
+  background: rgba(255,255,255,0.03); color: #fff;
+}
+
+/* ---- Range input ---- */
+.search-range-wrap {
+  padding: 0 16px 10px; display: flex; gap: 8px;
+}
+.search-range-wrap-compact { padding: 0 16px 4px; display: flex; gap: 8px; }
+.search-range-input {
+  flex: 1; padding: 8px 12px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: #fff; font-size: 13.5px; outline: none;
+  transition: border-color 0.2s;
+}
+.search-range-input:focus {
+  border-color: rgba(212,196,168,0.4);
+}
+.search-range-sep {
+  color: rgba(255,255,255,0.2); align-self: center; font-size: 12px;
+}
+
+/* ---- Brand search ---- */
+.search-brand-wrap { padding: 0 16px 8px; }
+.search-brand-input-wrap { position: relative; }
+.search-brand-icon {
+  position: absolute; left: 10px; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255,255,255,0.25); pointer-events: none;
+}
+.search-brand-input {
+  width: 100%; padding: 8px 12px 8px 30px;
+  border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04); color: #fff;
+  font-size: 13.5px; outline: none; box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.search-brand-input:focus { border-color: rgba(212,196,168,0.4); }
+.search-show-more-btn {
+  width: 100%; padding: 8px 16px; background: none; border: none;
+  color: var(--gold); font-size: 11px; font-weight: 600; cursor: pointer; text-align: left;
+}
+
+/* ---- Price presets ---- */
+.search-price-preset { font-size: 14; font-weight: 500; }
+
+/* ---- Color swatches ---- */
+.search-color-wrap {
+  padding: 4px 16px 8px; display: flex; flex-wrap: wrap; gap: 8px;
+}
+.search-color-swatch {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer; position: relative;
+  transition: all 0.15s;
+}
+.search-color-swatch-active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(212,196,168,0.2);
+}
+.search-color-check {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+}
+
+/* ---- Sidebar bottom padding ---- */
+.search-sidebar-pad { height: 32px; }
+
+/* ---- Year/mileage range sections ---- */
+.search-range-row { padding: 0 16px 4px; display: flex; gap: 8px; }

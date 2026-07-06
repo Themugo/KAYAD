@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="32" fill="#1a1a1a"/>
+  <g transform="translate(96,96)">
+    <path d="M-60,-10 L-45,-26 L-10,-30 L10,-30 L45,-26 L60,-10 L65,5 L-65,5 Z" fill="#d4c4a8" stroke="#b8a88a" stroke-width="1.5"/>
+    <rect x="-65" y="5" width="130" height="14" rx="3" fill="#d4c4a8" stroke="#b8a88a" stroke-width="1"/>
+    <circle cx="-35" cy="22" r="9" fill="#1a1a1a" stroke="#d4c4a8" stroke-width="2.5"/>
+    <circle cx="35" cy="22" r="9" fill="#1a1a1a" stroke="#d4c4a8" stroke-width="2.5"/>
+    <rect x="-48" y="-7" width="16" height="10" rx="2" fill="#1a1a1a"/>
+    <rect x="32" y="-7" width="16" height="10" rx="2" fill="#1a1a1a"/>
+    <circle cx="0" cy="-8" r="18" fill="none" stroke="#d4c4a8" stroke-width="2.5"/>
+    <text x="0" y="-4" text-anchor="middle" font-family="Georgia,serif" font-weight="900" font-style="italic" font-size="28" fill="#d4c4a8">K</text>
+  </g>
+</svg>

@@ -1,0 +1,134 @@
+name: SBOM Generation and Dependency Track
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run daily at 5 AM UTC
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM and Upload to Dependency Track
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        component:
+          - backend
+          - frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install CycloneDX
+        run: npm install -g @cyclonedx/cyclonedx-npm
+
+      - name: Generate SBOM for ${{ matrix.component }}
+        run: |
+          if [ "${{ matrix.component }}" = "backend" ]; then
+            cd backend
+            npm ci
+            cyclonedx-npm -o sbom-backend.json
+          else
+            pnpm install --frozen-lockfile
+            cyclonedx-npm -o sbom-frontend.json
+          fi
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component }}
+          path: ${{ matrix.component == 'backend' && 'backend/sbom-backend.json' || 'sbom-frontend.json' }}
+
+      - name: Upload to Dependency Track
+        if: env.DEPENDENCY_TRACK_URL != '' && env.DEPENDENCY_TRACK_API_KEY != ''
+        env:
+          DEPENDENCY_TRACK_URL: ${{ secrets.DEPENDENCY_TRACK_URL }}
+          DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          PROJECT_ID: ${{ secrets.DEPENDENCY_TRACK_PROJECT_ID }}
+        run: |
+          # Install Dependency Track CLI
+          curl -L https://github.com/DependencyTrack/dependency-track-cli/releases/latest/download/dt-cli.jar -o dt-cli.jar
+          
+          # Upload SBOM
+          java -jar dt-cli.jar \
+            --api-key $DEPENDENCY_TRACK_API_KEY \
+            --url $DEPENDENCY_TRACK_URL \
+            --project $PROJECT_ID \
+            --upload \
+            --auto-create \
+            ${{ matrix.component == 'backend' && 'backend/sbom-backend.json' || 'sbom-frontend.json' }}
+
+      - name: Check Dependency Track findings
+        if: env.DEPENDENCY_TRACK_URL != '' && env.DEPENDENCY_TRACK_API_KEY != ''
+        env:
+          DEPENDENCY_TRACK_URL: ${{ secrets.DEPENDENCY_TRACK_URL }}
+          DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          PROJECT_ID: ${{ secrets.DEPENDENCY_TRACK_PROJECT_ID }}
+        run: |
+          # Install Dependency Track CLI
+          curl -L https://github.com/DependencyTrack/dependency-track-cli/releases/latest/download/dt-cli.jar -o dt-cli.jar
+          
+          # Check for vulnerabilities
+          java -jar dt-cli.jar \
+            --api-key $DEPENDENCY_TRACK_API_KEY \
+            --url $DEPENDENCY_TRACK_URL \
+            --project $PROJECT_ID \
+            --find \
+            --output dt-findings.json
+          
+          # Check for critical/high vulnerabilities
+          CRITICAL=$(jq '[.[] | select(.severity == "CRITICAL")] | length' dt-findings.json)
+          HIGH=$(jq '[.[] | select(.severity == "HIGH")] | length' dt-findings.json)
+          
+          echo "Critical vulnerabilities: $CRITICAL"
+          echo "High vulnerabilities: $HIGH"
+          
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 5 ]; then
+            echo "Critical or too many high vulnerabilities found. Blocking release."
+            exit 1
+          fi
+
+      - name: Comment PR with SBOM findings
+        if: github.event_name == 'pull_request' && env.DEPENDENCY_TRACK_URL != '' && env.DEPENDENCY_TRACK_API_KEY != ''
+        env:
+          DEPENDENCY_TRACK_URL: ${{ secrets.DEPENDENCY_TRACK_URL }}
+          DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          PROJECT_ID: ${{ secrets.DEPENDENCY_TRACK_PROJECT_ID }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const findings = JSON.parse(fs.readFileSync('dt-findings.json', 'utf8'));
+              const critical = findings.filter(f => f.severity === 'CRITICAL').length;
+              const high = findings.filter(f => f.severity === 'HIGH').length;
+              const medium = findings.filter(f => f.severity === 'MEDIUM').length;
+              
+              const comment = `## 📦 SBOM Analysis - ${{ matrix.component }}\n\n**Critical**: ${critical}\n**High**: ${high}\n**Medium**: ${medium}\n\nSBOM generated and uploaded to Dependency Track.`;
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('No findings or error reading report');
+            }

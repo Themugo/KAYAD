@@ -1,0 +1,48 @@
+# Rolling Deployment Strategy
+# This is the default deployment strategy used in the Kubernetes manifests
+# It gradually replaces old pods with new pods to ensure zero downtime
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kayad-backend-rolling
+  namespace: kayad
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # Maximum number of pods that can be created above the desired replicas
+      maxUnavailable: 0  # Maximum number of pods that can be unavailable during the update
+  selector:
+    matchLabels:
+      app: kayad-backend
+  template:
+    metadata:
+      labels:
+        app: kayad-backend
+        version: v1
+    spec:
+      containers:
+      - name: kayad-backend
+        image: kayad-backend:latest
+        # ... rest of container configuration
+
+---
+# Rolling Update Process:
+# 1. New pods are created one at a time (maxSurge: 1)
+# 2. Old pods are terminated only after new pods are ready (maxUnavailable: 0)
+# 3. This ensures minimum availability during deployment
+# 4. Total pods during update: replicas + maxSurge = 3 + 1 = 4
+# 5. Minimum available pods: replicas - maxUnavailable = 3 - 0 = 3
+
+# Benefits:
+# - Zero downtime deployment
+# - Gradual rollout allows for early error detection
+# - Automatic rollback if health checks fail
+# - Simple to implement and maintain
+
+# Considerations:
+# - Slower deployment compared to blue-green
+# - Requires application to handle multiple versions running simultaneously
+# - Database schema changes must be backward compatible

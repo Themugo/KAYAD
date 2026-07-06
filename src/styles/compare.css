@@ -1,0 +1,187 @@
+/* ============================================================
+   KAYAD — Compare Page
+   Matrix comparison with velocity bars, feature tags
+   ============================================================ */
+
+.compare-page { padding: 24px 0 100px; min-height: 100vh; }
+
+/* ---- Header ---- */
+.compare-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 24px;
+}
+.compare-header-left { display: flex; align-items: center; gap: 12px; }
+.compare-back-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; padding: 6px 10px;
+  color: rgba(255,255,255,0.4); cursor: pointer; display: flex;
+}
+.compare-clear-btn {
+  background: transparent; border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 8px; padding: 6px 14px;
+  color: #ef4444; font-size: 11px; font-weight: 700; cursor: pointer;
+}
+
+/* ---- Bidding velocity ---- */
+.velocity-card {
+  background: #0C0C0C; border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
+}
+.velocity-title {
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.4);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+.velocity-bars { display: flex; gap: 12px; align-items: flex-end; }
+.velocity-col {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.velocity-count { font-size: 13px; font-weight: 900; color: var(--gold); }
+.velocity-bar {
+  width: 100%; border-radius: 3px 3px 0 0;
+  transition: height 0.4s ease;
+}
+.velocity-label {
+  font-size: 9px; color: rgba(255,255,255,0.3);
+  text-align: center; overflow: hidden;
+  text-overflow: ellipsis; max-width: 100%; white-space: nowrap;
+}
+
+/* ---- Comparison matrix ---- */
+.compare-matrix {
+  overflow-x: auto; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.compare-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.compare-th {
+  text-align: left; padding: 14px 16px;
+  background: #0C0C0C;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 10px; color: rgba(255,255,255,0.3);
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; width: 140px;
+}
+.compare-th-car {
+  text-align: center; padding: 12px 10px;
+  background: #0C0C0C;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-left: 1px solid rgba(255,255,255,0.04);
+}
+.compare-thumb-wrap { position: relative; display: inline-block; }
+.compare-thumb {
+  width: 80px; height: 60px; border-radius: 8px;
+  object-fit: cover; background: #111;
+}
+.compare-thumb-placeholder { width: 80px; height: 60px; border-radius: 8px; background: #111; }
+.compare-remove-btn {
+  position: absolute; top: -4px; right: -4px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; font-size: 8px;
+}
+.compare-car-title {
+  font-size: 11px; font-weight: 700; color: #fff;
+  margin-top: 6px; line-height: 1.2;
+}
+.compare-car-link {
+  display: inline-block; margin-top: 6px; font-size: 9px;
+  color: var(--gold); font-weight: 700; text-decoration: none;
+}
+
+/* ---- Table body ---- */
+.compare-section-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
+.compare-section-row-alt { background: rgba(212,196,168,0.02); }
+.compare-section-row-even { background: rgba(255,255,255,0.01); }
+.compare-label-cell {
+  padding: 10px 16px; font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,0.45); white-space: nowrap;
+}
+.compare-value-cell {
+  padding: 10px 12px; font-size: 12px;
+  text-align: center; border-left: 1px solid rgba(255,255,255,0.04);
+}
+.compare-value-best { color: #22c55e; font-weight: 800; }
+.compare-value-normal { color: #fff; font-weight: 500; }
+.compare-best-badge {
+  font-size: 8px; color: #22c55e;
+  display: block; margin-top: 2px; font-weight: 700;
+}
+
+/* ---- Feature tags ---- */
+.feature-tag-compare {
+  font-size: 9px; padding: 2px 6px; border-radius: 4px;
+  background: rgba(212,196,168,0.08);
+  border: 1px solid rgba(212,196,168,0.12);
+  color: rgba(255,255,255,0.6);
+}
+.feature-more-count {
+  font-size: 9px; color: rgba(255,255,255,0.25);
+}
+.feature-empty { color: rgba(255,255,255,0.2); font-size: 11px; }
+
+/* ---- Add more hint ---- */
+.compare-add-more {
+  text-align: center; margin-top: 24px;
+  color: rgba(255,255,255,0.2); font-size: 12px;
+}
+.compare-add-more a { color: var(--gold); }
+
+/* ---- Compare Drawer ---- */
+.compare-drawer {
+  position: fixed; bottom: 16px; left: 50%;
+  transform: translateX(-50%); z-index: 9999;
+  background: rgba(12,12,12,0.94);
+  border: 1px solid rgba(212,196,168,0.25);
+  box-shadow: 0 8px 36px rgba(0,0,0,0.55);
+  border-radius: 9999px;
+  padding: 7px 10px 7px 14px;
+  display: flex; align-items: center; gap: 12px;
+  backdrop-filter: blur(12px);
+  max-width: calc(100vw - 32px);
+}
+.compare-drawer-count {
+  display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.compare-drawer-label {
+  font-size: 12px; font-weight: 800; color: var(--gold);
+}
+.compare-drawer-thumbs { display: flex; gap: 6px; }
+.compare-drawer-thumb {
+  width: 40px; height: 30px; border-radius: 5px;
+  overflow: hidden; position: relative;
+  border: 1px solid rgba(212,196,168,0.25);
+  background: #111; flex-shrink: 0;
+}
+.compare-drawer-thumb-img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.compare-drawer-count-icon { color: var(--gold); }
+.compare-drawer-thumb-remove {
+  position: absolute; top: 0; right: 0;
+  width: 14px; height: 14px; border-radius: 0 0 0 5px;
+  background: rgba(0,0,0,0.75); border: none;
+  color: #fff; cursor: pointer;
+  display: flex; align-items: center;
+  justify-content: center; line-height: 1;
+}
+.compare-drawer-actions {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.compare-drawer-clear {
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.45);
+  font-size: 11px; font-weight: 600; cursor: pointer; padding: 0 4px;
+}
+.compare-drawer-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--gold); border-radius: 9999px;
+  padding: 6px 14px; color: #000;
+  font-size: 11px; font-weight: 800; text-decoration: none;
+}
+.compare-drawer-link-disabled {
+  opacity: 0.5; pointer-events: none;
+}

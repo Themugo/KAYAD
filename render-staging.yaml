@@ -1,0 +1,199 @@
+# render-staging.yaml — Kayad Backend Staging Environment
+# Deploy on Render: Create separate service for staging
+
+services:
+  - type: web
+    name: kayad-backend-staging
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node server.js
+    healthCheckPath: /health/live
+    autoDeploy: true
+    disk:
+      name: uploads-staging
+      mountPath: /app/backend/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: PORT
+        value: "5000"
+      - key: SESSION_SECRET
+        sync: false
+      - key: CUSTOM_DOMAIN
+        value: staging.kayad.space
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://kayad-motors-staging.vercel.app
+      - key: EXTRA_CORS_ORIGINS
+        sync: false
+      - key: WEBHOIST_EMAIL
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: MPESA_ENV
+        value: sandbox
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        value: https://kayad-backend-staging.onrender.com/api/payments/callback
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kayad-redis-staging
+          property: connectionString
+      - key: REDIS_HOST
+        value: 127.0.0.1
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: staging@kayad.space
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: ESCROW_ACCOUNT_NUMBER
+        sync: false
+      - key: ESCROW_BANK_NAME
+        value: Equity Bank Kenya
+      - key: ADMIN_EMAIL
+        value: admin-staging@kayad.space
+      - key: ADMIN_PHONE
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: APP_VERSION
+        value: 2.0.0-staging
+      - key: APP_NAME
+        value: Kayad Staging
+
+  # Worker service for background jobs (staging)
+  - type: worker
+    name: kayad-worker-staging
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && node scripts/startWorkers.js
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: MONGO_URI
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: MONGO_URI
+      - key: JWT_SECRET
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: JWT_SECRET
+      - key: REFRESH_TOKEN_SECRET
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: REFRESH_TOKEN_SECRET
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: kayad-redis-staging
+          property: connectionString
+      - key: POSTHOG_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: POSTHOG_API_KEY
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: SENTRY_DSN
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: SENTRY_DSN
+      - key: SENDGRID_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: SENDGRID_API_KEY
+      - key: EMAIL_FROM
+        value: staging@kayad.space
+      - key: AT_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: AT_API_KEY
+      - key: AT_USERNAME
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: AT_USERNAME
+      - key: CLOUDINARY_CLOUD_NAME
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: CLOUDINARY_CLOUD_NAME
+      - key: CLOUDINARY_API_KEY
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: CLOUDINARY_API_KEY
+      - key: CLOUDINARY_API_SECRET
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: CLOUDINARY_API_SECRET
+      - key: APP_VERSION
+        value: 2.0.0-staging
+      - key: APP_NAME
+        value: Kayad Staging
+
+# Redis instance for staging
+databases:
+  - name: kayad-redis-staging
+    databaseName: kayad_redis_staging
+    user: kayad_staging
+    region: oregon
+    plan: starter
