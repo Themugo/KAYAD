@@ -55,16 +55,6 @@ export const getCars = async (req, res) => {
 
     const query = { status: "active" };
 
-    // ── DEMO MODE AWARE ────────────────────────────────────
-    let demoMode = true;
-    try {
-      const config = await PlatformConfig.findOne().select("demoMode").lean();
-      if (config) demoMode = config.demoMode;
-    } catch { /* use default */ }
-    if (!demoMode) {
-      query.isDemo = { $ne: true };
-    }
-
     if (keyword) {
       const trimmed = keyword.trim();
       if (trimmed.length >= 3) {
@@ -144,9 +134,7 @@ export const getCars = async (req, res) => {
     else if (sort === "views_desc" || sort === "-views") sortOption = { views: -1 };
     else if (sort === "-createdAt" || sort === "createdAt_desc") sortOption = { createdAt: -1 };
     else if (sort === "createdAt_asc") sortOption = { createdAt: 1 };
-    else sortOption = { auctionStatus: -1, isDemo: 1, createdAt: -1 };
-    // Production-first: real content (isDemo: false) ordered before demo content,
-    // then by createdAt descending within each group.
+    else sortOption = { createdAt: -1 };
 
     const skip = (pageNum - 1) * limitNum;
 
@@ -885,24 +873,4 @@ export const placeBid = async (req, res) => {
   }
 };
 
-// =============================
-// 🧪 GET ALL DEMO CARS (demo dealer only)
-// =============================
-export const getDemoCars = async (req, res) => {
-  try {
-    if (!DEALER_ROLES.includes(req.user.role) && !STAFF_ROLES.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: "Only dealer or admin accounts can view demo cars" });
-    }
-
-    const cars = await Car.find({ isDemo: true })
-      .populate("dealer", "name email businessName")
-      .sort({ createdAt: -1 })
-      .limit(100) // Cap at 100 to prevent unbounded memory (Issue #11)
-      .lean();
-
-    res.json({ success: true, data: cars });
-  } catch (err) {
-    console.error("❌ GET DEMO CARS ERROR:", err.message);
-    res.status(500).json({ success: false, message: "Failed to fetch demo cars" });
-  }
-};
+// (getDemoCars removed — demo data eliminated)

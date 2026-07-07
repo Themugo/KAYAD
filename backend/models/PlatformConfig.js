@@ -39,7 +39,6 @@ const platformConfigSchema = new mongoose.Schema(
     requireDealerApproval: { type: Boolean, default: false }, // dealers auto-approved for now
     waivePayments: { type: Boolean, default: true }, // no listing/enrolment fees yet
     freeMarket: { type: Boolean, default: true }, // tiers exist but aren't enforced yet
-    demoMode: { type: Boolean, default: true }, // show demo content in marketplace
 
     // ── BRANDING ──────────────────────────────────────────
     branding: {

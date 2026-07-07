@@ -5,70 +5,10 @@
 // Production-grade: structured logging, abort-aware, no token leaks.
 // ============================================================
 
-import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from "axios";
-import { logInfo, logWarn, logError } from "../utils/logger";
-import { demoAPI } from "../data/demoAPI";
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import { logInfo } from "../utils/logger";
 
 const BASE = "/api";
-const HEALTH_ENDPOINT = `${BASE}/health`;
-
-const DEMO_MODE_ENABLED = (import.meta.env?.VITE_ENABLE_DEMO ?? "false") !== "false";
-let __DEMO_MODE__ = false;
-
-export const isDemoMode = (): boolean => __DEMO_MODE__ && DEMO_MODE_ENABLED;
-
-export const enableDemoMode = (): void => {
-  if (DEMO_MODE_ENABLED && import.meta.env?.VITE_ENABLE_DEMO !== "false") {
-    __DEMO_MODE__ = true;
-    try { localStorage.removeItem("kayad_demo_user"); } catch { /* ignore */ }
-    logInfo("Demo mode enabled");
-  }
-};
-
-let _backendProbePromise: Promise<boolean> | null = null;
-let _lastProbeAt = 0;
-const PROBE_COOLDOWN_MS = 20_000;
-
-export const checkBackendAvailability = async (retries = 2): Promise<boolean> => {
-  const now = Date.now();
-  if (_backendProbePromise) return _backendProbePromise;
-  if (now - _lastProbeAt < PROBE_COOLDOWN_MS) return !__DEMO_MODE__;
-  _lastProbeAt = now;
-  _backendProbePromise = (async () => {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-      try {
-        await axios.get(HEALTH_ENDPOINT, { timeout: 5000 });
-        __DEMO_MODE__ = false;
-        logInfo("Backend reachable — live mode");
-        return true;
-      } catch (err) {
-        const error = err as AxiosError;
-        const s = error.response?.status;
-        const unavailable =
-          !error.response ||
-          error.code === "ERR_NETWORK" ||
-          error.code === "ECONNABORTED" ||
-          error.message?.includes("Network Error") ||
-          (s !== undefined && [404, 502, 503, 504].includes(s));
-        if (!unavailable) return true;
-        if (attempt < retries) {
-          await new Promise<void>((r) => setTimeout(r, 1000 * attempt));
-          continue;
-        }
-        if (DEMO_MODE_ENABLED) {
-          __DEMO_MODE__ = true;
-          logWarn("Backend unreachable — falling back to demo mode");
-        } else {
-          logWarn("Backend unreachable — no demo fallback available");
-        }
-        return false;
-      }
-    }
-    return false;
-  })();
-  try { return await _backendProbePromise; }
-  finally { _backendProbePromise = null; }
-};
 
 const api: AxiosInstance = axios.create({
   baseURL: BASE,
@@ -86,7 +26,6 @@ api.interceptors.request.use(
       logInfo("API request", {
         method: (config.method ?? "get").toString().toUpperCase(),
         url: config.url,
-        demoMode: __DEMO_MODE__,
       });
     }
     return config;
@@ -115,11 +54,6 @@ api.interceptors.response.use(
       orig._retryCount = (orig._retryCount || 0) + 1;
       await new Promise<void>((resolve) => setTimeout(resolve, 300 * 2 ** ((orig._retryCount || 1) - 1)));
       return api(orig);
-    }
-
-    if (!err.response) {
-      if (DEMO_MODE_ENABLED) __DEMO_MODE__ = true;
-      return Promise.reject(err);
     }
 
     const requestUrl: string = orig?.url || "";
@@ -154,41 +88,9 @@ api.interceptors.response.use(
 );
 
 const unwrap = (res: AxiosResponse) => res.data;
-const isDemoToken = (): boolean => __DEMO_MODE__;
-
-const shouldFallbackToDemo = (err: AxiosError): boolean => {
-  if (!err.response) return true;
-  if (err.code === "ECONNABORTED") return true;
-  const s = err.response.status;
-  if (s >= 500) return true;
-  if (s === 404) return true;
-  if (s === 401 && isDemoToken()) return true;
-  return false;
-};
-
-function withDemo<T extends Record<string, any>>(realObj: T, demoObj: Partial<T>): T {
-  const wrapped = {} as T;
-  for (const key of Object.keys(realObj)) {
-    (wrapped as any)[key] = async (...args: any[]) => {
-      if (demoObj?.[key] && isDemoToken()) {
-        __DEMO_MODE__ = true;
-        return (demoObj[key] as (...a: any[]) => any)(...args);
-      }
-      try { return await (realObj as any)[key](...args); }
-      catch (err) {
-        if (demoObj?.[key] && DEMO_MODE_ENABLED && shouldFallbackToDemo(err as AxiosError)) {
-          __DEMO_MODE__ = true;
-          return (demoObj[key] as (...a: any[]) => any)(...args);
-        }
-        throw err;
-      }
-    };
-  }
-  return wrapped;
-}
 
 // Export shared utilities for api.exports.ts
-export { api, unwrap, withDemo };
+export { api, unwrap };
 export default api;
 
 // Re-export all API modules (unchanged shape from your original)

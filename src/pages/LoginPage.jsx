@@ -6,8 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
-import { authAPI, enableDemoMode, isDemoMode } from '../api/api';
-import { DEMO_ACCOUNTS } from '../data/demoData';
+import { authAPI } from '../api/api';
 
 function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
@@ -74,25 +73,6 @@ function LoginPage() {
     }
   };
 
-  // One-click demo sign-in. Forces demo mode so the @demo.com accounts
-  // resolve against the in-app dataset regardless of live-backend state.
-  const handleDemoLogin = async (acct) => {
-    setForm({ email: acct.email, password: acct.password });
-    setLoading(true);
-    try {
-      enableDemoMode();
-      const data = await login({ email: acct.email, password: acct.password });
-      toast(`Signed in as ${acct.label} (demo)`, 'success');
-      const targetPath = getPostAuthPath(data.user, from);
-      // Prevent redirect loop: don't redirect if already on the target path
-      if (targetPath !== location.pathname) {
-        navigate(targetPath, { replace: true });
-      }
-    } catch (err) {
-      toast(err.response?.data?.message || 'Demo sign-in failed', 'error');
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -166,63 +146,6 @@ function LoginPage() {
             </div>
           )}
 
-            {isDemoMode() && DEMO_ACCOUNTS.length > 0 && <div style={{ margin: '20px 0 12px' }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                margin: '0 0 12px',
-              }}>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-                <span style={{
-                  fontSize: 10, fontWeight: 700, letterSpacing: '0.14em',
-                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)',
-                  whiteSpace: 'nowrap',
-                }}>
-                  Or explore with a demo account
-                </span>
-                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-              </div>
-              <div className="rgrid rgrid-3" style={{ gap: 8 }}>
-                {DEMO_ACCOUNTS.map(acct => (
-                  <button
-                    key={acct.email}
-                    type="button"
-                    onClick={() => handleDemoLogin(acct)}
-                    disabled={loading}
-                    style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                      padding: '10px 12px',
-                      borderRadius: 9,
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: 'rgba(255,255,255,0.85)',
-                      fontSize: 12.5, fontWeight: 700,
-                      cursor: loading ? 'wait' : 'pointer',
-                      transition: 'all 0.18s ease',
-                      fontFamily: 'var(--font-body, sans-serif)',
-                    }}
-                    onMouseEnter={e => {
-                      if (loading) return;
-                      e.currentTarget.style.borderColor = acct.tint;
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
-                    }}
-                  >
-                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: acct.tint, flexShrink: 0 }} />
-                    {acct.label}
-                  </button>
-                ))}
-              </div>
-              <p style={{
-                fontSize: 10.5, color: 'rgba(255,255,255,0.3)',
-                textAlign: 'center', margin: '10px 0 0',
-                fontFamily: 'var(--font-body, sans-serif)',
-              }}>
-                Demo data only — no real transactions occur.
-              </p>
-            </div>}
 
             <div className="gold-line" />
 

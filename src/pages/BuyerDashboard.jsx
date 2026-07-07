@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI } from '../api/api';
+import { favoritesAPI, escrowAPI, paymentsAPI, carsAPI, chatAPI, savedSearchAPI, bidsAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import BackButton from '../components/BackButton';
 import GlassCard from '../components/dashboard/GlassCard';
@@ -62,11 +62,8 @@ export default function BuyerDashboard() {
   useEffect(() => {
     const tryFetchBids = async () => {
       try {
-        const res = await fetch('/api/bids/my', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          setMyBids(data.bids || data || []);
-        }
+        const data = await bidsAPI.myBids();
+        if (data) setMyBids(data.bids || data.data || data || []);
       } catch (error) {
         console.warn('Unable to load bids', error);
       }

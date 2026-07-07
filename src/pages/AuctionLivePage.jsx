@@ -1,5 +1,5 @@
 // src/pages/AuctionLivePage.jsx
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, bidsAPI, smsBiddingAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -8,8 +8,8 @@ import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../components/CountdownDisplay';
 import BackButton from '../components/BackButton';
 import WinnerModal from '../components/WinnerModal';
-import MarketValuationMatrix from '../components/MarketValuationMatrix';
-import GalleryModal from '../components/GalleryModal';
+const MarketValuationMatrix = lazy(() => import('../components/MarketValuationMatrix'));
+const GalleryModal = lazy(() => import('../components/GalleryModal'));
 import usePageMeta from '../hooks/usePageMeta';
 import SEOHead from '../components/SEOHead';
 import NotFoundState from '../components/NotFoundState';
@@ -534,13 +534,15 @@ export default function AuctionLivePage() {
 
             {/* Market Valuation */}
             <div className="bid-history-card">
-              <MarketValuationMatrix
-                carId={id}
-                carPrice={car.price || currentBid}
-                carBrand={car.brand}
-                carModel={car.model}
-                carYear={car.year}
-              />
+              <Suspense fallback={null}>
+                <MarketValuationMatrix
+                  carId={id}
+                  carPrice={car.price || currentBid}
+                  carBrand={car.brand}
+                  carModel={car.model}
+                  carYear={car.year}
+                />
+              </Suspense>
             </div>
 
             {/* Bid History */}
@@ -871,7 +873,9 @@ export default function AuctionLivePage() {
 
       {/* Gallery Modal */}
       {showGallery && (
-        <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+        <Suspense fallback={null}>
+          <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+        </Suspense>
       )}
 
       {/* Winner Modal */}

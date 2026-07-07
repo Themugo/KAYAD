@@ -1,12 +1,9 @@
 ﻿// src/api/api.exports.ts
-// All the per-route API objects. Unchanged from the original api.ts.
-// Keeping them here lets api.ts stay focused on client infrastructure
-// (instance, interceptors, demo fallback, withDemo wrapper).
-import { api, unwrap, withDemo } from "./api";
-import { demoAPI } from "../data/demoAPI";
+// All the per-route API objects.
+import { api, unwrap } from "./api";
 
 // ── AUTH ──────────────────────────────────────────────
-const _authAPI = {
+export const authAPI = {
   register: (body: any) => api.post('/auth/register', body).then(unwrap),
   login:    (body: any) => api.post('/auth/login', body).then(unwrap),
   refresh:  ()     => api.post('/auth/refresh').then(unwrap),
@@ -23,10 +20,9 @@ const _authAPI = {
   verifyPhone:   (otp: string) => api.post('/auth/verify-phone', { otp }).then(unwrap),
   phoneStatus:   ()     => api.get('/auth/phone-status').then(unwrap),
 };
-export const authAPI = withDemo(_authAPI, demoAPI.auth);
 
 // ── CARS ──────────────────────────────────────────────
-const _carsAPI = {
+export const carsAPI = {
   list: (params: any) => api.get('/cars', { params }).then(unwrap),
   get:  (id: string)     => api.get(`/cars/${id}`).then(unwrap),
   insights: (id: string) => api.get(`/cars/${id}/insights`).then(unwrap),
@@ -54,35 +50,32 @@ const _carsAPI = {
   bid: (id: string, body: any)        => api.post(`/cars/${id}/bid`, body).then(unwrap),
   toggleFav: (id: string)        => api.post(`/cars/${id}/favorite`).then(unwrap),
   batch: (body: any)         => api.post('/cars/batch', body).then(unwrap),
-  demoAll: ()       => api.get('/cars/demo/all').then(unwrap),
   fraudCheck: (id: string) => api.get(`/cars/admin/${id}/fraud`).then(unwrap),
   adminStart: (id: string) => api.post(`/cars/admin/${id}/start`).then(unwrap),
   adminEnd:   (id: string) => api.post(`/cars/admin/${id}/end`).then(unwrap),
 };
-export const carsAPI = withDemo(_carsAPI, demoAPI.cars);
 
 // ── BIDS ──────────────────────────────────────────────
-const _bidsAPI = {
+export const bidsAPI = {
   place:           (carId: string, body: any) => api.post(`/bids/${carId}/bid`, body).then(unwrap),
   getForCar:       (carId: string)       => api.get(`/bids/${carId}/bids`).then(unwrap),
   endAuction:      (carId: string)       => api.post(`/bids/${carId}/end`).then(unwrap),
   adminAll:        (params: any)      => api.get('/bids/admin/all', { params }).then(unwrap),
   adminSuspicious: ()            => api.get('/bids/admin/suspicious').then(unwrap),
   adminSetWinner:  (bidId: string)       => api.post(`/bids/admin/${bidId}/set-winner`).then(unwrap),
+  myBids:         ()              => api.get('/bids/my').then(unwrap),
 };
-export const bidsAPI = withDemo(_bidsAPI, demoAPI.bids);
 
 // ── PAYMENTS ──────────────────────────────────────────
-const _paymentsAPI = {
+export const paymentsAPI = {
   initiate:    (body: any)      => api.post('/payments/initiate', body, { timeout: 45000 }).then(unwrap),
   status:      (id: string)        => api.get(`/payments/status/${id}`).then(unwrap),
   myPayments:  ()          => api.get('/payments/my').then(unwrap),
   byCheckout:  (checkoutId: string)=> api.get(`/payments/checkout/${checkoutId}`).then(unwrap),
 };
-export const paymentsAPI = withDemo(_paymentsAPI, demoAPI.payments);
 
 // ── ESCROW ────────────────────────────────────────────
-const _escrowAPI = {
+export const escrowAPI = {
   mine:    ()              => api.get('/escrow/my').then(unwrap),
   all:     (params: any)        => api.get('/escrow', { params }).then(unwrap),
   get:     (id: string)            => api.get(`/escrow/${id}`).then(unwrap),
@@ -91,10 +84,9 @@ const _escrowAPI = {
   dispute: (id: string, reason: string)    => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
   requestRelease: (id: string)     => api.post(`/escrow/${id}/request-release`).then(unwrap),
 };
-export const escrowAPI = withDemo(_escrowAPI, demoAPI.escrow);
 
 // ── ESCROW VAULT ──────────────────────────────────────
-const _escrowVaultAPI = {
+export const escrowVaultAPI = {
   init:             (carId: string)          => api.post(`/escrow-vault/${carId}/init`).then(unwrap),
   my:               ()               => api.get('/escrow-vault/my').then(unwrap),
   get:              (id: string)             => api.get(`/escrow-vault/${id}`).then(unwrap),
@@ -107,10 +99,9 @@ const _escrowVaultAPI = {
   adminConfirm:     (id: string)             => api.post(`/escrow-vault/${id}/admin-confirm-funding`).then(unwrap),
   adminRefund:      (id: string)             => api.post(`/escrow-vault/${id}/admin-refund`).then(unwrap),
 };
-export const escrowVaultAPI = withDemo(_escrowVaultAPI, demoAPI.escrowVault);
 
 // ── DEALER ────────────────────────────────────────────
-const _dealerAPI = {
+export const dealerAPI = {
   earnings:   (params: any) => api.get('/dealer/earnings', { params }).then(unwrap),
   cars:       (params: any) => api.get('/dealer/cars', { params }).then(unwrap),
   analytics:  (params: any) => api.get('/dealer/analytics', { params }).then(unwrap),
@@ -143,10 +134,9 @@ const _dealerAPI = {
   pricingRecommendations: (body: any) => api.post('/dealer/pricing-recommendations', body).then(unwrap),
   generateApiKey:  () => api.post('/dealer/api-key').then(unwrap),
 };
-export const dealerAPI = withDemo(_dealerAPI, demoAPI.dealer);
 
 // ── ADMIN ─────────────────────────────────────────────
-const _adminAPI = {
+export const adminAPI = {
   stats:         ()          => api.get('/admin/stats').then(unwrap),
   users:         (params: any)    => api.get('/admin/users', { params }).then(unwrap),
   toggleBan:     (userId: string)    => api.post(`/admin/users/${userId}/toggle-ban`).then(unwrap),
@@ -188,14 +178,8 @@ const _adminAPI = {
   getPermCatalog:  ()            => api.get('/admin/staff/permissions/catalog').then(unwrap),
   getStaffPerms:   (id: string)          => api.get(`/admin/staff/${id}/permissions`).then(unwrap),
   setStaffPerms:   (id: string, body: any)    => api.put(`/admin/staff/${id}/permissions`, body).then(unwrap),
-  seedDepartments: ()            => api.post('/admin/seed-departments').then(unwrap),
-  reseed:          ()            => api.post('/admin/reseed').then(unwrap),
   deleteUser:      (userId: string)      => api.delete(`/admin/users/${userId}`).then(unwrap),
   deactivateUser:  (userId: string)      => api.put(`/admin/users/${userId}/deactivate`).then(unwrap),
-  demoStatus:      ()            => api.get('/admin/demo/status').then(unwrap),
-  demoCleanup:     ()            => api.delete('/admin/demo/cleanup').then(unwrap),
-  toggleDemo:      ()            => api.post('/admin/demo/toggle').then(unwrap),
-  demoReseed:      ()            => api.post('/admin/demo/reseed').then(unwrap),
   assignPackage:   (userId: string, body: any) => api.patch(`/admin/dealers/${userId}/package`, body).then(unwrap),
   updatePackages:  (packages: any) => api.put('/admin/config/packages', { packages }).then(unwrap),
   reviews:         (params: any)    => api.get('/admin/reviews', { params }).then(unwrap),
@@ -232,11 +216,10 @@ const _adminAPI = {
   integrityFlag:      (id: string)  => api.get(`/new-admin/auction-integrity/${id}`).then(unwrap),
   integrityUpdateFlag:(id: string, body: any) => api.patch(`/new-admin/auction-integrity/${id}/status`, body).then(unwrap),
   integrityScan:      (body: any)   => api.post('/new-admin/auction-integrity/scan', body).then(unwrap),
-   integrityRiskProfiles: (p: any) => api.get('/new-admin/auction-integrity/risk-profiles', { params: p }).then(unwrap),
-   escrowApprove: (userId: string) => api.put(`/admin/users/${userId}/escrow-approve`).then(unwrap),
-   escrowForce:   (userId: string) => api.put(`/admin/users/${userId}/escrow-force`).then(unwrap),
+  integrityRiskProfiles: (p: any) => api.get('/new-admin/auction-integrity/risk-profiles', { params: p }).then(unwrap),
+  escrowApprove: (userId: string) => api.put(`/admin/users/${userId}/escrow-approve`).then(unwrap),
+  escrowForce:   (userId: string) => api.put(`/admin/users/${userId}/escrow-force`).then(unwrap),
 };
-export const adminAPI = _adminAPI;
 
 // ── DISPUTE ───────────────────────────────────────────
 export const disputeAPI = {
@@ -262,27 +245,25 @@ export const disputeAPI = {
 };
 
 // ── NOTIFICATIONS ─────────────────────────────────────
-const _notifAPI = {
+export const notifAPI = {
   list:        (params: any) => api.get('/notifications', { params }).then(unwrap),
   markRead:    (id: string)     => api.post(`/notifications/${id}/read`).then(unwrap),
   markAllRead: ()       => api.post('/notifications/read-all').then(unwrap),
   remove:      (id: string)     => api.delete(`/notifications/${id}`).then(unwrap),
   createReminder: (body: any) => api.post('/notifications/reminders', body).then(unwrap),
 };
-export const notifAPI = withDemo(_notifAPI, demoAPI.notif);
 
 // ── FAVORITES ─────────────────────────────────────────
-const _favoritesAPI = {
+export const favoritesAPI = {
   list:   ()      => api.get('/favorites').then(unwrap),
   add:    (carId: string) => api.post(`/favorites/${carId}`).then(unwrap),
   remove: (carId: string) => api.delete(`/favorites/${carId}`).then(unwrap),
   toggle: (carId: string) => api.post(`/favorites/${carId}/toggle`).then(unwrap),
   setPriceAlert: (carId: string, notify: boolean) => api.put(`/favorites/${carId}/price-alert`, { notifyOnPriceDrop: notify }).then(unwrap),
 };
-export const favoritesAPI = withDemo(_favoritesAPI, demoAPI.favorites);
 
 // ── CHAT ──────────────────────────────────────────────
-const _chatAPI = {
+export const chatAPI = {
   inbox:    ()               => api.get('/chat').then(unwrap),
   start:    (body: any)           => api.post('/chat', body).then(unwrap),
   messages: (chatId: string, params: any) => api.get(`/chat/${chatId}/messages`, { params }).then(unwrap),
@@ -290,10 +271,9 @@ const _chatAPI = {
   seen:     (chatId: string)         => api.post(`/chat/${chatId}/seen`).then(unwrap),
   leave:    (chatId: string)         => api.delete(`/chat/${chatId}`).then(unwrap),
 };
-export const chatAPI = withDemo(_chatAPI, demoAPI.chat);
 
 // ── SAVED SEARCHES ────────────────────────────────────
-const _savedSearchAPI = {
+export const savedSearchAPI = {
   list:   ()             => api.get('/saved-searches').then(unwrap),
   create: (body: any)         => api.post('/saved-searches', body).then(unwrap),
   update: (id: string, body: any)     => api.put(`/saved-searches/${id}`, body).then(unwrap),
@@ -303,27 +283,24 @@ const _savedSearchAPI = {
     return api.put(`/saved-searches/${id}`, body).then(unwrap);
   },
 };
-export const savedSearchAPI = withDemo(_savedSearchAPI, demoAPI.savedSearch);
 
 // ── NTSA ──────────────────────────────────────────────
-const _ntsaAPI = {
+export const ntsaAPI = {
   list:    (params: any)    => api.get('/ntsa-verification', { params }).then(unwrap),
   queue:   (carId: string)     => api.post('/ntsa-verification', { carId }).then(unwrap),
   process: (id: string, body: any)  => api.post(`/ntsa-verification/${id}/process`, body).then(unwrap),
   addDoc:  (id: string, body: any)  => api.post(`/ntsa-verification/${id}/documents`, body).then(unwrap),
   status:  (carId: string)     => api.get(`/ntsa-verification/car/${carId}/status`).then(unwrap),
 };
-export const ntsaAPI = withDemo(_ntsaAPI, demoAPI.ntsa);
 
 // ── REFERRAL ──────────────────────────────────────────
-const _referralAPI = {
+export const referralAPI = {
   stats: () => api.get('/referral/stats').then(unwrap),
   code:  () => api.get('/referral/code').then(unwrap),
 };
-export const referralAPI = withDemo(_referralAPI, {});
 
 // ── INSPECTIONS ───────────────────────────────────────
-const _inspectionAPI = {
+export const inspectionAPI = {
   order:           (body: any)           => api.post('/inspections/order', body).then(unwrap),
   confirmPayment:  (checkoutRequestID: string) => api.post('/inspections/confirm-payment', { checkoutRequestID }).then(unwrap),
   myOrders:        ()               => api.get('/inspections/my').then(unwrap),
@@ -336,51 +313,45 @@ const _inspectionAPI = {
   get:             (id: string)             => api.get(`/inspections/${id}`).then(unwrap),
   forCar:          (carId: string)          => api.get(`/inspections/car/${carId}`).then(unwrap),
 };
-export const inspectionAPI = withDemo(_inspectionAPI, demoAPI.inspection);
 
 // ── REVIEWS ───────────────────────────────────────────
-const _reviewsAPI = {
+export const reviewsAPI = {
   create:       (body: any)     => api.post('/reviews', body).then(unwrap),
   mine:         ()         => api.get('/reviews/my').then(unwrap),
   forDealer:    (dealerId: string) => api.get(`/reviews/dealer/${dealerId}`).then(unwrap),
   remove:       (id: string)       => api.delete(`/reviews/${id}`).then(unwrap),
 };
-export const reviewsAPI = withDemo(_reviewsAPI, demoAPI.reviews);
 
 // ── TRANSACTIONS ──────────────────────────────────────
-const _transactionsAPI = {
+export const transactionsAPI = {
   list:    (params: any) => api.get('/transactions', { params }).then(unwrap),
   get:     (id: string)     => api.get(`/transactions/${id}`).then(unwrap),
   summary: ()       => api.get('/transactions/summary').then(unwrap),
 };
-export const transactionsAPI = withDemo(_transactionsAPI, demoAPI.transactions);
 
 // ── AUCTIONS (PUBLIC) ──────────────────────────────────
-const _auctionAPI = {
+export const auctionAPI = {
   list:     (params: any) => api.get('/auctions', { params }).then(unwrap),
   get:      (id: string)     => api.get(`/auctions/${id}`).then(unwrap),
   active:   (params: any) => api.get('/auctions/active', { params }).then(unwrap),
   my:       (params: any) => api.get('/auctions/my', { params }).then(unwrap),
 };
-export const auctionAPI = withDemo(_auctionAPI, demoAPI.auctionAdmin);
 
 // ── AUCTION ADMIN ─────────────────────────────────────
-const _auctionAdminAPI = {
+export const auctionAdminAPI = {
   start:     (carId: string, body: any)  => api.post(`/auction-admin/${carId}/start`, body).then(unwrap),
   end:       (carId: string)        => api.post(`/auction-admin/${carId}/end`).then(unwrap),
   extend:    (carId: string, body: any)  => api.post(`/auction-admin/${carId}/extend`, body).then(unwrap),
   bidHistory:(carId: string)        => api.get(`/auction-admin/${carId}/bids`).then(unwrap),
   setWinner: (carId: string, bidId: string) => api.post(`/auction-admin/${carId}/set-winner`, { bidId }).then(unwrap),
 };
-export const auctionAdminAPI = withDemo(_auctionAdminAPI, demoAPI.auctionAdmin);
 
 // ── DEALER AUCTION ────────────────────────────────────
-const _dealerAuctionAPI = {
+export const dealerAuctionAPI = {
   start:     (carId: string, body: any)  => api.post(`/dealer/cars/${carId}/auction/start`, body).then(unwrap),
   end:       (carId: string)        => api.post(`/dealer/cars/${carId}/auction/end`).then(unwrap),
   extend:    (carId: string, hours: number) => api.post(`/dealer/cars/${carId}/auction/extend`, { hours }).then(unwrap),
 };
-export const dealerAuctionAPI = withDemo(_dealerAuctionAPI, demoAPI.auctionAdmin);
 
 // ── VERIFIED BUYER ────────────────────────────────────
 export const buyerVerificationAPI = {
@@ -411,12 +382,11 @@ export const contactAPI = {
 };
 
 // ── MARKET ────────────────────────────────────────────
-const _marketAPI = {
+export const marketAPI = {
   pulse:      (carId: string)  => api.get(`/market/pulse/${carId}`).then(unwrap),
   trends:     (params: any) => api.get('/market/trends', { params }).then(unwrap),
   dealerInsights: ()   => api.get('/market/dealer/insights').then(unwrap),
 };
-export const marketAPI = withDemo(_marketAPI, demoAPI.market);
 
 // ── INSPECTOR ─────────────────────────────────────────
 export const inspectorAPI = {
@@ -551,5 +521,3 @@ export const platformStatsAPI = {
 
 // ── formatKES (re-exported from helpers) ──────────────
 export { formatKES } from "../utils/helpers";
-
-

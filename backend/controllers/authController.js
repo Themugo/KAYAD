@@ -304,7 +304,7 @@ export const login = async (req, res) => {
     const requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
       ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
       : emailConfigured;
-    if (requireVerification && !user.emailVerified && !user.isDemo) {
+    if (requireVerification && !user.emailVerified) {
       return R.error(
         res,
         "Please verify your email before logging in. Check your inbox or request a new verification link.",

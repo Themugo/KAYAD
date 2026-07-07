@@ -23,7 +23,6 @@ import {
   createCar,
   updateCar,
   deleteCar,
-  getDemoCars,
   deleteCarImage,
   addCarImages,
 } from "../controllers/carController.js";
@@ -85,10 +84,6 @@ router.get(
 );
 
 // =============================
-// 🧪 DEMO CARS (demo dealer only)
-// =============================
-router.get("/demo/all", protect, asyncHandler(getDemoCars));
-
 // =============================
 // 🚗 PUBLIC ROUTES
 // =============================

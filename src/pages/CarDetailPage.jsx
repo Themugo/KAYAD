@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import '../styles/car-detail.css';
 import BackButton from '../components/BackButton';
@@ -9,18 +9,17 @@ import InlineBidding from './car/components/InlineBidding';
 import NtsaStatusCard from './car/components/NtsaStatusCard';
 import NotFoundState from '../components/NotFoundState';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
-import { getDemoCar } from '../data/demoData';
 import { useAuth } from '../context/AuthContext';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
 import { useSocket } from '../context/SocketContext';
 import PaymentModal from '../components/PaymentModal';
 import InspectionButton from '../components/InspectionButton';
-import TcoCalculator from '../components/TcoCalculator';
-import MarketValuationMatrix from '../components/MarketValuationMatrix';
-import MarketPulse from '../components/MarketPulse';
-import PriceHistoryChart from '../components/PriceHistoryChart';
-import GalleryModal from '../components/GalleryModal';
+const TcoCalculator = lazy(() => import('../components/TcoCalculator'));
+const MarketValuationMatrix = lazy(() => import('../components/MarketValuationMatrix'));
+const MarketPulse = lazy(() => import('../components/MarketPulse'));
+const PriceHistoryChart = lazy(() => import('../components/PriceHistoryChart'));
+const GalleryModal = lazy(() => import('../components/GalleryModal'));
 import { VehicleStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
 import SEOHead from '../components/SEOHead';
 import { generateVehicleMetadata } from '../utils/seoService';
@@ -82,16 +81,12 @@ export default function CarDetailPage() {
     carsAPI.get(id)
       .then(data => {
         let c = data?.car || data?.data || data;
-        if (!c || !c._id) c = getDemoCar(id);
         setCar(c);
         if (c) { setImgIdx(c.coverImage ?? 0); carsAPI.trackClick?.(id).catch((error) => console.error('Track click failed:', error)); }
         if (c?.dealer?._id) reviewsAPI.forDealer(c.dealer._id).then(d => setReviews(d.reviews || [])).catch((error) => console.error('Fetch reviews failed:', error));
       })
       .catch((error) => {
         console.error('Failed to fetch car:', error);
-        const m = getDemoCar(id);
-        setCar(m);
-        if (m) setImgIdx(m.coverImage ?? 0);
       })
       .finally(() => setLoading(false));
     if (isAuth) {
@@ -857,22 +852,30 @@ export default function CarDetailPage() {
           )}
 
           {/* TCO */}
-          <TcoCalculator vehicle={car} />
+          <Suspense fallback={null}>
+            <TcoCalculator vehicle={car} />
+          </Suspense>
 
           {/* Market Valuation */}
-          <MarketValuationMatrix
-            carId={car._id}
-            carPrice={car.price || car.currentBid}
-            carBrand={car.brand}
-            carModel={car.model}
-            carYear={car.year}
-          />
+          <Suspense fallback={null}>
+            <MarketValuationMatrix
+              carId={car._id}
+              carPrice={car.price || car.currentBid}
+              carBrand={car.brand}
+              carModel={car.model}
+              carYear={car.year}
+            />
+          </Suspense>
 
           {/* Price History */}
-          <PriceHistoryChart carId={car._id} currentPrice={car.price} />
+          <Suspense fallback={null}>
+            <PriceHistoryChart carId={car._id} currentPrice={car.price} />
+          </Suspense>
 
           {/* Market Pulse (SokoAI) */}
-          <MarketPulse carId={car._id} carPrice={car.price || car.currentBid} carBrand={car.brand} carYear={car.year} />
+          <Suspense fallback={null}>
+            <MarketPulse carId={car._id} carPrice={car.price || car.currentBid} carBrand={car.brand} carYear={car.year} />
+          </Suspense>
         </div>
       </div>
 
@@ -917,7 +920,9 @@ export default function CarDetailPage() {
       )}
 
       {showGallery && (
-        <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+        <Suspense fallback={null}>
+          <GalleryModal car={car} initialIdx={imgIdx} onClose={() => setShowGallery(false)} />
+        </Suspense>
       )}
 
       {/* Similar Cars */}
