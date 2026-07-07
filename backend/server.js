@@ -699,6 +699,121 @@ mongoose.connection.on("error", (err) => logError("MongoDB error", err));
 // ─── ENV VALIDATION ───────────────────────────────────────────
 // (validateEnv is imported from ./utils/env.js)
 
+
+
+// ─── BACKGROUND SERVICES ────────────────────────────────────
+const startBackgroundServices = async (io) => {
+  console.log("🔧 Starting background services...");
+  await Promise.allSettled([
+    (async () => {
+      try { await startAuctionEngine(); console.log("✅ Auction engine started"); }
+      catch (err) { logError("Failed to start auction engine", err); console.log("❌ Failed to start auction engine:", err); }
+    })(),
+    (async () => {
+      try { startAuctionTimer(io); console.log("✅ Auction timer started"); }
+      catch (err) { logError("Failed to start auction timer", err); console.log("❌ Failed to start auction timer:", err); }
+    })(),
+    (async () => {
+      try { startEscrowCron(); console.log("✅ Escrow cron started"); }
+      catch (err) { logError("Failed to start escrow cron", err); console.log("❌ Failed to start escrow cron:", err); }
+    })(),
+    (async () => {
+      try { startDisputeCron(); console.log("✅ Dispute cron started"); }
+      catch (err) { logError("Failed to start dispute cron", err); console.log("❌ Failed to start dispute cron:", err); }
+    })(),
+    (async () => {
+      try { startAuctionReminderCron(); console.log("✅ Auction reminder cron started"); }
+      catch (err) { logError("Failed to start auction reminder cron", err); console.log("❌ Failed to start auction reminder cron:", err); }
+    })(),
+    (async () => {
+      try { startSavedSearchCron(); console.log("✅ Saved search cron started"); }
+      catch (err) { logError("Failed to start saved search cron", err); console.log("❌ Failed to start saved search cron:", err); }
+    })(),
+    (async () => {
+      try { startPriceAlertCron(); console.log("✅ Price alert cron started"); }
+      catch (err) { logError("Failed to start price alert cron", err); console.log("❌ Failed to start price alert cron:", err); }
+    })(),
+    (async () => {
+      try { startHealthScoreScheduler(); console.log("✅ Health score scheduler started"); }
+      catch (err) { logError("Failed to start health score scheduler", err); console.log("❌ Failed to start health score scheduler:", err); }
+    })(),
+    (async () => {
+      try { startMarketTrendScheduler(); console.log("✅ Market trend scheduler started"); }
+      catch (err) { logError("Failed to start market trend scheduler", err); console.log("❌ Failed to start market trend scheduler:", err); }
+    })(),
+    (async () => {
+      try { startMarketplaceHealthScheduler(); console.log("✅ Marketplace health scheduler started"); }
+      catch (err) { logError("Failed to start marketplace health scheduler", err); console.log("❌ Failed to start marketplace health scheduler:", err); }
+    })(),
+    (async () => {
+      try { startSliScheduler(); console.log("✅ Reliability/SLI scheduler started"); }
+      catch (err) { logError("Failed to start SLI scheduler", err); console.log("❌ Failed to start SLI scheduler:", err); }
+    })(),
+    (async () => {
+      try { startAllReconciliationCrons(); console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)"); }
+      catch (err) { logError("Failed to start reconciliation crons", err); console.log("❌ Failed to start reconciliation crons:", err); }
+    })(),
+    (async () => {
+      try { startIntegrityCron(); console.log("✅ Auction integrity cron started"); }
+      catch (err) { logError("Failed to start auction integrity cron", err); console.log("❌ Failed to start auction integrity cron:", err); }
+      try { startVerificationDeadlineCron(); console.log("✅ Verification deadline cron started"); }
+      catch (err) { logError("Failed to start verification deadline cron", err); console.log("❌ Failed to start verification deadline cron:", err); }
+    })(),
+  ]);
+
+  if (process.env.REDIS_URL || process.env.REDIS_HOST) {
+    try {
+      await initializeQueues();
+      console.log("✅ Queue infrastructure initialized");
+    } catch (err) {
+      logError("Failed to initialize queues", err);
+      console.log("⚠️ Queue infrastructure init failed (non-fatal)");
+    }
+    try {
+      startAllWorkers();
+      console.log("✅ Background workers started");
+    } catch (err) {
+      logError("Failed to start workers", err);
+      console.log("⚠️ Worker startup failed (non-fatal)");
+    }
+  } else {
+    console.log("⚠️ Redis not configured — queues/workers disabled");
+  }
+
+  logInfo("Background services started", {
+    escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
+    auctionReminderCron: "reminders active",
+    savedSearchCron: "10-min cycle",
+    priceAlertCron: "15-min cycle",
+    auctionEngine: "running",
+    sliScheduler: "1-min SLI / 5-min budget / 1-min alerts",
+  });
+
+  if (isRedisConnected()) {
+    const VIEW_FLUSH_MS = 60000;
+    setInterval(async () => {
+      try {
+        const redis = getRedisClient();
+        const counts = await redis.hGetAll("kayad:view_counts");
+        const ids = Object.keys(counts);
+        if (ids.length === 0) return;
+        const Car = (await import("./models/Car.js")).default;
+        const bulkOps = ids.map((id) => ({
+          updateOne: {
+            filter: { _id: id },
+            update: { $inc: { views: parseInt(counts[id], 10) || 0 } },
+          },
+        }));
+        await Car.bulkWrite(bulkOps, { ordered: false });
+        await redis.del("kayad:view_counts");
+      } catch (e) {
+        logWarn("View flush error", { error: e.message });
+      }
+    }, VIEW_FLUSH_MS);
+    logInfo("View flush configured", { interval: "60s", flow: "Redis → MongoDB" });
+  }
+};
+
 // ─── BOOTSTRAP ────────────────────────────────────────────────
 const bootstrap = async () => {
   try {
@@ -708,34 +823,9 @@ const bootstrap = async () => {
     await connectDB();
     console.log("✅ Database connected");
 
-    await initCache(); // Redis (optional)
+    await initCache();
 
-    // Auto-seed if no superadmin accounts exist (fresh DB)
-    try {
-      console.log("🌱 Checking if auto-seed is needed...");
-      const Car = (await import("./models/Car.js")).default;
-      const carCount = await Car.countDocuments({});
-      const User = (await import("./models/User.js")).default;
-      const existing = await User.countDocuments({ role: "superadmin" });
-      if (carCount === 0 || existing === 0) {
-        console.log("🌱 Auto-seeding database...");
-        const { reseed } = await import("./seed.js");
-        const result = await reseed();
-        logInfo("Auto-seeded database", {
-          webhost: result.webhost.length,
-          admin: result.admin.length,
-          demos: result.demos.length,
-          cars: result.cars,
-        });
-        console.log("✅ Auto-seed completed");
-      } else {
-        console.log("✅ Auto-seed not needed (cars and superadmin exist)");
-      }
-    } catch (seedErr) {
-      logWarn("Auto-seed skipped", { error: seedErr.message });
-      console.log("⚠️ Auto-seed skipped:", seedErr.message);
-    }
-
+    // Start listening BEFORE auto-seed so Render detects the open port
     try {
       console.log("🚀 Starting server on port", PORT);
       server.listen(PORT, async () => {
@@ -754,137 +844,37 @@ const bootstrap = async () => {
           cardPayment: process.env.CARD_PAYMENT_ENABLED === "true" ? "enabled" : "disabled",
         });
 
-        // Trigger startup alert
         if (process.env.SENTRY_DSN) {
-          await triggerAlert(
-            "Server Started",
-            `KAYAD backend server started successfully on port ${PORT}`,
-            ALERT_LEVELS.LOW,
-            { port: PORT, host: "localhost", environment: NODE_ENV },
-          );
+          await triggerAlert("Server Started", `KAYAD backend server started successfully on port ${PORT}`, ALERT_LEVELS.LOW, { port: PORT, host: "localhost", environment: NODE_ENV });
         }
+
+        // Auto-seed (non-blocking — port already open)
+        try {
+          console.log("🌱 Checking if auto-seed is needed...");
+          const Car = (await import("./models/Car.js")).default;
+          const carCount = await Car.countDocuments({});
+          const User = (await import("./models/User.js")).default;
+          const existing = await User.countDocuments({ role: "superadmin" });
+          if (carCount === 0 || existing === 0) {
+            console.log("🌱 Auto-seeding database...");
+            const { reseed } = await import("./seed.js");
+            const result = await reseed();
+            logInfo("Auto-seeded database", { webhost: result.webhost.length, admin: result.admin.length, demos: result.demos.length, cars: result.cars });
+            console.log("✅ Auto-seed completed");
+          } else {
+            console.log("✅ Auto-seed not needed (cars and superadmin exist)");
+          }
+        } catch (seedErr) {
+          logWarn("Auto-seed skipped", { error: seedErr.message });
+          console.log("⚠️ Auto-seed skipped:", seedErr.message);
+        }
+
+        await startBackgroundServices(io);
       });
     } catch (listenErr) {
       logError("Failed to start server", listenErr);
       console.log("❌ Failed to start server:", listenErr);
       process.exit(1);
-    }
-
-    console.log("🔧 Starting background services...");
-    // Start all non-critical services in parallel (crons, schedulers)
-    await Promise.allSettled([
-      (async () => {
-        try { await startAuctionEngine(); console.log("✅ Auction engine started"); }
-        catch (err) { logError("Failed to start auction engine", err); console.log("❌ Failed to start auction engine:", err); }
-      })(),
-      (async () => {
-        try { startAuctionTimer(io); console.log("✅ Auction timer started"); }
-        catch (err) { logError("Failed to start auction timer", err); console.log("❌ Failed to start auction timer:", err); }
-      })(),
-      (async () => {
-        try { startEscrowCron(); console.log("✅ Escrow cron started"); }
-        catch (err) { logError("Failed to start escrow cron", err); console.log("❌ Failed to start escrow cron:", err); }
-      })(),
-      (async () => {
-        try { startDisputeCron(); console.log("✅ Dispute cron started"); }
-        catch (err) { logError("Failed to start dispute cron", err); console.log("❌ Failed to start dispute cron:", err); }
-      })(),
-      (async () => {
-        try { startAuctionReminderCron(); console.log("✅ Auction reminder cron started"); }
-        catch (err) { logError("Failed to start auction reminder cron", err); console.log("❌ Failed to start auction reminder cron:", err); }
-      })(),
-      (async () => {
-        try { startSavedSearchCron(); console.log("✅ Saved search cron started"); }
-        catch (err) { logError("Failed to start saved search cron", err); console.log("❌ Failed to start saved search cron:", err); }
-      })(),
-      (async () => {
-        try { startPriceAlertCron(); console.log("✅ Price alert cron started"); }
-        catch (err) { logError("Failed to start price alert cron", err); console.log("❌ Failed to start price alert cron:", err); }
-      })(),
-      (async () => {
-        try { startHealthScoreScheduler(); console.log("✅ Health score scheduler started"); }
-        catch (err) { logError("Failed to start health score scheduler", err); console.log("❌ Failed to start health score scheduler:", err); }
-      })(),
-      (async () => {
-        try { startMarketTrendScheduler(); console.log("✅ Market trend scheduler started"); }
-        catch (err) { logError("Failed to start market trend scheduler", err); console.log("❌ Failed to start market trend scheduler:", err); }
-      })(),
-      (async () => {
-        try { startMarketplaceHealthScheduler(); console.log("✅ Marketplace health scheduler started"); }
-        catch (err) { logError("Failed to start marketplace health scheduler", err); console.log("❌ Failed to start marketplace health scheduler:", err); }
-      })(),
-      (async () => {
-        try { startSliScheduler(); console.log("✅ Reliability/SLI scheduler started"); }
-        catch (err) { logError("Failed to start SLI scheduler", err); console.log("❌ Failed to start SLI scheduler:", err); }
-      })(),
-      (async () => {
-        try { startAllReconciliationCrons(); console.log("✅ Reconciliation crons started (rapid/hourly/daily/deep)"); }
-        catch (err) { logError("Failed to start reconciliation crons", err); console.log("❌ Failed to start reconciliation crons:", err); }
-      })(),
-      (async () => {
-        try { startIntegrityCron(); console.log("✅ Auction integrity cron started"); }
-        catch (err) { logError("Failed to start auction integrity cron", err); console.log("❌ Failed to start auction integrity cron:", err); }
-
-        try { startVerificationDeadlineCron(); console.log("✅ Verification deadline cron started"); }
-        catch (err) { logError("Failed to start verification deadline cron", err); console.log("❌ Failed to start verification deadline cron:", err); }
-      })(),
-    ]);
-
-    if (process.env.REDIS_URL || process.env.REDIS_HOST) {
-      try {
-        await initializeQueues();
-        console.log("✅ Queue infrastructure initialized");
-      } catch (err) {
-        logError("Failed to initialize queues", err);
-        console.log("⚠️ Queue infrastructure init failed (non-fatal)");
-      }
-
-      try {
-        startAllWorkers();
-        console.log("✅ Background workers started");
-      } catch (err) {
-        logError("Failed to start workers", err);
-        console.log("⚠️ Worker startup failed (non-fatal)");
-      }
-    } else {
-      console.log("⚠️ Redis not configured — queues/workers disabled");
-    }
-
-    logInfo("Background services started", {
-      escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
-      auctionReminderCron: "reminders active",
-      savedSearchCron: "10-min cycle",
-      priceAlertCron: "15-min cycle",
-      auctionEngine: "running",
-      sliScheduler: "1-min SLI / 5-min budget / 1-min alerts",
-    });
-
-    // ── VIEW COUNT FLUSH (Issue #5) ─────────────────────────
-    // Every 60s, drain Redis view counters into MongoDB $inc bulk write
-    if (isRedisConnected()) {
-      const VIEW_FLUSH_MS = 60000;
-      setInterval(async () => {
-        try {
-          const redis = getRedisClient();
-          const counts = await redis.hGetAll("kayad:view_counts");
-          const ids = Object.keys(counts);
-          if (ids.length === 0) return;
-
-          const Car = (await import("./models/Car.js")).default;
-          const bulkOps = ids.map((id) => ({
-            updateOne: {
-              filter: { _id: id },
-              update: { $inc: { views: parseInt(counts[id], 10) || 0 } },
-            },
-          }));
-
-          await Car.bulkWrite(bulkOps, { ordered: false });
-          await redis.del("kayad:view_counts");
-        } catch (e) {
-          logWarn("View flush error", { error: e.message });
-        }
-      }, VIEW_FLUSH_MS);
-      logInfo("View flush configured", { interval: "60s", flow: "Redis → MongoDB" });
     }
   } catch (err) {
     logError("Bootstrap failed", err);
