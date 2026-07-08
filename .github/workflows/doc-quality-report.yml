@@ -17,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm install gray-matter date-fns
@@ -39,27 +39,21 @@ jobs:
           script: |
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('doc-quality-report.json', 'utf8'));
-            
-            const body = `# Documentation Quality Report
-            
-Generated: ${report.generated}
-
-## Summary
-- Total Documents: ${report.totalDocuments}
-- Stale Documents: ${report.staleDocuments} (${report.stalePercentage}%)
-- Documents with Ownership: ${report.documentsWithOwnership} (${report.ownershipCompliance}%)
-- Broken Links: ${report.brokenLinks}
-- Review Compliance: ${report.reviewCompliance}%
-
-## Quality Metrics
-- Overall Score: ${report.overallScore}/100
-- Readability Score: ${report.readabilityScore}/100
-- Completeness Score: ${report.completenessScore}/100
-
-## Recommendations
-${report.recommendations.map(r => `- ${r}`).join('\n')}
-`;
-            
+            const recs = report.recommendations || [];
+            const body = '# Documentation Quality Report\n\n' +
+              'Generated: ' + report.generated + '\n\n' +
+              '## Summary\n' +
+              '- Total Documents: ' + report.totalDocuments + '\n' +
+              '- Stale Documents: ' + report.staleDocuments + ' (' + report.stalePercentage + '%)' + '\n' +
+              '- Documents with Ownership: ' + report.documentsWithOwnership + ' (' + report.ownershipCompliance + '%)' + '\n' +
+              '- Broken Links: ' + report.brokenLinks + '\n' +
+              '- Review Compliance: ' + report.reviewCompliance + '%\n\n' +
+              '## Quality Metrics\n' +
+              '- Overall Score: ' + report.overallScore + '/100\n' +
+              '- Readability Score: ' + report.readabilityScore + '/100\n' +
+              '- Completeness Score: ' + report.completenessScore + '/100\n\n' +
+              '## Recommendations\n' +
+              recs.map(function(r) { return '- ' + r; }).join('\n');
             github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,

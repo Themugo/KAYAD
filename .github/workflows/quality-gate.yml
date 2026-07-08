@@ -22,19 +22,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: ${{ matrix.target == 'backend' && 'npm' || 'pnpm' }}
-          cache-dependency-path: ${{ matrix.target == 'backend' && 'backend/package-lock.json' || 'pnpm-lock.yaml' }}
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.target == 'backend' && 'backend/package-lock.json' || 'package-lock.json' }}
 
       - name: Install dependencies
-        run: ${{ matrix.target == 'backend' && 'npm ci' || 'pnpm install --frozen-lockfile' }}
+        run: npm ci
         working-directory: ${{ matrix.target == 'backend' && './backend' || '.' }}
 
       - name: Run linter

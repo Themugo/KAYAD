@@ -21,7 +21,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
@@ -65,24 +65,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run tests
-        run: pnpm test
+        run: npm test
 
       - name: Build
-        run: pnpm exec vite build
+        run: npm run build
         env:
           NODE_ENV: production
           NEXT_PUBLIC_API_URL: https://kayad-backend-preview-${{ github.event.pull_request.number }}.onrender.com

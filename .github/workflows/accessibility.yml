@@ -22,18 +22,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          npm ci
 
       - name: Run accessibility audit with Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
@@ -107,18 +103,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          npm ci
 
       - name: Run axe-core scan
         run: |
@@ -141,18 +133,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: |
-          pnpm install --frozen-lockfile
+          npm ci
 
       - name: Install color contrast checker
         run: npm install -g pa11y

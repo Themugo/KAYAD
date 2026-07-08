@@ -27,35 +27,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
-        run: |
-          if [ "${{ matrix.component }}" = "backend" ]; then
-            cd backend
-            npm ci
-          else
-            pnpm install --frozen-lockfile
-          fi
+        run: npm ci
+        working-directory: ${{ matrix.component == 'backend' && 'backend' || '.' }}
 
       - name: Install License Checker
         run: npm install -g license-checker
 
       - name: Run license check for ${{ matrix.component }}
+        working-directory: ${{ matrix.component == 'backend' && 'backend' || '.' }}
         run: |
-          if [ "${{ matrix.component }}" = "backend" ]; then
-            cd backend
-            license-checker --production --json --out ../license-report-${{ matrix.component }}.json
-          else
-            license-checker --production --json --out license-report-${{ matrix.component }}.json
-          fi
+          license-checker --production --json --out ../license-report-${{ matrix.component }}.json
 
       - name: Upload license report
         uses: actions/upload-artifact@v4
@@ -65,51 +52,27 @@ jobs:
 
       - name: Check for non-compliant licenses
         run: |
-          # Define allowed licenses
-          ALLOWED_LICENSES=(
-            "MIT"
-            "Apache-2.0"
-            "BSD-2-Clause"
-            "BSD-3-Clause"
-            "ISC"
-            "0BSD"
-            "CC0-1.0"
-            "Unlicense"
-            "WTFPL"
-          )
-          
-          # Check for disallowed licenses
-          DISALLOWED_LICENSES=(
-            "GPL"
-            "AGPL"
-            "LGPL"
-            "MPL"
-            "CPL"
-            "EPL"
-            "SSPL"
-            "CPAL"
-          )
-          
-          # Parse license report
           node -e "
-            const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
-            const disallowed = [];
-            const allowed = ['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', '0BSD', 'CC0-1.0', 'Unlicense', 'WTFPL'];
-            const disallowedPatterns = ['GPL', 'AGPL', 'LGPL', 'MPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
-            
-            report.forEach(pkg => {
-              const licenses = pkg.licenses || [];
-              licenses.forEach(license => {
-                if (disallowedPatterns.some(pattern => license.includes(pattern))) {
-                  disallowed.push({ package: pkg.name, license: license });
-                }
+            var fs = require('fs');
+            var report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
+            var disallowedPatterns = ['GPL', 'AGPL', 'LGPL', 'MPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
+            var disallowed = [];
+            Object.keys(report).forEach(function(name) {
+              var pkg = report[name];
+              var licenses = pkg.licenses;
+              if (typeof licenses === 'string') { licenses = [licenses]; }
+              if (!licenses || !Array.isArray(licenses)) { return; }
+              licenses.forEach(function(license) {
+                disallowedPatterns.forEach(function(pattern) {
+                  if (license.indexOf(pattern) !== -1) {
+                    disallowed.push({ package: name, license: license });
+                  }
+                });
               });
             });
-            
             if (disallowed.length > 0) {
               console.log('Disallowed licenses found:');
-              disallowed.forEach(d => console.log(\`  - \${d.package}: \${d.license}\`));
+              disallowed.forEach(function(d) { console.log('  - ' + d.package + ': ' + d.license); });
               process.exit(1);
             } else {
               console.log('All licenses are compliant.');
@@ -120,20 +83,21 @@ jobs:
         if: always()
         run: |
           node -e "
-            const fs = require('fs');
-            const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
-            
-            const licenseSummary = {};
-            report.forEach(pkg => {
-              const licenses = pkg.licenses || ['Unknown'];
-              licenses.forEach(license => {
+            var fs = require('fs');
+            var report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
+            var licenseSummary = {};
+            Object.keys(report).forEach(function(name) {
+              var pkg = report[name];
+              var licenses = pkg.licenses;
+              if (typeof licenses === 'string') { licenses = [licenses]; }
+              if (!licenses || !Array.isArray(licenses)) { return; }
+              licenses.forEach(function(license) {
                 licenseSummary[license] = (licenseSummary[license] || 0) + 1;
               });
             });
-            
             console.log('License Summary for ${{ matrix.component }}:');
-            Object.entries(licenseSummary).forEach(([license, count]) => {
-              console.log(\`  \${license}: \${count}\`);
+            Object.keys(licenseSummary).forEach(function(license) {
+              console.log('  ' + license + ': ' + licenseSummary[license]);
             });
           "
 
@@ -145,20 +109,18 @@ jobs:
             const fs = require('fs');
             try {
               const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
-              
               const licenseSummary = {};
-              report.forEach(pkg => {
-                const licenses = pkg.licenses || ['Unknown'];
-                licenses.forEach(license => {
+              Object.keys(report).forEach(function(name) {
+                const pkg = report[name];
+                const licenses = pkg.licenses;
+                if (typeof licenses === 'string') { return; }
+                if (!licenses || !Array.isArray(licenses)) { return; }
+                licenses.forEach(function(license) {
                   licenseSummary[license] = (licenseSummary[license] || 0) + 1;
                 });
               });
-              
-              const summary = Object.entries(licenseSummary)
-                .map(([license, count]) => `${license}: ${count}`)
-                .join('\n');
-              
-              const comment = `## 📜 License Compliance - ${{ matrix.component }}\n\n\`\`\`\n${summary}\n\`\`\`\n\nAll licenses are compliant with the allowed license policy.`;
+              const summary = Object.keys(licenseSummary).map(function(l) { return l + ': ' + licenseSummary[l]; }).join('\n');
+              const comment = '## License Compliance - ${{ matrix.component }}\n\n```\n' + summary + '\n```\n\nAll licenses are compliant with the allowed license policy.';
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,

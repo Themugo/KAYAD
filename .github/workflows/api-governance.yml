@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Run API governance check
         run: node scripts/api-governance-check.js
@@ -49,30 +49,25 @@ jobs:
               return;
             }
             
-            const { summary, compliance } = report;
-            
-            const body = `## API Governance Report
-            
-**Generated**: ${report.generated}
-
-### Summary
-- **Total Routes**: ${summary.totalRoutes}
-- **Documented Routes**: ${summary.documentedRoutes} (${summary.documentationCoverage}%)
-- **Routes with Validation**: ${summary.routesWithValidation} (${summary.validationCoverage}%)
-- **Undocumented Routes**: ${summary.undocumentedRoutes}
-- **Routes Without Validation**: ${summary.routesWithoutValidation}
-
-### Compliance Status
-- **Documentation**: ${compliance.documentation ? '✅ PASS' : '❌ FAIL'} (Target: 80%)
-- **Validation**: ${compliance.validation ? '✅ PASS' : '❌ FAIL'} (Target: 80%)
-
-${!compliance.documentation || !compliance.validation ? 
-'### Action Required\n\nThis PR fails API governance compliance. Please add OpenAPI documentation and/or validation middleware to the affected endpoints.' : 
-'### ✅ All Checks Passed'}
-
-### Details
-See the uploaded artifact for detailed route analysis.`;
-            
+            const summary = report.summary;
+            const compliance = report.compliance;
+            var actionMsg = '### Action Required\n\nThis PR fails API governance compliance. Please add OpenAPI documentation and/or validation middleware to the affected endpoints.';
+            if (compliance.documentation && compliance.validation) {
+              actionMsg = '### All Checks Passed';
+            }
+            var body = '## API Governance Report\n\n' +
+              '**Generated**: ' + report.generated + '\n\n' +
+              '### Summary\n' +
+              '- **Total Routes**: ' + summary.totalRoutes + '\n' +
+              '- **Documented Routes**: ' + summary.documentedRoutes + ' (' + summary.documentationCoverage + '%)' + '\n' +
+              '- **Routes with Validation**: ' + summary.routesWithValidation + ' (' + summary.validationCoverage + '%)' + '\n' +
+              '- **Undocumented Routes**: ' + summary.undocumentedRoutes + '\n' +
+              '- **Routes Without Validation**: ' + summary.routesWithoutValidation + '\n\n' +
+              '### Compliance Status\n' +
+              '- **Documentation**: ' + (compliance.documentation ? 'PASS' : 'FAIL') + ' (Target: 80%)\n' +
+              '- **Validation**: ' + (compliance.validation ? 'PASS' : 'FAIL') + ' (Target: 80%)\n\n' +
+              actionMsg + '\n\n' +
+              '### Details\nSee the uploaded artifact for detailed route analysis.';
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

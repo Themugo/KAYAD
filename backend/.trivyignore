@@ -1,0 +1,4 @@
+# Accepted vulnerabilities in node:22-alpine base image
+# These are OS-level CVEs in Alpine packages with no fix available
+# or that are not exploitable in this application context.
+# Review and update this list each quarter.
