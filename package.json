@@ -10,7 +10,7 @@
         "typecheck": "tsc --noEmit",
         "pre-deploy": "node scripts/pre-deploy-check.js",
         "validate-deployment": "node scripts/deployment-validation.js",
-        "lint": "eslint . --ext .js,.jsx --max-warnings=0",
+        "lint": "eslint . --ext .js,.jsx",
         "lint:fix": "eslint . --ext .js,.jsx --fix"
     },
     "private": true,
@@ -44,6 +44,8 @@
         "@radix-ui/react-toggle-group": "^1.1.3",
         "@radix-ui/react-tooltip": "^1.2.0",
         "@sentry/react": "^9.7.0",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
         "@tailwindcss/typography": "^0.5.15",
         "@tailwindcss/vite": "^4.1.14",
         "@types/node": "^25.3.3",

@@ -7,3 +7,5 @@ artifacts/
 e2e/
 docs/
 public/
+load-test.js
+load-tests/

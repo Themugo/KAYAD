@@ -21,7 +21,6 @@ const marketplaceHealthSchema = new mongoose.Schema(
     timestamp: {
       type: Date,
       required: true,
-      index: true,
     },
 
     // =============================

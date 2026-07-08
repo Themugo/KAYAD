@@ -78,7 +78,6 @@ const branchSchema = new mongoose.Schema(
     manager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      index: true,
     },
 
     staff: [

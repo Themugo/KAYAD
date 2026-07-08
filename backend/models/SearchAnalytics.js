@@ -51,7 +51,6 @@ const searchAnalyticsSchema = new mongoose.Schema(
       county: {
         type: String,
         trim: true,
-        index: true,
       },
       bodyType: {
         type: String,

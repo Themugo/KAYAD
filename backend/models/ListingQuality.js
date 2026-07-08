@@ -38,7 +38,6 @@ const listingQualitySchema = new mongoose.Schema(
     rating: {
       type: String,
       enum: ["Excellent", "Good", "Average", "Poor"],
-      index: true,
     },
 
     // =============================

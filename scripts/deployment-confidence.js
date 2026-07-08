@@ -460,6 +460,7 @@ function main() {
       const s = generateScorecard();
       console.log(JSON.stringify(s, null, 2));
       process.exit(s.passed ? 0 : 1);
+      break;
     }
     case "canary": {
       const metrics = {};
@@ -471,6 +472,7 @@ function main() {
       const result = validateCanaryHealth(metrics);
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.passed ? 0 : 1);
+      break;
     }
     case "rollback": {
       const metrics = {};
@@ -482,6 +484,7 @@ function main() {
       const result = evaluateRollbackTriggers(metrics);
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.shouldRollback ? 1 : 0);
+      break;
     }
     case "verify": {
       const checks = {};
@@ -491,6 +494,7 @@ function main() {
       const result = verifyDeployment(checks);
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.passed ? 0 : 1);
+      break;
     }
     case "risk": {
       const data = {};
@@ -504,6 +508,7 @@ function main() {
       const result = scoreReleaseRisk(data);
       console.log(JSON.stringify(result, null, 2));
       process.exit(result.level === "high" ? 1 : 0);
+      break;
     }
     case "report":
     default: {

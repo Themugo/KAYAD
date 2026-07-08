@@ -170,7 +170,6 @@ const organizationSchema = new mongoose.Schema(
     legacyDealerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Dealer",
-      index: true,
     },
   },
   { timestamps: true },

@@ -15,7 +15,6 @@ const leadActivitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Lead",
       required: true,
-      index: true,
     },
 
     // =============================

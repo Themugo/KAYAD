@@ -13,7 +13,6 @@ const reconciliationReportSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
 
     reportType: {
@@ -154,7 +153,6 @@ const reconciliationReportSchema = new mongoose.Schema(
 // =============================
 // 🔥 INDEXES
 // =============================
-reconciliationReportSchema.index({ reportId: 1 });
 reconciliationReportSchema.index({ reportType: 1, createdAt: -1 });
 reconciliationReportSchema.index({ status: 1, createdAt: -1 });
 reconciliationReportSchema.index({ startTime: 1, endTime: 1 });

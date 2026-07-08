@@ -13,7 +13,7 @@ const securityLogSchema = new mongoose.Schema(
     userAgent: String,
     metadata: { type: mongoose.Schema.Types.Mixed },
     severity: { type: String, enum: ["info", "warning", "critical"], default: "info" },
-    timestamp: { type: Date, default: Date.now, index: true },
+    timestamp: { type: Date, default: Date.now },
   },
   { timestamps: true },
 );

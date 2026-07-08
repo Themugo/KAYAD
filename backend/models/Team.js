@@ -58,7 +58,6 @@ const teamSchema = new mongoose.Schema(
     lead: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      index: true,
     },
 
     members: [

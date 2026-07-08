@@ -4,11 +4,20 @@ import { MemoryRouter } from 'react-router-dom';
 import CarDetailPage from '../../pages/CarDetailPage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
+// CarDetailPage fetches the car via carsAPI.get(id) — there is no demo-data
+// fallback in the component anymore (demo mode was intentionally removed),
+// so the mock resolves the real data path directly instead.
 vi.mock('../../api/api', () => ({
   carsAPI: {
-    get: vi.fn().mockRejectedValue({}),
+    get: vi.fn().mockResolvedValue({
+      car: {
+        _id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
+        year: 2023, fuel: 'Petrol', transmission: 'Automatic',
+        price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' },
+      },
+    }),
     list: vi.fn().mockResolvedValue({ data: [] }),
-    trackClick: vi.fn(),
+    trackClick: vi.fn().mockResolvedValue({}),
     promote: vi.fn(),
   },
   reviewsAPI: {
@@ -20,13 +29,6 @@ vi.mock('../../api/api', () => ({
   favoritesAPI: { list: vi.fn().mockResolvedValue({}), toggle: vi.fn(), setPriceAlert: vi.fn() },
   bidsAPI: { getForCar: vi.fn().mockResolvedValue({ bids: [] }), place: vi.fn() },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
-}));
-vi.mock('../../data/demoData', () => ({
-  getDemoCar: vi.fn().mockReturnValue({
-    _id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
-    year: 2023, fuel: 'Petrol', transmission: 'Automatic',
-    price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' },
-  }),
 }));
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: { _id: 'u1' }, isAuth: true, isAdmin: false }),

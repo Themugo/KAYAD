@@ -437,7 +437,7 @@ export async function reseed() {
   // ══════════════════════════════════════════════════════════
   // 2. PLATFORM ADMIN
   // ══════════════════════════════════════════════════════════
-  const adminPw = process.env.SEED_ADMIN_PW || devFallback("SEED_ADMIN_PW");
+  const adminPw = process.env.SEED_ADMIN_PW || process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PW");
   await upsertUser(
     { email: "admin@kayad.space" },
     {

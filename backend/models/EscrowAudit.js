@@ -79,7 +79,6 @@ const escrowAuditSchema = new mongoose.Schema(
     timestamp: {
       type: Date,
       required: true,
-      index: true,
       immutable: true,
     },
 
