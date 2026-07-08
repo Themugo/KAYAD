@@ -368,16 +368,21 @@ export const createCar = async (req, res) => {
       });
     }
 
-    let pendingFiles = null;
-    if (req.files && req.files.length > 0) {
-      body.images = req.files.map((f, i) => ({
-        url: `/uploads/${path.basename(f.path)}`,
-        thumb: `/uploads/${path.basename(f.path)}`,
-        public_id: null,
-        _pending: true,
-      }));
-      pendingFiles = req.files;
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required.",
+      });
     }
+
+    let pendingFiles = null;
+    body.images = req.files.map((f, i) => ({
+      url: `/uploads/${path.basename(f.path)}`,
+      thumb: `/uploads/${path.basename(f.path)}`,
+      public_id: null,
+      _pending: true,
+    }));
+    pendingFiles = req.files;
 
     // Set coverImage: use user selection if valid, otherwise default to 0
     const totalImages = (body.images || []).length;
@@ -439,29 +444,33 @@ export const createCar = async (req, res) => {
 
     res.status(201).json({ success: true, data: car });
 
-    // ── BACKGROUND: Upload images to Cloudinary after response (Issue #3) ──
+    // ── BACKGROUND: Upload images to Cloudinary after response ──
     if (pendingFiles && cloudinaryConfigured) {
       setImmediate(async () => {
-        try {
-          const uploaded = await uploadMultiple(pendingFiles, "kayad/cars");
-          await Car.findByIdAndUpdate(car._id, {
-            $set: { images: uploaded },
-          });
-          cleanupFiles(pendingFiles);
-        } catch (e) {
-          console.warn("⚠️ Background image upload failed:", e.message);
-          // Images remain as local placeholders — admin can re-upload
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const uploaded = await uploadMultiple(pendingFiles, "kayad/cars");
+            await Car.findByIdAndUpdate(car._id, { $set: { images: uploaded } });
+            cleanupFiles(pendingFiles);
+            break;
+          } catch (e) {
+            console.warn(`⚠️ Cloudinary upload attempt ${attempt}/3 failed:`, e.message);
+            if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
+          }
         }
       });
     }
   } catch (err) {
     console.error("❌ CREATE ERROR:", err.message);
+    cleanupFiles(req.files);
     const isDev = process.env.NODE_ENV === "development";
-    res.status(500).json({
-      success: false,
-      message: "Failed to create car",
-      ...(isDev && { error: err.message }),
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to create car",
+        ...(isDev && { error: err.message }),
+      });
+    }
   }
 };
 

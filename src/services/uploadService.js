@@ -6,7 +6,7 @@ const FOLDERS = [
   "marketing", "chat", "temp",
 ];
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = {
   image: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/avif"],
   video: ["video/mp4", "video/webm", "video/quicktime", "video/x-msvideo"],
