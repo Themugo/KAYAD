@@ -8,9 +8,16 @@ import usePageMeta from '../hooks/usePageMeta';
 import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
 import { authAPI } from '../api/api';
 
+const DEMO_ACCOUNTS = [
+  { role: 'admin',  label: 'Admin',   color: '#ef4444' },
+  { role: 'dealer', label: 'Dealer',  color: '#f59e0b' },
+  { role: 'seller', label: 'Seller',  color: '#3b82f6' },
+  { role: 'buyer',  label: 'Buyer',   color: '#22c55e' },
+];
+
 function LoginPage() {
   usePageMeta('Sign In', 'Sign in to your Kayad account to buy, sell, and bid on premium cars in Kenya.');
-  const { login, user, isAuth } = useAuth();
+  const { login, demoLogin, user, isAuth } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,6 +41,7 @@ function LoginPage() {
 
   const [form, setForm]       = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState('');
   const [resending, setResending] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
@@ -45,7 +53,6 @@ function LoginPage() {
       const data = await login(form);
       toast('Welcome back!', 'success');
       const targetPath = getPostAuthPath(data.user, from);
-      // Prevent redirect loop: don't redirect if already on the target path
       if (targetPath !== location.pathname) {
         navigate(targetPath, { replace: true });
       }
@@ -56,6 +63,18 @@ function LoginPage() {
       }
       toast(msg, 'error');
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (role) => {
+    setDemoLoading(role);
+    try {
+      const data = await demoLogin(role);
+      const targetPath = getPostAuthPath(data.user, from);
+      navigate(targetPath, { replace: true });
+    } catch (err) {
+      toast(err.response?.data?.message || 'Demo login failed. Was the server seeded?', 'error');
+      setDemoLoading('');
     }
   };
 
@@ -146,6 +165,25 @@ function LoginPage() {
             </div>
           )}
 
+
+            <div style={{ marginTop: 20, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16 }}>
+              <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-muted)', marginBottom: 10, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600 }}>
+                Quick Demo Access
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {DEMO_ACCOUNTS.map(a => (
+                  <button key={a.role} type="button" onClick={() => handleDemoLogin(a.role)} disabled={!!demoLoading}
+                    style={{
+                      padding: '6px 14px', borderRadius: 20, border: '1px solid rgba(255,255,255,0.12)',
+                      background: demoLoading === a.role ? 'rgba(255,255,255,0.1)' : 'transparent',
+                      color: a.color, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      opacity: demoLoading && demoLoading !== a.role ? 0.4 : 1,
+                    }}>
+                    {demoLoading === a.role ? <><span className="spinner" style={{ width: 12, height: 12, marginRight: 4 }} /> Loading...</> : `Demo ${a.label}`}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="gold-line" />
 

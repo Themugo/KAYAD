@@ -324,6 +324,45 @@ export const login = async (req, res) => {
 };
 
 // =============================
+// 👤 DEMO LOGIN (one-click, no password)
+// =============================
+const DEMO_ACCOUNTS = {
+  admin:  { email: "admin@kayad.space",  role: "admin" },
+  dealer: { email: "dealer@kayad.space", role: "dealer" },
+  seller: { email: "seller@kayad.space", role: "individual_seller" },
+  buyer:  { email: "buyer@kayad.space",  role: "user" },
+};
+
+export const demoLogin = async (req, res) => {
+  try {
+    const { role } = req.body;
+    const demo = DEMO_ACCOUNTS[role];
+    if (!demo) {
+      return res.status(400).json({ success: false, message: "Invalid demo account" });
+    }
+
+    const user = await User.findOne({ email: demo.email, isDemo: true })
+      .select("+password +tokenVersion");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Demo account not found. Run seed first.",
+      });
+    }
+
+    user.lastLogin = new Date();
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    return await sendAuthResponse(res, user, null, req);
+  } catch (err) {
+    console.error("❌ DEMO LOGIN ERROR:", err);
+    R.error(res, "Demo login failed", 500);
+  }
+};
+
+// =============================
 // 🔁 REFRESH TOKEN (ROTATING)
 // =============================
 export const refreshToken = async (req, res) => {

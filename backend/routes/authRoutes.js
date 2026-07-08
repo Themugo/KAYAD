@@ -14,6 +14,7 @@ import {
   getSessions,
   revokeSession,
   revokeAllSessions,
+  demoLogin,
 } from "../controllers/authController.js";
 
 import { protect, optionalAuth } from "../middleware/auth.js";
@@ -164,6 +165,9 @@ router.post("/register", authLimiter, validateAuth, validateResponse(authRespons
  *               $ref: '#/components/schemas/Error'
  */
 router.post("/login", authLimiter, accountLockout, validateAuth, validateResponse(authResponseSchema), asyncHandler(login));
+
+// 👤 DEMO LOGIN — one-click, no password required
+router.post("/demo-login", authLimiter, validateResponse(authResponseSchema), asyncHandler(demoLogin));
 
 // 🔁 REFRESH TOKEN (CRITICAL 🔥)
 router.post("/refresh", authLimiter, validateResponse(authResponseSchema), asyncHandler(refreshToken));

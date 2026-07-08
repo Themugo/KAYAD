@@ -1,7 +1,7 @@
 // src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { authAPI } from '../api/api';
+import { authAPI, api } from '../api/api';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import PageLoader from '../components/PageLoader';
@@ -35,6 +35,7 @@ interface AuthContextValue {
   permissions: Permission[];
   can: (perm: Permission) => boolean;
   login: (credentials: { email: string; password: string }) => Promise<any>;
+  demoLogin: (role: string) => Promise<any>;
   register: (body: any) => Promise<any>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
@@ -83,6 +84,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return data;
   }, []);
 
+  const demoLogin = useCallback(async (role: string) => {
+    const data = await api.post('/auth/demo-login', { role }).then(r => r.data);
+    setUser(normalizeUser(data.user));
+    setLoading(false);
+    return data;
+  }, []);
+
   const register = useCallback(async (body: any) => {
     const data = await authAPI.register(body);
     setUser(normalizeUser(data.user));
@@ -121,8 +129,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin, isDealer, isSuperAdmin, isSeller, isPrivateSeller, isBuyer,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
-    login, register, logout, setUser,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isSeller, isPrivateSeller, isBuyer, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+    login, demoLogin, register, logout, setUser,
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isSeller, isPrivateSeller, isBuyer, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, demoLogin, register, logout, setUser]);
 
   return (
     <AuthCtx.Provider value={value}>
