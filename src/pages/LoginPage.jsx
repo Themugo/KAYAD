@@ -9,7 +9,6 @@ import { getPostAuthPath, safeRedirectPath } from '../utils/authRoutes';
 import { authAPI } from '../api/api';
 
 const DEMO_ACCOUNTS = [
-  { role: 'admin',  label: 'Admin',   color: '#ef4444' },
   { role: 'dealer', label: 'Dealer',  color: '#f59e0b' },
   { role: 'seller', label: 'Seller',  color: '#3b82f6' },
   { role: 'buyer',  label: 'Buyer',   color: '#22c55e' },

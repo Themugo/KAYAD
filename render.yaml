@@ -34,6 +34,8 @@ services:
         sync: false
       - key: FRONTEND_URL
         value: https://kayad.space
+      - key: BACKEND_URL
+        value: https://api.kayad.space
       - key: EXTRA_CORS_ORIGINS
         sync: false
       - key: WEBHOIST_EMAIL

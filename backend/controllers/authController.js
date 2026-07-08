@@ -327,7 +327,6 @@ export const login = async (req, res) => {
 // 👤 DEMO LOGIN (one-click, no password)
 // =============================
 const DEMO_ACCOUNTS = {
-  admin:  { email: "admin@kayad.space",  role: "admin" },
   dealer: { email: "dealer@kayad.space", role: "dealer" },
   seller: { email: "seller@kayad.space", role: "individual_seller" },
   buyer:  { email: "buyer@kayad.space",  role: "user" },
