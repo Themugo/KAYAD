@@ -519,9 +519,16 @@ io.use((socket, next) => {
   }
 });
 
+// Online presence tracking
+const onlineUsers = new Map();
+
 io.on("connection", (socket) => {
   const uid = socket.user?.id || socket.user?._id;
-  if (uid) socket.join(`user_${uid}`);
+  if (uid) {
+    socket.join(`user_${uid}`);
+    onlineUsers.set(uid, socket.id);
+    io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+  }
 
   // Validate room IDs to prevent arbitrary room injection
   const isValidId = (id) => typeof id === "string" && /^[a-f0-9]{24}$/i.test(id);
@@ -577,6 +584,10 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     eventBuckets.clear();
+    if (uid) {
+      onlineUsers.delete(uid);
+      io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+    }
   });
 });
 

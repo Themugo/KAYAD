@@ -50,16 +50,49 @@ export const startChat = async (req, res) => {
 // =============================
 export const getUserChats = async (req, res) => {
   try {
-    const chats = await Chat.find({ participants: req.user.id })
-      .populate("participants", "name avatar")
-      .populate("car", "title images price")
-      .sort({ updatedAt: -1 })
-      .lean();
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
+    const skip = (page - 1) * limit;
 
-    res.json({ success: true, chats });
+    const [chats, total] = await Promise.all([
+      Chat.find({ participants: req.user.id })
+        .populate("participants", "name avatar")
+        .populate("car", "title images price")
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Chat.countDocuments({ participants: req.user.id }),
+    ]);
+
+    res.json({ success: true, chats, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
     console.error("❌ GET USER CHATS ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to fetch chats" });
+  }
+};
+
+// =============================
+// 🔢 GET UNREAD COUNT
+// =============================
+export const getUnreadCount = async (req, res) => {
+  try {
+    const result = await Chat.aggregate([
+      { $match: { participants: new mongoose.Types.ObjectId(req.user.id) } },
+      { $unwind: "$messages" },
+      {
+        $match: {
+          "messages.sender": { $ne: new mongoose.Types.ObjectId(req.user.id) },
+          "messages.seenBy": { $not: { $elemMatch: { $eq: new mongoose.Types.ObjectId(req.user.id) } } },
+        },
+      },
+      { $count: "unread" },
+    ]);
+
+    res.json({ success: true, unread: result[0]?.unread || 0 });
+  } catch (error) {
+    console.error("❌ GET UNREAD COUNT ERROR:", error);
+    res.status(500).json({ success: false, message: "Failed to get unread count" });
   }
 };
 

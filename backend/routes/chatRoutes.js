@@ -9,6 +9,7 @@ import {
   getMessages,
   startChat,
   getUserChats,
+  getUnreadCount,
   markAsSeen,
   deleteChat,
 } from "../controllers/chatController.js";
@@ -18,6 +19,8 @@ const router = express.Router();
 router.post("/", protect, createLimiter, validate(createChatSchema), asyncHandler(startChat));
 
 router.get("/", protect, validateQuery(chatListQuerySchema), asyncHandler(getUserChats));
+
+router.get("/unread", protect, asyncHandler(getUnreadCount));
 
 router.get("/:chatId/messages", protect, validateObjectId, validateQuery(messageListQuerySchema), asyncHandler(getMessages));
 

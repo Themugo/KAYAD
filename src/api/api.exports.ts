@@ -264,7 +264,8 @@ export const favoritesAPI = {
 
 // ── CHAT ──────────────────────────────────────────────
 export const chatAPI = {
-  inbox:    ()               => api.get('/chat').then(unwrap),
+  inbox:    (params?: any)       => api.get('/chat', { params }).then(unwrap),
+  unread:   ()               => api.get('/chat/unread').then(unwrap),
   start:    (body: any)           => api.post('/chat', body).then(unwrap),
   messages: (chatId: string, params: any) => api.get(`/chat/${chatId}/messages`, { params }).then(unwrap),
   send:     (chatId: string, body: any)   => api.post(`/chat/${chatId}/message`, body).then(unwrap),

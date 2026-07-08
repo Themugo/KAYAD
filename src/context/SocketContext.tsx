@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 
 interface SocketContextValue {
   connected: boolean;
+  onlineUsers: string[];
   joinAuction: (carId: string) => void;
   joinAdmin: () => void;
   joinShowroom: () => void;
@@ -24,6 +25,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const { isAuth } = useAuth();
   const socketRef = useRef<Socket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   useEffect(() => {
     if (!isAuth) return;
@@ -44,10 +46,15 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     socket.on('disconnect', () => setConnected(false));
 
+    socket.on('onlineUsers', (users: string[]) => {
+      setOnlineUsers(users);
+    });
+
     return () => {
       socket.disconnect();
       socketRef.current = null;
       setConnected(false);
+      setOnlineUsers([]);
     };
   }, [isAuth]);
 
@@ -79,9 +86,9 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, []);
 
   const value = useMemo(() => ({
-    connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit,
+    connected, onlineUsers, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit,
     socket: socketRef,
-  }), [connected, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit]);
+  }), [connected, onlineUsers, joinAuction, joinAdmin, joinShowroom, leaveShowroom, on, emit]);
 
   return (
     <SocketCtx.Provider value={value}>
@@ -95,6 +102,7 @@ export const useSocket = (): SocketContextValue => {
   if (!ctx) {
     return {
       connected: false,
+      onlineUsers: [],
       joinAuction: () => {},
       joinAdmin: () => {},
       joinShowroom: () => {},
