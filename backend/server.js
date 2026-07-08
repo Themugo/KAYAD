@@ -347,8 +347,10 @@ app.use(compression());
 app.use(cookieParser());
 
 // ─── SESSION (for CSRF) ─────────────────────────────────────
+import CacheStore from "./services/sessionStore.js";
 app.use(
   session({
+    store: new CacheStore(),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
