@@ -42,7 +42,7 @@ jobs:
       - name: Run license check for ${{ matrix.component }}
         run: |
           cd ${{ matrix.component == 'backend' && 'backend' || '.' }}
-          license-checker --production --json --out ../license-report-${{ matrix.component }}.json
+          license-checker --production --json --out "$GITHUB_WORKSPACE/license-report-${{ matrix.component }}.json"
 
       - name: Upload license report
         uses: actions/upload-artifact@v4
