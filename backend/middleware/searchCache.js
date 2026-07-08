@@ -4,8 +4,7 @@
 // Provides Redis-based caching for search results
 // ─────────────────────────────────────────────────────────────
 
-import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
-import { logInfo } from "../utils/logger.js";
+import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 
 // =============================
 // 📊 SEARCH CACHE TTL CONSTANTS
@@ -111,19 +110,7 @@ export const cacheSearchSummary = cacheSearch(SEARCH_CACHE_TTL.SEARCH_SUMMARY, "
 // =============================
 
 export const invalidateSearchCache = async (pattern) => {
-  // This would be implemented with cache service
-  // For now, we'll just log the invalidation
-  logInfo(`Search cache invalidated for pattern: ${pattern}`);
-
-  // In production, this would:
-  // 1. Connect to Redis
-  // 2. Delete keys matching pattern
-  // 3. Log the invalidation
-  // Example:
-  // const keys = await redis.keys(pattern);
-  // if (keys.length > 0) {
-  //   await redis.del(keys);
-  // }
+  await cacheDelPattern(pattern);
 };
 
 export const invalidateVehicleSearchCache = async () => {

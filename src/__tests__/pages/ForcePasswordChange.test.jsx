@@ -6,7 +6,6 @@ import ForcePasswordChange from '../../pages/ForcePasswordChange';
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 vi.mock('../../api/api', () => ({
   authAPI: { changePassword: vi.fn() },
-  isDemoMode: () => false,
 }));
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({

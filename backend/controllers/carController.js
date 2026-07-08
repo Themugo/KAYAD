@@ -132,8 +132,9 @@ export const getCars = async (req, res) => {
     else if (sort === "year_asc") sortOption = { year: 1 };
     else if (sort === "mileage_asc") sortOption = { mileage: 1 };
     else if (sort === "views_desc" || sort === "-views") sortOption = { views: -1 };
-    else if (sort === "-createdAt" || sort === "createdAt_desc") sortOption = { createdAt: -1 };
+    else if (sort === "-createdAt" || sort === "createdAt_desc" || sort === "newest") sortOption = { createdAt: -1 };
     else if (sort === "createdAt_asc") sortOption = { createdAt: 1 };
+    else if (sort === "ending_soon") sortOption = { auctionEnd: 1 };
     else sortOption = { createdAt: -1 };
 
     const skip = (pageNum - 1) * limitNum;
@@ -146,6 +147,7 @@ export const getCars = async (req, res) => {
         title: 1,
         price: 1,
         images: 1,
+        coverImage: 1,
         brand: 1,
         year: 1,
         model: 1,
@@ -166,7 +168,7 @@ export const getCars = async (req, res) => {
         trustScore: 1,
         dealRating: 1,
         createdAt: 1,
-        dealerPhone: 1,
+        dealer: 1,
         isVerifiedDealer: 1,
         ntsaVerified: 1,
         dutyStatus: 1,
@@ -177,9 +179,11 @@ export const getCars = async (req, res) => {
       });
     } else {
       findQuery = findQuery.select(
-        "title price images brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealerPhone isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
+        "title price images coverImage brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
       );
     }
+
+    findQuery = findQuery.populate("dealer", "name businessName phone role logo verified");
 
     const [cars, total] = await Promise.all([
       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),

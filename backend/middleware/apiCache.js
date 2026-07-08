@@ -4,8 +4,7 @@
 // Provides standardized caching for GET endpoints
 // ─────────────────────────────────────────────────────────────
 
-import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
-import { logInfo } from "../utils/logger.js";
+import { cacheMiddleware, cacheDelPattern, CACHE_TTL } from "../utils/cache.js";
 
 // =============================
 // 📊 CACHE TTL CONSTANTS
@@ -62,19 +61,12 @@ export const cacheResponse = (ttl, keyPrefix = "") => {
 
 export const invalidateCache = (pattern) => {
   return async (req, res, next) => {
-    // Store original res.json
     const originalJson = res.json;
 
-    // Override res.json to invalidate cache after response
     res.json = function (data) {
-      // Invalidate cache pattern
       if (pattern) {
-        // This would be implemented with cache service
-        // For now, we'll just log the invalidation
-        logInfo(`Cache invalidated for pattern: ${pattern}`);
+        cacheDelPattern(pattern);
       }
-
-      // Call original res.json
       return originalJson.call(this, data);
     };
 

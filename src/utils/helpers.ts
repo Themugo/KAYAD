@@ -100,6 +100,21 @@ export const getCarImage = (car: Car, index = 0): string | null => {
   return img?.url || null;
 };
 
+const CLOUDINARY_RE = /^(https?:\/\/res\.cloudinary\.com\/.*\/image\/upload)\/(v?\d+\/.*)$/;
+const BREAKPOINTS = [320, 640, 960, 1280];
+
+export const getCloudinarySrcSet = (url: string | null): { src: string; srcSet: string | undefined } | null => {
+  if (!url) return null;
+  const m = url.match(CLOUDINARY_RE);
+  if (!m) return { src: url, srcSet: undefined };
+  const base = m[1];
+  const tail = m[2];
+  const variants = BREAKPOINTS.map(
+    (w) => `${base}/w_${w},c_fill,q_auto,f_auto/${tail} ${w}w`,
+  ).join(",\n");
+  return { src: `${base}/q_auto,f_auto/${tail}`, srcSet: variants };
+};
+
 // ─── Deal Rating ────────────────────────────────────────
 export interface DealMeta {
   label: string;

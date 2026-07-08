@@ -11,14 +11,6 @@ vi.mock('../../api/api', () => ({
   smsBiddingAPI: { my: vi.fn().mockResolvedValue({}) },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
 }));
-vi.mock('../../data/demoData', () => ({
-  getDemoCar: vi.fn().mockReturnValue({
-    _id: 'car-1', title: 'Test Car', brand: 'Toyota', model: 'Hilux',
-    year: 2021, fuel: 'Diesel', transmission: 'Manual',
-    price: 2000000, images: [], auctionEnd: null,
-    dealer: { _id: 'd1', name: 'Test Dealer' },
-  }),
-}));
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: null, isAuth: false }),
 }));

@@ -115,13 +115,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
-          // Vendor chunks - avoid circular dependencies
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
               return 'react-vendor';
-            }
-            if (id.includes('react-router')) {
-              return 'router-vendor';
             }
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
@@ -138,16 +134,23 @@ export default defineConfig({
             if (id.includes('posthog')) {
               return 'analytics-vendor';
             }
-            if (id.includes('@radix-ui')) {
-              return 'ui-vendor';
-            }
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
             }
-            // Return all other node_modules to vendor to avoid circular dependencies
             return 'vendor';
           }
-          // App chunks
+          if (id.includes('src/pages/admin')) {
+            return 'pages-admin';
+          }
+          if (id.includes('src/pages/dealer')) {
+            return 'pages-dealer';
+          }
+          if (id.includes('src/pages/buyer') || id.includes('src/pages/seller') || id.includes('src/pages/inspector') || id.includes('src/pages/showroom')) {
+            return 'pages-role';
+          }
+          if (id.includes('src/pages/auction') || id.includes('src/pages/car')) {
+            return 'pages-feature';
+          }
           if (id.includes('src/pages')) {
             return 'pages';
           }

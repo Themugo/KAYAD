@@ -223,7 +223,6 @@ export default function Showroom() {
   const getApiParams = useCallback(p => ({
     page: p,
     limit: 12,
-    featured:     true,
     keyword:      filters.keyword     || undefined,
     brand:        brandFilter         || undefined,
     city:         filters.location    || undefined,

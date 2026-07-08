@@ -14,6 +14,7 @@ interface Car {
   title: string;
   image?: string;
   images?: (string | CarImage)[];
+  coverImage?: number;
   auctionStartTime?: string;
   auctionEnd?: string;
   currentBid?: number;
@@ -27,17 +28,18 @@ interface Car {
   isDemo?: boolean;
   isPromoted?: boolean;
   escrowEnabled?: boolean;
-  dealer?: { name?: string; logo?: string; _id?: string; role?: string };
+  dealer?: { name?: string; businessName?: string; logo?: string; _id?: string; role?: string; verified?: boolean };
   seller?: { name?: string; avatar?: string; _id?: string };
 }
 
 function firstImage(car: Car): string | undefined {
   if (car.image) return car.image;
   const imgs = car.images || [];
-  for (const img of imgs) {
-    if (typeof img === 'string' && img) return img;
-    if (typeof img === 'object' && img?.url) return img.url;
-  }
+  if (!imgs.length) return undefined;
+  const idx = typeof car.coverImage === 'number' ? car.coverImage : 0;
+  const img = imgs[idx] || imgs[0];
+  if (typeof img === 'string' && img) return img;
+  if (typeof img === 'object' && img?.url) return img.url;
   return undefined;
 }
 
@@ -66,7 +68,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   const img = firstImage(car) || undefined;
   const city = typeof car.location === 'string' ? car.location : (car.location?.city || 'Nairobi');
   const price = Number(car.currentBid || car.price || 0);
-  const sellerName = car.dealer?.name || car.seller?.name || 'Private Seller';
+  const sellerName = car.dealer?.businessName || car.dealer?.name || car.seller?.name || 'Private Seller';
   const isPrivateSeller = !car.dealer || car.dealer?.role === 'individual_seller' || car.dealer?.role === 'user';
   const showEscrowBadge = car.escrowEnabled || isPrivateSeller;
   const formatMileage = (km) => km ? `${Math.round(Number(km) / 1000)}k` : null;

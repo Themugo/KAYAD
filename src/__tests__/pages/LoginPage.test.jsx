@@ -8,7 +8,6 @@ vi.mock('../../utils/posthog', () => ({ setPostHogUser: () => {}, clearPostHogUs
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 vi.mock('../../api/api', () => ({
   authAPI: { login: vi.fn(), me: vi.fn().mockRejectedValue({}) },
-  isDemoMode: () => false,
 }));
 vi.mock('../../context/SocketContext', () => ({
   SocketProvider: ({ children }) => children,
