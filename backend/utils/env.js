@@ -22,7 +22,7 @@ export const getEnv = (key, { required = true, defaultValue = null, type = "stri
   }
 
   if (type === "boolean") {
-    return value === "true" || value === true;
+    return value === "true" || value === true || value === "TRUE" || value === "1" || value === "yes";
   }
 
   return value;
@@ -39,9 +39,13 @@ const REQUIRED_VARS = [
 
 const PRODUCTION_REQUIRED_VARS = [
   { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret (separate from JWT_SECRET)" },
+  { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
 ];
 
-const PRODUCTION_VARS = [{ key: "FRONTEND_URL", desc: "Production frontend URL for CORS" }];
+const PRODUCTION_VARS = [
+  { key: "FRONTEND_URL", desc: "Production frontend URL for CORS" },
+  { key: "BACKEND_URL", desc: "Production backend URL for M-Pesa callbacks" },
+];
 
 const FEATURE_GROUPS = [
   {

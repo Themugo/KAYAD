@@ -94,8 +94,12 @@ export const cacheDel = async (...keys) => {
 export const cacheDelPattern = async (pattern) => {
   try {
     if (client && connected) {
-      const keys = await client.keys(pattern);
-      if (keys.length) await client.del(keys);
+      let cursor = "0";
+      do {
+        const reply = await client.scan(cursor, { MATCH: pattern, COUNT: 100 });
+        cursor = reply.cursor;
+        if (reply.keys.length) await client.del(reply.keys);
+      } while (cursor !== "0");
     } else {
       const regex = new RegExp(pattern.replace("*", ".*"));
       for (const k of memCache.keys()) {

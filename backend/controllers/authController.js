@@ -22,7 +22,7 @@ try {
 }
 
 const WEBHOIST_EMAIL = process.env.WEBHOIST_EMAIL || "";
-const OWNER_EMAILS = [WEBHOIST_EMAIL].filter(Boolean);
+const OWNER_EMAILS = WEBHOIST_EMAIL.split(",").map(e => e.trim()).filter(Boolean);
 const STAFF_ROLES = [
   "admin",
   "superadmin",

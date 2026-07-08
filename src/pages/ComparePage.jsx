@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+import useMediaQuery from '../hooks/useMediaQuery';
 import { X, ArrowLeft, TrendingUp, Zap, Clock, Gauge, MapPin, Star, Check, Minus } from 'lucide-react';
 
 const COMPARE_ROWS = [

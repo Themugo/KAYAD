@@ -376,8 +376,10 @@ const seedCars = [
 ];
 
 const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) return; // already connected
-  await mongoose.connect(process.env.MONGO_URI || process.env.MONGODB_URI);
+  if (mongoose.connection.readyState === 1) return;
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  if (!uri) throw new Error("MONGO_URI or MONGODB_URI must be set for seeding");
+  await mongoose.connect(uri);
   logInfo("DB connected for seeding");
 };
 

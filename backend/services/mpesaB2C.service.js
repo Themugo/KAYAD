@@ -33,10 +33,10 @@ const B2C_SHORTCODE = process.env.MPESA_B2C_SHORTCODE || process.env.MPESA_SHORT
 const B2C_INITIATOR = process.env.MPESA_B2C_INITIATOR;
 const B2C_CALLBACK =
   process.env.MPESA_B2C_CALLBACK_URL ||
-  `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/callback`;
+  `${process.env.BACKEND_URL || "http://localhost:5000"}/api/payments/b2c/callback`;
 const B2C_TIMEOUT =
   process.env.MPESA_B2C_TIMEOUT_URL ||
-  `${process.env.FRONTEND_URL || "http://localhost:5000"}/api/payments/b2c/timeout`;
+  `${process.env.BACKEND_URL || "http://localhost:5000"}/api/payments/b2c/timeout`;
 const B2C_REMARKS = process.env.MPESA_B2C_REMARKS || "Kayad seller payout";
 const B2C_OCCASION = process.env.MPESA_B2C_OCCASION || "Vehicle sale payout";
 

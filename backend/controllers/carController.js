@@ -58,7 +58,7 @@ export const getCars = async (req, res) => {
     // never trigger an unbounded query (pagination cap — Issue: security test).
     const limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    const query = { status: "active" };
+    const query = { status: "active", isDemo: { $ne: true } };
 
     if (keyword) {
       const trimmed = keyword.trim();

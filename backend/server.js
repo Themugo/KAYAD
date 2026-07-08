@@ -351,7 +351,7 @@ import CacheStore from "./services/sessionStore.js";
 app.use(
   session({
     store: new CacheStore(),
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "kayad-session-secret-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -459,7 +459,6 @@ if (NODE_ENV !== "production") {
 // ─── API ROUTES (VERSIONED) ───────────────────────────────────
 app.use("/api/v1", v1Routes);
 app.use("/api/v2", v2Routes);
-app.use("/api", v1Routes); // Default to v1 for backward compatibility
 
 // ─── DASHBOARD ROUTES (ROLE-BASED) ───────────────────────────
 app.use("/api/v1/analytics/operations", operationsDashboardRoutes);

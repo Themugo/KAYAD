@@ -251,7 +251,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.user.id).select("-password").lean();
     if (!user) return res.status(403).json({ success: false, message: "Invalid session" });
-    const ownerEmails = [process.env.WEBHOIST_EMAIL].filter(Boolean).map((e) => e.toLowerCase().trim());
+    const ownerEmails = (process.env.WEBHOIST_EMAIL || "").split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
     if (
       ownerEmails.includes(
         String(user.email || "")
