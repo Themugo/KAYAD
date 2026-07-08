@@ -72,6 +72,8 @@ export const paymentsAPI = {
   status:      (id: string)        => api.get(`/payments/status/${id}`).then(unwrap),
   myPayments:  ()          => api.get('/payments/my').then(unwrap),
   byCheckout:  (checkoutId: string)=> api.get(`/payments/checkout/${checkoutId}`).then(unwrap),
+  all:         (params?: any)       => api.get('/payments', { params }).then(unwrap),
+  byId:        (id: string)        => api.get(`/payments/${id}`).then(unwrap),
 };
 
 // ── ESCROW ────────────────────────────────────────────
@@ -79,10 +81,13 @@ export const escrowAPI = {
   mine:    ()              => api.get('/escrow/my').then(unwrap),
   all:     (params: any)        => api.get('/escrow', { params }).then(unwrap),
   get:     (id: string)            => api.get(`/escrow/${id}`).then(unwrap),
-  release: (id: string)            => api.post(`/escrow/${id}/release`).then(unwrap),
-  refund:  (id: string)            => api.post(`/escrow/${id}/refund`).then(unwrap),
-  dispute: (id: string, reason: string)    => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
-  requestRelease: (id: string)     => api.post(`/escrow/${id}/request-release`).then(unwrap),
+  release:        (id: string)          => api.post(`/escrow/${id}/release`).then(unwrap),
+  refund:         (id: string)          => api.post(`/escrow/${id}/refund`).then(unwrap),
+  dispute:        (id: string, reason: string) => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
+  requestRelease: (id: string)          => api.post(`/escrow/${id}/request-release`).then(unwrap),
+  confirmVehicle: (id: string)          => api.post(`/escrow/${id}/confirm-vehicle`).then(unwrap),
+  confirmDelivery:(id: string)          => api.post(`/escrow/${id}/confirm-delivery`).then(unwrap),
+  close:          (id: string)          => api.post(`/escrow/${id}/close`).then(unwrap),
 };
 
 // ── ESCROW VAULT ──────────────────────────────────────

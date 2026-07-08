@@ -269,6 +269,17 @@ paymentSchema.methods.cancel = function () {
   return this.save();
 };
 
+// 🔁 MARK REFUNDED
+paymentSchema.methods.markRefunded = function (reason) {
+  if (this.status === "refunded") return this;
+
+  this.status = "refunded";
+  this.refundedAt = new Date();
+  this.refundReason = reason || "No reason provided";
+
+  return this.save();
+};
+
 // =============================
 // ⚡ STATICS
 // =============================
