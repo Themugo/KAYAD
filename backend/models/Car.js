@@ -29,6 +29,8 @@ const carSchema = new mongoose.Schema(
     fuel: { type: String, index: true, enum: ["Petrol", "Diesel", "Electric", "Hybrid", "LPG", "CNG"] },
     transmission: { type: String, enum: ["Automatic", "Manual", "CVT", "DCT", "Semi-Automatic"] },
     mileage: Number,
+    engine: String,
+    drivetrain: { type: String, enum: ["FWD", "RWD", "AWD", "4WD"] },
     bodyType: {
       type: String,
       enum: [

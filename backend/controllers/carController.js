@@ -28,6 +28,7 @@ export const getCars = async (req, res) => {
     const {
       keyword,
       brand,
+      model,
       city,
       minPrice,
       maxPrice,
@@ -44,6 +45,10 @@ export const getCars = async (req, res) => {
       sort,
       featured,
       auctionStatus,
+      dealerType,
+      vin,
+      engine,
+      drivetrain,
       page = 1,
       limit = 12,
     } = req.query;
@@ -68,6 +73,10 @@ export const getCars = async (req, res) => {
     }
 
     if (brand) query.brand = { $in: brand.split(",") };
+    if (model) {
+      const safeModel = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.model = { $regex: `^${safeModel}$`, $options: "i" };
+    }
     if (city) {
       const safeCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query["location.city"] = { $regex: `^${safeCity}$`, $options: "i" };
@@ -99,6 +108,23 @@ export const getCars = async (req, res) => {
       query.mileage = {};
       if (mileageMin) query.mileage.$gte = toNumber(mileageMin, 0);
       if (mileageMax) query.mileage.$lte = toNumber(mileageMax, 9999999);
+    }
+
+    if (vin) {
+      const safeVin = vin.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.vin = { $regex: safeVin, $options: "i" };
+    }
+    if (engine) {
+      const safeEngine = engine.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.engine = { $regex: `^${safeEngine}$`, $options: "i" };
+    }
+    if (drivetrain) query.drivetrain = exactText(drivetrain);
+    if (dealerType === "dealer") {
+      const dealerIds = await User.find({ role: "dealer" }).distinct("_id").lean();
+      query.dealer = { $in: dealerIds };
+    } else if (dealerType === "private") {
+      const sellerIds = await User.find({ role: "individual_seller" }).distinct("_id").lean();
+      query.dealer = { $in: sellerIds };
     }
 
     if (category === "auction") {

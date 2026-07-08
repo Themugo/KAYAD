@@ -34,6 +34,10 @@ export const carListQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional(),
   seller: z.string().optional(),
   ids: z.string().optional(),
+  dealerType: z.enum(["dealer", "private"]).optional(),
+  vin: z.string().optional(),
+  engine: z.string().optional(),
+  drivetrain: z.enum(["FWD", "RWD", "AWD", "4WD"]).optional(),
 });
 
 export const carSearchQuerySchema = z.object({
