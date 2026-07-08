@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useNotifications } from '../context/NotificationContext';
 import { isSellerRole } from '../utils/authRoutes';
-import { Menu, X, Car, User, LogOut, Shield, Search, HelpCircle, Plus, Gavel, Home } from 'lucide-react';
+import { Menu, X, Car, User, LogOut, Shield, Search, HelpCircle, Plus, Gavel, Home, Bell } from 'lucide-react';
+import NotificationCenter from './NotificationCenter';
 
 const NAV_LINKS = [
   { to: '/', label: 'Home', icon: Home },
@@ -15,9 +17,22 @@ const NAV_LINKS = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const { user, isAuth, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
   const isActive = (to) =>
     to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
@@ -72,6 +87,23 @@ export default function Navbar() {
                 <Link to="/dashboard" className="text-[13px] font-medium text-white/50 hover:text-white/90 transition-colors whitespace-nowrap tracking-wide">
                   Dashboard
                 </Link>
+                <div ref={notifRef} style={{ position: 'relative', display: 'inline-flex' }}>
+                  <button onClick={() => setNotifOpen(v => !v)}
+                    className="relative p-1.5 text-white/50 hover:text-white/90 transition-colors">
+                    <Bell className="w-4 h-4" />
+                    {unreadCount > 0 && (
+                      <span style={{
+                        position: 'absolute', top: -2, right: -2, width: 16, height: 16,
+                        borderRadius: '50%', background: '#D4C4A8', color: '#0D0D0D',
+                        fontSize: 9, fontWeight: 800, display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', lineHeight: 1,
+                      }}>
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                  {notifOpen && <NotificationCenter onClose={() => setNotifOpen(false)} />}
+                </div>
                 <button
                   onClick={handleLogout}
                   className="text-[13px] font-medium text-white/35 hover:text-white/70 transition-colors whitespace-nowrap tracking-wide"
