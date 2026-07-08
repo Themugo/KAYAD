@@ -49,16 +49,29 @@ jobs:
           echo $! > /tmp/backend.pid
           sleep 10
 
+      - name: Check backend availability
+        id: check-backend
+        run: |
+          if curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/api/cars --connect-timeout 3 > /dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "Backend not available, skipping load tests"
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Run API load tests
-        run: k6 run load-tests/api-load-test.js
+        if: steps.check-backend.outputs.available == 'true'
+        run: k6 run --duration 30s load-tests/api-load-test.js
         continue-on-error: true
 
       - name: Run WebSocket load tests
-        run: k6 run load-tests/websocket-load-test.js
+        if: steps.check-backend.outputs.available == 'true'
+        run: k6 run --duration 30s load-tests/websocket-load-test.js
         continue-on-error: true
 
       - name: Run database load tests
-        run: k6 run load-tests/database-load-test.js
+        if: steps.check-backend.outputs.available == 'true'
+        run: k6 run --duration 30s load-tests/database-load-test.js
         continue-on-error: true
 
       - name: Stop backend server

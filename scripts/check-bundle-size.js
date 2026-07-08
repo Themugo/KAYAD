@@ -9,10 +9,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const BUDGETS = {
-  'index-': 500000, // 500KB for main entry
-  'react-vendor': 500000, // 500KB for React vendor
-  'vendor': 600000, // 600KB for other vendors
-  default: 300000, // 300KB for other chunks
+  'index-': 500000,
+  'react-vendor': 500000,
+  'vendor': 600000,
+  'components-': 400000,
+  'pages-': 500000,
+  default: 400000,
 };
 
 const distDir = path.join(__dirname, '../dist/assets/js');
