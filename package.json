@@ -78,7 +78,7 @@
         "react-hook-form": "^7.55.0",
         "react-resizable-panels": "^2.1.7",
         "react-router-dom": "^6.30.4",
-        "recharts": "^2.15.2",
+        "recharts": "^3.9.2",
         "rollup-plugin-visualizer": "^5.14.0",
         "socket.io-client": "^4.7.5",
         "sonner": "^2.0.7",
