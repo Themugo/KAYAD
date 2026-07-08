@@ -229,7 +229,7 @@ export const createCar = async (req, res) => {
     const isDemoSeller = !!seller.isDemo;
 
     // ── PACKAGE / TRIAL ENFORCEMENT ─────────────────────────
-    const config = await (await import("../models/PlatformConfig.js")).default.findOne().lean();
+    const config = await PlatformConfig.findOne().lean();
     const pkgs = config?.packages || [];
     const pkg = pkgs.find((p) => p.id === seller.dealerPackage) || null;
 
