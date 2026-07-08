@@ -48,6 +48,7 @@
     "VITE_ENABLE_COMPARE": "true",
     "VITE_ENABLE_REVIEWS": "true",
     "VITE_ENABLE_DEMO": "false",
+    "VITE_ENABLE_DEMO_MODE": "true",
     "VITE_POSTHOG_HOST": "https://us.i.posthog.com"
   }
 }

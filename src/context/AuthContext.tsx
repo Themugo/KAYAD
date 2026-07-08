@@ -5,6 +5,7 @@ import { authAPI, api } from '../api/api';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import PageLoader from '../components/PageLoader';
+import DEMO_USERS from '../data/demoUsers';
 import {
   getEffectivePermissions,
   userHasPermission,
@@ -64,10 +65,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     else   clearPostHogUser();
   };
 
-  // On mount: fetch user via cookie-based auth (HttpOnly token cookie)
+  // On mount: fetch user via cookie-based auth, or restore local demo session
   useEffect(() => {
     const handleAuthExpired = () => { setUser(null); setLoading(false); };
     window.addEventListener('kayad:auth-expired', handleAuthExpired);
+
+    const demoUser = localStorage.getItem('kayad_demo_user');
+    if (demoUser) {
+      try {
+        const parsed = JSON.parse(demoUser);
+        setUser(normalizeUser(parsed));
+        setLoading(false);
+        return;
+      } catch {}
+    }
 
     authAPI.me()
       .then(data => setUser(normalizeUser(data.user)))
@@ -85,10 +96,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const demoLogin = useCallback(async (role: string) => {
-    const data = await api.post('/auth/demo-login', { role }).then(r => r.data);
-    setUser(normalizeUser(data.user));
-    setLoading(false);
-    return data;
+    try {
+      const data = await api.post('/auth/demo-login', { role }).then(r => r.data);
+      setUser(normalizeUser(data.user));
+      setLoading(false);
+      return data;
+    } catch {
+      const demoUser = DEMO_USERS[role as keyof typeof DEMO_USERS];
+      if (!demoUser) throw new Error(`Unknown demo role: ${role}`);
+      setUser(normalizeUser(demoUser));
+      localStorage.setItem('kayad_demo_user', JSON.stringify(demoUser));
+      setLoading(false);
+      return { user: demoUser };
+    }
   }, []);
 
   const register = useCallback(async (body: any) => {
@@ -100,6 +120,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = useCallback(async () => {
     try { await authAPI.logout(); } catch (error) { console.error('Logout failed:', error); }
+    localStorage.removeItem('kayad_demo_user');
     setUser(null);
     setLoading(false);
   }, []);

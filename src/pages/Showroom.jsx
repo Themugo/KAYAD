@@ -48,6 +48,7 @@ import useMediaQuery from '../hooks/useMediaQuery';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 import useDebouncedValue from '../hooks/useDebouncedValue';
 import { ItemListStructuredData, BreadcrumbStructuredData } from '../components/SeoStructuredData';
+import DEMO_CARS from '../data/demoCars';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import ShowroomEmptyState from './showroom/components/ShowroomEmptyState';
@@ -249,10 +250,17 @@ export default function Showroom() {
     try {
       const data = await carsAPI.list(getApiParams(pageNum));
       const newCars = data.data || data.cars || [];
-      setCars(prev => (replace ? newCars : [...prev, ...newCars]));
-      setTotalCount(data.pagination?.total || 0);
-      setHasMore(pageNum < (data.pagination?.pages || 1));
-      setShowroomError(null);
+      if (replace && (!newCars || newCars.length === 0)) {
+        setCars(DEMO_CARS);
+        setTotalCount(DEMO_CARS.length);
+        setHasMore(false);
+        setShowroomError(null);
+      } else {
+        setCars(prev => (replace ? newCars : [...prev, ...newCars]));
+        setTotalCount(data.pagination?.total || 0);
+        setHasMore(pageNum < (data.pagination?.pages || 1));
+        setShowroomError(null);
+      }
     } catch (error) {
       console.error('Failed to load cars:', error);
       
@@ -272,7 +280,12 @@ export default function Showroom() {
       }
       
       toast(errorMessage, 'error');
-      if (replace) setShowroomError(errorMessage);
+      if (replace) {
+        setCars(DEMO_CARS);
+        setTotalCount(DEMO_CARS.length);
+        setHasMore(false);
+        setShowroomError(null);
+      }
     } finally {
       setLoading(false);
       loadingRef.current = false;
