@@ -1,6 +1,7 @@
 name: API Governance Check
 
 on:
+  workflow_call:
   pull_request:
     paths:
       - 'backend/routes/**'

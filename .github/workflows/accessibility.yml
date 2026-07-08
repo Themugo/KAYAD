@@ -31,13 +31,16 @@ jobs:
         run: |
           npm ci
 
+      - name: Build frontend
+        run: npx vite build
+
       - name: Run accessibility audit with Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
         with:
           uploadArtifacts: true
           temporaryPublicStorage: true
           urls: |
-            http://localhost:3000
+            http://localhost:4173
           budgetPath: ./.github/lighthouse-budget.json
           configPath: ./.github/lighthouserc.json
 
@@ -112,9 +115,17 @@ jobs:
         run: |
           npm ci
 
+      - name: Build frontend
+        run: npx vite build
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 --host 0.0.0.0 &
+          sleep 5
+
       - name: Run axe-core scan
         run: |
-          npx @axe-core/cli http://localhost:3000 --exit
+          npx @axe-core/cli http://localhost:4173 --exit
 
       - name: Upload axe report
         if: always()
@@ -145,9 +156,17 @@ jobs:
       - name: Install color contrast checker
         run: npm install -g pa11y
 
+      - name: Build frontend
+        run: npx vite build
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 --host 0.0.0.0 &
+          sleep 5
+
       - name: Run color contrast check
         run: |
-          pa11y http://localhost:3000 --runner axe --threshold 0
+          pa11y http://localhost:4173 --runner axe --threshold 0 --no-sandbox
 
       - name: Upload contrast report
         if: always()

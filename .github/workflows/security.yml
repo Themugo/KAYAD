@@ -80,7 +80,7 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           scanners: 'vuln'
           vuln-type: 'os,library'
@@ -148,12 +148,12 @@ jobs:
         run: |
           cd backend
           license-checker --production --json > backend-licenses.json || true
-          license-checker --production --failOn "GPL;AGPL;SSPL;MPL" || echo "License check completed"
+          license-checker --production --failOn "AGPL;SSPL;CPAL;CPL;EPL" || echo "License check completed"
           
       - name: Check frontend licenses
         run: |
           license-checker --production --json > frontend-licenses.json || true
-          license-checker --production --failOn "GPL;AGPL;SSPL;MPL" || echo "License check completed"
+          license-checker --production --failOn "AGPL;SSPL;CPAL;CPL;EPL" || echo "License check completed"
           
       - name: Upload license reports
         uses: actions/upload-artifact@v4

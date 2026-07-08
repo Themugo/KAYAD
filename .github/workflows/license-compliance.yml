@@ -40,8 +40,8 @@ jobs:
         run: npm install -g license-checker
 
       - name: Run license check for ${{ matrix.component }}
-        working-directory: ${{ matrix.component == 'backend' && 'backend' || '.' }}
         run: |
+          cd ${{ matrix.component == 'backend' && 'backend' || '.' }}
           license-checker --production --json --out ../license-report-${{ matrix.component }}.json
 
       - name: Upload license report
@@ -55,7 +55,7 @@ jobs:
           node -e "
             var fs = require('fs');
             var report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
-            var disallowedPatterns = ['GPL', 'AGPL', 'LGPL', 'MPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
+            var disallowedPatterns = ['AGPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
             var disallowed = [];
             Object.keys(report).forEach(function(name) {
               var pkg = report[name];

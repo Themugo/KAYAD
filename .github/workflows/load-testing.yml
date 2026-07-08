@@ -11,7 +11,7 @@ on:
 
 env:
   NODE_VERSION: '22'
-  K6_VERSION: 'latest'
+  K6_VERSION: '0.54.0'
 
 jobs:
   load-test:
@@ -35,9 +35,12 @@ jobs:
           cd backend && npm ci
 
       - name: Setup k6
-        uses: grafana/k6-action@v0.3.1
-        with:
-          k6-version: ${{ env.K6_VERSION }}
+        run: |
+          curl -LO https://github.com/grafana/k6/releases/download/v${{ env.K6_VERSION }}/k6-v${{ env.K6_VERSION }}-linux-amd64.tar.gz
+          tar xzf k6-v${{ env.K6_VERSION }}-linux-amd64.tar.gz
+          sudo mv k6-v${{ env.K6_VERSION }}-linux-amd64/k6 /usr/local/bin/
+          rm -rf k6-v${{ env.K6_VERSION }}-linux-amd64 k6-v${{ env.K6_VERSION }}-linux-amd64.tar.gz
+          k6 version
 
       - name: Start backend server
         run: |

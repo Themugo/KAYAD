@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "vite --port 3000",
         "build": "vite build",
-        "preview": "vite preview --port 3000",
+        "preview": "vite preview --port 4173",
         "typecheck": "tsc --noEmit",
         "pre-deploy": "node scripts/pre-deploy-check.js",
         "validate-deployment": "node scripts/deployment-validation.js",
