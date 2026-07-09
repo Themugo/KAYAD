@@ -27,7 +27,7 @@ export default function AdminEscrowVault() {
       setVaults(data.vaults || []);
     } catch { toast('Failed to load vaults', 'error'); }
     finally { setLoading(false); }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 

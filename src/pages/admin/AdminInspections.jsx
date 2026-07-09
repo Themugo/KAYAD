@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { inspectionAPI, formatKES } from '../../api/api';
-import { Eye, UserCheck, ClipboardCheck, Search } from 'lucide-react';
+import { UserCheck, ClipboardCheck } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending_payment: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -18,7 +18,7 @@ export default function AdminInspections() {
   const [statusFilter, setStatusFilter] = useState('');
   const [assigning, setAssigning] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = statusFilter ? { status: statusFilter } : {};
@@ -30,11 +30,11 @@ export default function AdminInspections() {
       setInspectors(ins.inspectors || []);
     } catch { setOrders([]); }
     finally { setLoading(false); }
-  };
+  }, [statusFilter]);
 
-  useEffect(() => { load(); }, [statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleAssign = async (orderId) => {
+  const _handleAssign = async (orderId) => {
     const inspectorId = prompt('Enter Inspector ID to assign:');
     if (!inspectorId) return;
     try {

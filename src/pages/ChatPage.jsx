@@ -25,7 +25,7 @@ export default function ChatPage() {
   const [typingUsers, setTypingUsers] = useState({});
   const [search, setSearch]     = useState('');
   const [attachments, setAttachments] = useState([]);
-  const [onlineUsers, setOnlineUsers] = useState({});
+  const [onlineUsers, _setOnlineUsers] = useState({});
   const connected = ctxConnected;
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const bottomRef = useRef(null);
@@ -198,10 +198,10 @@ export default function ChatPage() {
     return d.toLocaleDateString('en-KE', { month: 'short', day: 'numeric', year: d.getFullYear() !== today.getFullYear() ? 'numeric' : undefined });
   };
 
-  const otherParticipant = (p) => {
+  const otherParticipant = useCallback((p) => {
     const parts = p.participants || [];
     return parts.find(u => userIdOf(u) !== uid) || parts[0];
-  };
+  }, [uid]);
 
   const filteredChats = useMemo(() => {
     if (!search.trim()) return chats;
@@ -210,7 +210,7 @@ export default function ChatPage() {
       const o = otherParticipant(c);
       return [o?.name, c.lastMessage?.message, c.car?.title].some(s => s?.toLowerCase().includes(q));
     });
-  }, [chats, search]);
+  }, [chats, search, otherParticipant]);
 
   const activeChat = chats.find(c => c._id === active);
   const otherInActive = activeChat ? otherParticipant(activeChat) : null;
@@ -228,9 +228,8 @@ export default function ChatPage() {
   return (
     <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* ─── Mobile toggle ─── */}
-      <div className="chat-mobile-toggle" style={{ display: 'none', padding: '12px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', alignItems: 'center', gap: 10 }}
-        onClick={() => setSidebarOpen(true)}>
-        <button style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer', padding: 0 }}>← Back</button>
+      <div className="chat-mobile-toggle" style={{ display: 'none', padding: '12px 16px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', alignItems: 'center', gap: 10 }}>
+        <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--gold)', fontSize: 14, cursor: 'pointer', padding: 0 }}>← Back</button>
         <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{otherInActive?.name || 'Messages'}</span>
         <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : 'var(--red)', display: 'inline-block', animation: connected ? 'pulse 2s infinite' : 'none' }} />
       </div>
@@ -269,6 +268,10 @@ export default function ChatPage() {
                 <div
                   key={chat._id}
                   onClick={() => { setActive(chat._id); navigate(`/chat/${chat._id}`, { replace: true }); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(chat._id); navigate(`/chat/${chat._id}`, { replace: true }); } }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open chat with ${other?.name || 'user'}`}
                   className={`chat-list-item ${isActive ? 'active' : ''}`}
                 >
                   <div className="chat-avatar-wrap">

@@ -45,7 +45,7 @@ export default function ProfilePage() {
     if (tab === 'Profile' && isSeller && !myStats) {
       carsAPI.analytics().then(d => setMyStats(d.analytics || d.data || d)).catch(() => {});
     }
-  }, [tab]);
+  }, [tab, activity.length, reviews.length, isSeller, myStats]);
 
   const handleSave = async (e) => {
     e.preventDefault();

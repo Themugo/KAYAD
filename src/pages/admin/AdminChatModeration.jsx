@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI, formatKES } from '../../api/api';
+import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function AdminChatModeration() {
@@ -24,7 +24,7 @@ export default function AdminChatModeration() {
       setTotal(d.pagination?.total || 0);
     } catch { toast('Failed to load chats', 'error'); }
     finally { setLoading(false); }
-  }, [page, search]);
+  }, [page, search, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -90,6 +90,8 @@ export default function AdminChatModeration() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {chats.map(c => (
                 <div key={c._id} onClick={() => loadMessages(c)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadMessages(c); } }}
+                  role="button" tabIndex={0}
                   style={{
                     background: selectedChat?._id === c._id ? 'rgba(212,196,168,0.06)' : '#0C0C0C',
                     border: `1px solid ${selectedChat?._id === c._id ? 'rgba(212,196,168,0.2)' : 'rgba(255,255,255,0.07)'}`,

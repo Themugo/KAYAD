@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { notifAPI, formatKES } from '../api/api';
+import { notifAPI } from '../api/api';
 import { useNotifications } from '../context/NotificationContext';
-import { timeAgo, formatDate } from '../utils/helpers';
+import { timeAgo } from '../utils/helpers';
 import EmptyState from '../components/EmptyState';
 
 const TYPE_ICONS = {
@@ -32,7 +32,7 @@ const TYPE_FILTERS = [
 ];
 
 export default function NotificationsPage() {
-  const { fetchNotifications, markAsRead, markAllRead, deleteNotif, unreadCount } = useNotifications();
+  const { markAsRead, markAllRead, deleteNotif, unreadCount } = useNotifications();
   const [notifs, setNotifs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('all');
@@ -40,7 +40,7 @@ export default function NotificationsPage() {
   const [total, setTotal] = useState(0);
   const limit = 30;
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit, type: typeFilter !== 'all' ? typeFilter : undefined };
@@ -51,9 +51,9 @@ export default function NotificationsPage() {
     } catch (error) {
       console.warn('Unable to load notifications', error);
     } finally { setLoading(false); }
-  };
+  }, [page, typeFilter]);
 
-  useEffect(() => { load(); }, [page, typeFilter]);
+  useEffect(() => { load(); }, [load]);
 
   const handleMarkRead = async (id) => {
     await markAsRead(id);

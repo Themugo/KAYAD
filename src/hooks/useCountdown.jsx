@@ -1,9 +1,9 @@
 // src/hooks/useCountdown.jsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useCountdown(endTime) {
-  const calc = () => {
+  const calc = useCallback(() => {
     if (!endTime) {
       return { d: 0, h: 0, m: 0, s: 0, total: 0, expired: true, urgent: false };
     }
@@ -25,7 +25,7 @@ export function useCountdown(endTime) {
       expired: false,
       urgent: diff <= 5 * 60 * 1000,
     };
-  };
+  }, [endTime]);
 
   const [time, setTime] = useState(calc);
 
@@ -44,7 +44,7 @@ export function useCountdown(endTime) {
     }, 1000);
 
     return () => clearInterval(id);
-  }, [endTime]);
+  }, [endTime, calc]);
 
   return time;
 }

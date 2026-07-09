@@ -176,7 +176,7 @@ export default function AdminCarModeration() {
                   <th style={{ width: 40 }}>
                     <input type="checkbox" checked={cars.length > 0 && selectedIds.length === cars.length}
                       onChange={toggleSelectAll}
-                      onClick={e => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()} role="presentation"
                       style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
                   </th>
                   <th>Listing</th>
@@ -192,7 +192,7 @@ export default function AdminCarModeration() {
                   const isSelected = selectedIds.includes(car._id);
                   return (
                   <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer', opacity: isSelected ? 0.8 : 1 }}>
-                    <td onClick={e => e.stopPropagation()}>
+                    <td onClick={e => e.stopPropagation()} role="presentation">
                       <input type="checkbox" checked={isSelected}
                         onChange={() => toggleSelect(car._id)}
                         style={{ accentColor: 'var(--gold)', cursor: 'pointer' }} />
@@ -217,7 +217,7 @@ export default function AdminCarModeration() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}
-                        onClick={e => e.stopPropagation()}>
+                        onClick={e => e.stopPropagation()} role="presentation">
                         <button
                           className="btn btn-sm"
                           style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
@@ -260,7 +260,7 @@ export default function AdminCarModeration() {
       </div>
 
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 560 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h2 style={{ margin: 0 }}>{selected.title || `${selected.brand} ${selected.model || ''}`}</h2>

@@ -32,7 +32,7 @@ export default function AdminMarketData() {
       setTotal(d.pagination?.total || 0);
     } catch { toast('Failed to load market data', 'error'); }
     finally { setLoading(false); }
-  }, [page, brandFilter, modelFilter, yearFilter]);
+  }, [page, brandFilter, modelFilter, yearFilter, toast]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setPage(1); }, [brandFilter, modelFilter, yearFilter]);

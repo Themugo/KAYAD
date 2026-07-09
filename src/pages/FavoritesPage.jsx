@@ -9,7 +9,7 @@ import EmptyState from '../components/EmptyState';
 
 export default function FavoritesPage() {
   const { toast } = useToast();
-  const { compareIds, compareCount, maxCompare, toggleCar, isComparing } = useCompare();
+  const { compareCount, maxCompare, toggleCar, isComparing } = useCompare();
   const [cars, setCars]       = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy]   = useState('saved');
@@ -23,7 +23,7 @@ export default function FavoritesPage() {
       })
       .catch(() => toast('Failed to load favourites', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const [alertStates, setAlertStates] = useState({});
 

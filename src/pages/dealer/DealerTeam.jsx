@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
 import { dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { Users, Mail, Shield, ChevronDown, Trash2, Plus, RefreshCw, Settings, Eye, Edit3, DollarSign, MessageCircle } from 'lucide-react';
+import { Users, Shield, ChevronDown, Trash2, Plus, RefreshCw, Settings, Edit3, DollarSign, MessageCircle } from 'lucide-react';
 
 const ROLES = [
   { id: 'manager',         label: 'Manager',         desc: 'Full business access, can manage team',       color: '#a855f7' },
@@ -46,8 +45,7 @@ function StatusDot({ status }) {
 }
 
 export default function DealerTeam() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+    const { toast } = useToast();
   const [members, setMembers]       = useState([]);
   const [loading, setLoading]       = useState(true);
   const [showInvite, setShowInvite] = useState(false);
@@ -161,6 +159,8 @@ export default function DealerTeam() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {ROLES.map(r => (
                     <div key={r.id} onClick={() => { setInvite(p => ({ ...p, role: r.id })); setCustomPerms(ROLE_DEFAULTS[r.id]); }}
+                      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setInvite(p => ({ ...p, role: r.id })); setCustomPerms(ROLE_DEFAULTS[r.id]); } }}
+                      role="radio" aria-checked={invite.role === r.id} tabIndex={0}
                       style={{ padding: '12px 16px', borderRadius: 10, border: `1px solid ${invite.role === r.id ? r.color + '50' : 'rgba(255,255,255,0.07)'}`, background: invite.role === r.id ? `${r.color}0a` : 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.15s' }}>
                       <div style={{ width: 10, height: 10, borderRadius: '50%', background: invite.role === r.id ? r.color : 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
                       <div>
@@ -182,6 +182,8 @@ export default function DealerTeam() {
                     const on = customPerms[p.key] ?? ROLE_DEFAULTS[invite.role]?.[p.key] ?? false;
                     return (
                       <div key={p.key} onClick={() => setCustomPerms(prev => ({ ...prev, [p.key]: !on }))}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCustomPerms(prev => ({ ...prev, [p.key]: !on })); } }}
+                        role="checkbox" aria-checked={on} tabIndex={0} aria-label={p.label}
                         style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,196,168,0.06)' : 'rgba(255,255,255,0.02)', cursor: 'pointer', transition: 'all 0.15s' }}>
                         <div style={{ width: 16, height: 16, borderRadius: 4, background: on ? 'var(--gold)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           {on && <span style={{ color: '#000', fontSize: 10, fontWeight: 900 }}>✓</span>}
@@ -278,6 +280,8 @@ export default function DealerTeam() {
                           const on = m.permissions?.[p.key] ?? false;
                           return (
                             <div key={p.key} onClick={() => handlePermToggle(m._id, p.key, on)}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePermToggle(m._id, p.key, on); } }}
+                              role="checkbox" aria-checked={on} tabIndex={0} aria-label={p.label}
                               style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(212,196,168,0.22)' : 'rgba(255,255,255,0.06)'}`, background: on ? 'rgba(212,196,168,0.06)' : 'transparent', cursor: 'pointer', transition: 'all 0.15s' }}>
                               <div style={{ width: 15, height: 15, borderRadius: 4, background: on ? 'var(--gold)' : 'rgba(255,255,255,0.08)', border: `1px solid ${on ? 'var(--gold)' : 'rgba(255,255,255,0.12)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 {on && <span style={{ color: '#000', fontSize: 9, fontWeight: 900 }}>✓</span>}

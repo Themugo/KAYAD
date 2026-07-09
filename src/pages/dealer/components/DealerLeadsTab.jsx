@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dealerAPI } from '../../../api/api';
-import { MessageSquare, Mail, Phone, ChevronRight, Filter, Search, X, Archive } from 'lucide-react';
+import { MessageSquare, Mail, Phone, Search, X, Archive } from 'lucide-react';
 import { timeAgo } from './DashboardWidgets';
 
 const STAGE_CONFIG = {
@@ -23,7 +23,7 @@ export default function DealerLeadsTab({ toast }) {
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
 
-  const fetchLeads = () => {
+  const fetchLeads = useCallback(() => {
     setLoading(true);
     const params = {};
     if (filter) params.stage = filter;
@@ -32,9 +32,11 @@ export default function DealerLeadsTab({ toast }) {
       .then(res => { setLeads(res.leads || []); })
       .catch(() => toast('Failed to load leads', 'error'))
       .finally(() => setLoading(false));
-  };
+    // search also drives client-side filtering below; it doesn't need to re-trigger a fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, toast]);
 
-  useEffect(() => { fetchLeads(); }, [filter]);
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
   const handleStageChange = async (leadId, stage) => {
     try {

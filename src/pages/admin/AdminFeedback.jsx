@@ -142,7 +142,7 @@ export default function AdminFeedback() {
                           {f.status || 'new'}
                         </span>
                       </td>
-                      <td onClick={e => e.stopPropagation()}>
+                      <td onClick={e => e.stopPropagation()} role="presentation">
                         <button className="btn btn-sm btn-outline" onClick={() => setSelected(f)}>
                           <Eye size={12} style={{ marginRight: 4 }} />
                           View
@@ -166,7 +166,7 @@ export default function AdminFeedback() {
       </div>
 
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 540 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
               <div>

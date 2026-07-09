@@ -114,7 +114,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                 const car = t.car || {};
                 const img = car.images?.[0]?.url || car.images?.[0] || car.image;
                 return (
-                  <div key={t._id} style={{
+                  <div role="presentation" key={t._id} style={{
                     background: 'var(--card)', border: '1px solid var(--border)',
                     borderRadius: 14, padding: '16px 20px',
                     transition: 'border-color 0.2s',

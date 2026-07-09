@@ -64,9 +64,9 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    let _cancelled = false;
     loadFeatured().catch(() => {});
-    return () => { cancelled = true; };
+    return () => { _cancelled = true; };
   }, [loadFeatured]);
 
   const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
@@ -121,7 +121,7 @@ export default function HomePage() {
       <section className="trust-strip">
         <div className="section-container">
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
-            {trustItems.map((item, i) => (
+            {trustItems.map((item, _i) => (
               <div key={item.title} className="flex items-center gap-3 px-5 py-4">
                 <item.icon className="w-4 h-4 text-gold shrink-0" />
                 <div className="min-w-0">

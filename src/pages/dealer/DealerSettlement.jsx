@@ -22,7 +22,7 @@ export default function DealerSettlement() {
       .then(d => { if (d.settlement) setSettlement(d.settlement); })
       .catch(() => toast('Failed to load settlement config', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const handleSave = async () => {
     setSaving(true);

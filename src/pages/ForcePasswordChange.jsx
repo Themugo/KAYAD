@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function ForcePasswordChange() {
-  const { user, loading: authLoading, setUser, login, isAdmin } = useAuth();
+  const { user, loading: authLoading, setUser, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });

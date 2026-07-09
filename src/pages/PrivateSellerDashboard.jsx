@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { carsAPI, escrowAPI } from '../api/api';
 import { timeAgo } from '../utils/helpers';
-import { Car, TrendingUp, Users, Shield, Clock, DollarSign, Plus, Eye, MessageCircle, RefreshCw } from 'lucide-react';
+import { Car, TrendingUp, Shield, DollarSign, Plus, Eye, RefreshCw } from 'lucide-react';
 import CartyGrid from '../components/CartyGrid';
 import BackButton from '../components/BackButton';
 import GlassCard from '../components/dashboard/GlassCard';
@@ -18,16 +18,19 @@ import '../styles/dashboard.css';
 export default function PrivateSellerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   
   const [listings, setListings] = useState([]);
   const [escrows, setEscrows] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('overview');
+  const [_tab, _setTab] = useState('overview');
 
   useEffect(() => {
     fetchData();
+    // mount-once load; fetchData closes over listings/escrows state which would
+    // cause a refetch loop if included as reactive dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {

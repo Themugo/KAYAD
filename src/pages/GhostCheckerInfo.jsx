@@ -83,7 +83,7 @@ export default function GhostCheckerInfo() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {STEPS.map((s, i) => (
-              <div key={i} style={{
+              <div role="presentation" key={i} style={{
                 display: 'flex', gap: 18, alignItems: 'flex-start',
                 background: 'var(--card)', border: '1px solid var(--border)',
                 borderRadius: 14, padding: '20px 24px',

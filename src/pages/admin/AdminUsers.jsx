@@ -1,6 +1,6 @@
 // src/pages/admin/AdminUsers.jsx
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI, formatKES } from '../../api/api';
+import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, formatDate, initials } from '../../utils/helpers';
 import { useAuth } from '../../context/AuthContext';
@@ -37,7 +37,7 @@ export default function AdminUsers() {
       setTotal(data.pagination?.total || data.total || 0);
     } catch { toast('Failed to load users', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, roleFilter, statusFilter]);
+  }, [page, search, roleFilter, statusFilter, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -184,7 +184,7 @@ export default function AdminUsers() {
                         </div>
                       </td>
                       <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{u.createdAt ? timeAgo(u.createdAt) : '—'}</td>
-                      <td onClick={e => e.stopPropagation()}>
+                      <td onClick={e => e.stopPropagation()} role="presentation">
                         <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 120 }}>
                           {SELLER_ROLES.includes(u.role) && u.status !== 'approved' && (
                             <button className="btn btn-gold btn-sm" disabled={actionId === u._id + '-approve'}
@@ -236,7 +236,7 @@ export default function AdminUsers() {
 
       {/* User detail modal */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>

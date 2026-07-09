@@ -19,7 +19,7 @@ export default function AdminReferrals() {
   const [statusFilter, setStatusFilter] = useState('');
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [creditAmount, setCreditAmount] = useState(500);
+  const [creditAmount, _setCreditAmount] = useState(500);
   const [userTree, setUserTree] = useState(null);
   const [userSearch, setUserSearch] = useState('');
 
@@ -43,7 +43,7 @@ export default function AdminReferrals() {
       }
     } catch { toast('Failed to load', 'error'); }
     finally { setLoading(false); }
-  }, [tab, page, statusFilter, userSearch]);
+  }, [tab, page, statusFilter, userSearch, toast]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => { setPage(1); }, [statusFilter, tab]);

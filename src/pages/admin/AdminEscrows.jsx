@@ -31,7 +31,7 @@ export default function AdminEscrows() {
       setTotal(data.pagination?.total || data.total || 0);
     } catch { toast('Failed to load escrows', 'error'); }
     finally { setLoading(false); }
-  }, [page, filter]);
+  }, [page, filter, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -240,7 +240,7 @@ export default function AdminEscrows() {
 
       {/* ─── Detail Modal ─── */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 540 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>

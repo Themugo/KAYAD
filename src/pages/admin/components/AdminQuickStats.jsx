@@ -18,9 +18,9 @@ export default function AdminQuickStats({ stats, formatValue }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 12, marginBottom: 24 }}>
       {STAT_DEFS.map(qs => {
         const val = s[qs.key];
-        const activeColor = qs.key === 'activeAlerts' && Number(val||0) > 0 ? '#ef4444' : (qs.color || 'rgba(255,255,255,0.3)');
+        const _activeColor = qs.key === 'activeAlerts' && Number(val||0) > 0 ? '#ef4444' : (qs.color || 'rgba(255,255,255,0.3)');
         const inner = (
-          <div style={{
+          <div role="presentation" style={{
             background: 'var(--card)', border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)', padding: '18px 20px',
             transition: 'border-color 0.2s, transform 0.2s',

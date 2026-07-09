@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { dealerAPI, formatKES } from '../../api/api';
+import { dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { timeAgo } from './components/DashboardWidgets';
-import { TrendingUp, BarChart3, Clock, DollarSign, ChevronRight } from 'lucide-react';
+import { TrendingUp, BarChart3, Clock, DollarSign } from 'lucide-react';
 
 const cardStyle = {
   background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)',
@@ -46,12 +44,12 @@ export default function DealerAnalytics() {
       setAnalytics(a.analytics || a.data || a);
     }).catch(() => toast('Failed to load analytics', 'error'))
     .finally(() => setLoading(false));
-  }, [period]);
+  }, [period, toast]);
 
   if (loading) return <div className="page" style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}><div className="spinner" /></div>;
 
   const a = analytics || {};
-  const s = summary || {};
+  const _s = summary || {};
   const topCars = a.topCars || [];
   const maxViews = Math.max(...topCars.map(c => c.views || 0), 1);
   const priceComp = a.priceComparison || [];
@@ -97,7 +95,7 @@ export default function DealerAnalytics() {
         <div style={{ padding: '16px 22px' }}>
           {topCars.length === 0 ? (
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '20px 0' }}>No data yet</div>
-          ) : topCars.map((c, i) => (
+          ) : topCars.map((c, _i) => (
             <MiniBar key={c._id} value={c.views || 0} max={maxViews} label={c.title || 'Untitled'} sub={`${c.views || 0} views · KES ${Number(c.price||0).toLocaleString()}`} />
           ))}
         </div>

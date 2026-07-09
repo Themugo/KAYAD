@@ -1,7 +1,7 @@
 // src/pages/admin/AdminAuctions.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';
+import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { CountdownDisplay } from '../../components/CountdownDisplay';
 
@@ -14,7 +14,7 @@ export default function AdminAuctions() {
   const [selected, setSelected] = useState(null); // car for start-auction modal
   const [bids, setBids]       = useState({}); // carId -> bids[]
   const [startForm, setStartForm] = useState({ hours: 24 });
-  const [extendForm, setExtendForm] = useState({ hours: 2 });
+  const [extendForm, _setExtendForm] = useState({ hours: 2 });
   const [winnerModal, setWinnerModal] = useState(null); // { car, bids }
 
   const load = useCallback(async () => {
@@ -33,7 +33,7 @@ export default function AdminAuctions() {
       setCars(all);
     } catch { toast('Failed to load auctions', 'error'); }
     finally { setLoading(false); }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -53,7 +53,7 @@ export default function AdminAuctions() {
     if (!selected) return;
     setActionId(selected._id);
     try {
-      const endAt = new Date(Date.now() + Number(startForm.hours) * 3600000).toISOString();
+      const _endAt = new Date(Date.now() + Number(startForm.hours) * 3600000).toISOString();
       const durationMs = Number(startForm.hours) * 3600000;
       await auctionAdminAPI.start(selected._id, { durationMs, startingBid: 0 });
       toast('🔴 Auction is now LIVE!', 'success');
@@ -266,7 +266,7 @@ export default function AdminAuctions() {
 
       {/* ─── Start Auction Modal ─── */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box">
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>
@@ -312,7 +312,7 @@ export default function AdminAuctions() {
 
       {/* ─── Set Winner Modal ─── */}
       {winnerModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setWinnerModal(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setWinnerModal(null)}>
           <div className="modal-box" style={{ maxWidth: 540 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>

@@ -39,7 +39,7 @@ export default function AdminBids() {
       setSuspicious(suspRes.bids || suspRes.data || []);
     } catch { toast('Failed to load bids', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, paidFilter]);
+  }, [page, search, paidFilter, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -172,7 +172,7 @@ export default function AdminBids() {
                         <td>
                           <Link to={`/cars/${bid.car?._id || bid.car}`}
                             style={{ color: 'var(--gold)', fontSize: 13, fontWeight: 500 }}
-                            onClick={e => e.stopPropagation()}>
+                            onClick={e => e.stopPropagation()} role="presentation">
                             {bid.car?.title || `#${String(bid.car || '').slice(-6)}`}
                           </Link>
                         </td>
@@ -200,7 +200,7 @@ export default function AdminBids() {
                         <td style={{ fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
                           {bid.createdAt ? timeAgo(bid.createdAt) : '—'}
                         </td>
-                        <td onClick={e => e.stopPropagation()}>
+                        <td onClick={e => e.stopPropagation()} role="presentation">
                           <button className="btn btn-gold btn-sm" disabled={actionId === bid._id}
                             onClick={() => handleSetWinner(bid)}>
                             {actionId === bid._id ? '...' : '🏆'}
@@ -226,7 +226,7 @@ export default function AdminBids() {
 
       {/* Bid detail modal */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>

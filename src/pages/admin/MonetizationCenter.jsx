@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI, carsAPI, partnersAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { DollarSign, Car, Users, Star, Megaphone, Settings, TrendingUp, Crown, Shield, Database, Eye, EyeOff, RotateCw } from 'lucide-react';
+import { DollarSign, Car, Star, Megaphone, Settings, TrendingUp, Crown, Shield, Database, Eye, EyeOff, RotateCw } from 'lucide-react';
 
 export default function MonetizationCenter() {
   const { toast } = useToast();
   const [config, setConfig] = useState(null);
   const [featured, setFeatured] = useState([]);
-  const [partners, setPartners] = useState([]);
+  const [_partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [heroCarIds, setHeroCarIds] = useState('');
   const [sponsorCarIds, setSponsorCarIds] = useState('');
@@ -95,7 +95,7 @@ export default function MonetizationCenter() {
           { icon: Shield, label: 'Sponsored Dealers', desc: 'Dealer IDs to show as sponsored', value: sponsorDealers, onChange: setSponsorDealers, placeholder: 'dealerId1, dealerId2', color: '#3B82F6' },
           { icon: Crown, label: 'Featured Dealers', desc: 'Dealer IDs shown as #1 in Top-Rated section', value: featuredDealerIds, onChange: setFeaturedDealerIds, placeholder: 'dealerId1, dealerId2', color: '#22C55E' },
         ].map((item, i) => (
-          <div key={i} style={{
+          <div role="presentation" key={i} style={{
             borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
             background: 'rgba(255,255,255,0.02)', padding: 20,
             transition: 'all 0.2s',
@@ -160,7 +160,7 @@ export default function MonetizationCenter() {
           { icon: Car, label: 'Featured Vehicles', desc: 'Manage all vehicle listings and toggle featured status', to: '/admin/cars', color: '#22C55E' },
         ].map((item, i) => (
           <Link key={i} to={item.to} style={{ textDecoration: 'none' }}>
-            <div style={{
+            <div role="presentation" style={{
               borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
               background: 'rgba(255,255,255,0.02)', padding: 20,
               transition: 'all 0.2s', cursor: 'pointer',
@@ -322,7 +322,7 @@ export default function MonetizationCenter() {
           </div>
           <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {promoted.slice(0, 12).map(car => (
-              <div key={car._id} style={{
+              <div role="presentation" key={car._id} style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '10px',
                 borderRadius: 8, background: 'rgba(255,255,255,0.02)',
                 border: '1px solid rgba(255,255,255,0.04)',

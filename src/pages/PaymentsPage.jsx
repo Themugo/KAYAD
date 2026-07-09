@@ -23,7 +23,7 @@ export default function PaymentsPage() {
       setPayments(d.payments || d.data || []);
     } catch { toast('Failed to load payments', 'error'); }
     finally { setLoading(false); }
-  }, []);
+  }, [toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -147,7 +147,10 @@ export default function PaymentsPage() {
                       </td>
                       <td style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                         {p.mpesaReceiptNumber
-                          ? <span onClick={e => { e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); }} style={{ cursor: 'pointer', color: 'var(--gold)' }} title="Click to copy">
+                          ? <span onClick={e => { e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); }}
+                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); } }}
+                              role="button" tabIndex={0}
+                              style={{ cursor: 'pointer', color: 'var(--gold)' }} title="Click to copy">
                               {p.mpesaReceiptNumber}
                             </span>
                           : '—'
@@ -172,7 +175,7 @@ export default function PaymentsPage() {
 
       {/* ─── Detail modal ─── */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>

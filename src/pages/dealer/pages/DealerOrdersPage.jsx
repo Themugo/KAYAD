@@ -16,7 +16,7 @@ export default function DealerOrdersPage() {
       .then(res => setOrders(res.orders || res.data || []))
       .catch(() => toast('Failed to load orders', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const filtered = orders.filter(o => {
     if (filter && o.status !== filter) return false;

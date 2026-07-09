@@ -6,7 +6,6 @@ import { Settings, AlertTriangle, RefreshCw, Gavel, Activity, Users, Car, Dollar
 import GlassCard from '../../components/dashboard/GlassCard';
 import KPICard from '../../components/dashboard/KPICard';
 import StatRow from '../../components/dashboard/StatRow';
-import ActivityFeed from '../../components/dashboard/ActivityFeed';
 import QuickActions from '../../components/dashboard/QuickActions';
 import AdminQuickStats from './components/AdminQuickStats';
 import AdminChartsRow from './components/AdminChartsRow';
@@ -100,7 +99,7 @@ const ROLE_LINKS = {
 };
 
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const role = user?.role || 'admin';
   const rc = ROLE_CONFIG[role] || ROLE_CONFIG.admin;
   const [stats, setStats] = useState(null);

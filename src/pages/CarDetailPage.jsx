@@ -4,17 +4,14 @@ import '../styles/car-detail.css';
 import BackButton from '../components/BackButton';
 import ReportButton from '../components/ReportButton';
 import DetailSkeleton from './car/components/DetailSkeleton';
-import AuctionAnnouncement from './car/components/AuctionAnnouncement';
 import InlineBidding from './car/components/InlineBidding';
 import NtsaStatusCard from './car/components/NtsaStatusCard';
 import NotFoundState from '../components/NotFoundState';
 import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
-import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
 import { useSocket } from '../context/SocketContext';
 import PaymentModal from '../components/PaymentModal';
-import InspectionButton from '../components/InspectionButton';
 const TcoCalculator = lazy(() => import('../components/TcoCalculator'));
 const MarketValuationMatrix = lazy(() => import('../components/MarketValuationMatrix'));
 const MarketPulse = lazy(() => import('../components/MarketPulse'));
@@ -27,13 +24,13 @@ import usePageMeta from '../hooks/usePageMeta';
 import useMediaQuery from '../hooks/useMediaQuery';
 import {
   MapPin, Gauge, Calendar, Fuel, Settings2, ShieldCheck,
-  Heart, MessageCircle, ChevronLeft, ChevronRight, Bell,
-  Star, Eye, Bookmark, Zap, Award, Lock, Pin, TrendingUp,
-  CheckCircle, AlertTriangle, Clock, BarChart3, Phone, Mail, X
+  Heart, MessageCircle, Bell,
+  Star, Zap, Lock, Pin, TrendingUp,
+  CheckCircle, AlertTriangle, Phone, Mail, X
 } from 'lucide-react';
 
 // Extracted sub-components
-import { firstImage, GalleryImage, SpecItem, CompareToggle } from './car/components/CarDetailWidgets';
+import { GalleryImage, SpecItem, CompareToggle } from './car/components/CarDetailWidgets';
 import CarDetailReviews from './car/components/CarDetailReviews';
 import SimilarCars from './car/components/SimilarCars';
 
@@ -73,7 +70,7 @@ export default function CarDetailPage() {
   const [showBidConfirm, setShowBidConfirm] = useState(false);
   const [outbidAlert, setOutbidAlert] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
-  const { on, connected } = useSocket();
+  const { on } = useSocket();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,15 +86,17 @@ export default function CarDetailPage() {
         console.error('Failed to fetch car:', error);
       })
       .finally(() => setLoading(false));
-    if (isAuth) {
-      favoritesAPI.list().then(d => {
-        const favs = d.favorites || d.cars || d.data || [];
-        const match = favs.find(f => (f._id === id || f?.car?._id === id));
-        setIsFav(!!match);
-        setPriceAlertOn(match?.notifyOnPriceDrop === true);
-      }).catch((error) => console.error('Failed to fetch favorites:', error));
-    }
   }, [id]);
+
+  useEffect(() => {
+    if (!isAuth) return;
+    favoritesAPI.list().then(d => {
+      const favs = d.favorites || d.cars || d.data || [];
+      const match = favs.find(f => (f._id === id || f?.car?._id === id));
+      setIsFav(!!match);
+      setPriceAlertOn(match?.notifyOnPriceDrop === true);
+    }).catch((error) => console.error('Failed to fetch favorites:', error));
+  }, [id, isAuth]);
 
   // Load NTSA verification status
   useEffect(() => {
@@ -255,7 +254,7 @@ export default function CarDetailPage() {
     });
 
     return () => { offBid(); offEnd(); offExt(); };
-  }, [id, on, isLive, isAuth, user]);
+  }, [id, on, isLive, isAuth, user, toast]);
 
   const handleBuy = (type) => {
     if (!isAuth) { navigate(`/register?redirect=/cars/${id}`); return; }

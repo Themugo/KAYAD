@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminVerificationAPI } from '../../api/api';
-import { ShieldCheck, Search, CheckCircle, XCircle, Clock, Eye, FileText, X, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, Search, CheckCircle, XCircle, Eye, FileText, X, AlertTriangle } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b', label: 'Pending' },
@@ -16,8 +16,8 @@ function Modal({ title, children, onClose }) {
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-    }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{
+    }} onClick={onClose} role="presentation">
+      <div onClick={e => e.stopPropagation()} role="presentation" style={{
         background: '#111', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 16, padding: 28, width: 520, maxWidth: '90vw',
         position: 'relative', maxHeight: '80vh', overflow: 'auto',
@@ -44,7 +44,7 @@ export default function AdminDealerVerifications() {
   const [actionNotes, setActionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = filter ? { status: filter } : {};
@@ -52,9 +52,9 @@ export default function AdminDealerVerifications() {
       setItems(data.verifications || []);
     } catch { setItems([]); }
     finally { setLoading(false); }
-  };
+  }, [filter]);
 
-  useEffect(() => { load(); }, [filter]);
+  useEffect(() => { load(); }, [load]);
 
   const filtered = items.filter(v =>
     !search ||

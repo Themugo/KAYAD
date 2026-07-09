@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { disputeAPI, formatKES } from '../api/api';
+import { disputeAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
-import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { timeAgo } from '../utils/helpers';
-import { Shield, AlertTriangle, Plus, Search, Filter } from 'lucide-react';
+import { Shield, Search } from 'lucide-react';
 import { LoadingPage } from '../components/LoadingPage';
 
 const STATUS_META = {
@@ -27,22 +26,21 @@ const CATEGORY_LABELS = {
 
 export default function DisputesPage() {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const { on } = useSocket();
+    const { on } = useSocket();
   const [disputes, setDisputes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     disputeAPI.my()
       .then(d => setDisputes(d.disputes || d.data || []))
       .catch(err => toast(err?.response?.data?.message || 'Failed to load disputes', 'error'))
       .finally(() => setLoading(false));
-  };
+  }, [toast]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
     const off = on?.('disputeUpdate', (data) => {
@@ -143,7 +141,7 @@ export default function DisputesPage() {
             const statusColor = d.status === 'open' ? '#F59E0B' : d.status === 'under_review' ? '#3B82F6' : d.status === 'mediation' ? '#8B5CF6' : d.status === 'resolved' ? '#22C55E' : d.status === 'appealed' ? '#F97316' : '#6B7280';
             return (
               <Link key={d._id} to={`/disputes/${d._id}`} style={{ textDecoration: 'none' }}>
-                <div style={{
+                <div role="presentation" style={{
                   borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
                   background: 'rgba(255,255,255,0.02)', padding: 16,
                   transition: 'all 0.2s', cursor: 'pointer',

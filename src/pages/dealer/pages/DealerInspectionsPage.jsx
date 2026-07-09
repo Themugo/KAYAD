@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dealerAPI } from '../../../api/api';
 import { useToast } from '../../../context/ToastContext';
-import { Search, ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck } from 'lucide-react';
 import { timeAgo, StatusBadge } from '../components/DashboardWidgets';
 
 export default function DealerInspectionsPage() {
@@ -15,7 +15,7 @@ export default function DealerInspectionsPage() {
       .then(res => setInspections(res.inspections || res.data || []))
       .catch(() => toast('Failed to load inspections', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const filtered = filter ? inspections.filter(i => i.status === filter) : inspections;
 

@@ -16,7 +16,7 @@ export default function NotFoundPage() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [navigate]);
 
   return (
     <div style={{

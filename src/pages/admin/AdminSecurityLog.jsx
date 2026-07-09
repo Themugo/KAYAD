@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 
 const SEVERITY_COLORS = {
@@ -42,7 +42,7 @@ export default function AdminSecurityLog() {
   const [showStatistics, setShowStatistics] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  const fetchLogs = () => {
+  const fetchLogs = useCallback(() => {
     setLoading(true);
     const params = { page, limit: 30 };
     if (filter) params.action = filter;
@@ -55,7 +55,9 @@ export default function AdminSecurityLog() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  };
+    // filter is applied manually (Enter key / Apply button), not auto-triggered on change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, severityFilter, targetModelFilter]);
 
   const fetchStatistics = () => {
     adminAPI.getAuditLogStatistics({ days: 30 })
@@ -99,7 +101,7 @@ export default function AdminSecurityLog() {
     }
   };
 
-  useEffect(() => { fetchLogs(); }, [page, severityFilter, targetModelFilter]);
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
   useEffect(() => { if (showStatistics) fetchStatistics(); }, [showStatistics]);
 
   return (

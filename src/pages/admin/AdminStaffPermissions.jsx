@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
@@ -21,20 +21,20 @@ export default function AdminStaffPermissions() {
   const [draftPerms, setDraftPerms] = useState(new Set()); // desired effective perms
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { load(); }, []);
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const [s, c] = await Promise.all([adminAPI.getStaff(), adminAPI.getPermCatalog()]);
       setStaff(s.staff || []);
       setCatalog(c.catalog || []);
-    } catch (e) {
+    } catch (_e) {
       toast('Failed to load staff & permissions', 'error');
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => { load(); }, [load]);
 
   const groups = useMemo(() => {
     const g = {};
@@ -146,8 +146,8 @@ export default function AdminStaffPermissions() {
 
       {/* ── Editor Modal ── */}
       {editing && (
-        <div onClick={() => !saving && setEditing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--card)', border: '1px solid var(--border-soft)', borderRadius: 18, width: '100%', maxWidth: 620, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div onClick={() => !saving && setEditing(null)} role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} role="presentation" style={{ background: 'var(--card)', border: '1px solid var(--border-soft)', borderRadius: 18, width: '100%', maxWidth: 620, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: '#fff' }}>Duties — {editing.name}</div>
@@ -166,6 +166,8 @@ export default function AdminStaffPermissions() {
                       const fromRole = (editing.rolePermissions || []).includes(p.key);
                       return (
                         <div key={p.key} onClick={() => toggle(p.key)}
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p.key); } }}
+                          role="switch" aria-checked={on} tabIndex={0} aria-label={p.label}
                           style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 11, border: `1px solid ${on ? 'rgba(212,196,168,.3)' : 'var(--border)'}`, background: on ? 'var(--gold-glow)' : 'var(--surface)', cursor: 'pointer', transition: 'all .15s' }}>
                           <div style={{ width: 36, height: 20, borderRadius: 999, background: on ? 'var(--gold)' : 'var(--border-soft)', position: 'relative', flexShrink: 0, transition: 'background .15s' }}>
                             <div style={{ position: 'absolute', top: 2, left: on ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: on ? '#0A0A0A' : '#fff', transition: 'left .15s' }} />

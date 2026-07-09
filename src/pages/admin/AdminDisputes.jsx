@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { disputeAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
 import { timeAgo } from '../../utils/helpers';
-import { Shield, Search, Filter, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Shield, Search, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { LoadingPage } from '../../components/LoadingPage';
 
 const STATUS_META = {
@@ -16,7 +16,7 @@ const STATUS_META = {
   closed:        { label: 'Closed',         badge: 'bg-gray-500/20 text-gray-400 border-gray-500/30',     icon: '🔒' },
 };
 
-const PRIORITY_COLORS = {
+const _PRIORITY_COLORS = {
   urgent: 'text-red-400',
   high:   'text-orange-400',
   medium: 'text-yellow-400',
@@ -34,7 +34,7 @@ export default function AdminDisputes() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
 
-  const load = (p = page) => {
+  const load = useCallback((p = page) => {
     setLoading(true);
     const params = { page: p, limit: 20 };
     if (filter !== 'all') params.status = filter;
@@ -49,14 +49,14 @@ export default function AdminDisputes() {
       })
       .catch(err => toast(err?.response?.data?.message || 'Failed to load', 'error'))
       .finally(() => setLoading(false));
-  };
+  }, [filter, page, toast]);
 
-  useEffect(() => { load(); }, [filter, page]);
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
     const offNew = on?.('newDispute', () => load());
     return () => offNew?.();
-  }, [on]);
+  }, [on, load]);
 
   const filtered = disputes.filter(d => {
     if (search) {
@@ -174,7 +174,7 @@ export default function AdminDisputes() {
           <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                {['Dispute', 'Status', 'Priority', 'Opened By', 'Amount', 'Category', 'Created', 'Action'].map((th, i) => (
+                {['Dispute', 'Status', 'Priority', 'Opened By', 'Amount', 'Category', 'Created', 'Action'].map((th, _i) => (
                   <th key={th} style={{
                     textAlign: 'left', padding: '16px', fontSize: 11, fontWeight: 700,
                     color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em', textTransform: 'uppercase',

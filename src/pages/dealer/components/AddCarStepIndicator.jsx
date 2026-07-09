@@ -29,6 +29,8 @@ export default function AddCarStepIndicator({ step, setStep, completed = {} }) {
 
           return (
             <div key={s.id} onClick={() => setStep(s.id)}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setStep(s.id); } }}
+              role="tab" aria-selected={isCurrent} tabIndex={0} aria-label={s.label || `Step ${s.id}`}
               style={{
                 flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 12,
                 background: isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.02)',

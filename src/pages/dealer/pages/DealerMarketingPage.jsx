@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Megaphone, TrendingUp, Eye, MousePointerClick, BarChart3 } from 'lucide-react';
+import { Megaphone, TrendingUp, Eye, MousePointerClick } from 'lucide-react';
 
 const STAT_CARDS = [
   { icon: Eye, label: 'Total Impressions', value: '—', color: '#3b82f6' },

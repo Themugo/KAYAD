@@ -203,13 +203,13 @@ function validateCanaryHealth(metrics) {
 
 // ── 3. Automatic Rollback Triggers ───────────────────────────
 
-function evaluateRollbackTriggers(postDeployMetrics, baselineMetrics = {}) {
+function evaluateRollbackTriggers(postDeployMetrics, _baselineMetrics = {}) {
   const triggers = [];
   let shouldRollback = false;
 
   const {
     errorRate = 0, baselineErrorRate = 0,
-    p95Latency = 0, baselineP95Latency = 0,
+    p95Latency = 0, _baselineP95Latency = 0,
     healthFailures = 0,
     sentryErrorSpike = 0,
     budgetConsumed = 0,
@@ -334,7 +334,7 @@ function verifyDeployment(healthChecks) {
 function scoreReleaseRisk(releaseData) {
   const {
     linesChanged = 0,
-    filesChanged = 0,
+    _filesChanged = 0,
     hasDbMigrations = false,
     hasBreakingApiChanges = false,
     touchesPayments = false,

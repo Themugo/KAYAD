@@ -31,7 +31,7 @@ export default function AdminCars() {
       setTotal(data.pagination?.total || data.total || 0);
     } catch { toast('Failed to load listings', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -149,7 +149,7 @@ export default function AdminCars() {
                       <td style={{ fontSize: 11, color: 'var(--text-dim)' }}>
                         {car.createdAt ? timeAgo(car.createdAt) : '—'}
                       </td>
-                      <td onClick={e => e.stopPropagation()}>
+                      <td onClick={e => e.stopPropagation()} role="presentation">
                         <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 100 }}>
                           <Link to={`/cars/${car._id}`} target="_blank" className="btn btn-outline btn-sm">View</Link>
                           <button className={`btn btn-sm ${car.isPromoted ? 'btn-outline' : 'btn-gold'}`}
@@ -184,7 +184,7 @@ export default function AdminCars() {
 
       {/* Detail modal */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 560 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>

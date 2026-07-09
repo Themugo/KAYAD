@@ -1,15 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
-import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import BackButton from '../components/BackButton';
-import { Car, Shield, Upload, Check, X } from 'lucide-react';
+import { Shield, Upload, Check, X } from 'lucide-react';
 import { revokeObjectURL } from '../services/uploadService';
 
 export default function PrivateSellerAddCar() {
-  const { user } = useAuth();
-  const { toast } = useToast();
+    const { toast } = useToast();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);

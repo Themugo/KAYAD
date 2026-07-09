@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { escrowAPI } from '../../../api/api';
 import { useToast } from '../../../context/ToastContext';
 import DealerEscrowsTab from '../components/DealerEscrowsTab';
@@ -8,16 +8,16 @@ export default function DealerEscrowsPage() {
   const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchEscrows = () => {
+  const fetchEscrows = useCallback(() => {
     setLoading(true);
     escrowAPI.mine().then(d => {
       setEscrows(d.escrows || d.data || d || []);
     }).catch(() => {
       toast('Failed to load escrows', 'error');
     }).finally(() => setLoading(false));
-  };
+  }, [toast]);
 
-  useEffect(() => { fetchEscrows(); }, []);
+  useEffect(() => { fetchEscrows(); }, [fetchEscrows]);
 
   return (
     <div className="dealer-page">

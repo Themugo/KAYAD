@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dealerAPI } from '../../api/api';
 import usePageMeta from '../../hooks/usePageMeta';
 
 export default function DealerSetup() {
   usePageMeta('Dealer Setup', 'Configure your dealer account on Kayad.');
-  const { user } = useAuth();
-  const { toast } = useToast();
+    const { toast } = useToast();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);

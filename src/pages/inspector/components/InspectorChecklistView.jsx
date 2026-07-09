@@ -11,7 +11,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
     ? checklist.filter(c => c.item.toLowerCase().includes(searchQuery.toLowerCase()) || c.category.toLowerCase().includes(searchQuery.toLowerCase()))
     : checklist;
   const [lastSaved, setLastSaved] = useState(null);
-  const [showKeyboardHint, setShowKeyboardHint] = useState(false);
+  const [_showKeyboardHint, setShowKeyboardHint] = useState(false);
 
   // Auto-save functionality
   useEffect(() => {
@@ -48,7 +48,11 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
         sessionStorage.setItem('keyboard_hint_shown', 'true');
       }, 5000);
     }
-  }, [activeTask._id]);
+    // checklist.length is intentionally excluded: this effect should only restore a
+    // draft when switching tasks (activeTask._id), not whenever checklist mutates,
+    // to avoid clobbering in-progress edits with a stale localStorage snapshot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTask._id, setChecklist, setNotes, setCondition]);
 
   const toggleCheck = (idx) => {
     setChecklist(prev => prev.map((c, i) => i === idx ? { ...c, passed: c.passed === true ? false : c.passed === false ? null : true } : c));
@@ -172,7 +176,7 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
             const catFailed = items.filter(c => c.passed === false).length;
             const isCollapsed = collapsedCats.includes(cat);
             return (
-              <div key={cat} style={{
+              <div role="presentation" key={cat} style={{
                 background: 'var(--card)', border: '1px solid var(--border)',
                 borderRadius: 12, overflow: 'hidden',
                 transition: 'border-color 0.2s',
@@ -181,6 +185,8 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
               >
                 <div onClick={() => toggleCategory(cat)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCategory(cat); } }}
+                  role="button" tabIndex={0} aria-expanded={!isCollapsed} aria-label={`${cat} category`}
                   style={{
                     padding: '12px 16px', display: 'flex', justifyContent: 'space-between',
                     alignItems: 'center', cursor: 'pointer', userSelect: 'none',

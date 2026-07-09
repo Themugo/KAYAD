@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { ntsaAPI, formatKES } from '../../api/api';
-import { ShieldCheck, Search, CheckCircle, XCircle, Clock, Eye, FileText, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { ntsaAPI } from '../../api/api';
+import { ShieldCheck, Search, CheckCircle, XCircle, FileText, X } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -15,8 +15,8 @@ function Modal({ title, children, onClose }) {
       position: 'fixed', inset: 0, zIndex: 9999,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-    }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} style={{
+    }} onClick={onClose} role="presentation">
+      <div onClick={e => e.stopPropagation()} role="presentation" style={{
         background: '#111', border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: 16, padding: 28, width: 420, maxWidth: '90vw',
         position: 'relative',
@@ -44,7 +44,7 @@ export default function AdminNtsaQueue() {
   const [carIdInput, setCarIdInput] = useState('');
   const [processing, setProcessing] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = statusFilter ? { status: statusFilter } : {};
@@ -52,9 +52,9 @@ export default function AdminNtsaQueue() {
       setRequests(data.requests || []);
     } catch { setRequests([]); }
     finally { setLoading(false); }
-  };
+  }, [statusFilter]);
 
-  useEffect(() => { load(); }, [statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
   const openProcessModal = (id, status) => {
     setProcessModal({ id, status });
@@ -137,6 +137,8 @@ export default function AdminNtsaQueue() {
                   padding: '14px 18px', cursor: 'pointer', transition: 'all 0.2s',
                 }}
                   onClick={() => setSelected(selected?._id === r._id ? null : r)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(selected?._id === r._id ? null : r); } }}
+                  role="button" tabIndex={0} aria-expanded={selected?._id === r._id}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>

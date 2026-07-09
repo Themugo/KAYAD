@@ -21,7 +21,7 @@ export default function AdminQuickActions() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {ACTIONS.map(action => (
           <Link key={action.label} to={action.to} style={{ textDecoration: 'none' }}>
-            <div style={{
+            <div role="presentation" style={{
               display: 'flex', alignItems: 'center', gap: 12,
               padding: '12px 14px', borderRadius: 10,
               background: action.danger ? 'rgba(239,68,68,0.04)' : 'rgba(255,255,255,0.02)',

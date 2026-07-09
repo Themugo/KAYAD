@@ -1,12 +1,11 @@
 // src/pages/EscrowPage.jsx
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { escrowAPI, formatKES } from '../api/api';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { timeAgo, formatDate } from '../utils/helpers';
-import { ShieldCheck, X } from 'lucide-react';
+
 import EscrowTimeline from '../components/EscrowTimeline';
 import EmptyState from '../components/EmptyState';
 
@@ -84,7 +83,7 @@ export default function EscrowPage() {
   const [disputeReason, setDisputeReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     escrowAPI.mine()
       .then(d => setEscrows(d.escrows || d.data || []))
@@ -93,9 +92,9 @@ export default function EscrowPage() {
         toast('Failed to load escrows', 'error');
       })
       .finally(() => setLoading(false));
-  };
+  }, [toast]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   // Real-time escrow updates
   useEffect(() => {
@@ -116,7 +115,7 @@ export default function EscrowPage() {
       toast('⚠️ Escrow disputed. Admin has been notified.', 'info');
     });
     return () => { offFunded(); offRelease(); offRefund(); offDisputed(); };
-  }, [on]);
+  }, [on, toast]);
 
   const filtered = tab === 'all' ? escrows : escrows.filter(e => e.status === tab);
 
@@ -235,6 +234,10 @@ export default function EscrowPage() {
                   border: e.status === 'held' ? '1px solid rgba(59,130,246,0.25)' : '1px solid var(--border)',
                 }}
                   onClick={() => setSelected(e)}
+                  onKeyDown={ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); setSelected(e); } }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`View escrow details for ${e.car?.title || 'transaction'}`}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
                     <div style={{ fontSize: 32 }}>{meta.icon}</div>
@@ -273,7 +276,7 @@ export default function EscrowPage() {
 
       {/* ─── Detail Modal ─── */}
       {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 500 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>

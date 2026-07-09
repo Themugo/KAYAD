@@ -12,7 +12,7 @@ const DEFAULT_PKG = [
 ];
 
 export default function PostRegPackageSelect() {
-  const { user, setUser } = useAuth();
+  const { setUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [packages, setPackages] = useState(DEFAULT_PKG);
@@ -72,6 +72,8 @@ export default function PostRegPackageSelect() {
                   : "rgba(255,255,255,0.5)";
             return (
               <div key={pkg.id} onClick={() => setSelected(pkg.id)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(pkg.id); } }}
+                role="button" tabIndex={0} aria-pressed={sel} aria-label={`Select ${pkg.name} package`}
                 style={{
                   background: "#0C0C0C", border: `2px solid ${sel ? color : "rgba(255,255,255,0.08)"}`,
                   borderRadius: 16, padding: "22px 20px", cursor: "pointer", transition: "all 0.2s",

@@ -34,18 +34,27 @@ export default function EditCarPhotosTab({ images, coverImage, handleSetCover, h
             const isSelected = selectedSet.has(i);
             return (
               <div key={i} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: isCover ? '2px solid var(--gold)' : isSelected ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.07)', aspectRatio: '4/3', background: '#111', cursor: 'pointer', transition: 'border-color 0.2s', opacity: isDeleting ? 0.5 : 1 }}>
-                {src && <img src={src} alt={isCover ? `Cover image ${i + 1}` : `Image ${i + 1}`} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => toggleSelect(i)} />}
-                <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : isSelected ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s' }} onClick={() => toggleSelect(i)} />
+                {src && <img src={src} alt={isCover ? `Cover image ${i + 1}` : `Image ${i + 1}`} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onClick={() => toggleSelect(i)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleSelect(i); } }}
+                  role="button" tabIndex={0} aria-label={isSelected ? `Deselect image ${i + 1}` : `Select image ${i + 1}`} />}
+                <div style={{ position: 'absolute', inset: 0, background: isCover ? 'rgba(212,196,168,0.1)' : isSelected ? 'rgba(59,130,246,0.1)' : 'transparent', transition: 'background 0.2s' }} onClick={() => toggleSelect(i)} role="presentation" />
                 <div aria-label={isCover ? "Cover image" : "Set as cover"} style={{ position: 'absolute', top: 6, left: 6, width: 28, height: 28, borderRadius: 7, background: isCover ? 'var(--gold)' : 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                  onClick={(e) => { e.stopPropagation(); handleSetCover(i); }}>
+                  onClick={(e) => { e.stopPropagation(); handleSetCover(i); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); handleSetCover(i); } }}
+                  role="button" tabIndex={0}>
                   <Pin size={13} style={{ color: isCover ? '#000' : 'rgba(255,255,255,0.6)' }} />
                 </div>
                 <div aria-label="Delete image" style={{ position: 'absolute', top: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: 'rgba(239,68,68,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                  onClick={(e) => { e.stopPropagation(); handleDeleteImage(i); }}>
+                  onClick={(e) => { e.stopPropagation(); handleDeleteImage(i); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); handleDeleteImage(i); } }}
+                  role="button" tabIndex={0}>
                   <Trash2 size={13} style={{ color: '#fff' }} />
                 </div>
                 <div style={{ position: 'absolute', bottom: 6, right: 6, width: 28, height: 28, borderRadius: 7, background: isSelected ? '#3b82f6' : 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: isSelected ? 'none' : '1px solid rgba(255,255,255,0.2)' }}
-                  onClick={(e) => { e.stopPropagation(); toggleSelect(i); }}>
+                  onClick={(e) => { e.stopPropagation(); toggleSelect(i); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggleSelect(i); } }}
+                  role="button" tabIndex={0} aria-label={isSelected ? `Deselect image ${i + 1}` : `Select image ${i + 1}`}>
                   {isSelected ? <span style={{ color: '#fff', fontSize: 14, fontWeight: 900 }}>x</span> : <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10 }}>{i + 1}</span>}
                 </div>
                 {isCover && (

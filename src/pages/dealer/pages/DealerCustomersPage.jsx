@@ -14,7 +14,7 @@ export default function DealerCustomersPage() {
       .then(res => setCustomers(res.customers || res.data || []))
       .catch(() => toast('Failed to load customers', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const filtered = search
     ? customers.filter(c => (c.name || '').toLowerCase().includes(search.toLowerCase()) || (c.email || '').toLowerCase().includes(search.toLowerCase()))

@@ -53,6 +53,8 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
           transition: 'border-color 0.2s',
         }}
         onClick={() => fileInputRef.current?.click()}
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+        role="button" tabIndex={0} aria-label="Upload photos"
         onDragOver={e => e.preventDefault()}
         onDrop={e => {
           e.preventDefault();
@@ -86,6 +88,8 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
                 onDrop={(e) => handleDrop(e, i)}
                 onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
                 onClick={() => setCoverImage(i)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCoverImage(i); } }}
+                role="button" tabIndex={0} aria-label={`Set photo ${i + 1} as cover image`}
                 style={{
                   aspectRatio: '4/3', borderRadius: 10, overflow: 'hidden', position: 'relative',
                   border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(212,196,168,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,

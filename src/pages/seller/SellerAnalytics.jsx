@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { carsAPI } from '../../api/api';
@@ -13,11 +13,7 @@ export default function SellerAnalytics() {
   const [listings, setListings] = useState([]);
   const [period, setPeriod] = useState('30d');
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [period]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
       const data = await carsAPI.list({ seller: user?._id, limit: 100 });
@@ -34,7 +30,11 @@ export default function SellerAnalytics() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const calculateStats = () => {
     const activeListings = listings.filter(l => l.status === 'active');

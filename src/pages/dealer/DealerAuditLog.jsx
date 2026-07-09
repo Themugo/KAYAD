@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dealerAPI } from '../../api/api';
 
 export default function DealerAuditLog() {
@@ -8,7 +8,7 @@ export default function DealerAuditLog() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
 
-  const fetchLogs = () => {
+  const fetchLogs = useCallback(() => {
     setLoading(true);
     const params = { page, limit: 30 };
     if (filter) params.action = filter;
@@ -19,9 +19,11 @@ export default function DealerAuditLog() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  };
+    // filter is applied manually (Enter key / button), not auto-triggered on change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
-  useEffect(() => { fetchLogs(); }, [page]);
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>

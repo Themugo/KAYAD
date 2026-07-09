@@ -47,7 +47,7 @@ const BRANDING_DEFAULTS = {
 };
 
 export default function AdminSettings() {
-  const { user, isSuperAdmin } = useAuth();
+  const { isSuperAdmin } = useAuth();
   const { toast } = useToast();
   const [tab, setTab] = useState('general');
   const [loading, setLoading] = useState(true);

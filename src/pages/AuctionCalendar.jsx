@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { Bell, RefreshCw, AlertTriangle, Gavel } from 'lucide-react';
 import { notifAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
-import { fetchList, getErrorMessage } from '../services/auctionService';
+import { fetchList } from '../services/auctionService';
 import usePageMeta from '../hooks/usePageMeta';
-import EmptyState from '../components/EmptyState';
 
 export default function AuctionCalendar() {
   usePageMeta('Auction House', 'Live and upcoming car auctions in Kenya. Bid live on premium vehicles with Kayad.');
@@ -194,7 +193,7 @@ export default function AuctionCalendar() {
                 const image = auction.image;
                 return (
                   <Link key={auction._id} to={isLive ? `/auction/${auction.carId}` : `/cars/${auction.carId}`} style={{ textDecoration: 'none' }}>
-                    <div className="card" style={{
+                    <div role="presentation" className="card" style={{
                       overflow: 'hidden', transition: 'transform 0.25s, box-shadow 0.25s',
                       border: '1px solid var(--border)', position: 'relative',
                     }}

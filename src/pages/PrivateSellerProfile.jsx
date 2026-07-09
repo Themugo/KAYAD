@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { authAPI, carsAPI } from '../api/api';
-import { User, MapPin, Phone, Shield, Star, Edit2, Camera } from 'lucide-react';
+import { User, MapPin, Phone, Shield, Edit2, Camera } from 'lucide-react';
 import BackButton from '../components/BackButton';
 
 export default function PrivateSellerProfile() {
@@ -24,19 +24,7 @@ export default function PrivateSellerProfile() {
     bio: '',
   });
 
-  useEffect(() => {
-    if (!user) return;
-    setForm({
-      name: user.name || '',
-      phone: user.phone || '',
-      location: user.location || '',
-      city: user.city || '',
-      bio: user.bio || '',
-    });
-    fetchListings();
-  }, [user]);
-
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     setListingsLoading(true);
     setListingsError(null);
     try {
@@ -48,7 +36,19 @@ export default function PrivateSellerProfile() {
     } finally {
       setListingsLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    setForm({
+      name: user.name || '',
+      phone: user.phone || '',
+      location: user.location || '',
+      city: user.city || '',
+      bio: user.bio || '',
+    });
+    fetchListings();
+  }, [user, fetchListings]);
 
   const update = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -59,7 +59,7 @@ export default function PrivateSellerProfile() {
       if (updated) setUser(updated);
       toast('Profile updated successfully', 'success');
       setEditMode(false);
-    } catch (err) {
+    } catch (_err) {
       toast('Failed to update profile', 'error');
     } finally {
       setLoading(false);
@@ -228,7 +228,9 @@ export default function PrivateSellerProfile() {
           ) : listings.length > 0 ? (
             <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
               {listings.slice(0, 4).map(car => (
-                <div key={car._id} className="card overflow-hidden group cursor-pointer" onClick={() => navigate(`/car/${car._id}`)}>
+                <div key={car._id} className="card overflow-hidden group cursor-pointer" onClick={() => navigate(`/car/${car._id}`)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/car/${car._id}`); } }}
+                  role="button" tabIndex={0} aria-label={`View ${car.title}`}>
                   <div className="aspect-video overflow-hidden">
                     <img src={car.images?.[0] || car.coverImage} alt={car.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>

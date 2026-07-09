@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Eye, Download, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, Download, Trash2, CheckCircle } from 'lucide-react';
 import { disputeAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
@@ -36,7 +36,7 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
       await disputeAPI.verifyEvidence(disputeId, evidenceId);
       toast('Evidence verified', 'success');
       if (onRefresh) onRefresh();
-    } catch (err) {
+    } catch (_err) {
       toast('Verification failed', 'error');
     }
   };
@@ -97,8 +97,8 @@ export default function EvidenceTimeline({ evidence, disputeId, onRefresh }) {
       })}
 
       {previewUrl && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)}>
-          <div className="max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onClick={() => setPreviewUrl(null)} role="presentation">
+          <div className="max-w-4xl max-h-[90vh]" onClick={e => e.stopPropagation()} role="presentation">
             {previewUrl.match(/\.(mp4|webm|mov)$/i) ? (
               <video src={previewUrl} controls className="max-h-[80vh] rounded-lg" />
             ) : previewUrl.match(/\.pdf$/i) ? (

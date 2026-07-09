@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { disputeAPI, formatKES } from '../api/api';
+import { disputeAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { timeAgo, formatDate } from '../utils/helpers';
-import { ArrowLeft, Shield, Clock, User, AlertTriangle, Gavel, RotateCcw, Activity } from 'lucide-react';
+import { timeAgo } from '../utils/helpers';
+import { ArrowLeft, Shield, Clock, User, Gavel, RotateCcw, Activity } from 'lucide-react';
 import NotFoundState from '../components/NotFoundState';
 import { LoadingPage } from '../components/LoadingPage';
 import EvidenceUpload from '../components/EvidenceUpload';
@@ -44,7 +44,7 @@ export default function DisputeDetailPage() {
 
   const isAdmin = ['admin', 'superadmin', 'escrow_officer'].includes(user?.role);
 
-  const load = () => {
+  const load = useCallback(() => {
     setLoading(true);
     disputeAPI.get(id)
       .then(d => {
@@ -53,9 +53,9 @@ export default function DisputeDetailPage() {
       })
       .catch(err => toast(err?.response?.data?.message || 'Failed to load dispute', 'error'))
       .finally(() => setLoading(false));
-  };
+  }, [id, toast]);
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
     const offDispute = on?.('disputeUpdate', (data) => {
@@ -65,7 +65,7 @@ export default function DisputeDetailPage() {
       if (data.disputeId === id) load();
     });
     return () => { offDispute?.(); offEvidence?.(); };
-  }, [on, id]);
+  }, [on, id, load]);
 
   if (loading) return <LoadingPage />;
   if (!dispute) return <NotFoundState title="Dispute Not Found" message="This dispute doesn't exist or has been closed." actions={[{ label: 'Back to Disputes', to: '/disputes' }, { label: 'Go Home', to: '/' }]} />;

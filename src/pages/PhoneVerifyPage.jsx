@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -7,7 +7,7 @@ import usePageMeta from "../hooks/usePageMeta";
 
 export default function PhoneVerifyPage() {
   usePageMeta("Verify Phone", "Verify your phone number to get started.");
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -16,6 +16,18 @@ export default function PhoneVerifyPage() {
   const [cooldown, setCooldown] = useState(0);
   const inputs = useRef([]);
   const sentRef = useRef(false);
+
+  const handleSendOTP = useCallback(async () => {
+    setSending(true);
+    try {
+      await authAPI.sendOTP();
+      setCooldown(30);
+    } catch {
+      toast("Failed to send code. Try again.", "error");
+    } finally {
+      setSending(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (!user) {
@@ -26,25 +38,13 @@ export default function PhoneVerifyPage() {
       handleSendOTP();
       sentRef.current = true;
     }
-  }, [user]);
+  }, [user, navigate, handleSendOTP]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setInterval(() => setCooldown((c) => c - 1), 1000);
     return () => clearInterval(t);
   }, [cooldown]);
-
-  const handleSendOTP = async () => {
-    setSending(true);
-    try {
-      await authAPI.sendOTP();
-      setCooldown(30);
-    } catch {
-      toast("Failed to send code. Try again.", "error");
-    } finally {
-      setSending(false);
-    }
-  };
 
   const handleInput = (idx, val) => {
     if (!/^\d*$/.test(val)) return;

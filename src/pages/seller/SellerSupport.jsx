@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
-import { MessageCircle, Phone, Mail, Clock, CheckCircle, AlertCircle, Search, ChevronDown } from 'lucide-react';
+import { MessageCircle, Phone, Mail, Clock, Search, ChevronDown } from 'lucide-react';
 import BackButton from '../../components/BackButton';
 
 const FAQ_ITEMS = [
@@ -77,9 +76,8 @@ const FAQ_ITEMS = [
 ];
 
 export default function SellerSupport() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+    const { toast } = useToast();
+  const _navigate = useNavigate();
   
   const [activeCategory, setActiveCategory] = useState('Getting Started');
   const [expandedQuestion, setExpandedQuestion] = useState(null);

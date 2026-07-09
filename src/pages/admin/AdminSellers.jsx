@@ -162,7 +162,7 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0} max={50}
                           value={s.commission} onChange={e => updateSeller(s.id, 'commission', Number(e.target.value))}
                           style={{ width: 70, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} />
+                          onClick={e => e.stopPropagation()} role="presentation" />
                       ) : (
                         <span style={{ fontWeight: 600 }}>{s.commission}%</span>
                       )}
@@ -172,7 +172,7 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0}
                           value={s.waiver} onChange={e => updateSeller(s.id, 'waiver', Number(e.target.value))}
                           style={{ width: 100, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} />
+                          onClick={e => e.stopPropagation()} role="presentation" />
                       ) : (
                         <span>{s.waiver > 0 ? formatKES(s.waiver) : '—'}</span>
                       )}
@@ -182,7 +182,7 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0} max={100}
                           value={s.discount} onChange={e => updateSeller(s.id, 'discount', Number(e.target.value))}
                           style={{ width: 70, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} />
+                          onClick={e => e.stopPropagation()} role="presentation" />
                       ) : (
                         <span>{s.discount > 0 ? `${s.discount}%` : '—'}</span>
                       )}
@@ -215,7 +215,7 @@ export default function AdminSellers() {
                         {s.status}
                       </span>
                     </td>
-                    <td onClick={e => e.stopPropagation()}>
+                    <td onClick={e => e.stopPropagation()} role="presentation">
                       <div style={{ display: 'flex', gap: 6 }}>
                         {editing === s.id ? (
                           <button className="btn btn-gold btn-sm" onClick={() => saveSeller(s.id)}>Save</button>

@@ -15,7 +15,7 @@ export default function DealerFinancePage() {
       .then(d => setEarnings(d.earnings || d.data || d))
       .catch(() => toast('Failed to load earnings', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   return (
     <div className="dealer-page">

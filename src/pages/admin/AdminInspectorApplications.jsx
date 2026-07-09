@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -11,7 +11,7 @@ export default function AdminInspectorApplications() {
   const [reviewNotes, setReviewNotes] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
 
-  const fetchApps = () => {
+  const fetchApps = useCallback(() => {
     setLoading(true);
     const params = {};
     if (statusFilter) params.status = statusFilter;
@@ -19,9 +19,9 @@ export default function AdminInspectorApplications() {
       .then(d => setApps(d.applications || []))
       .catch(() => toast('Failed to load', 'error'))
       .finally(() => setLoading(false));
-  };
+  }, [statusFilter, toast]);
 
-  useEffect(() => { fetchApps(); }, [statusFilter]);
+  useEffect(() => { fetchApps(); }, [fetchApps]);
 
   const handleAction = async (id, action) => {
     setActionLoading(id);

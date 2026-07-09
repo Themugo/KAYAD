@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 
 export function StatBox({ icon: Icon, label, value, sub, color = 'var(--gold)', to }) {
   const inner = (
-    <div style={{
+    <div role="presentation" style={{
       background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)',
       borderRadius: 16, padding: '22px', position: 'relative', overflow: 'hidden',
       transition: 'border-color 0.2s, transform 0.2s',
@@ -27,7 +27,7 @@ export function NavTile({ to, icon: Icon, label, desc, danger }) {
   const accent = danger ? '#ef4444' : 'var(--gold)';
   return (
     <Link to={to} style={{ textDecoration: 'none' }}>
-      <div style={{
+      <div role="presentation" style={{
         background: '#0C0C0C',
         border: `1px solid ${danger ? 'rgba(239,68,68,0.12)' : 'rgba(255,255,255,0.07)'}`,
         borderRadius: 14, padding: '18px 20px',

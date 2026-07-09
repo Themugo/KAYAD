@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI, formatKES } from '../../api/api';
+import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function AdminReviews() {
@@ -31,7 +31,7 @@ export default function AdminReviews() {
       setTotal(data.pagination?.total || list.length);
     } catch { toast('Failed to load reviews', 'error'); }
     finally { setLoading(false); }
-  }, [page, search]);
+  }, [page, search, toast]);
 
   useEffect(() => { load(); }, [load]);
 

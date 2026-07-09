@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
-import useMediaQuery from '../hooks/useMediaQuery';
-import { X, ArrowLeft, TrendingUp, Zap, Clock, Gauge, MapPin, Star, Check, Minus } from 'lucide-react';
+import { X, ArrowLeft, Zap } from 'lucide-react';
 
 const COMPARE_ROWS = [
   { key: 'brand', label: 'Brand' },
@@ -65,7 +64,6 @@ export default function ComparePage() {
   const navigate = useNavigate();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   useEffect(() => {
     if (compareIds.length === 0) { navigate('/showroom'); return; }
@@ -74,13 +72,13 @@ export default function ComparePage() {
       setCars(r.cars || []);
     }).catch(() => { toast('Failed to load compare data', 'error'); setCars([]); })
     .finally(() => setLoading(false));
-  }, [compareIds]);
+  }, [compareIds, navigate, toast]);
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   const sorted = [...cars].sort((a, b) => (b.bidsCount || 0) - (a.bidsCount || 0));
   const maxBidVelocity = Math.max(...cars.map(c => c.bidsCount || 0), 1);
-  const maxPrice = Math.max(...cars.map(c => c.price || 0), 1);
+  const _maxPrice = Math.max(...cars.map(c => c.price || 0), 1);
   const bestPrice = Math.min(...cars.map(c => c.price || Infinity));
   const bestMileage = Math.min(...cars.map(c => c.mileage || Infinity));
 
@@ -142,18 +140,18 @@ export default function ComparePage() {
 
         {/* Comparison Matrix */}
         <div style={{ overflowX: 'auto', borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: isMobile ? 480 : 600 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
             {/* Header row — images */}
             <thead>
               <tr>
-                <th style={{ position: 'sticky', left: 0, zIndex: 2, textAlign: 'left', padding: isMobile ? '12px 10px' : '14px 16px', background: '#0C0C0C', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', width: isMobile ? 100 : 140 }}>
+                <th style={{ textAlign: 'left', padding: '14px 16px', background: '#0C0C0C', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', width: 140 }}>
                   Specs
                 </th>
                 {cars.map(c => (
-                  <th key={c._id} style={{ textAlign: 'center', padding: isMobile ? '10px 6px' : '12px 10px', background: '#0C0C0C', borderBottom: '1px solid rgba(255,255,255,0.06)', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
+                  <th key={c._id} style={{ textAlign: 'center', padding: '12px 10px', background: '#0C0C0C', borderBottom: '1px solid rgba(255,255,255,0.06)', borderLeft: '1px solid rgba(255,255,255,0.04)' }}>
                     <div style={{ position: 'relative', display: 'inline-block' }}>
                       <img src={c.images?.[0]?.url || c.images?.[0] || ''}
-                        alt={c.title} loading="lazy" decoding="async" style={{ width: isMobile ? 60 : 80, height: isMobile ? 45 : 60, borderRadius: 8, objectFit: 'cover', background: '#111' }}
+                        alt={c.title} loading="lazy" decoding="async" style={{ width: 80, height: 60, borderRadius: 8, objectFit: 'cover', background: '#111' }}
                         onError={e => { e.currentTarget.src = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=200&fit=crop'; }}
                       />
                       <button onClick={() => removeCar(c._id)}
@@ -166,7 +164,7 @@ export default function ComparePage() {
                         <X size={8} />
                       </button>
                     </div>
-                    <div style={{ fontSize: isMobile ? 10 : 11, fontWeight: 700, color: '#fff', marginTop: 6, lineHeight: 1.2 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', marginTop: 6, lineHeight: 1.2 }}>
                       {c.title?.split(' ').slice(0, 3).join(' ') || 'Vehicle'}
                     </div>
                     <Link to={`/cars/${c._id}`}
@@ -174,7 +172,7 @@ export default function ComparePage() {
                         display: 'inline-block', marginTop: 6, fontSize: 9, color: 'var(--gold)',
                         fontWeight: 700, textDecoration: 'none',
                       }}>
-                      View →
+                      View Details →
                     </Link>
                   </th>
                 ))}
@@ -184,7 +182,7 @@ export default function ComparePage() {
             <tbody>
               {/* Features row (special rendering with tags) */}
               <tr style={{ background: 'rgba(212,196,168,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                <td style={{ position: 'sticky', left: 0, zIndex: 1, padding: isMobile ? '8px 10px' : '10px 16px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap', background: 'rgba(212,196,168,0.02)' }}>
+                <td style={{ padding: '10px 16px', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap' }}>
                   Features
                 </td>
                 {cars.map(c => (
@@ -197,10 +195,10 @@ export default function ComparePage() {
               {/* Spec rows */}
               {COMPARE_ROWS.map((row, ri) => {
                 const values = cars.map(c => getNested(c, row.key));
-                const hasAny = values.some(v => v != null && v !== '');
+                const _hasAny = values.some(v => v != null && v !== '');
 
-                let isBest = false;
-                const rawVals = cars.map(c => {
+                let _isBest = false;
+                const _rawVals = cars.map(c => {
                   if (row.key === 'price') return c.price;
                   if (row.key === 'mileage') return c.mileage;
                   return null;
@@ -212,10 +210,8 @@ export default function ComparePage() {
                     borderBottom: '1px solid rgba(255,255,255,0.04)',
                   }}>
                     <td style={{
-                      position: 'sticky', left: 0, zIndex: 1,
-                      padding: isMobile ? '8px 10px' : '10px 16px', fontSize: 11, fontWeight: 700,
+                      padding: '10px 16px', fontSize: 11, fontWeight: 700,
                       color: 'rgba(255,255,255,0.45)', whiteSpace: 'nowrap',
-                      background: ri % 2 === 0 ? '#0F0F0F' : '#0A0A0A',
                     }}>
                       {row.label}
                     </td>

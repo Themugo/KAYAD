@@ -18,10 +18,7 @@ import { ChevronLeft, ChevronRight, Eye, Star, CheckCircle, RefreshCw, AlertTria
 import '../styles/auction-live.css';
 
 // Extracted visual effects
-import {
-  AVATAR_COLORS, hashColor, getAvatarInitials,
-  ConfettiOverlay, ViewersCounter, OutbidBell, PriceParticles,
-} from './auction/components/AuctionEffects';
+import { hashColor, getAvatarInitials, ConfettiOverlay, ViewersCounter, OutbidBell, PriceParticles } from './auction/components/AuctionEffects';
 
 export default function AuctionLivePage() {
   const { id } = useParams();
@@ -43,16 +40,16 @@ export default function AuctionLivePage() {
   const [maxBid, setMaxBid] = useState('');
   const [phone, setPhone] = useState('');
   const [placing, setPlacing] = useState(false);
-  const [pendingBidId, setPendingBidId] = useState(null);
+  const [_pendingBidId, setPendingBidId] = useState(null);
   const [currentBid, setCurrentBid] = useState(0);
-  const [prevBid, setPrevBid] = useState(0);
+  const [_prevBid, setPrevBid] = useState(0);
   const [bidCount, setBidCount]   = useState(0);
   const [extended, setExtended] = useState(false);
   const [smsRegistered, setSmsRegistered] = useState(false);
   const [smsSubscribed, setSmsSubscribed] = useState(false);
   const [togglingSms, setTogglingSms] = useState(false);
   const [showWinner, setShowWinner] = useState(null);
-  const [watchers, setWatchers] = useState(0);
+  const [_watchers, _setWatchers] = useState(0);
   const [bidFlash, setBidFlash] = useState(false);
   const [auctionPhase, setAuctionPhase] = useState('');
   const [confetti, setConfetti] = useState(false);
@@ -61,7 +58,7 @@ export default function AuctionLivePage() {
   const [showBidConfirm, setShowBidConfirm] = useState(false);
   const bidListRef = useRef(null);
   const prevBidRef = useRef(0);
-  const newBidIdsRef = useRef(new Set());
+  const _newBidIdsRef = useRef(new Set());
   const bidsRef = useRef([]);
   const carRef = useRef(null);
   const currentBidRef = useRef(0);
@@ -152,7 +149,7 @@ export default function AuctionLivePage() {
   useEffect(() => {
     if (!id) return;
     joinAuction(id);
-  }, [id, connected]);
+  }, [id, connected, joinAuction]);
 
   // Keyboard image navigation
   useEffect(() => {
@@ -248,7 +245,7 @@ export default function AuctionLivePage() {
     });
 
     return () => { offBid(); offEnd(); offExt(); offPhase(); };
-  }, [id, on, isAuth, user]);
+  }, [id, on, isAuth, user, navigate, toast]);
 
   const handlePlaceBid = async () => {
     if (!isAuth) { navigate('/login'); return; }
@@ -378,7 +375,7 @@ export default function AuctionLivePage() {
           {/* ─── LEFT: Car + Bid History ─── */}
           <div>
             {/* Car image gallery */}
-            <div className="auction-car-image" onClick={() => totalImages > 0 && setShowGallery(true)} style={{ cursor: totalImages > 0 ? 'zoom-in' : 'default' }}>
+            <div className="auction-car-image" onClick={() => totalImages > 0 && setShowGallery(true)} onKeyDown={e => { if (totalImages > 0 && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setShowGallery(true); } }} role="button" tabIndex={totalImages > 0 ? 0 : -1} aria-label={totalImages > 0 ? 'Open image gallery' : undefined} style={{ cursor: totalImages > 0 ? 'zoom-in' : 'default' }}>
               <div className="auction-car-image-wrap">
                 {totalImages > 0 ? (
                   <img src={firstImgSrc(imgIdx) || firstImgSrc(0)} alt={car.title} decoding="async" />
@@ -419,7 +416,7 @@ export default function AuctionLivePage() {
                 {auctionImages.map((img, i) => {
                   const src = typeof img === 'string' ? img : img?.url;
                   return (
-                    <div key={i} onClick={() => setImgIdx(i)} className={`thumbnail-item ${i === imgIdx ? 'active' : 'inactive'}`}>
+                    <div key={i} onClick={() => setImgIdx(i)} onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setImgIdx(i); } }} role="button" tabIndex={0} aria-label={`View image ${i + 1}`} className={`thumbnail-item ${i === imgIdx ? 'active' : 'inactive'}`}>
                       {src && <img src={src} alt="" loading="lazy" decoding="async" className="thumbnail-img" />}
                     </div>
                   );
