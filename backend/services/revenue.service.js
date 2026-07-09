@@ -1,29 +1,17 @@
-import Payment from "../models/Payment.js";
+import { findAll } from "../db/index.js";
 
 export const calculateRevenue = async ({ startDate, endDate } = {}) => {
-  const match = {
-    status: "success",
-  };
+  const filters = { status: "success" };
 
   if (startDate || endDate) {
-    match.createdAt = {};
-    if (startDate) match.createdAt.$gte = new Date(startDate);
-    if (endDate) match.createdAt.$lte = new Date(endDate);
+    filters.createdAt = {};
+    if (startDate) filters.createdAt.$gte = new Date(startDate).toISOString();
+    if (endDate) filters.createdAt.$lte = new Date(endDate).toISOString();
   }
 
-  const revenue = await Payment.aggregate([
-    { $match: match },
-    {
-      $group: {
-        _id: null,
-        total: { $sum: "$amount" },
-        count: { $sum: 1 },
-      },
-    },
-  ]);
+  const payments = await findAll("payments", { filters });
 
-  return {
-    total: revenue[0]?.total || 0,
-    transactions: revenue[0]?.count || 0,
-  };
+  const total = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+  return { total, transactions: payments.length };
 };

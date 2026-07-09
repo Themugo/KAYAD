@@ -1,15 +1,6 @@
-import mongoose from "mongoose";
-import Payment from "../models/Payment.js";
-import Bid from "../models/Bid.js";
-import Car from "../models/Car.js";
-import Escrow from "../models/Escrow.js";
-import Auction from "../models/Auction.js";
+import { findById, findOne, findAll, create, update } from "../db/index.js";
 import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
-import PlatformConfig from "../models/PlatformConfig.js";
-import User from "../models/User.js";
-import Dealer from "../models/Dealer.js";
-import DealerVerification from "../models/DealerVerification.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 
@@ -29,9 +20,6 @@ const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
 };
 
 export const handleMpesaCallback = async (callbackData) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const stk = callbackData.Body?.stkCallback;
 
@@ -40,53 +28,44 @@ export const handleMpesaCallback = async (callbackData) => {
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
 
-    // ── Atomic claim: only one callback can claim a payment ──
-    // Uses findOneAndUpdate with processed:false filter to
-    // prevent race conditions when Safaricom retries the callback
-    // while the first request's transaction is still in-flight.
-    // After the first transaction commits, the retry will see
-    // processed:true and return here instead of reprocessing.
-    const payment = await Payment.findOneAndUpdate(
-      { checkoutRequestId: checkoutId, processed: false },
-      { $set: { processed: true } },
-      { session, new: false },
-    );
+    // ── Claim payment ──
+    const payment = await findOne("payments", { checkoutRequestId: checkoutId, processed: false });
 
     if (!payment) {
-      const existing = await Payment.findOne({ checkoutRequestId: checkoutId }).session(session);
+      const existing = await findOne("payments", { checkoutRequestId: checkoutId });
       if (existing && existing.status === "success") {
         logInfo("Callback idempotent: payment already succeeded", { checkoutId });
-        await session.commitTransaction();
         return existing;
       }
       logWarn("Payment not found or already claimed", { checkoutId });
-      await session.abortTransaction();
       return;
     }
 
+    // Claim this payment
+    await update("payments", payment.id, { processed: true });
+
     if (!success) {
-      payment.status = "failed";
-      payment.resultDesc = stk.ResultDesc || "M-Pesa transaction failed";
-      await payment.save({ session });
+      await update("payments", payment.id, {
+        status: "failed",
+        resultDesc: stk.ResultDesc || "M-Pesa transaction failed",
+      });
 
       await sendNotification({
         userId: payment.user,
         title: "Payment Failed",
-        message: `KES ${payment.amount} — ${payment.resultDesc}`,
+        message: `KES ${payment.amount} — ${stk.ResultDesc || "M-Pesa transaction failed"}`,
       }).catch((e) => logWarn("Payment callback notification failed", { error: e.message }));
-
-      await session.commitTransaction();
 
       const io = getIO();
       if (io) {
         io.to(`user_${payment.user}`).emit("paymentFailed", {
           checkoutID: checkoutId,
-          reason: payment.resultDesc,
+          reason: stk.ResultDesc || "M-Pesa transaction failed",
         });
         if (payment.car)
           io.to(String(payment.car)).emit("paymentFailed", {
             checkoutID: checkoutId,
-            reason: payment.resultDesc,
+            reason: stk.ResultDesc || "M-Pesa transaction failed",
           });
       }
       return;
@@ -106,20 +85,20 @@ export const handleMpesaCallback = async (callbackData) => {
       throw new Error("Amount mismatch");
     }
 
-    payment.status = "success";
-    payment.mpesaReceipt = receipt;
-    payment.paidAt = new Date();
-
-    await payment.save({ session });
+    await update("payments", payment.id, {
+      status: "success",
+      mpesaReceipt: receipt,
+      paidAt: new Date(),
+    });
 
     let userDoc = null;
     try {
-      userDoc = await User.findById(payment.user).select("email name phone").lean();
+      userDoc = await findById("users", payment.user, "email name phone");
     } catch (_) {}
     sendDigitalReceipt({
       amount: payment.amount,
       carTitle: payment.car?.toString() || "Vehicle",
-      mpesaReceipt: receipt || String(payment._id).slice(-8),
+      mpesaReceipt: receipt || String(payment.id).slice(-8),
       user: userDoc || { email: null, phone: null, id: payment.user },
     }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
 
@@ -128,69 +107,66 @@ export const handleMpesaCallback = async (callbackData) => {
         let bid = null;
 
         if (payment.bidId) {
-          bid = await Bid.findById(payment.bidId).session(session);
+          bid = await findById("bids", payment.bidId);
         }
 
         if (!bid && payment.car) {
-          bid = await Bid.findOne({
+          bid = await findOne("bids", {
             carId: payment.car,
             status: "pending",
             checkoutRequestID: checkoutId,
-          }).session(session);
+          });
         }
 
         if (bid && bid.status !== "paid") {
-          bid.status = "paid";
-          bid.mpesaReceipt = receipt;
-          bid.paidAt = new Date();
-          await bid.save({ session });
+          await update("bids", bid.id, {
+            status: "paid",
+            mpesaReceipt: receipt,
+            paidAt: new Date(),
+          });
 
-          const car = await Car.findById(bid.carId).session(session);
+          const car = await findById("cars", bid.carId);
 
           if (car) {
-            car.currentBid = bid.amount;
-            car.highestBidder = bid.user;
-            await car.save({ session });
+            await update("cars", car.id, {
+              currentBid: bid.amount,
+              highestBidder: bid.user,
+            });
 
             if (getIO()) {
-              getIO().to(`car_${car._id}`).emit("auctionUpdate", {
-                carId: car._id,
+              getIO().to(`car_${car.id}`).emit("auctionUpdate", {
+                carId: car.id,
                 currentBid: bid.amount,
               });
             }
           }
 
-          // Transition auction to completed
-          await Auction.findOneAndUpdate(
-            { carId: bid.carId, status: "pending_payment" },
-            { status: "completed", paidAt: new Date() },
-            { session },
-          );
+          const auction = await findOne("auctions", { carId: bid.carId, status: "pending_payment" });
+          if (auction) {
+            await update("auctions", auction.id, { status: "completed", paidAt: new Date() });
+          }
         }
       });
     }
 
     if (payment.type === "purchase") {
-      const escrowCar = await Car.findById(payment.car).session(session).lean();
+      const escrowCar = await findById("cars", payment.car);
       const sellerId = escrowCar?.dealer || payment.user;
 
-      // Check seller verification status
-      const dealer = await Dealer.findOne({ user: sellerId }).session(session);
+      const dealer = await findOne("dealers", { user: sellerId });
       if (dealer) {
-        // Check legacy approval
         if (dealer.approved !== true) {
-          const verification = await DealerVerification.findOne({ user: sellerId }).session(session);
+          const verification = await findOne("dealer_verifications", { user: sellerId });
           if (!verification || verification.verificationStatus !== "approved") {
             logWarn("Escrow creation blocked: seller not verified", {
               sellerId,
               verificationStatus: verification?.verificationStatus || "none",
-              paymentId: payment._id,
+              paymentId: payment.id,
             });
-            // Refund payment since seller is not verified
-            payment.status = "failed";
-            payment.resultDesc = "Seller verification required for escrow";
-            await payment.save({ session });
-            await session.commitTransaction();
+            await update("payments", payment.id, {
+              status: "failed",
+              resultDesc: "Seller verification required for escrow",
+            });
             await sendNotification({
               userId: payment.user,
               title: "Payment Refunded",
@@ -202,27 +178,24 @@ export const handleMpesaCallback = async (callbackData) => {
         }
       }
 
-      const config = await PlatformConfig.findOne().lean();
+      const config = await findOne("platform_config", {});
       const rate = config?.dealerCommission ? config.dealerCommission / 100 : 0.05;
       const commission = Math.round(payment.amount * rate);
       const sellerAmount = payment.amount - commission;
-      const [newEscrow] = await Escrow.create(
-        [{
-          car: payment.car,
-          buyer: payment.user,
-          seller: sellerId,
-          amount: payment.amount,
-          payment: payment._id,
-          commission,
-          sellerAmount,
-          status: "funded",
-          fundedAt: new Date(),
-          autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
-          timeline: { depositReceived: true, depositReceivedAt: new Date() },
-          history: [{ action: "Escrow created and funded", at: new Date() }],
-        }],
-        { session },
-      );
+      const newEscrow = await create("escrows", {
+        car: payment.car,
+        buyer: payment.user,
+        seller: sellerId,
+        amount: payment.amount,
+        payment: payment.id,
+        commission,
+        sellerAmount,
+        status: "funded",
+        fundedAt: new Date(),
+        autoReleaseEligibleAt: new Date(Date.now() + 3 * 86400000),
+        timeline: { depositReceived: true, depositReceivedAt: new Date() },
+        history: [{ action: "Escrow created and funded", at: new Date() }],
+      });
     }
 
     await sendNotification({
@@ -241,41 +214,24 @@ export const handleMpesaCallback = async (callbackData) => {
       };
       const plan = PLANS[planId];
       if (plan) {
-        await User.findByIdAndUpdate(payment.user, {
-          $set: {
-            dealerPackage: planId,
-            packageListingMax: plan.limit,
-            packageExpiresAt: new Date(Date.now() + 30 * 86400000),
-          },
-        }).session(session);
+        await update("users", payment.user, {
+          dealerPackage: planId,
+          packageListingMax: plan.limit,
+          packageExpiresAt: new Date(Date.now() + 30 * 86400000),
+        });
         logInfo("Package upgraded via payment", { userId: payment.user, planId });
       }
     }
 
-    await session.commitTransaction();
-    session.endSession();
-
     const io = getIO();
     if (io) {
-      const payload = { checkoutID: checkoutId, receipt, paymentId: payment._id };
+      const payload = { checkoutID: checkoutId, receipt, paymentId: payment.id };
       io.to(`user_${payment.user}`).emit("paymentSuccess", payload);
       if (payment.car) io.to(String(payment.car)).emit("paymentSuccess", payload);
     }
 
     return payment;
   } catch (err) {
-    if (session) {
-      try {
-        await session.abortTransaction();
-      } catch {
-        /* already aborted */
-      }
-      try {
-        session.endSession();
-      } catch {
-        /* already ended */
-      }
-    }
     logError("CALLBACK ERROR", err);
     throw err;
   }

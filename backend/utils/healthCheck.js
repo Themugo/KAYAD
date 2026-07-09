@@ -5,22 +5,22 @@
 // Kubernetes uses /health/ready and /health/live.
 // ─────────────────────────────────────────────────────────────
 
-import mongoose from "mongoose";
 import { isRedisConnected } from "./cache.js";
 import { isPostHogEnabled } from "./posthog.js";
 import { getQueueMetrics, connection as queueConnection } from "../config/queue.js";
+import { isSupabaseConnected } from "./supabase.js";
 
 const START_TIME = Date.now();
 
 // ── SHALLOW CHECK — for load balancers (fast) ─────────────────
 const shallowHealth = (req, res) => {
-  const dbReady = mongoose.connection.readyState === 1;
+  const dbReady = isSupabaseConnected();
   res.json({
     status: dbReady ? "ok" : "degraded",
     service: "Kayad API",
     version: process.env.APP_VERSION || "1.0.0",
     checks: {
-      mongodb: dbReady ? "ok" : "degraded",
+      database: dbReady ? "ok" : "degraded",
     },
     uptime: Math.round((Date.now() - START_TIME) / 1000),
     env: process.env.NODE_ENV,
@@ -32,15 +32,13 @@ const shallowHealth = (req, res) => {
 const deepHealth = async (req, res) => {
   const checks = {};
 
-  // MongoDB
+  // Database
   try {
-    const state = mongoose.connection.readyState;
-    checks.mongodb = {
-      status: state === 1 ? "ok" : "degraded",
-      state: ["disconnected", "connected", "connecting", "disconnecting"][state] || "unknown",
+    checks.database = {
+      status: isSupabaseConnected() ? "ok" : "degraded",
     };
   } catch {
-    checks.mongodb = { status: "error" };
+    checks.database = { status: "error" };
   }
 
   // Redis (optional)
@@ -129,12 +127,12 @@ export const registerHealthRoutes = (app) => {
 
   // Kubernetes readiness probe
   app.get("/health/ready", async (_, res) => {
-    const dbReady = mongoose.connection.readyState === 1;
+    const dbReady = isSupabaseConnected();
     if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
     res.json({ status: "ready" });
   });
   app.get("/api/health/ready", async (_, res) => {
-    const dbReady = mongoose.connection.readyState === 1;
+    const dbReady = isSupabaseConnected();
     if (!dbReady) return res.status(503).json({ status: "not ready", reason: "db" });
     res.json({ status: "ready" });
   });

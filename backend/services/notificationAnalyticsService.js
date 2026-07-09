@@ -4,8 +4,9 @@
 // Tracks and analyzes notification delivery and engagement
 // ─────────────────────────────────────────────────────────────
 
-import NotificationAudit from "../models/NotificationAudit.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findById, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // 📊 TRACK NOTIFICATION EVENT
@@ -14,7 +15,7 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 export const trackNotification = async (notificationData) => {
   try {
     const audit = await NotificationAudit.trackNotification(notificationData);
-    logInfo("Notification tracked", { auditId: audit._id, channel: audit.channel });
+    logInfo("Notification tracked", { auditId: audit.id, channel: audit.channel });
     return audit;
   } catch (err) {
     logError("Failed to track notification", err);
@@ -29,7 +30,7 @@ export const trackNotification = async (notificationData) => {
 
 export const updateNotificationStatus = async (auditId, status, data = {}) => {
   try {
-    const audit = await NotificationAudit.findById(auditId);
+    const audit = await findById("notification_audits", auditId);
     if (!audit) {
       logWarn("Notification audit not found", { auditId });
       return null;
@@ -152,10 +153,9 @@ export const getUserNotificationStats = async (userId, period = 24) => {
   try {
     const startDate = new Date(Date.now() - period * 60 * 60 * 1000);
 
-    const stats = await NotificationAudit.aggregate([
-      {
+    const stats = await aggregate("notification_audits", [{
         $match: {
-          userId: mongoose.Types.ObjectId(userId),
+          userId: userId,
           queuedAt: { $gte: startDate },
         },
       },
@@ -179,11 +179,10 @@ export const getUserNotificationStats = async (userId, period = 24) => {
             },
           },
         },
-      },
-    ]);
+      },]);
 
     return stats.map((stat) => ({
-      channel: stat._id,
+      channel: stat.id,
       total: stat.total,
       delivered: stat.delivered,
       opened: stat.opened,
@@ -205,8 +204,7 @@ export const getPlatformNotificationStats = async (period = 24) => {
   try {
     const startDate = new Date(Date.now() - period * 60 * 60 * 1000);
 
-    const stats = await NotificationAudit.aggregate([
-      {
+    const stats = await aggregate("notification_audits", [{
         $match: {
           queuedAt: { $gte: startDate },
         },
@@ -241,8 +239,7 @@ export const getPlatformNotificationStats = async (period = 24) => {
             },
           },
         },
-      },
-    ]);
+      },]);
 
     const platformStats = stats[0] || {
       total: 0,
@@ -301,8 +298,7 @@ export const getNotificationTrends = async (period = 30) => {
   try {
     const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
-    const trends = await NotificationAudit.aggregate([
-      {
+    const trends = await aggregate("notification_audits", [{
         $match: {
           queuedAt: { $gte: startDate },
         },
@@ -328,8 +324,7 @@ export const getNotificationTrends = async (period = 30) => {
       },
       {
         $sort: { "_id.date": 1 },
-      },
-    ]);
+      },]);
 
     return trends;
   } catch (err) {

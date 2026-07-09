@@ -4,9 +4,9 @@
 // Handles retry logic for failed notifications
 // ─────────────────────────────────────────────────────────────
 
-import NotificationAudit from "../models/NotificationAudit.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findById } from "../db/index.js";
 
 // =============================
 // 🔁 RETRY FAILED NOTIFICATION
@@ -14,7 +14,7 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 export const retryFailedNotification = async (auditId) => {
   try {
-    const audit = await NotificationAudit.findById(auditId);
+    const audit = await findById("notification_audits", auditId);
     if (!audit) {
       logWarn("Notification audit not found for retry", { auditId });
       return { success: false, message: "Audit not found" };
@@ -43,7 +43,7 @@ export const retryFailedNotification = async (auditId) => {
       type: audit.type,
       channels: [audit.channel],
       metadata: {
-        originalAuditId: audit._id,
+        originalAuditId: audit.id,
         isRetry: true,
         retryCount: audit.retryCount,
       },
@@ -74,15 +74,15 @@ export const bulkRetryFailedNotifications = async (channel = null, period = 24) 
     const results = [];
     for (const notification of failedNotifications) {
       try {
-        const result = await retryFailedNotification(notification._id);
+        const result = await retryFailedNotification(notification.id);
         results.push({
-          auditId: notification._id,
+          auditId: notification.id,
           success: result.success,
           message: result.message,
         });
       } catch (err) {
         results.push({
-          auditId: notification._id,
+          auditId: notification.id,
           success: false,
           error: err.message,
         });
@@ -113,7 +113,7 @@ export const bulkRetryFailedNotifications = async (channel = null, period = 24) 
 
 export const scheduleRetry = async (auditId) => {
   try {
-    const audit = await NotificationAudit.findById(auditId);
+    const audit = await findById("notification_audits", auditId);
     if (!audit) {
       logWarn("Notification audit not found for scheduling", { auditId });
       return { success: false, message: "Audit not found" };
@@ -143,7 +143,7 @@ export const scheduleRetry = async (auditId) => {
 
 export const shouldRetry = async (auditId) => {
   try {
-    const audit = await NotificationAudit.findById(auditId);
+    const audit = await findById("notification_audits", auditId);
     if (!audit) return false;
 
     return audit.shouldRetry();
@@ -162,7 +162,7 @@ export const getRetryQueue = async (channel = null) => {
     const pendingRetry = await NotificationAudit.getPendingRetry(channel);
 
     return pendingRetry.map((audit) => ({
-      auditId: audit._id,
+      auditId: audit.id,
       channel: audit.channel,
       retryCount: audit.retryCount,
       maxRetries: audit.maxRetries,

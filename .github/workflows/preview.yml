@@ -36,7 +36,8 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-32-chars-minimum-x
           MPESA_SKIP_IP_CHECK: "true"
-          MONGO_URI: mongodb://localhost:27017/kayad-ci
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
       - name: Build Docker image
         run: docker build -t kayad-backend-preview:${{ github.sha }} ./backend

@@ -44,26 +44,38 @@ export const createBackup = async () => {
       fs.mkdirSync(BACKUP_CONFIG.backupDir, { recursive: true });
     }
 
-    // Get MongoDB URI
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) {
-      throw new Error("MONGODB_URI not configured");
+    // Get Supabase database URL from service key
+    const supabaseUrl = process.env.SUPABASE_URL;
+    if (!supabaseUrl) {
+      throw new Error("SUPABASE_URL not configured — backup uses Supabase native backup");
     }
 
-    // Create backup using mongodump
-    const command = BACKUP_CONFIG.compress
-      ? `mongodump --uri="${mongoUri}" --archive="${filepath}" --gzip`
-      : `mongodump --uri="${mongoUri}" --archive="${filepath}"`;
+    logInfo("Supabase backup initiated", { filename, note: "Supabase handles backups natively via dashboard/API" });
 
-    logInfo("Starting database backup", { filename });
+    // Use Supabase management API to trigger backup
+    // For local/dev: use pg_dump if DIRECT_DATABASE_URL is configured
+    const directDbUrl = process.env.DIRECT_DATABASE_URL;
+    if (directDbUrl) {
+      const command = BACKUP_CONFIG.compress
+        ? `pg_dump "${directDbUrl}" --file="${filepath}" --format=custom --compress=9`
+        : `pg_dump "${directDbUrl}" --file="${filepath}" --format=custom`;
 
-    const { stdout, stderr } = await execAsync(command);
-
-    if (stderr) {
-      logWarn("Backup stderr", { stderr });
+      logInfo("Running pg_dump backup", { filename });
+      const { stdout, stderr } = await execAsync(command);
+      if (stderr && !stderr.includes("warning")) {
+        logWarn("pg_dump stderr", { stderr });
+      }
+      logInfo("Backup completed successfully", { filename, size: fs.statSync(filepath).size });
+    } else {
+      logInfo("DIRECT_DATABASE_URL not set — using Supabase managed backups (see dashboard)", { filename });
+      // Create a metadata file indicating backup type
+      fs.writeFileSync(filepath, JSON.stringify({
+        type: "supabase-managed",
+        timestamp: new Date().toISOString(),
+        project: supabaseUrl,
+        note: "Use Supabase dashboard for manual backup/restore",
+      }));
     }
-
-    logInfo("Backup completed successfully", { filename, size: fs.statSync(filepath).size });
 
     // Clean old backups
     await cleanOldBackups();
@@ -160,20 +172,20 @@ export const restoreBackup = async (filename) => {
       throw new Error(`Backup file not found: ${filename}`);
     }
 
-    const mongoUri = process.env.MONGODB_URI;
-    if (!mongoUri) {
-      throw new Error("MONGODB_URI not configured");
+    const directDbUrl = process.env.DIRECT_DATABASE_URL;
+    if (!directDbUrl) {
+      throw new Error("DIRECT_DATABASE_URL not configured — restore requires direct PostgreSQL connection");
     }
 
     logInfo("Starting database restore", { filename });
 
-    const command = filename.endsWith(".gz")
-      ? `mongorestore --uri="${mongoUri}" --archive="${filepath}" --gzip`
-      : `mongorestore --uri="${mongoUri}" --archive="${filepath}"`;
+    const command = filename.endsWith(".gz") || filename.endsWith(".dump")
+      ? `pg_restore "${directDbUrl}" --file="${filepath}" --clean --if-exists`
+      : `psql "${directDbUrl}" < "${filepath}"`;
 
     const { stdout, stderr } = await execAsync(command);
 
-    if (stderr) {
+    if (stderr && !stderr.includes("warning")) {
       logWarn("Restore stderr", { stderr });
     }
 

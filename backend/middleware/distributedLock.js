@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import mongoose from "mongoose";
+import { getSupabase } from "../utils/supabase.js";
 
 const LOCK_TTL_MS = 30_000;
 const RETRY_INTERVAL_MS = 200;
@@ -13,23 +13,25 @@ function instanceId() {
 
 export async function acquireLock(resourceId, ttl = LOCK_TTL_MS) {
   const now = Date.now();
-  const expiresAt = new Date(now + ttl);
+  const expiresAt = new Date(now + ttl).toISOString();
   const id = instanceId();
 
   try {
-    const db = mongoose.connection.db;
-    if (!db) return { acquired: true, id };
+    const sb = getSupabase();
+    const { data: existing } = await sb.from("distributed_locks").select("*").eq("resource_id", resourceId).single();
 
-    const result = await db.collection("distributedLocks").findOneAndUpdate(
-      { _id: resourceId, $or: [{ expiresAt: { $lt: new Date() } }, { expiresAt: null }] },
-      { $set: { _id: resourceId, holder: id, acquiredAt: new Date(), expiresAt } },
-      { upsert: true, returnDocument: "before" },
-    );
+    if (!existing || new Date(existing.expires_at) < new Date()) {
+      await sb.from("distributed_locks").upsert({
+        resource_id: resourceId,
+        holder: id,
+        acquired_at: new Date().toISOString(),
+        expires_at: expiresAt,
+      }, { onConflict: "resource_id" });
+      return { acquired: true, id };
+    }
 
-    if (!result) return { acquired: true, id };
-    if (result.holder === id) return { acquired: true, id };
-    if (result.expiresAt && result.expiresAt > new Date()) return { acquired: false, holder: result.holder, id };
-    return { acquired: true, id };
+    if (existing.holder === id) return { acquired: true, id };
+    return { acquired: false, holder: existing.holder, id };
   } catch {
     if (!locks.has(resourceId)) {
       locks.set(resourceId, { holder: id, expiresAt });
@@ -47,10 +49,8 @@ export async function acquireLock(resourceId, ttl = LOCK_TTL_MS) {
 
 export async function releaseLock(resourceId, holderId) {
   try {
-    const db = mongoose.connection.db;
-    if (db) {
-      await db.collection("distributedLocks").deleteOne({ _id: resourceId, holder: holderId });
-    }
+    const sb = getSupabase();
+    await sb.from("distributed_locks").delete().eq("resource_id", resourceId).eq("holder", holderId);
   } catch {
     /* ignore */
   }

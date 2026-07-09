@@ -1,9 +1,8 @@
 // backend/services/paymentService.js — FIXED: emits socket events on confirmation
-import Payment from "../models/Payment.js";
-import MpesaTransaction from "../models/MpesaTransaction.js";
 import { stkPush } from "./mpesaService.js";
 import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
+import { findById, findOne, create, update } from "../db/index.js";
 
 const formatPhone = (phone) => {
   if (!phone) return null;
@@ -19,12 +18,8 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   const formattedPhone = formatPhone(phone);
   if (!formattedPhone) return { success: false, message: "Invalid Safaricom number" };
 
-  // Prevent duplicate pending payments for same car
-  const existing = await Payment.findOne({
-    user: userId,
-    car: carId,
-    status: "pending",
-    type,
+  const existing = await findOne("payments", {
+    user: userId, car: carId, status: "pending", type,
   });
   if (existing) {
     return { success: false, message: "Payment already in progress", payment: existing };
@@ -40,13 +35,11 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
       mode = String(checkoutID).toLowerCase().startsWith("mock_") ? "mock" : "mpesa";
     }
   } catch (err) {
-    if (process.env.NODE_ENV !== "development") {
-      throw err;
-    }
+    if (process.env.NODE_ENV !== "development") throw err;
     console.warn("STK Push failed, using mock mode:", err.message);
   }
 
-  const payment = await Payment.create({
+  const payment = await create("payments", {
     user: userId,
     car: carId,
     type,
@@ -60,7 +53,7 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     ...metadata,
   });
 
-  await MpesaTransaction.create({
+  await create("mpesa_transactions", {
     checkoutRequestID: checkoutID,
     phone: formattedPhone,
     amount,
@@ -80,38 +73,37 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
 
 // ── CONFIRM (fires socket events) ─────────────────────────────
 export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => {
-  const payment = await Payment.findOne({ checkoutRequestId: checkoutRequestID });
+  const payment = await findOne("payments", { checkoutRequestId: checkoutRequestID });
 
   if (!payment) throw new Error("Payment record not found");
-  if (payment.status === "success") return payment; // idempotent
+  if (payment.status === "success") return payment;
 
   if (Number(amount) !== Number(payment.amount)) {
     throw new Error(`Amount mismatch: expected ${payment.amount}, got ${amount}`);
   }
 
-  payment.status = "success";
-  payment.mpesaReceiptNumber = receipt;
-  payment.mpesaReceipt = receipt;
-  payment.paidAt = new Date();
-  await payment.save();
+  const updatedPayment = await update("payments", payment.id, {
+    status: "success",
+    mpesaReceiptNumber: receipt,
+    mpesaReceipt: receipt,
+    paidAt: new Date().toISOString(),
+  });
 
-  await MpesaTransaction.findOneAndUpdate({ checkoutRequestID }, { status: "success", mpesaReceipt: receipt }).catch(
+  await update("mpesa_transactions", payment.id, { status: "success", mpesaReceipt: receipt }).catch(
     (e) => console.warn("⚠️ Payment service notification failed:", e.message),
   );
 
   // 📧 Payment confirmed email (fire-and-forget)
   try {
     const { sendPaymentConfirmedEmail } = await import("./email.service.js");
-    const User = (await import("../models/User.js")).default;
-    const user = await User.findById(payment.user).select("email name");
+    const user = await findById("users", payment.user, "email,name");
     if (user?.email && typeof sendPaymentConfirmedEmail === "function") {
       let carTitle = null;
       if (payment.car) {
-        const Car = (await import("../models/Car.js")).default;
-        const carDoc = await Car.findById(payment.car).select("title");
+        const carDoc = await findById("cars", payment.car, "title");
         carTitle = carDoc?.title || null;
       }
-      sendPaymentConfirmedEmail(user, payment, { title: carTitle }).catch((e) =>
+      sendPaymentConfirmedEmail(user, updatedPayment, { title: carTitle }).catch((e) =>
         console.warn("⚠️ Payment confirmed email failed:", e.message),
       );
     }
@@ -119,72 +111,59 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
 
   // ── DIGITAL RECEIPT (email + SMS + WhatsApp) ──────────────
   try {
-    const User = (await import("../models/User.js")).default;
-    const userDoc = await User.findById(payment.user).select("email name phone").lean();
+    const userDoc = await findById("users", payment.user, "email,name,phone");
     if (userDoc) {
       sendDigitalReceipt({
         amount: payment.amount,
         carTitle: payment.car?.toString() || "Vehicle",
-        mpesaReceipt: receipt || String(payment._id).slice(-8),
-        user: { email: userDoc.email, phone: userDoc.phone, id: userDoc._id },
+        mpesaReceipt: receipt || String(payment.id).slice(-8),
+        user: { email: userDoc.email, phone: userDoc.phone, id: userDoc.id },
       }).catch((e) => console.warn("⚠️ Digital receipt failed:", e.message));
     }
   } catch (_) {}
 
   // If escrow payment, mark escrow as held
   if (payment.type === "escrow") {
-    const Escrow = (await import("../models/Escrow.js")).default;
-    const escrow = await Escrow.findOne({ payment: payment._id });
+    const escrow = await findOne("escrows", { payment: payment.id });
     if (escrow && escrow.status === "pending") {
-      await escrow.markFunded();
+      await update("escrows", escrow.id, { status: "funded", fundedAt: new Date().toISOString() });
     }
   }
 
   // If no escrow record exists (escrow disabled on car), mark car sold directly
   if (payment.car) {
-    const Car = (await import("../models/Car.js")).default;
-    const car = await Car.findById(payment.car);
+    const car = await findById("cars", payment.car);
     if (car && !car.escrowEnabled) {
-      car.sold = true;
-      car.status = "sold";
-      car.isPaid = true;
-      car.paymentStatus = "paid";
-      await car.save();
+      await update("cars", car.id, { sold: true, status: "sold", isPaid: true, paymentStatus: "paid" });
     }
   }
 
   // ── EMIT: user gets real-time confirmation ──────────────────
   const io = getIO();
   if (io) {
-    const payload = { checkoutID: checkoutRequestID, receipt, paymentId: payment._id };
-
-    // Notify the payer's personal room
+    const payload = { checkoutID: checkoutRequestID, receipt, paymentId: payment.id };
     io.to(`user_${payment.user}`).emit("paymentSuccess", payload);
-
-    // Also notify the auction room (carId) so all watchers see confirmed bid
-    if (payment.car) {
-      io.to(String(payment.car)).emit("paymentSuccess", payload);
-    }
+    if (payment.car) io.to(String(payment.car)).emit("paymentSuccess", payload);
   }
 
-  return payment;
+  return updatedPayment;
 };
 
 // ── FAIL ──────────────────────────────────────────────────────
 export const failPayment = async (checkoutRequestID, resultDesc = "") => {
-  const payment = await Payment.findOne({ checkoutRequestId: checkoutRequestID });
+  const payment = await findOne("payments", { checkoutRequestId: checkoutRequestID });
 
   if (!payment || payment.status === "success") return;
 
-  payment.status = "failed";
-  payment.resultDesc = resultDesc;
-  await payment.save();
+  const updated = await update("payments", payment.id, { status: "failed", resultDesc });
 
-  await MpesaTransaction.findOneAndUpdate({ checkoutRequestID }, { status: "failed" }).catch((e) =>
-    console.warn("⚠️ Payment service notification failed:", e.message),
-  );
+  const mpesaTxn = await findOne("mpesa_transactions", { checkoutRequestID: checkoutRequestID });
+  if (mpesaTxn) {
+    await update("mpesa_transactions", mpesaTxn.id, { status: "failed" }).catch((e) =>
+      console.warn("⚠️ Payment service notification failed:", e.message),
+    );
+  }
 
-  // ── EMIT failure ────────────────────────────────────────────
   const io = getIO();
   if (io) {
     const payload = { checkoutID: checkoutRequestID, reason: resultDesc };

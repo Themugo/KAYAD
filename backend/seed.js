@@ -1,31 +1,16 @@
 // backend/seed.js
 // Run: node seed.js
 // Also exports reseed() for programmatic re-seeding from admin API
-// Hierarchy: Webhost (superadmin) → Admin → Staff | Dealer → Dealer Staff | Seller | Buyer
 
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import path from "path";
-import Car from "./models/Car.js";
-import User from "./models/User.js";
+import bcrypt from "bcryptjs";
 import { logInfo, logWarn, logError } from "./utils/logger.js";
+import { initSupabase, getSupabase } from "./utils/supabase.js";
+import { findOne, create, upsert } from "./db/index.js";
 
 dotenv.config();
-
-// Helper: upsert a user (create or update)
-const upsertUser = async (match, data, createdList, listKey) => {
-  let u = await User.findOne(match);
-  if (!u) {
-    u = await User.create(data);
-    createdList.push(`${data.email}`);
-  } else {
-    for (const key of Object.keys(data)) u[key] = data[key];
-    await u.save();
-    createdList.push(`${data.email} (updated)`);
-  }
-  return u;
-};
 
 const IMG = (u) => ({ url: u, thumb: u, public_id: "" });
 
@@ -64,327 +49,27 @@ const eightImages = (urls, i) => {
 };
 
 const seedCars = [
-  {
-    title: "Toyota Land Cruiser V8 2021",
-    brand: "Toyota",
-    year: 2021,
-    price: 8500000,
-    fuel: "Diesel",
-    transmission: "Automatic",
-    mileage: 45000,
-    bodyType: "SUV",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 1842,
-    isPromoted: true,
-    isVerifiedDealer: true,
-    allowBid: true,
-    allowBuy: false,
-    auctionStatus: "live",
-    startingBid: 100000,
-    currentBid: 100000,
-    bidIncrement: 50000,
-    dealRating: "great",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=400&fit=crop",
-      ],
-      0,
-    ),
-  },
-  {
-    title: "Mercedes-Benz GLE 350d 2022",
-    brand: "Mercedes",
-    year: 2022,
-    price: 12000000,
-    fuel: "Diesel",
-    transmission: "Automatic",
-    mileage: 22000,
-    bodyType: "SUV",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 2103,
-    isPromoted: true,
-    isVerifiedDealer: true,
-    allowBid: true,
-    allowBuy: false,
-    auctionStatus: "live",
-    startingBid: 100000,
-    currentBid: 100000,
-    bidIncrement: 50000,
-    dealRating: "fair",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d1?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop",
-      ],
-      1,
-    ),
-  },
-  {
-    title: "BMW X5 M Sport 2020",
-    brand: "BMW",
-    year: 2020,
-    price: 6200000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 38000,
-    bodyType: "SUV",
-    location: { city: "Mombasa", coordinates: { type: "Point", coordinates: [39.6682, -4.0435] } },
-    views: 1567,
-    isPromoted: false,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "great",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=600&h=400&fit=crop",
-      ],
-      2,
-    ),
-  },
-  {
-    title: "Subaru Forester XT 2021",
-    brand: "Subaru",
-    year: 2021,
-    price: 3800000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 28000,
-    bodyType: "SUV",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 982,
-    isPromoted: false,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "good",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop",
-      ],
-      3,
-    ),
-  },
-  {
-    title: "Nissan X-Trail 2022",
-    brand: "Nissan",
-    year: 2022,
-    price: 2900000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 18000,
-    bodyType: "SUV",
-    location: { city: "Nakuru", coordinates: { type: "Point", coordinates: [36.0667, -0.2833] } },
-    views: 734,
-    isPromoted: false,
-    isVerifiedDealer: false,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "good",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1533928298208-27ff66555d8d?w=600&h=400&fit=crop",
-      ],
-      4,
-    ),
-  },
-  {
-    title: "Mazda CX-5 2023",
-    brand: "Mazda",
-    year: 2023,
-    price: 4200000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 12000,
-    bodyType: "SUV",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 1289,
-    isPromoted: true,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "great",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&h=400&fit=crop",
-      ],
-      5,
-    ),
-  },
-  {
-    title: "Land Rover Range Rover Sport 2020",
-    brand: "Land Rover",
-    year: 2020,
-    price: 15000000,
-    fuel: "Diesel",
-    transmission: "Automatic",
-    mileage: 35000,
-    bodyType: "SUV",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 3210,
-    isPromoted: true,
-    isVerifiedDealer: true,
-    allowBid: true,
-    allowBuy: false,
-    auctionStatus: "live",
-    startingBid: 100000,
-    currentBid: 100000,
-    bidIncrement: 50000,
-    dealRating: "overpriced",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1607016284316-6e1019c28e23?w=600&h=400&fit=crop",
-      ],
-      6,
-    ),
-  },
-  {
-    title: "Audi A4 2.0 TFSI 2021",
-    brand: "Audi",
-    year: 2021,
-    price: 3800000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 25000,
-    bodyType: "Sedan",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 876,
-    isPromoted: false,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "good",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1603584173870-7f23fd4c2b4b?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1606664444110-0c1e1e84b8fe?w=600&h=400&fit=crop",
-      ],
-      7,
-    ),
-  },
-  {
-    title: "Lexus ES 350 2022",
-    brand: "Lexus",
-    year: 2022,
-    price: 5200000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 15000,
-    bodyType: "Sedan",
-    location: { city: "Mombasa", coordinates: { type: "Point", coordinates: [39.6682, -4.0435] } },
-    views: 654,
-    isPromoted: false,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "fair",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1511919886926-f7fb7d0c6e2c?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1581540222194-0def2dda95b8?w=600&h=400&fit=crop",
-      ],
-      8,
-    ),
-  },
-  {
-    title: "Volkswagen Passat 2021",
-    brand: "Volkswagen",
-    year: 2021,
-    price: 2600000,
-    fuel: "Diesel",
-    transmission: "Automatic",
-    mileage: 32000,
-    bodyType: "Sedan",
-    location: { city: "Eldoret", coordinates: { type: "Point", coordinates: [35.2695, 0.5204] } },
-    views: 521,
-    isPromoted: false,
-    isVerifiedDealer: false,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "great",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1570733117311-d990c3816c47?w=600&h=400&fit=crop",
-      ],
-      9,
-    ),
-  },
-  {
-    title: "Honda Accord 2022",
-    brand: "Honda",
-    year: 2022,
-    price: 3100000,
-    fuel: "Petrol",
-    transmission: "Automatic",
-    mileage: 20000,
-    bodyType: "Sedan",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 445,
-    isPromoted: false,
-    isVerifiedDealer: false,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "good",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1605816988069-b11383b5076e?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1590362891991-f776e747a588?w=600&h=400&fit=crop",
-      ],
-      10,
-    ),
-  },
-  {
-    title: "Toyota Hilux Double Cabin 2021",
-    brand: "Toyota",
-    year: 2021,
-    price: 4200000,
-    fuel: "Diesel",
-    transmission: "Automatic",
-    mileage: 40000,
-    bodyType: "Pickup",
-    location: { city: "Nairobi", coordinates: { type: "Point", coordinates: [36.8219, -1.2921] } },
-    views: 1678,
-    isPromoted: true,
-    isVerifiedDealer: true,
-    allowBid: false,
-    allowBuy: true,
-    auctionStatus: "draft",
-    dealRating: "great",
-    images: eightImages(
-      [
-        "https://images.unsplash.com/photo-1583267746897-3e42c7e14754?w=600&h=400&fit=crop",
-        "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=600&h=400&fit=crop",
-      ],
-      11,
-    ),
-  },
+  { title: "Toyota Land Cruiser V8 2021", make: "Toyota", model: "Land Cruiser V8", year: 2021, price: 8500000, fuel_type: "Diesel", transmission: "Automatic", mileage: 45000, body_type: "SUV", featured: true, status: "available" },
+  { title: "Mercedes-Benz GLE 350d 2022", make: "Mercedes-Benz", model: "GLE 350d", year: 2022, price: 12000000, fuel_type: "Diesel", transmission: "Automatic", mileage: 22000, body_type: "SUV", featured: true, status: "available" },
+  { title: "BMW X5 M Sport 2020", make: "BMW", model: "X5 M Sport", year: 2020, price: 6200000, fuel_type: "Petrol", transmission: "Automatic", mileage: 38000, body_type: "SUV", featured: false, status: "available" },
+  { title: "Subaru Forester XT 2021", make: "Subaru", model: "Forester XT", year: 2021, price: 3800000, fuel_type: "Petrol", transmission: "Automatic", mileage: 28000, body_type: "SUV", featured: false, status: "available" },
+  { title: "Nissan X-Trail 2022", make: "Nissan", model: "X-Trail", year: 2022, price: 2900000, fuel_type: "Petrol", transmission: "Automatic", mileage: 18000, body_type: "SUV", featured: false, status: "available" },
+  { title: "Mazda CX-5 2023", make: "Mazda", model: "CX-5", year: 2023, price: 4200000, fuel_type: "Petrol", transmission: "Automatic", mileage: 12000, body_type: "SUV", featured: true, status: "available" },
+  { title: "Land Rover Range Rover Sport 2020", make: "Land Rover", model: "Range Rover Sport", year: 2020, price: 15000000, fuel_type: "Diesel", transmission: "Automatic", mileage: 35000, body_type: "SUV", featured: true, has_auction: true, status: "available" },
+  { title: "Audi A4 2.0 TFSI 2021", make: "Audi", model: "A4 2.0 TFSI", year: 2021, price: 3800000, fuel_type: "Petrol", transmission: "Automatic", mileage: 25000, body_type: "Sedan", featured: false, status: "available" },
+  { title: "Lexus ES 350 2022", make: "Lexus", model: "ES 350", year: 2022, price: 5200000, fuel_type: "Petrol", transmission: "Automatic", mileage: 15000, body_type: "Sedan", featured: false, status: "available" },
+  { title: "Volkswagen Passat 2021", make: "Volkswagen", model: "Passat", year: 2021, price: 2600000, fuel_type: "Diesel", transmission: "Automatic", mileage: 32000, body_type: "Sedan", featured: false, status: "available" },
+  { title: "Honda Accord 2022", make: "Honda", model: "Accord", year: 2022, price: 3100000, fuel_type: "Petrol", transmission: "Automatic", mileage: 20000, body_type: "Sedan", featured: false, status: "available" },
+  { title: "Toyota Hilux Double Cabin 2021", make: "Toyota", model: "Hilux Double Cabin", year: 2021, price: 4200000, fuel_type: "Diesel", transmission: "Automatic", mileage: 40000, body_type: "Pickup", featured: true, status: "available" },
 ];
 
-const connectDB = async () => {
-  if (mongoose.connection.readyState === 1) return;
-  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
-  if (!uri) throw new Error("MONGO_URI or MONGODB_URI must be set for seeding");
-  await mongoose.connect(uri);
-  logInfo("DB connected for seeding");
+const connectDB = () => {
+  initSupabase();
 };
 
 export async function reseed() {
-  await connectDB();
+  connectDB();
+  const sb = getSupabase();
 
   const created = { webhost: [], admin: [], demos: [], staff: [], dealers: [], cars: 0 };
 
@@ -397,233 +82,106 @@ export async function reseed() {
     return pw;
   };
 
-  // ══════════════════════════════════════════════════════════
-  // 1. WEBHOST (IMMUTABLE SUPERADMIN) — owns the platform
-  // ══════════════════════════════════════════════════════════
+  const hashPw = (pw) => bcrypt.hashSync(pw, 12);
+
+  // 1. WEBHOST (SUPERADMIN)
   const webhostEmail = process.env.SEED_ADMIN_EMAIL;
-  const webhostPassword = process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PASSWORD");
+  const webhostPassword = hashPw(process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PASSWORD"));
   const webhostName = process.env.SEED_ADMIN_NAME || "Platform Owner";
 
-  // Provision EVERY configured platform owner (WEBHOIST_EMAIL may be a
-  // comma-separated list, e.g. the gmail owner + a kayad-domain owner). Each
-  // is created/normalised as a superadmin and is treated as immutable by the
-  // admin routes (see middleware/protectAccount.js).
   const { OWNER_EMAILS } = await import("./config/owners.js");
   const ownerList = OWNER_EMAILS.length ? OWNER_EMAILS : webhostEmail ? [webhostEmail.toLowerCase()] : [];
 
   for (const ownerEmail of ownerList) {
     const isPrimary = ownerEmail === (webhostEmail || ownerList[0])?.toLowerCase();
-    const pw = isPrimary ? webhostPassword : process.env.SEED_WEBHOST_PW || webhostPassword;
+    const pw = isPrimary ? webhostPassword : hashPw(process.env.SEED_WEBHOST_PW || "ChangeMe123!");
     const name = isPrimary ? webhostName : "KAYAD Webhost";
-    let admin = await User.findOne({ email: ownerEmail });
-    if (!admin) {
-      admin = await User.create({
+    try {
+      await upsert("users", "email", ownerEmail, {
         name,
         email: ownerEmail,
         password: pw,
         role: "superadmin",
-        isDemo: false,
-        emailVerified: true,
+        is_demo: false,
+        email_verified: true,
       });
       created.webhost.push(ownerEmail);
-    } else {
-      admin.password = pw;
-      admin.role = "superadmin";
-      admin.isDemo = false;
-      admin.emailVerified = true;
-      await admin.save();
-      created.webhost.push(`${ownerEmail} (updated)`);
+    } catch (err) {
+      logError("Failed to upsert webhost", { email: ownerEmail, error: err.message });
     }
   }
 
-  // ══════════════════════════════════════════════════════════
   // 2. PLATFORM ADMIN
-  // ══════════════════════════════════════════════════════════
-  const adminPw = process.env.SEED_ADMIN_PW || process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PW");
-  await upsertUser(
-    { email: "admin@kayad.space" },
-    {
-      name: "Platform Admin",
-      email: "admin@kayad.space",
-      password: adminPw,
-      role: "admin",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    created.admin,
-  );
+  const adminPw = hashPw(process.env.SEED_ADMIN_PW || process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PW"));
+  await upsert("users", "email", "admin@kayad.space", {
+    name: "Platform Admin",
+    email: "admin@kayad.space",
+    password: adminPw,
+    role: "admin",
+    email_verified: true,
+    must_change_password: true,
+  });
+  created.admin.push("admin@kayad.space");
 
-  // ══════════════════════════════════════════════════════════
-  // 3. DEMO ACCOUNTS (3 only — Dealer, Seller, Buyer)
-  // ══════════════════════════════════════════════════════════
+  // 3. DEMO ACCOUNTS
   const demos = [
-    {
-      name: "Demo Dealer",
-      email: "dealer@kayad.space",
-      password: process.env.SEED_DEALER_PW || devFallback("SEED_DEALER_PW"),
-      role: "dealer",
-      approved: true,
-      businessName: "Kayad Motors Demo",
-      location: "Nairobi",
-      dealerPackage: "starter",
-      dealerRating: 4.7,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Demo Seller",
-      email: "seller@kayad.space",
-      password: process.env.SEED_SELLER_PW || devFallback("SEED_SELLER_PW"),
-      role: "individual_seller",
-      approved: true,
-      businessName: "Private Seller",
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Demo Buyer",
-      email: "buyer@kayad.space",
-      password: process.env.SEED_BUYER_PW || devFallback("SEED_BUYER_PW"),
-      role: "user",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
+    { name: "Demo Dealer", email: "dealer@kayad.space", password: hashPw(process.env.SEED_DEALER_PW || devFallback("SEED_DEALER_PW")), role: "dealer", business_name: "Kayad Motors Demo" },
+    { name: "Demo Seller", email: "seller@kayad.space", password: hashPw(process.env.SEED_SELLER_PW || devFallback("SEED_SELLER_PW")), role: "individual_seller", business_name: "Private Seller" },
+    { name: "Demo Buyer", email: "buyer@kayad.space", password: hashPw(process.env.SEED_BUYER_PW || devFallback("SEED_BUYER_PW")), role: "user" },
   ];
 
-  // Issue #6: Parallelize independent upserts instead of sequential awaits
-  await Promise.all(demos.map((acc) => upsertUser({ email: acc.email }, acc, created.demos)));
+  for (const acc of demos) {
+    await upsert("users", "email", acc.email, { ...acc, must_change_password: true, email_verified: true });
+    created.demos.push(acc.email);
+  }
 
-  // ══════════════════════════════════════════════════════════
-  // 3b. ADDITIONAL DEALER ACCOUNTS (Elite + Pending)
-  // ══════════════════════════════════════════════════════════
+  // Extra dealers
   const extraDealers = [
-    {
-      name: "Elite Dealer",
-      email: "elite@kayad.space",
-      password: process.env.SEED_ELITE_PW || devFallback("SEED_ELITE_PW"),
-      role: "dealer",
-      approved: true,
-      businessName: "Elite Motors Kenya",
-      location: "Nairobi",
-      dealerPackage: "elite",
-      dealerRating: 4.9,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Pending Dealer",
-      email: "pending@kayad.space",
-      password: process.env.SEED_PENDING_PW || devFallback("SEED_PENDING_PW"),
-      role: "dealer",
-      approved: false,
-      businessName: "New Ventures Ltd",
-      location: "Nairobi",
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
+    { name: "Elite Dealer", email: "elite@kayad.space", password: hashPw(process.env.SEED_ELITE_PW || devFallback("SEED_ELITE_PW")), role: "dealer", business_name: "Elite Motors Kenya" },
+    { name: "Pending Dealer", email: "pending@kayad.space", password: hashPw(process.env.SEED_PENDING_PW || devFallback("SEED_PENDING_PW")), role: "dealer", business_name: "New Ventures Ltd", status: "pending" },
   ];
 
-  await Promise.all(extraDealers.map((acc) => upsertUser({ email: acc.email }, acc, created.dealers)));
+  for (const acc of extraDealers) {
+    await upsert("users", "email", acc.email, { ...acc, must_change_password: true, email_verified: true });
+    created.dealers.push(acc.email);
+  }
 
-  // ══════════════════════════════════════════════════════════
-  // 3c. STAFF ACCOUNTS (departmental roles)
-  // ══════════════════════════════════════════════════════════
+  // Staff accounts
   const staffAccounts = [
-    {
-      name: "HR Manager",
-      email: "hr@kayad.space",
-      password: process.env.SEED_HR_PW || devFallback("SEED_HR_PW"),
-      role: "hr",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Accounts Officer",
-      email: "accounts@kayad.space",
-      password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"),
-      role: "accounts",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Escrow Officer",
-      email: "escrow@kayad.space",
-      password: process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"),
-      role: "escrow_officer",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Marketing Lead",
-      email: "marketing@kayad.space",
-      password: process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"),
-      role: "marketing",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Ad Manager",
-      email: "ads@kayad.space",
-      password: process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"),
-      role: "ad_manager",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Tech Support",
-      email: "support@kayad.space",
-      password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"),
-      role: "technical_support",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
-    {
-      name: "Moderator",
-      email: "mod@kayad.space",
-      password: process.env.SEED_MOD_PW || devFallback("SEED_MOD_PW"),
-      role: "moderator",
-      approved: true,
-      mustChangePassword: true,
-      isDemo: true,
-      emailVerified: true,
-    },
+    { name: "HR Manager", email: "hr@kayad.space", role: "hr" },
+    { name: "Accounts Officer", email: "accounts@kayad.space", role: "accounts" },
+    { name: "Escrow Officer", email: "escrow@kayad.space", role: "escrow_officer" },
+    { name: "Marketing Lead", email: "marketing@kayad.space", role: "marketing" },
+    { name: "Ad Manager", email: "ads@kayad.space", role: "ad_manager" },
+    { name: "Tech Support", email: "support@kayad.space", role: "technical_support" },
+    { name: "Moderator", email: "mod@kayad.space", role: "moderator" },
   ];
 
-  await Promise.all(staffAccounts.map((acc) => upsertUser({ email: acc.email }, acc, created.staff)));
+  const staffPw = hashPw(process.env.SEED_STAFF_PW || devFallback("SEED_STAFF_PW"));
+  for (const acc of staffAccounts) {
+    await upsert("users", "email", acc.email, { ...acc, password: staffPw, must_change_password: true, email_verified: true });
+    created.staff.push(acc.email);
+  }
 
-  // ══════════════════════════════════════════════════════════
   // 4. DEMO CARS
-  // ══════════════════════════════════════════════════════════
-  const dealer = await User.findOne({ email: "dealer@kayad.space" });
+  const dealer = await findOne("users", { email: "dealer@kayad.space" });
   if (dealer) {
-    await Car.deleteMany({ dealer: dealer._id });
-    dealer.listingCount = 0;
-    dealer.trialListingsUsed = 0;
-    dealer.firstVehicleUsed = false;
-    await dealer.save();
-    const cars = seedCars.map((c) => ({ ...c, dealer: dealer._id, status: "active", coverImage: 0, isDemo: true }));
-    const inserted = await Car.insertMany(cars);
-    created.cars = inserted.length;
+    await sb.from("cars").delete().eq("dealer_id", dealer.id);
+    for (const c of seedCars) {
+      const images = eightImages([], seedCars.indexOf(c));
+      await create("cars", {
+        ...c,
+        dealer_id: dealer.id,
+        images: images.map((i) => i.url),
+        featured_image: images[0]?.url || "",
+        views: Math.floor(Math.random() * 2000),
+        description: `${c.title} — well maintained, genuine mileage, ready for test drive.`,
+        condition: "Excellent",
+        color: ["White", "Black", "Silver", "Blue", "Red"][Math.floor(Math.random() * 5)],
+        location: "Nairobi, Kenya",
+      });
+    }
+    created.cars = seedCars.length;
   }
 
   return created;
@@ -632,7 +190,7 @@ export async function reseed() {
 const seed = async () => {
   dotenv.config();
   try {
-    await connectDB();
+    connectDB();
     const result = await reseed();
     logInfo("KAYAD — SEED COMPLETE", {
       webhost: result.webhost,
@@ -649,8 +207,6 @@ const seed = async () => {
   }
 };
 
-// CLI: node seed.js (skip when imported by admin route)
 const __filename = fileURLToPath(import.meta.url);
-const isMain =
-  process.argv[1] && (path.resolve(process.argv[1]) === __filename || process.argv[1] === path.basename(__filename));
+const isMain = process.argv[1] && (path.resolve(process.argv[1]) === __filename || process.argv[1] === path.basename(__filename));
 if (isMain) seed();

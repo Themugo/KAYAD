@@ -24,7 +24,9 @@ services:
         sync: false
       - key: CUSTOM_DOMAIN
         value: staging.kayad.space
-      - key: MONGO_URI
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
         sync: false
       - key: JWT_SECRET
         sync: false
@@ -121,11 +123,16 @@ services:
     envVars:
       - key: NODE_ENV
         value: staging
-      - key: MONGO_URI
+      - key: SUPABASE_URL
         fromService:
           type: web
           name: kayad-backend-staging
-          property: MONGO_URI
+          property: SUPABASE_URL
+      - key: SUPABASE_SERVICE_KEY
+        fromService:
+          type: web
+          name: kayad-backend-staging
+          property: SUPABASE_SERVICE_KEY
       - key: JWT_SECRET
         fromService:
           type: web

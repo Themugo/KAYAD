@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
-import LedgerEntry from "../models/LedgerEntry.js";
-import LedgerAccount from "../models/LedgerAccount.js";
+import { findAll, findById, findOne, create, update } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 import crypto from "crypto";
 
 function generateTransactionId() {
@@ -12,7 +11,7 @@ function formatCurrency(amount) {
 }
 
 async function ensureAccounts() {
-  const accounts = await LedgerAccount.find({}).lean();
+  const accounts = await findAll("ledger_accounts", {});
   if (accounts.length === 0) {
     const seed = [
       { code: "1000", name: "Cash - M-Pesa", type: "asset", category: "cash", description: "M-Pesa payment collections" },
@@ -28,16 +27,19 @@ async function ensureAccounts() {
       { code: "4300", name: "Listing Fees", type: "revenue", category: "fees", description: "Listing promotion fees" },
       { code: "5000", name: "B2C Disbursement Payable", type: "liability", category: "payable", description: "Pending seller payouts" },
     ];
-    await LedgerAccount.insertMany(seed);
-    return await LedgerAccount.find({}).lean();
+    const created = [];
+    for (const acct of seed) {
+      created.push(await create("ledger_accounts", acct));
+    }
+    return created;
   }
   return accounts;
 }
 
 async function getAccountId(code) {
-  const account = await LedgerAccount.findOne({ code });
+  const account = await findOne("ledger_accounts", { code });
   if (!account) throw new Error(`Account not found: ${code}`);
-  return account._id;
+  return account.id;
 }
 
 export async function recordLedgerEntry({
@@ -52,43 +54,41 @@ export async function recordLedgerEntry({
   debitAccountCode,
   creditAccountCode,
 }) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
     await ensureAccounts();
     const debitAccountId = await getAccountId(debitAccountCode);
     const creditAccountId = await getAccountId(creditAccountCode);
     const roundedAmount = formatCurrency(amount);
 
-    const entry = await LedgerEntry.create(
-      [{
-        transaction_id: generateTransactionId(),
-        external_reference,
-        user: user_id,
-        amount: roundedAmount,
-        currency,
-        source,
-        destination,
-        status: "completed",
-        description: description || `${source} → ${destination}`,
-        entries: [
-          { account: debitAccountId, debit: roundedAmount, credit: 0 },
-          { account: creditAccountId, debit: 0, credit: roundedAmount },
-        ],
-        metadata,
-      }],
-      { session },
-    );
+    const entry = await create("ledger_entries", {
+      transaction_id: generateTransactionId(),
+      external_reference,
+      user: user_id,
+      amount: roundedAmount,
+      currency,
+      source,
+      destination,
+      status: "completed",
+      description: description || `${source} → ${destination}`,
+      entries: [
+        { account: debitAccountId, debit: roundedAmount, credit: 0 },
+        { account: creditAccountId, debit: 0, credit: roundedAmount },
+      ],
+      metadata,
+    });
 
-    await LedgerAccount.findByIdAndUpdate(debitAccountId, { $inc: { balance: roundedAmount } }, { session });
-    await LedgerAccount.findByIdAndUpdate(creditAccountId, { $inc: { balance: -roundedAmount } }, { session });
+    const debitAccount = await findById("ledger_accounts", debitAccountId);
+    if (debitAccount) {
+      await update("ledger_accounts", debitAccountId, { balance: (debitAccount.balance || 0) + roundedAmount });
+    }
 
-    await session.commitTransaction();
-    session.endSession();
-    return entry[0];
+    const creditAccount = await findById("ledger_accounts", creditAccountId);
+    if (creditAccount) {
+      await update("ledger_accounts", creditAccountId, { balance: (creditAccount.balance || 0) - roundedAmount });
+    }
+
+    return entry;
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     throw err;
   }
 }
@@ -208,16 +208,16 @@ export async function recordAuctionPayment({ payment_id, user_id, amount, commis
 }
 
 export async function getBalanceSheet() {
-  const accounts = await LedgerAccount.find({ isActive: true }).lean();
+  const accounts = await findAll("ledger_accounts", { filters: { isActive: true } });
   const totals = { asset: 0, liability: 0, equity: 0, revenue: 0, expense: 0 };
   for (const acc of accounts) {
-    totals[acc.type] = (totals[acc.type] || 0) + acc.balance;
+    totals[acc.type] = (totals[acc.type] || 0) + (acc.balance || 0);
   }
   return { accounts, totals, generatedAt: new Date() };
 }
 
 export async function getTrialBalance() {
-  const accounts = await LedgerAccount.find({ isActive: true }).lean();
+  const accounts = await findAll("ledger_accounts", { filters: { isActive: true } });
   let totalDebit = 0;
   let totalCredit = 0;
   for (const acc of accounts) {
@@ -228,89 +228,120 @@ export async function getTrialBalance() {
 }
 
 export async function getLedgerEntries({ source, status, user_id, startDate, endDate, page = 1, limit = 50 }) {
-  const filter = {};
-  if (source) filter.source = source;
-  if (status) filter.status = status;
-  if (user_id) filter.user = user_id;
-  if (startDate || endDate) {
-    filter.createdAt = {};
-    if (startDate) filter.createdAt.$gte = new Date(startDate);
-    if (endDate) filter.createdAt.$lte = new Date(endDate);
+  const sb = getSupabase();
+  let query = sb.from("ledger_entries").select("*", { count: "exact" });
+
+  if (source) query = query.eq("source", source);
+  if (status) query = query.eq("status", status);
+  if (user_id) query = query.eq("user", user_id);
+  if (startDate) query = query.gte("createdAt", new Date(startDate).toISOString());
+  if (endDate) query = query.lte("createdAt", new Date(endDate).toISOString());
+
+  query = query.order("createdAt", { ascending: false });
+  query = query.range((page - 1) * limit, (page - 1) * limit + limit - 1);
+
+  const { data: entries, error, count } = await query;
+  if (error) throw error;
+
+  for (const entry of entries) {
+    if (entry.entries) {
+      for (const e of entry.entries) {
+        if (e.account) {
+          const acc = await findById("ledger_accounts", e.account);
+          if (acc) e.account = { id: acc.id, code: acc.code, name: acc.name, type: acc.type };
+        }
+      }
+    }
   }
-  const skip = (page - 1) * limit;
-  const [entries, total] = await Promise.all([
-    LedgerEntry.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("entries.account", "code name type").lean(),
-    LedgerEntry.countDocuments(filter),
-  ]);
-  return { entries, pagination: { page, limit, total, pages: Math.ceil(total / limit) } };
+
+  return { entries, pagination: { page, limit, total: count, pages: Math.ceil(count / limit) } };
 }
 
 export async function getLedgerEntryById(id) {
-  const entry = await LedgerEntry.findById(id).populate("entries.account", "code name type").populate("user", "name email");
+  const entry = await findById("ledger_entries", id);
+  if (!entry) return null;
+  if (entry.entries) {
+    for (const e of entry.entries) {
+      if (e.account) {
+        const acc = await findById("ledger_accounts", e.account);
+        if (acc) e.account = { id: acc.id, code: acc.code, name: acc.name, type: acc.type };
+      }
+    }
+  }
+  if (entry.user) {
+    const user = await findById("users", entry.user);
+    if (user) entry.user = { id: user.id, name: user.name, email: user.email };
+  }
   return entry;
 }
 
 export async function reverseLedgerEntry(entryId, userId, reason) {
-  const session = await mongoose.startSession();
-  session.startTransaction();
   try {
-    const original = await LedgerEntry.findById(entryId).session(session);
+    const original = await findById("ledger_entries", entryId);
     if (!original) throw new Error("Entry not found");
     if (original.status === "reversed") throw new Error("Entry already reversed");
 
     for (const e of original.entries) {
-      const account = await LedgerAccount.findById(e.account).session(session);
+      const account = await findById("ledger_accounts", e.account);
       if (!account) throw new Error(`Account ${e.account} not found`);
-      account.balance -= (e.debit || 0);
-      account.balance += (e.credit || 0);
-      await account.save({ session });
+      const newBalance = (account.balance || 0) - (e.debit || 0) + (e.credit || 0);
+      await update("ledger_accounts", account.id, { balance: newBalance });
     }
 
-    original.status = "reversed";
-    original.reversed_at = new Date();
-    original.reversed_by = userId;
-    original.metadata = { ...original.metadata, reversal_reason: reason };
-    await original.save({ session });
+    await update("ledger_entries", original.id, {
+      status: "reversed",
+      reversed_at: new Date().toISOString(),
+      reversed_by: userId,
+      metadata: { ...original.metadata, reversal_reason: reason },
+    });
 
-    const reversalEntry = await LedgerEntry.create(
-      [{
-        transaction_id: generateTransactionId(),
-        external_reference: original.transaction_id,
-        user: original.user,
-        amount: original.amount,
-        currency: original.currency,
-        source: original.source,
-        destination: original.destination,
-        status: "completed",
-        description: `Reversal: ${reason} — ref ${original.transaction_id}`,
-        entries: original.entries.map((e) => ({
-          account: e.account,
-          debit: e.credit || 0,
-          credit: e.debit || 0,
-        })),
-        metadata: { reversed_entry_id: entryId, reason, event: "reversal" },
-      }],
-      { session },
-    );
+    const reversalEntry = await create("ledger_entries", {
+      transaction_id: generateTransactionId(),
+      external_reference: original.transaction_id,
+      user: original.user,
+      amount: original.amount,
+      currency: original.currency,
+      source: original.source,
+      destination: original.destination,
+      status: "completed",
+      description: `Reversal: ${reason} — ref ${original.transaction_id}`,
+      entries: original.entries.map((e) => ({
+        account: e.account,
+        debit: e.credit || 0,
+        credit: e.debit || 0,
+      })),
+      metadata: { reversed_entry_id: entryId, reason, event: "reversal" },
+    });
 
-    await session.commitTransaction();
-    session.endSession();
-    return reversalEntry[0];
+    return reversalEntry;
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     throw err;
   }
 }
 
 export async function getReconciliationReport({ startDate, endDate }) {
-  const filter = {};
-  if (startDate || endDate) {
-    filter.createdAt = {};
-    if (startDate) filter.createdAt.$gte = new Date(startDate);
-    if (endDate) filter.createdAt.$lte = new Date(endDate);
+  const sb = getSupabase();
+  let query = sb.from("ledger_entries").select("*");
+
+  if (startDate) query = query.gte("createdAt", new Date(startDate).toISOString());
+  if (endDate) query = query.lte("createdAt", new Date(endDate).toISOString());
+
+  query = query.order("createdAt", { ascending: false });
+
+  const { data: entries, error } = await query;
+  if (error) throw error;
+
+  for (const entry of entries) {
+    if (entry.entries) {
+      for (const e of entry.entries) {
+        if (e.account) {
+          const acc = await findById("ledger_accounts", e.account);
+          if (acc) e.account = { id: acc.id, code: acc.code, name: acc.name };
+        }
+      }
+    }
   }
-  const entries = await LedgerEntry.find(filter).sort({ createdAt: -1 }).populate("entries.account", "code name").lean();
+
   const summary = {
     total_entries: entries.length,
     total_debit: 0,

@@ -1,10 +1,6 @@
 // backend/services/tenantIsolationAudit.js
 // Tenant isolation audit service
 
-import User from '../models/User.js';
-import Car from '../models/Car.js';
-import Dealer from '../models/Dealer.js';
-import AuditLog from '../models/AuditLog.js';
 import { logInfo, logError } from '../utils/logger.js';
 
 export class TenantIsolationAudit {

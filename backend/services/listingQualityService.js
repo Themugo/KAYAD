@@ -4,9 +4,9 @@
 // Calculates and manages listing quality scores
 // ─────────────────────────────────────────────────────────────
 
-import ListingQuality from "../models/ListingQuality.js";
-import Car from "../models/Car.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // 📊 CALCULATE LISTING QUALITY
@@ -127,8 +127,7 @@ export const getPlatformQualityStats = async () => {
   try {
     const distribution = await ListingQuality.getQualityDistribution();
 
-    const stats = await ListingQuality.aggregate([
-      {
+    const stats = await aggregate("listing_qualities", [{
         $group: {
           _id: null,
           totalListings: { $sum: 1 },
@@ -137,8 +136,7 @@ export const getPlatformQualityStats = async () => {
           minScore: { $min: "$overallScore" },
           maxScore: { $max: "$overallScore" },
         },
-      },
-    ]);
+      },]);
 
     const platformStats = stats[0] || {
       totalListings: 0,
@@ -166,8 +164,7 @@ export const getQualityTrends = async (period = 30) => {
   try {
     const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
-    const trends = await ListingQuality.aggregate([
-      {
+    const trends = await aggregate("listing_qualities", [{
         $match: {
           lastCalculatedAt: { $gte: startDate },
         },
@@ -184,8 +181,7 @@ export const getQualityTrends = async (period = 30) => {
       },
       {
         $sort: { "_id.date": 1 },
-      },
-    ]);
+      },]);
 
     return trends;
   } catch (err) {
@@ -203,7 +199,7 @@ export const getLowQualityListings = async (threshold = 50, limit = 20) => {
     const lowQuality = await ListingQuality.getLowQuality(threshold);
 
     return lowQuality.slice(0, limit).map((quality) => ({
-      carId: quality.car._id,
+      carId: quality.car.id,
       carTitle: quality.car.title,
       overallScore: quality.overallScore,
       rating: quality.rating,
@@ -264,20 +260,20 @@ export const generateQualityReport = async (dealerId) => {
 
 export const bulkRecalculateDealerQuality = async (dealerId) => {
   try {
-    const cars = await Car.find({ dealer: dealerId, status: "active" });
+    const cars = await findAll("cars", { filters: { dealer: dealerId, status: "active" } });
 
     const results = [];
     for (const car of cars) {
       try {
-        const quality = await recalculateListingQuality(car._id);
+        const quality = await recalculateListingQuality(car.id);
         results.push({
-          carId: car._id,
+          carId: car.id,
           success: true,
           score: quality.overallScore,
         });
       } catch (err) {
         results.push({
-          carId: car._id,
+          carId: car.id,
           success: false,
           error: err.message,
         });

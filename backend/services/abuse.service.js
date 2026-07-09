@@ -1,7 +1,7 @@
-import Bid from "../models/Bid.js";
+import { findAll } from "../db/index.js";
 
 export const detectAbuse = async (userId, auctionId) => {
-  const recentBids = await Bid.find({ user: userId, auction: auctionId }).sort({ createdAt: -1 }).limit(20);
+  const recentBids = await findAll("bids", { filters: { user: userId, auction: auctionId }, orderBy: "createdAt", ascending: false, limit: 20 });
 
   if (recentBids.length < 5) {
     return { flagged: false };

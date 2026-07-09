@@ -4,16 +4,8 @@
 // Calculates platform health metrics and generates alerts
 // ─────────────────────────────────────────────────────────────
 
-import User from "../models/User.js";
-import Dealer from "../models/Dealer.js";
-import Car from "../models/Car.js";
-import Escrow from "../models/Escrow.js";
-import Auction from "../models/Auction.js";
-import Lead from "../models/Lead.js";
-import FraudDetection from "../models/FraudDetection.js";
-import Transaction from "../models/Transaction.js";
-import MarketplaceHealth from "../models/MarketplaceHealth.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, update, count, upsert } from "../db/index.js";
 
 // =============================
 // 👥 CALCULATE ACTIVE DEALERS
@@ -21,13 +13,13 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 export const calculateActiveDealers = async (startDate, endDate) => {
   try {
-    const dealers = await User.countDocuments({
+    const dealers = await count("users", {
       role: "dealer",
       isBanned: false,
       deactivatedAt: null,
     });
 
-    const newDealers = await User.countDocuments({
+    const newDealers = await count("users", {
       role: "dealer",
       createdAt: { $gte: startDate, $lte: endDate },
     });
@@ -45,13 +37,13 @@ export const calculateActiveDealers = async (startDate, endDate) => {
 
 export const calculateActiveBuyers = async (startDate, endDate) => {
   try {
-    const buyers = await User.countDocuments({
+    const buyers = await count("users", {
       role: "buyer",
       isBanned: false,
       deactivatedAt: null,
     });
 
-    const newBuyers = await User.countDocuments({
+    const newBuyers = await count("users", {
       role: "buyer",
       createdAt: { $gte: startDate, $lte: endDate },
     });
@@ -69,18 +61,18 @@ export const calculateActiveBuyers = async (startDate, endDate) => {
 
 export const calculateVehicleMetrics = async (startDate, endDate) => {
   try {
-    const vehiclesListed = await Car.countDocuments({
+    const vehiclesListed = await count("cars", {
       status: "active",
       deletedAt: null,
     });
 
-    const vehiclesSold = await Car.countDocuments({
+    const vehiclesSold = await count("cars", {
       status: "sold",
       updatedAt: { $gte: startDate, $lte: endDate },
       deletedAt: null,
     });
 
-    const newListings = await Car.countDocuments({
+    const newListings = await count("cars", {
       status: "active",
       createdAt: { $gte: startDate, $lte: endDate },
       deletedAt: null,
@@ -100,30 +92,30 @@ export const calculateVehicleMetrics = async (startDate, endDate) => {
 export const calculateConversionRates = async (startDate, endDate) => {
   try {
     // Escrow conversion
-    const totalEscrows = await Escrow.countDocuments({
+    const totalEscrows = await count("escrows", {
       createdAt: { $gte: startDate, $lte: endDate },
     });
-    const releasedEscrows = await Escrow.countDocuments({
+    const releasedEscrows = await count("escrows", {
       status: "released",
       releasedAt: { $gte: startDate, $lte: endDate },
     });
     const escrowConversionRate = totalEscrows > 0 ? (releasedEscrows / totalEscrows) * 100 : 0;
 
     // Auction conversion
-    const totalAuctions = await Auction.countDocuments({
+    const totalAuctions = await count("auctions", {
       createdAt: { $gte: startDate, $lte: endDate },
     });
-    const completedAuctions = await Auction.countDocuments({
+    const completedAuctions = await count("auctions", {
       status: "completed",
       endTime: { $gte: startDate, $lte: endDate },
     });
     const auctionConversionRate = totalAuctions > 0 ? (completedAuctions / totalAuctions) * 100 : 0;
 
     // Lead conversion
-    const totalLeads = await Lead.countDocuments({
+    const totalLeads = await count("leads", {
       createdAt: { $gte: startDate, $lte: endDate },
     });
-    const soldLeads = await Lead.countDocuments({
+    const soldLeads = await count("leads", {
       stage: "sold",
       updatedAt: { $gte: startDate, $lte: endDate },
     });
@@ -150,12 +142,12 @@ export const calculateConversionRates = async (startDate, endDate) => {
 
 export const calculateFraudMetrics = async (startDate, endDate) => {
   try {
-    const fraudIncidents = await FraudDetection.countDocuments({
+    const fraudIncidents = await count("fraud_detections", {
       status: "confirmed",
       createdAt: { $gte: startDate, $lte: endDate },
     });
 
-    const totalUsers = await User.countDocuments({
+    const totalUsers = await count("users", {
       createdAt: { $gte: startDate, $lte: endDate },
     });
 
@@ -174,12 +166,12 @@ export const calculateFraudMetrics = async (startDate, endDate) => {
 
 export const calculateDisputeMetrics = async (startDate, endDate) => {
   try {
-    const disputes = await Escrow.countDocuments({
+    const disputes = await count("escrows", {
       status: "disputed",
       disputedAt: { $gte: startDate, $lte: endDate },
     });
 
-    const totalEscrows = await Escrow.countDocuments({
+    const totalEscrows = await count("escrows", {
       createdAt: { $gte: startDate, $lte: endDate },
     });
 
@@ -199,21 +191,21 @@ export const calculateDisputeMetrics = async (startDate, endDate) => {
 export const calculateFinancialMetrics = async (startDate, endDate) => {
   try {
     // Revenue from successful transactions
-    const successfulTransactions = await Transaction.find({
+    const successfulTransactions = await findAll("transactions", { filters: {
       status: "success",
       type: { $in: ["escrow_deposit", "escrow_release", "buy_now"] },
       createdAt: { $gte: startDate, $lte: endDate },
-    });
+    } });
 
     const revenue = successfulTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
 
     // Payment success rate
-    const totalTransactions = await Transaction.countDocuments({
+    const totalTransactions = await count("transactions", {
       type: { $in: ["escrow_deposit", "escrow_release", "buy_now"] },
       createdAt: { $gte: startDate, $lte: endDate },
     });
 
-    const failedTransactions = await Transaction.countDocuments({
+    const failedTransactions = await count("transactions", {
       status: "failed",
       type: { $in: ["escrow_deposit", "escrow_release", "buy_now"] },
       createdAt: { $gte: startDate, $lte: endDate },
@@ -237,7 +229,7 @@ export const calculateDealerInactivity = async () => {
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    const inactiveDealers = await User.countDocuments({
+    const inactiveDealers = await count("users", {
       role: "dealer",
       isBanned: false,
       deactivatedAt: null,
@@ -306,37 +298,36 @@ export const generateMarketplaceHealth = async (period, timestamp) => {
     };
 
     // Create health record
-    const health = await MarketplaceHealth.findOneAndUpdate(
-      {
-        period,
-        timestamp,
-      },
-      {
-        activeDealers: dealerMetrics.active,
-        activeBuyers: buyerMetrics.active,
-        newDealers: dealerMetrics.new,
-        newBuyers: buyerMetrics.new,
-        vehiclesListed: vehicleMetrics.vehiclesListed,
-        vehiclesSold: vehicleMetrics.vehiclesSold,
-        newListings: vehicleMetrics.newListings,
-        escrowConversionRate: conversionRates.escrowConversionRate,
-        auctionConversionRate: conversionRates.auctionConversionRate,
-        leadConversionRate: conversionRates.leadConversionRate,
-        overallConversionRate: conversionRates.overallConversionRate,
-        fraudIncidents: trustSafetyMetrics.fraudIncidents,
-        fraudRate: trustSafetyMetrics.fraudRate,
-        disputes: trustSafetyMetrics.disputes,
-        disputeRate: trustSafetyMetrics.disputeRate,
-        revenue: financialMetrics.revenue,
-        paymentSuccessRate: financialMetrics.paymentSuccessRate,
-        paymentFailures: financialMetrics.paymentFailures,
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
-      },
-    );
+    const healthData = {
+      period,
+      timestamp,
+      activeDealers: dealerMetrics.active,
+      activeBuyers: buyerMetrics.active,
+      newDealers: dealerMetrics.new,
+      newBuyers: buyerMetrics.new,
+      vehiclesListed: vehicleMetrics.vehiclesListed,
+      vehiclesSold: vehicleMetrics.vehiclesSold,
+      newListings: vehicleMetrics.newListings,
+      escrowConversionRate: conversionRates.escrowConversionRate,
+      auctionConversionRate: conversionRates.auctionConversionRate,
+      leadConversionRate: conversionRates.leadConversionRate,
+      overallConversionRate: conversionRates.overallConversionRate,
+      fraudIncidents: trustSafetyMetrics.fraudIncidents,
+      fraudRate: trustSafetyMetrics.fraudRate,
+      disputes: trustSafetyMetrics.disputes,
+      disputeRate: trustSafetyMetrics.disputeRate,
+      revenue: financialMetrics.revenue,
+      paymentSuccessRate: financialMetrics.paymentSuccessRate,
+      paymentFailures: financialMetrics.paymentFailures,
+    };
+
+    const existingHealth = await findOne("marketplace_healths", { period, timestamp });
+    let health;
+    if (existingHealth) {
+      health = await update("marketplace_healths", existingHealth.id, healthData);
+    } else {
+      health = await create("marketplace_healths", healthData);
+    }
 
     // Calculate health score
     health.calculateHealthScore();

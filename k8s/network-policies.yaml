@@ -34,7 +34,7 @@ spec:
   - to:
     - podSelector:
         matchLabels:
-          app: mongodb
+          app: supabase
     ports:
     - protocol: TCP
       port: 27017

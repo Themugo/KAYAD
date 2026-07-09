@@ -5,12 +5,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
-import mongoose from "mongoose";
 import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const router = express.Router();
 
@@ -24,47 +24,16 @@ router.get("/", async (req, res) => {
   };
 
   try {
-    // Database health
-    if (mongoose.connection.readyState === 1) {
-      health.checks.database = {
-        status: "healthy",
-        host: mongoose.connection.host,
-        name: mongoose.connection.name,
-        readyState: mongoose.connection.readyState,
-      };
-
-      // Replica set health if configured
-      if (process.env.MONGO_REPLICA_SET_NAME) {
-        try {
-          const admin = mongoose.connection.db.admin();
-          const status = await admin.command({ replSetGetStatus: 1 });
-          health.checks.replicaSet = {
-            status: "healthy",
-            name: status.set,
-            primary: status.members.find((m) => m.stateStr === "PRIMARY")?.name,
-            secondaries: status.members.filter((m) => m.stateStr === "SECONDARY").length,
-            members: status.members.length,
-          };
-        } catch (error) {
-          health.checks.replicaSet = {
-            status: "error",
-            error: error.message,
-          };
-          health.status = "degraded";
-        }
-      }
+    const sb = getSupabase();
+    const { error: dbError } = await sb.from("cars").select("id", { count: 'exact', head: true }).limit(1);
+    if (!dbError) {
+      health.checks.database = { status: "healthy" };
     } else {
-      health.checks.database = {
-        status: "unhealthy",
-        state: mongoose.connection.readyState,
-      };
+      health.checks.database = { status: "unhealthy", error: dbError.message };
       health.status = "degraded";
     }
   } catch (error) {
-    health.checks.database = {
-      status: "error",
-      error: error.message,
-    };
+    health.checks.database = { status: "error", error: error.message };
     health.status = "unhealthy";
   }
 
@@ -130,26 +99,16 @@ router.get("/detailed", checkReplicaSetHealth, async (req, res) => {
   };
 
   try {
-    // Database health
-    if (mongoose.connection.readyState === 1) {
-      health.checks.database = {
-        status: "healthy",
-        host: mongoose.connection.host,
-        name: mongoose.connection.name,
-        readyState: mongoose.connection.readyState,
-      };
+    const sb = getSupabase();
+    const { error: dbError } = await sb.from("cars").select("id", { count: 'exact', head: true }).limit(1);
+    if (!dbError) {
+      health.checks.database = { status: "healthy" };
     } else {
-      health.checks.database = {
-        status: "unhealthy",
-        state: mongoose.connection.readyState,
-      };
+      health.checks.database = { status: "unhealthy", error: dbError.message };
       health.status = "degraded";
     }
   } catch (error) {
-    health.checks.database = {
-      status: "error",
-      error: error.message,
-    };
+    health.checks.database = { status: "error", error: error.message };
     health.status = "unhealthy";
   }
 

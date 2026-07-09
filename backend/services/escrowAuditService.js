@@ -4,10 +4,9 @@
 // Immutable audit trail for all escrow actions
 // ─────────────────────────────────────────────────────────────
 
-import EscrowAudit from "../models/EscrowAudit.js";
-import Escrow from "../models/Escrow.js";
-import User from "../models/User.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findAll, findById, create, count } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // 📝 LOG ESCROW ACTION
@@ -20,7 +19,7 @@ export const logEscrowAction = async (escrowId, action, userId, req, options = {
     const requestId = req?.id || generateRequestId();
 
     // Get user details
-    const user = await User.findById(userId).select("name email role");
+    const user = await findById("users", userId).select("name email role");
     if (!user) {
       logWarn("User not found for escrow audit", { userId, escrowId, action });
       return null;
@@ -40,7 +39,7 @@ export const logEscrowAction = async (escrowId, action, userId, req, options = {
     const stateChanges = calculateStateDiff(previousState, newState);
 
     // Create audit record
-    const audit = await EscrowAudit.create({
+    const audit = await create("escrow_audits", {
       escrow: escrowId,
       action,
       performedBy: userId,
@@ -65,7 +64,7 @@ export const logEscrowAction = async (escrowId, action, userId, req, options = {
       action,
       userId,
       ipAddress,
-      auditId: audit._id,
+      auditId: audit.id,
     });
 
     return audit;
@@ -81,7 +80,7 @@ export const logEscrowAction = async (escrowId, action, userId, req, options = {
 // =============================
 export const captureState = async (escrowId) => {
   try {
-    const escrow = await Escrow.findById(escrowId).lean();
+    const escrow = await findById("escrows", escrowId);
     if (!escrow) {
       throw new Error("Escrow not found");
     }
@@ -132,10 +131,10 @@ export const calculateStateDiff = (previous, current) => {
 // =============================
 export const getAuditTrail = async (escrowId) => {
   try {
-    const audits = await EscrowAudit.find({ escrow: escrowId })
-      .populate("performedBy", "name email role")
+    const audits = await findAll("escrow_audits", { filters: { escrow: escrowId } })
+       /* .populate("performedBy", "name email role") - TODO: use separate query */
       .sort({ timestamp: 1 })
-      .lean();
+      ;
 
     return audits;
   } catch (err) {
@@ -154,12 +153,12 @@ export const getAuditByUser = async (userId, options = {}) => {
     const query = { performedBy: userId };
     if (action) query.action = action;
 
-    const audits = await EscrowAudit.find(query)
-      .populate("escrow", "amount status")
+    const audits = await findAll("escrow_audits", { filters: query })
+       /* .populate("escrow", "amount status") - TODO: use separate query */
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      ;
 
     return audits;
   } catch (err) {
@@ -182,13 +181,13 @@ export const getAuditByAction = async (action, options = {}) => {
       if (endDate) query.timestamp.$lte = new Date(endDate);
     }
 
-    const audits = await EscrowAudit.find(query)
-      .populate("performedBy", "name email role")
-      .populate("escrow", "amount status")
+    const audits = await findAll("escrow_audits", { filters: query })
+       /* .populate("performedBy", "name email role") - TODO: use separate query */
+       /* .populate("escrow", "amount status") - TODO: use separate query */
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      ;
 
     return audits;
   } catch (err) {
@@ -214,13 +213,13 @@ export const getAuditByDateRange = async (startDate, endDate, options = {}) => {
     if (action) query.action = action;
     if (escrowId) query.escrow = escrowId;
 
-    const audits = await EscrowAudit.find(query)
-      .populate("performedBy", "name email role")
-      .populate("escrow", "amount status")
+    const audits = await findAll("escrow_audits", { filters: query })
+       /* .populate("performedBy", "name email role") - TODO: use separate query */
+       /* .populate("escrow", "amount status") - TODO: use separate query */
       .sort({ timestamp: -1 })
       .skip(skip)
       .limit(limit)
-      .lean();
+      ;
 
     return audits;
   } catch (err) {
@@ -297,22 +296,22 @@ export const getAuditStatistics = async (options = {}) => {
     const fromDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const [totalAudits, byAction, byUser, bySource, byIp] = await Promise.all([
-      EscrowAudit.countDocuments({ timestamp: { $gte: fromDate } }),
-      EscrowAudit.aggregate([
+      count("escrow_audits", { timestamp: { $gte: fromDate } }),
+      aggregate("escrow_audits", [
         { $match: { timestamp: { $gte: fromDate } } },
         { $group: { _id: "$action", count: { $sum: 1 } } },
       ]),
-      EscrowAudit.aggregate([
+      aggregate("escrow_audits", [
         { $match: { timestamp: { $gte: fromDate } } },
         { $group: { _id: "$performedBy", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 10 },
       ]),
-      EscrowAudit.aggregate([
+      aggregate("escrow_audits", [
         { $match: { timestamp: { $gte: fromDate } } },
         { $group: { _id: "$source", count: { $sum: 1 } } },
       ]),
-      EscrowAudit.aggregate([
+      aggregate("escrow_audits", [
         { $match: { timestamp: { $gte: fromDate } } },
         { $group: { _id: "$ipAddress", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
@@ -323,11 +322,11 @@ export const getAuditStatistics = async (options = {}) => {
     return {
       totalAudits,
       byAction: byAction.reduce((acc, item) => {
-        acc[item._id] = item.count;
+        acc[item.id] = item.count;
         return acc;
       }, {}),
       bySource: bySource.reduce((acc, item) => {
-        acc[item._id] = item.count;
+        acc[item.id] = item.count;
         return acc;
       }, {}),
       topUsers: byUser,

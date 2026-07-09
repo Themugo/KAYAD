@@ -1,7 +1,7 @@
-import Notification from "../models/Notification.js";
 import { sendRawEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { logInfo } from "../utils/logger.js";
+import { create } from "../db/index.js";
 
 const sendWhatsApp = async (to, message) => {
   if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
@@ -25,7 +25,7 @@ export const sendDigitalReceipt = async (transaction) => {
   const receiptData = {
     amount: transaction.amount,
     car: transaction.carTitle || transaction.car?.title || "Vehicle",
-    ref: transaction.mpesaReceipt || String(transaction._id || "").slice(-8),
+    ref: transaction.mpesaReceipt || String(transaction.id || "").slice(-8),
   };
 
   const emailHtml = `
@@ -55,7 +55,7 @@ export const sendDigitalReceipt = async (transaction) => {
     tasks.push(sendWhatsApp(transaction.user.phone, smsText));
   }
   tasks.push(
-    Notification.create({
+    create("notifications", {
       user: transaction.user?.id || transaction.user,
       message: `Payment Verified: KES ${receiptData.amount} for ${receiptData.car}`,
       type: "payment",

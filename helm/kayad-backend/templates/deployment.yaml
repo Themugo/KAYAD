@@ -39,12 +39,19 @@ spec:
         - name: {{ $key }}
           value: {{ $value | quote }}
         {{- end }}
-        {{- if .Values.secrets.mongoUri }}
-        - name: MONGO_URI
+        {{- if .Values.secrets.supabaseUrl }}
+        - name: SUPABASE_URL
           valueFrom:
             secretKeyRef:
               name: {{ include "kayad-backend.fullname" . }}-secrets
-              key: mongo-uri
+              key: supabase-url
+        {{- end }}
+        {{- if .Values.secrets.supabaseServiceKey }}
+        - name: SUPABASE_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "kayad-backend.fullname" . }}-secrets
+              key: supabase-service-key
         {{- end }}
         {{- if .Values.secrets.redisUrl }}
         - name: REDIS_URL

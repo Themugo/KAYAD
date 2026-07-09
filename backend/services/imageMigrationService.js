@@ -4,9 +4,9 @@
 // Batch processes existing images to generate variants and optimize storage
 // ─────────────────────────────────────────────────────────────
 
-import Car from "../models/Car.js";
 import { uploadImage } from "../config/cloudinary.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, update } from "../db/index.js";
 
 // =============================
 // 📊 MIGRATION STATUS
@@ -28,11 +28,10 @@ let migrationStatus = {
 
 const getImagesToMigrate = async () => {
   try {
-    const cars = await Car.find({
-      images: { $exists: true, $ne: [] },
-    })
-      .select("_id images")
-      .lean();
+    const cars = await findAll("cars", {
+      filters: { images: { $ne: null } },
+      select: "id,images",
+    });
 
     const images = [];
     for (const car of cars) {
@@ -40,7 +39,7 @@ const getImagesToMigrate = async () => {
         // Only migrate images that don't have variants
         if (typeof image === "string" || !image.mobile || !image.tablet) {
           images.push({
-            carId: car._id,
+            carId: car.id,
             image: image,
           });
         }
@@ -85,7 +84,7 @@ const migrateSingleImage = async (carId, image) => {
     );
 
     // Update car document
-    await Car.findByIdAndUpdate(carId, {
+    await update("cars", carId, {
       $set: {
         "images.$[elem]": result,
       },

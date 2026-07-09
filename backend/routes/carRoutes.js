@@ -1,12 +1,10 @@
 import express from "express";
-import mongoose from "mongoose";
 import { protect, dealerOnly, adminOnly, optionalAuth } from "../middleware/auth.js";
 
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateCar, validateQuery, carListQuerySchema, validateResponse, carResponseSchema, carListResponseSchema } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
-import MarketData from "../models/MarketData.js";
 import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
 import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
@@ -27,8 +25,8 @@ import {
   addCarImages,
 } from "../controllers/carController.js";
 
-import Car from "../models/Car.js";
-import User from "../models/User.js";
+import { findAll, findById, findOne, create, update, remove, paginate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const router = express.Router();
 
@@ -40,10 +38,12 @@ router.get(
   protect,
   dealerOnly,
   asyncHandler(async (req, res) => {
-    const cars = await Car.find({ dealer: req.user.id })
-      .select("title price images views clicks bidsCount createdAt status auctionStatus")
-      .sort({ createdAt: -1 })
-      .lean();
+    const cars = await findAll("cars", {
+      filters: { dealer: req.user.id },
+      select: "title,price,images,views,clicks,bidsCount,createdAt,status,auctionStatus",
+      orderBy: "createdAt",
+      ascending: false,
+    });
 
     res.json({
       success: true,
@@ -60,25 +60,22 @@ router.get(
   protect,
   dealerOnly,
   asyncHandler(async (req, res) => {
-    const dealerId = new mongoose.Types.ObjectId(req.user.id);
+    const dealerCars = await findAll("cars", {
+      filters: { dealer: req.user.id },
+      select: "views,clicks,bidsCount,price",
+    });
 
-    const [stats] = await Car.aggregate([
-      { $match: { dealer: dealerId } },
-      {
-        $group: {
-          _id: null,
-          totalCars: { $sum: 1 },
-          totalViews: { $sum: "$views" },
-          totalClicks: { $sum: "$clicks" },
-          totalBids: { $sum: "$bidsCount" },
-          avgPrice: { $avg: "$price" },
-        },
-      },
-    ]);
+    const stats = {
+      totalCars: dealerCars.length,
+      totalViews: dealerCars.reduce((s, c) => s + (c.views || 0), 0),
+      totalClicks: dealerCars.reduce((s, c) => s + (c.clicks || 0), 0),
+      totalBids: dealerCars.reduce((s, c) => s + (c.bidsCount || 0), 0),
+      avgPrice: dealerCars.length > 0 ? dealerCars.reduce((s, c) => s + (c.price || 0), 0) / dealerCars.length : 0,
+    };
 
     res.json({
       success: true,
-      data: stats || {},
+      data: stats,
     });
   }),
 );
@@ -197,7 +194,8 @@ router.post(
   "/:id/click",
   validateObjectId,
   asyncHandler(async (req, res) => {
-    await Car.updateOne({ _id: req.params.id }, { $inc: { clicks: 1 } });
+    const car = await findById("cars", req.params.id, "clicks");
+    await update("cars", req.params.id, { clicks: (car?.clicks || 0) + 1 });
 
     res.json({ success: true });
   }),
@@ -208,7 +206,8 @@ router.post(
   "/:id/favorite",
   validateObjectId,
   asyncHandler(async (req, res) => {
-    await Car.updateOne({ _id: req.params.id }, { $inc: { favoritesCount: 1 } });
+    const car = await findById("cars", req.params.id, "favoritesCount");
+    await update("cars", req.params.id, { favoritesCount: (car?.favoritesCount || 0) + 1 });
 
     res.json({ success: true });
   }),
@@ -285,7 +284,7 @@ router.get(
   validateObjectId,
   cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id).select("price priceHistory").lean();
+    const car = await findById("cars", req.params.id, "price,priceHistory");
 
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
@@ -294,7 +293,6 @@ router.get(
       date: h.date,
     }));
 
-    // Include current price as the latest point
     history.push({ price: car.price, date: new Date() });
 
     res.json({ success: true, history });
@@ -309,7 +307,7 @@ router.get(
   validateObjectId,
   cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id).lean();
+    const car = await findById("cars", req.params.id);
 
     if (!car) {
       return res.status(404).json({
@@ -318,11 +316,13 @@ router.get(
       });
     }
 
-    const similar = await Car.find({
-      brand: car.brand,
-      year: { $gte: car.year - 1, $lte: car.year + 1 },
-    })
+    const sb = getSupabase();
+    const { data: similar } = await sb
+      .from("cars")
       .select("price")
+      .eq("brand", car.brand)
+      .gte("year", car.year - 1)
+      .lte("year", car.year + 1)
       .limit(20);
 
     const avg = similar.reduce((sum, c) => sum + c.price, 0) / (similar.length || 1);
@@ -350,29 +350,33 @@ router.get(
   "/:id/valuation",
   cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id).lean();
+    const car = await findById("cars", req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
+    const sb = getSupabase();
     const [fromPlatform, fromMarketData] = await Promise.all([
-      Car.find({
-        brand: car.brand,
-        model: car.model,
-        year: { $gte: car.year - 3, $lte: car.year + 1 },
-        _id: { $ne: car._id },
-      })
-        .select("price year mileage fuel transmission bodyType")
-        .sort({ createdAt: -1 })
+      sb
+        .from("cars")
+        .select("price,year,mileage,fuel,transmission,bodyType")
+        .eq("brand", car.brand)
+        .eq("model", car.model)
+        .gte("year", car.year - 3)
+        .lte("year", car.year + 1)
+        .neq("id", car.id)
+        .order("createdAt", { ascending: false })
         .limit(25)
-        .lean(),
+        .then(({ data }) => data || []),
 
-      MarketData.find({
-        brand: car.brand,
-        model: car.model,
-        year: { $gte: car.year - 3, $lte: car.year + 1 },
-      })
-        .sort({ lastUpdated: -1 })
+      sb
+        .from("market_data")
+        .select("*")
+        .eq("brand", car.brand)
+        .eq("model", car.model)
+        .gte("year", car.year - 3)
+        .lte("year", car.year + 1)
+        .order("lastUpdated", { ascending: false })
         .limit(10)
-        .lean(),
+        .then(({ data }) => data || []),
     ]);
 
     const allPrices = fromPlatform.map((c) => c.price).filter(Boolean);
@@ -426,7 +430,7 @@ router.get(
   adminOnly,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id).lean();
+    const car = await findById("cars", req.params.id);
 
     let score = 0;
 
@@ -456,7 +460,7 @@ router.post(
   requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id);
+    const car = await findById("cars", req.params.id);
 
     if (!car) {
       return res.status(404).json({
@@ -465,8 +469,7 @@ router.post(
       });
     }
 
-    // 🚫 Listing lock check — block if dealer has outstanding commission
-    const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
+    const dealer = await findById("users", car.dealer, "commissionBalance,listingsLocked");
 
     if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
       return res.status(403).json({
@@ -475,12 +478,12 @@ router.post(
       });
     }
 
-    car.auctionStatus = "live";
-    car.auctionEnd = new Date(Date.now() + 60 * 60 * 1000);
+    const updated = await update("cars", req.params.id, {
+      auctionStatus: "live",
+      auctionEnd: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    });
 
-    await car.save();
-
-    res.json({ success: true, data: car });
+    res.json({ success: true, data: updated });
   }),
 );
 
@@ -492,7 +495,7 @@ router.post(
   requirePermission(PERM.MANAGE_AUCTIONS),
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id);
+    const car = await findById("cars", req.params.id);
 
     if (!car) {
       return res.status(404).json({
@@ -501,10 +504,9 @@ router.post(
       });
     }
 
-    car.auctionStatus = "ended";
-    await car.save();
+    const updated = await update("cars", req.params.id, { auctionStatus: "ended" });
 
-    res.json({ success: true, data: car });
+    res.json({ success: true, data: updated });
   }),
 );
 
@@ -518,9 +520,11 @@ router.post(
     if (!Array.isArray(ids) || ids.length === 0 || ids.length > 10) {
       return res.status(400).json({ success: false, message: "Provide an array of up to 10 car IDs" });
     }
-    const cars = await Car.find({ _id: { $in: ids } })
-      .populate("dealer", "name dealerRating")
-      .lean();
+    const sb = getSupabase();
+    const { data: cars } = await sb
+      .from("cars")
+      .select("*, dealer:dealer(name, dealerRating)")
+      .in("id", ids);
     res.json({ success: true, cars });
   }),
 );
@@ -532,19 +536,20 @@ router.patch(
   validateObjectId,
   invalidateCache("cache:*"),
   asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id);
+    const car = await findById("cars", req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isOwner = car.dealer?.toString() === req.user.id;
+    const isOwner = car.dealer === req.user.id;
     const isStaff = STAFF_ROLES.includes(req.user.role);
     if (!isOwner && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
 
     const { isPromoted, coverImage } = req.body;
-    if (isPromoted !== undefined) car.isPromoted = Boolean(isPromoted);
-    if (coverImage !== undefined) car.coverImage = Number(coverImage) || 0;
-    await car.save();
+    const updateData = {};
+    if (isPromoted !== undefined) updateData.isPromoted = Boolean(isPromoted);
+    if (coverImage !== undefined) updateData.coverImage = Number(coverImage) || 0;
+    const updated = await update("cars", req.params.id, updateData);
 
-    res.json({ success: true, data: car });
+    res.json({ success: true, data: updated });
   }),
 );
 

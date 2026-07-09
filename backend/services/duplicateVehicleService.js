@@ -5,10 +5,8 @@
 // Non-blocking approach - flags suspicious listings for admin review
 // ─────────────────────────────────────────────────────────────
 
-import Car from "../models/Car.js";
-import DuplicateVehicleLog from "../models/DuplicateVehicleLog.js";
-import User from "../models/User.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findAll, findById, create, update } from "../db/index.js";
 
 // =============================
 // 🔍 DETECT DUPLICATES
@@ -64,7 +62,7 @@ export const detectDuplicates = async (carData, dealerId) => {
     }
 
     // Check partial matches (lower priority)
-    const dealer = await User.findById(dealerId).select("phone");
+    const dealer = await findById("users", dealerId).select("phone");
     if (dealer?.phone) {
       const phoneMatches = await checkByPhone(dealer.phone, dealerId);
       if (phoneMatches.length > 0) {
@@ -121,9 +119,9 @@ export const checkByVIN = async (vin, excludeDealerId = null) => {
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await Car.find(query)
+    const matches = await findAll("cars", { filters: query })
       .select("_id title brand model year dealer vin status isFlaggedDuplicate")
-      .lean();
+      ;
 
     return matches;
   } catch (err) {
@@ -144,9 +142,9 @@ export const checkByChassis = async (chassisNumber, excludeDealerId = null) => {
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await Car.find(query)
+    const matches = await findAll("cars", { filters: query })
       .select("_id title brand model year dealer chassisNumber status isFlaggedDuplicate")
-      .lean();
+      ;
 
     return matches;
   } catch (err) {
@@ -167,9 +165,9 @@ export const checkByRegistration = async (registrationNumber, excludeDealerId = 
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await Car.find(query)
+    const matches = await findAll("cars", { filters: query })
       .select("_id title brand model year dealer registrationNumber status isFlaggedDuplicate")
-      .lean();
+      ;
 
     return matches;
   } catch (err) {
@@ -185,22 +183,22 @@ export const checkByPhone = async (phone, excludeDealerId = null) => {
   try {
     const normalizedPhone = phone.replace(/[^0-9]/g, "");
 
-    const dealers = await User.find({
+    const dealers = await findAll("users", { filters: {
       phone: { $regex: normalizedPhone, $options: "i" },
       _id: { $ne: excludeDealerId },
-    }).select("_id");
+    }, select: "_id" });
 
-    const dealerIds = dealers.map((d) => d._id);
+    const dealerIds = dealers.map((d) => d.id);
 
     if (dealerIds.length === 0) return [];
 
-    const matches = await Car.find({
+    const matches = await findAll("cars", { filters: {
       dealer: { $in: dealerIds },
       status: "active",
-    })
+    } })
       .select("_id title brand model year dealer status isFlaggedDuplicate")
       .limit(20)
-      .lean();
+      ;
 
     return matches;
   } catch (err) {
@@ -215,14 +213,14 @@ export const checkByPhone = async (phone, excludeDealerId = null) => {
 export const checkByDealer = async (dealerId, carData, similarityThreshold = 0.7) => {
   try {
     // Find recent listings from same dealer
-    const recentListings = await Car.find({
+    const recentListings = await findAll("cars", { filters: {
       dealer: dealerId,
       status: "active",
-      createdAt: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }, // Last 90 days
+      createdAt: { $gte: new Date(Date.now( }) - 90 * 24 * 60 * 60 * 1000) }, // Last 90 days
     })
       .select("_id title brand model year price mileage color status")
       .limit(50)
-      .lean();
+      ;
 
     const similarListings = [];
 
@@ -298,36 +296,20 @@ export const calculateSimilarity = (car1, car2) => {
 // =============================
 export const flagDuplicate = async (carId, detectionData, dealerId) => {
   try {
-    const car = await Car.findById(carId);
+    const car = await findById("cars", carId);
     if (!car) {
       logWarn("Car not found for duplicate flagging", { carId });
       return null;
     }
 
     // Create duplicate log
-    const duplicateLog = await DuplicateVehicleLog.create({
-      car: carId,
-      dealer: dealerId,
-      detectionCriteria: detectionData.detectionCriteria,
-      matchType: detectionData.matchType,
-      matchScore: detectionData.matchScore,
-      matchedCars: detectionData.matches.map((m) => m._id),
-      matchDetails: {
-        matches: detectionData.matches,
-        detectionMethod: detectionData.detectionMethod,
-      },
-      status: "flagged",
-      detectionMethod: detectionData.detectionMethod,
-      similarityThreshold: 0.7,
-      originalFraudScore: car.fraudScore,
-      originalTrustScore: car.trustScore,
-    });
+    const duplicateLog = await create("duplicate_vehicle_logs", {car: carId, dealer: dealerId, detectionCriteria: detectionData.detectionCriteria, matchType: detectionData.matchType, matchScore: detectionData.matchScore, matchedCars: detectionData.matches.map((m) => m.id), matchDetails: { matches: detectionData.matches, detectionMethod: detectionData.detectionMethod, }, status: "flagged", detectionMethod: detectionData.detectionMethod, similarityThreshold: 0.7, originalFraudScore: car.fraudScore, originalTrustScore: car.trustScore,});
 
     // Update car with duplicate flags
     car.isFlaggedDuplicate = true;
     car.duplicateStatus = "flagged";
-    car.duplicateLog = duplicateLog._id;
-    car.duplicateListings = detectionData.matches.map((m) => m._id);
+    car.duplicateLog = duplicateLog.id;
+    car.duplicateListings = detectionData.matches.map((m) => m.id);
 
     // Update fraud and trust scores
     const fraudImpact = Math.min(30, detectionData.matchScore * 0.3);
@@ -339,8 +321,18 @@ export const flagDuplicate = async (carId, detectionData, dealerId) => {
     duplicateLog.fraudScoreImpact = fraudImpact;
     duplicateLog.trustScoreImpact = -trustImpact;
 
-    await car.save();
-    await duplicateLog.save();
+    await update("cars", carId, {
+      isFlaggedDuplicate: true,
+      duplicateStatus: "flagged",
+      duplicateLog: duplicateLog.id,
+      duplicateListings: detectionData.matches.map((m) => m.id),
+      fraudScore: car.fraudScore,
+      trustScore: car.trustScore,
+    });
+    await update("duplicate_vehicle_logs", duplicateLog.id, {
+      fraudScoreImpact: fraudImpact,
+      trustScoreImpact: -trustImpact,
+    });
 
     logInfo("Car flagged as duplicate", {
       carId,
@@ -361,21 +353,7 @@ export const flagDuplicate = async (carId, detectionData, dealerId) => {
 // =============================
 export const logDetection = async (carId, detectionData, dealerId) => {
   try {
-    const duplicateLog = await DuplicateVehicleLog.create({
-      car: carId,
-      dealer: dealerId,
-      detectionCriteria: detectionData.detectionCriteria,
-      matchType: detectionData.matchType,
-      matchScore: detectionData.matchScore,
-      matchedCars: detectionData.matches.map((m) => m._id),
-      matchDetails: {
-        matches: detectionData.matches,
-        detectionMethod: detectionData.detectionMethod,
-      },
-      status: "flagged",
-      detectionMethod: detectionData.detectionMethod,
-      similarityThreshold: 0.7,
-    });
+    const duplicateLog = await create("duplicate_vehicle_logs", {car: carId, dealer: dealerId, detectionCriteria: detectionData.detectionCriteria, matchType: detectionData.matchType, matchScore: detectionData.matchScore, matchedCars: detectionData.matches.map((m) => m.id), matchDetails: { matches: detectionData.matches, detectionMethod: detectionData.detectionMethod, }, status: "flagged", detectionMethod: detectionData.detectionMethod, similarityThreshold: 0.7,});
 
     logInfo("Duplicate detection logged", {
       carId,
@@ -395,7 +373,7 @@ export const logDetection = async (carId, detectionData, dealerId) => {
 // =============================
 export const updateFraudScore = async (carId, impact) => {
   try {
-    const car = await Car.findById(carId);
+    const car = await findById("cars", carId);
     if (!car) {
       logWarn("Car not found for fraud score update", { carId });
       return null;
@@ -424,7 +402,7 @@ export const updateFraudScore = async (carId, impact) => {
 // =============================
 export const restoreScores = async (carId, duplicateLogId) => {
   try {
-    const car = await Car.findById(carId);
+    const car = await findById("cars", carId);
     const duplicateLog = await DuplicateVehicleLog.findById(duplicateLogId);
 
     if (!car || !duplicateLog) {

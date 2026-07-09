@@ -1,5 +1,4 @@
 import express from "express";
-import mongoose from "mongoose";
 import { protect, dealerOnly, requireApproved } from "../middleware/auth.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -7,17 +6,6 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { getPagination, withPagination } from "../middleware/apiPagination.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { cacheDealerData, cacheAnalytics, invalidateCache } from "../middleware/apiCache.js";
-
-import Car from "../models/Car.js";
-import Payment from "../models/Payment.js";
-import Bid from "../models/Bid.js";
-import Escrow from "../models/Escrow.js";
-import Chat from "../models/Chat.js";
-import Favorite from "../models/Favorite.js";
-import Message from "../models/Message.js";
-import User from "../models/User.js";
-import Dealer from "../models/Dealer.js";
-import DealerTeam from "../models/DealerTeam.js";
 import { initiatePayment } from "../services/paymentService.js";
 import { getPricingRecommendations } from "../services/pricingRecommendationService.js";
 
@@ -27,8 +15,9 @@ const PLANS = {
   elite:      { price: 14000, limit: 100, name: "Elite" },
   enterprise: { price: 0,     limit: 0,   name: "Enterprise" },
 };
-import DealerVerification from "../models/DealerVerification.js";
-import DealerHealthScore from "../models/DealerHealthScore.js";
+
+import { findAll, findById, findOne, create, update, remove, paginate, count } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 import { sendNotification } from "../services/notification.service.js";
 
 // Email service — top-level, no-ops if unavailable
@@ -55,40 +44,37 @@ router.get(
   cacheAnalytics,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
-    const filter = {
-      user: req.user.id,
-      status: "success",
-    };
 
-    // 📅 DATE FILTER — support both `from/to` and `days`
+    const sb = getSupabase();
+    let dateFrom, dateTo;
     if (req.query.from || req.query.to) {
-      filter.createdAt = {};
-      if (req.query.from) filter.createdAt.$gte = new Date(req.query.from);
-      if (req.query.to) filter.createdAt.$lte = new Date(req.query.to);
+      if (req.query.from) dateFrom = new Date(req.query.from).toISOString();
+      if (req.query.to) dateTo = new Date(req.query.to).toISOString();
     } else {
       const days = parseInt(req.query.days) || 30;
-      filter.createdAt = { $gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
+      dateFrom = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
     }
 
-    const [payments, monthlyAgg, total] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Payment.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
-            amount: { $sum: "$dealerAmount" },
-          },
-        },
-        { $sort: { "_id.year": 1, "_id.month": 1 } },
-      ]),
-      Payment.countDocuments(filter),
-    ]);
+    let listQuery = sb.from("payments").select("*", { count: 'exact' }).eq("user", req.user.id).eq("status", "success").order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    if (dateFrom) listQuery = listQuery.gte("createdAt", dateFrom);
+    if (dateTo) listQuery = listQuery.lte("createdAt", dateTo);
+    const { data: payments, count: total } = await listQuery;
 
+    let aggQuery = sb.from("payments").select("dealerAmount,createdAt").eq("user", req.user.id).eq("status", "success");
+    if (dateFrom) aggQuery = aggQuery.gte("createdAt", dateFrom);
+    if (dateTo) aggQuery = aggQuery.lte("createdAt", dateTo);
+    const { data: aggData } = await aggQuery;
+    const monthlyMap = {};
+    (aggData || []).forEach((p) => {
+      const d = new Date(p.createdAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (!monthlyMap[key]) monthlyMap[key] = { year: d.getFullYear(), month: d.getMonth(), amount: 0 };
+      monthlyMap[key].amount += (p.dealerAmount || 0);
+    });
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthly = monthlyAgg.map((m) => ({
-      month: months[m._id.month - 1],
-      label: `${months[m._id.month - 1]} ${m._id.year}`,
+    const monthly = Object.values(monthlyMap).sort((a, b) => a.year - b.year || a.month - b.month).map((m) => ({
+      month: months[m.month],
+      label: `${months[m.month]} ${m.year}`,
       amount: m.amount,
     }));
 
@@ -114,27 +100,16 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
-    const filter = { dealer: req.user.id };
-    const dealerId = new mongoose.Types.ObjectId(req.user.id);
-
-    if (req.query.sold === "true") filter.sold = true;
-    if (req.query.active === "true") filter.sold = false;
-    if (req.query.status) filter.status = req.query.status;
+    const sb = getSupabase();
+    let query = sb.from("cars").select("*", { count: 'exact' }).eq("dealer", req.user.id).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    if (req.query.sold === "true") query = query.eq("sold", true);
+    if (req.query.active === "true") query = query.eq("sold", false);
+    if (req.query.status) query = query.eq("status", req.query.status);
     if (req.query.search) {
-      const q = req.query.search;
-      filter.$or = [
-        { title: { $regex: q, $options: "i" } },
-        { brand: { $regex: q, $options: "i" } },
-        { model: { $regex: q, $options: "i" } },
-        { vin: { $regex: q, $options: "i" } },
-      ];
+      const q = `%${req.query.search}%`;
+      query = query.or(`title.ilike.${q},brand.ilike.${q},model.ilike.${q},vin.ilike.${q}`);
     }
-
-    const [cars, total] = await Promise.all([
-      Car.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-
-      Car.countDocuments(filter),
-    ]);
+    const { data: cars, count: total } = await query;
 
     res.json({
       success: true,
@@ -160,23 +135,27 @@ router.get(
     const periodDays = parseInt(req.query.days) || 30;
     const from = req.query.from ? new Date(req.query.from) : new Date(Date.now() - periodDays * 24 * 60 * 60 * 1000);
 
-    const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
-    const dealerCars = await Car.find({ dealer: dealerId }).lean();
+    const sb = getSupabase();
+    const { data: dealerIdList } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    const dealerCarIds = (dealerIdList || []).map((r) => r.id);
+    const dealerCars = await findAll("cars", { filters: { dealer: dealerId } });
 
-    const [viewsAgg, totalBids, totalInquiries, totalFavorites, topCars] = await Promise.all([
-      Car.aggregate([{ $match: { dealer: dealerId } }, { $group: { _id: null, totalViews: { $sum: "$views" } } }]),
-      Bid.countDocuments({ carId: { $in: dealerCarIds }, createdAt: { $gte: from } }),
-      Chat.countDocuments({ car: { $in: dealerCarIds }, createdAt: { $gte: from } }),
-      Favorite.countDocuments({ car: { $in: dealerCarIds }, createdAt: { $gte: from } }),
-      Car.find({ dealer: dealerId })
-        .sort({ views: -1, bidsCount: -1 })
-        .limit(10)
-        .select("title views bidsCount favoritesCount currentBid price auctionStatus status createdAt")
-        .lean(),
-    ]);
-
-    const totalViews = viewsAgg[0]?.totalViews || 0;
+    const totalViews = dealerCars.reduce((s, c) => s + (c.views || 0), 0);
     const totalCars = dealerCars.length;
+
+    const fromStr = from.toISOString();
+    const [totalBids, totalInquiries, totalFavorites, topCars] = await Promise.all([
+      dealerCarIds.length > 0
+        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        : 0,
+      dealerCarIds.length > 0
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        : 0,
+      dealerCarIds.length > 0
+        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).gte("createdAt", fromStr).then(({ count }) => count || 0)
+        : 0,
+      sb.from("cars").select("title,views,bidsCount,favoritesCount,currentBid,price,auctionStatus,status,createdAt").eq("dealer", dealerId).order("views", { ascending: false }).order("bidsCount", { ascending: false }).limit(10).then(({ data }) => data || []),
+    ]);
 
     // ── Price comparison ──────────────────────────────────────
     let priceComparison = [];
@@ -189,13 +168,14 @@ router.get(
           brandModelGroups[key].prices.push(c.price);
         }
       });
-      for (const [key, group] of Object.entries(brandModelGroups)) {
+      for (const [, group] of Object.entries(brandModelGroups)) {
         const avgPrice = Math.round(group.prices.reduce((a, b) => a + b, 0) / group.prices.length);
-        const marketMatch = await Car.aggregate([
-          { $match: { brand: group.brand, ...(group.model !== 'all' ? { model: group.model } : {}), price: { $gt: 0 } } },
-          { $group: { _id: null, avgPrice: { $avg: "$price" }, count: { $sum: 1 } } },
-        ]);
-        const marketAvg = marketMatch[0] ? Math.round(marketMatch[0].avgPrice) : null;
+        let marketQuery = sb.from("cars").select("price").eq("brand", group.brand).gt("price", 0);
+        if (group.model !== 'all') marketQuery = marketQuery.eq("model", group.model);
+        const { data: marketPrices } = await marketQuery;
+        const marketAvg = marketPrices && marketPrices.length > 0
+          ? Math.round(marketPrices.reduce((s, c) => s + c.price, 0) / marketPrices.length)
+          : null;
         priceComparison.push({
           brand: group.brand,
           model: group.model,
@@ -224,11 +204,15 @@ router.get(
     }));
 
     // ── Monthly revenue ───────────────────────────────────────
-    const monthlyRevenue = await Payment.aggregate([
-      { $match: { user: dealerId, status: "success", createdAt: { $gte: from } } },
-      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, total: { $sum: "$amount" } } },
-      { $sort: { "_id.year": 1, "_id.month": 1 } },
-    ]);
+    const { data: revData } = await sb.from("payments").select("amount,createdAt").eq("user", dealerId).eq("status", "success").gte("createdAt", fromStr);
+    const revMap = {};
+    (revData || []).forEach((p) => {
+      const d = new Date(p.createdAt);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      if (!revMap[key]) revMap[key] = { year: d.getFullYear(), month: d.getMonth() + 1, total: 0 };
+      revMap[key].total += (p.amount || 0);
+    });
+    const monthlyRevenue = Object.values(revMap).sort((a, b) => a.year - b.year || a.month - b.month);
 
     res.json({
       success: true,
@@ -259,15 +243,17 @@ router.get(
   "/summary",
   cacheAnalytics,
   asyncHandler(async (req, res) => {
-    const dealerId = new mongoose.Types.ObjectId(req.user.id);
+    const dealerId = req.user.id;
 
-    const dealerCarIds = await Car.find({ dealer: dealerId }).distinct("_id");
+    const sb = getSupabase();
+    const { data: idList } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    const dealerCarIds = (idList || []).map((r) => r.id);
 
     const [
       totalCars,
       soldCars,
-      totalRevenueAgg,
-      carViewsAgg,
+      totalFromPayments,
+      viewsFromCars,
       liveAuctions,
       pendingEscrows,
       pendingBids,
@@ -276,34 +262,41 @@ router.get(
       totalFavorites,
       unreadMessages,
     ] = await Promise.all([
-      Car.countDocuments({ dealer: dealerId }),
-      Car.countDocuments({ dealer: dealerId, sold: true }),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("sold", true).then(({ count }) => count || 0),
 
-      Payment.aggregate([
-        { $match: { user: dealerId, status: "success" } },
-        { $group: { _id: null, total: { $sum: "$dealerAmount" } } },
-      ]),
+      sb.from("payments").select("dealerAmount").eq("user", dealerId).eq("status", "success").then(({ data }) =>
+        (data || []).reduce((s, p) => s + (p.dealerAmount || 0), 0)
+      ),
 
-      Car.aggregate([{ $match: { dealer: dealerId } }, { $group: { _id: null, totalViews: { $sum: "$views" } } }]),
+      sb.from("cars").select("views").eq("dealer", dealerId).then(({ data }) =>
+        (data || []).reduce((s, c) => s + (c.views || 0), 0)
+      ),
 
-      Car.countDocuments({ dealer: dealerId, auctionStatus: "live" }),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "live").then(({ count }) => count || 0),
 
-      Escrow.countDocuments({ seller: dealerId, status: "held" }),
+      sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).eq("status", "held").then(({ count }) => count || 0),
 
-      Bid.countDocuments({ carId: { $in: dealerCarIds }, status: "pending" }),
+      dealerCarIds.length > 0
+        ? sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).eq("status", "pending").then(({ count }) => count || 0)
+        : 0,
 
-      Car.countDocuments({ dealer: dealerId, auctionStatus: "draft" }),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "draft").then(({ count }) => count || 0),
 
-      Chat.countDocuments({ car: { $in: dealerCarIds } }),
+      dealerCarIds.length > 0
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        : 0,
 
-      Favorite.countDocuments({ car: { $in: dealerCarIds } }),
+      dealerCarIds.length > 0
+        ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        : 0,
 
-      Message.countDocuments({ receiver: dealerId, status: { $ne: "seen" } }),
+      sb.from("messages").select("id", { count: 'exact', head: true }).eq("receiver", dealerId).neq("status", "seen").then(({ count }) => count || 0),
     ]);
 
-    const totalBids = await Bid.countDocuments({
-      carId: { $in: dealerCarIds },
-    });
+    const totalBids = dealerCarIds.length > 0
+      ? await sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCarIds).then(({ count }) => count || 0)
+      : 0;
 
     res.json({
       success: true,
@@ -312,8 +305,8 @@ router.get(
         soldCars,
         activeCars: totalCars - soldCars,
         liveAuctions,
-        totalRevenue: totalRevenueAgg[0]?.total || 0,
-        totalViews: carViewsAgg[0]?.totalViews || 0,
+        totalRevenue: totalFromPayments,
+        totalViews: viewsFromCars,
         totalBids,
         pendingEscrows,
         pendingBids,
@@ -333,9 +326,10 @@ router.get(
   "/quick-stats",
   cacheDealerData,
   asyncHandler(async (req, res) => {
+    const sb = getSupabase();
     const [cars, sold] = await Promise.all([
-      Car.countDocuments({ dealer: req.user.id }),
-      Car.countDocuments({ dealer: req.user.id, sold: true }),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", req.user.id).then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", req.user.id).eq("sold", true).then(({ count }) => count || 0),
     ]);
 
     res.json({
@@ -357,14 +351,20 @@ router.get(
   asyncHandler(async (req, res) => {
     const dealerId = req.user.id;
 
+    const sb = getSupabase();
+    const { data: dealerCarIdRows } = await sb.from("cars").select("id").eq("dealer", dealerId);
+    const dealerCarIds = (dealerCarIdRows || []).map((r) => r.id);
+
     const [totalCars, dealerProfile, verification, healthScore, totalInquiries, liveAuctions, soldAuctions] = await Promise.all([
-      Car.countDocuments({ dealer: dealerId }),
-      Dealer.findOne({ user: dealerId }),
-      DealerVerification.findOne({ user: dealerId }).select("verificationStatus submittedAt").lean(),
-      DealerHealthScore.findOne({ dealer: dealerId }).select("overallScore category").lean(),
-      Chat.countDocuments({ car: { $in: await Car.find({ dealer: dealerId }).distinct("_id") } }),
-      Car.countDocuments({ dealer: dealerId, auctionStatus: "live" }),
-      Car.countDocuments({ dealer: dealerId, auctionStatus: "sold" }),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).then(({ count }) => count || 0),
+      findOne("dealers", { user: dealerId }),
+      findOne("dealer_verifications", { user: dealerId }),
+      findOne("dealer_health_scores", { dealer: dealerId }),
+      dealerCarIds.length > 0
+        ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(({ count }) => count || 0)
+        : 0,
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "live").then(({ count }) => count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer", dealerId).eq("auctionStatus", "sold").then(({ count }) => count || 0),
     ]);
 
     const milestones = [
@@ -409,23 +409,17 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
-    const dealerCars = await Car.find({ dealer: req.user.id }).distinct("_id");
+    const sb = getSupabase();
+    const { data: carRows } = await sb.from("cars").select("id").eq("dealer", req.user.id);
+    const dealerCars = (carRows || []).map((r) => r.id);
 
-    const filter = { carId: { $in: dealerCars } };
+    let bidQuery = sb.from("bids").select("*, user:users(name, email), carId:cars(title, price, images)").in("carId", dealerCars).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
+    if (req.query.status) bidQuery = bidQuery.eq("status", req.query.status);
+    const { data: bids } = await bidQuery;
 
-    if (req.query.status) filter.status = req.query.status;
-
-    const [bids, total] = await Promise.all([
-      Bid.find(filter)
-        .populate("user", "name email")
-        .populate("carId", "title price images")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-
-      Bid.countDocuments(filter),
-    ]);
+    let countQuery = sb.from("bids").select("id", { count: 'exact', head: true }).in("carId", dealerCars);
+    if (req.query.status) countQuery = countQuery.eq("status", req.query.status);
+    const { count: total } = await countQuery;
 
     const formatted = bids.map((b) => ({
       ...b,
@@ -453,16 +447,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
-    const [escrows, total] = await Promise.all([
-      Escrow.find({ seller: req.user.id })
-        .populate("car", "title price images")
-        .populate("buyer", "name email")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      Escrow.countDocuments({ seller: req.user.id }),
-    ]);
+    const sb = getSupabase();
+    const { data: escrows, count: total } = await sb
+      .from("escrows")
+      .select("*, car:cars(title, price, images), buyer:users(name, email)", { count: 'exact' })
+      .eq("seller", req.user.id)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
     res.json({
       success: true,
@@ -479,9 +470,7 @@ router.get(
   "/settlement",
   cacheDealerData,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select(
-      "mpesaBusiness mpesaBusinessName paymentDetails bankName bankAccount",
-    );
+    const user = await findById("users", req.user.id, "mpesaBusiness,mpesaBusinessName,paymentDetails,bankName,bankAccount");
     res.json({
       success: true,
       settlement: {
@@ -507,14 +496,10 @@ router.put(
     if (bankName !== undefined) update.bankName = bankName;
     if (bankAccount !== undefined) update.bankAccount = bankAccount;
     if (paymentDetails !== undefined) update.paymentDetails = paymentDetails;
-    const user = await User.findByIdAndUpdate(req.user.id, update, { new: true }).select(
-      "mpesaBusiness mpesaBusinessName paymentDetails bankName bankAccount",
-    );
-
+    const user = await update("users", req.user.id, update);
     await logActionFromReq(req, "update_settlement", {
       details: { fields: Object.keys(update) },
     });
-
     res.json({ success: true, settlement: user });
   }),
 );
@@ -526,9 +511,7 @@ router.get(
   "/profile",
   cacheDealerData,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user.id).select(
-      "name email phone avatar businessName businessAddress dealerRating dealerListingsCount location bio socialLinks website verifiedBuyer",
-    );
+    const user = await findById("users", req.user.id, "name,email,phone,avatar,businessName,businessAddress,dealerRating,dealerListingsCount,location,bio,socialLinks,website,verifiedBuyer");
     res.json({ success: true, profile: user });
   }),
 );
@@ -552,9 +535,7 @@ router.put(
     for (const field of allowed) {
       if (req.body[field] !== undefined) update[field] = req.body[field];
     }
-    const user = await User.findByIdAndUpdate(req.user.id, update, { new: true }).select(
-      "name email phone avatar businessName businessAddress dealerRating dealerListingsCount location bio socialLinks website verifiedBuyer",
-    );
+    const user = await update("users", req.user.id, update);
     await logActionFromReq(req, "update_profile", { details: { fields: Object.keys(update) } });
     res.json({ success: true, profile: user });
   }),
@@ -572,15 +553,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 
-    const [members, total] = await Promise.all([
-      DealerTeam.find({ dealer: req.user.id })
-        .populate("member", "name email phone role avatar")
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
-      DealerTeam.countDocuments({ dealer: req.user.id }),
-    ]);
+    const sb = getSupabase();
+    const { data: members, count: total } = await sb
+      .from("dealer_teams")
+      .select("*, member:users(name, email, phone, role, avatar)", { count: 'exact' })
+      .eq("dealer", req.user.id)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
     res.json({
       success: true,
@@ -600,7 +579,7 @@ router.post(
 
     // Check if already in team
 
-    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    const existing = await findOne("users", { email: email.toLowerCase().trim() });
 
     const token = crypto.randomBytes(24).toString("hex");
     const defaultPerms = {
@@ -616,20 +595,25 @@ router.post(
     };
 
     // Upsert — handles re-invite
-    const member = await DealerTeam.findOneAndUpdate(
-      { dealer: req.user.id, inviteEmail: email.toLowerCase().trim() },
-      {
-        dealer: req.user.id,
-        member: existing?._id,
-        role,
-        permissions: defaultPerms,
-        invitedBy: req.user.id,
-        status: existing ? "invited" : "invited",
-        inviteEmail: email.toLowerCase().trim(),
-        inviteToken: token,
-      },
-      { upsert: true, new: true },
-    );
+    const sb = getSupabase();
+    const { data: existingTeam } = await sb.from("dealer_teams").select("id").eq("dealer", req.user.id).eq("inviteEmail", email.toLowerCase().trim()).limit(1);
+    const memberData = {
+      dealer: req.user.id,
+      member: existing?.id,
+      role,
+      permissions: defaultPerms,
+      invitedBy: req.user.id,
+      status: "invited",
+      inviteEmail: email.toLowerCase().trim(),
+      inviteToken: token,
+    };
+    let member;
+    if (existingTeam && existingTeam.length > 0) {
+      const { data: upd } = await sb.from("dealer_teams").update(memberData).eq("id", existingTeam[0].id).select().single();
+      member = upd;
+    } else {
+      member = await create("dealer_teams", memberData);
+    }
 
     const { sendTeamInviteEmail } = dealerEmailService;
     if (typeof sendTeamInviteEmail === "function") {
@@ -647,20 +631,21 @@ router.patch(
   "/team/:memberId",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const record = await DealerTeam.findOne({ _id: req.params.memberId, dealer: req.user.id });
+    const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
     if (!record) return res.status(404).json({ success: false, message: "Team member not found" });
 
+    const updateData = {};
     const { role, permissions, status } = req.body;
-    if (role) record.role = role;
-    if (permissions) Object.assign(record.permissions, permissions);
-    if (status) record.status = status;
-    await record.save();
+    if (role) updateData.role = role;
+    if (permissions) updateData.permissions = permissions;
+    if (status) updateData.status = status;
+    const updated = await update("dealer_teams", req.params.memberId, updateData);
 
     await logActionFromReq(req, "team_update", {
       details: { teamMemberId: req.params.memberId, role, status },
     });
 
-    res.json({ success: true, member: record });
+    res.json({ success: true, member: updated });
   }),
 );
 
@@ -669,8 +654,9 @@ router.delete(
   "/team/:memberId",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const record = await DealerTeam.findOneAndDelete({ _id: req.params.memberId, dealer: req.user.id });
+    const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
     if (!record) return res.status(404).json({ success: false, message: "Not found" });
+    await remove("dealer_teams", req.params.memberId);
 
     await logActionFromReq(req, "team_remove", {
       details: { teamMemberId: req.params.memberId, removedEmail: record.inviteEmail },
@@ -687,12 +673,12 @@ router.post(
   "/cars/:id/duplicate",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const dup = await Car.create({
-      ...car.toObject(),
-      _id: undefined,
+    const { id, createdAt, updatedAt, ...carData } = car;
+    const dup = await create("cars", {
+      ...carData,
       title: `${car.title} (Copy)`,
       vin: undefined,
       chassisNumber: undefined,
@@ -708,12 +694,10 @@ router.post(
       winner: undefined,
       isPromoted: false,
       status: "active",
-      createdAt: undefined,
-      updatedAt: undefined,
     });
 
     await logActionFromReq(req, "duplicate_listing", {
-      target: dup._id,
+      target: dup.id,
       targetModel: "Car",
       details: { originalId: req.params.id, newTitle: dup.title },
     });
@@ -734,13 +718,18 @@ router.post(
       return res.status(400).json({ success: false, message: "No IDs provided" });
     }
 
-    const result = await Car.deleteMany({ _id: { $in: ids }, dealer: req.user.id });
+    const sb = getSupabase();
+    const { data: toDelete } = await sb.from("cars").select("id").in("id", ids).eq("dealer", req.user.id);
+    const deleteIds = (toDelete || []).map((r) => r.id);
+    if (deleteIds.length > 0) {
+      await sb.from("cars").delete().in("id", deleteIds);
+    }
 
     await logActionFromReq(req, "bulk_delete_listings", {
-      details: { count: result.deletedCount, ids },
+      details: { count: deleteIds.length, ids },
     });
 
-    res.json({ success: true, deletedCount: result.deletedCount });
+    res.json({ success: true, deletedCount: deleteIds.length });
   }),
 );
 
@@ -752,21 +741,17 @@ router.patch(
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { buyerName, buyerEmail, salePrice, saleNotes } = req.body;
-    const car = await Car.findOneAndUpdate(
-      { _id: req.params.id, dealer: req.user.id },
-      {
-        $set: {
-          sold: true,
-          status: "sold",
-          saleDetails: { buyerName, buyerEmail, salePrice: salePrice || car?.price, saleNotes, soldAt: new Date() },
-        },
-      },
-      { new: true },
-    );
-    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    const existing = await findOne("cars", { id: req.params.id, dealer: req.user.id });
+    if (!existing) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const car = await update("cars", req.params.id, {
+      sold: true,
+      status: "sold",
+      saleDetails: { buyerName, buyerEmail, salePrice: salePrice || existing.price, saleNotes, soldAt: new Date().toISOString() },
+    });
 
     await logActionFromReq(req, "mark_sold", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
       details: { buyerName, salePrice },
     });
@@ -786,13 +771,20 @@ router.patch(
     if (!Array.isArray(ids) || !status) {
       return res.status(400).json({ success: false, message: "ids (array) and status required" });
     }
-    const result = await Car.updateMany({ _id: { $in: ids }, dealer: req.user.id }, { $set: { status } });
+    const sb = getSupabase();
+    const { data: toUpdate } = await sb.from("cars").select("id").in("id", ids).eq("dealer", req.user.id);
+    const updateIds = (toUpdate || []).map((r) => r.id);
+    let modified = 0;
+    if (updateIds.length > 0) {
+      const { error: updErr } = await sb.from("cars").update({ status }).in("id", updateIds);
+      if (!updErr) modified = updateIds.length;
+    }
 
     await logActionFromReq(req, "bulk_status_update", {
-      details: { ids, status, modified: result.modifiedCount },
+      details: { ids, status, modified },
     });
 
-    res.json({ success: true, modified: result.modifiedCount });
+    res.json({ success: true, modified });
   }),
 );
 
@@ -806,21 +798,21 @@ router.post(
     const { bidId } = req.body;
     if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
 
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
     if (car.sold) return res.status(400).json({ success: false, message: "Already sold" });
 
-    const bid = await Bid.findOne({ _id: bidId, carId: car._id });
+    const bid = await findOne("bids", { id: bidId, carId: car.id });
     if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
 
-    bid.status = "accepted";
-    await bid.save();
+    await update("bids", bidId, { status: "accepted" });
 
-    car.sold = true;
-    car.status = "sold";
-    car.soldTo = { user: bid.user, amount: bid.amount, bidId: bid._id, soldAt: new Date() };
-    car.auctionStatus = "ended";
-    await car.save();
+    const updatedCar = await update("cars", req.params.id, {
+      sold: true,
+      status: "sold",
+      soldTo: { user: bid.user, amount: bid.amount, bidId: bid.id, soldAt: new Date().toISOString() },
+      auctionStatus: "ended",
+    });
 
     // Notify winner
     try {
@@ -835,12 +827,12 @@ router.post(
     }
 
     await logActionFromReq(req, "accept_bid", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
-      details: { bidId: bid._id, bidder: bid.user, amount: bid.amount },
+      details: { bidId, bidder: bid.user, amount: bid.amount },
     });
 
-    res.json({ success: true, car, bid });
+    res.json({ success: true, car: updatedCar, bid });
   }),
 );
 
@@ -854,15 +846,13 @@ router.post(
     const { bidId } = req.body;
     if (!bidId) return res.status(400).json({ success: false, message: "bidId required" });
 
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const bid = await Bid.findOne({ _id: bidId, carId: car._id });
+    const bid = await findOne("bids", { id: bidId, carId: car.id });
     if (!bid) return res.status(404).json({ success: false, message: "Bid not found for this car" });
 
-    bid.status = "failed";
-    bid.isWinningBid = false;
-    await bid.save();
+    await update("bids", bidId, { status: "failed", isWinningBid: false });
 
     // Notify bidder
     try {
@@ -877,9 +867,9 @@ router.post(
     }
 
     await logActionFromReq(req, "reject_bid", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
-      details: { bidId: bid._id, bidder: bid.user, amount: bid.amount },
+      details: { bidId, bidder: bid.user, amount: bid.amount },
     });
 
     res.json({ success: true, message: "Bid rejected" });
@@ -910,16 +900,14 @@ router.post(
       });
     }
 
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     if (car.auctionStatus === "live") {
       return res.status(400).json({ success: false, message: "Auction already live" });
     }
 
-    // Listing lock check
-
-    const dealer = await User.findById(car.dealer).select("commissionBalance listingsLocked");
+    const dealer = await findById("users", car.dealer, "commissionBalance,listingsLocked");
     if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
       return res.status(403).json({
         success: false,
@@ -938,23 +926,24 @@ router.post(
     }
 
     const result = await startAuction({
-      roomId: car._id.toString(),
+      roomId: car.id,
       startingBid: startingBidVal,
       durationMs,
     });
 
-    car.auctionStatus = "live";
-    car.allowBid = true;
-    car.startingBid = startingBidVal;
-    car.currentBid = startingBidVal;
-    car.reservePrice = reserveVal;
-    car.reserveMode = reserveMode || "none";
-    car.auctionStartTime = new Date();
-    car.auctionEnd = new Date(Date.now() + durationMs);
-    await car.save();
+    const updated = await update("cars", req.params.id, {
+      auctionStatus: "live",
+      allowBid: true,
+      startingBid: startingBidVal,
+      currentBid: startingBidVal,
+      reservePrice: reserveVal,
+      reserveMode: reserveMode || "none",
+      auctionStartTime: new Date().toISOString(),
+      auctionEnd: new Date(Date.now() + durationMs).toISOString(),
+    });
 
     await logActionFromReq(req, "auction_start", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
       details: { startingBid: startingBidVal, reservePrice: reserveVal, durationMs },
     });
@@ -968,23 +957,20 @@ router.post(
   "/cars/:id/auction/end",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     if (car.auctionStatus !== "live") {
       return res.status(400).json({ success: false, message: "Auction is not live" });
     }
 
-    const result = await endAuction(car._id.toString());
-    await syncAuctionResult({ roomId: car._id.toString(), winner: result.winner });
+    const result = await endAuction(car.id);
+    await syncAuctionResult({ roomId: car.id, winner: result.winner });
 
-    // Always mark auction as ended and stop accepting bids
-    car.auctionStatus = "ended";
-    car.allowBid = false;
-    await car.save();
+    await update("cars", req.params.id, { auctionStatus: "ended", allowBid: false });
 
     await logActionFromReq(req, "auction_end", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
       details: { winner: result.winner, finalBid: result.finalBid },
     });
@@ -1005,7 +991,7 @@ router.post(
       return res.status(400).json({ success: false, message: "Extension must be between 1 and 72 hours" });
     }
 
-    const car = await Car.findOne({ _id: req.params.id, dealer: req.user.id, auctionStatus: "live" });
+    const car = await findOne("cars", { id: req.params.id, dealer: req.user.id, auctionStatus: "live" });
     if (!car) return res.status(404).json({ success: false, message: "Car not found or auction not live" });
 
     const MAX_EXTENSIONS = 3;
@@ -1017,19 +1003,15 @@ router.post(
     }
 
     const currentEnd = new Date(car.auctionEnd).getTime();
-    const newEnd = new Date(Math.max(currentEnd, Date.now()) + hours * 60 * 60 * 1000);
+    const newEnd = new Date(Math.max(currentEnd, Date.now()) + hours * 60 * 60 * 1000).toISOString();
 
-    const updated = await Car.findOneAndUpdate(
-      { _id: req.params.id, dealer: req.user.id, auctionStatus: "live" },
-      {
-        $set: { auctionEnd: newEnd },
-        $inc: { extensionCount: 1 },
-      },
-      { new: true },
-    );
+    const updated = await update("cars", req.params.id, {
+      auctionEnd: newEnd,
+      extensionCount: extensionCount + 1,
+    });
 
     await logActionFromReq(req, "auction_extend", {
-      target: car._id,
+      target: req.params.id,
       targetModel: "Car",
       details: { hours, extensionsUsed: extensionCount + 1, newEndTime: updated.auctionEnd },
     });
@@ -1055,7 +1037,7 @@ router.post(
       return res.status(400).json({ success: false, message: "Contact sales for Enterprise plan" });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await findById("users", req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -1088,7 +1070,7 @@ router.post(
       checkoutRequestID: result.checkoutRequestID,
       mode: result.mode,
       message: result.mode === "mpesa" ? "STK push sent. Enter PIN on your phone." : "Mock payment — refresh to see upgrade",
-      paymentId: result.payment._id,
+      paymentId: result.payment.id,
     });
   }),
 );
@@ -1099,12 +1081,9 @@ router.post(
 router.patch(
   "/cars/:id/wholesale",
   asyncHandler(async (req, res) => {
-    const car = await Car.findOneAndUpdate(
-      { _id: req.params.id, dealer: req.user.id },
-      { $set: { wholesale: req.body.wholesale === true } },
-      { new: true },
-    );
-    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    const existing = await findOne("cars", { id: req.params.id, dealer: req.user.id });
+    if (!existing) return res.status(404).json({ success: false, message: "Car not found" });
+    const car = await update("cars", req.params.id, { wholesale: req.body.wholesale === true });
     res.json({ success: true, car });
   }),
 );
@@ -1116,19 +1095,13 @@ router.get(
   "/trade-listings",
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
-    const filter = { wholesale: true };
+    const sb = getSupabase();
+    let qb = sb.from("cars").select("*, dealer:users(name, businessName, location)", { count: 'exact' }).eq("wholesale", true).order("createdAt", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.search) {
-      const q = req.query.search;
-      filter.$or = [
-        { title: { $regex: q, $options: "i" } },
-        { brand: { $regex: q, $options: "i" } },
-        { model: { $regex: q, $options: "i" } },
-      ];
+      const s = `%${req.query.search}%`;
+      qb = qb.or(`title.ilike.${s},brand.ilike.${s},model.ilike.${s}`);
     }
-    const [cars, total] = await Promise.all([
-      Car.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate("dealer", "name businessName location").lean(),
-      Car.countDocuments(filter),
-    ]);
+    const { data: cars, count: total } = await qb;
     res.json({ success: true, cars, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   }),
 );

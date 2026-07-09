@@ -1,13 +1,4 @@
----
-title: MONITORING
-owner: @sre-lead
-team: sre
-last-reviewed: 2026-06-23
-review-frequency: monthly
-status: active
-tags: [monitoring]
----
-# Kayad — Zero-Code Integrations Guide
+# Gari Motors — Zero-Code Integrations Guide
 ## Every integration below activates with ENV vars or DNS changes only.
 ## No code changes needed. Just set the variable and restart.
 
@@ -29,7 +20,7 @@ SENTRY_DSN=https://xxxxxxxxxxxx@o000000.ingest.sentry.io/0000000
 cd backend && npm install @sentry/node @sentry/profiling-node
 
 # 5. Restart backend:
-pm2 restart kayad-backend
+pm2 restart gari-backend
 
 # Frontend Sentry:
 # 1. Sentry → New Project → React
@@ -57,13 +48,13 @@ npm run build
 1. Go to https://uptimerobot.com → Create Free Account
 2. Add New Monitor:
    - Monitor Type: HTTP(s)
-    - Friendly Name: Kayad API
-   - URL: https://www.kayad.space/health
+   - Friendly Name: Gari Motors API
+   - URL: https://garimotors.co.ke/health
    - Monitoring Interval: 5 minutes
 
 3. Add another monitor:
-   - URL: https://www.kayad.space
-    - Name: Kayad Frontend
+   - URL: https://garimotors.co.ke
+   - Name: Gari Motors Frontend
 
 4. Add alert contacts: your email, phone (SMS), and Slack webhook
 ```
@@ -73,7 +64,7 @@ npm run build
 { "status": "ok", "uptime": 3600, "env": "production" }
 ```
 
-**Deep health check:** `https://www.kayad.space/health/deep` — shows MongoDB, Redis, Sentry, and memory status.
+**Deep health check:** `https://garimotors.co.ke/health/deep` — shows MongoDB, Redis, Sentry, and memory status.
 
 ---
 
@@ -84,7 +75,7 @@ npm run build
 **Setup (15 minutes, free plan available):**
 
 ```
-1. Go to https://cloudflare.com → Add Site → Enter: kayad.space
+1. Go to https://cloudflare.com → Add Site → Enter: garimotors.co.ke
 
 2. Select Free plan
 
@@ -107,11 +98,11 @@ npm run build
 
 | URL Pattern | Setting | Value |
 |---|---|---|
-| `kayad.space/api/*` | Cache Level | Bypass |
-| `kayad.space/socket.io/*` | Cache Level | Bypass |
-| `kayad.space/health*` | Cache Level | Bypass |
-| `kayad.space/*.js` | Cache Level | Cache Everything |
-| `kayad.space/*.css` | Cache Level | Cache Everything |
+| `garimotors.co.ke/api/*` | Cache Level | Bypass |
+| `garimotors.co.ke/socket.io/*` | Cache Level | Bypass |
+| `garimotors.co.ke/health*` | Cache Level | Bypass |
+| `garimotors.co.ke/*.js` | Cache Level | Cache Everything |
+| `garimotors.co.ke/*.css` | Cache Level | Cache Everything |
 
 **Result:** Static assets served from 200+ global data centers. DDoS attacks absorbed automatically. SSL auto-renewed.
 
@@ -125,7 +116,7 @@ npm run build
 
 ```
 1. Go to https://upstash.com → Create Database
-   - Name: kayad
+   - Name: gari-motors
    - Region: eu-west-1 (closest to Nairobi)
    - Type: Regional
 
@@ -135,7 +126,7 @@ npm run build
 REDIS_URL=rediss://:your-password@your-endpoint.upstash.io:6379
 
 4. Restart backend:
-pm2 restart kayad-backend
+pm2 restart gari-backend
 ```
 
 **Verification:** Backend startup log shows `✅ Redis connected` instead of `in-memory fallback`.
@@ -150,7 +141,7 @@ pm2 restart kayad-backend
 
 ```
 1. Go to https://resend.com → Create Account
-2. Add Domain → Follow DNS verification steps for kayad.space
+2. Add Domain → Follow DNS verification steps for garimotors.co.ke
 3. Create API Key
 
 4. Add to backend/.env:
@@ -158,10 +149,10 @@ EMAIL_HOST=smtp.resend.com
 EMAIL_PORT=465
 EMAIL_USER=resend
 EMAIL_PASS=re_your_api_key_here
-EMAIL_FROM=noreply@kayad.space
+EMAIL_FROM=noreply@garimotors.co.ke
 
 5. Restart backend:
-pm2 restart kayad-backend
+pm2 restart gari-backend
 ```
 
 **Alternative providers:**
@@ -171,7 +162,7 @@ pm2 restart kayad-backend
 
 **Test:**
 ```bash
-curl -X POST https://www.kayad.space/api/auth/register \
+curl -X POST https://garimotors.co.ke/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{"name":"Test","email":"you@email.com","password":"test123"}'
 # → Welcome email should arrive within 30 seconds
@@ -187,7 +178,7 @@ curl -X POST https://www.kayad.space/api/auth/register \
 
 ```
 1. Go to https://analytics.google.com → Create Property
-2. Select Web → Enter: kayad.space
+2. Select Web → Enter: garimotors.co.ke
 3. Copy Measurement ID (format: G-XXXXXXXXXX)
 
 4. Add to frontend/.env:
@@ -209,7 +200,7 @@ VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
 ```
 6. Rebuild frontend:
-npm run build && pm2 restart kayad-backend
+npm run build && pm2 restart gari-backend
 ```
 
 **Key events to track manually later (optional):**
@@ -237,15 +228,15 @@ npm run build && pm2 restart kayad-backend
 **M0 free tier backup (cron already set up):**
 ```bash
 # This cron was configured by setup-cron.sh:
-# 0 2 * * * bash /var/www/kayad/backend/scripts/backup.sh
+# 0 2 * * * bash /var/www/gari-motors/backend/scripts/backup.sh
 
 # Manual backup anytime:
-cd /var/www/kayad/backend
+cd /var/www/gari-motors/backend
 bash scripts/backup.sh
-# → Saves to /var/backups/kayad/kayad-YYYY-MM-DD_HH-MM.gz
+# → Saves to /var/backups/gari-motors/gari-YYYY-MM-DD_HH-MM.gz
 
 # To also upload to S3, add to backend/.env:
-AWS_S3_BUCKET=kayad-backups
+AWS_S3_BUCKET=gari-motors-backups
 # Then install: apt install awscli && aws configure
 ```
 
@@ -266,7 +257,7 @@ AT_USERNAME=your_username
 AT_SENDER_ID=GariMotors
 
 4. Restart backend:
-pm2 restart kayad-backend
+pm2 restart gari-backend
 ```
 
 **SMS is already integrated** in `backend/utils/sms.js` — it reads these env vars automatically.
@@ -313,7 +304,7 @@ TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
 Run this to check which integrations are active:
 
 ```bash
-curl https://www.kayad.space/health/deep | python3 -m json.tool
+curl https://garimotors.co.ke/health/deep | python3 -m json.tool
 ```
 
 Expected output when all integrations active:

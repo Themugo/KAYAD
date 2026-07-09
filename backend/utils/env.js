@@ -34,7 +34,8 @@ export const getEnv = (key, { required = true, defaultValue = null, type = "stri
 
 const REQUIRED_VARS = [
   { key: "JWT_SECRET", desc: "JWT signing secret" },
-  { key: "MONGO_URI", desc: "MongoDB connection string" },
+  { key: "SUPABASE_URL", desc: "Supabase project URL" },
+  { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service_role key (not anon)" },
   { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
 ];
 

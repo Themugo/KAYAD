@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import Notification from "../models/Notification.js";
+import { create } from "../db/index.js";
 import { sendRawEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { withRetry } from "../utils/retry.js";
@@ -20,13 +19,13 @@ const VALID_TYPES = new Set([
 export const sendNotification = async ({ userId, title, message, type = "info", email, phone }) => {
   try {
     const normalizedType = VALID_TYPES.has(type) ? type : "info";
-    const hasUserTarget = mongoose.isValidObjectId(userId);
+    const hasUserTarget = !!userId;
     let notification = null;
 
     if (hasUserTarget) {
       notification = await withRetry(
         () =>
-          Notification.create({
+          create("notifications", {
             user: userId,
             title,
             message,
@@ -41,7 +40,7 @@ export const sendNotification = async ({ userId, title, message, type = "info", 
 
     if (notification && getIO()) {
       const payload = {
-        id: notification._id,
+        id: notification.id,
         title,
         message,
         type: normalizedType,

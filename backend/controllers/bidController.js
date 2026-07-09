@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import { startSession } from "../utils/supabaseSession.js";
 import crypto from "crypto";
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";

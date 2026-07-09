@@ -1,25 +1,17 @@
-// backend/services/sitemapService.js - Production Hardened v7.0
-// ─────────────────────────────────────────────────────────────
-// Dynamic sitemap generation service
-// Generates XML sitemaps for vehicles, dealers, and auctions
-// ─────────────────────────────────────────────────────────────
-
-import Car from "../models/Car.js";
-import User from "../models/User.js";
-import Auction from "../models/Auction.js";
+import { findAll } from "../db/index.js";
 
 const BASE_URL = "https://www.kayad.space";
 
-// =============================
-// 🚗 VEHICLE SITEMAP GENERATOR
-// =============================
 export const generateVehicleSitemap = async () => {
   try {
-    const cars = await Car.find({ status: "active" }).select("_id updatedAt").lean();
+    const cars = await findAll("cars", {
+      filters: { status: "active" },
+      select: "id,updatedAt",
+    });
 
     const urls = cars.map((car) => ({
-      loc: `${BASE_URL}/cars/${car._id}`,
-      lastmod: car.updatedAt ? car.updatedAt.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      loc: `${BASE_URL}/cars/${car.id}`,
+      lastmod: car.updatedAt ? new Date(car.updatedAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
       changefreq: "weekly",
       priority: 0.8,
     }));
@@ -31,16 +23,16 @@ export const generateVehicleSitemap = async () => {
   }
 };
 
-// =============================
-// 🏪 DEALER SITEMAP GENERATOR
-// =============================
 export const generateDealerSitemap = async () => {
   try {
-    const dealers = await User.find({ role: "dealer", status: "approved" }).select("_id updatedAt").lean();
+    const dealers = await findAll("users", {
+      filters: { role: "dealer", status: "approved" },
+      select: "id,updatedAt",
+    });
 
     const urls = dealers.map((dealer) => ({
-      loc: `${BASE_URL}/dealer/${dealer._id}`,
-      lastmod: dealer.updatedAt ? dealer.updatedAt.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+      loc: `${BASE_URL}/dealer/${dealer.id}`,
+      lastmod: dealer.updatedAt ? new Date(dealer.updatedAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
       changefreq: "weekly",
       priority: 0.7,
     }));
@@ -52,19 +44,17 @@ export const generateDealerSitemap = async () => {
   }
 };
 
-// =============================
-// 🎪 AUCTION SITEMAP GENERATOR
-// =============================
 export const generateAuctionSitemap = async () => {
   try {
-    const auctions = await Auction.find({ status: { $in: ["scheduled", "live"] } })
-      .select("_id updatedAt")
-      .lean();
+    const auctions = await findAll("auctions", {
+      filters: { status: { $in: ["scheduled", "live"] } },
+      select: "id,updatedAt",
+    });
 
     const urls = auctions.map((auction) => ({
-      loc: `${BASE_URL}/auctions/${auction._id}`,
+      loc: `${BASE_URL}/auctions/${auction.id}`,
       lastmod: auction.updatedAt
-        ? auction.updatedAt.toISOString().split("T")[0]
+        ? new Date(auction.updatedAt).toISOString().split("T")[0]
         : new Date().toISOString().split("T")[0],
       changefreq: "hourly",
       priority: 0.9,
@@ -77,64 +67,33 @@ export const generateAuctionSitemap = async () => {
   }
 };
 
-// =============================
-// 📋 SITEMAP INDEX GENERATOR
-// =============================
 export const generateSitemapIndex = async () => {
   const sitemaps = [
-    {
-      loc: `${BASE_URL}/sitemap-cars.xml`,
-      lastmod: new Date().toISOString().split("T")[0],
-    },
-    {
-      loc: `${BASE_URL}/sitemap-dealers.xml`,
-      lastmod: new Date().toISOString().split("T")[0],
-    },
-    {
-      loc: `${BASE_URL}/sitemap-auctions.xml`,
-      lastmod: new Date().toISOString().split("T")[0],
-    },
+    { loc: `${BASE_URL}/sitemap-cars.xml`, lastmod: new Date().toISOString().split("T")[0] },
+    { loc: `${BASE_URL}/sitemap-dealers.xml`, lastmod: new Date().toISOString().split("T")[0] },
+    { loc: `${BASE_URL}/sitemap-auctions.xml`, lastmod: new Date().toISOString().split("T")[0] },
   ];
-
   return generateXMLSitemapIndex(sitemaps);
 };
 
-// =============================
-// 📄 XML SITEMAP GENERATOR
-// =============================
 const generateXMLSitemap = (urls) => {
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls
-  .map(
-    (url) => `  <url>
+${urls.map((url) => `  <url>
     <loc>${url.loc}</loc>
     <lastmod>${url.lastmod}</lastmod>
     <changefreq>${url.changefreq}</changefreq>
     <priority>${url.priority}</priority>
-  </url>`,
-  )
-  .join("\n")}
+  </url>`).join("\n")}
 </urlset>`;
-
-  return xml;
 };
 
-// =============================
-// 📄 XML SITEMAP INDEX GENERATOR
-// =============================
 const generateXMLSitemapIndex = (sitemaps) => {
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${sitemaps
-  .map(
-    (sitemap) => `  <sitemap>
+${sitemaps.map((sitemap) => `  <sitemap>
     <loc>${sitemap.loc}</loc>
     <lastmod>${sitemap.lastmod}</lastmod>
-  </sitemap>`,
-  )
-  .join("\n")}
+  </sitemap>`).join("\n")}
 </sitemapindex>`;
-
-  return xml;
 };

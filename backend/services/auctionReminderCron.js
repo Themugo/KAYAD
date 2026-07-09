@@ -7,14 +7,12 @@
 //   AUCTION_REMINDER_ENABLED=true   (default: true)
 // ─────────────────────────────────────────────────────────────
 
-import Car from "../models/Car.js";
 import { logInfo } from "../utils/logger.js";
-import Bid from "../models/Bid.js";
-import Notification from "../models/Notification.js";
-import User from "../models/User.js";
 import { getIO } from "../utils/io.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { addEmailJob } from "../queues/emailQueue.js";
+import { findAll, findById, create, update } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 let cronEmailService = {};
 try {
@@ -41,7 +39,7 @@ const notify = async (userId, title, message, type = "auction") => {
     }
 
     // Synchronous fallback
-    const notif = await Notification.create({ user: userId, title, message, type });
+    const notif = await create("notifications", { user: userId, title, message, type });
     getIO()?.to(`user_${userId}`).emit("notification", notif);
   } catch (e) {
     console.error("❌ Notify failed:", e.message);
@@ -61,28 +59,26 @@ const runReminders = async () => {
     const windowStart = new Date(now.getTime() + threshold.ms);
     const windowEnd = new Date(now.getTime() + threshold.ms + 60 * 1000);
 
-    const endingAuctions = await Car.find({
+    const endingAuctions = await findAll("cars", { filters: {
       auctionStatus: "live",
       allowBid: true,
       auctionEnd: { $gte: windowStart, $lte: windowEnd },
       [`reminderSent_${threshold.label}min`]: { $ne: true },
-    }).select("_id title currentBid price auctionEnd");
+    }, select: "_id title currentBid price auctionEnd" });
 
     if (endingAuctions.length === 0) continue;
 
     for (const car of endingAuctions) {
       try {
-        const activeBidders = await Bid.find({
-          carId: car._id,
-          status: { $in: ["active", "paid"] },
-        }).distinct("user");
+        const activeBidders = await getSupabase().from("bids").select("user").eq("carId", car.id).in("status", ["active", "paid"]);
+        const bidderIds = [...new Set((activeBidders.data || []).map(b => b.user))];
 
-        if (activeBidders.length === 0) continue;
+        if (bidderIds.length === 0) continue;
 
         const { sendAuctionEndingSoonEmail } = cronEmailService;
 
-        for (const userId of activeBidders) {
-          const user = await User.findById(userId).select("email name notifications");
+        for (const userId of bidderIds) {
+          const user = await findById("users", userId).select("email name notifications");
           if (user?.email && user?.notifications?.email !== false && typeof sendAuctionEndingSoonEmail === "function") {
             // Use queue if enabled
             if (QUEUE_MODE) {
@@ -107,13 +103,13 @@ const runReminders = async () => {
           );
         }
 
-        await Car.findByIdAndUpdate(car._id, {
+        await update("cars", car.id, {
           [`reminderSent_${threshold.label}min`]: true,
         });
 
-        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car._id} (${activeBidders.length} bidders)`);
+        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car.id} (${activeBidders.length} bidders)`);
       } catch (err) {
-        console.error(`  ❌ Reminder failed for ${car._id}:`, err.message);
+        console.error(`  ❌ Reminder failed for ${car.id}:`, err.message);
       }
     }
   }

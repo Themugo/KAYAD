@@ -1,10 +1,8 @@
-import Car from "../models/Car.js";
-import User from "../models/User.js";
-import SavedSearch from "../models/SavedSearch.js";
 import { createNotification } from "../controllers/notificationController.js";
 import { sendSavedSearchAlertEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
 import { logInfo } from "../utils/logger.js";
+import { findAll, findById, update } from "../db/index.js";
 
 const CHECK_INTERVAL = 10 * 60 * 1000;
 
@@ -39,13 +37,14 @@ const shouldNotify = (prefs, channel) => {
 export const startSavedSearchCron = () => {
   const tick = async () => {
     try {
-      const searches = await SavedSearch.find({ notify: true }).lean();
+      const searches = await findAll("saved_searches", { filters: { notify: true } });
       if (searches.length === 0) return;
 
-      const since = new Date(Date.now() - CHECK_INTERVAL);
-      const newCars = await Car.find({ createdAt: { $gte: since } })
-        .select("title brand price year mileage fuel transmission bodyType color location.city auctionStatus allowBid")
-        .lean();
+      const since = new Date(Date.now() - CHECK_INTERVAL).toISOString();
+      const newCars = await findAll("cars", {
+        filters: { createdAt: { $gte: since } },
+        select: "title,brand,price,year,mileage,fuel,transmission,bodyType,color,location,auctionStatus,allowBid,createdAt",
+      });
 
       if (newCars.length === 0) return;
 
@@ -58,9 +57,9 @@ export const startSavedSearchCron = () => {
 
         if (fresh.length === 0) continue;
 
-        await SavedSearch.findByIdAndUpdate(search._id, { lastNotifiedAt: new Date() });
+        await update("saved_searches", search.id, { lastNotifiedAt: new Date().toISOString() });
 
-        const user = await User.findById(search.user).select("email name phone notifications").lean();
+        const user = await findById("users", search.user);
         if (!user) continue;
         const prefs = user.notifications || {};
 
@@ -76,7 +75,7 @@ export const startSavedSearchCron = () => {
             title: `New matching vehicles: ${search.name}`,
             message: `${fresh.length} vehicle${fresh.length > 1 ? "s" : ""} added: ${titles}${rest}`,
             type: "info",
-            data: { savedSearchId: search._id, count: fresh.length },
+            data: { savedSearchId: search.id, count: fresh.length },
           });
         }
 

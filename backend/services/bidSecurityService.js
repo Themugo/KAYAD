@@ -1,10 +1,9 @@
-import Auction from "../models/Auction.js";
-import Transaction from "../models/Transaction.js";
 import { stkPush } from "./mpesaService.js";
 import { sendNotification } from "./notification.service.js";
+import { findById, findOne, create } from "../db/index.js";
 
 export async function initiateBidSecurity({ auctionId, userId, phone, amount }) {
-  const auction = await Auction.findById(auctionId).populate("carId");
+  const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
   if (!auction) return { success: false, message: "Auction not found" };
 
   const securityAmount = amount || auction.bidSecurityAmount || 50000;
@@ -28,7 +27,7 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
   }
 
   // Create transaction record
-  const transaction = await Transaction.create({
+  const transaction = await create("transactions", {
     user: userId,
     car: auction.carId?._id || auction.carId,
     amount: securityAmount,
@@ -44,7 +43,7 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount }) 
 }
 
 export async function handleBidSecurityCallback({ checkoutRequestID, resultCode, mpesaReceipt }) {
-  const transaction = await Transaction.findOne({ checkoutRequestId: checkoutRequestID });
+  const transaction = await findOne("transactions", { checkoutRequestId: checkoutRequestID });
   if (!transaction) return { success: false, message: "Transaction not found" };
 
   if (resultCode !== 0) {
@@ -62,7 +61,7 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
     await generateReceipt({
       title: "Bid Security Confirmed",
       amount: transaction.amount,
-      transactionId: mpesaReceipt || transaction._id.toString(),
+      transactionId: mpesaReceipt || transaction.id.toString(),
       carDetails: transaction.car?.toString() || "—",
       date: new Date(),
     });

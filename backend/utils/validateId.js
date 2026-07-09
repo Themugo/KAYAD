@@ -1,33 +1,9 @@
 // backend/utils/validateId.js
-// Safe ObjectId validation for controllers.
-//
-// Usage:
-//   import { isValidId, requireValidId } from "../utils/validateId.js";
-//
-//   // Check only:
-//   if (!isValidId(req.params.id)) return res.status(400).json(...)
-//
-//   // Check + auto-respond:
-//   if (requireValidId(req, res, req.params.id)) return;
-//   // ^ returns true if INVALID (already sent 400), false if valid
+// Safe UUID validation for controllers.
 
-import mongoose from "mongoose";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export const isValidId = (id) =>
-  typeof id === "string" && mongoose.Types.ObjectId.isValid(id) && /^[a-f0-9]{24}$/i.test(id);
-
-/**
- * Validates an ObjectId param. If invalid, sends 400 and returns true.
- * If valid, returns false (continue processing).
- *
- * @param {object} req
- * @param {object} res
- * @param {string} id - The ID to validate
- * @param {string} [label="ID"] - Label for the error message
- * @returns {boolean} true if INVALID (response already sent), false if valid
- */
-/** @deprecated Use isValidId instead */
-export const isValidObjectId = isValidId;
+export const isValidId = (id) => typeof id === "string" && UUID_RE.test(id);
 
 export const requireValidId = (req, res, id, label = "ID") => {
   if (!isValidId(id)) {

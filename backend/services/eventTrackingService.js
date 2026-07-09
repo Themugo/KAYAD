@@ -1,4 +1,4 @@
-import Event from "../models/Event.js";
+import { findAll, create } from "../db/index.js";
 
 // =============================
 // 📊 TRACK EVENT
@@ -20,7 +20,7 @@ export const trackEvent = async ({
   os,
 }) => {
   try {
-    await Event.create({
+    await create("events", {
       user: userId,
       sessionId,
       eventType,
@@ -209,7 +209,7 @@ export const getEventAnalytics = async (startDate, endDate, eventType = null) =>
     filter.eventType = eventType;
   }
 
-  const events = await Event.find(filter).sort({ createdAt: -1 });
+  const events = await findAll("events", { filters: filter, orderBy: "createdAt", ascending: false });
 
   // Group by event type
   const byEventType = {};

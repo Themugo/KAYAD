@@ -1,7 +1,7 @@
 // backend/controllers/paymentController.js
 
-import mongoose from "mongoose";
-import Payment from "../models/Payment.js";
+import { findOne, findById } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
@@ -11,15 +11,10 @@ import { logInfo } from "../utils/logger.js";
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
 // =============================
 export const initiatePayment = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { phone, amount, carId, type } = req.body;
 
     if (!phone || !amount || !type) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Phone, amount and type required",
@@ -28,8 +23,6 @@ export const initiatePayment = async (req, res) => {
 
     const parsedAmount = Number(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Amount must be a positive number",
@@ -38,8 +31,6 @@ export const initiatePayment = async (req, res) => {
 
     // Minimum payment: KES 1 (M-Pesa minimum is 1)
     if (parsedAmount < 1) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({
         success: false,
         message: "Minimum payment is KES 1",
@@ -59,49 +50,42 @@ export const initiatePayment = async (req, res) => {
 
     // Create Escrow record for private sellers (individual_seller) - MANDATORY
     // Private sellers cannot disable escrow; it's enforced for all their transactions
-    if (normalizedType === "escrow" && result.payment?._id) {
-      const Car = (await import("../models/Car.js")).default;
-      const User = (await import("../models/User.js")).default;
-      const car = await Car.findById(carId).select("escrowEnabled dealer").session(session);
-      const sellerUser = car ? await User.findById(car.dealer).select("role escrowApproved escrowForced").session(session) : null;
+    if (normalizedType === "escrow" && result.payment?.id) {
+      const car = await findById("cars", carId, "escrowEnabled,dealer");
+      const sellerUser = car ? await findById("users", car.dealer, "role,escrowApproved,escrowForced") : null;
       const isPrivateSeller = sellerUser && sellerUser.role === "individual_seller";
       const dealerCanEscrow = sellerUser && sellerUser.role === "dealer" && car.escrowEnabled && (sellerUser.escrowApproved || sellerUser.escrowForced);
       const useEscrow = isPrivateSeller || dealerCanEscrow;
 
       if (car && useEscrow) {
-        const Escrow = (await import("../models/Escrow.js")).default;
-        const escrow = await Escrow.create([{
+        const { create: createEscrow } = await import("../db/index.js");
+        const escrow = await createEscrow("escrows", {
           car: carId,
           buyer: req.user.id,
           seller: car.dealer,
           amount: parsedAmount,
-          payment: result.payment._id,
+          payment: result.payment.id,
           status: "pending",
-        }], { session });
+        });
 
         // Create or update lead from escrow
         try {
           const { findOrCreateLeadFromEscrow, updateLeadStage } = await import("../services/leadService.js");
-          const lead = await findOrCreateLeadFromEscrow(escrow[0]._id);
-          await updateLeadStage(lead._id, "escrow_started", car.dealer);
+          const lead = await findOrCreateLeadFromEscrow(escrow.id);
+          await updateLeadStage(lead.id, "escrow_started", car.dealer);
         } catch (leadErr) {
           console.warn("⚠️ Failed to update lead from escrow:", leadErr.message);
         }
 
-        result.escrowId = escrow[0]._id;
+        result.escrowId = escrow.id;
       }
     }
-
-    await session.commitTransaction();
-    session.endSession();
 
     res.json({
       success: true,
       ...result,
     });
   } catch (err) {
-    await session.abortTransaction();
-    session.endSession();
     console.error("INITIATE ERROR:", err);
 
     res.status(500).json({
@@ -122,7 +106,7 @@ export const mpesaCallback = async (req, res) => {
       throw new Error("Invalid callback format");
     }
 
-    const existing = await Payment.findOne({
+    const existing = await findOne("payments", {
       checkoutRequestId: callback.CheckoutRequestID,
     });
 
@@ -174,9 +158,9 @@ export const b2cTimeout = async (req, res) => {
 // =============================
 export const checkPaymentStatus = async (req, res) => {
   try {
-    const payment = await Payment.findOne({
+    const payment = await findOne("payments", {
       checkoutRequestId: req.params.id,
-    }).lean();
+    });
 
     if (!payment) {
       return res.json({
@@ -217,10 +201,13 @@ export const getUserPayments = async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const [payments, total] = await Promise.all([
-      Payment.find({ user: req.user.id }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Payment.countDocuments({ user: req.user.id }),
-    ]);
+    const sb = getSupabase();
+    const { data: payments, count: total } = await sb
+      .from("payments")
+      .select("*", { count: "exact" })
+      .eq("user", req.user.id)
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
     res.json({
       success: true,
@@ -246,16 +233,17 @@ export const getAllPayments = async (req, res) => {
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const skip = (page - 1) * limit;
 
-    const filter = {};
+    const sb = getSupabase();
+    let query = sb.from("payments").select("*", { count: "exact" });
+
     const VALID_STATUSES = ["pending", "success", "failed", "cancelled"];
     const VALID_TYPES = ["bid", "auction_win", "buy", "listing", "subscription", "escrow"];
-    if (req.query.status && VALID_STATUSES.includes(req.query.status)) filter.status = req.query.status;
-    if (req.query.type && VALID_TYPES.includes(req.query.type)) filter.type = req.query.type;
+    if (req.query.status && VALID_STATUSES.includes(req.query.status)) query = query.eq("status", req.query.status);
+    if (req.query.type && VALID_TYPES.includes(req.query.type)) query = query.eq("type", req.query.type);
 
-    const [payments, total] = await Promise.all([
-      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Payment.countDocuments(filter),
-    ]);
+    const { data: payments, count: total } = await query
+      .order("createdAt", { ascending: false })
+      .range(skip, skip + limit - 1);
 
     res.json({
       success: true,
@@ -281,7 +269,7 @@ export const getPaymentById = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid payment ID" });
     }
 
-    const payment = await Payment.findById(req.params.id).lean();
+    const payment = await findById("payments", req.params.id);
 
     if (!payment) {
       return res.status(404).json({

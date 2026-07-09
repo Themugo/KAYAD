@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { logInfo, logError, logWarn } from "../utils/logger.js";
-import JobFailure from "../models/JobFailure.js";
+import { findAll } from "../db/index.js";
 
 // =============================
 // 📊 QUEUE METRICS STORAGE

@@ -1,4 +1,4 @@
-import Car from "../models/Car.js";
+import { findAll, findById } from "../db/index.js";
 
 const DEPRECIATION_BY_AGE = [
   { maxAge: 3, factor: 0.85 },
@@ -8,44 +8,16 @@ const DEPRECIATION_BY_AGE = [
 ];
 
 const BRAND_PREMIUM = {
-  toyota: 1.15,
-  mercedes: 1.5,
-  bmw: 1.4,
-  audi: 1.45,
-  lexus: 1.6,
-  landrover: 1.55,
-  porsche: 1.8,
-  volkswagen: 1.2,
-  nissan: 1.0,
-  mazda: 1.05,
-  subaru: 1.0,
-  honda: 1.1,
-  ford: 0.95,
-  mitsubishi: 0.9,
-  suzuki: 0.85,
-  hyundai: 0.9,
-  kia: 0.88,
-  peugeot: 0.85,
-  isuzu: 0.95,
+  toyota: 1.15, mercedes: 1.5, bmw: 1.4, audi: 1.45, lexus: 1.6,
+  landrover: 1.55, porsche: 1.8, volkswagen: 1.2, nissan: 1.0,
+  mazda: 1.05, subaru: 1.0, honda: 1.1, ford: 0.95, mitsubishi: 0.9,
+  suzuki: 0.85, hyundai: 0.9, kia: 0.88, peugeot: 0.85, isuzu: 0.95,
 };
 
 const MODEL_DEMAND = {
-  prado: 95,
-  landcruiser: 98,
-  harrier: 88,
-  cx5: 85,
-  xtrail: 78,
-  forester: 80,
-  demio: 82,
-  vitz: 85,
-  axio: 75,
-  premio: 80,
-  corolla: 77,
-  civic: 72,
-  gle: 70,
-  x5: 73,
-  "c-class": 65,
-  "e-class": 68,
+  prado: 95, landcruiser: 98, harrier: 88, cx5: 85, xtrail: 78,
+  forester: 80, demio: 82, vitz: 85, axio: 75, premio: 80,
+  corolla: 77, civic: 72, gle: 70, x5: 73, "c-class": 65, "e-class": 68,
 };
 
 function getDepreciationFactor(year) {
@@ -66,7 +38,7 @@ function parseModelKey(title, brand) {
 
 export async function getMarketPulse(carId, car) {
   if (!car) {
-    car = await Car.findById(carId).lean();
+    car = await findById("cars", carId);
     if (!car) return null;
   }
 
@@ -75,17 +47,15 @@ export async function getMarketPulse(carId, car) {
   const modelKey = parseModelKey(car.title, car.brand);
   const demandScore = MODEL_DEMAND[modelKey] || 60;
 
-  const similar = await Car.find({
-    brand: car.brand,
-    model: { $regex: modelKey !== brandKey ? modelKey : "", $options: "i" },
-    year: { $gte: car.year - 2, $lte: car.year + 2 },
-    _id: { $ne: car._id },
-  })
-    .select("price year mileage views")
-    .limit(30)
-    .lean();
+  const similar = await findAll("cars", {
+    filters: { brand: car.brand, year: { $gte: car.year - 2, $lte: car.year + 2 } },
+    select: "price,year,mileage,views",
+    limit: 30,
+  });
 
-  const allPrices = [car.price, ...similar.map((c) => c.price)].filter(Boolean);
+  const filteredSimilar = similar.filter(c => c.id !== car.id);
+
+  const allPrices = [car.price, ...filteredSimilar.map((c) => c.price)].filter(Boolean);
   const avgPrice = allPrices.reduce((s, p) => s + p, 0) / (allPrices.length || 1);
   const minPrice = Math.min(...allPrices);
   const maxPrice = Math.max(...allPrices);
@@ -102,15 +72,12 @@ export async function getMarketPulse(carId, car) {
   else if (priceRatio > 1.15) trend = "overvalued";
   else trend = "stable";
 
-  const avgViews = similar.length ? similar.reduce((s, c) => s + (c.views || 0), 0) / similar.length : 0;
+  const avgViews = filteredSimilar.length ? filteredSimilar.reduce((s, c) => s + (c.views || 0), 0) / filteredSimilar.length : 0;
   const daysOnMarket = car.createdAt ? Math.round((Date.now() - new Date(car.createdAt).getTime()) / 86400000) : 1;
   const estDaysToSell = Math.max(3, Math.round(45 - demandScore * 0.3 + (car.price / (avgPrice || car.price)) * 15));
 
   return {
-    predictiveScore: Math.min(
-      100,
-      Math.round(demandScore * 0.6 + (avgViews > 100 ? 15 : 5) + (priceRatio < 1.1 ? 10 : 0)),
-    ),
+    predictiveScore: Math.min(100, Math.round(demandScore * 0.6 + (avgViews > 100 ? 15 : 5) + (priceRatio < 1.1 ? 10 : 0))),
     trend,
     demandScore: Math.min(100, demandScore),
     fairPriceRange: { min: fairPriceMin, max: fairPriceMax, avg: fairPriceBase },
@@ -119,18 +86,18 @@ export async function getMarketPulse(carId, car) {
     marketAvgPrice: Math.round(avgPrice),
     priceVsMarket: Math.round((priceRatio - 1) * 100),
     brandPremium,
-    sampleSize: similar.length,
+    sampleSize: filteredSimilar.length,
   };
 }
 
 export async function getDealerInsights(dealerId) {
-  const cars = await Car.find({
-    $or: [{ dealer: dealerId }, { "dealer._id": dealerId }],
-  })
-    .select("title brand price year mileage views images createdAt status")
-    .sort({ createdAt: -1 })
-    .limit(50)
-    .lean();
+  const cars = await findAll("cars", {
+    filters: { dealer: dealerId },
+    select: "title,brand,price,year,mileage,views,images,createdAt,status",
+    orderBy: "createdAt",
+    ascending: false,
+    limit: 50,
+  });
 
   if (!cars.length) {
     return { totalCars: 0, photoScore: "--", recommendations: [], averageScore: 0 };
@@ -148,11 +115,11 @@ export async function getDealerInsights(dealerId) {
 
   const recommendations = await Promise.all(
     cars.slice(0, 5).map(async (c) => {
-      const pulse = await getMarketPulse(c._id, c);
+      const pulse = await getMarketPulse(c.id, c);
       const optimalPrice = pulse?.fairPriceRange?.avg || c.price;
       const priceDiff = Math.round(((c.price - optimalPrice) / (optimalPrice || 1)) * 100);
       return {
-        carId: c._id,
+        carId: c.id,
         title: c.title,
         currentPrice: c.price,
         optimalPrice,
@@ -168,10 +135,5 @@ export async function getDealerInsights(dealerId) {
     ? Math.round(recommendations.reduce((s, r) => s + r.engagementScore, 0) / recommendations.length)
     : 0;
 
-  return {
-    totalCars: cars.length,
-    photoScore,
-    recommendations,
-    averageScore: avgScore,
-  };
+  return { totalCars: cars.length, photoScore, recommendations, averageScore: avgScore };
 }

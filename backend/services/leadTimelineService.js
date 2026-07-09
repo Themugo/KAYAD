@@ -4,9 +4,8 @@
 // Manages lead activity timeline and history
 // ─────────────────────────────────────────────────────────────
 
-import LeadActivity from "../models/LeadActivity.js";
-import Lead from "../models/Lead.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { findAll, findById, update } from "../db/index.js";
 
 // =============================
 // 📊 GET LEAD TIMELINE
@@ -31,7 +30,7 @@ export const addTimelineEvent = async (leadId, type, actorId, actorType, descrip
     const activity = await LeadActivity.createActivity(leadId, type, actorId, actorType, description, metadata);
 
     // Update lead's last activity timestamp
-    await Lead.findByIdAndUpdate(leadId, { lastActivityAt: new Date() });
+    await update("leads", leadId, { lastActivityAt: new Date() });
 
     logInfo("Timeline event added", { leadId, type, actorId });
     return activity;
@@ -47,7 +46,7 @@ export const addTimelineEvent = async (leadId, type, actorId, actorType, descrip
 
 export const getLeadHistory = async (leadId) => {
   try {
-    const lead = await Lead.findById(leadId);
+    const lead = await findById("leads", leadId);
     if (!lead) {
       throw new Error("Lead not found");
     }
@@ -83,7 +82,7 @@ export const getLeadHistory = async (leadId) => {
 
 export const getActivitySummary = async (leadId) => {
   try {
-    const activities = await LeadActivity.find({ lead: leadId });
+    const activities = await findAll("lead_activities", { filters: { lead: leadId } });
 
     const summary = {
       totalActivities: activities.length,

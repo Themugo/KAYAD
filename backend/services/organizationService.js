@@ -4,14 +4,9 @@
 // Manages enterprise organizations
 // ─────────────────────────────────────────────────────────────
 
-import Organization from "../models/Organization.js";
-import Branch from "../models/Branch.js";
-import Department from "../models/Department.js";
-import Team from "../models/Team.js";
-import Role from "../models/Role.js";
-import User from "../models/User.js";
-import Dealer from "../models/Dealer.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, findById, findOne, create, update, remove, count, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // 🏢 CREATE ORGANIZATION
@@ -19,8 +14,8 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 export const createOrganization = async (organizationData) => {
   try {
-    const organization = await Organization.create(organizationData);
-    logInfo("Organization created", { organizationId: organization._id, name: organization.name });
+    const organization = await create("organizations", organizationData);
+    logInfo("Organization created", { organizationId: organization.id, name: organization.name });
     return organization;
   } catch (err) {
     logError("Failed to create organization", err);
@@ -34,10 +29,10 @@ export const createOrganization = async (organizationData) => {
 
 export const getOrganization = async (organizationId) => {
   try {
-    const organization = await Organization.findById(organizationId)
-      .populate("owner", "name email")
-      .populate("admins", "name email")
-      .lean();
+    const organization = await findById("organizations", organizationId)
+       /* .populate("owner", "name email") - TODO: use separate query */
+       /* .populate("admins", "name email") - TODO: use separate query */
+      ;
     if (!organization) {
       logWarn("Organization not found", { organizationId });
       return null;
@@ -55,10 +50,7 @@ export const getOrganization = async (organizationId) => {
 
 export const updateOrganization = async (organizationId, updateData) => {
   try {
-    const organization = await Organization.findByIdAndUpdate(organizationId, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const organization = await update("organizations", organizationId, updateData);
     if (!organization) {
       logWarn("Organization not found for update", { organizationId });
       return null;
@@ -77,7 +69,7 @@ export const updateOrganization = async (organizationId, updateData) => {
 
 export const deleteOrganization = async (organizationId) => {
   try {
-    const organization = await Organization.findByIdAndDelete(organizationId);
+    const organization = await remove("organizations", organizationId);
     if (!organization) {
       logWarn("Organization not found for deletion", { organizationId });
       return null;
@@ -96,14 +88,14 @@ export const deleteOrganization = async (organizationId) => {
 
 export const getOrganizationUsers = async (organizationId) => {
   try {
-    const organization = await Organization.findById(organizationId);
+    const organization = await findById("organizations", organizationId);
     if (!organization) return null;
 
-    const users = await User.find({
+    const users = await findAll("users", { filters: {
       $or: [{ _id: organization.owner }, { _id: { $in: organization.admins } }],
-    })
+    } })
       .select("name email role")
-      .lean();
+      ;
 
     return users;
   } catch (err) {
@@ -118,7 +110,7 @@ export const getOrganizationUsers = async (organizationId) => {
 
 export const addOrganizationAdmin = async (organizationId, userId) => {
   try {
-    const organization = await Organization.findById(organizationId);
+    const organization = await findById("organizations", organizationId);
     if (!organization) {
       logWarn("Organization not found", { organizationId });
       return null;
@@ -139,7 +131,7 @@ export const addOrganizationAdmin = async (organizationId, userId) => {
 
 export const removeOrganizationAdmin = async (organizationId, userId) => {
   try {
-    const organization = await Organization.findById(organizationId);
+    const organization = await findById("organizations", organizationId);
     if (!organization) {
       logWarn("Organization not found", { organizationId });
       return null;
@@ -160,7 +152,7 @@ export const removeOrganizationAdmin = async (organizationId, userId) => {
 
 export const createBranch = async (organizationId, branchData) => {
   try {
-    const organization = await Organization.findById(organizationId);
+    const organization = await findById("organizations", organizationId);
     if (!organization) {
       logWarn("Organization not found", { organizationId });
       return null;
@@ -171,13 +163,13 @@ export const createBranch = async (organizationId, branchData) => {
       throw new Error("Branch limit reached for current subscription");
     }
 
-    const branch = await Branch.create({
+    const branch = await create("branches", {
       ...branchData,
       organization: organizationId,
     });
 
     await organization.incrementBranchCount();
-    logInfo("Branch created", { branchId: branch._id, organizationId });
+    logInfo("Branch created", { branchId: branch.id, organizationId });
     return branch;
   } catch (err) {
     logError("Failed to create branch", err);
@@ -205,7 +197,7 @@ export const getOrganizationBranches = async (organizationId) => {
 
 export const getOrganizationStats = async (organizationId) => {
   try {
-    const organization = await Organization.findById(organizationId);
+    const organization = await findById("organizations", organizationId);
     if (!organization) return null;
 
     const branches = await Branch.getByOrganization(organizationId);
@@ -215,7 +207,7 @@ export const getOrganizationStats = async (organizationId) => {
 
     return {
       organization: {
-        id: organization._id,
+        id: organization.id,
         name: organization.name,
         type: organization.type,
         subscription: organization.subscription,
@@ -230,7 +222,7 @@ export const getOrganizationStats = async (organizationId) => {
         totalRoles: roles.length,
       },
       branches: branches.map((b) => ({
-        id: b._id,
+        id: b.id,
         name: b.name,
         type: b.type,
         status: b.status,
@@ -238,21 +230,21 @@ export const getOrganizationStats = async (organizationId) => {
         totalTeams: b.totalTeams,
       })),
       departments: departments.map((d) => ({
-        id: d._id,
+        id: d.id,
         name: d.name,
         type: d.type,
         status: d.status,
         totalTeams: d.totalTeams,
       })),
       teams: teams.map((t) => ({
-        id: t._id,
+        id: t.id,
         name: t.name,
         type: t.type,
         status: t.status,
         totalMembers: t.totalMembers,
       })),
       roles: roles.map((r) => ({
-        id: r._id,
+        id: r.id,
         name: r.name,
         type: r.type,
         status: r.status,
@@ -271,14 +263,14 @@ export const getOrganizationStats = async (organizationId) => {
 
 export const migrateDealerToOrganization = async (dealerId) => {
   try {
-    const dealer = await Dealer.findById(dealerId).populate("user");
+    const dealer = await findById("dealers", dealerId) /* .populate("user") - TODO: use separate query */;
     if (!dealer) {
       logWarn("Dealer not found for migration", { dealerId });
       return null;
     }
 
     // Check if organization already exists
-    const existingOrganization = await Organization.findOne({ legacyDealerId: dealerId });
+    const existingOrganization = await findOne("organizations", { legacyDealerId: dealerId });
     if (existingOrganization) {
       logWarn("Organization already exists for dealer", { dealerId });
       return existingOrganization;
@@ -286,7 +278,7 @@ export const migrateDealerToOrganization = async (dealerId) => {
 
     // Create organization from dealer
     const organization = await Organization.createFromDealer(dealer, dealer.user);
-    logInfo("Dealer migrated to organization", { dealerId, organizationId: organization._id });
+    logInfo("Dealer migrated to organization", { dealerId, organizationId: organization.id });
     return organization;
   } catch (err) {
     logError("Failed to migrate dealer to organization", err);
@@ -300,20 +292,20 @@ export const migrateDealerToOrganization = async (dealerId) => {
 
 export const bulkMigrateDealers = async () => {
   try {
-    const dealers = await Dealer.find({}).populate("user");
+    const dealers = await findAll("dealers", { filters: {} }) /* .populate("user") - TODO: use separate query */;
 
     const results = [];
     for (const dealer of dealers) {
       try {
-        const organization = await migrateDealerToOrganization(dealer._id);
+        const organization = await migrateDealerToOrganization(dealer.id);
         results.push({
-          dealerId: dealer._id,
+          dealerId: dealer.id,
           success: true,
-          organizationId: organization._id,
+          organizationId: organization.id,
         });
       } catch (err) {
         results.push({
-          dealerId: dealer._id,
+          dealerId: dealer.id,
           success: false,
           error: err.message,
         });
@@ -344,8 +336,7 @@ export const bulkMigrateDealers = async () => {
 
 export const getPlatformOrganizationStats = async () => {
   try {
-    const stats = await Organization.aggregate([
-      {
+    const stats = await aggregate("organizations", [{
         $group: {
           _id: "$type",
           count: { $sum: 1 },
@@ -353,18 +344,15 @@ export const getPlatformOrganizationStats = async () => {
           totalUsers: { $sum: "$totalUsers" },
           totalListings: { $sum: "$totalListings" },
         },
-      },
-    ]);
+      },]);
 
-    const totalOrganizations = await Organization.countDocuments();
-    const subscriptionStats = await Organization.aggregate([
-      {
+    const totalOrganizations = await count("organizations", );
+    const subscriptionStats = await aggregate("organizations", [{
         $group: {
           _id: "$subscription.plan",
           count: { $sum: 1 },
         },
-      },
-    ]);
+      },]);
 
     return {
       totalOrganizations,

@@ -1,7 +1,6 @@
-import Favorite from "../models/Favorite.js";
-import Car from "../models/Car.js";
 import { sendNotification } from "./notification.service.js";
 import { logInfo } from "../utils/logger.js";
+import { findAll, findOne, update, getSupabase } from "../db/index.js";
 
 const CHECK_INTERVAL = 15 * 60 * 1000;
 
@@ -13,15 +12,14 @@ export function startPriceAlertCron() {
 
 async function run() {
   try {
-    const alerts = await Favorite.find({ notifyOnPriceDrop: true })
-      .populate({ path: "car", select: "price title images brand" })
-      .populate({ path: "user", select: "email phone name" })
-      .lean();
+    const alerts = await findAll("favorites", { filters: { notifyOnPriceDrop: true } });
+    if (alerts.length === 0) return;
 
     for (const fav of alerts) {
-      const car = fav.car;
+      const car = fav.car ? await findOne("cars", { id: fav.car }) : null;
       if (!car) continue;
 
+      const user = fav.user ? await findOne("users", { id: fav.user }) : null;
       const oldPrice = fav.carSnapshot?.price;
       const newPrice = car.price;
 
@@ -32,15 +30,17 @@ async function run() {
         const message = `${car.title || "A saved car"} dropped from KES ${oldPrice.toLocaleString()} to KES ${newPrice.toLocaleString()} (${pct}% off)`;
 
         await sendNotification({
-          userId: fav.user?._id || fav.user,
+          userId: fav.user,
           title: `💰 Price Drop: ${title}`,
           message,
           type: "price_alert",
-          email: fav.user?.email,
-          phone: fav.user?.phone,
+          email: user?.email,
+          phone: user?.phone,
         });
 
-        await Favorite.updateOne({ _id: fav._id }, { $set: { "carSnapshot.price": newPrice } });
+        await update("favorites", fav.id, {
+          carSnapshot: { ...fav.carSnapshot, price: newPrice },
+        });
       }
     }
   } catch (err) {

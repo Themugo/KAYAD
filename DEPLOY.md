@@ -1,13 +1,4 @@
----
-title: DEPLOY
-owner: @devops-lead
-team: devops
-last-reviewed: 2026-06-23
-review-frequency: monthly
-status: active
-tags: [deployment]
----
-# 🚀 Kayad — Production Deployment
+# 🚀 Gari Motors — Production Deployment
 ## Ubuntu 22.04 LTS · Node.js 20 · MongoDB Atlas · Nginx · PM2
 
 ---
@@ -43,12 +34,12 @@ nginx -v          # nginx/1.x.x
 pm2 --version     # 5.x.x
 
 # Create log directory
-sudo mkdir -p /var/log/kayad
-sudo chown $USER:$USER /var/log/kayad
+sudo mkdir -p /var/log/gari
+sudo chown $USER:$USER /var/log/gari
 
 # Create backup directory
-sudo mkdir -p /var/backups/kayad
-sudo chown $USER:$USER /var/backups/kayad
+sudo mkdir -p /var/backups/gari-motors
+sudo chown $USER:$USER /var/backups/gari-motors
 ```
 
 ---
@@ -57,16 +48,18 @@ sudo chown $USER:$USER /var/backups/kayad
 
 ```bash
 # Clone project
-git clone https://github.com/your-org/kayad.git /var/www/kayad
-cd /var/www/kayad
+git clone https://github.com/your-org/gari-motors.git /var/www/gari-motors
+cd /var/www/gari-motors
 
 # Install backend dependencies
 cd backend
 npm install
 cd ..
 
-# Install frontend dependencies (at project root)
+# Install frontend dependencies
+cd frontend
 npm install
+cd ..
 ```
 
 ---
@@ -83,16 +76,16 @@ Fill in these **required** values (everything else is optional):
 
 ```env
 NODE_ENV=production
-MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/kayad
+MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/gari-motors
 JWT_SECRET=<run: openssl rand -hex 32>
 REFRESH_TOKEN_SECRET=<run: openssl rand -hex 32>
-FRONTEND_URL=https://www.kayad.space
+FRONTEND_URL=https://garimotors.co.ke
 MPESA_ENV=production
 MPESA_CONSUMER_KEY=your_key
 MPESA_CONSUMER_SECRET=your_secret
 MPESA_SHORTCODE=your_shortcode
 MPESA_PASSKEY=your_passkey
-MPESA_CALLBACK_URL=https://www.kayad.space/api/payments/callback
+MPESA_CALLBACK_URL=https://garimotors.co.ke/api/payments/callback
 CLOUDINARY_CLOUD_NAME=your_name
 CLOUDINARY_API_KEY=your_key
 CLOUDINARY_API_SECRET=your_secret
@@ -105,8 +98,8 @@ nano frontend/.env
 ```
 
 ```env
-VITE_API_BASE_URL=https://www.kayad.space
-VITE_SOCKET_URL=https://www.kayad.space
+VITE_API_BASE_URL=https://garimotors.co.ke
+VITE_SOCKET_URL=https://garimotors.co.ke
 ```
 
 ---
@@ -114,7 +107,7 @@ VITE_SOCKET_URL=https://www.kayad.space
 ## Step 4 — Seed Database (First Time Only)
 
 ```bash
-cd /var/www/kayad/backend
+cd /var/www/gari-motors/backend
 node seed.js
 ```
 
@@ -123,7 +116,7 @@ Output:
 ✅ SEED COMPLETE
 ────────────────────────────────
 Admin login:
-  Email:    admin@kayad.space
+  Email:    admin@garimotors.co.ke
   Password: password123   ← CHANGE THIS IMMEDIATELY
 ...
 ```
@@ -135,7 +128,7 @@ Admin login:
 ## Step 5 — Build Frontend
 
 ```bash
-cd /var/www/kayad/frontend
+cd /var/www/gari-motors/frontend
 npm run build
 # → Output in frontend/dist/
 ```
@@ -146,15 +139,15 @@ npm run build
 
 ```bash
 # Copy nginx config
-sudo cp /var/www/kayad/nginx.conf /etc/nginx/sites-available/kayad
+sudo cp /var/www/gari-motors/frontend/nginx.conf /etc/nginx/sites-available/gari-motors
 
 # Edit domain name
-sudo sed -i 's/kayad.space/YOUR-ACTUAL-DOMAIN.co.ke/g' \
-  /etc/nginx/sites-available/kayad
+sudo sed -i 's/garimotors.co.ke/YOUR-ACTUAL-DOMAIN.co.ke/g' \
+  /etc/nginx/sites-available/gari-motors
 
 # Enable site
-sudo ln -sf /etc/nginx/sites-available/kayad \
-            /etc/nginx/sites-enabled/kayad
+sudo ln -sf /etc/nginx/sites-available/gari-motors \
+            /etc/nginx/sites-enabled/gari-motors
 
 # Remove default site
 sudo rm -f /etc/nginx/sites-enabled/default
@@ -190,7 +183,7 @@ sudo certbot renew --dry-run
 ## Step 8 — Start Backend with PM2
 
 ```bash
-cd /var/www/kayad
+cd /var/www/gari-motors
 
 # Start in cluster mode (uses all CPU cores)
 pm2 start ecosystem.config.cjs
@@ -204,12 +197,12 @@ pm2 startup
 
 # Verify
 pm2 status
-# → kayad-backend   online   cluster (N instances)
+# → gari-backend   online   cluster (N instances)
 ```
 
 Expected startup logs:
 ```
-🚗 Kayad API
+🚗 Gari Motors API
 ├─ URL:      http://localhost:5000
 ├─ Env:      production
 ├─ Routes:   13 mounted
@@ -227,7 +220,7 @@ Expected startup logs:
 ## Step 9 — Set Up Cron Jobs
 
 ```bash
-cd /var/www/kayad/backend
+cd /var/www/gari-motors/backend
 bash scripts/setup-cron.sh
 ```
 
@@ -251,7 +244,7 @@ curl https://yourdomain.co.ke/health/deep
 # Test login
 curl -X POST https://yourdomain.co.ke/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@kayad.space","password":"password123"}'
+  -d '{"email":"admin@garimotors.co.ke","password":"password123"}'
 # → {"success":true,"token":"..."}
 
 # Test car listing
@@ -280,11 +273,11 @@ EMAIL_HOST=smtp.resend.com
 EMAIL_PORT=465
 EMAIL_USER=resend
 EMAIL_PASS=re_your_api_key
-EMAIL_FROM=noreply@kayad.space
+EMAIL_FROM=noreply@garimotors.co.ke
 EOF
 
 # Restart to activate
-pm2 restart kayad-backend
+pm2 restart gari-backend
 ```
 
 See `MONITORING.md` for full setup guides for all integrations.
@@ -307,7 +300,7 @@ sudo ufw status
 ## Updating the App
 
 ```bash
-cd /var/www/kayad
+cd /var/www/gari-motors
 bash backend/scripts/deploy.sh
 ```
 
@@ -319,25 +312,25 @@ This script: pulls latest code → runs backup → restarts backend → rebuilds
 
 ```bash
 # Live PM2 logs
-pm2 logs kayad-backend --lines 100
+pm2 logs gari-backend --lines 100
 
 # CPU + memory usage
 pm2 monit
 
 # Backend errors only
-pm2 logs kayad-backend --err --lines 50
+pm2 logs gari-backend --err --lines 50
 
 # Nginx error log
 sudo tail -f /var/log/nginx/error.log
 
 # Backup log
-tail -f /var/log/kayad/backup.log
+tail -f /var/log/gari/backup.log
 
 # Restart backend
-pm2 restart kayad-backend
+pm2 restart gari-backend
 
 # Zero-downtime reload
-pm2 reload kayad-backend
+pm2 reload gari-backend
 ```
 
 ---

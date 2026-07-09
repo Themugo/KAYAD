@@ -6,11 +6,10 @@
 // Sends admin notifications for aging disputes.
 // ─────────────────────────────────────────────────────────────
 
-import Dispute from "../models/Dispute.js";
 import { STATES } from "./disputeStateMachine.js";
-import Notification from "../models/Notification.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findAll, create } from "../db/index.js";
 
 const ENABLED = process.env.DISPUTE_CRON_ENABLED !== "false";
 
@@ -19,13 +18,10 @@ const MEDIATION_MAX_DAYS = parseInt(process.env.DISPUTE_MEDIATION_MAX_DAYS || "7
 
 const notifyAdmins = async (title, message) => {
   try {
-    const admins = await (await import("../models/User.js")).default.find(
-      { role: { $in: ["admin", "superadmin"] } },
-      { _id: 1 },
-    ).lean();
+    const admins = await findAll("users", { filters: { role: { $in: ["admin", "superadmin"] } }, select: "id" });
     for (const admin of admins) {
-      const notif = await Notification.create({ user: admin._id, title, message, type: "dispute" });
-      getIO()?.to(`user_${admin._id}`).emit("notification", notif);
+      const notif = await create("notifications", { user: admin.id, title, message, type: "dispute" });
+      getIO()?.to(`user_${admin.id}`).emit("notification", notif);
     }
     getIO()?.to("admins").emit("notification", { title, message, type: "dispute" });
   } catch (e) {
@@ -37,11 +33,11 @@ const notifyAdmins = async (title, message) => {
 const escalateOpenDisputes = async () => {
   const cutoff = new Date(Date.now() - ESCALATION_HOURS_OPEN * 3600000);
 
-  const staleOpen = await Dispute.find({
+  const staleOpen = await findAll("disputes", { filters: {
     status: STATES.OPEN,
     assignedTo: null,
     createdAt: { $lte: cutoff },
-  }).populate("openedBy", "name");
+  } }) /* .populate("openedBy", "name") - TODO: use separate query */;
 
   if (staleOpen.length === 0) return;
 
@@ -67,11 +63,11 @@ const escalateOpenDisputes = async () => {
 const flagStuckMediation = async () => {
   const cutoff = new Date(Date.now() - MEDIATION_MAX_DAYS * 86400000);
 
-  const stuckMediation = await Dispute.find({
+  const stuckMediation = await findAll("disputes", { filters: {
     status: STATES.MEDIATION,
     "mediation.startedAt": { $lte: cutoff },
     "mediation.completedAt": null,
-  });
+  } });
 
   if (stuckMediation.length === 0) return;
 

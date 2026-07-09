@@ -125,7 +125,8 @@ jobs:
           
       - name: Run restore test
         env:
-          MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           RUN_RESTORE_TEST: true
         run: |
           cd backend
@@ -178,22 +179,23 @@ jobs:
           cd backend
           npm ci
           
-      - name: Simulate database failover
+      - name: Verify database connectivity
         env:
-          MONGODB_URI: ${{ secrets.STANDBY_MONGODB_URI }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: |
           cd backend
-          echo "Simulating database failover to standby..."
-          # This would be implemented based on your failover setup
-          # For now, just verify standby connectivity
+          echo "Verifying Supabase connectivity..."
           node -e "
-          const mongoose = require('mongoose');
-          const uri = process.env.MONGODB_URI;
-          mongoose.connect(uri).then(() => {
-            console.log('Standby database connected successfully');
+          import('@supabase/supabase-js').then(({ createClient }) => {
+            const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+            return sb.from('users').select('id', { count: 'exact', head: true });
+          }).then(({ count, error }) => {
+            if (error) { console.error('Database check failed:', error.message); process.exit(1); }
+            console.log('Database connected. User count:', count);
             process.exit(0);
           }).catch(err => {
-            console.error('Standby database connection failed:', err);
+            console.error('Database connection failed:', err);
             process.exit(1);
           });
           "

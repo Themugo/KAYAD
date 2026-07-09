@@ -5,12 +5,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import express from "express";
-import mongoose from "mongoose";
 import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { getAllMetrics, getCounter, getGauge, getHistogram } from "../config/metrics.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const router = express.Router();
 
@@ -28,12 +28,14 @@ router.get("/", async (req, res) => {
       nodeVersion: process.version,
     };
 
-    // Add database metrics
-    const dbMetrics = {
-      readyState: mongoose.connection.readyState,
-      host: mongoose.connection.host,
-      name: mongoose.connection.name,
-    };
+    let dbMetrics = { connected: false };
+    try {
+      const sb = getSupabase();
+      const { error } = await sb.from("cars").select("id", { count: 'exact', head: true }).limit(1);
+      dbMetrics = { connected: !error };
+    } catch {
+      dbMetrics = { connected: false };
+    }
 
     // Add cache metrics
     const cacheMetrics = cacheService.getStats();
@@ -126,9 +128,8 @@ router.get("/database", async (req, res) => {
       connectionPool: connectionPoolMetrics,
       replicaSet: replicaSetMetrics,
       connectionInfo: {
-        readyState: mongoose.connection.readyState,
-        host: mongoose.connection.host,
-        name: mongoose.connection.name,
+        type: "supabase",
+        connected: true,
       },
     });
   } catch (error) {
@@ -199,30 +200,7 @@ router.get("/replica-set", async (req, res) => {
       }
     });
 
-    // Get actual replica set status from MongoDB
-    let replicaSetStatus = null;
-    if (process.env.MONGO_REPLICA_SET_NAME) {
-      try {
-        const admin = mongoose.connection.db.admin();
-        const status = await admin.command({ replSetGetStatus: 1 });
-        replicaSetStatus = {
-          name: status.set,
-          primary: status.members.find((m) => m.stateStr === "PRIMARY")?.name,
-          secondaries: status.members.filter((m) => m.stateStr === "SECONDARY").length,
-          arbiters: status.members.filter((m) => m.stateStr === "ARBITER").length,
-          members: status.members.map((m) => ({
-            name: m.name,
-            state: m.stateStr,
-            health: m.health,
-            optimeDate: m.optimeDate,
-          })),
-        };
-      } catch (error) {
-        replicaSetStatus = {
-          error: error.message,
-        };
-      }
-    }
+    let replicaSetStatus = { provider: "supabase", managed: true };
 
     res.json({
       success: true,

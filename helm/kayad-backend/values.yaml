@@ -90,7 +90,8 @@ env:
   METRICS_PORT: "9090"
 
 secrets:
-  mongoUri: ""
+  supabaseUrl: ""
+  supabaseServiceKey: ""
   redisUrl: ""
   jwtSecret: ""
   sentryDsn: ""
@@ -114,9 +115,9 @@ persistence:
   size: 50Gi
 
 mongodb:
-  enabled: true
-  host: "mongodb"
-  port: 27017
+  enabled: false
+  host: ""
+  port: 0
   database: "kayad"
 
 redis:

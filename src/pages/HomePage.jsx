@@ -1,230 +1,213 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Shield, FileCheck, UserCheck, Gavel, MapPin, Gauge, RefreshCw, AlertTriangle, Car } from 'lucide-react';
-import { carsAPI, formatKES } from '../api/api';
-import EmptyState from '../components/EmptyState';
-import usePageMeta from '../hooks/usePageMeta';
-import '../styles/home.css';
+import CarCard from '../components/CarCard.jsx';
+import { MOCK_CARS } from '../data/mockCars.js';
 
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-const fallbackSlides = [
-  { image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg', label: 'Executive Sedan' },
-  { image: 'https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=800&h=533&fit=crop', label: 'Luxury SUV' },
-  { image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&h=533&fit=crop', label: 'Premium Pickup' },
-  { image: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg', label: 'Sports Vehicle' },
+const SLIDES = [
+  {
+    id: 1,
+    image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Drive Your Dream Today',
+    sub: 'Buy, sell and auction vehicles with confidence.',
+  },
+  {
+    id: 2,
+    image: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Kenya\'s Finest Selection',
+    sub: 'Premium verified vehicles ready for your journey.',
+  },
+  {
+    id: 3,
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Bid. Buy. Drive.',
+    sub: 'Real-time auctions with transparent M-Pesa escrow.',
+  },
+  {
+    id: 4,
+    image: 'https://images.pexels.com/photos/1805053/pexels-photo-1805053.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Trusted by Thousands',
+    sub: 'Every seller is vetted. Every deal is protected.',
+  },
 ];
 
-const trustItems = [
-  { icon: Shield, title: 'Escrow Protection', desc: 'Funds held until safe delivery.' },
-  { icon: FileCheck, title: 'Pre-Inspection', desc: 'Independent check before purchase.' },
-  { icon: UserCheck, title: 'Verified Dealers', desc: 'All sellers vetted and approved.' },
-  { icon: Gavel, title: 'Auctions', desc: 'Transparent real-time bidding.' },
+const FEATURES = [
+  {
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+      </svg>
+    ),
+    title: 'Escrow Protection',
+    desc: 'Funds held until safe delivery.',
+  },
+  {
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      </svg>
+    ),
+    title: 'Pre-Inspection',
+    desc: 'Independent check before purchase.',
+  },
+  {
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+      </svg>
+    ),
+    title: 'Verified Dealers',
+    desc: 'All sellers vetted and approved.',
+  },
+  {
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <path strokeLinecap="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ),
+    title: 'Auctions',
+    desc: 'Transparent real-time bidding.',
+  },
 ];
+
+const FEATURED = MOCK_CARS.filter((c) => c.featured);
 
 export default function HomePage() {
-  usePageMeta('Home', "East Africa's most trusted car marketplace.");
+  const [current, setCurrent] = useState(0);
 
-  const [heroSlides, setHeroSlides] = useState(fallbackSlides);
-  const [featuredCars, setFeaturedCars] = useState([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [featuredError, setFeaturedError] = useState(null);
-  const timerRef = useRef(null);
-
-  const loadFeatured = useCallback(async () => {
-    setLoading(true);
-    setFeaturedError(null);
-    try {
-      const res = await carsAPI.list({ page: 1, limit: 8, sort: '-createdAt' });
-      const cars = res?.cars || res?.data || [];
-      setFeaturedCars(cars);
-      const withImages = cars.filter(c => c.images?.[0]?.url || c.images?.[0]);
-      if (withImages.length >= 3) {
-        const picks = shuffle(withImages).slice(0, 6);
-        setHeroSlides(picks.map(c => ({
-          image: c.images[0]?.url || c.images[0],
-          label: c.title,
-        })));
-      }
-    } catch (error) {
-      console.error('Failed to load featured cars:', error);
-      setFeaturedError(error);
-      setFeaturedCars([]);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    const t = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % SLIDES.length);
+    }, 5000);
+    return () => clearInterval(t);
   }, []);
 
-  useEffect(() => {
-    let _cancelled = false;
-    loadFeatured().catch(() => {});
-    return () => { _cancelled = true; };
-  }, [loadFeatured]);
-
-  const slides = heroSlides.length > 0 ? heroSlides : fallbackSlides;
-
-  useEffect(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => setCurrentSlide(p => (p + 1) % slides.length), 5000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [slides.length]);
-
-  const safeSlide = slides.length > 0 ? currentSlide % slides.length : 0;
+  const goTo = (i) => setCurrent(i);
+  const prev = () => setCurrent((p) => (p - 1 + SLIDES.length) % SLIDES.length);
+  const next = () => setCurrent((p) => (p + 1) % SLIDES.length);
 
   return (
-    <div className="home-page">
-      {/* ═══ HERO — Fullscreen slideshow ═══ */}
-      <section className="hero-section">
-        {slides.map((slide, i) => (
-          <div key={i} className={`hero-slide ${i === safeSlide ? 'hero-slide-active' : 'hero-slide-hidden'}`}>
-            <img src={slide.image} alt={slide.label} className="hero-slide-img" />
+    <>
+      {/* ── HERO SLIDER ── */}
+      <section className="kd-hero">
+        {SLIDES.map((slide, i) => (
+          <div
+            key={slide.id}
+            className={`kd-slide${i === current ? ' active' : ''}`}
+          >
+            <img src={slide.image} alt={slide.headline} />
+            <div className="kd-slide__overlay" />
           </div>
         ))}
 
-        <div className="hero-overlay-right" />
-        <div className="hero-overlay-bottom" />
-
-        <div className="section-container hero-content">
-          <p className="hero-overline">East Africa's Trusted Car Marketplace</p>
-          <h1 className="hero-heading">
-            <span className="gradient-text">Drive Your Dream Today</span>
-          </h1>
-          <p className="hero-subtitle">Buy, sell and auction vehicles with confidence.</p>
-          <div className="hero-actions">
-            <Link to="/showroom" className="hero-btn-primary">
-              Browse Cars <ArrowRight size={16} />
+        <div className="kd-hero__content">
+          <p className="kd-hero__eyebrow">EAST AFRICA'S TRUSTED CAR MARKETPLACE</p>
+          <h1 className="kd-hero__title">{SLIDES[current].headline}</h1>
+          <p className="kd-hero__sub">{SLIDES[current].sub}</p>
+          <div className="kd-hero__actions">
+            <Link to="/browse" className="kd-hero__cta-primary">
+              Browse Cars <span>&#8594;</span>
             </Link>
-            <Link to="/sell" className="hero-btn-secondary">
+            <Link to="/register?role=dealer" className="kd-hero__cta-ghost">
               Sell a Vehicle
             </Link>
           </div>
         </div>
 
-        <div className="hero-slide-dots">
-          {slides.map((_, i) => (
-            <button key={i} onClick={() => setCurrentSlide(i)}
-              className={`hero-dot ${i === safeSlide ? 'hero-dot-active' : 'hero-dot-inactive'}`}
+        {/* Nav arrows */}
+        <button className="kd-hero__arrow kd-hero__arrow--prev" onClick={prev} aria-label="Previous">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button className="kd-hero__arrow kd-hero__arrow--next" onClick={next} aria-label="Next">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Dots */}
+        <div className="kd-hero__dots">
+          {SLIDES.map((_, i) => (
+            <button
+              key={i}
+              className={`kd-hero__dot${i === current ? ' active' : ''}`}
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
             />
           ))}
         </div>
       </section>
 
-      {/* ═══ TRUST STRIP ═══ */}
-      <section className="trust-strip">
-        <div className="section-container">
-          <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-border">
-            {trustItems.map((item, _i) => (
-              <div key={item.title} className="flex items-center gap-3 px-5 py-4">
-                <item.icon className="w-4 h-4 text-gold shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-white/85 text-[12px] font-medium leading-tight">{item.title}</p>
-                  <p className="text-white/35 text-[11px] leading-snug mt-0.5 truncate hidden sm:block">{item.desc}</p>
+      {/* ── FEATURE BAR ── */}
+      <div className="kd-features">
+        <div className="container">
+          <div className="kd-features__grid">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="kd-feature">
+                <span className="kd-feature__icon">{f.icon}</span>
+                <div>
+                  <div className="kd-feature__title">{f.title}</div>
+                  <div className="kd-feature__desc">{f.desc}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ═══ FEATURED VEHICLES — always rendered ═══ */}
-      <section className="featured-section">
-        <div className="section-container">
-          <div className="featured-header">
-            <div>
-              <h2 className="section-heading">Featured Vehicles</h2>
-              <p className="section-subheading">Premium selection from verified dealers.</p>
-            </div>
-            <Link to="/showroom" className="btn-outline btn-sm group hidden sm:inline-flex">
-              View All <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
+      {/* ── FEATURED VEHICLES ── */}
+      <section className="kd-section">
+        <div className="container">
+          <div className="kd-section__header">
+            <h2 className="kd-section__title">Featured Vehicles</h2>
+            <Link to="/browse" className="kd-section__link">View all &#8594;</Link>
           </div>
-
-          {loading ? (
-            <div className="fc-grid">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="featured-card" aria-hidden="true">
-                  <div className="skeleton" style={{ height: 160, borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }} />
-                  <div className="featured-card-body">
-                    <div className="skeleton" style={{ height: 18, width: '70%', marginBottom: 8, borderRadius: 4 }} />
-                    <div className="skeleton" style={{ height: 12, width: '45%', marginBottom: 10, borderRadius: 4 }} />
-                    <div className="skeleton" style={{ height: 20, width: '50%', marginBottom: 8, borderRadius: 4 }} />
-                    <div className="skeleton" style={{ height: 12, width: '60%', borderRadius: 4 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : featuredError ? (
-            <div className="featured-error-state">
-              <div className="empty-state-icon" style={{ opacity: 0.35 }}>
-                <AlertTriangle size={48} strokeWidth={1.2} />
-              </div>
-              <h3 className="empty-state-title">Could not load featured vehicles</h3>
-              <p className="empty-state-text">Check your connection and try again.</p>
-              <button type="button" onClick={loadFeatured} className="btn btn-gold btn-sm" style={{ marginTop: 8 }}>
-                <RefreshCw size={14} style={{ marginRight: 6 }} />
-                Try Again
-              </button>
-            </div>
-          ) : featuredCars.length === 0 ? (
-            <div className="featured-empty-state">
-              <EmptyState
-                icon={Car}
-                title="No featured vehicles yet"
-                message="Premium listings will appear here once dealers add vehicles."
-                action={{ label: 'Browse All Vehicles', to: '/showroom' }}
-                size="sm"
-              />
-            </div>
-          ) : (
-            <>
-              <div className="fc-grid">
-                {featuredCars.map(car => (
-                  <Link key={car._id} to={`/cars/${car._id}`} className="featured-card">
-                    <div className="featured-card-img-wrap">
-                      <img
-                        src={car.images?.[0]?.url || car.images?.[0] || 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg'}
-                        alt={car.title}
-                        className="featured-card-img"
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className="featured-card-body">
-                      <h3 className="featured-card-title">{car.title}</h3>
-                      {car.dealer?.name && <p className="featured-card-dealer">{car.dealer.name}</p>}
-                      <p className="featured-card-price gradient-text">{formatKES(car.price)}</p>
-                      <div className="featured-card-footer">
-                        <span className="featured-card-footer-spec">
-                          <Gauge size={12} />
-                          {car.mileage ? `${Number(car.mileage).toLocaleString()} km` : '-'}
-                        </span>
-                        <span className="capitalize">{car.fuel || car.fuel_type || '-'}</span>
-                        {car.location?.city && (
-                          <span className="featured-card-location">
-                            <MapPin size={12} />
-                            <span>{car.location.city}</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="featured-mobile-cta">
-                <Link to="/showroom" className="btn-outline">Browse All Vehicles</Link>
-              </div>
-            </>
-          )}
+          <div className="kd-cars-grid">
+            {FEATURED.map((car) => (
+              <CarCard key={car.id} car={car} />
+            ))}
+          </div>
         </div>
       </section>
-    </div>
+
+      {/* ── LIVE AUCTIONS ── */}
+      {MOCK_CARS.some((c) => c.isAuction) && (
+        <section className="kd-section kd-section--alt">
+          <div className="container">
+            <div className="kd-section__header">
+              <div>
+                <span className="kd-auction-badge">
+                  <span className="kd-auction-dot" />
+                  LIVE
+                </span>
+                <h2 className="kd-section__title" style={{ marginTop: 8 }}>Active Auctions</h2>
+              </div>
+              <Link to="/auctions" className="kd-section__link">All Auctions &#8594;</Link>
+            </div>
+            <div className="kd-cars-grid">
+              {MOCK_CARS.filter((c) => c.isAuction).map((car) => (
+                <CarCard key={car.id} car={car} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── CTA ── */}
+      <section className="kd-cta">
+        <div className="container">
+          <div className="kd-cta__inner">
+            <h2 className="kd-cta__title">Ready to Sell Your Car?</h2>
+            <p className="kd-cta__sub">
+              List for free and reach thousands of verified buyers across East Africa.
+              Our live auction feature gets you the best price — fast.
+            </p>
+            <Link to="/register?role=dealer" className="kd-hero__cta-primary" style={{ display: 'inline-flex' }}>
+              List Your Car Free &#8594;
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

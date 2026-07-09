@@ -1,27 +1,31 @@
-import Car from "../models/Car.js";
+import { findAll } from "../db/index.js";
 
 export const getPricingRecommendations = async (carData) => {
   const { brand, model, year, mileage, fuel, transmission, bodyType } = carData;
   if (!brand) return { recommendations: [], marketData: null };
 
-  const match = { brand, price: { $gt: 0, $lt: 50000000 } };
-  if (model) match.model = model;
-  if (year) match.year = { $gte: year - 3, $lte: year + 3 };
-  if (fuel) match.fuel = fuel;
-  if (bodyType) match.bodyType = bodyType;
+  const matchFilters = { brand, price: { $gt: 0, $lt: 50000000 } };
+  if (model) matchFilters.model = model;
+  if (year) matchFilters.year = { $gte: year - 3, $lte: year + 3 };
+  if (fuel) matchFilters.fuel = fuel;
+  if (bodyType) matchFilters.bodyType = bodyType;
 
-  const similar = await Car.find(match)
-    .select("price year mileage title")
-    .sort({ createdAt: -1 })
-    .limit(50)
-    .lean();
+  const similar = await findAll("cars", {
+    filters: matchFilters,
+    select: "price,year,mileage,title",
+    orderBy: "createdAt",
+    ascending: false,
+    limit: 50,
+  });
 
   if (similar.length < 2) {
-    const broader = await Car.find({ brand, price: { $gt: 0, $lt: 50000000 } })
-      .select("price year mileage title")
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .lean();
+    const broader = await findAll("cars", {
+      filters: { brand, price: { $gt: 0, $lt: 50000000 } },
+      select: "price,year,mileage,title",
+      orderBy: "createdAt",
+      ascending: false,
+      limit: 20,
+    });
     if (broader.length < 2) return { recommendations: [], marketData: null };
     return computePricing(carData, broader);
   }
@@ -62,13 +66,6 @@ function computePricing(carData, similar) {
 
   return {
     recommendations: suggestion ? [{ suggestedPrice: suggestion, reason }] : [],
-    marketData: {
-      avgPrice,
-      medianPrice,
-      minPrice,
-      maxPrice,
-      sampleSize: similar.length,
-      priceRange: { low: q1, high: q3 },
-    },
+    marketData: { avgPrice, medianPrice, minPrice, maxPrice, sampleSize: similar.length, priceRange: { low: q1, high: q3 } },
   };
 }

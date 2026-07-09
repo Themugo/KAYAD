@@ -43,7 +43,8 @@ const FRONTEND_REQUIRED_VARS = [
 const BACKEND_REQUIRED_VARS = [
   'NODE_ENV',
   'PORT',
-  'MONGO_URI',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_KEY',
   'JWT_SECRET',
   'REFRESH_TOKEN_SECRET',
   'FRONTEND_URL',
@@ -51,7 +52,8 @@ const BACKEND_REQUIRED_VARS = [
 
 // Critical environment variables (will fail deployment if missing)
 const CRITICAL_VARS = [
-  'MONGO_URI',
+  'SUPABASE_URL',
+  'SUPABASE_SERVICE_KEY',
   'JWT_SECRET',
   'FRONTEND_URL',
 ];

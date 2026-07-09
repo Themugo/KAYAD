@@ -3,11 +3,11 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import PlatformConfig from "../models/PlatformConfig.js";
 import { withRetry, createServiceConfig } from "../utils/retry.js";
 import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 import { triggerAlert } from "../config/alerting.js";
+import { findOne } from "../db/index.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -70,7 +70,7 @@ const loadConfig = async (overrides = {}) => {
   };
 
   try {
-    const db = await PlatformConfig.findOne().lean();
+    const db = await findOne("platform_configs", {});
     if (db?.daraja) {
       cfg = { ...cfg, ...db.daraja };
     }

@@ -4,14 +4,10 @@
 // Manages lead creation, updates, and analytics
 // ─────────────────────────────────────────────────────────────
 
-import Lead from "../models/Lead.js";
-import LeadActivity from "../models/LeadActivity.js";
-import Car from "../models/Car.js";
-import Chat from "../models/Chat.js";
-import Auction from "../models/Auction.js";
-import Escrow from "../models/Escrow.js";
 import { addTimelineEvent, getLeadTimeline } from "./leadTimelineService.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, findById, findOne, create, count, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // ➕ CREATE LEAD
@@ -20,7 +16,7 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 export const createLead = async (buyerId, dealerId, vehicleId, source, referenceId) => {
   try {
     // Check if lead already exists for this combination
-    const existingLead = await Lead.findOne({
+    const existingLead = await findOne("leads", {
       buyer: buyerId,
       dealer: dealerId,
       vehicle: vehicleId,
@@ -36,13 +32,13 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
     // Get vehicle details for estimated value
     let estimatedValue = 0;
     if (vehicleId) {
-      const vehicle = await Car.findById(vehicleId);
+      const vehicle = await findById("cars", vehicleId);
       if (vehicle) {
         estimatedValue = vehicle.price || 0;
       }
     }
 
-    const lead = await Lead.create({
+    const lead = await create("leads", {
       buyer: buyerId,
       dealer: dealerId,
       vehicle: vehicleId,
@@ -53,12 +49,12 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
     });
 
     // Add creation activity
-    await addTimelineEvent(lead._id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, {
+    await addTimelineEvent(lead.id, "lead_created", buyerId, "buyer", `Lead created from ${source}`, {
       source,
       referenceId,
     });
 
-    logInfo("Lead created", { leadId: lead._id, buyerId, dealerId, source });
+    logInfo("Lead created", { leadId: lead.id, buyerId, dealerId, source });
     return lead;
   } catch (err) {
     logError("Failed to create lead", err, { buyerId, dealerId, source });
@@ -72,7 +68,7 @@ export const createLead = async (buyerId, dealerId, vehicleId, source, reference
 
 export const updateLeadStage = async (leadId, newStage, actorId) => {
   try {
-    const lead = await Lead.findById(leadId);
+    const lead = await findById("leads", leadId);
     if (!lead) {
       throw new Error("Lead not found");
     }
@@ -92,7 +88,7 @@ export const updateLeadStage = async (leadId, newStage, actorId) => {
 
 export const addLeadActivity = async (leadId, type, actorId, details) => {
   try {
-    const lead = await Lead.findById(leadId);
+    const lead = await findById("leads", leadId);
     if (!lead) {
       throw new Error("Lead not found");
     }
@@ -132,10 +128,10 @@ export const getDealerLeads = async (dealerId, filters = {}) => {
 
 export const getLeadById = async (leadId) => {
   try {
-    const lead = await Lead.findById(leadId)
-      .populate("buyer", "name email phone")
-      .populate("dealer", "name email businessName")
-      .populate("vehicle", "title brand model year price images");
+    const lead = await findById("leads", leadId)
+       /* .populate("buyer", "name email phone") - TODO: use separate query */
+       /* .populate("dealer", "name email businessName") - TODO: use separate query */
+       /* .populate("vehicle", "title brand model year price images") - TODO: use separate query */;
 
     if (!lead) {
       throw new Error("Lead not found");
@@ -154,7 +150,7 @@ export const getLeadById = async (leadId) => {
 
 export const archiveLead = async (leadId, actorId) => {
   try {
-    const lead = await Lead.findById(leadId);
+    const lead = await findById("leads", leadId);
     if (!lead) {
       throw new Error("Lead not found");
     }
@@ -174,7 +170,7 @@ export const archiveLead = async (leadId, actorId) => {
 
 export const markLeadAsHot = async (leadId, actorId) => {
   try {
-    const lead = await Lead.findById(leadId);
+    const lead = await findById("leads", leadId);
     if (!lead) {
       throw new Error("Lead not found");
     }
@@ -202,8 +198,8 @@ export const calculateConversionRate = async (dealerId, startDate, endDate) => {
       },
     };
 
-    const totalLeads = await Lead.countDocuments(matchQuery);
-    const soldLeads = await Lead.countDocuments({
+    const totalLeads = await count("leads", matchQuery);
+    const soldLeads = await count("leads", {
       ...matchQuery,
       stage: "sold",
     });
@@ -227,10 +223,10 @@ export const calculateConversionRate = async (dealerId, startDate, endDate) => {
 
 export const calculateResponseTime = async (dealerId, startDate, endDate) => {
   try {
-    const leads = await Lead.find({
+    const leads = await findAll("leads", { filters: {
       dealer: dealerId,
       createdAt: {
-        $gte: new Date(startDate),
+        $gte: new Date(startDate }),
         $lte: new Date(endDate),
       },
       firstResponseTime: { $gt: 0 },
@@ -285,28 +281,24 @@ export const getLeadAnalytics = async (dealerId, startDate, endDate) => {
     };
 
     // Total leads by source
-    const leadsBySource = await Lead.aggregate([
-      { $match: matchQuery },
+    const leadsBySource = await aggregate("leads", [{ $match: matchQuery },
       {
         $group: {
           _id: "$source",
           count: { $sum: 1 },
           totalValue: { $sum: "$estimatedValue" },
         },
-      },
-    ]);
+      },]);
 
     // Total leads by stage
-    const leadsByStage = await Lead.aggregate([
-      { $match: matchQuery },
+    const leadsByStage = await aggregate("leads", [{ $match: matchQuery },
       {
         $group: {
           _id: "$stage",
           count: { $sum: 1 },
           totalValue: { $sum: "$estimatedValue" },
         },
-      },
-    ]);
+      },]);
 
     // Conversion metrics
     const conversionMetrics = await calculateConversionRate(dealerId, startDate, endDate);
@@ -315,7 +307,7 @@ export const getLeadAnalytics = async (dealerId, startDate, endDate) => {
     const responseTimeMetrics = await calculateResponseTime(dealerId, startDate, endDate);
 
     // Hot leads
-    const hotLeadsCount = await Lead.countDocuments({
+    const hotLeadsCount = await count("leads", {
       ...matchQuery,
       isHot: true,
     });
@@ -339,7 +331,7 @@ export const getLeadAnalytics = async (dealerId, startDate, endDate) => {
 
 export const findOrCreateLeadFromChat = async (chatId) => {
   try {
-    const chat = await Chat.findById(chatId).populate("car");
+    const chat = await findById("chats", chatId) /* .populate("car") - TODO: use separate query */;
     if (!chat) {
       throw new Error("Chat not found");
     }
@@ -365,19 +357,19 @@ export const findOrCreateLeadFromChat = async (chatId) => {
 
 export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
   try {
-    const auction = await Auction.findById(auctionId).populate("carId");
+    const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
     if (!auction) {
       throw new Error("Auction not found");
     }
 
-    const vehicle = await Car.findById(auction.carId);
+    const vehicle = await findById("cars", auction.carId);
     if (!vehicle) {
       throw new Error("Vehicle not found");
     }
 
     const dealerId = vehicle.dealer;
 
-    return await createLead(buyerId, dealerId, vehicle._id, "auction", auctionId);
+    return await createLead(buyerId, dealerId, vehicle.id, "auction", auctionId);
   } catch (err) {
     logError("Failed to find or create lead from auction", err, { auctionId });
     throw err;
@@ -390,7 +382,7 @@ export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
 
 export const findOrCreateLeadFromEscrow = async (escrowId) => {
   try {
-    const escrow = await Escrow.findById(escrowId).populate("car");
+    const escrow = await findById("escrows", escrowId) /* .populate("car") - TODO: use separate query */;
     if (!escrow) {
       throw new Error("Escrow not found");
     }
@@ -402,7 +394,7 @@ export const findOrCreateLeadFromEscrow = async (escrowId) => {
     const lead = await createLead(buyerId, dealerId, vehicleId, "chat", null);
 
     // Update lead stage to escrow_started
-    await updateLeadStage(lead._id, "escrow_started", dealerId);
+    await updateLeadStage(lead.id, "escrow_started", dealerId);
 
     return lead;
   } catch (err) {

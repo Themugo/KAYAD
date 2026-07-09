@@ -1,38 +1,33 @@
-import User from "../models/User.js";
-import Car from "../models/Car.js";
-import Bid from "../models/Bid.js";
-import Escrow from "../models/Escrow.js";
-import Dispute from "../models/Dispute.js";
-import FraudDetection from "../models/FraudDetection.js";
+import { findAll, findById, create } from "../db/index.js";
 
 // =============================
 // 👤 USER FRAUD DETECTION
 // =============================
 
 export const detectDuplicateAccounts = async (userId) => {
-  const user = await User.findById(userId);
+  const user = await findById("users", userId);
   if (!user) return null;
 
-  const duplicates = await User.find({
+  const duplicates = await findAll("users", { filters: {
     $or: [
       { phone: user.phone, _id: { $ne: userId } },
       { email: user.email, _id: { $ne: userId } },
     ],
-  });
+  } });
 
   if (duplicates.length > 0) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: userId,
       targetType: "user",
       fraudType: "multiple_accounts",
       severity: "high",
       evidence: {
         duplicateCount: duplicates.length,
-        duplicateIds: duplicates.map((d) => d._id),
+        duplicateIds: duplicates.map((d) => d.id),
         phone: user.phone,
         email: user.email,
       },
-      relatedEntities: duplicates.map((d) => d._id),
+      relatedEntities: duplicates.map((d) => d.id),
       detectionMethod: "duplicate_contact_check",
       confidenceScore: 90,
     });
@@ -43,24 +38,24 @@ export const detectDuplicateAccounts = async (userId) => {
 };
 
 export const detectDuplicatePhone = async (phone) => {
-  const users = await User.find({ phone });
+  const users = await findAll("users", { filters: { phone } });
 
   if (users.length > 1) {
     const primaryUser = users[0];
     const otherUsers = users.slice(1);
 
     for (const user of otherUsers) {
-      await FraudDetection.create({
-        target: user._id,
+      await create("fraud_detections", {
+        target: user.id,
         targetType: "user",
         fraudType: "duplicate_phone",
         severity: "high",
         evidence: {
           phone,
-          primaryUserId: primaryUser._id,
+          primaryUserId: primaryUser.id,
           primaryUserName: primaryUser.name,
         },
-        relatedEntities: [primaryUser._id],
+        relatedEntities: [primaryUser.id],
         detectionMethod: "phone_duplication_check",
         confidenceScore: 95,
       });
@@ -73,24 +68,24 @@ export const detectDuplicatePhone = async (phone) => {
 };
 
 export const detectDuplicateEmail = async (email) => {
-  const users = await User.find({ email });
+  const users = await findAll("users", { filters: { email } });
 
   if (users.length > 1) {
     const primaryUser = users[0];
     const otherUsers = users.slice(1);
 
     for (const user of otherUsers) {
-      await FraudDetection.create({
-        target: user._id,
+      await create("fraud_detections", {
+        target: user.id,
         targetType: "user",
         fraudType: "duplicate_email",
         severity: "high",
         evidence: {
           email,
-          primaryUserId: primaryUser._id,
+          primaryUserId: primaryUser.id,
           primaryUserName: primaryUser.name,
         },
-        relatedEntities: [primaryUser._id],
+        relatedEntities: [primaryUser.id],
         detectionMethod: "email_duplication_check",
         confidenceScore: 95,
       });
@@ -107,16 +102,16 @@ export const detectDuplicateEmail = async (email) => {
 // =============================
 
 export const detectSelfBidding = async (carId) => {
-  const car = await Car.findById(carId).populate("dealer");
+  const car = await findById("cars", carId) /* .populate("dealer") - TODO: use separate query */;
   if (!car) return null;
 
-  const bids = await Bid.find({ car: carId }).populate("user");
+  const bids = await findAll("bids", { filters: { car: carId } }) /* .populate("user") - TODO: use separate query */;
   const dealerId = car.dealer?._id;
 
   const suspiciousBids = bids.filter((bid) => bid.user?._id.toString() === dealerId?.toString());
 
   if (suspiciousBids.length > 0) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: dealerId,
       targetType: "user",
       fraudType: "self_bidding",
@@ -125,10 +120,10 @@ export const detectSelfBidding = async (carId) => {
         carId,
         carTitle: car.title,
         suspiciousBidCount: suspiciousBids.length,
-        suspiciousBidIds: suspiciousBids.map((b) => b._id),
+        suspiciousBidIds: suspiciousBids.map((b) => b.id),
         bidAmounts: suspiciousBids.map((b) => b.amount),
       },
-      relatedEntities: [carId, ...suspiciousBids.map((b) => b._id)],
+      relatedEntities: [carId, ...suspiciousBids.map((b) => b.id)],
       detectionMethod: "self_bidding_detection",
       confidenceScore: 100,
     });
@@ -140,7 +135,7 @@ export const detectSelfBidding = async (carId) => {
 };
 
 export const detectBidRing = async (carId) => {
-  const bids = await Bid.find({ car: carId }).populate("user");
+  const bids = await findAll("bids", { filters: { car: carId } }) /* .populate("user") - TODO: use separate query */;
 
   // Group bids by user
   const userBids = {};
@@ -176,7 +171,7 @@ export const detectBidRing = async (carId) => {
   }
 
   if (suspiciousUsers.length > 0) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: carId,
       targetType: "auction",
       fraudType: "bid_ring",
@@ -198,7 +193,7 @@ export const detectBidRing = async (carId) => {
 };
 
 export const detectSuspiciousBidSpike = async (carId) => {
-  const bids = await Bid.find({ car: carId }).sort({ createdAt: 1 });
+  const bids = await findAll("bids", { filters: { car: carId }, orderBy: { createdAt: 1 } });
 
   if (bids.length < 5) return null;
 
@@ -222,7 +217,7 @@ export const detectSuspiciousBidSpike = async (carId) => {
 
   // If more than 5 bids in a minute, it's suspicious
   if (maxBidsInMinute > 5) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: carId,
       targetType: "auction",
       fraudType: "suspicious_bid_spike",
@@ -248,28 +243,28 @@ export const detectSuspiciousBidSpike = async (carId) => {
 // =============================
 
 export const detectRepeatedDisputes = async (userId) => {
-  const disputes = await Dispute.find({
+  const disputes = await findAll("disputes", { filters: {
     $or: [{ openedBy: userId }, { openedAgainst: userId }],
-  }).sort({ createdAt: -1 });
+  }, orderBy: { createdAt: -1 } });
 
   if (disputes.length >= 3) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: userId,
       targetType: "user",
       fraudType: "repeated_disputes",
       severity: "high",
       evidence: {
         disputeCount: disputes.length,
-        disputeIds: disputes.map((d) => d._id),
+        disputeIds: disputes.map((d) => d.id),
         disputeCategories: disputes.map((d) => d.category),
         recentDisputes: disputes.slice(0, 3).map((d) => ({
-          id: d._id,
+          id: d.id,
           category: d.category,
           status: d.status,
           createdAt: d.createdAt,
         })),
       },
-      relatedEntities: disputes.map((d) => d._id),
+      relatedEntities: disputes.map((d) => d.id),
       detectionMethod: "repeated_dispute_check",
       confidenceScore: 80,
     });
@@ -283,10 +278,10 @@ export const detectRepeatedDisputes = async (userId) => {
 export const detectChargeback = async (escrowId) => {
   // This would integrate with payment processor webhooks
   // For now, it's a placeholder for when chargeback notifications come in
-  const escrow = await Escrow.findById(escrowId);
+  const escrow = await findById("escrows", escrowId);
 
   if (escrow && escrow.status === "released") {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: escrow.buyer,
       targetType: "user",
       fraudType: "chargeback",
@@ -312,7 +307,7 @@ export const detectChargeback = async (escrowId) => {
 // =============================
 
 export const detectDuplicateListing = async (dealerId) => {
-  const cars = await Car.find({ dealer: dealerId });
+  const cars = await findAll("cars", { filters: { dealer: dealerId } });
 
   // Check for duplicate titles or VINs
   const titleMap = {};
@@ -324,7 +319,7 @@ export const detectDuplicateListing = async (dealerId) => {
       if (!titleMap[car.title]) {
         titleMap[car.title] = [];
       }
-      titleMap[car.title].push(car._id);
+      titleMap[car.title].push(car.id);
 
       if (titleMap[car.title].length > 1) {
         duplicates.push({ type: "title", value: car.title, carIds: titleMap[car.title] });
@@ -335,7 +330,7 @@ export const detectDuplicateListing = async (dealerId) => {
       if (!vinMap[car.vin]) {
         vinMap[car.vin] = [];
       }
-      vinMap[car.vin].push(car._id);
+      vinMap[car.vin].push(car.id);
 
       if (vinMap[car.vin].length > 1) {
         duplicates.push({ type: "vin", value: car.vin, carIds: vinMap[car.vin] });
@@ -344,7 +339,7 @@ export const detectDuplicateListing = async (dealerId) => {
   });
 
   if (duplicates.length > 0) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: dealerId,
       targetType: "user",
       fraudType: "duplicate_listing",
@@ -365,25 +360,25 @@ export const detectDuplicateListing = async (dealerId) => {
 };
 
 export const detectVinReuse = async (vin) => {
-  const cars = await Car.find({ vin });
+  const cars = await findAll("cars", { filters: { vin } });
 
   if (cars.length > 1) {
     const primaryCar = cars[0];
     const otherCars = cars.slice(1);
 
     for (const car of otherCars) {
-      await FraudDetection.create({
+      await create("fraud_detections", {
         target: car.dealer,
         targetType: "user",
         fraudType: "vin_reuse",
         severity: "high",
         evidence: {
           vin,
-          primaryCarId: primaryCar._id,
+          primaryCarId: primaryCar.id,
           primaryCarTitle: primaryCar.title,
           primaryDealerId: primaryCar.dealer,
         },
-        relatedEntities: [primaryCar._id, car._id],
+        relatedEntities: [primaryCar.id, car.id],
         detectionMethod: "vin_reuse_detection",
         confidenceScore: 90,
       });
@@ -398,7 +393,7 @@ export const detectVinReuse = async (vin) => {
 export const detectStolenPhotos = async (carId) => {
   // This would integrate with image recognition service
   // For now, it's a placeholder
-  const car = await Car.findById(carId);
+  const car = await findById("cars", carId);
 
   if (car && car.images && car.images.length > 0) {
     // Placeholder for image similarity check
@@ -414,16 +409,16 @@ export const detectStolenPhotos = async (carId) => {
 // =============================
 
 export const detectPriceManipulation = async (carId) => {
-  const car = await Car.findById(carId);
+  const car = await findById("cars", carId);
   if (!car) return null;
 
   // Check if price is significantly below market value
-  const similarCars = await Car.find({
+  const similarCars = await findAll("cars", { filters: {
     make: car.make,
     model: car.model,
     year: { $gte: car.year - 2, $lte: car.year + 2 },
     status: "active",
-  });
+  } });
 
   if (similarCars.length < 3) return null;
 
@@ -433,7 +428,7 @@ export const detectPriceManipulation = async (carId) => {
 
   // If price is more than 40% below market value, flag as suspicious
   if (priceDeviation > 0.4) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: car.dealer,
       targetType: "user",
       fraudType: "price_manipulation",
@@ -466,29 +461,29 @@ export const detectPriceManipulation = async (carId) => {
 // =============================
 
 export const detectAccountFarms = async (dealerId) => {
-  const dealer = await User.findById(dealerId);
+  const dealer = await findById("users", dealerId);
   if (!dealer) return null;
 
   // Check for multiple accounts from same IP or device
-  const accounts = await User.find({
+  const accounts = await findAll("users", { filters: {
     $or: [{ ipAddress: dealer.ipAddress }, { userAgent: dealer.userAgent }],
     role: "dealer",
     _id: { $ne: dealerId },
-  });
+  } });
 
   if (accounts.length >= 3) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: dealerId,
       targetType: "user",
       fraudType: "account_farm",
       severity: "critical",
       evidence: {
         relatedAccountsCount: accounts.length,
-        relatedAccountIds: accounts.map((a) => a._id),
+        relatedAccountIds: accounts.map((a) => a.id),
         ipAddress: dealer.ipAddress,
         userAgent: dealer.userAgent,
       },
-      relatedEntities: accounts.map((a) => a._id),
+      relatedEntities: accounts.map((a) => a.id),
       detectionMethod: "account_farm_detection",
       confidenceScore: 85,
     });
@@ -504,17 +499,17 @@ export const detectAccountFarms = async (dealerId) => {
 // =============================
 
 export const detectDuplicatePhotos = async (carId) => {
-  const car = await Car.findById(carId);
+  const car = await findById("cars", carId);
   if (!car || !car.images || car.images.length === 0) return null;
 
   // Check if same images are used in other listings
-  const carsWithSameImages = await Car.find({
+  const carsWithSameImages = await findAll("cars", { filters: {
     images: { $in: car.images },
     _id: { $ne: carId },
-  });
+  } });
 
   if (carsWithSameImages.length > 0) {
-    await FraudDetection.create({
+    await create("fraud_detections", {
       target: car.dealer,
       targetType: "user",
       fraudType: "duplicate_photos",
@@ -523,10 +518,10 @@ export const detectDuplicatePhotos = async (carId) => {
         carId,
         carTitle: car.title,
         duplicateImageCount: car.images.length,
-        duplicateCarIds: carsWithSameImages.map((c) => c._id),
+        duplicateCarIds: carsWithSameImages.map((c) => c.id),
         duplicateCarTitles: carsWithSameImages.map((c) => c.title),
       },
-      relatedEntities: [carId, ...carsWithSameImages.map((c) => c._id)],
+      relatedEntities: [carId, ...carsWithSameImages.map((c) => c.id)],
       detectionMethod: "duplicate_photo_detection",
       confidenceScore: 90,
     });

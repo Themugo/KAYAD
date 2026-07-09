@@ -69,8 +69,7 @@ export const disburseB2C = async ({
 }) => {
   // ── DEDUP: check lastActionKey on escrow ──────────────────
   if (escrowId && idempotencyKey) {
-    const Escrow = (await import("../models/Escrow.js")).default;
-    const escrow = await Escrow.findById(escrowId).select("lastActionKey status");
+    const escrow = await findById("escrows", escrowId);
     if (!escrow) throw new Error(`Escrow ${escrowId} not found`);
     if (escrow.status === "released" || escrow.lastActionKey === idempotencyKey) {
       return { success: true, idempotent: true, message: "B2C already processed for this escrow" };
@@ -81,8 +80,7 @@ export const disburseB2C = async ({
   if (MPESA_ENV === "sandbox" && !process.env.MPESA_B2C_INITIATOR) {
     logInfo(`B2C mock: KES ${amount.toLocaleString()} to ${phone} for escrow ${escrowId}`);
     if (escrowId && idempotencyKey) {
-      const Escrow = (await import("../models/Escrow.js")).default;
-      await Escrow.findByIdAndUpdate(escrowId, { lastActionKey: idempotencyKey });
+      await update("escrows", escrowId, { lastActionKey: idempotencyKey });
     }
     return {
       success: true,
@@ -111,8 +109,7 @@ export const disburseB2C = async ({
 
   // ── Record idempotency key BEFORE API call (prevents double-disbursement) ──
   if (escrowId && idempotencyKey) {
-    const Escrow = (await import("../models/Escrow.js")).default;
-    await Escrow.findByIdAndUpdate(escrowId, { lastActionKey: idempotencyKey }).catch(() => {});
+    await update("escrows", escrowId, { lastActionKey: idempotencyKey }).catch(() => {});
   }
 
   const res = await axios.post(`${MPESA_BASE}/mpesa/b2c/v1/paymentrequest`, payload, {

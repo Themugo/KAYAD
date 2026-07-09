@@ -4,18 +4,8 @@
 // Calculates comprehensive trust and reputation scores for dealers
 // ─────────────────────────────────────────────────────────────
 
-import Dealer from "../models/Dealer.js";
-import DealerVerification from "../models/DealerVerification.js";
-import Review from "../models/Review.js";
-import Transaction from "../models/Transaction.js";
-import Escrow from "../models/Escrow.js";
-import FraudDetection from "../models/FraudDetection.js";
-import Auction from "../models/Auction.js";
-import Car from "../models/Car.js";
-import DealerHealthScore from "../models/DealerHealthScore.js";
-import User from "../models/User.js";
-import Chat from "../models/Chat.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, findById, findOne, create, update, upsert } from "../db/index.js";
 
 // =============================
 // 📊 CALCULATE HEALTH SCORE
@@ -23,7 +13,7 @@ import { logInfo, logError, logWarn } from "../utils/logger.js";
 
 export const calculateHealthScore = async (dealerId) => {
   try {
-    const dealer = await Dealer.findOne({ user: dealerId });
+    const dealer = await findOne("dealers", { user: dealerId });
     if (!dealer) {
       throw new Error("Dealer not found");
     }
@@ -58,44 +48,48 @@ export const calculateHealthScore = async (dealerId) => {
     const scoreCategory = DealerHealthScore.determineScoreCategory(clampedScore);
 
     // Get previous score for trend calculation
-    const previousRecord = await DealerHealthScore.findOne({ dealer: dealerId });
+    const previousRecord = await findOne("dealer_health_scores", { dealer: dealerId });
     const previousScore = previousRecord?.healthScore || 0;
     const scoreChange = clampedScore - previousScore;
     const trend = scoreChange > 0 ? "up" : scoreChange < 0 ? "down" : "stable";
 
     // Update or create health score record
-    const healthScore = await DealerHealthScore.findOneAndUpdate(
-      { dealer: dealerId },
-      {
-        dealer: dealerId,
-        healthScore: clampedScore,
-        scoreCategory,
-        verificationScore,
-        accountAgeScore,
-        transactionScore,
-        escrowScore,
-        reviewScore,
-        fraudScore,
-        responseScore,
-        listingQualityScore,
-        auctionScore,
-        verificationDetails: verificationScore.details,
-        accountAgeDetails: accountAgeScore.details,
-        transactionDetails: transactionScore.details,
-        escrowDetails: escrowScore.details,
-        reviewDetails: reviewScore.details,
-        fraudDetails: fraudScore.details,
-        responseDetails: responseScore.details,
-        listingQualityDetails: listingQualityScore.details,
+    const existingScore = await findOne("dealer_health_scores", { dealer: dealerId });
+    const scoreData = {
+      dealer: dealerId,
+      healthScore: clampedScore,
+      scoreCategory,
+      verificationScore,
+      accountAgeScore,
+      transactionScore,
+      escrowScore,
+      reviewScore,
+      fraudScore,
+      responseScore,
+      listingQualityScore,
+      auctionScore,
+      verificationDetails: verificationScore.details,
+      accountAgeDetails: accountAgeScore.details,
+      transactionDetails: transactionScore.details,
+      escrowDetails: escrowScore.details,
+      reviewDetails: reviewScore.details,
+      fraudDetails: fraudScore.details,
+      responseDetails: responseScore.details,
+      listingQualityDetails: listingQualityScore.details,
         auctionDetails: auctionScore.details,
-        lastCalculatedAt: new Date(),
-        lastRecalculatedAt: new Date(),
+        lastCalculatedAt: new Date().toISOString(),
+        lastRecalculatedAt: new Date().toISOString(),
         previousScore,
         scoreChange,
         trend,
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
-    );
+      };
+
+    let healthScore;
+    if (existingScore) {
+      healthScore = await update("dealer_health_scores", existingScore.id, scoreData);
+    } else {
+      healthScore = await create("dealer_health_scores", scoreData);
+    }
 
     logInfo("Health score calculated", { dealerId, healthScore: clampedScore, scoreCategory });
 
@@ -126,7 +120,7 @@ export const calculateHealthScore = async (dealerId) => {
 
 export const calculateVerificationScore = async (dealerId) => {
   try {
-    const verification = await DealerVerification.findOne({ user: dealerId });
+    const verification = await findOne("dealer_verifications", {user: dealerId});
 
     if (!verification) {
       return { score: 0, details: { completeness: 0 } };
@@ -187,7 +181,7 @@ export const calculateVerificationScore = async (dealerId) => {
 
 export const calculateAccountAgeScore = async (dealerId) => {
   try {
-    const user = await User.findById(dealerId);
+    const user = await findById("users", dealerId);
 
     if (!user) {
       return { score: 0, details: { accountAgeDays: 0 } };
@@ -229,7 +223,7 @@ export const calculateAccountAgeScore = async (dealerId) => {
 
 export const calculateTransactionScore = async (dealerId) => {
   try {
-    const transactions = await Transaction.find({ user: dealerId, status: { $ne: "pending" } });
+    const transactions = await findAll("transactions", { filters: { user: dealerId, status: { $ne: "pending" } } });
 
     if (transactions.length === 0) {
       return { score: 50, details: { totalTransactions: 0, successRate: 100 } };
@@ -278,7 +272,7 @@ export const calculateTransactionScore = async (dealerId) => {
 
 export const calculateEscrowScore = async (dealerId) => {
   try {
-    const escrows = await Escrow.find({ seller: dealerId });
+    const escrows = await findAll("escrows", { filters: { seller: dealerId } });
 
     if (escrows.length === 0) {
       return { score: 75, details: { totalEscrows: 0, completionRate: 100 } };
@@ -320,7 +314,7 @@ export const calculateEscrowScore = async (dealerId) => {
 
 export const calculateReviewScore = async (dealerId) => {
   try {
-    const reviews = await Review.find({ dealer: dealerId, isApproved: true });
+    const reviews = await findAll("reviews", { filters: {dealer: dealerId, isApproved: true} });
 
     if (reviews.length === 0) {
       return { score: 70, details: { totalReviews: 0, averageRating: 0 } };
@@ -364,7 +358,7 @@ export const calculateReviewScore = async (dealerId) => {
 
 export const calculateFraudScore = async (dealerId) => {
   try {
-    const fraudFlags = await FraudDetection.find({ target: dealerId, status: { $ne: "dismissed" } });
+    const fraudFlags = await findAll("fraud_detections", { filters: { target: dealerId, status: { $ne: "dismissed" } } });
 
     if (fraudFlags.length === 0) {
       return { score: 0, details: { totalFlags: 0 } };
@@ -413,7 +407,7 @@ export const calculateFraudScore = async (dealerId) => {
 export const calculateResponseScore = async (dealerId) => {
   try {
     // Get messages where dealer is the recipient
-    const chats = await Chat.find({ participants: dealerId });
+    const chats = await findAll("chats", { filters: {participants: dealerId} });
 
     if (chats.length === 0) {
       return { score: 70, details: { averageResponseTime: 0 } };
@@ -457,7 +451,7 @@ export const calculateResponseScore = async (dealerId) => {
 
 export const calculateListingQualityScore = async (dealerId) => {
   try {
-    const cars = await Car.find({ dealer: dealerId, isDemo: false });
+    const cars = await findAll("cars", { filters: { dealer: dealerId, isDemo: false } });
 
     if (cars.length === 0) {
       return { score: 70, details: { totalListings: 0 } };
@@ -523,14 +517,14 @@ export const calculateListingQualityScore = async (dealerId) => {
 
 export const calculateAuctionScore = async (dealerId) => {
   try {
-    const cars = await Car.find({ dealer: dealerId, isAuction: true });
-    const auctionIds = cars.map((c) => c._id);
+    const cars = await findAll("cars", { filters: { dealer: dealerId, isAuction: true } });
+    const auctionIds = cars.map((c) => c.id);
 
     if (auctionIds.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
     }
 
-    const auctions = await Auction.find({ carId: { $in: auctionIds } });
+    const auctions = await findAll("auctions", { filters: { carId: { $in: auctionIds } } });
 
     if (auctions.length === 0) {
       return { score: 70, details: { totalAuctions: 0 } };
@@ -578,7 +572,7 @@ export const calculateAuctionScore = async (dealerId) => {
 
 export const recalculateAllScores = async () => {
   try {
-    const dealers = await Dealer.find({ approved: true }).select("user");
+    const dealers = await findAll("dealers", { filters: { approved: true }, select: "user" });
 
     logInfo("Starting health score recalculation", { totalDealers: dealers.length });
 

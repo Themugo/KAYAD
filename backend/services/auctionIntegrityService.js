@@ -1,11 +1,7 @@
 import crypto from "crypto";
-import Auction from "../models/Auction.js";
-import Bid from "../models/Bid.js";
-import User from "../models/User.js";
-import Car from "../models/Car.js";
-import AuctionIntegrityFlag from "../models/AuctionIntegrityFlag.js";
-import AuctionRiskProfile from "../models/AuctionRiskProfile.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findAll, findById, findOne, create, update, count, upsert, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const THRESHOLDS = {
   SELF_BID_MIN_AMOUNT: parseFloat(process.env.AI_SELF_BID_MIN || "1000"),
@@ -40,16 +36,17 @@ const generateFlagId = (category) => {
 
 const upsertRiskProfile = async (userId, role, updates) => {
   try {
-    const existing = await AuctionRiskProfile.findOne({ user: userId, role });
+    const existing = await findOne("auction_risk_profiles", {user: userId, role});
     if (!existing) {
-      await AuctionRiskProfile.create({ user: userId, role, ...updates, lastScoreUpdate: new Date() });
+      await create("auction_risk_profiles", {user: userId, role, ...updates, lastScoreUpdate: new Date().toISOString()});
       return;
     }
-    await AuctionRiskProfile.findOneAndUpdate(
-      { user: userId, role },
-      { $inc: updates, lastScoreUpdate: new Date() },
-      { upsert: true },
-    );
+    // Increment numeric fields
+    const incData = {};
+    for (const [k, v] of Object.entries(updates)) {
+      incData[k] = (existing[k] || 0) + v;
+    }
+    await update("auction_risk_profiles", existing.id, { ...incData, lastScoreUpdate: new Date().toISOString() });
   } catch (err) {
     logWarn("Risk profile upsert failed", { userId, role, error: err.message });
   }
@@ -57,7 +54,7 @@ const upsertRiskProfile = async (userId, role, updates) => {
 
 const recalculateRiskScore = async (userId, role) => {
   try {
-    const profile = await AuctionRiskProfile.findOne({ user: userId, role });
+    const profile = await findOne("auction_risk_profiles", {user: userId, role});
     if (!profile) return;
 
     const selfWeight = profile.selfBidCount * 25;
@@ -75,10 +72,9 @@ const recalculateRiskScore = async (userId, role) => {
     );
 
     const tier = resolveSeverity(score);
-    await AuctionRiskProfile.findOneAndUpdate(
-      { user: userId, role },
-      { riskScore: Math.round(score), riskTier: tier, lastScoreUpdate: new Date() },
-    );
+    if (profile) {
+      await update("auction_risk_profiles", profile.id, { riskScore: Math.round(score), riskTier: tier, lastScoreUpdate: new Date().toISOString() });
+    }
   } catch (err) {
     logWarn("Risk profile recalc failed", { userId, role, error: err.message });
   }
@@ -90,23 +86,23 @@ const recalculateRiskScore = async (userId, role) => {
 const detectSelfBidding = async (scanUntil) => {
   const anomalies = [];
 
-  const recentBids = await Bid.find({
+  const recentBids = await findAll("bids", { filters: {
     createdAt: { $gte: scanUntil },
     status: { $in: ["paid", "pending"] },
-  })
-    .populate({ path: "carId", select: "dealer" })
-    .populate({ path: "user", select: "name email phone" })
-    .lean();
+  } })
+     /* .populate({ path: "carId", select: "dealer" }) - TODO: use separate query */
+     /* .populate({ path: "user", select: "name email phone" }) - TODO: use separate query */
+    ;
 
   const auctionOwners = {};
-  const activeAuctions = await Auction.find({
+  const activeAuctions = await findAll("auctions", { filters: {
     status: { $in: ["active", "ended"] },
-  })
+  } })
     .select("carId createdBy")
-    .lean();
+    ;
 
   for (const a of activeAuctions) {
-    auctionOwners[a._id.toString()] = a.createdBy;
+    auctionOwners[a.id.toString()] = a.createdBy;
   }
 
   const carDealers = {};
@@ -114,7 +110,7 @@ const detectSelfBidding = async (scanUntil) => {
     if (a.carId) {
       const carId = a.carId.toString();
       try {
-        const car = await Car.findById(a.carId).select("dealer").lean();
+        const car = await findById("cars", a.carId).select("dealer");
         if (car && car.dealer) {
           carDealers[carId] = car.dealer.toString();
         }
@@ -137,11 +133,7 @@ const detectSelfBidding = async (scanUntil) => {
     if (seen.has(dedupKey)) continue;
     seen.add(dedupKey);
 
-    const existing = await AuctionIntegrityFlag.findOne({
-      targetUser: bidderId,
-      category: "self_bidding",
-      status: { $in: ["detected", "under_review", "confirmed"] },
-    });
+    const existing = await findOne("auction_integrity_flags", {targetUser: bidderId, category: "self_bidding", status: { $in: ["detected", "under_review", "confirmed"] },});
     if (existing) continue;
 
     anomalies.push({
@@ -158,7 +150,7 @@ const detectSelfBidding = async (scanUntil) => {
         dealerId,
         carId,
         bidAmount: bid.amount,
-        bidId: bid._id,
+        bidId: bid.id,
         bidderName: bid.user?.name,
         bidderPhone: bid.user?.phone,
       },
@@ -180,24 +172,22 @@ const detectSelfBidding = async (scanUntil) => {
 const detectRelatedAccountBidding = async (scanUntil) => {
   const anomalies = [];
 
-  const auctionBidGroups = await Bid.aggregate([
-    { $match: { createdAt: { $gte: scanUntil }, status: { $in: ["paid", "pending"] } } },
+  const auctionBidGroups = await aggregate("bids", [{ $match: { createdAt: { $gte: scanUntil }, status: { $in: ["paid", "pending"] } } },
     { $group: { _id: "$carId", bidders: { $addToSet: "$user" }, bidCount: { $sum: 1 } } },
-    { $match: { bidCount: { $gte: 2 } } },
-  ]);
+    { $match: { bidCount: { $gte: 2 } } },]);
 
   for (const group of auctionBidGroups) {
     const bidders = group.bidders;
     if (bidders.length < 2) continue;
 
-    const users = await User.find({ _id: { $in: bidders } })
+    const users = await findAll("users", { filters: { _id: { $in: bidders } } })
       .select("_id name email phone referredBy")
-      .lean();
+      ;
 
     const phoneMap = {};
     const referralMap = {};
     for (const u of users) {
-      const uid = u._id.toString();
+      const uid = u.id.toString();
       if (u.phone) {
         const normalizedPhone = u.phone.replace(/[^0-9]/g, "").slice(-9);
         if (!phoneMap[normalizedPhone]) phoneMap[normalizedPhone] = [];
@@ -227,15 +217,11 @@ const detectRelatedAccountBidding = async (scanUntil) => {
     for (const pair of relatedPairs) {
       const seen = new Set();
       for (const uid of pair.users) {
-        const dedupKey = `${uid}-${group._id}-related_account`;
+        const dedupKey = `${uid}-${group.id}-related_account`;
         if (seen.has(dedupKey)) continue;
         seen.add(dedupKey);
 
-        const existing = await AuctionIntegrityFlag.findOne({
-          targetUser: uid,
-          category: "related_account",
-          status: { $in: ["detected", "under_review", "confirmed"] },
-        });
+        const existing = await findOne("auction_integrity_flags", {targetUser: uid, category: "related_account", status: { $in: ["detected", "under_review", "confirmed"] },});
         if (existing) continue;
 
         anomalies.push({
@@ -246,14 +232,14 @@ const detectRelatedAccountBidding = async (scanUntil) => {
           status: "detected",
           targetUser: uid,
           targetUserRole: "bidder",
-          auction: group._id,
+          auction: group.id,
           summary: `Related accounts bidding in same auction (${pair.type})`,
           evidence: {
             relationship: pair.type,
             phone: pair.phone || null,
             referrerId: pair.referrerId || null,
             relatedUserIds: pair.users.filter((u) => u !== uid),
-            auctionId: group._id,
+            auctionId: group.id,
             allBidders: bidders,
           },
           riskFactors: [
@@ -276,12 +262,12 @@ const detectRelatedAccountBidding = async (scanUntil) => {
 const detectBidInflation = async (scanUntil) => {
   const anomalies = [];
 
-  const activeAuctions = await Auction.find({
+  const activeAuctions = await findAll("auctions", { filters: {
     status: { $in: ["active", "ended"] },
-    endTime: { $gte: new Date(Date.now() - 7 * 86400000) },
+    endTime: { $gte: new Date(Date.now( }) - 7 * 86400000) },
   })
     .select("_id carId bidHistory startTime endTime highestBid startingBid")
-    .lean();
+    ;
 
   for (const auction of activeAuctions) {
     const history = auction.bidHistory || [];
@@ -323,11 +309,7 @@ const detectBidInflation = async (scanUntil) => {
           ? ((auction.highestBid - auction.startingBid) / auction.startingBid) * 100
           : 0;
 
-        const existing = await AuctionIntegrityFlag.findOne({
-          auction: auction._id,
-          category: "bid_inflation",
-          status: { $in: ["detected", "under_review", "confirmed"] },
-        });
+        const existing = await findOne("auction_integrity_flags", {auction: auction.id, category: "bid_inflation", status: { $in: ["detected", "under_review", "confirmed"] },});
         if (existing) continue;
 
         anomalies.push({
@@ -338,10 +320,10 @@ const detectBidInflation = async (scanUntil) => {
           status: "detected",
           targetUser: topBidder[0],
           targetUserRole: "bidder",
-          auction: auction._id,
+          auction: auction.id,
           summary: `Bid inflation pattern — ${topBidder[1]}/${recentBids.length} bids by one account`,
           evidence: {
-            auctionId: auction._id,
+            auctionId: auction.id,
             bidderDistribution: sortedCounts.map(([u, c]) => ({ userId: u, count: c })),
             totalBids: recentBids.length,
             dominantBidder: topBidder[0],
@@ -377,8 +359,7 @@ const detectBidVelocityAbuse = async (scanUntil) => {
   const burstCount = THRESHOLDS.VELOCITY_BURST_COUNT;
   const windowSec = THRESHOLDS.VELOCITY_WINDOW_SECONDS;
 
-  const userBidWindows = await Bid.aggregate([
-    {
+  const userBidWindows = await aggregate("bids", [{
       $match: {
         createdAt: { $gte: scanUntil },
         status: { $in: ["paid", "pending"] },
@@ -398,8 +379,7 @@ const detectBidVelocityAbuse = async (scanUntil) => {
         bidCount: { $sum: 1 },
       },
     },
-    { $match: { bidCount: { $gte: burstCount } } },
-  ]);
+    { $match: { bidCount: { $gte: burstCount } } },]);
 
   for (const group of userBidWindows) {
     const bids = group.bids.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
@@ -411,14 +391,9 @@ const detectBidVelocityAbuse = async (scanUntil) => {
       const elapsedSec = (lastTime - firstTime) / 1000;
 
       if (elapsedSec <= windowSec) {
-        const userId = group._id.user;
+        const userId = group.id.user;
 
-        const existing = await AuctionIntegrityFlag.findOne({
-          targetUser: userId,
-          auction: group._id.carId,
-          category: "bid_velocity",
-          status: { $in: ["detected", "under_review", "confirmed"] },
-        });
+        const existing = await findOne("auction_integrity_flags", {targetUser: userId, auction: group.id.carId, category: "bid_velocity", status: { $in: ["detected", "under_review", "confirmed"] },});
         if (existing) continue;
 
         let severity = "medium";
@@ -439,16 +414,16 @@ const detectBidVelocityAbuse = async (scanUntil) => {
           status: "detected",
           targetUser: userId,
           targetUserRole: "bidder",
-          auction: group._id.carId,
+          auction: group.id.carId,
           summary: `${burstCount} bids in ${elapsedSec.toFixed(0)}s — velocity abuse`,
           evidence: {
             userId,
-            auctionId: group._id.carId,
+            auctionId: group.id.carId,
             bidCount: burstCount,
             windowSeconds: elapsedSec,
             timeWindowMs: lastTime - firstTime,
             bidSequence: window.map((b) => ({
-              bidId: b._id,
+              bidId: b.id,
               amount: b.amount,
               time: b.createdAt,
             })),
@@ -477,11 +452,11 @@ const detectLastSecondManipulation = async (scanUntil) => {
   const windowSec = THRESHOLDS.LAST_SECOND_WINDOW_SECONDS;
   const repeatThreshold = THRESHOLDS.LAST_SECOND_REPEAT_THRESHOLD;
 
-  const endingAuctions = await Auction.find({
+  const endingAuctions = await findAll("auctions", { filters: {
     status: { $in: ["active", "ended"] },
-  })
+  } })
     .select("_id carId endTime bidHistory")
-    .lean();
+    ;
 
   for (const auction of endingAuctions) {
     if (!auction.endTime) continue;
@@ -520,12 +495,7 @@ const detectLastSecondManipulation = async (scanUntil) => {
         scoreVal = Math.min(scoreVal + 10, 100);
       }
 
-      const existing = await AuctionIntegrityFlag.findOne({
-        targetUser: userId,
-        auction: auction._id,
-        category: "last_second_manipulation",
-        status: { $in: ["detected", "under_review", "confirmed"] },
-      });
+      const existing = await findOne("auction_integrity_flags", {targetUser: userId, auction: auction.id, category: "last_second_manipulation", status: { $in: ["detected", "under_review", "confirmed"] },});
       if (existing) continue;
 
       anomalies.push({
@@ -536,11 +506,11 @@ const detectLastSecondManipulation = async (scanUntil) => {
         status: "detected",
         targetUser: userId,
         targetUserRole: "bidder",
-        auction: auction._id,
+        auction: auction.id,
         summary: `Bid placed ${secBeforeEnd}s before auction end — manipulation risk`,
         evidence: {
           userId,
-          auctionId: auction._id,
+          auctionId: auction.id,
           secondsBeforeEnd: secBeforeEnd,
           endTime: auction.endTime,
           lateBidCount: count,
@@ -588,7 +558,7 @@ export const runIntegrityScan = async ({ scanWindowHours = 24, saveResults = tru
     }
 
     if (saveResults && allFlags.length > 0) {
-      await AuctionIntegrityFlag.insertMany(allFlags, { ordered: false });
+      await (await Promise.all(allFlags, { ordered: false }.map(item => create("auction_integrity_flags", item))));
     }
 
     for (const flag of allFlags) {
@@ -609,23 +579,19 @@ export const runIntegrityScan = async ({ scanWindowHours = 24, saveResults = tru
 // 🔍 SINGLE AUCTION CHECK
 // =============================
 export const checkAuctionForIntegrity = async (auctionId) => {
-  const auction = await Auction.findById(auctionId).populate("carId").lean();
+  const auction = await findById("auctions", auctionId) /* .populate("carId") - TODO: use separate query */;
   if (!auction) throw new Error("Auction not found");
 
   const flags = [];
 
-  const selfBidCheck = await AuctionIntegrityFlag.findOne({
-    auction: auctionId,
-    category: "self_bidding",
-    status: { $in: ["detected", "under_review", "confirmed"] },
-  });
+  const selfBidCheck = await findOne("auction_integrity_flags", {auction: auctionId, category: "self_bidding", status: { $in: ["detected", "under_review", "confirmed"] },});
   if (!selfBidCheck && auction.carId?.dealer) {
-    const car = await Car.findById(auction.carId).select("dealer").lean();
+    const car = await findById("cars", auction.carId).select("dealer");
     if (car?.dealer) {
-      const recentBids = await Bid.find({ carId: auction.carId, status: "paid" })
+      const recentBids = await findAll("bids", { filters: { carId: auction.carId, status: "paid" } })
         .sort({ createdAt: -1 })
         .limit(10)
-        .lean();
+        ;
       for (const bid of recentBids) {
         const bidderId = bid.user?.toString();
         if (bidderId && bidderId === car.dealer.toString()) {
@@ -662,18 +628,18 @@ export const getIntegrityDashboard = async () => {
 
   const [totalFlags, openFlags, categoryCounts, severityCounts, todayCount, weekTrend, topRisks] =
     await Promise.all([
-      AuctionIntegrityFlag.countDocuments(),
-      AuctionIntegrityFlag.countDocuments({ status: { $in: ["detected", "under_review"] } }),
-      AuctionIntegrityFlag.aggregate([
+      count("auction_integrity_flags", ),
+      count("auction_integrity_flags", { status: { $in: ["detected", "under_review"] } }),
+      aggregate("auction_integrity_flags", [
         { $group: { _id: "$category", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
-      AuctionIntegrityFlag.aggregate([
+      aggregate("auction_integrity_flags", [
         { $group: { _id: "$severity", count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]),
-      AuctionIntegrityFlag.countDocuments({ createdAt: { $gte: todayStart } }),
-      AuctionIntegrityFlag.aggregate([
+      count("auction_integrity_flags", { createdAt: { $gte: todayStart } }),
+      aggregate("auction_integrity_flags", [
         { $match: { createdAt: { $gte: weekAgo } } },
         {
           $group: {
@@ -683,11 +649,9 @@ export const getIntegrityDashboard = async () => {
         },
         { $sort: { _id: 1 } },
       ]),
-      AuctionRiskProfile.find({})
-        .populate("user", "name email")
-        .sort({ riskScore: -1 })
+      findAll("auction_risk_profiles", { orderBy: "riskScore", ascending: false, limit: 10 })
         .limit(10)
-        .lean(),
+        ,
     ]);
 
   return {

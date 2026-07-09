@@ -4,8 +4,9 @@
 // Enterprise-grade feature flagging service
 // ─────────────────────────────────────────────────────────────
 
-import FeatureFlag from "../models/FeatureFlag.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, create, update, findOne, remove } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // 🔍 GET FLAG BY KEY
@@ -78,7 +79,7 @@ export const getAllFlags = async (filters = {}) => {
       query.environments = filters.environment;
     }
 
-    const flags = await FeatureFlag.find(query).sort({ category: 1, key: 1 });
+    const flags = await findAll("feature_flags", { filters: query, orderBy: { category: 1, key: 1 } });
     return flags;
   } catch (err) {
     logError("Failed to get all flags", err);
@@ -106,7 +107,7 @@ export const getFlagsByCategory = async (category) => {
 
 export const createFlag = async (flagData, createdBy) => {
   try {
-    const flag = await FeatureFlag.create({
+    const flag = await create("feature_flags", {
       ...flagData,
       createdBy,
     });
@@ -125,19 +126,15 @@ export const createFlag = async (flagData, createdBy) => {
 
 export const updateFlag = async (key, flagData, updatedBy) => {
   try {
-    const flag = await FeatureFlag.findOneAndUpdate(
-      { key },
-      {
-        ...flagData,
-        updatedBy,
-        updatedAt: new Date(),
-      },
-      { new: true },
-    );
-
-    if (!flag) {
+    const existing = await findOne("feature_flags", { key });
+    if (!existing) {
       throw new Error(`Flag with key "${key}" not found`);
     }
+    const flag = await update("feature_flags", existing.id, {
+      ...flagData,
+      updatedBy,
+      updatedAt: new Date().toISOString(),
+    });
 
     logInfo("Feature flag updated", { key, category: flag.category });
     return flag;
@@ -153,7 +150,7 @@ export const updateFlag = async (key, flagData, updatedBy) => {
 
 export const deleteFlag = async (key) => {
   try {
-    const flag = await FeatureFlag.findOneAndDelete({ key });
+    const flag = (async () => { const _r = await findOne("feature_flags", { key }); if (_r) await remove("feature_flags", _r.id); return _r; })();
 
     if (!flag) {
       throw new Error(`Flag with key "${key}" not found`);

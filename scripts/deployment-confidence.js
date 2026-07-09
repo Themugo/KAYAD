@@ -72,7 +72,7 @@ function scoreCodeQuality() {
 function scoreSecurity() {
   let score = 100; const issues = [];
   // Check for hardcoded secrets
-  const sensitive = ["SENTRY_DSN", "JWT_SECRET", "MONGO_URI", "REDIS_URL", "CLOUDINARY"];
+  const sensitive = ["SENTRY_DSN", "JWT_SECRET", "SUPABASE_URL", "SUPABASE_SERVICE_KEY", "REDIS_URL", "CLOUDINARY"];
   const envFile = join(ROOT, ".env");
   if (existsSync(envFile)) {
     try {

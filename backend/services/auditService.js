@@ -4,8 +4,8 @@
 // Ensures immutability and comprehensive tracking
 // ─────────────────────────────────────────────────────────────
 
-import AuditLog from "../models/AuditLog.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { create } from "../db/index.js";
 
 // =============================
 // 📝 AUDIT LOGGING SERVICE
@@ -35,7 +35,7 @@ import { logInfo, logError } from "../utils/logger.js";
  */
 export const logAuditEvent = async (data) => {
   try {
-    const auditLog = await AuditLog.create({
+    const auditLog = await create("audit_logs", {
       action: data.action,
       actor: data.actor,
       actorRole: data.actorRole,
@@ -59,7 +59,7 @@ export const logAuditEvent = async (data) => {
       action: data.action,
       actor: data.actor,
       target: data.target,
-      auditLogId: auditLog._id,
+      auditLogId: auditLog.id,
     });
 
     return auditLog;
@@ -77,11 +77,11 @@ export const logAuditEvent = async (data) => {
 export const logVehicleCreated = async (vehicle, actor, req) => {
   return logAuditEvent({
     action: "vehicle_created",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: vehicle._id,
+    target: vehicle.id,
     targetModel: "Car",
     targetName: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
     newValue: {
@@ -135,11 +135,11 @@ export const logVehicleEdited = async (vehicle, oldData, actor, req) => {
 
   return logAuditEvent({
     action: "vehicle_edited",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: vehicle._id,
+    target: vehicle.id,
     targetModel: "Car",
     targetName: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
     oldValue: oldData,
@@ -163,11 +163,11 @@ export const logVehicleEdited = async (vehicle, oldData, actor, req) => {
 export const logVehicleDeleted = async (vehicle, actor, req) => {
   return logAuditEvent({
     action: "vehicle_deleted",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: vehicle._id,
+    target: vehicle.id,
     targetModel: "Car",
     targetName: `${vehicle.year} ${vehicle.make} ${vehicle.model}`,
     oldValue: vehicle.toObject(),
@@ -189,11 +189,11 @@ export const logVehicleDeleted = async (vehicle, actor, req) => {
 export const logAuctionCreated = async (auction, actor, req) => {
   return logAuditEvent({
     action: "auction_created",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: auction._id,
+    target: auction.id,
     targetModel: "Auction",
     targetName: `Auction for ${auction.car?.make || auction.car}`,
     newValue: {
@@ -220,11 +220,11 @@ export const logAuctionCreated = async (auction, actor, req) => {
 export const logAuctionBidPlaced = async (auction, bid, actor, req) => {
   return logAuditEvent({
     action: "auction_bid_placed",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: auction._id,
+    target: auction.id,
     targetModel: "Auction",
     targetName: `Auction for ${auction.car?.make || auction.car}`,
     newValue: {
@@ -238,7 +238,7 @@ export const logAuctionBidPlaced = async (auction, bid, actor, req) => {
     sessionId: req?.sessionID,
     details: {
       auctionId: auction.auctionId,
-      bidId: bid._id,
+      bidId: bid.id,
       previousBid: auction.currentBid,
     },
     severity: "info",
@@ -251,11 +251,11 @@ export const logAuctionBidPlaced = async (auction, bid, actor, req) => {
 export const logAuctionEnded = async (auction, winner, actor, req) => {
   return logAuditEvent({
     action: "auction_ended",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: auction._id,
+    target: auction.id,
     targetModel: "Auction",
     targetName: `Auction for ${auction.car?.make || auction.car}`,
     oldValue: {
@@ -286,11 +286,11 @@ export const logAuctionEnded = async (auction, winner, actor, req) => {
 export const logEscrowCreated = async (escrow, actor, req) => {
   return logAuditEvent({
     action: "escrow_created",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: escrow._id,
+    target: escrow.id,
     targetModel: "Escrow",
     targetName: `Escrow for transaction ${escrow.transactionId}`,
     newValue: {
@@ -317,11 +317,11 @@ export const logEscrowCreated = async (escrow, actor, req) => {
 export const logEscrowReleased = async (escrow, actor, req) => {
   return logAuditEvent({
     action: "escrow_released",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: escrow._id,
+    target: escrow.id,
     targetModel: "Escrow",
     targetName: `Escrow for transaction ${escrow.transactionId}`,
     oldValue: {
@@ -351,11 +351,11 @@ export const logEscrowReleased = async (escrow, actor, req) => {
 export const logEscrowRefunded = async (escrow, actor, req) => {
   return logAuditEvent({
     action: "escrow_refunded",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: escrow._id,
+    target: escrow.id,
     targetModel: "Escrow",
     targetName: `Escrow for transaction ${escrow.transactionId}`,
     oldValue: {
@@ -385,11 +385,11 @@ export const logEscrowRefunded = async (escrow, actor, req) => {
 export const logDealerVerificationSubmitted = async (verification, actor, req) => {
   return logAuditEvent({
     action: "dealer_verification_submitted",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: verification._id,
+    target: verification.id,
     targetModel: "DealerVerification",
     targetName: `Verification for dealer ${verification.dealer}`,
     newValue: {
@@ -414,11 +414,11 @@ export const logDealerVerificationSubmitted = async (verification, actor, req) =
 export const logDealerVerificationApproved = async (verification, actor, req) => {
   return logAuditEvent({
     action: "dealer_verification_approved",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: verification._id,
+    target: verification.id,
     targetModel: "DealerVerification",
     targetName: `Verification for dealer ${verification.dealer}`,
     oldValue: {
@@ -426,7 +426,7 @@ export const logDealerVerificationApproved = async (verification, actor, req) =>
     },
     newValue: {
       status: "approved",
-      approvedBy: actor._id,
+      approvedBy: actor.id,
       approvedAt: new Date(),
     },
     ipAddress: req?.ip,
@@ -447,11 +447,11 @@ export const logDealerVerificationApproved = async (verification, actor, req) =>
 export const logUserRoleChanged = async (user, oldRole, newRole, actor, req) => {
   return logAuditEvent({
     action: "role_changed",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: user._id,
+    target: user.id,
     targetModel: "User",
     targetName: user.name || user.email,
     oldValue: {
@@ -465,7 +465,7 @@ export const logUserRoleChanged = async (user, oldRole, newRole, actor, req) => 
     requestId: req?.id,
     sessionId: req?.sessionID,
     details: {
-      changedBy: actor._id,
+      changedBy: actor.id,
       changedByName: actor.name,
     },
     severity: "critical",
@@ -478,7 +478,7 @@ export const logUserRoleChanged = async (user, oldRole, newRole, actor, req) => 
 export const logAdminAction = async (action, target, targetModel, actor, req, details = {}) => {
   return logAuditEvent({
     action: action,
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
@@ -491,7 +491,7 @@ export const logAdminAction = async (action, target, targetModel, actor, req, de
     sessionId: req?.sessionID,
     details: {
       ...details,
-      performedBy: actor._id,
+      performedBy: actor.id,
       performedByName: actor.name,
     },
     severity: "critical",
@@ -504,11 +504,11 @@ export const logAdminAction = async (action, target, targetModel, actor, req, de
 export const logDisputeCreated = async (dispute, actor, req) => {
   return logAuditEvent({
     action: "dispute_created",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: dispute._id,
+    target: dispute.id,
     targetModel: "Dispute",
     targetName: `Dispute for transaction ${dispute.transactionId}`,
     newValue: {
@@ -534,11 +534,11 @@ export const logDisputeCreated = async (dispute, actor, req) => {
 export const logDisputeResolved = async (dispute, resolution, actor, req) => {
   return logAuditEvent({
     action: "dispute_resolved",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: dispute._id,
+    target: dispute.id,
     targetModel: "Dispute",
     targetName: `Dispute for transaction ${dispute.transactionId}`,
     oldValue: {
@@ -547,7 +547,7 @@ export const logDisputeResolved = async (dispute, resolution, actor, req) => {
     newValue: {
       status: "resolved",
       resolution: resolution,
-      resolvedBy: actor._id,
+      resolvedBy: actor.id,
       resolvedAt: new Date(),
     },
     ipAddress: req?.ip,
@@ -568,11 +568,11 @@ export const logDisputeResolved = async (dispute, resolution, actor, req) => {
 export const logPaymentInitiated = async (payment, actor, req) => {
   return logAuditEvent({
     action: "payment_initiated",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: payment._id,
+    target: payment.id,
     targetModel: "Payment",
     targetName: `Payment ${payment.paymentId}`,
     newValue: {
@@ -598,11 +598,11 @@ export const logPaymentInitiated = async (payment, actor, req) => {
 export const logPaymentCompleted = async (payment, actor, req) => {
   return logAuditEvent({
     action: "payment_completed",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: payment._id,
+    target: payment.id,
     targetModel: "Payment",
     targetName: `Payment ${payment.paymentId}`,
     oldValue: {
@@ -631,11 +631,11 @@ export const logPaymentCompleted = async (payment, actor, req) => {
 export const logPaymentRefunded = async (payment, actor, req) => {
   return logAuditEvent({
     action: "payment_refunded",
-    actor: actor._id,
+    actor: actor.id,
     actorRole: actor.role,
     actorName: actor.name,
     actorEmail: actor.email,
-    target: payment._id,
+    target: payment.id,
     targetModel: "Payment",
     targetName: `Payment ${payment.paymentId}`,
     oldValue: {

@@ -8,7 +8,6 @@
 
 import express from "express";
 import http from "http";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -25,7 +24,7 @@ import { fileURLToPath } from "url";
 import { globalLimiter, authLimiter, adminLimiter, webhookLimiter, socketRateLimit } from "./middleware/rateLimiter.js";
 
 // ─── Security Middleware ───────────────────────────────────────
-import { mongoSanitize, xssProtection, paginationCap, extraHeaders, bodyGuard, hppProtection } from "./middleware/security.js";
+import { mongoSanitize as sanitizeInput, xssProtection, paginationCap, extraHeaders, bodyGuard, hppProtection } from "./middleware/security.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection, csrfToken } from "./middleware/csrf.js";
@@ -36,6 +35,7 @@ import { performanceMonitor, memoryMonitor, cpuMonitor } from "./middleware/perf
 import sliMiddleware from "./middleware/sliMiddleware.js";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger.js";
+import { initSupabase, isSupabaseConnected } from "./utils/supabase.js";
 
 // ─── Routes ───────────────────────────────────────────────────
 import authRoutes from "./routes/authRoutes.js";
@@ -395,7 +395,7 @@ app.use(
 );
 
 // ─── SECURITY SANITIZATION ───────────────────────────────────
-app.use(mongoSanitize()); // Block NoSQL injection
+app.use(sanitizeInput()); // Block injection attacks
 app.use(xssProtection()); // Sanitize XSS in inputs
 app.use(hppProtection()); // Block HTTP parameter pollution
 app.use(paginationCap()); // Cap ?limit and ?page params
@@ -530,7 +530,7 @@ io.on("connection", (socket) => {
   }
 
   // Validate room IDs to prevent arbitrary room injection
-  const isValidId = (id) => typeof id === "string" && /^[a-f0-9]{24}$/i.test(id);
+  const isValidId = (id) => typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
   // Issue #8: Per-socket event rate limiter (max 10 events per 10 seconds)
   const eventBuckets = new Map();
@@ -550,14 +550,15 @@ io.on("connection", (socket) => {
     if (isValidId(carId)) {
       socket.join(String(carId));
       socket.join(`car_${carId}`);
-      const Car = (await import("./models/Car.js")).default;
-      const car = await Car.findById(carId).select("currentBid auctionEnd auctionStatus highestBidder").lean();
+      const { getSupabase } = await import("./utils/supabase.js");
+      const sb = getSupabase();
+      const { data: car } = await sb.from("cars").select("current_bid, auction_end, auction_status, highest_bidder_id").eq("id", carId).single();
       if (car) {
         socket.emit("auctionResync", {
           carId,
-          currentBid: car.currentBid,
-          auctionEnd: car.auctionEnd,
-          auctionStatus: car.auctionStatus,
+          currentBid: car.current_bid,
+          auctionEnd: car.auction_end,
+          auctionStatus: car.auction_status,
         });
       }
     }
@@ -680,36 +681,14 @@ app.use(notFound);
 app.use(errorHandler);
 
 // ─── DATABASE ─────────────────────────────────────────────────
-const connectDB = async (retries = 5, delay = 2000) => {
-  if (mongoose.connection.readyState === 1) return mongoose.connection;
-  if (!process.env.MONGO_URI) throw new Error("MONGO_URI missing in .env");
-
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      const conn = await mongoose.connect(process.env.MONGO_URI, {
-        maxPoolSize: parseInt(process.env.MONGO_POOL_SIZE || "50"),
-        minPoolSize: parseInt(process.env.MONGO_MIN_POOL_SIZE || "5"),
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-      });
-      logInfo("MongoDB connected", { host: conn.connection.host });
-      return conn;
-    } catch (err) {
-      if (attempt === retries) throw err;
-      const backoff = delay * Math.pow(2, attempt - 1);
-      logWarn("MongoDB connection failed", { attempt, retries, error: err.message, backoff: `${backoff}ms` });
-      await new Promise((r) => setTimeout(r, backoff));
-    }
+const connectDB = () => {
+  initSupabase();
+  if (isSupabaseConnected()) {
+    logInfo("Supabase connected");
+  } else {
+    logWarn("Supabase not configured — running without database");
   }
 };
-
-// ── Mongoose connection monitoring ──────────────────────────
-mongoose.connection.on("disconnected", () => logWarn("MongoDB disconnected"));
-mongoose.connection.on("reconnected", () => logInfo("MongoDB reconnected"));
-mongoose.connection.on("error", (err) => logError("MongoDB error", err));
-
-// ─── ENV VALIDATION ───────────────────────────────────────────
-// (validateEnv is imported from ./utils/env.js)
 
 
 
@@ -809,20 +788,18 @@ const startBackgroundServices = async (io) => {
         const counts = await redis.hGetAll("kayad:view_counts");
         const ids = Object.keys(counts);
         if (ids.length === 0) return;
-        const Car = (await import("./models/Car.js")).default;
-        const bulkOps = ids.map((id) => ({
-          updateOne: {
-            filter: { _id: id },
-            update: { $inc: { views: parseInt(counts[id], 10) || 0 } },
-          },
-        }));
-        await Car.bulkWrite(bulkOps, { ordered: false });
+        const { getSupabase } = await import("./utils/supabase.js");
+        const sb = getSupabase();
+        for (const id of ids) {
+          const viewCount = parseInt(counts[id], 10) || 0;
+          await sb.rpc("increment_car_views", { car_id: id, increment_by: viewCount });
+        }
         await redis.del("kayad:view_counts");
       } catch (e) {
         logWarn("View flush error", { error: e.message });
       }
     }, VIEW_FLUSH_MS);
-    logInfo("View flush configured", { interval: "60s", flow: "Redis → MongoDB" });
+    logInfo("View flush configured", { interval: "60s", flow: "Redis → PostgreSQL" });
   }
 };
 
@@ -863,15 +840,15 @@ const bootstrap = async () => {
         // Auto-seed (non-blocking — port already open)
         try {
           console.log("🌱 Checking if auto-seed is needed...");
-          const Car = (await import("./models/Car.js")).default;
-          const carCount = await Car.countDocuments({});
-          const User = (await import("./models/User.js")).default;
-          const existing = await User.countDocuments({ role: "superadmin" });
-          if (carCount === 0 || existing === 0) {
+          const { getSupabase } = await import("./utils/supabase.js");
+          const sb = getSupabase();
+          const { count: carCount } = await sb.from("cars").select("*", { count: "exact", head: true });
+          const { count: adminCount } = await sb.from("users").select("*", { count: "exact", head: true }).eq("role", "superadmin");
+          if (!carCount || carCount === 0 || !adminCount || adminCount === 0) {
             console.log("🌱 Auto-seeding database...");
             const { reseed } = await import("./seed.js");
             const result = await reseed();
-            logInfo("Auto-seeded database", { webhost: result.webhost.length, admin: result.admin.length, demos: result.demos.length, cars: result.cars });
+            logInfo("Auto-seeded database", result);
             console.log("✅ Auto-seed completed");
           } else {
             console.log("✅ Auto-seed not needed (cars and superadmin exist)");
@@ -938,10 +915,6 @@ const shutdown = async (signal) => {
       await closeConnection();
       logInfo("Redis connection closed");
 
-      // Close MongoDB connection
-      await mongoose.connection.close();
-      logInfo("MongoDB connection closed");
-
       logInfo("Shutdown complete");
       process.exit(0);
     } catch (err) {
@@ -991,7 +964,6 @@ if (NODE_ENV !== "test") {
 
 if (NODE_ENV === "test") {
   // Do NOT connect in test mode — tests handle their own DB connection
-  // via mongodb-memory-server or TEST_MONGO_URI
 } else {
   bootstrap();
 }

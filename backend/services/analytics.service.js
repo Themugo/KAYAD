@@ -1,89 +1,40 @@
-import Car from "../models/Car.js";
-import Bid from "../models/Bid.js";
-import User from "../models/User.js";
+import { count, aggregate, findAll, getSupabase } from "../db/index.js";
 
 export const getPlatformAnalytics = async () => {
-  // =============================
-  // 📊 BASIC COUNTS
-  // =============================
   const [totalCars, totalBids, totalUsers] = await Promise.all([
-    Car.countDocuments(),
-    Bid.countDocuments(),
-    User.countDocuments(),
+    count("cars"), count("bids"), count("users"),
   ]);
 
-  // =============================
-  // 💰 AVERAGE BID
-  // =============================
-  const avgBidResult = await Bid.aggregate([{ $group: { _id: null, avg: { $avg: "$amount" } } }]);
-
+  const avgBidResult = await aggregate("bids", [{ $group: { _id: null, avg: { $avg: "$amount" } } }]);
   const avgBid = avgBidResult[0]?.avg || 0;
 
-  // =============================
-  // 💰 TOTAL BID VALUE (MARKET SIZE)
-  // =============================
-  const totalValueResult = await Bid.aggregate([{ $group: { _id: null, total: { $sum: "$amount" } } }]);
-
+  const totalValueResult = await aggregate("bids", [{ $group: { _id: null, total: { $sum: "$amount" } } }]);
   const totalBidValue = totalValueResult[0]?.total || 0;
 
-  // =============================
-  // 📈 DAILY ACTIVITY (LAST 7 DAYS)
-  // =============================
-  const last7Days = new Date();
-  last7Days.setDate(last7Days.getDate() - 7);
+  const last7Days = new Date(Date.now() - 7 * 86400000).toISOString();
 
-  const dailyBids = await Bid.aggregate([
+  const dailyBids = await aggregate("bids", [
     { $match: { createdAt: { $gte: last7Days } } },
-    {
-      $group: {
-        _id: {
-          day: { $dayOfMonth: "$createdAt" },
-          month: { $month: "$createdAt" },
-        },
-        count: { $sum: 1 },
-      },
-    },
+    { $group: { _id: { day: { $dayOfMonth: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
     { $sort: { "_id.day": 1 } },
   ]);
 
-  // =============================
-  // 🔥 TOP ACTIVE CARS (MOST BIDS)
-  // =============================
-  const topCars = await Bid.aggregate([
-    {
-      $group: {
-        _id: "$car",
-        bidCount: { $sum: 1 },
-      },
-    },
+  const topCars = await aggregate("bids", [
+    { $group: { _id: "$car", bidCount: { $sum: 1 } } },
     { $sort: { bidCount: -1 } },
     { $limit: 5 },
   ]);
 
-  // =============================
-  // 🧠 AVG BIDS PER CAR
-  // =============================
   const avgBidsPerCar = totalCars > 0 ? totalBids / totalCars : 0;
 
-  // =============================
-  // 📊 RETURN FULL ANALYTICS
-  // =============================
   return {
-    overview: {
-      totalCars,
-      totalBids,
-      totalUsers,
-      totalBidValue,
-      avgBid,
-      avgBidsPerCar,
-    },
-
-    activity: {
-      dailyBids,
-    },
-
-    performance: {
-      topCars,
-    },
+    totalCars,
+    totalBids,
+    totalUsers,
+    avgBid,
+    totalBidValue,
+    avgBidsPerCar,
+    dailyBids,
+    topCars,
   };
 };

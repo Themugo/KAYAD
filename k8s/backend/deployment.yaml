@@ -35,11 +35,16 @@ spec:
           value: "production"
         - name: PORT
           value: "5000"
-        - name: MONGO_URI
+        - name: SUPABASE_URL
           valueFrom:
             secretKeyRef:
               name: kayad-secrets
-              key: mongo-uri
+              key: supabase-url
+        - name: SUPABASE_SERVICE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kayad-secrets
+              key: supabase-service-key
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:

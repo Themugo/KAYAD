@@ -6,9 +6,8 @@
 
 import cron from "node-cron";
 import { calculateHealthScore, recalculateAllScores } from "./dealerHealthScoreService.js";
-import Dealer from "../models/Dealer.js";
-import DealerHealthScore from "../models/DealerHealthScore.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, update } from "../db/index.js";
 
 let schedulerTask = null;
 let incrementalTask = null;
@@ -75,9 +74,9 @@ export const calculateChangedScores = async () => {
     // Get dealers with recent activity (last 24 hours)
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-    const dealers = await Dealer.find({
+    const dealers = await findAll("dealers", { filters: {
       $or: [{ updatedAt: { $gte: oneDayAgo } }, { createdAt: { $gte: oneDayAgo } }],
-    }).select("user");
+    }, select: "user" });
 
     logInfo("Calculating scores for changed dealers", { count: dealers.length });
 
@@ -109,7 +108,7 @@ export const calculateChangedScores = async () => {
 
 export const updateScoreTrends = async () => {
   try {
-    const healthScores = await DealerHealthScore.find({});
+    const healthScores = await findAll("dealer_health_scores", { filters: {} });
 
     for (const healthScore of healthScores) {
       const previousScore = healthScore.previousScore || 0;
@@ -118,7 +117,7 @@ export const updateScoreTrends = async () => {
 
       const trend = scoreChange > 0 ? "up" : scoreChange < 0 ? "down" : "stable";
 
-      await DealerHealthScore.findByIdAndUpdate(healthScore._id, {
+      await update("dealer_health_scores", healthScore.id, {
         previousScore: currentScore,
         scoreChange,
         trend,

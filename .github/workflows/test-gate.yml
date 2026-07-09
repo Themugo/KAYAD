@@ -21,17 +21,6 @@ jobs:
       passed: ${{ steps.check.outputs.passed }}
       coverage: ${{ steps.coverage.outputs.percentage }}
     
-    services:
-      mongodb:
-        image: mongo:7
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,7 +43,8 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: ci-test-secret-key-32-chars-minimum-x
           MPESA_SKIP_IP_CHECK: "true"
-          MONGO_URI: mongodb://localhost:27017/kayad-ci
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4

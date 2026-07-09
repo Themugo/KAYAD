@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import axios from "axios";
-import User from "../models/User.js";
 import { logInfo } from "../utils/logger.js";
+import { update } from "../db/index.js";
 
 const AT_API_KEY = process.env.AT_API_KEY;
 const AT_USERNAME = process.env.AT_USERNAME || "kayad";
@@ -58,9 +58,7 @@ const sendEmail = async (to, subject, text) => {
 
 export const sendOTP = async (user, channel = "sms") => {
   const otp = Math.floor(1000 + Math.random() * 9000);
-  user.otpHash = hashOtp(otp);
-  user.otpExpiry = Date.now() + 600000;
-  await user.save();
+  await update("users", user.id, { otpHash: hashOtp(otp), otpExpiry: Date.now() + 600000 });
 
   if (channel === "sms" && user.phone) {
     await sendSMS(user.phone, `Your KAYAD verification code is: ${otp}`);
@@ -75,8 +73,6 @@ export const verifyOTP = async (user, otp) => {
   if (!user.otpHash || !user.otpExpiry) return false;
   if (Date.now() > user.otpExpiry) return false;
   if (user.otpHash !== hashOtp(otp)) return false;
-  user.otpHash = undefined;
-  user.otpExpiry = undefined;
-  await user.save();
+  await update("users", user.id, { otpHash: null, otpExpiry: null });
   return true;
 };

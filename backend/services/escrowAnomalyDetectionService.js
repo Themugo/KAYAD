@@ -12,12 +12,9 @@
 // ─────────────────────────────────────────────────────────────
 
 import crypto from "crypto";
-import Escrow from "../models/Escrow.js";
-import Payment from "../models/Payment.js";
-import Dispute from "../models/Dispute.js";
-import EscrowAnomaly from "../models/EscrowAnomaly.js";
-import EscrowRiskScore from "../models/EscrowRiskScore.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { findAll, findById, findOne, create, update, count, upsert, aggregate } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 // =============================
 // ⚙️ CONFIGURABLE THRESHOLDS
@@ -61,16 +58,16 @@ const generateAnomalyId = (category) => {
 
 const upsertRiskScore = async (userId, role, updates) => {
   try {
-    const existing = await EscrowRiskScore.findOne({ user: userId, role });
+    const existing = await findOne("escrow_risk_scores", {user: userId, role});
     if (!existing) {
-      await EscrowRiskScore.create({ user: userId, role, ...updates, lastScoreUpdate: new Date() });
+      await create("escrow_risk_scores", {user: userId, role, ...updates, lastScoreUpdate: new Date().toISOString()});
       return;
     }
-    await EscrowRiskScore.findOneAndUpdate(
-      { user: userId, role },
-      { $inc: updates, lastScoreUpdate: new Date() },
-      { upsert: true },
-    );
+    const incData = {};
+    for (const [k, v] of Object.entries(updates)) {
+      incData[k] = (existing[k] || 0) + v;
+    }
+    await update("escrow_risk_scores", existing.id, { ...incData, lastScoreUpdate: new Date().toISOString() });
   } catch (err) {
     logWarn("Risk score upsert failed", { userId, role, error: err.message });
   }
@@ -78,7 +75,7 @@ const upsertRiskScore = async (userId, role, updates) => {
 
 const recalculateRiskScore = async (userId, role) => {
   try {
-    const profile = await EscrowRiskScore.findOne({ user: userId, role });
+    const profile = await findOne("escrow_risk_scores", {user: userId, role});
     if (!profile) return;
 
     const disputeWeight = profile.disputeInitiatorCount * 15;
@@ -98,10 +95,9 @@ const recalculateRiskScore = async (userId, role) => {
     );
 
     const tier = resolveSeverity(score);
-    await EscrowRiskScore.findOneAndUpdate(
-      { user: userId, role },
-      { riskScore: Math.round(score), riskTier: tier, lastScoreUpdate: new Date() },
-    );
+    if (profile) {
+      await update("escrow_risk_scores", profile.id, { riskScore: Math.round(score), riskTier: tier, lastScoreUpdate: new Date().toISOString() });
+    }
   } catch (err) {
     logWarn("Risk score recalc failed", { userId, role, error: err.message });
   }
@@ -114,10 +110,10 @@ const detectLargeTransactions = async (scanUntil) => {
   const anomalies = [];
   const minAmount = THRESHOLDS.LARGE_TRANSACTION_MIN;
 
-  const largeEscrows = await Escrow.find({
+  const largeEscrows = await findAll("escrows", { filters: {
     amount: { $gte: minAmount },
     createdAt: { $gte: scanUntil },
-  }).populate("buyer seller payment");
+  } }) /* .populate("buyer seller payment") - TODO: use separate query */;
 
   for (const escrow of largeEscrows) {
     const amount = escrow.amount;
@@ -128,7 +124,7 @@ const detectLargeTransactions = async (scanUntil) => {
     const score = SCORE_WEIGHTS.large_transaction[severity];
     const tier = resolveSeverity(score);
 
-    const existing = await EscrowAnomaly.findOne({ escrow: escrow._id, category: "large_transaction" });
+    const existing = await findOne("escrow_anomalies", { escrow: escrow.id, category: "large_transaction" });
     if (existing) continue;
 
     anomalies.push({
@@ -139,7 +135,7 @@ const detectLargeTransactions = async (scanUntil) => {
       status: "detected",
       targetUser: escrow.buyer,
       targetUserRole: "buyer",
-      escrow: escrow._id,
+      escrow: escrow.id,
       summary: `Large escrow of KES ${amount.toLocaleString("en-KE")} — ${severity} risk`,
       evidence: {
         amount,
@@ -168,11 +164,11 @@ const detectRapidRefunds = async (scanUntil) => {
   const maxHours = THRESHOLDS.RAPID_REFUND_HOURS;
   const refundCutoff = new Date(Date.now() - maxHours * 3600000);
 
-  const refundedEscrows = await Escrow.find({
+  const refundedEscrows = await findAll("escrows", { filters: {
     status: { $in: ["refunded"] },
     fundedAt: { $gte: scanUntil },
     refundedAt: { $ne: null },
-  }).populate("buyer seller");
+  } }) /* .populate("buyer seller") - TODO: use separate query */;
 
   for (const escrow of refundedEscrows) {
     if (!escrow.fundedAt || !escrow.refundedAt) continue;
@@ -187,7 +183,7 @@ const detectRapidRefunds = async (scanUntil) => {
     const score = SCORE_WEIGHTS.rapid_refund[severity];
     const tier = resolveSeverity(score);
 
-    const existing = await EscrowAnomaly.findOne({ escrow: escrow._id, category: "rapid_refund" });
+    const existing = await findOne("escrow_anomalies", { escrow: escrow.id, category: "rapid_refund" });
     if (existing) continue;
 
     anomalies.push({
@@ -198,7 +194,7 @@ const detectRapidRefunds = async (scanUntil) => {
       status: "detected",
       targetUser: escrow.buyer || escrow.seller,
       targetUserRole: escrow.buyer ? "buyer" : "seller",
-      escrow: escrow._id,
+      escrow: escrow.id,
       relatedEscrows: [],
       summary: `Rapid refund in ${hoursToRefund.toFixed(1)}h of funding — KES ${escrow.amount.toLocaleString("en-KE")}`,
       evidence: {
@@ -227,7 +223,7 @@ const detectMultipleDisputes = async (scanUntil) => {
   const anomalies = [];
   const minDisputes = THRESHOLDS.MULTIPLE_DISPUTES_COUNT;
 
-  const disputeCounts = await Dispute.aggregate([
+  const disputeCounts = await aggregate("disputes", [
     { $match: { createdAt: { $gte: scanUntil } } },
     {
       $group: {
@@ -248,8 +244,8 @@ const detectMultipleDisputes = async (scanUntil) => {
     const score = SCORE_WEIGHTS.multiple_disputes[severity];
     const tier = resolveSeverity(score);
 
-    const existing = await EscrowAnomaly.findOne({
-      targetUser: group._id,
+    const existing = await findOne("escrow_anomalies", {
+      targetUser: group.id,
       category: "multiple_disputes",
       status: { $in: ["detected", "under_review", "confirmed"] },
     });
@@ -261,7 +257,7 @@ const detectMultipleDisputes = async (scanUntil) => {
       severity: tier,
       riskScore: score,
       status: "detected",
-      targetUser: group._id,
+      targetUser: group.id,
       targetUserRole: "buyer",
       summary: `User initiated ${group.count} disputes in scan period`,
       evidence: {
@@ -275,7 +271,7 @@ const detectMultipleDisputes = async (scanUntil) => {
       detectionRules: ["multiple_disputes_count_check"],
     });
 
-    await upsertRiskScore(group._id, "buyer", { disputeInitiatorCount: group.count, recentDisputes30d: group.count, disputedEscrows: group.count });
+    await upsertRiskScore(group.id, "buyer", { disputeInitiatorCount: group.count, recentDisputes30d: group.count, disputedEscrows: group.count });
   }
 
   return anomalies;
@@ -289,11 +285,9 @@ const detectRepeatOffenders = async (scanUntil) => {
   const lookbackDays = THRESHOLDS.REPEAT_OFFENDER_DAYS;
   const lookback = new Date(Date.now() - lookbackDays * 86400000);
 
-  const repeatUsers = await EscrowAnomaly.aggregate([
-    { $match: { createdAt: { $gte: lookback }, status: { $in: ["confirmed", "action_taken"] } } },
+  const repeatUsers = await aggregate("escrow_anomalies", [{ $match: { createdAt: { $gte: lookback }, status: { $in: ["confirmed", "action_taken"] } } },
     { $group: { _id: "$targetUser", count: { $sum: 1 }, categories: { $addToSet: "$category" }, anomalyIds: { $addToSet: "$anomalyId" } } },
-    { $match: { count: { $gte: 2 } } },
-  ]);
+    { $match: { count: { $gte: 2 } } },]);
 
   for (const group of repeatUsers) {
     let severity = "medium";
@@ -303,14 +297,14 @@ const detectRepeatOffenders = async (scanUntil) => {
     const score = SCORE_WEIGHTS.repeat_offender[severity];
     const tier = resolveSeverity(score);
 
-    const existing = await EscrowAnomaly.findOne({
-      targetUser: group._id,
+    const existing = await findOne("escrow_anomalies", {
+      targetUser: group.id,
       category: "repeat_offender",
       status: { $in: ["detected", "under_review", "confirmed"] },
     });
     if (existing) continue;
 
-    const user = await (await import("../models/User.js")).default.findById(group._id).select("name email phone").lean();
+    const user = await findById("users", group.id);
 
     anomalies.push({
       anomalyId: generateAnomalyId("repeat_offender"),
@@ -318,7 +312,7 @@ const detectRepeatOffenders = async (scanUntil) => {
       severity: tier,
       riskScore: score,
       status: "detected",
-      targetUser: group._id,
+      targetUser: group.id,
       summary: `${user?.name || "User"} has ${group.count} confirmed anomalies across ${group.categories.length} categories`,
       evidence: {
         totalAnomalies: group.count,
@@ -333,7 +327,7 @@ const detectRepeatOffenders = async (scanUntil) => {
       detectionRules: ["repeat_offender_anomaly_count_check"],
     });
 
-    await upsertRiskScore(group._id, "buyer", { abusePatternCount: 1 });
+    await upsertRiskScore(group.id, "buyer", { abusePatternCount: 1 });
   }
 
   return anomalies;
@@ -347,8 +341,7 @@ const detectEscrowAbuse = async (scanUntil) => {
   const minAmount = THRESHOLDS.ESCROW_ABUSE_MIN_AMOUNT;
   const autoReleaseMinHours = THRESHOLDS.ESCROW_ABUSE_AUTO_RELEASE_HOURS;
 
-  const sellerAbuse = await Escrow.aggregate([
-    {
+  const sellerAbuse = await aggregate("escrows", [{
       $match: {
         amount: { $gte: minAmount },
         createdAt: { $gte: scanUntil },
@@ -366,8 +359,7 @@ const detectEscrowAbuse = async (scanUntil) => {
         statuses: { $addToSet: "$status" },
       },
     },
-    { $match: { escrowCount: { $gte: 3 } } },
-  ]);
+    { $match: { escrowCount: { $gte: 3 } } },]);
 
   for (const group of sellerAbuse) {
     const hasHighAutoRelease = group.statuses.includes("released") || group.statuses.includes("vehicle_confirmed");
@@ -381,8 +373,8 @@ const detectEscrowAbuse = async (scanUntil) => {
     const score = SCORE_WEIGHTS.escrow_abuse[severity] || abuseScore;
     const tier = resolveSeverity(score);
 
-    const existing = await EscrowAnomaly.findOne({
-      targetUser: group._id,
+    const existing = await findOne("escrow_anomalies", {
+      targetUser: group.id,
       category: "escrow_abuse",
       status: { $in: ["detected", "under_review", "confirmed"] },
     });
@@ -394,7 +386,7 @@ const detectEscrowAbuse = async (scanUntil) => {
       severity: tier,
       riskScore: score,
       status: "detected",
-      targetUser: group._id,
+      targetUser: group.id,
       targetUserRole: "seller",
       relatedEscrows: group.escrowIds,
       summary: `Seller has ${group.escrowCount} escrows totaling KES ${group.totalAmount.toLocaleString("en-KE")} — high volume pattern`,
@@ -411,7 +403,7 @@ const detectEscrowAbuse = async (scanUntil) => {
       detectionRules: ["escrow_abuse_high_volume_check"],
     });
 
-    await upsertRiskScore(group._id, "seller", { abusePatternCount: 1, totalEscrows: group.escrowCount });
+    await upsertRiskScore(group.id, "seller", { abusePatternCount: 1, totalEscrows: group.escrowCount });
   }
 
   return anomalies;
@@ -443,7 +435,7 @@ export const runAnomalyDetection = async ({ scanWindowHours = 24, saveResults = 
     }
 
     if (saveResults && allAnomalies.length > 0) {
-      await EscrowAnomaly.insertMany(allAnomalies, { ordered: false });
+      await (await Promise.all(allAnomalies, { ordered: false }.map(item => create("escrow_anomalies", item))));
     }
 
     for (const anomaly of allAnomalies) {
@@ -464,12 +456,12 @@ export const runAnomalyDetection = async ({ scanWindowHours = 24, saveResults = 
 // 🔍 RUN SINGLE CHECK ON ESCROW
 // =============================
 export const checkEscrowForAnomalies = async (escrowId) => {
-  const escrow = await Escrow.findById(escrowId).populate("buyer seller");
+  const escrow = await findById("escrows", escrowId) /* .populate("buyer seller") - TODO: use separate query */;
   if (!escrow) throw new Error("Escrow not found");
 
   const anomalies = [];
 
-  const existingLarge = await EscrowAnomaly.findOne({ escrow: escrowId, category: "large_transaction" });
+  const existingLarge = await findOne("escrow_anomalies", { escrow: escrowId, category: "large_transaction" });
   if (!existingLarge && escrow.amount >= THRESHOLDS.LARGE_TRANSACTION_MIN) {
     let severity = escrow.amount >= THRESHOLDS.LARGE_TRANSACTION_CRITICAL ? "critical" : "high";
     anomalies.push({
@@ -477,7 +469,7 @@ export const checkEscrowForAnomalies = async (escrowId) => {
       category: "large_transaction",
       severity: resolveSeverity(SCORE_WEIGHTS.large_transaction[severity]),
       riskScore: SCORE_WEIGHTS.large_transaction[severity],
-      targetUser: escrow.buyer._id,
+      targetUser: escrow.buyer.id,
       targetUserRole: "buyer",
       escrow: escrowId,
       summary: `Large escrow of KES ${escrow.amount.toLocaleString("en-KE")}`,
@@ -487,16 +479,16 @@ export const checkEscrowForAnomalies = async (escrowId) => {
     });
   }
 
-  const disputeCount = await Dispute.countDocuments({ openedBy: escrow.buyer._id });
+  const disputeCount = await count("disputes", { openedBy: escrow.buyer.id });
   if (disputeCount >= THRESHOLDS.MULTIPLE_DISPUTES_COUNT) {
-    const existingMulti = await EscrowAnomaly.findOne({ targetUser: escrow.buyer._id, category: "multiple_disputes", status: { $in: ["detected", "under_review", "confirmed"] } });
+    const existingMulti = await findOne("escrow_anomalies", { targetUser: escrow.buyer.id, category: "multiple_disputes", status: { $in: ["detected", "under_review", "confirmed"] } });
     if (!existingMulti) {
       anomalies.push({
         anomalyId: generateAnomalyId("multiple_disputes"),
         category: "multiple_disputes",
         severity: "medium",
         riskScore: SCORE_WEIGHTS.multiple_disputes.medium,
-        targetUser: escrow.buyer._id,
+        targetUser: escrow.buyer.id,
         targetUserRole: "buyer",
         summary: `Buyer has ${disputeCount} total disputes`,
         evidence: { disputeCount },
@@ -507,7 +499,7 @@ export const checkEscrowForAnomalies = async (escrowId) => {
   }
 
   if (anomalies.length > 0) {
-    await EscrowAnomaly.insertMany(anomalies, { ordered: false });
+    await (await Promise.all(anomalies, { ordered: false }.map(item => create("escrow_anomalies", item))));
     for (const a of anomalies) {
       await recalculateRiskScore(a.targetUser, a.targetUserRole || "buyer");
     }
@@ -532,32 +524,32 @@ export const getAnomalyDashboard = async () => {
     topRiskUsers,
     recentActivity,
   ] = await Promise.all([
-    EscrowAnomaly.countDocuments({}),
-    EscrowAnomaly.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
-    EscrowAnomaly.aggregate([{ $group: { _id: "$category", count: { $sum: 1 } } }]),
-    EscrowAnomaly.aggregate([{ $group: { _id: "$severity", count: { $sum: 1 } } }]),
-    EscrowAnomaly.find({ createdAt: { $gte: thirtyDaysAgo } }).sort({ createdAt: -1 }).limit(10).populate("targetUser", "name email phone").lean(),
-    EscrowRiskScore.find({}).sort({ riskScore: -1 }).limit(10).populate("user", "name email phone").lean(),
-    EscrowAnomaly.aggregate([
+    count("escrow_anomalies", {}),
+    aggregate("escrow_anomalies", [{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+    aggregate("escrow_anomalies", [{ $group: { _id: "$category", count: { $sum: 1 } } }]),
+    aggregate("escrow_anomalies", [{ $group: { _id: "$severity", count: { $sum: 1 } } }]),
+    findAll("escrow_anomalies", { filters: { createdAt: { $gte: thirtyDaysAgo } }, orderBy: "createdAt", ascending: false, limit: 10 }),
+    findAll("escrow_risk_scores", { orderBy: "riskScore", ascending: false, limit: 10 }),
+    aggregate("escrow_anomalies", [
       { $match: { createdAt: { $gte: thirtyDaysAgo } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]),
   ]);
 
-  const openCount = (byStatus.find((s) => s._id === "detected")?.count || 0) +
-    (byStatus.find((s) => s._id === "under_review")?.count || 0);
+  const openCount = (byStatus.find((s) => s.id === "detected")?.count || 0) +
+    (byStatus.find((s) => s.id === "under_review")?.count || 0);
 
   return {
     totalAnomalies,
     openAnomalies: openCount,
-    resolvedAnomalies: byStatus.find((s) => s._id === "action_taken")?.count || 0,
-    dismissedAnomalies: byStatus.find((s) => s._id === "dismissed")?.count || 0,
-    statusBreakdown: Object.fromEntries(byStatus.map((s) => [s._id, s.count])),
-    categoryBreakdown: Object.fromEntries(byCategory.map((c) => [c._id, c.count])),
-    severityBreakdown: Object.fromEntries(bySeverity.map((s) => [s._id, s.count])),
+    resolvedAnomalies: byStatus.find((s) => s.id === "action_taken")?.count || 0,
+    dismissedAnomalies: byStatus.find((s) => s.id === "dismissed")?.count || 0,
+    statusBreakdown: Object.fromEntries(byStatus.map((s) => [s.id, s.count])),
+    categoryBreakdown: Object.fromEntries(byCategory.map((c) => [c.id, c.count])),
+    severityBreakdown: Object.fromEntries(bySeverity.map((s) => [s.id, s.count])),
     recentAnomalies,
     topRiskUsers,
-    activityTrend: recentActivity.map((d) => ({ date: d._id, count: d.count })),
+    activityTrend: recentActivity.map((d) => ({ date: d.id, count: d.count })),
   };
 };

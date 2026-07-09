@@ -5,8 +5,8 @@ import { SLIS, SLOS, ERROR_BUDGET_CONFIG } from "../config/reliability.js";
 import {
   getCounter, getHistogram, getAllMetrics,
 } from "../config/metrics.js";
-import ErrorBudget from "../models/ErrorBudget.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
+import { findAll, findOne, create, update } from "../db/index.js";
 
 // =============================
 // 📐 SLI COMPUTATION
@@ -163,6 +163,35 @@ export function evaluateAllSlos(sliValues) {
 // 💰 ERROR BUDGET MANAGEMENT
 // =============================
 
+function consumeBudget(budget, amount, sliValue) {
+  budget.consumedBudget += amount;
+  budget.remainingBudget = Math.max(0, budget.totalBudget - budget.consumedBudget);
+  budget.consumedPercent = budget.totalBudget > 0
+    ? Math.min(100, (budget.consumedBudget / budget.totalBudget) * 100)
+    : 100;
+  budget.remainingPercent = Math.max(0, 100 - budget.consumedPercent);
+  budget.currentSliValue = sliValue;
+  if (budget.consumedPercent >= 100) budget.status = "exhausted";
+  else if (budget.consumedPercent >= 80) budget.status = "critical";
+  else if (budget.consumedPercent >= 50) budget.status = "warning";
+  else budget.status = "healthy";
+  budget.lastUpdated = new Date().toISOString();
+}
+
+function addSnapshot(budget) {
+  const history = budget.history || [];
+  if (history.length >= 10080) history.shift();
+  history.push({
+    timestamp: new Date().toISOString(),
+    consumedPercent: budget.consumedPercent,
+    remainingPercent: budget.remainingPercent,
+    sliValue: budget.currentSliValue,
+    periodStart: budget.periodStart,
+    periodEnd: budget.periodEnd,
+  });
+  budget.history = history;
+}
+
 export async function updateErrorBudgets(sliValues) {
   const results = [];
 
@@ -174,12 +203,12 @@ export async function updateErrorBudgets(sliValues) {
     if (sliValue === null || sliValue === undefined) continue;
 
     try {
-      let budget = await ErrorBudget.findOne({ sloId: slo.id });
-      const now = new Date();
-      const periodStart = new Date(now.getTime() - slo.windowDays * 86400000);
+      let budget = await findOne("error_budgets", { sloId: slo.id });
+      const now = new Date().toISOString();
+      const periodStart = new Date(Date.now() - slo.windowDays * 86400000).toISOString();
 
       if (!budget) {
-        budget = new ErrorBudget({
+        budget = await create("error_budgets", {
           sloId: slo.id,
           sloName: slo.name,
           totalBudget: config.totalBudget,
@@ -191,6 +220,7 @@ export async function updateErrorBudgets(sliValues) {
           status: "healthy",
           periodStart,
           periodEnd: now,
+          history: [],
         });
       }
 
@@ -198,17 +228,26 @@ export async function updateErrorBudgets(sliValues) {
       budget.currentSliValue = sliValue;
 
       if (!evaluation.compliant) {
-        const consumption = config.unit === "percentage"
-          ? evaluation.gap
-          : evaluation.gap;
-        budget.consume(consumption, sliValue);
+        const consumption = evaluation.gap;
+        consumeBudget(budget, consumption, sliValue);
       }
 
       budget.periodEnd = now;
       if (!budget.periodStart) budget.periodStart = periodStart;
 
-      budget.addSnapshot();
-      await budget.save();
+      addSnapshot(budget);
+      await update("error_budgets", budget.id, {
+        consumedBudget: budget.consumedBudget,
+        remainingBudget: budget.remainingBudget,
+        consumedPercent: budget.consumedPercent,
+        remainingPercent: budget.remainingPercent,
+        status: budget.status,
+        currentSliValue: budget.currentSliValue,
+        periodStart: budget.periodStart,
+        periodEnd: budget.periodEnd,
+        history: budget.history,
+        lastUpdated: budget.lastUpdated,
+      });
       results.push({ sloId: slo.id, status: budget.status, consumedPercent: budget.consumedPercent });
     } catch (err) {
       logError("Error budget update failed", { sloId: slo.id, error: err.message });
@@ -219,11 +258,11 @@ export async function updateErrorBudgets(sliValues) {
 }
 
 export async function getErrorBudgetBySloId(sloId) {
-  return ErrorBudget.findOne({ sloId });
+  return findOne("error_budgets", { sloId });
 }
 
 export async function getAllErrorBudgets() {
-  return ErrorBudget.find().sort({ sloId: 1 });
+  return findAll("error_budgets", { orderBy: "sloId", ascending: true });
 }
 
 // =============================
