@@ -43,7 +43,7 @@ jobs:
 
       - name: Fetch CodeQL results
         if: inputs.report_type == 'all' || inputs.report_type == 'codeql'
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           upload-database: false
           upload-results: false

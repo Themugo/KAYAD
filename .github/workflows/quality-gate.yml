@@ -9,14 +9,12 @@ on:
 
 jobs:
   quality:
-    name: Quality Checks
+    name: Quality Checks (${{ matrix.target }})
     strategy:
       fail-fast: false
       matrix:
         target: [frontend, backend]
     runs-on: ubuntu-latest
-    outputs:
-      passed: ${{ steps.check.outputs.passed }}
     
     steps:
       - name: Checkout code
@@ -50,6 +48,21 @@ jobs:
         if: matrix.target == 'frontend'
         run: npm run build
 
-      - name: Mark as passed
+  check:
+    name: Quality Gate Status
+    if: always()
+    runs-on: ubuntu-latest
+    needs: [quality]
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+    
+    steps:
+      - name: Aggregate results
         id: check
-        run: echo "passed=true" >> $GITHUB_OUTPUT
+        run: |
+          PASSED="true"
+          RESULTS='${{ toJSON(needs.quality.result) }}'
+          if echo "${RESULTS}" | grep -q '"failure"'; then
+            PASSED="false"
+          fi
+          echo "passed=${PASSED}" >> $GITHUB_OUTPUT

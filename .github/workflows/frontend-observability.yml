@@ -52,7 +52,7 @@ jobs:
           echo "|--------|-------|-------|" >> observability-report.md
           echo "| Error Rate | 0.5% | ↓ |" >> observability-report.md
           echo "| JS Errors | 125 | ↓ |" >> observability-report.md
-          "| API Errors | 45 | → |" >> observability-report.md
+          echo "| API Errors | 45 | → |" >> observability-report.md
           echo "| Error Boundary Triggers | 12 | → |" >> observability-report.md
           echo "" >> observability-report.md
           echo "## User Journey Analytics" >> observability-report.md

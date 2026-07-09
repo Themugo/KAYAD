@@ -64,7 +64,7 @@ jobs:
           echo "Checking ADR index in README.md"
           
           # Extract ADR numbers from files
-          ADR_FILES=$(ls docs/adr/*.md | grep -E "000[1-9]-" | wc -l)
+          ADR_FILES=$(ls docs/adr/*.md | grep -E "[0-9]{4}-" | wc -l)
           
           # Check if README exists
           if [ ! -f "docs/adr/README.md" ]; then

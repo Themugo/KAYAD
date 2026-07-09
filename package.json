@@ -54,7 +54,7 @@
         "@typescript-eslint/eslint-plugin": "^8.63.0",
         "@typescript-eslint/parser": "^8.63.0",
         "@vitejs/plugin-react": "^5.0.4",
-        "axios": "^1.6.0",
+        "axios": "^1.16.1",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",

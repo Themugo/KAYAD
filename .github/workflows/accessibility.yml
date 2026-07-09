@@ -37,8 +37,6 @@ jobs:
       - name: Run accessibility audit with Lighthouse CI
         uses: treosh/lighthouse-ci-action@v10
         with:
-          uploadArtifacts: true
-          temporaryPublicStorage: true
           uploadArtifacts: false
           urls: |
             http://localhost:4173

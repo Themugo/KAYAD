@@ -28,12 +28,10 @@ jobs:
 
       - name: Run npm audit (root)
         run: npm audit --audit-level=high
-        continue-on-error: true
 
       - name: Run npm audit (backend)
         run: npm audit --audit-level=high
         working-directory: ./backend
-        continue-on-error: true
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -59,8 +57,13 @@ jobs:
           report-path: gitleaks-report.sarif
           upload-report: true
           fail-on-severity: critical
-          continue-on-error: true
 
-      - name: Mark as passed
+      - name: Set gate output
         id: check
-        run: echo "passed=true" >> $GITHUB_OUTPUT
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "passed=false" >> $GITHUB_OUTPUT
+          fi

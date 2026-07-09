@@ -35,11 +35,11 @@ export const getEnv = (key, { required = true, defaultValue = null, type = "stri
 const REQUIRED_VARS = [
   { key: "JWT_SECRET", desc: "JWT signing secret" },
   { key: "MONGO_URI", desc: "MongoDB connection string" },
+  { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
 ];
 
 const PRODUCTION_REQUIRED_VARS = [
   { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret (separate from JWT_SECRET)" },
-  { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
 ];
 
 const PRODUCTION_VARS = [

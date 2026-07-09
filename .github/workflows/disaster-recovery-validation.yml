@@ -23,9 +23,21 @@ on:
 jobs:
   backup-verification:
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_type == 'backup-verification' || github.event.inputs.test_type == 'all' || github.event_name == 'schedule'
+    if: |
+      github.event_name == 'schedule' ||
+      github.event.inputs.test_type == 'backup-verification' ||
+      github.event.inputs.test_type == 'all'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check schedule month (quarterly — Jan/Apr/Jul/Oct)
+        if: github.event_name == 'schedule'
+        run: |
+          MONTH=$(date +%m)
+          case $MONTH in
+            01|04|07|10) echo "Backup verification quarter" ;;
+            *) echo "Not backup verification quarter — skipping"; exit 0 ;;
+          esac
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,9 +78,21 @@ jobs:
 
   restore-test:
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_type == 'restore-test' || github.event.inputs.test_type == 'all'
+    if: |
+      github.event_name == 'schedule' ||
+      github.event.inputs.test_type == 'restore-test' ||
+      github.event.inputs.test_type == 'all'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check schedule month (quarterly — Feb/May/Aug/Nov)
+        if: github.event_name == 'schedule'
+        run: |
+          MONTH=$(date +%m)
+          case $MONTH in
+            02|05|08|11) echo "Restore test quarter" ;;
+            *) echo "Not restore test quarter — skipping"; exit 0 ;;
+          esac
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -91,7 +115,8 @@ jobs:
               console.log('No backups found');
               process.exit(1);
             }
-            console.log('::set-output name=filename::' + backups[0].filename);
+            const { writeFileSync } = require('fs');
+            writeFileSync(process.env.GITHUB_OUTPUT, 'filename=' + backups[0].filename + '\n', { flag: 'a' });
           }).catch(err => {
             console.error('Failed to list backups:', err);
             process.exit(1);
@@ -127,9 +152,21 @@ jobs:
 
   failover-test:
     runs-on: ubuntu-latest
-    if: github.event.inputs.test_type == 'failover-test' || github.event.inputs.test_type == 'all'
+    if: |
+      github.event_name == 'schedule' ||
+      github.event.inputs.test_type == 'failover-test' ||
+      github.event.inputs.test_type == 'all'
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check schedule month (quarterly — Mar/Jun/Sep/Dec)
+        if: github.event_name == 'schedule'
+        run: |
+          MONTH=$(date +%m)
+          case $MONTH in
+            03|06|09|12) echo "Failover test quarter" ;;
+            *) echo "Not failover test quarter — skipping"; exit 0 ;;
+          esac
       
       - name: Setup Node.js
         uses: actions/setup-node@v4

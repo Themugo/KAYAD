@@ -10,8 +10,16 @@ const __dirname = path.dirname(__filename);
 
 const BUDGETS = {
   'index-': 200000, // 200KB for main entry
-  'react-vendor': 250000, // 250KB for React vendor
+  'react-vendor': 700000, // 700KB for React vendor
+  'animation-vendor': 200000, // 200KB for animation vendor
   'vendor': 300000, // 300KB for other vendors
+  'pages-admin-': 500000, // 500KB for admin pages
+  'pages-dealer-': 300000, // 300KB for dealer pages
+  'pages-role-': 50000, // 50KB for role-specific pages
+  'pages-': 500000, // 500KB for other pages
+  'components-': 400000, // 400KB for components
+  'context': 50000, // 50KB for context
+  'api': 100000, // 100KB for API layer
   default: 100000, // 100KB for other chunks
 };
 

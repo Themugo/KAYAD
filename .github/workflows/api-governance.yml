@@ -2,13 +2,6 @@ name: API Governance Check
 
 on:
   workflow_call:
-  pull_request:
-    paths:
-      - 'backend/routes/**'
-      - 'backend/controllers/**'
-      - 'backend/middleware/**'
-  push:
-    branches: [main, develop]
   workflow_dispatch:
 
 jobs:

@@ -351,7 +351,7 @@ import CacheStore from "./services/sessionStore.js";
 app.use(
   session({
     store: new CacheStore(),
-    secret: process.env.SESSION_SECRET || "kayad-session-secret-change-in-production",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {

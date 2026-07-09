@@ -102,7 +102,7 @@ jobs:
               const results = JSON.parse(fs.readFileSync('load-tests/results/api-results.json', 'utf8'));
               comment += `### API Load Test\n`;
               comment += `- Requests: ${results.metrics.http_reqs.values.count}\n`;
-              comment += `- RPS: ${results.metrics.http_reqs.values.count / results.metrics.http_req_duration.values.count}\n`;
+              comment += `- RPS: ${(results.metrics.http_reqs.values.rate || 0).toFixed(2)}\n`;
               comment += `- Avg Latency: ${results.metrics.http_req_duration.values.avg}ms\n`;
               comment += `- P95 Latency: ${results.metrics.http_req_duration.values['p(95)']}ms\n`;
               comment += `- P99 Latency: ${results.metrics.http_req_duration.values['p(99)']}ms\n`;

@@ -1,7 +1,7 @@
 // backend/chaos/cacheOutage.js
 // Chaos experiment: Cache outage simulation
 
-import { createClient } from 'redis';
+import Redis from 'ioredis';
 import { logInfo, logError } from '../utils/logger.js';
 
 export async function simulateCacheOutage(options = {}) {
@@ -13,32 +13,26 @@ export async function simulateCacheOutage(options = {}) {
   logInfo(`Starting cache outage simulation: ${severity} for ${duration}ms`);
 
   try {
-    const redisClient = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
-
-    await redisClient.connect();
+    const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    await redisClient.ping();
     logInfo('Redis client connected');
 
-    const initialState = await redisClient.ping();
-    logInfo(`Initial cache state: ${initialState ? 'available' : 'unavailable'}`);
+    const initialState = 'PONG';
+    logInfo(`Initial cache state: available`);
 
     // Simulate outage
     if (severity === 'full') {
-      await redisClient.quit();
+      await redisClient.disconnect();
       logInfo('Redis connection closed (simulating full outage)');
     } else {
-      // Simulate partial outage by setting a flag
       await redisClient.set('_chaosMode', 'true');
       logInfo('Cache chaos mode enabled (simulating partial outage)');
     }
 
-    // Wait for duration
     await new Promise((resolve) => setTimeout(resolve, duration));
 
-    // Restore connection
     if (severity === 'full') {
-      await redisClient.connect();
+      await redisClient.ping();
       logInfo('Redis connection restored');
     } else {
       await redisClient.del('_chaosMode');
@@ -46,14 +40,14 @@ export async function simulateCacheOutage(options = {}) {
     }
 
     const finalState = await redisClient.ping();
-    logInfo(`Final cache state: ${finalState ? 'available' : 'unavailable'}`);
+    logInfo(`Final cache state: ${finalState === 'PONG' ? 'available' : 'unavailable'}`);
 
-    await redisClient.quit();
+    await redisClient.disconnect();
 
     return {
       success: true,
-      initialState: initialState ? 'available' : 'unavailable',
-      finalState: finalState ? 'available' : 'unavailable',
+      initialState: 'available',
+      finalState: finalState === 'PONG' ? 'available' : 'unavailable',
       duration,
       severity,
     };
@@ -101,11 +95,7 @@ export async function validateCacheResilience() {
 
 async function testCacheRetry() {
   try {
-    const redisClient = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
-
-    await redisClient.connect();
+    const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
     let attemptCount = 0;
     for (let i = 0; i < 3; i++) {
@@ -120,7 +110,7 @@ async function testCacheRetry() {
       }
     }
 
-    await redisClient.quit();
+    await redisClient.disconnect();
     return { success: true, attempts: attemptCount };
   } catch (error) {
     return { success: false, error: error.message };
@@ -129,14 +119,8 @@ async function testCacheRetry() {
 
 async function testCacheCircuitBreaker() {
   try {
-    // Test circuit breaker pattern for cache
-    const redisClient = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379',
-    });
-
-    await redisClient.connect();
-    await redisClient.quit();
-
+    const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    await redisClient.disconnect();
     return { success: true };
   } catch (error) {
     return { success: false, error: error.message };

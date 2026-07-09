@@ -11,6 +11,7 @@ import { carsAPI, reviewsAPI, chatAPI, ntsaAPI, favoritesAPI, bidsAPI, formatKES
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useSocket } from '../context/SocketContext';
+import DEMO_CARS from '../data/demoCars';
 import PaymentModal from '../components/PaymentModal';
 const TcoCalculator = lazy(() => import('../components/TcoCalculator'));
 const MarketValuationMatrix = lazy(() => import('../components/MarketValuationMatrix'));
@@ -84,9 +85,14 @@ export default function CarDetailPage() {
       })
       .catch((error) => {
         console.error('Failed to fetch car:', error);
+        const demoCar = DEMO_CARS.find(c => c._id === id);
+        if (demoCar) {
+          setCar(demoCar);
+          toast('Demo mode — showing sample data', 'info');
+        }
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, toast]);
 
   useEffect(() => {
     if (!isAuth) return;
