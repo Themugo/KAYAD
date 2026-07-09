@@ -1,6 +1,6 @@
 import AuctionIntegrityFlag from "../models/AuctionIntegrityFlag.js";
 import AuctionRiskProfile from "../models/AuctionRiskProfile.js";
-import { isValidObjectId } from "../utils/validateId.js";
+import { isValidId } from "../utils/validateId.js";
 import { logError, logInfo } from "../utils/logger.js";
 import { success, error, notFound } from "../utils/response.js";
 import {
@@ -65,7 +65,7 @@ export const listFlags = async (req, res) => {
 export const getFlag = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid ID", 400);
 
     const flag = await AuctionIntegrityFlag.findById(id)
       .populate("targetUser", "name email phone")
@@ -86,7 +86,7 @@ export const getFlag = async (req, res) => {
 export const updateFlagStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid ID", 400);
 
     const { status, actionTaken, actionNotes, reviewNotes } = req.body;
 
@@ -121,7 +121,7 @@ export const triggerScan = async (req, res) => {
 
     let results;
     if (auctionId) {
-      if (!isValidObjectId(auctionId)) return error(res, "Invalid auction ID", 400);
+      if (!isValidId(auctionId)) return error(res, "Invalid auction ID", 400);
       results = await checkAuctionForIntegrity(auctionId);
     } else {
       const { scanWindowHours = 24 } = req.body;

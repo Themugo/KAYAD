@@ -213,10 +213,12 @@ export const checkByPhone = async (phone, excludeDealerId = null) => {
 export const checkByDealer = async (dealerId, carData, similarityThreshold = 0.7) => {
   try {
     // Find recent listings from same dealer
-    const recentListings = await findAll("cars", { filters: {
-      dealer: dealerId,
-      status: "active",
-      createdAt: { $gte: new Date(Date.now( }) - 90 * 24 * 60 * 60 * 1000) }, // Last 90 days
+    const recentListings = await findAll("cars", { 
+      filters: {
+        dealer: dealerId,
+        status: "active",
+        createdAt: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }, // Last 90 days
+      }
     })
       .select("_id title brand model year price mileage color status")
       .limit(50)

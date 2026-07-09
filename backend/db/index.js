@@ -1,4 +1,4 @@
-﻿import { getSupabase } from './supabase.js';
+﻿import { getSupabase } from '../utils/supabase.js';
 
 /**
  * Generic database utility for Supabase/PostgreSQL operations.

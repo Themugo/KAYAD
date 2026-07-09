@@ -1,5 +1,6 @@
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, count, getSupabase } from "../db/index.js";
+import { findAll, count } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 export const trackSearch = async (searchData) => {
   try {

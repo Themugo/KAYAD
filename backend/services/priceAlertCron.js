@@ -1,6 +1,7 @@
 import { sendNotification } from "./notification.service.js";
 import { logInfo } from "../utils/logger.js";
-import { findAll, findOne, update, getSupabase } from "../db/index.js";
+import { findAll, findOne, update } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const CHECK_INTERVAL = 15 * 60 * 1000;
 

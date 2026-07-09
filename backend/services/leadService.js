@@ -223,13 +223,15 @@ export const calculateConversionRate = async (dealerId, startDate, endDate) => {
 
 export const calculateResponseTime = async (dealerId, startDate, endDate) => {
   try {
-    const leads = await findAll("leads", { filters: {
-      dealer: dealerId,
-      createdAt: {
-        $gte: new Date(startDate }),
-        $lte: new Date(endDate),
-      },
-      firstResponseTime: { $gt: 0 },
+    const leads = await findAll("leads", { 
+      filters: {
+        dealer: dealerId,
+        createdAt: {
+          $gte: new Date(startDate),
+          $lte: new Date(endDate),
+        },
+        firstResponseTime: { $gt: 0 },
+      }
     });
 
     if (leads.length === 0) {

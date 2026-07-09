@@ -262,9 +262,11 @@ const detectRelatedAccountBidding = async (scanUntil) => {
 const detectBidInflation = async (scanUntil) => {
   const anomalies = [];
 
-  const activeAuctions = await findAll("auctions", { filters: {
-    status: { $in: ["active", "ended"] },
-    endTime: { $gte: new Date(Date.now( }) - 7 * 86400000) },
+  const activeAuctions = await findAll("auctions", { 
+    filters: {
+      status: { $in: ["active", "ended"] },
+      endTime: { $gte: new Date(Date.now() - 7 * 86400000) },
+    }
   })
     .select("_id carId bidHistory startTime endTime highestBid startingBid")
     ;

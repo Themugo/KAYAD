@@ -880,7 +880,7 @@ router.post(
 // 🔨 DEALER AUCTION CONTROLS
 // =============================
 import { startAuction, endAuction } from "../realtime/auctionEngine.js";
-import { syncAuctionResult } from "../realtime/syncService.js";
+import { syncAuctionEnd } from "../services/auctionSync.service.js";
 
 // 🚀 Start auction on dealer's own car
 router.post(

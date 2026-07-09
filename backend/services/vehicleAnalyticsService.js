@@ -1,5 +1,6 @@
 import { logInfo, logError } from "../utils/logger.js";
-import { findAll, update, count, upsert, getSupabase } from "../db/index.js";
+import { findAll, update, count, upsert } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 export const calculateAverageSellingPrice = async (startDate, endDate) => {
   try {

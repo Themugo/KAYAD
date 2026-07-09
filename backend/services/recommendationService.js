@@ -1,4 +1,5 @@
-import { findAll, findById, getSupabase } from "../db/index.js";
+import { findAll, findById } from "../db/index.js";
+import { getSupabase } from "../utils/supabase.js";
 
 export const getPersonalizedRecommendations = async (userId) => {
   try {

@@ -7,7 +7,7 @@
 import express from "express";
 import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
-import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
+// import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { getSupabase } from "../utils/supabase.js";
@@ -84,7 +84,7 @@ router.get("/", async (req, res) => {
 });
 
 // Detailed health check with replica set info
-router.get("/detailed", checkReplicaSetHealth, async (req, res) => {
+router.get("/detailed", async (req, res) => {
   const health = {
     status: "healthy",
     timestamp: new Date().toISOString(),
@@ -94,7 +94,6 @@ router.get("/detailed", checkReplicaSetHealth, async (req, res) => {
       redis: {},
       memory: {},
       cache: {},
-      replicaSet: req.replicaSetHealth,
     },
   };
 
@@ -153,10 +152,6 @@ router.get("/detailed", checkReplicaSetHealth, async (req, res) => {
     stats: cacheStats,
   };
 
-  // Check replica set health status
-  if (req.replicaSetHealth && req.replicaSetHealth.status !== "healthy") {
-    health.status = req.replicaSetHealth.status;
-  }
 
   const statusCode = health.status === "healthy" ? 200 : health.status === "degraded" ? 200 : 503;
 

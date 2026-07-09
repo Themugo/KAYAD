@@ -11,7 +11,7 @@ import Bid from "../models/Bid.js";
 
 import { startAuction, endAuction, getBidHistory } from "../realtime/auctionEngine.js";
 
-import { syncAuctionResult } from "../realtime/syncService.js";
+import { syncAuctionEnd } from "../services/auctionSync.service.js";
 
 const router = express.Router();
 

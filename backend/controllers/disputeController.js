@@ -7,7 +7,7 @@
 import mongoose from "mongoose";
 import Dispute from "../models/Dispute.js";
 import Evidence from "../models/Evidence.js";
-import { isValidObjectId } from "../utils/validateId.js";
+import { isValidId } from "../utils/validateId.js";
 import { logError, logInfo } from "../utils/logger.js";
 import { getIO } from "../utils/io.js";
 import { success, error, notFound, validationError } from "../utils/response.js";
@@ -150,7 +150,7 @@ export const getAllDisputes = async (req, res) => {
 export const getDispute = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const dispute = await Dispute.findById(id)
       .populate("escrow")
@@ -189,7 +189,7 @@ export const transitionDisputeState = async (req, res) => {
   try {
     const { id } = req.params;
     const { nextStatus, reason } = req.body;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const dispute = await Dispute.findById(id);
     if (!dispute) return notFound(res, "Dispute not found");
@@ -240,7 +240,7 @@ export const transitionDisputeState = async (req, res) => {
 export const uploadEvidence = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const dispute = await Dispute.findById(id);
     if (!dispute) return notFound(res, "Dispute not found");
@@ -313,7 +313,7 @@ export const uploadEvidence = async (req, res) => {
 export const getEvidence = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const dispute = await Dispute.findById(id).select("openedBy openedAgainst status");
     if (!dispute) return notFound(res, "Dispute not found");
@@ -339,7 +339,7 @@ export const getEvidence = async (req, res) => {
 export const getEvidenceItem = async (req, res) => {
   try {
     const { id, evidenceId } = req.params;
-    if (!isValidObjectId(id) || !isValidObjectId(evidenceId)) return error(res, "Invalid ID", 400);
+    if (!isValidId(id) || !isValidId(evidenceId)) return error(res, "Invalid ID", 400);
 
     const evidence = await Evidence.findOne({ _id: evidenceId, dispute: id, deletedAt: null })
       .populate("uploadedBy", "name email");
@@ -358,7 +358,7 @@ export const getEvidenceItem = async (req, res) => {
 export const deleteEvidence = async (req, res) => {
   try {
     const { id, evidenceId } = req.params;
-    if (!isValidObjectId(id) || !isValidObjectId(evidenceId)) return error(res, "Invalid ID", 400);
+    if (!isValidId(id) || !isValidId(evidenceId)) return error(res, "Invalid ID", 400);
 
     const evidence = await Evidence.findById(evidenceId);
     if (!evidence) return notFound(res, "Evidence not found");
@@ -387,7 +387,7 @@ export const deleteEvidence = async (req, res) => {
 export const verifyEvidence = async (req, res) => {
   try {
     const { id, evidenceId } = req.params;
-    if (!isValidObjectId(id) || !isValidObjectId(evidenceId)) return error(res, "Invalid ID", 400);
+    if (!isValidId(id) || !isValidId(evidenceId)) return error(res, "Invalid ID", 400);
 
     const evidence = await Evidence.findByIdAndUpdate(evidenceId, {
       verified: true,
@@ -411,7 +411,7 @@ export const verifyEvidence = async (req, res) => {
 export const addInternalNote = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { note, isPrivate } = req.body;
 
@@ -445,7 +445,7 @@ export const addInternalNote = async (req, res) => {
 export const assignDispute = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { assigneeId } = req.body;
 
@@ -470,7 +470,7 @@ export const assignDispute = async (req, res) => {
 export const startMediation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { mediatorId, scheduledAt } = req.body;
 
@@ -515,7 +515,7 @@ export const startMediation = async (req, res) => {
 export const completeMediation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { outcome, mediatorNotes, buyerSatisfied, sellerSatisfied } = req.body;
 
@@ -551,7 +551,7 @@ export const completeMediation = async (req, res) => {
 export const resolveDispute = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { decision, amount, sellerAmount, buyerAmount, reason } = req.body;
 
@@ -572,7 +572,7 @@ export const resolveDispute = async (req, res) => {
 export const submitAppeal = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { reason, additionalDetails } = req.body;
 
@@ -617,7 +617,7 @@ export const submitAppeal = async (req, res) => {
 export const reviewAppeal = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return error(res, "Invalid dispute ID", 400);
+    if (!isValidId(id)) return error(res, "Invalid dispute ID", 400);
 
     const { decision, reviewNotes } = req.body;
 
