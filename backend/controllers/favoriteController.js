@@ -1,6 +1,6 @@
 // backend/controllers/favoriteController.js
 // Uses the Favorite collection (separate model — no embedded User.favorites needed)
-import mongoose from "mongoose";
+import { startSession } from "../utils/supabaseSession.js";
 import Favorite from "../models/Favorite.js";
 import Car from "../models/Car.js";
 
@@ -46,7 +46,7 @@ export const getFavorites = async (req, res) => {
 
 // POST /api/favorites/:carId (Phase 2 Transaction Support)
 export const addFavorite = async (req, res) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
 
   try {
@@ -109,7 +109,7 @@ export const updateFavoritePriceAlert = async (req, res) => {
 
 // DELETE /api/favorites/:carId (Phase 2 Transaction Support)
 export const removeFavorite = async (req, res) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
 
   try {
@@ -131,7 +131,7 @@ export const removeFavorite = async (req, res) => {
 
 // POST /api/favorites/:carId/toggle (Phase 2 Transaction Support)
 export const toggleFavorite = async (req, res) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
 
   try {

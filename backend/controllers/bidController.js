@@ -1,5 +1,6 @@
 import { startSession } from "../utils/supabaseSession.js";
 import crypto from "crypto";
+import User from "../models/User.js";
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
@@ -196,7 +197,7 @@ export const getAuctionBids = async (req, res) => {
 // 💰 PLACE BID (AUTO-BID READY - Phase 2 Transaction Support)
 // =============================
 export const placeBid = async (req, res) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
 
   try {
@@ -257,7 +258,7 @@ export const placeBid = async (req, res) => {
     }
 
     // 📱 Require verified phone for bids
-    const bidder = await mongoose.model("User").findById(userId).select("phone emailVerified phone notifications").session(session);
+    const bidder = await User.findById(userId).select("phone emailVerified phone notifications");
     if (!bidder?.phone || bidder.phone.length < 8) {
       await session.abortTransaction();
       session.endSession();
@@ -453,7 +454,7 @@ export const placeBid = async (req, res) => {
 // =============================
 export const confirmBidPayment = async (req, res) => {
   try {
-    const session = await mongoose.startSession();
+    const session = await startSession();
     session.startTransaction();
 
     const callback = req.body?.Body?.stkCallback || req.body?.stkCallback;
@@ -603,7 +604,7 @@ export const getMyBids = async (req, res) => {
 export const endAuction = async (req, res) => {
   try {
     const { id: carId } = req.params;
-    const session = await mongoose.startSession();
+    const session = await startSession();
     session.startTransaction();
 
     try {

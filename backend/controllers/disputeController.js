@@ -4,7 +4,6 @@
 // evidence management, mediation, resolution, and appeal workflows.
 // ─────────────────────────────────────────────────────────────
 
-import mongoose from "mongoose";
 import Dispute from "../models/Dispute.js";
 import Evidence from "../models/Evidence.js";
 import { isValidId } from "../utils/validateId.js";

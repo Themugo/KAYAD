@@ -1,11 +1,11 @@
 // backend/controllers/reviewController.js
-import mongoose from "mongoose";
+import { startSession } from "../utils/supabaseSession.js";
 import Review from "../models/Review.js";
 import User from "../models/User.js";
 
 // POST /api/reviews (Phase 2 Transaction Support)
 export const createReview = async (req, res) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
 
   try {

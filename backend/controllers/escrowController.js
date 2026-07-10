@@ -6,7 +6,6 @@
 // commits atomically with ledger updates.
 // ─────────────────────────────────────────────────────────────
 
-import mongoose from "mongoose";
 import Escrow from "../models/Escrow.js";
 import Car from "../models/Car.js";
 import Payment from "../models/Payment.js";

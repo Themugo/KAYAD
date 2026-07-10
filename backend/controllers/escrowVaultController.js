@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import mongoose from "mongoose";
+import { startSession } from "../utils/supabaseSession.js";
 import Car from "../models/Car.js";
 import EscrowVault from "../models/EscrowVault.js";
 import { sendOTP, verifyOTP } from "../services/otpService.js";
@@ -13,7 +13,7 @@ const addHistory = (vault, action, userId) => {
 };
 
 const withTransaction = async (fn) => {
-  const session = await mongoose.startSession();
+  const session = await startSession();
   session.startTransaction();
   try {
     const result = await fn(session);
