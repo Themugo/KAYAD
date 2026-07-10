@@ -13,13 +13,19 @@ services:
         value: production
       - key: PORT
         value: "5000"
-      - key: MONGO_URI
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SESSION_SECRET
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: REFRESH_TOKEN_SECRET
         sync: false
       - key: FRONTEND_URL
+        sync: false
+      - key: BACKEND_URL
         sync: false
       - key: MPESA_CONSUMER_KEY
         sync: false

@@ -1,6 +1,6 @@
 {
-  "framework": null,
-  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "vite",
+  "installCommand": "npm install",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
@@ -48,6 +48,8 @@
     "VITE_ENABLE_COMPARE": "true",
     "VITE_ENABLE_REVIEWS": "true",
     "VITE_ENABLE_DEMO": "true",
+    "VITE_API_URL": "https://kayad-backend-staging.onrender.com",
+    "VITE_FRONTEND_URL": "https://kayad-motors-staging.vercel.app",
     "VITE_POSTHOG_HOST": "https://us.i.posthog.com"
   }
 }
