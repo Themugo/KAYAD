@@ -1,155 +1,181 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import usePageMeta from "../hooks/usePageMeta";
+import { useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 export default function RegisterPage() {
-  usePageMeta("Join Free", "Create your Kayad account in seconds.");
-  const { register, isAuth } = useAuth();
+  const { register } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
+  const roleParam = searchParams.get('role');
+  const isFromCar = redirectTo.startsWith('/cars/');
+  const isDealerFlow = roleParam === 'dealer' || roleParam === 'broker';
 
-  const [form, setForm] = useState({ name: "", email: "", password: "", phone: "" });
-  const [wantToSell, setWantToSell] = useState(params.get("sell") === "1");
-  const [sellerType, setSellerType] = useState(params.get("role") === "individual_seller" ? "individual_seller" : "dealer");
+  const [step, setStep] = useState(isFromCar || isDealerFlow ? 2 : 1);
+  const [role, setRole] = useState(roleParam === 'broker' ? 'broker' : isDealerFlow ? 'dealer' : 'user');
   const [loading, setLoading] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (isAuth) navigate("/dashboard", { replace: true });
-  }, [isAuth, navigate]);
-
-  const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', phone: '',
+    businessName: '', location: '',
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
-    if (form.password.length < 8) newErrors.password = "At least 8 characters";
-    if (!/^07[0-9]{8}$/.test(form.phone.replace(/\s/g, ''))) newErrors.phone = "Enter a valid Safaricom number (0712 345 678)";
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-    setErrors({});
+    if (form.password.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
     setLoading(true);
     try {
-      const body = {
-        name: form.name,
-        email: form.email.toLowerCase().trim(),
-        password: form.password,
-        phone: form.phone.trim(),
-        role: wantToSell ? sellerType : "user",
-      };
-      const refCode = params.get("ref") || "";
-      if (refCode) body.referralCode = refCode;
-
-      await register(body);
-      toast("Account created! Welcome to Kayad.", "success");
-      navigate("/verify-phone", { replace: true });
+      const body = { ...form, role };
+      if (role !== 'dealer' && role !== 'broker') { delete body.businessName; delete body.location; }
+      const data = await register(body);
+      toast('Account created! Welcome to Gari Motors', 'success');
+      const dest = role === 'dealer' || role === 'broker' ? '/dealer' : redirectTo;
+      navigate(dest, { replace: true });
     } catch (err) {
-      toast(err.response?.data?.message || "Registration failed", "error");
+      toast(err.response?.data?.message || 'Registration failed', 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  const set = (key, val) => setForm(p => ({ ...p, [key]: val }));
+
   return (
-    <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      <div style={{ width: "100%", maxWidth: 420, padding: "0 20px" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
+    <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px 20px' }}>
+      <div style={{ width: '100%', maxWidth: 480 }}>
+
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🚗</div>
-          <h2 style={{ marginBottom: 6 }}>Join Kayad</h2>
-          <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Create your account in under a minute</p>
+          <h2 style={{ marginBottom: 6 }}>Create Your Account</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Join Kenya's premium car marketplace</p>
         </div>
 
-        <div className="card" style={{ padding: 28 }}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div className="input-group">
-              <label className="input-label">Full Name</label>
-              <input className="input" type="text" placeholder="John Doe" value={form.name} onChange={(e) => { set("name", e.target.value); setErrors(p => ({ ...p, name: '' })); }} required autoComplete="name" />
-              {errors.name && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.name}</span>}
+        {step === 1 && (
+          <div className="card" style={{ padding: 32 }}>
+            <h3 style={{ marginBottom: 20, textAlign: 'center' }}>I am a...</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+              {[
+                { val: 'user',   icon: '👤', title: 'Car Buyer',     desc: 'Browse listings, bid on auctions, and buy cars.' },
+                { val: 'dealer', icon: '🏪', title: 'Car Dealer',    desc: 'List inventory, run live auctions, and grow your business.' },
+                { val: 'broker', icon: '🤝', title: 'Seller / Broker', desc: 'List your personal car for sale. No business account needed.' },
+              ].map(r => (
+                <div
+                  key={r.val}
+                  onClick={() => {
+                    setRole(r.val);
+                    setStep(2);
+                  }}
+                  style={{
+                    background: 'var(--surface)',
+                    border: '2px solid var(--border)',
+                    borderRadius: 'var(--radius)', padding: '18px 20px',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 16,
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.background = 'var(--gold-glow)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'var(--surface)'; }}
+                >
+                  <span style={{ fontSize: 32 }}>{r.icon}</span>
+                  <div>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{r.title}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{r.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
+            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: 'var(--gold)', fontWeight: 600 }}>Sign In</Link>
+            </p>
+          </div>
+        )}
 
-            <div className="input-group">
-              <label className="input-label">Email</label>
-              <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={(e) => { set("email", e.target.value); setErrors(p => ({ ...p, email: '' })); }} required autoComplete="email" />
-              {errors.email && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.email}</span>}
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Password</label>
-              <div style={{ position: "relative" }}>
-                <input className="input" type={showPwd ? "text" : "password"} placeholder="At least 8 characters" value={form.password} onChange={(e) => { set("password", e.target.value); setErrors(p => ({ ...p, password: '' })); }} required autoComplete="new-password" style={{ paddingRight: 44 }} />
-                <button type="button" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? "Hide password" : "Show password"} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", display: "flex" }}>
-                  {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+        {step === 2 && (
+          <div className="card" style={{ padding: 32 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              {!isFromCar && !isDealerFlow && (
+                <button onClick={() => setStep(1)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 12px', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 13 }}>
+                  ← Back
                 </button>
-              </div>
-              {errors.password && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.password}</span>}
-              {form.password && !errors.password && (
-                <div style={{ marginTop: 6 }}>
-                  <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', borderRadius: 2, transition: 'all 0.3s',
-                      width: `${Math.min(100, form.password.length * 10)}%`,
-                      background: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#22c55e',
-                    }} />
-                  </div>
-                  <div style={{ fontSize: 11, color: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#22c55e', marginTop: 3 }}>
-                    {form.password.length < 6 ? 'Weak' : form.password.length < 10 ? 'Fair' : 'Strong'}
-                  </div>
-                </div>
               )}
+              <span className={`badge ${role === 'dealer' ? 'badge-gold' : role === 'broker' ? 'badge-orange' : 'badge-blue'}`}>
+                {role === 'dealer' ? '🏪 Dealer' : role === 'broker' ? '🤝 Broker' : '👤 Buyer'}
+              </span>
             </div>
 
-            <div className="input-group">
-              <label className="input-label">Phone (M-Pesa)</label>
-              <input className="input" type="tel" placeholder="0712 345 678" value={form.phone} onChange={(e) => { set("phone", e.target.value); setErrors(p => ({ ...p, phone: '' })); }} required autoComplete="tel" />
-              {errors.phone && <span role="alert" style={{ fontSize: 11, color: '#ef4444', marginTop: 4 }}>{errors.phone}</span>}
-            </div>
-
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", margin: "4px 0" }}>
-              <input type="checkbox" checked={wantToSell} onChange={(e) => setWantToSell(e.target.checked)} style={{ width: 18, height: 18 }} />
-              <span style={{ fontSize: 13, color: "var(--text-muted)" }}>I also want to sell cars</span>
-            </label>
-
-            {wantToSell && (
-              <div style={{ marginTop: 12, padding: 12, background: "rgba(212,196,168,0.08)", borderRadius: 8, border: "1px solid rgba(212,196,168,0.15)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--gold)", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Seller Type</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                    <input type="radio" name="sellerType" value="dealer" checked={sellerType === "dealer"} onChange={(e) => setSellerType(e.target.value)} style={{ width: 16, height: 16 }} />
-                    <div>
-                      <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>Registered Dealer</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Business with multiple vehicles, verified dealer benefits</div>
-                    </div>
-                  </label>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                    <input type="radio" name="sellerType" value="individual_seller" checked={sellerType === "individual_seller"} onChange={(e) => setSellerType(e.target.value)} style={{ width: 16, height: 16 }} />
-                    <div>
-                      <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 600 }}>Private Seller</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Individual selling personal vehicle, escrow protection included</div>
-                    </div>
-                  </label>
-                </div>
+            {isFromCar && !isDealerFlow && (
+              <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
+                Sign up to bid, buy, or message the dealer about this car. You'll be redirected back after registration.
               </div>
             )}
 
-            <button className="btn btn-gold btn-full btn-lg" type="submit" disabled={loading} style={{ marginTop: 4 }}>
-              {loading ? <><span className="spinner" style={{ width: 18, height: 18 }} /> Creating account...</> : "Create Account"}
-            </button>
-          </form>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div className="input-group">
+                <label className="input-label">Full Name</label>
+                <input className="input" placeholder="John Kamau" value={form.name} onChange={e => set('name', e.target.value)} required />
+              </div>
 
-          <div className="gold-line" style={{ margin: "16px 0" }} />
+              <div className="input-group">
+                <label className="input-label">Email</label>
+                <input className="input" type="email" placeholder="you@example.com" value={form.email} onChange={e => set('email', e.target.value)} required />
+              </div>
 
-          <p style={{ textAlign: "center", fontSize: 14, color: "var(--text-muted)" }}>
-            Already have an account?{" "}
-            <Link to="/login" style={{ color: "var(--gold)", fontWeight: 600 }}>Sign In</Link>
-          </p>
-        </div>
+              <div className="input-group">
+                <label className="input-label">Phone (M-Pesa Number)</label>
+                <div className="mpesa-wrap">
+                  <span className="mpesa-prefix">🇰🇪</span>
+                  <input className="input" placeholder="0712 345 678" value={form.phone} onChange={e => set('phone', e.target.value)} />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Password</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="input"
+                    type={showPwd ? 'text' : 'password'}
+                    placeholder="Min 6 characters"
+                    value={form.password}
+                    onChange={e => set('password', e.target.value)}
+                    required
+                    style={{ paddingRight: 44 }}
+                  />
+                  <button type="button" onClick={() => setShowPwd(!showPwd)}
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                    {showPwd ? '🙈' : '👁'}
+                  </button>
+                </div>
+              </div>
+
+              {(role === 'dealer' || role === 'broker') && (
+                <>
+                  <div className="input-group">
+                    <label className="input-label">Business Name {role === 'broker' && '(optional)'}</label>
+                    <input className="input" placeholder={role === 'dealer' ? "ABC Motors Ltd" : "Your name or trading name"} value={form.businessName} onChange={e => set('businessName', e.target.value)} />
+                  </div>
+                  <div className="input-group">
+                    <label className="input-label">Location / City</label>
+                    <input className="input" placeholder="Nairobi, Westlands" value={form.location} onChange={e => set('location', e.target.value)} />
+                  </div>
+                  <div style={{ background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+                    {role === 'dealer' ? 'Dealer accounts require admin approval before you can list cars. You\'ll receive an email once approved.' : 'Broker accounts require admin approval before you can list cars. You\'ll be notified once approved.'}
+                  </div>
+                </>
+              )}
+
+              <button className="btn btn-gold btn-full btn-lg" type="submit" disabled={loading}>
+                {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Creating...</> : 'Create Account'}
+              </button>
+            </form>
+
+            <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: 'var(--gold)', fontWeight: 600 }}>Sign In</Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

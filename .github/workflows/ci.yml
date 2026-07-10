@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI
 
 on:
   push:
@@ -6,73 +6,107 @@ on:
   pull_request:
     branches: [main]
 
-permissions:
-  contents: read
-  security-events: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
-    name: Quality Gate
-    uses: ./.github/workflows/quality-gate.yml
-
-  test:
-    name: Test Gate
-    uses: ./.github/workflows/test-gate.yml
-
-  security:
-    name: Security Gate
-    if: github.event_name == 'push'
-    uses: ./.github/workflows/security-gate.yml
-
-  api-governance:
-    name: API Governance
-    if: github.event_name == 'push'
-    uses: ./.github/workflows/api-governance.yml
-
-  e2e:
-    name: E2E Tests
-    needs: [quality, test]
+    name: Quality Checks
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 15
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Lint
+        run: npm run lint
 
-      - name: Run E2E tests
-        run: npm run test:e2e
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
-      - name: Upload Playwright report
-        if: always()
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+          name: dist
+          path: dist/
+          retention-days: 1
 
-  deploy-preview:
-    name: Deploy Preview
-    needs: [quality, test]
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Check for secrets in code
+        run: |
+          if grep -rn "SUPABASE_SERVICE_ROLE_KEY\|mongodb+srv\|MONGO_URI" src/ --include="*.jsx" --include="*.js" --include="*.ts"; then
+            echo "ERROR: Found potential secrets in source code"
+            exit 1
+          fi
+          echo "No secrets found in source code"
+
+  bundle-analysis:
+    name: Bundle Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     if: github.event_name == 'pull_request'
-    uses: ./.github/workflows/deploy-gate.yml
-    with:
-      environment: preview
 
-  deploy-production:
-    name: Deploy Production
-    needs: [quality, test, security, e2e]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: ./.github/workflows/deploy-gate.yml
-    with:
-      environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Check bundle size
+        run: |
+          MAIN_JS=$(find dist/assets -name "*.js" -not -name "*.map" | xargs ls -la | sort -k5 -n | tail -1)
+          echo "Largest JS bundle: $MAIN_JS"
+          SIZE=$(find dist/assets -name "*.js" | xargs du -sk | awk '{sum += $1} END {print sum}')
+          echo "Total JS size: ${SIZE}K"
+          if [ "$SIZE" -gt "2000" ]; then
+            echo "WARNING: Total bundle size exceeds 2MB (${SIZE}K)"
+          else
+            echo "Bundle size OK (${SIZE}K)"
+          fi

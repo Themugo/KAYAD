@@ -10,20 +10,17 @@
     "lint": "eslint src --ext .js,.jsx"
   },
   "dependencies": {
-    "@sentry/react": "^8.0.0",
-    "axios": "^1.6.0",
+    "@supabase/supabase-js": "^2.110.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.0",
-    "socket.io-client": "^4.7.5"
+    "react-router-dom": "^6.22.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.2",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^8.57.0",
-    "rollup-plugin-visualizer": "^7.0.1",
-    "vite": "^5.4.0",
-    "vite-plugin-compression": "^0.5.1",
-    "vite-plugin-pwa": "^1.3.0"
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "vite": "^5.4.0"
   }
 }

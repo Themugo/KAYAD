@@ -35,7 +35,7 @@ services:
   # ── Frontend (served by nginx) ──────────────────────────
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
     container_name: gari-frontend
     restart: unless-stopped
@@ -50,8 +50,7 @@ services:
     networks:
       - gari-net
 
-  # ── MongoDB (local dev only) ─────────────────────────────
-  # For production, use MongoDB Atlas instead — remove this service
+  # ── Supabase (local dev only) ────────────────────────────
   mongo:
     image: mongo:7
     container_name: gari-mongo

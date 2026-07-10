@@ -123,6 +123,4 @@ spec:
   podSelector: {}
   policyTypes:
   - Ingress
-  ingress:
-  # Deny all ingress by default (whitelist approach)
-  - {}
+  ingress: []

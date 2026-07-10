@@ -1,144 +1,522 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { dealerAPI, notifAPI } from '../../api/api';
+import { dealerAPI, carsAPI, formatKES } from '../../api/api';
 import { useAuth } from '../../context/AuthContext';
-import {
-  Plus, Car, Gavel, Search, Megaphone, ShoppingCart, ClipboardCheck, TrendingUp,
-} from 'lucide-react';
+import { useToast } from '../../context/ToastContext';
 
-const QUICK_ACTIONS = [
-  { id: 'add', icon: Plus, label: 'Add Vehicle', desc: 'List a new car for sale', to: '/dealer/add-car', color: 'var(--gold)', bg: 'rgba(212,196,168,0.12)' },
-  { id: 'inventory', icon: Car, label: 'Manage Inventory', desc: 'View and edit listings', to: '/dealer/inventory', color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  { id: 'auction', icon: Gavel, label: 'Create Auction', desc: 'Start a live auction', to: '/dealer/auctions', color: '#f97316', bg: 'rgba(249,115,22,0.12)' },
-  { id: 'inspection', icon: Search, label: 'Request Inspection', desc: 'Schedule pre-inspection', to: '/dealer/inspections', color: '#a855f7', bg: 'rgba(168,85,247,0.12)' },
-  { id: 'promote', icon: Megaphone, label: 'Promote Listing', desc: 'Boost visibility', to: '/dealer/marketing', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
-  { id: 'orders', icon: ShoppingCart, label: 'View Orders', desc: 'Track purchase orders', to: '/dealer/orders', color: '#ec4899', bg: 'rgba(236,72,153,0.12)' },
+const TABS = [
+  { id: 'overview',  label: '📊 Overview' },
+  { id: 'listings',  label: '🚗 Listings' },
+  { id: 'bids',      label: '⚡ Bids' },
+  { id: 'escrows',   label: '🔒 Escrows' },
+  { id: 'earnings',  label: '💰 Earnings' },
 ];
-
-function KPIBox({ label, value, sub, color }) {
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '18px 20px' }}>
-      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: color || '#fff' }}>{value ?? '—'}</div>
-      {sub && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{sub}</div>}
-    </div>
-  );
-}
 
 export default function DealerDashboard() {
   const { user } = useAuth();
-  const [summary, setSummary] = useState(null);
-  const [cars, setCars] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [healthData, setHealthData] = useState(null);
+  const { toast } = useToast();
 
-  const canManageDemoCars = ['dealer', 'individual_seller'].includes(user?.role);
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-  const dateStr = new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const [summary, setSummary]     = useState(null);
+  const [cars, setCars]           = useState([]);
+  const [bids, setBids]           = useState([]);
+  const [escrows, setEscrows]     = useState([]);
+  const [earnings, setEarnings]   = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [tab, setTab]             = useState('overview');
+  const [bidsPage, setBidsPage]   = useState(1);
+  const [bidsTotal, setBidsTotal] = useState(0);
 
-  useEffect(() => {
-    let ignore = false;
-    const carsPromise = canManageDemoCars
-      ? Promise.all([
-          dealerAPI.cars({ limit: 100 }).catch(() => ({ cars: [] })),
-        ]).then(([ownedRes]) => {
-          const owned = ownedRes.cars || ownedRes.data || [];
-          return { cars: owned };
-        })
-      : dealerAPI.cars({ limit: 100 }).catch(() => ({ cars: [] }));
-    Promise.all([
-      dealerAPI.summary().catch(() => ({})),
-      carsPromise,
-      notifAPI.list({ limit: 1, unread: true }).catch(() => ({})),
-      dealerAPI.analytics?.({ days: 30 }).catch(() => ({})),
-      dealerAPI.milestones?.().catch(() => ({})),
-    ]).then(([s, c, n, a, m]) => {
-      if (ignore) return;
+  const loadDashboard = async () => {
+    setLoading(true);
+    try {
+      const [s, c] = await Promise.all([
+        dealerAPI.summary().catch(() => ({ summary: {} })),
+        dealerAPI.cars().catch(() => ({ cars: [] })),
+      ]);
       setSummary(s.summary || s.data || s);
       setCars(c.cars || c.data || []);
-      const mData = m?.milestones || m;
-      const mStats = mData?.stats || m?.stats || {};
-      if (mStats?.profileHealth) setHealthData(mStats.profileHealth);
-    }).finally(() => { if (!ignore) setLoading(false); });
-    return () => { ignore = true; };
-  }, [canManageDemoCars]);
+    } catch { /* ignore */ }
+    setLoading(false);
+  };
+
+  useEffect(() => { loadDashboard(); }, []);
+
+  useEffect(() => {
+    if (tab === 'bids') {
+      dealerAPI.bids({ page: bidsPage, limit: 20 })
+        .then(d => { setBids(d.bids || []); setBidsTotal(d.pagination?.total || 0); })
+        .catch(() => {});
+    }
+    if (tab === 'escrows') {
+      dealerAPI.escrows()
+        .then(d => setEscrows(d.escrows || []))
+        .catch(() => {});
+    }
+    if (tab === 'earnings') {
+      dealerAPI.earnings({ days: 365 })
+        .then(d => setEarnings(d.earnings || d.data || d))
+        .catch(() => {});
+    }
+  }, [tab, bidsPage]);
+
+  const handleDelete = async (carId) => {
+    if (!confirm('Delete this listing?')) return;
+    try {
+      await carsAPI.remove(carId);
+      setCars(prev => prev.filter(c => c._id !== carId));
+      toast('Listing deleted', 'info');
+    } catch { toast('Failed to delete', 'error'); }
+  };
+
+  if (!user?.approved && user?.role === 'dealer') {
+    return (
+      <div className="page loading-center" style={{ flexDirection: 'column', gap: 16 }}>
+        <div style={{ fontSize: 48 }}>⏳</div>
+        <h3>Awaiting Admin Approval</h3>
+        <p style={{ color: 'var(--text-muted)', textAlign: 'center', maxWidth: 400 }}>
+          Your dealer account is pending approval. You'll be notified once approved.
+        </p>
+      </div>
+    );
+  }
+
+  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   const s = summary || {};
-  const totalRevenue = s.totalRevenue || s.revenue || 0;
-  const activeListings = cars.filter(c => c.status === 'active' || !c.status).length;
-  const pendingApproval = cars.filter(c => c.status === 'pending').length;
+
+  const statCards = [
+    { label: 'Total Listings', value: s.totalCars ?? cars.length, icon: '🚗' },
+    { label: 'Active', value: s.activeCars ?? 0, icon: '✅' },
+    { label: 'Total Views', value: (s.totalViews ?? 0).toLocaleString(), icon: '👁' },
+    { label: 'Total Bids', value: s.totalBids ?? 0, icon: '⚡' },
+    { label: 'Live Auctions', value: s.liveAuctions ?? 0, icon: '🔴' },
+    { label: 'Pending Escrows', value: s.pendingEscrows ?? 0, icon: '🔒' },
+  ];
+
+  const totalPages = Math.ceil(bidsTotal / 20);
 
   return (
-    <div className="dealer-page">
-      <div className="dealer-page-inner">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 8 }}>
+    <div className="page">
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+
+        {/* ─── Header ─── */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>Dealer Hub</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-                Connected
-              </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-              <h1 className="dash-welcome">
-                {greeting}, <span className="dash-welcome-name">{user?.businessName || user?.name || 'Dealer'}</span>
-              </h1>
-              {healthData && (() => {
-                const score = healthData.score || 0;
-                const tier = score >= 90 ? { label: 'Elite', color: '#a855f7', bg: 'rgba(168,85,247,0.15)' }
-                  : score >= 75 ? { label: 'Platinum', color: '#22c55e', bg: 'rgba(34,197,94,0.15)' }
-                  : score >= 50 ? { label: 'Gold', color: 'var(--gold)', bg: 'rgba(212,196,168,0.15)' }
-                  : score >= 25 ? { label: 'Silver', color: '#60a5fa', bg: 'rgba(96,165,250,0.15)' }
-                  : { label: 'Bronze', color: '#d97706', bg: 'rgba(217,119,6,0.15)' };
-                return <span className="dash-status-pill" style={{ background: tier.bg, color: tier.color, border: `1px solid ${tier.color}40` }}>{tier.label} <span style={{ opacity: 0.6, fontWeight: 700 }}>{score}%</span></span>;
-              })()}
-            </div>
-            <p className="dash-subtitle">{user?.location || 'Nairobi, Kenya'} · {dateStr} · {cars.length} listings</p>
+            <div className="section-eyebrow">Dealer Hub</div>
+            <h2>Welcome, {user?.name?.split(' ')[0]}</h2>
+            {user?.businessName && (
+              <div style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 4 }}>🏪 {user.businessName}</div>
+            )}
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Link to="/dealer/add-car"
-              style={{ padding: '10px 20px', borderRadius: 10, background: 'var(--gold)', color: '#000', fontSize: 12, fontWeight: 900, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              <Plus size={14} /> New Listing
-            </Link>
-            <Link to="/dealer/auctions"
-              style={{ padding: '10px 18px', borderRadius: 10, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Gavel size={13} /> Auction
-            </Link>
-          </div>
+          <Link to="/dealer/add-car" className="btn btn-gold">+ List New Car</Link>
         </div>
 
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
-        ) : (
-          <>
-            <div className="dash-kpi-grid" style={{ marginTop: 28 }}>
-              <KPIBox label="Active Listings" value={activeListings} sub="On marketplace" color="#22c55e" />
-              <KPIBox label="Pending Approval" value={pendingApproval} sub="Awaiting review" color="#f97316" />
-              <KPIBox label="Live Auctions" value={s.activeAuctions || 0} sub="Currently running" color="#ef4444" />
-              <KPIBox label="Active Escrows" value={s.activeEscrows || 0} sub="In progress" color="#a855f7" />
-              <KPIBox label="Leads Today" value={s.leadsToday || 0} sub="New inquiries" color="#3b82f6" />
-              <KPIBox label="Revenue" value={`KES ${(totalRevenue >= 1e6 ? (totalRevenue / 1e6).toFixed(1) + 'M' : totalRevenue >= 1e3 ? Math.round(totalRevenue / 1e3) + 'K' : totalRevenue.toLocaleString())}`} sub="This month" color="var(--gold)" />
+        {/* ─── Stats Grid ─── */}
+        <div className="grid-3" style={{ marginBottom: 28 }}>
+          {statCards.map(c => (
+            <div key={c.label} className="stat-box">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div className="stat-label">{c.label}</div>
+                  <div className="stat-value">{c.value}</div>
+                </div>
+                <span style={{ fontSize: 28 }}>{c.icon}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ─── Tabs ─── */}
+        <div className="tabs" style={{ marginBottom: 24 }}>
+          {TABS.map(t => (
+            <button key={t.id} className={`tab-btn ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* OVERVIEW                                                 */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {tab === 'overview' && (
+          <div className="grid-2">
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Recent Listings</h3>
+              {cars.slice(0, 5).map(car => (
+                <div key={car._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+                  <div>
+                    <div style={{ fontWeight: 500, fontSize: 13 }}>{car.title}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{car.views || 0} views · {car.bidsCount || 0} bids</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-light)', fontWeight: 600, fontSize: '0.95rem' }}>
+                      {formatKES(car.price)}
+                    </div>
+                    {car.auctionStatus === 'live' && <span className="badge badge-green" style={{ fontSize: 9 }}>LIVE</span>}
+                  </div>
+                </div>
+              ))}
+              {cars.length === 0 && (
+                <div className="empty-state" style={{ padding: 20 }}>
+                  <div className="empty-icon">🚗</div>
+                  <p style={{ fontSize: 13 }}>No listings yet</p>
+                  <Link to="/dealer/add-car" className="btn btn-gold btn-sm" style={{ marginTop: 8 }}>Add First Car</Link>
+                </div>
+              )}
+              {cars.length > 0 && (
+                <button onClick={() => setTab('listings')} style={{ display: 'block', marginTop: 12, fontSize: 13, color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  View all listings →
+                </button>
+              )}
             </div>
 
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontStyle: 'italic', fontSize: 16, color: '#fff', margin: '0 0 16px' }}>Quick Actions</h3>
-            <div className="dash-actions-grid">
-              {QUICK_ACTIONS.map(a => (
-                <Link key={a.id} to={a.to} className="dash-action-card">
-                  <div className="dash-action-icon" style={{ background: a.bg }}>
-                    <a.icon size={18} style={{ color: a.color }} />
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Quick Actions</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { to: '/dealer/add-car', icon: '➕', label: 'List a New Car', desc: 'Add vehicle to marketplace' },
+                  { to: '/dealer/analytics', icon: '📊', label: 'Analytics', desc: 'Views, bids, earnings reports' },
+                  { to: '/dealer/settings', icon: '⚙', label: 'Settings', desc: 'Payments, business profile, alerts' },
+                  { to: '/escrow', icon: '🔒', label: 'Check Escrow', desc: 'View payment status' },
+                  { to: '/chat', icon: '💬', label: 'View Messages', desc: 'Buyer inquiries' },
+                ].map(a => (
+                  <Link key={a.to} to={a.to} style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '12px', borderRadius: 8,
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    transition: 'border-color 0.2s',
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--gold)'}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+                  >
+                    <span style={{ fontSize: 24 }}>{a.icon}</span>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>{a.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.desc}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Dealer Stats Summary */}
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Performance at a Glance</h3>
+              <div className="grid-2" style={{ gap: 12 }}>
+                {[
+                  { label: 'Conversion Rate', val: s.totalCars > 0 ? `${Math.round(((s.soldCars || 0) / s.totalCars) * 100)}%` : '0%' },
+                  { label: 'Avg Views / Car', val: s.totalCars > 0 ? Math.round((s.totalViews || 0) / s.totalCars).toLocaleString() : 0 },
+                  { label: 'Total Revenue', val: formatKES(s.totalRevenue || 0) },
+                  { label: 'Sold Cars', val: s.soldCars ?? 0 },
+                ].map(st => (
+                  <div key={st.label} style={{ background: 'var(--surface)', borderRadius: 8, padding: '12px 14px' }}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{st.label}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--gold-light)', marginTop: 2 }}>{st.val}</div>
                   </div>
-                  <div className="dash-action-info">
-                    <div className="dash-action-label">{a.label}</div>
-                    <div className="dash-action-desc">{a.desc}</div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>Dealer Quick Links</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <Link to="/dealer/analytics" className="btn btn-outline btn-sm">📊 Full Analytics</Link>
+                <Link to="/dealer/settings" className="btn btn-outline btn-sm">⚙ Settings</Link>
+                <Link to="/payments" className="btn btn-outline btn-sm">💳 Payments</Link>
+                <Link to="/escrow" className="btn btn-outline btn-sm">🔒 Escrows</Link>
+                <Link to="/chat" className="btn btn-outline btn-sm">💬 Messages</Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* LISTINGS                                                */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {tab === 'listings' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>{cars.length} listing{cars.length !== 1 ? 's' : ''}</div>
+              <Link to="/dealer/add-car" className="btn btn-gold btn-sm">+ Add Car</Link>
+            </div>
+
+            {cars.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🚗</div>
+                <h3>No listings yet</h3>
+                <p>Start by adding your first car to the marketplace.</p>
+                <Link to="/dealer/add-car" className="btn btn-gold" style={{ marginTop: 16 }}>List Your First Car</Link>
+              </div>
+            ) : (
+              <div className="card" style={{ padding: 0 }}>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Car</th>
+                        <th>Price</th>
+                        <th>Views</th>
+                        <th>Bids</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cars.map(car => (
+                        <tr key={car._id}>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 44, height: 32, borderRadius: 4, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
+                                {car.images?.[0]?.url
+                                  ? <img src={car.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🚗</div>
+                                }
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: 13 }}>{car.title}</div>
+                                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{car.year} · {car.fuel}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="price-tag" style={{ fontSize: '0.9rem' }}>{formatKES(car.price)}</td>
+                          <td>{car.views || 0}</td>
+                          <td>{car.bidsCount || 0}</td>
+                          <td>
+                            {car.auctionStatus === 'live'
+                              ? <span className="badge badge-green">Live</span>
+                              : car.auctionStatus === 'ended'
+                              ? <span className="badge badge-muted">Ended</span>
+                              : <span className="badge badge-blue">Listed</span>
+                            }
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <Link to={`/dealer/edit/${car._id}`} className="btn btn-outline btn-sm">Edit</Link>
+                              <button className="btn btn-danger btn-sm" onClick={() => handleDelete(car._id)}>Del</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* BIDS                                                    */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {tab === 'bids' && (
+          <div>
+            <div style={{ marginBottom: 16, color: 'var(--text-muted)', fontSize: 14 }}>
+              {bidsTotal} bid{bidsTotal !== 1 ? 's' : ''} on your listings
+            </div>
+
+            {bids.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">⚡</div>
+                <h3>No bids received yet</h3>
+                <p>Bids from buyers appear here once they place them on your listings.</p>
+                <Link to="/dealer/add-car" className="btn btn-gold" style={{ marginTop: 16 }}>List a Car to Attract Bids</Link>
+              </div>
+            ) : (
+              <>
+                <div className="card" style={{ padding: 0 }}>
+                  <div className="table-wrap">
+                    <table className="data-table">
+                      <thead>
+                        <tr>
+                          <th>Car</th>
+                          <th>Bidder</th>
+                          <th>Amount</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bids.map(b => (
+                          <tr key={b._id}>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 36, height: 26, borderRadius: 3, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
+                                  {b.carImage
+                                    ? <img src={b.carImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>🚗</div>
+                                  }
+                                </div>
+                                <span style={{ fontWeight: 500, fontSize: 13 }}>{b.carTitle}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <div style={{ fontSize: 13, fontWeight: 500 }}>{b.bidderName}</div>
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{b.bidderEmail}</div>
+                            </td>
+                            <td className="price-tag" style={{ fontSize: '0.9rem' }}>{formatKES(b.amount)}</td>
+                            <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                              {b.createdAt ? new Date(b.createdAt).toLocaleDateString('en-KE') : '—'}
+                            </td>
+                            <td>
+                              <span className={`badge ${b.status === 'paid' ? 'badge-green' : b.status === 'failed' ? 'badge-red' : 'badge-orange'}`}>
+                                {b.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <TrendingUp size={14} style={{ color: 'rgba(255,255,255,0.15)', flexShrink: 0 }} />
-                </Link>
+                </div>
+
+                {totalPages > 1 && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+                    <button className="btn btn-outline btn-sm" disabled={bidsPage <= 1} onClick={() => setBidsPage(p => p - 1)}>← Prev</button>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)', padding: '6px 12px' }}>Page {bidsPage} of {totalPages}</span>
+                    <button className="btn btn-outline btn-sm" disabled={bidsPage >= totalPages} onClick={() => setBidsPage(p => p + 1)}>Next →</button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* ESCROWS                                                 */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {tab === 'escrows' && (
+          <div>
+            <div style={{ marginBottom: 16, color: 'var(--text-muted)', fontSize: 14 }}>
+              {escrows.length} escrow{escrows.length !== 1 ? 's' : ''}
+            </div>
+
+            {escrows.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">🔒</div>
+                <h3>No escrows yet</h3>
+                <p>Escrows are created when a buyer pays for one of your listings. They'll appear here.</p>
+              </div>
+            ) : (
+              <div className="grid-2">
+                {escrows.map(e => (
+                  <div key={e._id} className="card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{e.car?.title || 'Unknown Car'}</div>
+                      <span className={`badge ${e.status === 'held' ? 'badge-gold' : e.status === 'released' ? 'badge-green' : e.status === 'refunded' ? 'badge-red' : 'badge-muted'}`}>
+                        {e.status}
+                      </span>
+                    </div>
+                    <div className="grid-2" style={{ gap: 8, fontSize: 13 }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Buyer</div>
+                        <div style={{ fontWeight: 500 }}>{e.buyer?.name || '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Amount</div>
+                        <div className="price-tag">{formatKES(e.amount)}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Created</div>
+                        <div>{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-KE') : '—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Released</div>
+                        <div>{e.releasedAt ? new Date(e.releasedAt).toLocaleDateString('en-KE') : '—'}</div>
+                      </div>
+                    </div>
+                    {e.status === 'held' && (
+                      <div style={{ marginTop: 12, background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 6, padding: 10, fontSize: 12, color: 'var(--text-muted)' }}>
+                        ⏳ Payment held in escrow — awaiting admin release after buyer confirms receipt
+                      </div>
+                    )}
+                    {e.status === 'released' && (
+                      <div style={{ marginTop: 12, fontSize: 12, color: 'var(--green)' }}>✅ Released — funds sent to your account</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ marginTop: 16 }}>
+              <Link to="/escrow" className="btn btn-outline btn-sm">View All Escrows →</Link>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════ */}
+        {/* EARNINGS                                                */}
+        {/* ═══════════════════════════════════════════════════════ */}
+        {tab === 'earnings' && (
+          <div>
+            <div className="grid-4" style={{ marginBottom: 24 }}>
+              {[
+                { label: 'Total Earned', value: formatKES(earnings?.total ?? s.totalRevenue ?? 0), icon: '💰' },
+                { label: 'In Escrow', value: formatKES(earnings?.inEscrow ?? 0), icon: '🔒' },
+                { label: 'Released', value: formatKES(earnings?.released ?? 0), icon: '✅' },
+                { label: 'This Period', value: formatKES(earnings?.thisMonth ?? 0), icon: '📈' },
+              ].map(e => (
+                <div key={e.label} className="stat-box">
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                      <div className="stat-label">{e.label}</div>
+                      <div className="stat-value">{e.value}</div>
+                    </div>
+                    <span style={{ fontSize: 26 }}>{e.icon}</span>
+                  </div>
+                </div>
               ))}
             </div>
-          </>
+
+            {earnings?.payments?.length > 0 && (
+              <div className="card" style={{ padding: 0 }}>
+                <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+                  <h3 style={{ fontSize: '0.95rem' }}>Recent Payments</h3>
+                </div>
+                <div className="table-wrap">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Car</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {earnings.payments.slice(0, 10).map(p => (
+                        <tr key={p._id}>
+                          <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                            {p.createdAt ? new Date(p.createdAt).toLocaleDateString('en-KE') : '—'}
+                          </td>
+                          <td style={{ fontSize: 13 }}>{p.car?.title || '—'}</td>
+                          <td className="price-tag" style={{ fontSize: '0.9rem' }}>{formatKES(p.dealerAmount || p.amount)}</td>
+                          <td>
+                            <span className={`badge ${p.status === 'success' ? 'badge-green' : p.status === 'failed' ? 'badge-red' : 'badge-muted'}`}>
+                              {p.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)' }}>
+                  <Link to="/payments" className="btn btn-outline btn-sm">View All Payments →</Link>
+                </div>
+              </div>
+            )}
+
+            {(!earnings?.payments || earnings.payments.length === 0) && (
+              <div className="empty-state">
+                <div className="empty-icon">💰</div>
+                <h3>No earnings yet</h3>
+                <p>Once you make sales, your earnings and payment history will appear here.</p>
+                <Link to="/dealer/analytics" className="btn btn-outline" style={{ marginTop: 16 }}>View Analytics 📊</Link>
+              </div>
+            )}
+          </div>
         )}
+
       </div>
     </div>
   );

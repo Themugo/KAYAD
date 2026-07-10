@@ -1,21 +1,18 @@
 // src/pages/ProfilePage.jsx
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { authAPI, paymentsAPI, reviewsAPI, carsAPI, formatKES } from '../api/api';
 import { timeAgo, formatDate, initials, validatePassword } from '../utils/helpers';
 import { SkeletonRow, SkeletonText } from '../components/Skeleton';
-import ReferralStats from '../components/ReferralStats';
-import BackButton from '../components/BackButton';
 
-const TABS = ['Profile', 'Security', 'Activity', 'Reviews', 'Referrals'];
+const TABS = ['Profile', 'Security', 'Activity', 'Reviews'];
 
 export default function ProfilePage() {
-  const { user, setUser, isDealer, isSeller } = useAuth();
+  const { user, setUser, isDealer } = useAuth();
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
-  const [tab, setTab]       = useState(searchParams.get('tab') || 'Profile');
+  const [tab, setTab]       = useState('Profile');
   const [saving, setSaving] = useState(false);
   const [changingPw, setChangingPw] = useState(false);
   const [activity, setActivity] = useState([]);
@@ -42,10 +39,10 @@ export default function ProfilePage() {
       setLoading(true);
       reviewsAPI.mine().then(d => setReviews(d.reviews || d.data || [])).finally(() => setLoading(false));
     }
-    if (tab === 'Profile' && isSeller && !myStats) {
+    if (tab === 'Profile' && isDealer && !myStats) {
       carsAPI.analytics().then(d => setMyStats(d.analytics || d.data || d)).catch(() => {});
     }
-  }, [tab, activity.length, reviews.length, isSeller, myStats]);
+  }, [tab]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -78,12 +75,11 @@ export default function ProfilePage() {
     return Math.round((fields.filter(Boolean).length / fields.length) * 100);
   })();
 
-  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', user: 'badge-blue' };
+  const roleColor = { admin: 'badge-red', dealer: 'badge-gold', broker: 'badge-orange', user: 'badge-blue' };
 
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 40, paddingBottom: 40, maxWidth: 780 }}>
-        <BackButton fallback="/" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }} />
 
         {/* ─── Header card ─── */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, marginBottom: 36, flexWrap: 'wrap' }}>
@@ -100,8 +96,8 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
               <h2 style={{ fontSize: '1.4rem' }}>{user?.name}</h2>
               <span className={`badge ${roleColor[user?.role] || 'badge-muted'}`}>{user?.role}</span>
-              {(user?.role === 'dealer' || user?.role === 'individual_seller') && user?.status === 'approved' && <span className="badge badge-green">✓ Verified</span>}
-              {(user?.role === 'dealer' || user?.role === 'individual_seller') && user?.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
+              {(user?.role === 'dealer' || user?.role === 'broker') && user?.approved && <span className="badge badge-green">✓ Verified</span>}
+              {(user?.role === 'dealer' || user?.role === 'broker') && !user?.approved && <span className="badge badge-orange">⏳ Pending</span>}
             </div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 6 }}>{user?.email}</div>
             <div style={{ fontSize: 12, color: 'var(--text-dim)' }}>
@@ -118,7 +114,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-          {isSeller && myStats && (
+          {isDealer && myStats && (
             <div style={{ display: 'flex', gap: 10 }}>
               {[
                 { val: myStats.totalCars || 0,  label: 'Listed', icon: '🚗' },
@@ -177,13 +173,13 @@ export default function ProfilePage() {
               <div className="input-group">
                 <label className="input-label">Bio</label>
                 <textarea className="input" rows={3} value={form.bio} onChange={e => set('bio', e.target.value)}
-                  placeholder={isSeller ? 'Tell buyers about your dealership...' : 'A short intro...'} />
+                  placeholder={isDealer ? 'Tell buyers about your dealership...' : 'A short intro...'} />
               </div>
               <div style={{ display: 'flex', gap: 12 }}>
                 <button className="btn btn-gold" type="submit" disabled={saving}>
                   {saving ? 'Saving...' : '✓ Save Changes'}
                 </button>
-                {isSeller && <Link to="/dealer" className="btn btn-outline">{isDealer ? 'Dealer Hub →' : 'My Listings →'}</Link>}
+                {isDealer && <Link to="/dealer" className="btn btn-outline">Dealer Hub →</Link>}
               </div>
             </form>
           </div>
@@ -244,46 +240,6 @@ export default function ProfilePage() {
                     <div style={{ fontWeight: 600, marginTop: 4, fontFamily: r.mono ? 'monospace' : undefined, fontSize: 14 }}>{r.val}</div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            {/* SMS Notification Toggle */}
-            <div className="card" style={{ padding: 24 }}>
-              <h3 style={{ marginBottom: 16 }}>📱 SMS Notifications</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
-                Receive instant SMS alerts for outbid notifications, escrow confirmations, and dealer chat messages.
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>SMS Alerts</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {user?.phone ? `Sent to ${user.phone}` : 'Add a phone number to enable'}
-                  </div>
-                </div>
-                <label style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, cursor: user?.phone ? 'pointer' : 'not-allowed' }}>
-                  <input type="checkbox" checked={user?.notifications?.sms !== false}
-                    onChange={async e => {
-                      try {
-                        const data = await authAPI.updateProfile({ notifications: { sms: e.target.checked } });
-                        setUser(data.user);
-                        toast('SMS preference updated', 'success');
-                      } catch { toast('Failed to update', 'error'); }
-                    }}
-                    disabled={!user?.phone}
-                    style={{ opacity: 0, width: 0, height: 0 }} />
-                  <div style={{
-                    position: 'absolute', inset: 0, borderRadius: 12,
-                    background: user?.notifications?.sms !== false ? 'var(--gold)' : 'rgba(255,255,255,0.1)',
-                    transition: 'background 0.3s',
-                    opacity: user?.phone ? 1 : 0.4,
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: 2, left: user?.notifications?.sms !== false ? 22 : 2,
-                      width: 20, height: 20, borderRadius: '50%', background: '#fff',
-                      transition: 'left 0.3s',
-                    }} />
-                  </div>
-                </label>
               </div>
             </div>
           </div>
@@ -369,11 +325,6 @@ export default function ProfilePage() {
               </div>
             ))}
           </div>
-        )}
-
-        {/* ─── Referrals ─── */}
-        {tab === 'Referrals' && (
-          <ReferralStats />
         )}
       </div>
     </div>

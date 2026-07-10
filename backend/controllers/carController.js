@@ -4,6 +4,7 @@ import PlatformConfig from "../models/PlatformConfig.js";
 import { cacheDelPattern } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
+import { logWarn } from "../utils/logger.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
@@ -855,10 +856,10 @@ export const getCar = async (req, res) => {
         const redisClient = (await import("../config/redis.js")).default;
         await redisClient.hIncrBy("kayad:view_counts", String(car._id), 1);
       } else {
-        Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
+        Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed", { error: e.message }));
       }
     } catch {
-      Car.updateOne({ _id: car._id }, { $inc: { views: 1 } }).catch(() => {});
+      Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed (fallback)", { error: e.message }));
     }
 
     res.json({ success: true, data: car });

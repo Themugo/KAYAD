@@ -82,7 +82,7 @@ jobs:
         run: npm run build
         env:
           NODE_ENV: production
-          NEXT_PUBLIC_API_URL: https://kayad-backend-preview-${{ github.event.pull_request.number }}.onrender.com
+          VITE_API_URL: https://kayad-backend-preview-${{ github.event.pull_request.number }}.onrender.com
 
       - name: Deploy to Vercel (Preview)
         id: deploy

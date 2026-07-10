@@ -2,6 +2,7 @@
 import { stkPush } from "./mpesaService.js";
 import { sendDigitalReceipt } from "./receiptService.js";
 import { getIO } from "../utils/io.js";
+import { logWarn } from "../utils/logger.js";
 import { findById, findOne, create, update } from "../db/index.js";
 
 const formatPhone = (phone) => {
@@ -104,10 +105,10 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
         carTitle = carDoc?.title || null;
       }
       sendPaymentConfirmedEmail(user, updatedPayment, { title: carTitle }).catch((e) =>
-        console.warn("⚠️ Payment confirmed email failed:", e.message),
+        logWarn("Payment confirmed email failed", { error: e.message }),
       );
     }
-  } catch (_) {}
+  } catch (e) { logWarn("Payment email notification failed", { error: e.message }); }
 
   // ── DIGITAL RECEIPT (email + SMS + WhatsApp) ──────────────
   try {
@@ -118,9 +119,9 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
         carTitle: payment.car?.toString() || "Vehicle",
         mpesaReceipt: receipt || String(payment.id).slice(-8),
         user: { email: userDoc.email, phone: userDoc.phone, id: userDoc.id },
-      }).catch((e) => console.warn("⚠️ Digital receipt failed:", e.message));
+      }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
     }
-  } catch (_) {}
+  } catch (e) { logWarn("Digital receipt notification failed", { error: e.message }); }
 
   // If escrow payment, mark escrow as held
   if (payment.type === "escrow") {

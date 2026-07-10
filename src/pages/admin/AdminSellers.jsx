@@ -14,11 +14,8 @@ export default function AdminSellers() {
   const fetchSellers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminAPI.users({
-        seller: true,
-        ...(filter === 'pending' ? { pendingApproval: true } : {}),
-        search: search || undefined,
-      });
+      const roleParam = filter !== 'all' ? 'dealer' : undefined;
+      const data = await adminAPI.users({ role: roleParam, search: search || undefined });
       const users = data.users || data.data || [];
       const mapped = users.map(u => ({
         id: u._id,
@@ -26,7 +23,7 @@ export default function AdminSellers() {
         name: u.name,
         email: u.email,
         phone: u.phone || '—',
-        status: u.isBanned ? 'suspended' : u.status === 'approved' ? 'approved' : 'pending',
+        status: u.isBanned ? 'suspended' : u.approved ? 'approved' : 'pending',
         commission: u.commission ?? 5,
         waiver: u.waiver ?? 0,
         discount: u.discount ?? 0,
@@ -34,11 +31,6 @@ export default function AdminSellers() {
         listingCount: u.listingCount || 0,
         rating: u.dealerRating || 0,
         createdAt: u.createdAt,
-        dealerPackage: u.dealerPackage || 'none',
-        isDemo: !!u.isDemo,
-        role: u.role,
-        escrowApproved: !!u.escrowApproved,
-        escrowForced: !!u.escrowForced,
       }));
       const filtered = filter === 'pending' ? mapped.filter(s => s.status === 'pending')
         : filter === 'suspended' ? mapped.filter(s => s.status === 'suspended')
@@ -71,26 +63,6 @@ export default function AdminSellers() {
 
   const updateSeller = (id, field, val) => {
     setSellers(prev => prev.map(s => s.id === id ? { ...s, [field]: val } : s));
-  };
-
-  const handleEscrowApprove = async (id) => {
-    try {
-      await adminAPI.escrowApprove(id);
-      fetchSellers();
-      toast('Escrow approval toggled', 'success');
-    } catch {
-      toast('Failed to toggle escrow approval', 'error');
-    }
-  };
-
-  const handleEscrowForce = async (id) => {
-    try {
-      await adminAPI.escrowForce(id);
-      fetchSellers();
-      toast('Escrow force toggled', 'success');
-    } catch {
-      toast('Failed to toggle escrow force', 'error');
-    }
   };
 
   const saveSeller = async (id) => {
@@ -135,14 +107,14 @@ export default function AdminSellers() {
               <thead>
                 <tr>
                   <th>Seller</th><th>Contact</th><th>Commission</th>
-                  <th>Waiver</th><th>Discount</th><th>Sales</th><th>Escrow</th><th>Status</th><th>Actions</th>
+                  <th>Waiver</th><th>Discount</th><th>Sales</th><th>Status</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                  {loading ? (
-                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading sellers...</td></tr>
+                {loading ? (
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading sellers...</td></tr>
                 ) : sellers.length === 0 ? (
-                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>No sellers found</div>
                     <div style={{ fontSize: 13 }}>Try adjusting your search or filter</div>
@@ -162,7 +134,7 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0} max={50}
                           value={s.commission} onChange={e => updateSeller(s.id, 'commission', Number(e.target.value))}
                           style={{ width: 70, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} role="presentation" />
+                          onClick={e => e.stopPropagation()} />
                       ) : (
                         <span style={{ fontWeight: 600 }}>{s.commission}%</span>
                       )}
@@ -172,7 +144,7 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0}
                           value={s.waiver} onChange={e => updateSeller(s.id, 'waiver', Number(e.target.value))}
                           style={{ width: 100, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} role="presentation" />
+                          onClick={e => e.stopPropagation()} />
                       ) : (
                         <span>{s.waiver > 0 ? formatKES(s.waiver) : '—'}</span>
                       )}
@@ -182,40 +154,18 @@ export default function AdminSellers() {
                         <input className="input" type="number" min={0} max={100}
                           value={s.discount} onChange={e => updateSeller(s.id, 'discount', Number(e.target.value))}
                           style={{ width: 70, height: 32, fontSize: 13 }}
-                          onClick={e => e.stopPropagation()} role="presentation" />
+                          onClick={e => e.stopPropagation()} />
                       ) : (
                         <span>{s.discount > 0 ? `${s.discount}%` : '—'}</span>
                       )}
                     </td>
                     <td style={{ fontWeight: 600, color: 'var(--gold-light)' }}>{formatKES(s.totalSales)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                        {s.role === 'dealer' ? (
-                          <>
-                            <span className={`badge ${s.escrowForced ? 'badge-orange' : s.escrowApproved ? 'badge-green' : 'badge-muted'}`}
-                              style={{ fontSize: 10, whiteSpace: 'nowrap' }}>
-                              {s.escrowForced ? 'Forced' : s.escrowApproved ? 'Approved' : 'None'}
-                            </span>
-                            <button onClick={e => { e.stopPropagation(); handleEscrowApprove(s.id); }}
-                              className="btn btn-sm" style={{ fontSize: 10, padding: '2px 6px', background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', borderRadius: 4, cursor: 'pointer' }}>
-                              {s.escrowApproved ? 'Revoke' : 'Approve'}
-                            </button>
-                            <button onClick={e => { e.stopPropagation(); handleEscrowForce(s.id); }}
-                              className="btn btn-sm" style={{ fontSize: 10, padding: '2px 6px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', borderRadius: 4, cursor: 'pointer' }}>
-                              {s.escrowForced ? 'Unforce' : 'Force'}
-                            </button>
-                          </>
-                        ) : (
-                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>—</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
                       <span className={`badge ${s.status === 'approved' ? 'badge-green' : s.status === 'pending' ? 'badge-orange' : 'badge-muted'}`}>
                         {s.status}
                       </span>
                     </td>
-                    <td onClick={e => e.stopPropagation()} role="presentation">
+                    <td onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: 6 }}>
                         {editing === s.id ? (
                           <button className="btn btn-gold btn-sm" onClick={() => saveSeller(s.id)}>Save</button>
@@ -260,40 +210,6 @@ export default function AdminSellers() {
                   <div style={{ fontWeight: 600, marginTop: 4 }}>{r.val}</div>
                 </div>
               ))}
-            </div>
-
-            {/* Package assignment */}
-            <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-                Listing Package
-              </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                {['none','starter','growth','elite','enterprise'].map(pkg => {
-                  const isCurrent = selected.dealerPackage === pkg;
-                  return (
-                    <button key={pkg} onClick={async () => {
-                      try {
-                        const days = pkg !== 'none' ? 30 : undefined;
-                        await adminAPI.assignPackage(selected.id, { dealerPackage: pkg, durationDays: days });
-                        setSellers(prev => prev.map(s => s.id === selected.id ? { ...s, dealerPackage: pkg } : s));
-                        setSelected(p => ({ ...p, dealerPackage: pkg }));
-                        toast(`Package set to ${pkg}`, 'success');
-                      } catch { toast('Failed to set package', 'error'); }
-                    }} style={{
-                      padding: '7px 16px', borderRadius: 8, border: `1px solid ${isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
-                      background: isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.04)',
-                      color: isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.6)',
-                      fontSize: 12, fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize',
-                      transition: 'all 0.15s',
-                    }}>
-                      {pkg === 'none' ? 'No Package' : pkg}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 8 }}>
-                Setting a package activates it for 30 days. Dealers do not pay per listing.
-              </div>
             </div>
           </div>
         )}

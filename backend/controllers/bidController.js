@@ -429,7 +429,7 @@ export const placeBid = async (req, res) => {
             ).catch((e) => logWarn("SMS send failed", { error: e.message }));
           }
         }
-      } catch (_) {}
+      } catch (e) { logWarn("Outbid notification failed", { error: e.message }); }
     } else {
       await session.commitTransaction();
       session.endSession();
@@ -560,7 +560,7 @@ export const confirmBidPayment = async (req, res) => {
           ).catch((e) => logWarn("SMS send failed", { error: e.message }));
         }
       }
-    } catch (_) {}
+    } catch (e) { logWarn("Bid confirmation SMS notification failed", { error: e.message }); }
 
     res.json({ success: true });
   } catch (err) {

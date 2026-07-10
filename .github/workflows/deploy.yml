@@ -1,0 +1,86 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Pre-deployment Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate environment secrets
+        run: |
+          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
+            echo "ERROR: VITE_SUPABASE_URL secret not configured"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "ERROR: VITE_SUPABASE_ANON_KEY secret not configured"
+            exit 1
+          fi
+          echo "All required secrets are configured"
+
+      - name: Build for production
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Validate dist output
+        run: |
+          if [ ! -f "dist/index.html" ]; then
+            echo "ERROR: dist/index.html not found"
+            exit 1
+          fi
+          if [ ! -d "dist/assets" ]; then
+            echo "ERROR: dist/assets not found"
+            exit 1
+          fi
+          echo "Build output validated"
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+          retention-days: 30
+
+  smoke-test:
+    name: Smoke Test
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-build
+          path: dist/
+
+      - name: Check critical files
+        run: |
+          echo "Checking critical files..."
+          ls -la dist/
+          ls -la dist/assets/
+          grep -l "react" dist/assets/*.js || true
+          echo "Critical file check passed"

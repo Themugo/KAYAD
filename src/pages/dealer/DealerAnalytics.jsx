@@ -1,16 +1,11 @@
+// src/pages/dealer/DealerAnalytics.jsx
 import { useState, useEffect } from 'react';
-import { dealerAPI } from '../../api/api';
+import { Link } from 'react-router-dom';
+import { dealerAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { TrendingUp, BarChart3, Clock, DollarSign } from 'lucide-react';
+import { timeAgo, compactNumber } from '../../utils/helpers';
 
-const cardStyle = {
-  background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)',
-  borderRadius: 'var(--radius-lg)', overflow: 'hidden',
-};
-const cardHeader = {
-  padding: '16px 22px', borderBottom: '1px solid rgba(255,255,255,0.05)',
-  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-};
+const BAR_COLORS = ['var(--gold)', 'var(--gold-muted)', 'var(--blue)', 'var(--green)', 'var(--orange)'];
 
 function MiniBar({ value, max, color = 'var(--gold)', label, sub }) {
   const pct = max > 0 ? Math.round((value / max) * 100) : 0;
@@ -18,9 +13,9 @@ function MiniBar({ value, max, color = 'var(--gold)', label, sub }) {
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
         <span style={{ fontSize: 13, fontWeight: 500 }}>{label}</span>
-        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{sub}</span>
+        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{sub}</span>
       </div>
-      <div style={{ height: 6, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+      <div style={{ height: 6, background: 'var(--surface)', borderRadius: 3, overflow: 'hidden' }}>
         <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 3, transition: 'width 0.6s ease' }} />
       </div>
     </div>
@@ -29,135 +24,226 @@ function MiniBar({ value, max, color = 'var(--gold)', label, sub }) {
 
 export default function DealerAnalytics() {
   const { toast } = useToast();
-  const [summary, setSummary] = useState(null);
+  const [summary, setSummary]   = useState(null);
+  const [earnings, setEarnings] = useState(null);
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [period, setPeriod] = useState('30');
+  const [loading, setLoading]   = useState(true);
+  const [period, setPeriod]     = useState('30');
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
       dealerAPI.summary(),
+      dealerAPI.earnings({ days: period }),
       dealerAPI.analytics({ days: period }),
-    ]).then(([s, a]) => {
+    ]).then(([s, e, a]) => {
       setSummary(s.summary || s.data || s);
+      setEarnings(e.earnings || e.data || e);
       setAnalytics(a.analytics || a.data || a);
     }).catch(() => toast('Failed to load analytics', 'error'))
     .finally(() => setLoading(false));
-  }, [period, toast]);
+  }, [period]);
 
-  if (loading) return <div className="page" style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}><div className="spinner" /></div>;
+  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
-  const a = analytics || {};
-  const _s = summary || {};
-  const topCars = a.topCars || [];
+  const topCars = analytics?.topCars || analytics?.cars || [];
   const maxViews = Math.max(...topCars.map(c => c.views || 0), 1);
-  const priceComp = a.priceComparison || [];
-  const timeToSell = a.timeToSell || [];
-  const monthlyRev = a.monthlyRevenue || [];
+  const maxBids  = Math.max(...topCars.map(c => c.bidsCount || 0), 1);
+
+  const monthlyEarnings = earnings?.monthly || earnings?.byMonth || [];
+  const maxMonthly = Math.max(...monthlyEarnings.map(m => m.amount || m.total || 0), 1);
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.8rem', color: '#fff', margin: '0 0 4px' }}>Analytics</h1>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>Performance insights for your inventory</p>
-        </div>
-        <select value={period} onChange={e => setPeriod(e.target.value)} style={{ padding: '8px 14px', borderRadius: 8, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 12, outline: 'none' }}>
-          <option value="7">Last 7 days</option>
-          <option value="30">Last 30 days</option>
-          <option value="90">Last 90 days</option>
-          <option value="365">Last year</option>
-        </select>
-      </div>
+    <div className="page">
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
-      {/* KPI row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, marginBottom: 24 }}>
-        {[
-          { icon: '👁️', label: 'Total Views', value: (a.totalViews ?? 0).toLocaleString() },
-          { icon: '🔨', label: 'Bids', value: String(a.totalBids ?? 0) },
-          { icon: '💬', label: 'Inquiries', value: String(a.totalInquiries ?? 0) },
-          { icon: '❤️', label: 'Favorites', value: String(a.totalFavorites ?? 0) },
-          { icon: '📊', label: 'Conv. Rate', value: a.conversionRates?.viewsToBids ? `${a.conversionRates.viewsToBids}%` : '—' },
-        ].map((kpi, i) => (
-          <div key={i} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{kpi.icon} {kpi.label}</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{kpi.value}</div>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div className="section-eyebrow">Dealer Hub</div>
+            <h2>Analytics & Earnings</h2>
           </div>
-        ))}
-      </div>
-
-      {/* Top cars */}
-      <div style={{ ...cardStyle, marginBottom: 24 }}>
-        <div style={cardHeader}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}><TrendingUp size={15} style={{ color: 'var(--gold)' }} /> Top Performing Listings</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {[
+              { val: '7',   label: '7 Days' },
+              { val: '30',  label: '30 Days' },
+              { val: '90',  label: '3 Months' },
+              { val: '365', label: '1 Year' },
+            ].map(p => (
+              <button key={p.val}
+                className={`btn btn-sm ${period === p.val ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => setPeriod(p.val)}>
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ padding: '16px 22px' }}>
-          {topCars.length === 0 ? (
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', textAlign: 'center', padding: '20px 0' }}>No data yet</div>
-          ) : topCars.map((c, _i) => (
-            <MiniBar key={c._id} value={c.views || 0} max={maxViews} label={c.title || 'Untitled'} sub={`${c.views || 0} views · KES ${Number(c.price||0).toLocaleString()}`} />
+
+        {/* ─── Top KPIs ─── */}
+        <div className="grid-4" style={{ marginBottom: 28 }}>
+          {[
+            { label: 'Total Listings',    val: summary?.totalCars || 0,                    icon: '🚗', color: 'var(--text)' },
+            { label: 'Total Views',       val: compactNumber(analytics?.totalViews || 0),  icon: '👁', color: 'var(--blue)' },
+            { label: 'Total Bids',        val: analytics?.totalBids || 0,                  icon: '⚡', color: 'var(--gold-light)' },
+            { label: `Revenue (${period}d)`, val: formatKES(earnings?.total || 0),         icon: '💰', color: 'var(--green)' },
+          ].map(s => (
+            <div key={s.label} className="stat-box">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="stat-label">{s.label}</div>
+                  <div className="stat-value" style={{ color: s.color }}>{s.val}</div>
+                </div>
+                <span style={{ fontSize: 26 }}>{s.icon}</span>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Price comparison */}
-      {priceComp.length > 0 && (
-        <div style={{ ...cardStyle, marginBottom: 24 }}>
-          <div style={cardHeader}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}><DollarSign size={15} style={{ color: '#22c55e' }} /> Price Comparison</span>
-          </div>
-          <div style={{ padding: '16px 22px' }}>
-            {priceComp.map((p, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: i < priceComp.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                <div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{p.brand} {p.model || ''}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginLeft: 8 }}>{p.count} listings</span>
+        <div className="grid-2" style={{ marginBottom: 20 }}>
+
+          {/* ─── Monthly Revenue Chart ─── */}
+          <div className="card" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: 20 }}>📈 Revenue Over Time</h3>
+            {monthlyEarnings.length === 0 ? (
+              <div className="empty-state" style={{ padding: 32 }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📊</div>
+                <p style={{ fontSize: 13 }}>No earnings data yet</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 140, marginBottom: 10 }}>
+                  {monthlyEarnings.slice(-12).map((m, i) => {
+                    const val = m.amount || m.total || 0;
+                    const pct = maxMonthly > 0 ? (val / maxMonthly) * 100 : 0;
+                    return (
+                      <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                        <div style={{ fontSize: 9, color: 'var(--text-dim)' }}>{formatKES(val).replace('KES ', '')}</div>
+                        <div style={{
+                          width: '100%', borderRadius: '3px 3px 0 0',
+                          height: `${Math.max(4, pct)}%`,
+                          background: i === monthlyEarnings.slice(-12).length - 1
+                            ? 'var(--gold)' : 'var(--gold-muted)',
+                          minHeight: 4, transition: 'height 0.4s ease',
+                          cursor: 'default',
+                        }} title={`${m.month || m.label || ''}: ${formatKES(val)}`} />
+                      </div>
+                    );
+                  })}
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>KES {p.dealerAvg?.toLocaleString() || '—'}</div>
-                  {p.marketAvg && (
-                    <div style={{ fontSize: 11, color: p.difference > 0 ? '#ef4444' : '#22c55e' }}>
-                      {p.difference > 0 ? '▲' : '▼'} {Math.abs(p.difference)}% vs market avg KES {p.marketAvg.toLocaleString()}
-                    </div>
-                  )}
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-dim)' }}>
+                  {monthlyEarnings.slice(-12).filter((_, i) => i % 3 === 0).map((m, i) => (
+                    <span key={i}>{m.month || m.label || `M${i + 1}`}</span>
+                  ))}
+                </div>
+                <div className="gold-line" style={{ margin: '16px 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Total period</span>
+                  <span className="price-tag" style={{ fontSize: '1rem' }}>{formatKES(earnings?.total || 0)}</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* ─── Listing Status Breakdown ─── */}
+          <div className="card" style={{ padding: 24 }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: 20 }}>🗂 Listing Breakdown</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+              {[
+                { label: 'Active Listings',  val: summary?.activeCars    || 0, color: 'var(--green)' },
+                { label: 'Live Auctions',    val: summary?.liveAuctions  || 0, color: 'var(--red)' },
+                { label: 'Sold',             val: summary?.soldCars      || 0, color: 'var(--gold)' },
+                { label: 'Pending Bids',     val: summary?.pendingBids   || 0, color: 'var(--blue)' },
+                { label: 'Draft',            val: summary?.draftCars     || 0, color: 'var(--text-muted)' },
+              ].map((s, i) => {
+                const total = summary?.totalCars || 1;
+                return <MiniBar key={s.label} label={s.label} sub={s.val} value={s.val} max={total} color={BAR_COLORS[i]} />;
+              })}
+            </div>
+
+            {/* Conversion rate */}
+            {summary?.totalCars > 0 && (
+              <div style={{ marginTop: 20, background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 14 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Sell-Through Rate</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', color: 'var(--gold-light)', marginTop: 4 }}>
+                  {Math.round(((summary?.soldCars || 0) / summary.totalCars) * 100)}%
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
+
+          {/* ─── Top Performing Cars ─── */}
+          <div className="card" style={{ padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ fontSize: '1rem' }}>🔥 Top Listings</h3>
+              <Link to="/dealer" className="btn btn-ghost btn-sm" style={{ fontSize: 12 }}>View All →</Link>
+            </div>
+            {topCars.length === 0 ? (
+              <div className="empty-state" style={{ padding: 24 }}>
+                <div className="empty-icon">🚗</div>
+                <h3>No listing data</h3>
+                <Link to="/dealer/add-car" className="btn btn-gold btn-sm" style={{ marginTop: 12 }}>Add First Car</Link>
+              </div>
+            ) : topCars.slice(0, 5).map((car, i) => (
+              <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                  background: i === 0 ? 'var(--gold)' : 'var(--surface)',
+                  border: `1px solid ${i === 0 ? 'var(--gold)' : 'var(--border)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700,
+                  color: i === 0 ? '#0A1628' : 'var(--text-muted)',
+                }}>
+                  {i + 1}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Link to={`/cars/${car._id}`} style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>
+                    {car.title}
+                  </Link>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                    👁 {car.views || 0} · ⚡ {car.bidsCount || 0} bids · ❤️ {car.favoritesCount || 0}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div className="price-tag" style={{ fontSize: '0.85rem' }}>{formatKES(car.currentBid || car.price)}</div>
+                  <span className={`badge ${car.auctionStatus === 'live' ? 'badge-green' : car.status === 'sold' ? 'badge-gold' : 'badge-muted'}`} style={{ marginTop: 3, fontSize: 9 }}>
+                    {car.auctionStatus === 'live' ? '🔴 LIVE' : car.status || 'Active'}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
 
-      {/* Time to sell */}
-      {timeToSell.length > 0 && (
-        <div style={{ ...cardStyle, marginBottom: 24 }}>
-          <div style={cardHeader}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}><Clock size={15} style={{ color: '#3b82f6' }} /> Time to Sell by Brand</span>
-          </div>
-          <div style={{ padding: '16px 22px' }}>
-            {timeToSell.map((t, i) => (
-              <MiniBar key={i} value={t.avgDays} max={Math.max(...timeToSell.map(x => x.avgDays), 1)} label={t.brand} sub={`${t.avgDays}d avg · ${t.count} sold`} color="#3b82f6" />
-            ))}
-          </div>
-        </div>
-      )}
+          {/* ─── Quick Tips ─── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '0.95rem', marginBottom: 16 }}>💡 Boost Your Listings</h3>
+              {[
+                { icon: '📷', tip: 'Add 6+ high-quality photos. Listings with more images get 3× more views.' },
+                { icon: '⚡', tip: 'Enable live auctions. They generate 5× more bids than fixed-price.' },
+                { icon: '✅', tip: 'Keep your dealer profile complete and verified for trust badge.' },
+                { icon: '📍', tip: 'Specify exact city location to appear in local searches.' },
+              ].map(t => (
+                <div key={t.icon} style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+                  <span style={{ fontSize: 18, flexShrink: 0 }}>{t.icon}</span>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{t.tip}</p>
+                </div>
+              ))}
+            </div>
 
-      {/* Monthly revenue */}
-      {monthlyRev.length > 0 && (
-        <div style={{ ...cardStyle }}>
-          <div style={cardHeader}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 700, color: '#fff' }}><BarChart3 size={15} style={{ color: '#22c55e' }} /> Monthly Revenue</span>
-          </div>
-          <div style={{ padding: '16px 22px' }}>
-            {monthlyRev.map((m, i) => {
-              const maxRev = Math.max(...monthlyRev.map(x => x.total), 1);
-              return (
-                <MiniBar key={i} value={m.total} max={maxRev} label={`${m._id.month}/${m._id.year}`} sub={`KES ${(m.total || 0).toLocaleString()}`} color="#22c55e" />
-              );
-            })}
+            <div className="card" style={{ padding: 20 }}>
+              <h3 style={{ fontSize: '0.95rem', marginBottom: 14 }}>Quick Actions</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <Link to="/dealer/add-car"  className="btn btn-gold btn-sm" style={{ justifyContent: 'center' }}>+ New Listing</Link>
+                <Link to="/dealer"          className="btn btn-outline btn-sm" style={{ justifyContent: 'center' }}>Dashboard</Link>
+                <Link to="/admin/auctions"  className="btn btn-outline btn-sm" style={{ justifyContent: 'center' }}>Auction Control</Link>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

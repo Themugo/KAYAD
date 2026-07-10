@@ -31,7 +31,7 @@ export default function AdminCars() {
       setTotal(data.pagination?.total || data.total || 0);
     } catch { toast('Failed to load listings', 'error'); }
     finally { setLoading(false); }
-  }, [page, search, statusFilter, toast]);
+  }, [page, search, statusFilter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -110,7 +110,7 @@ export default function AdminCars() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 52, height: 36, borderRadius: 4, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
                             {car.images?.[0]
-                              ? <img src={car.images[0]?.url || car.images[0]} alt={car.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ? <img src={car.images[0]?.url || car.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                               : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>🚗</div>
                             }
                           </div>
@@ -142,14 +142,14 @@ export default function AdminCars() {
                       </td>
                       <td>
                         <span className={`badge ${STATUS_BADGE[car.auctionStatus] || 'badge-muted'}`}>
-                          {(() => { const s = car.auctionStartTime ? new Date(car.auctionStartTime).getTime() : 0; const e = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0; const n = Date.now(); return s > 0 && e > 0 && s <= n && e > n; })() && <span className="live-dot" style={{ width: 6, height: 6 }} />}
+                          {car.auctionStatus === 'live' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
                           {car.auctionStatus || 'listed'}
                         </span>
                       </td>
                       <td style={{ fontSize: 11, color: 'var(--text-dim)' }}>
                         {car.createdAt ? timeAgo(car.createdAt) : '—'}
                       </td>
-                      <td onClick={e => e.stopPropagation()} role="presentation">
+                      <td onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 100 }}>
                           <Link to={`/cars/${car._id}`} target="_blank" className="btn btn-outline btn-sm">View</Link>
                           <button className={`btn btn-sm ${car.isPromoted ? 'btn-outline' : 'btn-gold'}`}
@@ -184,7 +184,7 @@ export default function AdminCars() {
 
       {/* Detail modal */}
       {selected && (
-        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 560 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
               <div>
@@ -196,7 +196,7 @@ export default function AdminCars() {
 
             {selected.images?.[0] && (
               <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 20 }}>
-                <img src={selected.images[0]?.url || selected.images[0]} alt={selected.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={selected.images[0]?.url || selected.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
             )}
 

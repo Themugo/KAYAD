@@ -34,7 +34,7 @@ export const listAuctions = async (req, res) => {
   ];
 
   if (search) {
-    const searchRegex = new RegExp(search, "i");
+    const searchRegex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
     pipeline.unshift({
       $match: {
         $or: [

@@ -3,7 +3,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { paymentsAPI, formatKES } from '../api/api';
 import { useToast } from '../context/ToastContext';
 import { timeAgo, copyToClipboard } from '../utils/helpers';
-import EmptyState from '../components/EmptyState';
 
 const STATUS_BADGE = { success: 'badge-green', pending: 'badge-orange', failed: 'badge-red', cancelled: 'badge-muted' };
 const STATUS_ICON  = { success: '✅', pending: '⏳', failed: '❌', cancelled: '—' };
@@ -23,7 +22,7 @@ export default function PaymentsPage() {
       setPayments(d.payments || d.data || []);
     } catch { toast('Failed to load payments', 'error'); }
     finally { setLoading(false); }
-  }, [toast]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
@@ -104,12 +103,11 @@ export default function PaymentsPage() {
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
         ) : filtered.length === 0 ? (
-          <EmptyState
-            icon="💳"
-            title={filter === 'all' && typeFilter === 'all' ? 'No payments yet' : 'No matching payments'}
-            description="Your M-Pesa transactions appear here after placing bids or buying cars."
-            action={{ label: 'Browse Cars', onClick: () => window.location.href = '/' }}
-          />
+          <div className="empty-state">
+            <div className="empty-icon">💳</div>
+            <h3>{filter === 'all' && typeFilter === 'all' ? 'No payments yet' : 'No matching payments'}</h3>
+            <p>Your M-Pesa transactions appear here after placing bids or buying cars.</p>
+          </div>
         ) : (
           <div className="card">
             <div className="table-wrap">
@@ -147,10 +145,7 @@ export default function PaymentsPage() {
                       </td>
                       <td style={{ fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                         {p.mpesaReceiptNumber
-                          ? <span onClick={e => { e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); }}
-                              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); } }}
-                              role="button" tabIndex={0}
-                              style={{ cursor: 'pointer', color: 'var(--gold)' }} title="Click to copy">
+                          ? <span onClick={e => { e.stopPropagation(); handleCopy(p.mpesaReceiptNumber); }} style={{ cursor: 'pointer', color: 'var(--gold)' }} title="Click to copy">
                               {p.mpesaReceiptNumber}
                             </span>
                           : '—'
@@ -175,7 +170,7 @@ export default function PaymentsPage() {
 
       {/* ─── Detail modal ─── */}
       {selected && (
-        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 460 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>

@@ -94,7 +94,7 @@ export const handleMpesaCallback = async (callbackData) => {
     let userDoc = null;
     try {
       userDoc = await findById("users", payment.user, "email name phone");
-    } catch (_) {}
+    } catch (e) { logWarn("Payment callback user lookup failed", { error: e.message }); }
     sendDigitalReceipt({
       amount: payment.amount,
       carTitle: payment.car?.toString() || "Vehicle",

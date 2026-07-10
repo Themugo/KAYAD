@@ -179,7 +179,7 @@ export const confirmDelivery = async (req, res) => {
         sendSMS(buyer.phone, `Seller confirmed delivery for escrow KES ${Number(escrow.amount).toLocaleString("en-KE")}. Release pending admin approval. Kayad.`)
           .catch((e) => logWarn("SMS send failed:", e.message));
       }
-    } catch (_) {}
+    } catch (e) { logWarn("Escrow notification failed", { error: e.message }); }
 
     logActionFromReq(req, "escrow.delivery_confirmed", {
       target: escrow._id, targetModel: "Escrow", resourceId: req.params.id,

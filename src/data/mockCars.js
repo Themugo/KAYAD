@@ -294,3 +294,22 @@ export const TESTIMONIALS = [
     rating: 5,
   },
 ];
+
+export function getMockCar(id) {
+  return MOCK_CARS.find((c) => c.id === Number(id)) || null;
+}
+
+export function filterMockCars(filters = {}) {
+  let results = [...MOCK_CARS];
+  if (filters.search) {
+    const q = filters.search.toLowerCase();
+    results = results.filter((c) => c.title.toLowerCase().includes(q) || c.brand.toLowerCase().includes(q) || c.location.toLowerCase().includes(q));
+  }
+  if (filters.brand && filters.brand !== 'All') results = results.filter((c) => c.brand === filters.brand);
+  if (filters.fuel && filters.fuel !== 'All') results = results.filter((c) => c.fuel === filters.fuel);
+  if (filters.transmission && filters.transmission !== 'All') results = results.filter((c) => c.transmission === filters.transmission);
+  if (filters.bodyType && filters.bodyType !== 'All') results = results.filter((c) => c.bodyType === filters.bodyType);
+  if (filters.priceMax) results = results.filter((c) => c.price <= Number(filters.priceMax));
+  if (filters.auctionStatus === 'live') results = results.filter((c) => c.isAuction);
+  return results;
+}

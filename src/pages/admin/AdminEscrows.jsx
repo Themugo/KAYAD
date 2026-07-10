@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 
 const STATUS_META = {
   pending:  { label: 'Pending',  badge: 'badge-orange', icon: '⏳' },
-  held:     { label: 'Held',     badge: 'badge-blue',   icon: '💰' },
+  funded:   { label: 'Funded',   badge: 'badge-blue',   icon: '💰' },
   released: { label: 'Released', badge: 'badge-green',  icon: '✅' },
   refunded: { label: 'Refunded', badge: 'badge-red',    icon: '↩️' },
   disputed: { label: 'Disputed', badge: 'badge-red',    icon: '⚠️' },
@@ -31,7 +31,7 @@ export default function AdminEscrows() {
       setTotal(data.pagination?.total || data.total || 0);
     } catch { toast('Failed to load escrows', 'error'); }
     finally { setLoading(false); }
-  }, [page, filter, toast]);
+  }, [page, filter]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -67,8 +67,8 @@ export default function AdminEscrows() {
     return acc;
   }, {});
 
-  const heldTotal = escrows
-    .filter(e => e.status === 'held')
+  const fundedTotal = escrows
+    .filter(e => e.status === 'funded')
     .reduce((acc, e) => acc + (e.amount || 0), 0);
 
   return (
@@ -87,8 +87,8 @@ export default function AdminEscrows() {
         <div className="grid-4" style={{ marginBottom: 28 }}>
           {[
             { label: 'Total Escrows', val: total, icon: '🔒', color: 'var(--text)' },
-            { label: 'Awaiting Release', val: counts.held || 0, icon: '💰', color: 'var(--blue)' },
-            { label: 'Funds Locked (KES)', val: formatKES(heldTotal), icon: '⏳', color: 'var(--gold-light)' },
+            { label: 'Awaiting Release', val: counts.funded || 0, icon: '💰', color: 'var(--blue)' },
+            { label: 'Funds Locked (KES)', val: formatKES(fundedTotal), icon: '⏳', color: 'var(--gold-light)' },
             { label: 'Disputes', val: counts.disputed || 0, icon: '⚠️', color: 'var(--red)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
@@ -103,8 +103,8 @@ export default function AdminEscrows() {
           ))}
         </div>
 
-        {/* Alert: held escrows need action */}
-        {(counts.held || 0) > 0 && (
+        {/* Alert: funded escrows need action */}
+        {(counts.funded || 0) > 0 && (
           <div style={{
             background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)',
             borderRadius: 'var(--radius)', padding: '14px 18px', marginBottom: 20,
@@ -113,21 +113,21 @@ export default function AdminEscrows() {
             <span style={{ fontSize: 22 }}>💰</span>
             <div>
               <div style={{ fontWeight: 600, color: 'var(--blue)', fontSize: 14 }}>
-                {counts.held} escrow{counts.held !== 1 ? 's' : ''} awaiting your action
+                {counts.funded} escrow{counts.funded !== 1 ? 's' : ''} awaiting your action
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                Review held escrows and release or refund funds accordingly.
+                Review funded escrows and release or refund funds accordingly.
               </div>
             </div>
-            <button className="btn btn-outline btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setFilter('held')}>
-              Show Held →
+            <button className="btn btn-outline btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setFilter('funded')}>
+              Show Funded →
             </button>
           </div>
         )}
 
         {/* Filter tabs */}
         <div className="tabs">
-          {['all', 'pending', 'held', 'released', 'refunded', 'disputed'].map(f => (
+          {['all', 'pending', 'funded', 'released', 'refunded', 'disputed'].map(f => (
             <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`}
               onClick={() => { setFilter(f); setPage(1); }}>
               {STATUS_META[f]?.icon} {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -166,9 +166,9 @@ export default function AdminEscrows() {
                 <tbody>
                   {escrows.map(e => {
                     const meta = STATUS_META[e.status] || { label: e.status, badge: 'badge-muted', icon: '•' };
-                    const isHeld = e.status === 'held';
+                    const isFunded = e.status === 'funded';
                     return (
-                      <tr key={e._id} style={{ background: isHeld ? 'rgba(59,130,246,0.03)' : '' }}>
+                      <tr key={e._id} style={{ background: isFunded ? 'rgba(59,130,246,0.03)' : '' }}>
                         <td style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                           #{e._id?.slice(-8)}
                         </td>
@@ -203,7 +203,7 @@ export default function AdminEscrows() {
                             >
                               🔍 Details
                             </button>
-                            {isHeld && (
+                            {isFunded && (
                               <>
                                 <button className="btn btn-gold btn-sm" disabled={actionId === e._id}
                                   onClick={() => handleRelease(e._id)}>
@@ -240,7 +240,7 @@ export default function AdminEscrows() {
 
       {/* ─── Detail Modal ─── */}
       {selected && (
-        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
           <div className="modal-box" style={{ maxWidth: 540 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
               <div>
@@ -268,7 +268,7 @@ export default function AdminEscrows() {
               ))}
             </div>
 
-            {selected.status === 'held' && (
+            {selected.status === 'funded' && (
               <div style={{ display: 'flex', gap: 12 }}>
                 <button className="btn btn-gold btn-full" disabled={actionId === selected._id}
                   onClick={() => handleRelease(selected._id)}>

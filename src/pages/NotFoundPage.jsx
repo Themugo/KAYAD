@@ -1,10 +1,8 @@
 // src/pages/NotFoundPage.jsx
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import usePageMeta from '../hooks/usePageMeta';
 
 export default function NotFoundPage() {
-  usePageMeta('Page Not Found', 'The page you are looking for does not exist. Browse premium cars for sale in Kenya on Kayad.');
   const navigate = useNavigate();
   const [count, setCount] = useState(5);
 
@@ -16,7 +14,7 @@ export default function NotFoundPage() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [navigate]);
+  }, []);
 
   return (
     <div style={{
