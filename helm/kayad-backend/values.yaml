@@ -114,11 +114,10 @@ persistence:
   accessMode: "ReadWriteMany"
   size: 50Gi
 
-mongodb:
-  enabled: false
-  host: ""
-  port: 0
-  database: "kayad"
+supabase:
+  enabled: true
+  url: ""
+  serviceKey: ""
 
 redis:
   enabled: true
