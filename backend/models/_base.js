@@ -45,7 +45,31 @@ const TABLE_MAP = {
   Ticket: "support_tickets",
 };
 
-function createQuery() {
+function wrapDoc(doc, tableName, sb) {
+  if (!doc) return null;
+  return Object.defineProperties(doc, {
+    _id: { get() { return this.id; }, set(v) { this.id = v; }, enumerable: true, configurable: true },
+    save: {
+      value: async function () {
+        const client = sb();
+        const { data, error } = await client.from(tableName).update(Object.fromEntries(
+          Object.entries(this).filter(([k]) => !["save","toObject","_id"].includes(k))
+        )).eq("id", this.id).select().single();
+        if (error) throw error;
+        if (data) Object.assign(this, data);
+        return this;
+      },
+      writable: true, configurable: true,
+    },
+    toObject: {
+      value: function () { return { ...this }; },
+      writable: true, configurable: true,
+    },
+  });
+}
+
+function createQuery(tableName) {
+  const sb = () => getSupabase();
   return {
     _select: "*",
     _lean: false,
@@ -83,6 +107,14 @@ function createQuery() {
 
     where(filters) {
       this._filters = { ...this._filters, ...filters };
+      return this;
+    },
+
+    distinct(field) {
+      return this._executor().then(rows => [...new Set(rows.map(r => r[field]).filter(Boolean))]);
+    },
+
+    populate() {
       return this;
     },
 
@@ -143,7 +175,7 @@ export function createModel(name) {
 
     find(filters = {}) {
       const sel = typeof filters === "object" && !Array.isArray(filters) ? { ...filters } : {};
-      const q = createQuery();
+      const q = createQuery(table);
       q._filters = sel;
       q._executor = async () => {
         const client = sb();
@@ -158,26 +190,26 @@ export function createModel(name) {
         if (q._skip) query = query.range(q._skip, q._skip + (q._limit || 1000) - 1);
         const { data, error } = await query;
         if (error) throw error;
-        return data || [];
+        return (data || []).map((d) => q._lean ? d : wrapDoc(d, table, sb));
       };
       return q;
     },
 
     findById(id) {
-      const q = createQuery();
+      const q = createQuery(table);
       q._findById = id;
       q._executor = async () => {
         if (!q._findById) return null;
         const client = sb();
         const { data, error } = await client.from(table).select(q._select).eq("id", q._findById).maybeSingle();
         if (error) throw error;
-        return data || null;
+        return data ? (q._lean ? data : wrapDoc(data, table, sb)) : null;
       };
       return q;
     },
 
     findOne(filters = {}) {
-      const q = createQuery();
+      const q = createQuery(table);
       q._filters = { ...filters };
       q._executor = async () => {
         const client = sb();
@@ -185,7 +217,8 @@ export function createModel(name) {
         query = buildWhere(query, q._filters);
         const { data, error } = await query;
         if (error) throw error;
-        return data?.[0] || null;
+        const doc = data?.[0] || null;
+        return doc ? (q._lean ? doc : wrapDoc(doc, table, sb)) : null;
       };
       return q;
     },
@@ -194,7 +227,7 @@ export function createModel(name) {
       const client = sb();
       const { data: created, error } = await client.from(table).insert(data).select().single();
       if (error) throw error;
-      return created;
+      return wrapDoc(created, table, sb);
     },
 
     async findByIdAndUpdate(id, update, options = {}) {
@@ -234,7 +267,8 @@ export function createModel(name) {
       if (options.new !== false) q.select();
       const { data, error } = await q;
       if (error) throw error;
-      return options.new !== false ? (Array.isArray(data) ? data?.[0] : data) : null;
+      const row = options.new !== false ? (Array.isArray(data) ? data?.[0] : data) : null;
+      return row ? wrapDoc(row, table, sb) : null;
     },
 
     async findOneAndUpdate(filter, update, options = {}) {

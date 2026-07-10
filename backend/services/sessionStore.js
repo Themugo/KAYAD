@@ -1,5 +1,6 @@
+import session from "express-session";
 import { cacheGet, cacheSet, cacheDel } from "../utils/cache.js";
-class CacheStore {
+class CacheStore extends session.Store {
   async get(sid, cb) {
     try {
       const data = await cacheGet(`session:${sid}`);
