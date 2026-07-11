@@ -5,9 +5,10 @@ services:
   - type: web
     name: kayad-backend
     region: oregon
-    env: node
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && node server.js
+    env: docker
+    dockerfilePath: backend/Dockerfile
+    dockerCommand: []
+    dockerContext: ./
     healthCheckPath: /health
     disk:
       name: uploads
