@@ -82,7 +82,7 @@ export default function AdminDealerVerifications() {
       setSelected(null);
       load();
     } catch (err) {
-      console.warn('Action failed', err);
+      if (import.meta.env.DEV) console.warn('Action failed', err);
     } finally { setProcessing(false); }
   };
 

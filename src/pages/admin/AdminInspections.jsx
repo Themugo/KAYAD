@@ -42,7 +42,7 @@ export default function AdminInspections() {
       setAssigning(null);
       load();
     } catch (error) {
-      console.warn('Unable to assign inspector', error);
+      if (import.meta.env.DEV) console.warn('Unable to assign inspector', error);
     }
   };
 
@@ -52,7 +52,7 @@ export default function AdminInspections() {
       setAssigning(null);
       load();
     } catch (error) {
-      console.warn('Unable to assign inspector', error);
+      if (import.meta.env.DEV) console.warn('Unable to assign inspector', error);
     }
   };
 

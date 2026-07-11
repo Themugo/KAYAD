@@ -115,7 +115,7 @@ export function withPerformanceTracking<P extends object>(
       trackRender(displayName, duration);
       
       if (import.meta.env.DEV && duration > 16.67) {
-        console.warn(`[Performance] Slow render: ${displayName} took ${duration.toFixed(2)}ms`);
+        if (import.meta.env.DEV) console.warn(`[Performance] Slow render: ${displayName} took ${duration.toFixed(2)}ms`);
       }
       
       renderCount.current++;
@@ -136,7 +136,7 @@ export function useRenderPerformance(componentName: string) {
     trackRender(componentName, duration);
     
     if (import.meta.env.DEV && duration > 16.67) {
-      console.warn(`[Performance] Slow render: ${componentName} took ${duration.toFixed(2)}ms`);
+      if (import.meta.env.DEV) console.warn(`[Performance] Slow render: ${componentName} took ${duration.toFixed(2)}ms`);
     }
   });
   

@@ -541,7 +541,7 @@ export default function OptimizedCarGallery({
   // Memoized handlers
   const handleFav = useCallback((id: string) => {
     // Handle favorite toggle - could call API here
-    console.log('Toggle favorite:', id);
+    // Toggle favorite - handled by parent via onToggleFavorite
   }, []);
 
   // Render based on view mode
