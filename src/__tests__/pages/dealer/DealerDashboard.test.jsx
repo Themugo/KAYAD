@@ -14,7 +14,6 @@ vi.mock('lucide-react', () => ({
   DollarSign: () => null,
   Settings: () => null,
   ChevronRight: () => null,
-  Plus: () => null,
 }));
 
 vi.mock('../../../context/AuthContext', () => ({

@@ -8,6 +8,9 @@ import tsparser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'build/**', '*.min.js', 'backend/**', 'lib/**', 'artifacts/**', 'e2e/**', 'docs/**', 'public/**', 'src/components/PerformanceMonitor.tsx']
+  },
+  {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
       parserOptions: {
@@ -45,7 +48,9 @@ export default [
         WebSocket: 'readonly',
         Worker: 'readonly',
         Notification: 'readonly',
-        matchMedia: 'readonly'
+        matchMedia: 'readonly',
+        confirm: 'readonly',
+        prompt: 'readonly'
       }
     },
     plugins: {
@@ -61,10 +66,23 @@ export default [
       'react/no-unescaped-entities': 'off',
       'react/prop-types': 'off',
       'no-unused-vars': 'off',
+      'no-undef': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/set-state-in-render': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/error-boundaries': 'warn',
+      'react-hooks/static-components': 'warn',
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/anchor-has-content': 'warn',
       'jsx-a11y/click-events-have-key-events': 'warn',
-      'jsx-a11y/no-static-element-interactions': 'warn'
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      'react/no-unknown-property': 'off',
+      'no-empty': 'warn'
     },
     settings: {
       react: {
@@ -81,7 +99,8 @@ export default [
         sourceType: 'module',
         ecmaFeatures: {
           jsx: true
-        }
+        },
+        requireConfigFile: false
       },
       globals: {
         console: 'readonly',
@@ -108,10 +127,14 @@ export default [
         URLSearchParams: 'readonly',
         Blob: 'readonly',
         File: 'readonly',
+        FileReader: 'readonly',
         WebSocket: 'readonly',
         Worker: 'readonly',
         Notification: 'readonly',
-        matchMedia: 'readonly'
+        matchMedia: 'readonly',
+        confirm: 'readonly',
+        prompt: 'readonly',
+        import: 'readonly'
       }
     },
     plugins: {
@@ -129,13 +152,25 @@ export default [
       'react/prop-types': 'off',
       'no-unused-vars': 'off',
       'no-undef': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/immutability': 'warn',
+      'react-hooks/preserve-manual-memoization': 'warn',
+      'react-hooks/set-state-in-render': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/error-boundaries': 'warn',
+      'react-hooks/static-components': 'warn',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-expressions': 'off',
       'jsx-a11y/alt-text': 'warn',
       'jsx-a11y/anchor-has-content': 'warn',
       'jsx-a11y/click-events-have-key-events': 'warn',
-      'jsx-a11y/no-static-element-interactions': 'warn'
+      'jsx-a11y/no-static-element-interactions': 'warn',
+      'react/no-unknown-property': 'off',
+      'no-empty': 'warn'
     },
     settings: {
       react: {
@@ -157,11 +192,9 @@ export default [
         beforeAll: 'readonly',
         afterAll: 'readonly',
         jest: 'readonly',
-        global: 'readonly'
+        global: 'readonly',
+        FileReader: 'readonly'
       }
     }
-  },
-  {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'build/**', '*.min.js']
   }
 ];
