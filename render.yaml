@@ -34,7 +34,7 @@ services:
         sync: false
       - key: MPESA_CONSUMER_KEY
         sync: false
-      - key: MPESA_SECRET
+      - key: MPESA_CONSUMER_SECRET
         sync: false
       - key: MPESA_SHORTCODE
         sync: false
@@ -47,4 +47,8 @@ services:
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: WEBHOIST_EMAIL
+        sync: false
+      - key: ADMIN_EMAIL
         sync: false
