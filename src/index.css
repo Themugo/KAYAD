@@ -2,6 +2,9 @@
    KAYAD — Premium Automotive Marketplace Design System
    ============================================================ */
 
+/* Mobile design system */
+@import './styles/mobile.css';
+
 /* ---- Design Tokens ---- */
 :root {
   /* Brand colors */

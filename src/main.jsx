@@ -11,6 +11,50 @@ if (typeof window !== 'undefined') {
   window.addEventListener('drop', (e) => e.preventDefault());
 }
 
+// ─── Service Worker Registration ──────────────────────────────
+
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('[App] Service Worker registered:', registration.scope);
+          
+          // Check for updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New content available
+                console.log('[App] New content available, refresh to update');
+              }
+            });
+          });
+        })
+        .catch((error) => {
+          console.error('[App] Service Worker registration failed:', error);
+        });
+
+      // Handle controller change (new SW activated)
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('[App] Service Worker controller changed');
+      });
+    });
+
+    // Request persistent storage for offline support
+    if (navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then((granted) => {
+        if (granted) {
+          console.log('[App] Persistent storage granted');
+        }
+      });
+    }
+  }
+}
+
+registerServiceWorker();
+
 // ─── Global Error Handler ─────────────────────────────────────
 
 class SecurityErrorBoundary extends React.Component {

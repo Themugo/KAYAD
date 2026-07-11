@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense, useMemo, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -10,6 +10,10 @@ import { BottomNav } from './components/ui';
 import HomePage from './pages/HomePage';
 import BrowsePage from './pages/BrowsePage';
 import GalleryPage from './pages/GalleryPage';
+// Mobile pages (eager loaded for instant mobile experience)
+import MobileHomePage from './pages/mobile/MobileHomePage';
+import MobileBrowsePage from './pages/mobile/MobileBrowsePage';
+
 // Lazy load: everything else for smaller initial bundle
 const InspectionPage = lazy(() => import('./pages/InspectionPage'));
 const SupportPage = lazy(() => import('./pages/SupportPage'));
@@ -58,6 +62,23 @@ function LazyFallback() {
   );
 }
 
+// Mobile detection hook
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 const MOBILE_NAV_ITEMS = [
   { id: '/',            label: 'Home',     icon: '🏠' },
   { id: '/browse',      label: 'Gallery',  icon: '🚗' },
@@ -84,6 +105,8 @@ function MobileNav() {
 }
 
 export default function App() {
+  const isMobile = useIsMobile();
+
   return (
     <BrowserRouter>
       <ErrorBoundary>
@@ -93,9 +116,20 @@ export default function App() {
               <ErrorBoundary>
                 <Suspense fallback={<LazyFallback />}>
                   <Routes>
-                    {/* Public */}
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/browse" element={<BrowsePage />} />
+                    {/* Mobile-optimized routes */}
+                    {isMobile ? (
+                      <>
+                        <Route path="/" element={<MobileHomePage />} />
+                        <Route path="/browse" element={<MobileBrowsePage />} />
+                      </>
+                    ) : (
+                      <>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/browse" element={<BrowsePage />} />
+                      </>
+                    )}
+
+                    {/* Shared routes */}
                     <Route path="/gallery" element={<GalleryPage />} />
                     <Route path="/auctions" element={<AuctionPage />} />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
@@ -144,7 +178,7 @@ export default function App() {
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Suspense>
-                <MobileNav />
+                {!isMobile && <MobileNav />}
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>
