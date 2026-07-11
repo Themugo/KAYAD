@@ -303,6 +303,7 @@ export {
   MobileSection as Section,
   MobileTabs as Tabs,
   MobileStatsBar as StatsBar,
+  MobileCarousel,
   MobileCarousel as Carousel,
   CarouselItem,
   usePullToRefresh,

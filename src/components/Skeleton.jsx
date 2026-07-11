@@ -83,3 +83,6 @@ export function SkeletonStat() {
     </div>
   );
 }
+
+// Default export for backward compatibility
+export default SkeletonCard;
