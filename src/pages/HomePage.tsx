@@ -5,9 +5,7 @@ import { useState, useEffect, useMemo, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Shield, CheckCircle, Users, Gavel, ArrowRight, Menu, X, Car, ChevronDown } from 'lucide-react';
 import CarCard from '../components/CarCard';
-import LazyImage from '../components/LazyImage';
 import usePageMeta from '../hooks/usePageMeta';
-import { carsAPI } from '../api/api';
 
 // Nav Links
 const NAV_LINKS = [

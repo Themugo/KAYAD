@@ -4,7 +4,6 @@
 import { useState, useMemo, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Filter, X, Menu, ArrowRight, ChevronDown } from 'lucide-react';
-import LazyImage from '../components/LazyImage';
 import usePageMeta from '../hooks/usePageMeta';
 
 // Sample Gallery Data
