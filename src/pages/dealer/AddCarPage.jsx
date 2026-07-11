@@ -1,8 +1,9 @@
 // src/pages/dealer/AddCarPage.jsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { carsAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { calculateListingQualityScore, getQualityScoreColor, getQualityScoreGradient } from '../../utils/listingQualityScore';
 
 const BRANDS  = ['Toyota','Mercedes-Benz','BMW','Land Rover','Subaru','Mazda','Nissan','Honda','Volkswagen','Lexus','Audi','Mitsubishi','Hyundai','Kia','Ford','Jeep','Peugeot','Isuzu'];
 const FUELS   = ['Petrol','Diesel','Hybrid','Electric','LPG'];
@@ -27,6 +28,84 @@ export default function AddCarPage() {
   });
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
+
+  // Calculate listing quality score based on form data
+  const qualityScore = useMemo(() => {
+    const factors = {
+      hasTitle: Boolean(form.title),
+      hasBrand: Boolean(form.brand),
+      hasModel: Boolean(form.model),
+      hasYear: Boolean(form.year),
+      hasPrice: Boolean(form.price),
+      hasMileage: Boolean(form.mileage),
+      hasFuel: Boolean(form.fuel),
+      hasTransmission: Boolean(form.transmission),
+      hasBodyType: Boolean(form.bodyType),
+      hasDescription: false,
+      hasLocation: Boolean(form.city),
+      hasImages: images.length > 0,
+      imageCount: images.length,
+      hasFeatures: false,
+      featureCount: 0,
+      hasVin: false,
+      hasLogbook: false,
+      descriptionLength: 0,
+    };
+    return calculateListingQualityScore(factors);
+  }, [form, images.length]);
+
+  // Quality Score Component
+  const QualityIndicator = () => (
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--border)',
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 20,
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)' }}>Listing Quality Score</span>
+        <span style={{ 
+          fontSize: 24, 
+          fontWeight: 800, 
+          color: getQualityScoreColor(qualityScore.score),
+        }}>
+          {qualityScore.score}/100
+        </span>
+      </div>
+      <div style={{
+        height: 8,
+        background: 'var(--border)',
+        borderRadius: 4,
+        overflow: 'hidden',
+        marginBottom: 12,
+      }}>
+        <div style={{
+          height: '100%',
+          width: `${qualityScore.score}%`,
+          background: getQualityScoreGradient(qualityScore.score),
+          borderRadius: 4,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ 
+          fontSize: 12, 
+          fontWeight: 600,
+          color: getQualityScoreColor(qualityScore.score),
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}>
+          {qualityScore.level}
+        </span>
+        {qualityScore.suggestions.length > 0 && (
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+            💡 {qualityScore.suggestions[0]}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 
   const handleImages = (e) => {
     const files = Array.from(e.target.files).slice(0, 8);
@@ -101,6 +180,9 @@ export default function AddCarPage() {
             </div>
           ))}
         </div>
+
+        {/* Quality Score Indicator */}
+        <QualityIndicator />
 
         <div className="card" style={{ padding: 28, marginBottom: 20 }}>
 
