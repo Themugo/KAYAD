@@ -54,9 +54,13 @@ export function getPostAuthPath(user: User | undefined, fallback = '/'): string 
   const safeFallback = safeRedirectPath(fallback, '/');
   if (user?.mustChangePassword) return '/force-password-change';
   if (user?.role === 'inspector') return '/inspector';
-  if (isStaffRole(user?.role)) return '/admin';
+  if (isStaffRole(user?.role)) {
+    if (user?.role === 'technical_support') return '/admin/support';
+    return '/admin';
+  }
   if (isSellerRole(user?.role)) {
     if (user?.status !== 'approved') return fallback;
+    if (user?.role === 'individual_seller') return '/seller';
     return '/dealer';
   }
   if (user?.role === 'user') {

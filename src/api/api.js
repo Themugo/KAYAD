@@ -1160,5 +1160,27 @@ export const transactionsAPI = {
   },
 };
 
+// ─── INSPECTION API (mock for frontend-only use) ──
+export const inspectionAPI = {
+  async myTasks() {
+    return { tasks: [
+      { _id: 'insp-001', car: { title: 'Toyota Prado TX', brand: 'Toyota', year: 2022, images: [''] }, status: 'pending_payment', buyer: { name: 'James K.' }, createdAt: '2026-07-10', packageType: 'standard', amount: 3500 },
+      { _id: 'insp-002', car: { title: 'Honda CR-V', brand: 'Honda', year: 2021, images: [''] }, status: 'assigned', buyer: { name: 'Grace W.' }, createdAt: '2026-07-09', packageType: 'premium', amount: 5500, inspector: { name: 'Sarah M.' } },
+      { _id: 'insp-003', car: { title: 'Nissan X-Trail', brand: 'Nissan', year: 2023, images: [''] }, status: 'in_progress', buyer: { name: 'Peter O.' }, createdAt: '2026-07-08', packageType: 'standard', amount: 3500, inspector: { name: 'John D.' }, progress: 45 },
+      { _id: 'insp-004', car: { title: 'Mazda CX-5', brand: 'Mazda', year: 2022, images: [''] }, status: 'completed', buyer: { name: 'Aisha M.' }, createdAt: '2026-07-07', packageType: 'premium', amount: 5500, inspector: { name: 'Sarah M.' }, completedAt: '2026-07-10' },
+      { _id: 'insp-005', car: { title: 'Subaru Outback', brand: 'Subaru', year: 2021, images: [''] }, status: 'pending_payment', buyer: { name: 'John K.' }, createdAt: '2026-07-11', packageType: 'standard', amount: 3500 },
+    ] };
+  },
+  async start(id) { return { message: 'Inspection started' }; },
+  async submit(id, body) { return { message: 'Inspection submitted' }; },
+  list: () => inspectionAPI.myTasks(),
+  availableInspectors: () => ({ inspectors: [
+    { _id: 'insp-01', name: 'Sarah M.', rating: 4.9, completed: 128 },
+    { _id: 'insp-02', name: 'John D.', rating: 4.7, completed: 94 },
+    { _id: 'insp-03', name: 'Peter K.', rating: 4.5, completed: 52 },
+  ] }),
+  assign: (id, inspectorId) => ({ message: 'Inspector assigned' }),
+};
+
 // Re-export mock data for fallback
 export { MOCK_CARS, filterMockCars, getMockCar };

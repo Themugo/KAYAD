@@ -45,6 +45,12 @@ const AdminAuctions = lazy(() => import('./pages/admin/AdminAuctions'));
 const AdminSellers = lazy(() => import('./pages/admin/AdminSellers'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 
+// Dashboards
+const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
+const PrivateSellerDashboard = lazy(() => import('./pages/PrivateSellerDashboard'));
+const InspectorDashboard = lazy(() => import('./pages/InspectorDashboard'));
+const SupportDashboard = lazy(() => import('./pages/SupportDashboard'));
+
 function LazyFallback() {
   return (
     <div className="page loading-center">
@@ -124,6 +130,12 @@ export default function App() {
                     <Route path="/admin/auctions" element={<RequireAdmin><AdminAuctions /></RequireAdmin>} />
                     <Route path="/admin/sellers" element={<RequireAdmin><AdminSellers /></RequireAdmin>} />
                     <Route path="/admin/settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+
+                    {/* Dashboards */}
+                    <Route path="/dashboard" element={<RequireAuth><BuyerDashboard /></RequireAuth>} />
+                    <Route path="/seller" element={<RequireAuth><PrivateSellerDashboard /></RequireAuth>} />
+                    <Route path="/inspector" element={<RequireAuth><InspectorDashboard /></RequireAuth>} />
+                    <Route path="/admin/support" element={<RequireAdmin><SupportDashboard /></RequireAdmin>} />
 
                     {/* Info pages */}
                     <Route path="/inspection" element={<InspectionPage />} />
