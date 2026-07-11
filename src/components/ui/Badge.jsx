@@ -1,4 +1,3 @@
-// src/components/ui/Badge.jsx
 export default function Badge({
   children,
   variant = 'muted',

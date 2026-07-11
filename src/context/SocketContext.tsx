@@ -1,4 +1,3 @@
-// src/context/SocketContext.tsx
 import { createContext, useContext, useState, useEffect, useRef, useCallback, ReactNode } from 'react';
 import { supabase, RealtimeChannel } from '../lib/supabaseClient';
 import { useAuth } from './AuthContext';

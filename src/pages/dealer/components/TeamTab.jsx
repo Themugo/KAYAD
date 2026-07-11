@@ -1,4 +1,3 @@
-// src/pages/dealer/components/TeamTab.jsx
 // Extracted from DealerDashboard.jsx for maintainability
 
 import { useState, useEffect } from 'react';

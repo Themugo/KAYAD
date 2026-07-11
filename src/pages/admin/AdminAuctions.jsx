@@ -1,4 +1,3 @@
-// src/pages/admin/AdminAuctions.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';

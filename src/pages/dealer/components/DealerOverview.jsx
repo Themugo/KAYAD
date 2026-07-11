@@ -1,4 +1,3 @@
-// src/pages/dealer/components/DealerOverview.jsx
 // Enhanced overview tab — applies the dark-mockup design language
 // (performance chart, quick actions, activity feed, inventory-by-type,
 // top performers) on top of the existing live data. Pure presentation:

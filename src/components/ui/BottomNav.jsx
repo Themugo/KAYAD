@@ -1,4 +1,3 @@
-// src/components/ui/BottomNav.jsx
 export default function BottomNav({ items = [], active, onChange, className = '' }) {
   return (
     <nav className={`ui-bottom-nav ${className}`} aria-label="Mobile navigation">

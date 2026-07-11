@@ -1,4 +1,3 @@
-// src/components/ui/Accordion.jsx
 import { useState } from 'react';
 
 export default function Accordion({ items = [], defaultOpen = -1, className = '' }) {

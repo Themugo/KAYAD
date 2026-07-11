@@ -1,4 +1,3 @@
-// src/lib/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -18,11 +17,10 @@ export const supabase = createClient(safeUrl, safeKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    // Security: Set secure cookie options
     cookieOptions: {
       secure: import.meta.env.PROD,
       sameSite: 'strict',
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
     },
   },
   realtime: {
@@ -35,22 +33,20 @@ export const supabase = createClient(safeUrl, safeKey, {
   },
 });
 
-// Helper to get current session with error handling
 export async function getSecureSession() {
   try {
     const { data: { session }, error } = await supabase.auth.getSession();
     if (error) {
-      console.error('[AUTH] Session error:', error.message);
+      if (import.meta.env.DEV) console.error('[AUTH] Session error:', error.message);
       return null;
     }
     return session;
   } catch (err) {
-    console.error('[AUTH] Unexpected session error:', err);
+    if (import.meta.env.DEV) console.error('[AUTH] Unexpected session error:', err);
     return null;
   }
 }
 
-// Helper to verify user authentication
 export async function verifyAuth() {
   const session = await getSecureSession();
   return !!session?.user;

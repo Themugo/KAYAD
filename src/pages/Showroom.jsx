@@ -1,4 +1,3 @@
-// src/pages/Showroom.jsx
 // ─────────────────────────────────────────────────────────────────────────
 // Premium Showroom — unified command bar.
 //

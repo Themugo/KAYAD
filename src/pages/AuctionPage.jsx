@@ -1,4 +1,3 @@
-// src/pages/AuctionPage.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MOCK_CARS, formatKES } from '../api/api';

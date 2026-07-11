@@ -1,4 +1,3 @@
-// src/components/ui/Card.jsx
 export default function Card({
   children,
   hover = false,

@@ -1,4 +1,3 @@
-// src/components/ErrorBoundary.jsx
 import { Component } from 'react';
 
 export class ErrorBoundary extends Component {
@@ -12,7 +11,9 @@ export class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    console.error('[Gari Motors] Uncaught error:', error, info);
+    if (import.meta.env.DEV) {
+      console.error('[Gari Motors] Uncaught error:', error, info);
+    }
   }
 
   render() {
@@ -39,7 +40,7 @@ export class ErrorBoundary extends Component {
               ↻ Reload Page
             </button>
           </div>
-          {process.env.NODE_ENV === 'development' && this.state.error && (
+          {import.meta.env.DEV && this.state.error && (
             <pre style={{
               marginTop: 28, padding: 16, background: 'var(--surface)', borderRadius: 8,
               fontSize: 11, color: 'var(--red)', textAlign: 'left', maxWidth: 600,

@@ -1,4 +1,3 @@
-// src/components/ui/EmptyState.jsx
 export default function EmptyState({ icon = '📭', title = 'Nothing here yet', desc, action, actionLabel, className = '' }) {
   return (
     <div className={`ui-empty ${className}`}>

@@ -1,4 +1,3 @@
-// src/components/PerformanceMonitor.tsx
 // Performance monitoring component for identifying slow renders and bottlenecks
 // Can be used in development to measure component render times
 

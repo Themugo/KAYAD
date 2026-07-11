@@ -1,4 +1,3 @@
-// src/components/Skeleton.jsx
 // Usage: <SkeletonCard /> or <SkeletonRow /> or <SkeletonText lines={3} />
 
 const pulse = {

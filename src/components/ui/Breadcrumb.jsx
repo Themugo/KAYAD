@@ -1,4 +1,3 @@
-// src/components/ui/Breadcrumb.jsx
 export default function Breadcrumb({ items = [], className = '' }) {
   return (
     <nav className={`ui-breadcrumb ${className}`} aria-label="Breadcrumb">

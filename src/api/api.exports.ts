@@ -527,3 +527,7 @@ export const platformStatsAPI = {
 
 // ── formatKES (re-exported from helpers) ──────────────
 export { formatKES } from "../utils/helpers";
+
+// ── RE-EXPORTS from data layer ──────────────────────────
+export { formatKES } from '../utils/helpers';
+export { BRANDS, TESTIMONIALS, MOCK_CARS } from '../data/mockCars';

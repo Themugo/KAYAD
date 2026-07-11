@@ -1,4 +1,3 @@
-// src/components/ui/Segmented.jsx
 export default function Segmented({ options = [], value, onChange, className = '' }) {
   return (
     <div className={`ui-segmented ${className}`}>

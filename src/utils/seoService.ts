@@ -1,4 +1,3 @@
-// src/utils/seoService.ts - Production Hardened v7.0
 // ─────────────────────────────────────────────────────────────
 // Dynamic SEO metadata generation service
 // Generates OpenGraph tags, Twitter cards, canonical URLs, and structured data

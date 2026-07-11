@@ -1,4 +1,3 @@
-// src/components/ui/PriceTag.jsx
 export default function PriceTag({ value, size = 'md', sub, currency = 'KES', className = '', style }) {
   const formatted = typeof value === 'number'
     ? `${currency} ${value.toLocaleString('en-KE')}`

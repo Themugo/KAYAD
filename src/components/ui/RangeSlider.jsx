@@ -1,4 +1,3 @@
-// src/components/ui/RangeSlider.jsx
 export default function RangeSlider({ min = 0, max = 100, step = 1, value, onChange, label, formatValue, className = '' }) {
   return (
     <div className={className} style={{ width: '100%' }}>

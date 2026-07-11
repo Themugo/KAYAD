@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx — Premium Landing Page
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI, BRANDS, TESTIMONIALS, MOCK_CARS } from '../api/api';

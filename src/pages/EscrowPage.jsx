@@ -1,4 +1,3 @@
-// src/pages/EscrowPage.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { escrowAPI, formatKES } from '../api/api';

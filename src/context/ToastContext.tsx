@@ -1,4 +1,3 @@
-// src/context/ToastContext.tsx
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import type { Toast, ToastType, ToastContextValue } from '../types';
 

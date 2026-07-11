@@ -1,4 +1,3 @@
-// src/pages/GalleryPage.tsx
 // Simplified gallery page matching original KAYAD design
 
 import { useState, useMemo, memo } from 'react';

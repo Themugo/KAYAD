@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx — Premium Navigation with Mega Menu
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

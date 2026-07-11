@@ -1,4 +1,3 @@
-// src/utils/sentry.ts
 // ─────────────────────────────────────────────────────────────
 // Frontend Sentry error tracking.
 // Zero-code to enable:

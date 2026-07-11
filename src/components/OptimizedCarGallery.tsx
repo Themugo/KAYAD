@@ -1,4 +1,3 @@
-// src/components/OptimizedCarGallery.tsx
 // High-performance car gallery with virtualization for 100k+ vehicles
 // Supports multiple view modes (grid, list, table) with smooth scrolling
 

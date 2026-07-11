@@ -1,4 +1,3 @@
-// src/components/VirtualList.tsx
 // High-performance virtualized list for rendering 100k+ items
 // Uses windowing technique to only render visible items + buffer
 

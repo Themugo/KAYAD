@@ -1,4 +1,3 @@
-// src/App.jsx
 import { lazy, Suspense, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';

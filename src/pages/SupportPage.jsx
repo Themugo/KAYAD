@@ -1,4 +1,3 @@
-// src/pages/SupportPage.jsx
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';

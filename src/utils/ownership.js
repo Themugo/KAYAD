@@ -1,4 +1,3 @@
-// src/utils/ownership.js
 // ============================================================
 // RESOURCE OWNERSHIP VALIDATION
 // Ensures users can only access/modify their own resources

@@ -1,4 +1,3 @@
-// src/pages/PaymentsPage.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { paymentsAPI, formatKES } from '../api/api';
 import { useToast } from '../context/ToastContext';

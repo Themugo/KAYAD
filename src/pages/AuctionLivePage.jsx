@@ -1,4 +1,3 @@
-// src/pages/AuctionLivePage.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { carsAPI, bidsAPI, formatKES } from '../api/api';

@@ -31,7 +31,7 @@ export default function PrivateSellerProfile() {
       const data = await carsAPI.list({ seller: user?._id, limit: 10 });
       setListings(data.cars || data.data || []);
     } catch (err) {
-      console.error('Failed to fetch listings:', err);
+      if (import.meta.env.DEV) console.error('Failed to fetch listings:', err);
       setListingsError('Could not load your listings.');
     } finally {
       setListingsLoading(false);

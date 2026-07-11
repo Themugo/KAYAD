@@ -1,4 +1,3 @@
-// src/pages/FavoritesPage.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { favoritesAPI, formatKES } from '../api/api';

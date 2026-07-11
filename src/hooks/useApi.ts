@@ -1,4 +1,3 @@
-// src/hooks/useApi.ts
 // Optimized API hook with caching, request deduplication, and automatic cleanup
 // Supports optimistic updates, background refetch, and stale-while-revalidate
 

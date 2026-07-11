@@ -1,4 +1,3 @@
-// src/__tests__/seo.test.js
 // ─────────────────────────────────────────────────────────────
 // SEO system tests
 // Tests metadata generation, OpenGraph tags, Twitter cards, and structured data

@@ -1,4 +1,3 @@
-// src/pages/admin/AdminBids.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { bidsAPI, formatKES } from '../../api/api';

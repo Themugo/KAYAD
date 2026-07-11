@@ -1,4 +1,3 @@
-// src/components/ui/Pagination.jsx
 export default function Pagination({ page = 1, totalPages = 1, onChange, className = '' }) {
   if (totalPages <= 1) return null;
 

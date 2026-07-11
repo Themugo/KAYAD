@@ -1,4 +1,3 @@
-// src/components/ui/Progress.jsx
 export default function Progress({ value = 0, max = 100, variant = 'default', label, className = '' }) {
   const pct = Math.min(100, Math.max(0, (value / max) * 100));
   return (

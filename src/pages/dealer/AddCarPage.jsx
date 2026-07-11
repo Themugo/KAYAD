@@ -1,4 +1,3 @@
-// src/pages/dealer/AddCarPage.jsx
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { carsAPI } from '../../api/api';

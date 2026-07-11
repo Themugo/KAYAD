@@ -2,7 +2,6 @@ export { default as Button } from './Button.jsx';
 export { default as Badge } from './Badge.jsx';
 export { default as Card } from './Card.jsx';
 export { default as Drawer } from './Drawer.jsx';
-export { default as Skeleton } from './Skeleton.jsx';
 export { default as Progress } from './Progress.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
 export { default as Avatar } from './Avatar.jsx';

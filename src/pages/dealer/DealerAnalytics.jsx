@@ -1,4 +1,3 @@
-// src/pages/dealer/DealerAnalytics.jsx
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dealerAPI, formatKES } from '../../api/api';

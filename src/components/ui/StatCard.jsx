@@ -1,4 +1,3 @@
-// src/components/ui/StatCard.jsx
 export default function StatCard({ icon, iconVariant = 'gold', label, value, trend, trendLabel, className = '', style }) {
   return (
     <div className={`ui-stat-card ${className}`} style={style}>

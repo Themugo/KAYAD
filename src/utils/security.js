@@ -1,4 +1,3 @@
-// src/utils/security.js - KAYAD FRONTEND SECURITY UTILITIES
 
 export const VALIDATION_PATTERNS = {
   phone: /^(\+254|254|0)[17][0-9]{8}$/,

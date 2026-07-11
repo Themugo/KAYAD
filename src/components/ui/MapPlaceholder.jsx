@@ -1,4 +1,3 @@
-// src/components/ui/MapPlaceholder.jsx
 export default function MapPlaceholder({ label = 'Map view', height = 200, pin, className = '', children }) {
   return (
     <div className={`ui-map-placeholder ${className}`} style={{ minHeight: height }} aria-label={label}>

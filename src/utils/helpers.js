@@ -1,4 +1,3 @@
-// src/utils/helpers.js
 
 // ─── Currency ───────────────────────────────────────────
 export const formatKES = (n) =>

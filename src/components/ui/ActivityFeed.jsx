@@ -1,4 +1,3 @@
-// src/components/ui/ActivityFeed.jsx
 export default function ActivityFeed({ items = [], className = '' }) {
   return (
     <div className={`ui-activity-feed ${className}`}>

@@ -1,4 +1,3 @@
-// src/utils/apiSecurity.js
 // ============================================================
 // SECURE API CLIENT
 // Wraps API calls with security best practices

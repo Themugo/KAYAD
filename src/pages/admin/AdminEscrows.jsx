@@ -1,4 +1,3 @@
-// src/pages/admin/AdminEscrows.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { escrowAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';

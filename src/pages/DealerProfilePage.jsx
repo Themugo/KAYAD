@@ -1,4 +1,3 @@
-// src/pages/DealerProfilePage.jsx — Premium Dealer Profile (presentation-only)
 import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button, Badge, Card, Avatar, Breadcrumb, MapPlaceholder, StatCard } from '../components/ui';

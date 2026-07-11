@@ -1,4 +1,3 @@
-// src/pages/dealer/components/DashboardWidgets.jsx
 // Shared widgets and constants for the dealer dashboard
 
 import { Link } from 'react-router-dom';

@@ -1,4 +1,3 @@
-// src/components/OptimizedSearchBar.tsx
 // High-performance search bar with debouncing, suggestions, and caching
 // Supports keyboard navigation and recent searches
 

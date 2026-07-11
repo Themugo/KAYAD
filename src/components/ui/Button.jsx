@@ -1,4 +1,3 @@
-// src/components/ui/Button.jsx
 import { useCallback } from 'react';
 
 const VARIANTS = ['primary', 'secondary', 'outline', 'ghost', 'danger', 'success'];

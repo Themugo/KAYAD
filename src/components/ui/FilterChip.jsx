@@ -1,4 +1,3 @@
-// src/components/ui/FilterChip.jsx
 export default function FilterChip({ label, active = false, onToggle, onRemove, icon, className = '' }) {
   return (
     <button

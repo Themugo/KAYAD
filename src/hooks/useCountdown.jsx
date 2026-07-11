@@ -1,4 +1,3 @@
-// src/hooks/useCountdown.jsx
 
 import { useState, useEffect } from 'react';
 
