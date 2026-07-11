@@ -3,17 +3,80 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Gari Motors — Kenya's Premium Car Marketplace. Buy, sell, and auction vehicles with confidence. Secure M-Pesa escrow and live auctions." />
     <meta name="theme-color" content="#07090C" />
+    <meta name="color-scheme" content="dark" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'none';" />
     <title>Gari Motors — Kenya's Premium Car Marketplace</title>
+    
+    <!-- Performance: DNS Prefetch for critical origins -->
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+    <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+    <link rel="dns-prefetch" href="https://supabase.co" />
+    
+    <!-- Performance: Preconnect to critical third-party origins -->
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin="anonymous" />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin="anonymous" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Critical CSS inlined for fastest first paint -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+      html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+      body{background:#07090C;color:#F1F1F1;font-family:Inter,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overflow-x:hidden}
+      #root{min-height:100vh;display:flex;flex-direction:column}
+      @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .app-loading{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#07090C}
+      .spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:#C8962A;border-radius:50%;animation:spin 0.8s linear infinite}
+      .skeleton{background:linear-gradient(90deg,#1a1a2e 0%,#252540 50%,#1a1a2e 100%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:4px}
+      .loading-card{background:#0F1318;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:20px;margin-bottom:16px}
+      .loading-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+      .loading-image{width:100%;aspect-ratio:16/9;background:linear-gradient(90deg,#1a1a2e 0%,#252540 50%,#1a1a2e 100%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:8px;margin-bottom:12px}
+    </style>
+    
+    <!-- Fonts: Load asynchronously -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    
+    <noscript>
+      <style>.app-loading{display:none} .no-js-message{display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px}</style>
+    </noscript>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Initial loading skeleton -->
+      <div class="app-loading">
+        <div style="text-align:center;max-width:400px;padding:24px;">
+          <div style="font-size:48px;margin-bottom:24px">🚗</div>
+          <div class="loading-card" style="margin-bottom:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;gap:24px;">
+                <div class="skeleton" style="width:60px;height:20px;"></div>
+                <div class="skeleton" style="width:80px;height:20px;"></div>
+                <div class="skeleton" style="width:70px;height:20px;"></div>
+              </div>
+              <div class="skeleton" style="width:100px;height:36px;border-radius:8px;"></div>
+            </div>
+          </div>
+          <div class="loading-card" style="margin-bottom:24px;">
+            <div class="skeleton" style="width:60%;height:40px;margin-bottom:16px;"></div>
+            <div class="skeleton" style="width:80%;height:20px;margin-bottom:24px;"></div>
+            <div style="display:flex;gap:12px;">
+              <div class="skeleton" style="flex:1;height:48px;border-radius:8px;"></div>
+              <div class="skeleton" style="flex:1;height:48px;border-radius:8px;"></div>
+              <div class="skeleton" style="width:120px;height:48px;border-radius:8px;"></div>
+            </div>
+          </div>
+          <div class="loading-grid">
+            <div class="loading-card"><div class="loading-image"></div><div class="skeleton" style="width:70%;height:16px;margin-bottom:8px;"></div><div class="skeleton" style="width:40%;height:14px;"></div></div>
+            <div class="loading-card"><div class="loading-image"></div><div class="skeleton" style="width:70%;height:16px;margin-bottom:8px;"></div><div class="skeleton" style="width:40%;height:14px;"></div></div>
+            <div class="loading-card"><div class="loading-image"></div><div class="skeleton" style="width:70%;height:16px;margin-bottom:8px;"></div><div class="skeleton" style="width:40%;height:14px;"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
