@@ -5,6 +5,7 @@ import CarCard from '../components/CarCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { dedupedFetch, clearCache } from '../utils/requestCache';
+import { useToast } from '../context/ToastContext';
 
 const FUELS = ['All', 'Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANSMISSIONS = ['All', 'Automatic', 'Manual', 'CVT'];
@@ -54,6 +55,7 @@ function BrowseRecentlyViewed() {
 }
 
 export default function BrowsePage() {
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const [sort, setSort] = useState('default');
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -65,7 +67,34 @@ export default function BrowsePage() {
   const [hasMore, setHasMore] = useState(true);
   const [view, setView] = useState('grid');
   const [activeChips, setActiveChips] = useState([]);
+  const [showSaveSearch, setShowSaveSearch] = useState(false);
+  const [searchName, setSearchName] = useState('');
   const filterKey = useRef(0);
+
+  const hasActiveFilters = useMemo(() => {
+    return filters.search || filters.brand !== 'All' || filters.fuel !== 'All' || 
+           filters.transmission !== 'All' || filters.bodyType !== 'All' || 
+           filters.priceMax < 20000000 || filters.mileageMax < 200000 ||
+           filters.auctionOnly || filters.verifiedOnly || filters.inspectedOnly;
+  }, [filters]);
+
+  const handleSaveSearch = () => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('kayad_saved_searches') || '[]');
+      const newSearch = {
+        ...filters,
+        name: searchName || filters.search || `${filters.brand !== 'All' ? filters.brand : ''} ${filters.bodyType !== 'All' ? filters.bodyType : ''}`.trim() || 'My Search',
+        savedAt: new Date().toISOString(),
+      };
+      stored.unshift(newSearch);
+      localStorage.setItem('kayad_saved_searches', JSON.stringify(stored.slice(0, 20)));
+      toast('Search saved! You\'ll see it on your dashboard.', 'success');
+      setShowSaveSearch(false);
+      setSearchName('');
+    } catch {
+      toast('Failed to save search', 'error');
+    }
+  };
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -224,7 +253,64 @@ export default function BrowsePage() {
             {BRANDS.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
           </select>
           <Button variant="outline" icon="⚙" onClick={() => setDrawerOpen(true)}>Filters</Button>
+          {hasActiveFilters && (
+            <Button variant="secondary" icon="🔔" onClick={() => setShowSaveSearch(true)}>
+              Save Search
+            </Button>
+          )}
         </div>
+
+        {/* Save Search Dialog */}
+        {showSaveSearch && (
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: 20,
+          }}>
+            <div style={{
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: 16,
+              padding: 24,
+              maxWidth: 400,
+              width: '100%',
+            }}>
+              <h3 style={{ marginBottom: 8 }}>Save This Search</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
+                We'll save your search criteria so you can easily run it again later.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ padding: 12, background: 'var(--surface)', borderRadius: 8, fontSize: 13 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {filters.brand !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.brand}</span>}
+                    {filters.bodyType !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.bodyType}</span>}
+                    {filters.fuel !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.fuel}</span>}
+                    {filters.transmission !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.transmission}</span>}
+                    {filters.priceMax < 20000000 && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Under KES {(filters.priceMax / 1000000).toFixed(0)}M</span>}
+                    {filters.auctionOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Auction Only</span>}
+                    {filters.verifiedOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Verified</span>}
+                    {filters.inspectedOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Inspected</span>}
+                  </div>
+                </div>
+                <input
+                  className="ui-input"
+                  placeholder="Name this search (optional)"
+                  value={searchName}
+                  onChange={e => setSearchName(e.target.value)}
+                />
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <Button variant="outline" style={{ flex: 1 }} onClick={() => setShowSaveSearch(false)}>Cancel</Button>
+                  <Button variant="primary" style={{ flex: 1 }} onClick={handleSaveSearch}>Save Search</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {activeChips.length > 0 && (
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>

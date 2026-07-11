@@ -35,13 +35,34 @@ Supabase credentials are pre-configured in `.env`.
 
 ## Project Structure
 
-```
+```text
 src/
-  api/           Supabase client and data access layer
-  components/    Reusable UI components
-  context/       React contexts (Auth, Socket, Toast)
-  data/          Static data (car brands, testimonials)
-  hooks/         Custom React hooks
-  pages/         Route components (public, dealer/, admin/)
-  utils/         Helper functions
+├── api/           Supabase client and data access layer
+├── components/    Reusable UI components
+├── context/       React contexts (Auth, Socket, Toast)
+├── data/          Static data (car brands, testimonials)
+├── hooks/         Custom React hooks
+├── pages/         Route components (public, dealer/, admin/)
+└── utils/         Helper functions
 ```
+
+## Backend
+
+The backend is a separate Node.js service located in the [`backend/`](backend/) directory. It handles:
+
+- REST API endpoints (see [`API_GUIDE.md`](API_GUIDE.md))
+- WebSocket connections for real-time updates
+- Background job processing with Bull queues
+
+See the [Backend README](backend/README.md) for backend-specific setup instructions.
+
+## Documentation
+
+- [API Guide](API_GUIDE.md) — REST API documentation
+- [Contributing Guide](CONTRIBUTING.md) — How to contribute to this project
+- [Deployment Guide](DEPLOY.md) — Deployment instructions
+- [Monitoring & Observability](MONITORING.md) — Metrics and alerting setup
+
+## Contributing
+
+We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting pull requests.

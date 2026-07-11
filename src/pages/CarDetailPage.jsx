@@ -65,6 +65,8 @@ export default function CarDetailPage() {
   const [financing, setFinancing] = useState({ downPayment: 20, months: 60 });
   const [showInquiry, setShowInquiry] = useState(false);
   const [fav, setFav] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -83,7 +85,7 @@ export default function CarDetailPage() {
     try {
       const viewed = JSON.parse(localStorage.getItem('kayad_recently_viewed') || '[]');
       const filtered = viewed.filter(v => v.id !== car.id);
-      filtered.unshift({ id: car.id, title: car.title, image: car.image || car.images?.[0]?.url || car.images?.[0], price: car.price, year: car.year });
+      filtered.unshift({ id: car.id, title: car.title, image: car.image || car.images?.[0]?.url || car.images?.[0], price: car.price, year: car.year, viewedAt: new Date().toISOString() });
       localStorage.setItem('kayad_recently_viewed', JSON.stringify(filtered.slice(0, 8)));
     } catch {}
   }, [car]);
@@ -107,11 +109,79 @@ export default function CarDetailPage() {
     return MOCK_CARS.filter(c => c.id !== car.id && c.brand === car.brand).slice(0, 4);
   }, [car]);
 
+  const viewingHistory = useMemo(() => {
+    if (!car) return null;
+    try {
+      const stored = JSON.parse(localStorage.getItem('kayad_recently_viewed') || '[]');
+      const entry = stored.find(v => v.id === car.id);
+      if (!entry || !entry.viewedAt) return null;
+      const viewedDate = new Date(entry.viewedAt);
+      const now = new Date();
+      const diffDays = Math.floor((now - viewedDate) / (1000 * 60 * 60 * 24));
+      if (diffDays === 0) return 'Viewed today';
+      if (diffDays === 1) return 'Viewed yesterday';
+      if (diffDays < 7) return `Viewed ${diffDays} days ago`;
+      if (diffDays < 30) return `Viewed ${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+      return `Viewed ${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+    } catch {
+      return null;
+    }
+  }, [car]);
+
   const setActiveImgSafe = useCallback((dir) => {
     setActiveImg(p => dir === 'prev'
       ? (p - 1 + images.length) % images.length
       : (p + 1) % images.length);
   }, [images.length]);
+
+  const handleShare = useCallback(async () => {
+    const shareData = {
+      title: car?.title || 'Vehicle',
+      text: `Check out this ${car?.year || ''} ${car?.title || 'vehicle'} on KAYAD — KES ${(car?.price || 0).toLocaleString()}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Clipboard API not available
+    }
+    setShowShareMenu(true);
+  }, [car]);
+
+  const handleCopyLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+      setShowShareMenu(false);
+    } catch {}
+  }, []);
+
+  const handleWhatsAppShare = useCallback(() => {
+    const text = encodeURIComponent(`Check out this ${car?.year || ''} ${car?.title || 'vehicle'} on KAYAD — KES ${(car?.price || 0).toLocaleString()}\n${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+    setShowShareMenu(false);
+  }, [car]);
+
+  const handleEmailShare = useCallback(() => {
+    const subject = encodeURIComponent(`Check out this ${car?.title || 'vehicle'} on KAYAD`);
+    const body = encodeURIComponent(`Hi,\n\nI found this vehicle on KAYAD and thought you might be interested:\n\n${car?.title || 'Vehicle'} — KES ${(car?.price || 0).toLocaleString()}\n${window.location.href}\n\nRegards`);
+    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+    setShowShareMenu(false);
+  }, [car]);
 
   const isAuction = car?.auction_status === 'live' || car?.isAuction;
   const isVerified = car?.is_verified_dealer || car?.isVerified;
@@ -204,6 +274,24 @@ export default function CarDetailPage() {
                   )}
                 </div>
               </div>
+              {viewingHistory && (
+                <div style={{
+                  marginTop: 12,
+                  padding: '8px 12px',
+                  background: 'rgba(212, 196, 168, 0.08)',
+                  border: '1px solid rgba(212, 196, 168, 0.15)',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  color: 'var(--gold)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}>
+                  <span>👁</span>
+                  <span>{viewingHistory}</span>
+                  <span style={{ color: 'var(--text-muted)', marginLeft: 4 }}>— We're glad you're back!</span>
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: 24 }}>
@@ -357,8 +445,134 @@ export default function CarDetailPage() {
                   <Button variant="secondary" icon={fav ? '♥' : '♡'} onClick={() => setFav(!fav)} style={{ flex: 1 }}>
                     {fav ? 'Saved' : 'Save'}
                   </Button>
-                  <Button variant="secondary" icon="🔗" style={{ flex: 1 }}>Share</Button>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <Button 
+                      variant="secondary" 
+                      icon={linkCopied ? '✓' : '🔗'} 
+                      onClick={handleShare} 
+                      style={{ flex: 1, width: '100%' }}
+                    >
+                      {linkCopied ? 'Copied!' : 'Share'}
+                    </Button>
+                    {showShareMenu && (
+                      <div style={{
+                        position: 'absolute',
+                        bottom: '100%',
+                        right: 0,
+                        marginBottom: 8,
+                        background: 'var(--card)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 10,
+                        padding: 8,
+                        minWidth: 180,
+                        zIndex: 100,
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                      }}>
+                        <button
+                          onClick={handleCopyLink}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            width: '100%',
+                            padding: '10px 12px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: 6,
+                            color: 'var(--text)',
+                            fontSize: 13,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span style={{ fontSize: 16 }}>🔗</span>
+                          <span>Copy Link</span>
+                        </button>
+                        <button
+                          onClick={handleWhatsAppShare}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            width: '100%',
+                            padding: '10px 12px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: 6,
+                            color: 'var(--text)',
+                            fontSize: 13,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span style={{ fontSize: 16 }}>💬</span>
+                          <span>WhatsApp</span>
+                        </button>
+                        <button
+                          onClick={handleEmailShare}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            width: '100%',
+                            padding: '10px 12px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderRadius: 6,
+                            color: 'var(--text)',
+                            fontSize: 13,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'var(--surface)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          <span style={{ fontSize: 16 }}>📧</span>
+                          <span>Email</span>
+                        </button>
+                        <div style={{
+                          borderTop: '1px solid var(--border)',
+                          marginTop: 6,
+                          paddingTop: 6,
+                        }}>
+                          <button
+                            onClick={() => setShowShareMenu(false)}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 10,
+                              width: '100%',
+                              padding: '8px 12px',
+                              background: 'transparent',
+                              border: 'none',
+                              borderRadius: 6,
+                              color: 'var(--text-muted)',
+                              fontSize: 12,
+                              cursor: 'pointer',
+                              textAlign: 'left',
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {showShareMenu && (
+                  <div
+                    style={{
+                      position: 'fixed',
+                      inset: 0,
+                      zIndex: 99,
+                    }}
+                    onClick={() => setShowShareMenu(false)}
+                  />
+                )}
               </div>
 
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 20 }}>

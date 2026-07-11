@@ -82,6 +82,43 @@ export default function ComparePage() {
   const bestPrice = Math.min(...cars.map(c => c.price || Infinity));
   const bestMileage = Math.min(...cars.map(c => c.mileage || Infinity));
 
+  // Calculate value scores
+  const priceRange = Math.max(...cars.map(c => c.price || 0)) - Math.min(...cars.map(c => c.price || 0));
+  const avgPrice = cars.reduce((sum, c) => sum + (c.price || 0), 0) / cars.length;
+  
+  const getValueScore = (car) => {
+    let score = 50;
+    // Lower price = higher score
+    if (car.price && car.price < avgPrice) {
+      score += Math.min(30, Math.round((avgPrice - car.price) / avgPrice * 100));
+    }
+    // Lower mileage = higher score
+    if (car.mileage && bestMileage !== Infinity) {
+      const mileageDiff = (car.mileage - bestMileage) / car.mileage;
+      score -= Math.min(20, Math.round(mileageDiff * 20));
+    }
+    // Verified badges add points
+    if (car.ntsaVerified || car.logbookVerified) score += 10;
+    if (car.isVerified) score += 5;
+    if (car.inspectionStatus === 'completed') score += 5;
+    return Math.max(0, Math.min(100, score));
+  };
+
+  const getBestValue = () => {
+    let best = null;
+    let bestScore = 0;
+    cars.forEach(c => {
+      const score = getValueScore(c);
+      if (score > bestScore) {
+        bestScore = score;
+        best = c;
+      }
+    });
+    return best;
+  };
+
+  const bestValueCar = getBestValue();
+
   return (
     <div className="page" style={{ padding: '24px 0 100px', minHeight: '100vh' }}>
       <div className="container">
@@ -108,6 +145,51 @@ export default function ComparePage() {
             }}>
             Clear All
           </button>
+        </div>
+
+        {/* Value Assessment Summary */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.02) 100%)',
+          border: '1px solid rgba(34,197,94,0.2)',
+          borderRadius: 12, 
+          padding: '20px 24px', 
+          marginBottom: 20,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 20,
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 11, color: '#22c55e', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+              🏆 Best Value Pick
+            </div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff' }}>
+              {bestValueCar?.title?.split(' ').slice(0, 4).join(' ') || 'Vehicle'}
+            </div>
+            <div style={{ fontSize: 13, color: '#22c55e', marginTop: 4 }}>
+              Score: {getValueScore(bestValueCar)}/100 — Best price-to-features ratio
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#22c55e' }}>
+                KES {(bestPrice / 1000000).toFixed(1)}M
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Lowest Price</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#3b82f6' }}>
+                {(bestMileage / 1000).toFixed(0)}K km
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Lowest Mileage</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>
+                {cars.filter(c => c.ntsaVerified || c.logbookVerified).length}/{cars.length}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Verified</div>
+            </div>
+          </div>
         </div>
 
         {/* Bidding Velocity Bar */}
@@ -166,6 +248,18 @@ export default function ComparePage() {
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', marginTop: 6, lineHeight: 1.2 }}>
                       {c.title?.split(' ').slice(0, 3).join(' ') || 'Vehicle'}
+                    </div>
+                    {/* Value Score Badge */}
+                    <div style={{
+                      marginTop: 6,
+                      padding: '2px 8px',
+                      background: getValueScore(c) >= 70 ? 'rgba(34,197,94,0.2)' : getValueScore(c) >= 50 ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)',
+                      borderRadius: 4,
+                      fontSize: 10,
+                      fontWeight: 700,
+                      color: getValueScore(c) >= 70 ? '#22c55e' : getValueScore(c) >= 50 ? '#f59e0b' : '#ef4444',
+                    }}>
+                      {getValueScore(c)}/100 {getValueScore(c) >= 70 ? '★ Best' : ''}
                     </div>
                     <Link to={`/cars/${c._id}`}
                       style={{
