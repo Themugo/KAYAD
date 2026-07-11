@@ -11,7 +11,6 @@ import { BottomNav } from './components/ui';
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
 import BrowsePage from './pages/BrowsePage';
-import NotFoundPage from './pages/NotFoundPage';
 // Lazy load: everything else for smaller initial bundle
 const InspectionPage = lazy(() => import('./pages/InspectionPage'));
 const SupportPage = lazy(() => import('./pages/SupportPage'));
@@ -19,6 +18,7 @@ const AuctionPage = lazy(() => import('./pages/AuctionPage'));
 const CarDetailPage = lazy(() => import('./pages/CarDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const ForcePasswordChange = lazy(() => import('./pages/ForcePasswordChange'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
