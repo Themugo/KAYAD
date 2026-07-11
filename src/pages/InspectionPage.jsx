@@ -1,6 +1,6 @@
 // src/pages/InspectionPage.jsx
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -20,10 +20,12 @@ const HOW_IT_WORKS = [
 export default function InspectionPage() {
   const { isAuth } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [selected, setSelected] = useState('comprehensive');
-  const [form, setForm] = useState({ carUrl: '', location: '', date: '', name: '', phone: '', notes: '' });
+  const [form, setForm] = useState({ carUrl: searchParams.get('carUrl') || '', location: '', date: '', name: '', phone: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [slotsLeft, ] = useState(Math.floor(Math.random() * 3) + 3); // 3-5 slots left today
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -156,6 +158,14 @@ export default function InspectionPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                     <span style={{ color: 'var(--text-muted)' }}>{pkg?.label}</span>
                     <span className="price-tag" style={{ fontSize: 14 }}>KES {pkg?.price?.toLocaleString()}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, background: 'rgba(212,168,67,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--gold)' }}>
+                      ⏳ Only {slotsLeft} slots left today
+                    </span>
+                    <span style={{ fontSize: 11, background: 'rgba(82,196,26,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--green)' }}>
+                      ✅ 100% refund if not completed
+                    </span>
                   </div>
                 </div>
 

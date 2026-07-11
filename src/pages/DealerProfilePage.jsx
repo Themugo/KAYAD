@@ -4,6 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import { Button, Badge, Card, Avatar, Breadcrumb, MapPlaceholder, StatCard } from '../components/ui';
 import CarCard from '../components/CarCard';
 import { MOCK_CARS } from '../data/mockCars';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const DEALER = {
   name: 'Nairobi Auto Hub Ltd',
@@ -32,8 +34,26 @@ const REVIEWS = [
 
 export default function DealerProfilePage() {
   const { id } = useParams();
+  const { isAuth } = useAuth();
+  const { toast } = useToast();
   const [tab, setTab] = useState('inventory');
   const [sort, setSort] = useState('newest');
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' });
+  const [contactSent, setContactSent] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    if (!contactForm.name || !contactForm.phone || !contactForm.message) {
+      toast('Please fill in your name, phone and message', 'warning');
+      return;
+    }
+    setContactLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setContactSent(true);
+    toast('Message sent! The dealer will respond within 2 hours.', 'success');
+    setContactLoading(false);
+  };
 
   const inventory = useMemo(() => {
     return MOCK_CARS.slice(0, 8);
@@ -182,7 +202,7 @@ export default function DealerProfilePage() {
 
         {/* ── About Tab ── */}
         {tab === 'about' && (
-          <div className="about-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, alignItems: 'start' }}>
             <Card>
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>📍 Location & Contact</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14 }}>
@@ -214,6 +234,41 @@ export default function DealerProfilePage() {
                   <Button variant="secondary" size="sm" icon="🐦">Twitter</Button>
                 </div>
               </div>
+              <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+                <Link to={`/register?role=dealer&redirect=${encodeURIComponent(window.location.pathname)}`}>
+                  <Button variant="outline" size="sm" full icon="🏪">Become a Dealer Like This</Button>
+                </Link>
+              </div>
+            </Card>
+
+            <Card>
+              <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>💬 Contact This Dealer</h3>
+              {contactSent ? (
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                  <div style={{ fontWeight: 600, marginBottom: 8 }}>Message Sent!</div>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>The dealer will contact you at {contactForm.phone} within 2 hours.</p>
+                  <Button variant="outline" size="sm" style={{ marginTop: 16 }} onClick={() => { setContactSent(false); setContactForm({ name: '', email: '', phone: '', message: '' }); }}>
+                    Send Another
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <input className="input" placeholder="Your Name *" value={contactForm.name} onChange={e => setContactForm(p => ({ ...p, name: e.target.value }))} required />
+                  <input className="input" placeholder="Your Phone *" value={contactForm.phone} onChange={e => setContactForm(p => ({ ...p, phone: e.target.value }))} required />
+                  <input className="input" type="email" placeholder="Your Email (optional)" value={contactForm.email} onChange={e => setContactForm(p => ({ ...p, email: e.target.value }))} />
+                  <textarea className="input" rows={3} placeholder="Message * — e.g. I'm interested in the Toyota Prado..." value={contactForm.message} onChange={e => setContactForm(p => ({ ...p, message: e.target.value }))} required />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button variant="primary" type="submit" disabled={contactLoading} full>
+                      {contactLoading ? 'Sending...' : 'Send Message'}
+                    </Button>
+                    <Button variant="outline" icon="📱" onClick={() => window.open(`https://wa.me/${DEALER.whatsapp}`, '_blank')}>WhatsApp</Button>
+                  </div>
+                  <p style={{ fontSize: 11, color: 'var(--text-dim)', textAlign: 'center' }}>
+                    Messages are sent directly to the dealer. Your details stay private.
+                  </p>
+                </form>
+              )}
             </Card>
           </div>
         )}

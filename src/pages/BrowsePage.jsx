@@ -17,6 +17,42 @@ const SORTS = [
 ];
 const PAGE_SIZE = 24;
 
+function BrowseRecentlyViewed() {
+  const [recent, setRecent] = useState([]);
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('kayad_recently_viewed') || '[]');
+      setRecent(stored.slice(0, 4));
+    } catch {}
+  }, []);
+  if (recent.length === 0) return null;
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, fontSize: 13, color: 'var(--text-muted)' }}>
+        <span>🕐 Recently Viewed</span>
+        <span style={{ flex: 1, height: 1, background: 'var(--border)' }} />
+      </div>
+      <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {recent.map(c => (
+          <Link key={c.id} to={`/cars/${c.id}`} style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 12px', borderRadius: 8, background: 'var(--surface)',
+            border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit',
+            flexShrink: 0, transition: 'border-color 0.15s',
+          }} onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--gold)'}
+             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
+            <img src={c.image} alt="" style={{ width: 40, height: 30, borderRadius: 4, objectFit: 'cover' }} />
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>{c.title}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.year} · KES {(c.price / 1000).toFixed(0)}K</div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function BrowsePage() {
   const [searchParams] = useSearchParams();
   const [sort, setSort] = useState('default');
@@ -204,6 +240,8 @@ export default function BrowsePage() {
         {!loading && cars.length > 0 && (
           <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>{resultLabel}</p>
         )}
+
+        <BrowseRecentlyViewed />
 
         {loading ? (
           <div className="car-grid">{skeletonCards}</div>

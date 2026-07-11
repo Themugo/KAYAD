@@ -35,6 +35,25 @@ const trustFeatures = [
   { icon: '✓', label: 'Verified Dealer' },
 ];
 
+function RecentlyViewed() {
+  const [recent, setRecent] = useState([]);
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('kayad_recently_viewed') || '[]');
+      setRecent(stored);
+    } catch {}
+  }, []);
+  if (recent.length === 0) return null;
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h3 style={{ marginBottom: 16, fontSize: '1.1rem' }}>🕐 Recently Viewed</h3>
+      <div className="car-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
+        {recent.slice(0, 4).map(c => <CarCard key={c.id} car={c} />)}
+      </div>
+    </div>
+  );
+}
+
 export default function CarDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -58,6 +77,16 @@ export default function CarDetailPage() {
     }).finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, [id]);
+
+  useEffect(() => {
+    if (!car) return;
+    try {
+      const viewed = JSON.parse(localStorage.getItem('kayad_recently_viewed') || '[]');
+      const filtered = viewed.filter(v => v.id !== car.id);
+      filtered.unshift({ id: car.id, title: car.title, image: car.image || car.images?.[0]?.url || car.images?.[0], price: car.price, year: car.year });
+      localStorage.setItem('kayad_recently_viewed', JSON.stringify(filtered.slice(0, 8)));
+    } catch {}
+  }, [car]);
 
   const images = useMemo(() => {
     if (!car) return [];
@@ -291,6 +320,8 @@ export default function CarDetailPage() {
                 </div>
               </div>
             )}
+
+            <RecentlyViewed />
           </div>
 
           <div className="sticky-panel">
@@ -318,6 +349,9 @@ export default function CarDetailPage() {
                 ) : (
                   <Button variant="primary" size="lg" full icon="💳">Buy Now with Escrow</Button>
                 )}
+                <Link to={`/inspection?carUrl=${encodeURIComponent(window.location.href)}`}>
+                  <Button variant="outline" size="lg" full icon="🔍">Book Inspection — KES 3,500</Button>
+                </Link>
                 <Button variant="outline" size="lg" full icon="💬" onClick={() => setShowInquiry(true)}>Message Dealer</Button>
                 <div className="quick-actions">
                   <Button variant="secondary" icon={fav ? '♥' : '♡'} onClick={() => setFav(!fav)} style={{ flex: 1 }}>

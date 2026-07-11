@@ -46,10 +46,27 @@ export default function RegisterPage() {
     <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px 20px' }}>
       <div style={{ width: '100%', maxWidth: 480 }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🚗</div>
           <h2 style={{ marginBottom: 6 }}>Create Your Account</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Join Kenya's premium car marketplace</p>
+        </div>
+
+        <div className="steps-bar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 28, fontSize: 12 }}>
+          <span style={{ color: step >= 1 ? 'var(--gold)' : 'var(--text-muted)', fontWeight: step >= 1 ? 700 : 400 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: '50%', background: step >= 1 ? 'var(--gold)' : 'var(--bg-elevated)', color: step >= 1 ? '#fff' : 'var(--text-muted)', fontSize: 11, marginRight: 6, fontWeight: 700 }}>1</span>
+            Choose Role
+          </span>
+          <span style={{ flex: '0 0 40px', height: 2, background: step >= 2 ? 'var(--gold)' : 'var(--border)' }} />
+          <span style={{ color: step >= 2 ? 'var(--gold)' : 'var(--text-muted)', fontWeight: step >= 2 ? 700 : 400 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: '50%', background: step >= 2 ? 'var(--gold)' : 'var(--bg-elevated)', color: step >= 2 ? '#fff' : 'var(--text-muted)', fontSize: 11, marginRight: 6, fontWeight: 700 }}>2</span>
+            Your Details
+          </span>
+          <span style={{ flex: '0 0 40px', height: 2, background: 'var(--border)' }} />
+          <span style={{ color: 'var(--text-muted)' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 22, height: 22, borderRadius: '50%', background: 'var(--bg-elevated)', color: 'var(--text-muted)', fontSize: 11, marginRight: 6, fontWeight: 700 }}>✓</span>
+            Done
+          </span>
         </div>
 
         {step === 1 && (
@@ -108,6 +125,33 @@ export default function RegisterPage() {
             {isFromCar && !isDealerFlow && (
               <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
                 Sign up to bid, buy, or message the dealer about this car. You'll be redirected back after registration.
+              </div>
+            )}
+
+            {(role === 'dealer' || role === 'broker') && (
+              <div style={{ background: 'linear-gradient(135deg, rgba(212,168,67,0.08), rgba(212,168,67,0.02))', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--gold)', marginBottom: 8 }}>
+                  {role === 'dealer' ? '🏪 Why Become a Dealer?' : '💰 Why Sell on KAYAD?'}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
+                  {role === 'dealer' ? [
+                    'List unlimited cars with detailed specs & photos',
+                    'Run live auctions with real-time bidding',
+                    'Verified badge builds buyer trust',
+                    'Dashboard with analytics & lead tracking',
+                    'M-Pesa escrow handles payment securely',
+                  ] : [
+                    'List your car in under 5 minutes',
+                    'Reach thousands of serious buyers instantly',
+                    'M-Pesa escrow protects your payment',
+                    'Free listing — only pay when it sells',
+                    'Dedicated support throughout the sale',
+                  ].map(b => (
+                    <div key={b} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: 'var(--green)' }}>✓</span> {b}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -144,6 +144,18 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+
+            <div className="hero-press" style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap', opacity: 0.6 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>As featured in</span>
+              {['Business Daily', 'Nation', 'Standard', 'Citizen TV'].map(m => (
+                <span key={m} style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>{m}</span>
+              ))}
+            </div>
+
+            <div className="hero-cta-row" style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link to="/browse"><Button variant="primary" size="lg" icon="🚗">Browse Cars to Buy</Button></Link>
+              <Link to="/register?role=broker"><Button variant="outline" size="lg" icon="💰">Sell Your Car</Button></Link>
+            </div>
           </div>
         </div>
 
@@ -440,14 +452,14 @@ export default function HomePage() {
       <section className="cta-section" aria-label="Call to action">
         <div className="container" style={{ textAlign: 'center' }}>
           <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', marginBottom: 16 }}>
-            Ready to Sell Your Car?
+            Ready to Buy or Sell?
           </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 480, margin: '0 auto 32px' }}>
-            Join thousands of successful sellers on Kenya's most trusted marketplace. List in minutes, sell with confidence.
+          <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 520, margin: '0 auto 32px' }}>
+            Join thousands of Kenyans on the most trusted marketplace. Buy with escrow protection or sell in minutes with confidence.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/register?role=dealer"><Button variant="primary" size="lg" icon="🏪">List Your Car</Button></Link>
-            <Link to="/browse"><Button variant="outline" size="lg" iconRight="→">Browse Marketplace</Button></Link>
+          <div className="cta-dual" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/browse"><Button variant="primary" size="lg" icon="🚗">Find Your Dream Car</Button></Link>
+            <Link to="/register?role=broker"><Button variant="outline" size="lg" icon="💰">List Your Car for Sale</Button></Link>
           </div>
         </div>
       </section>
