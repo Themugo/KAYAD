@@ -11,6 +11,7 @@ import { BottomNav } from './components/ui';
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
 import BrowsePage from './pages/BrowsePage';
+import GalleryPage from './pages/GalleryPage';
 // Lazy load: everything else for smaller initial bundle
 const InspectionPage = lazy(() => import('./pages/InspectionPage'));
 const SupportPage = lazy(() => import('./pages/SupportPage'));
@@ -98,6 +99,7 @@ export default function App() {
                     {/* Public */}
                     <Route path="/" element={<HomePage />} />
                     <Route path="/browse" element={<BrowsePage />} />
+                    <Route path="/gallery" element={<GalleryPage />} />
                     <Route path="/auctions" element={<AuctionPage />} />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
                     <Route path="/dealer/:id" element={<DealerProfilePage />} />
