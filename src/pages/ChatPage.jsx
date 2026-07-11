@@ -1,15 +1,40 @@
-// src/pages/ChatPage.jsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { chatAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
+import VirtualList from '../components/VirtualList';
+
+function MessageRow({ msg, isMine, showDate, formatDate, formatTime }) {
+  return (
+    <div>
+      {showDate && (
+        <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', margin: '8px 0' }}>
+          {formatDate(msg.createdAt)}
+        </div>
+      )}
+      <div style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
+        <div>
+          <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
+            {msg.message || msg.content || msg.text}
+          </div>
+          <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 3, textAlign: isMine ? 'right' : 'left' }}>
+            {formatTime(msg.createdAt)}
+            {isMine && msg.seen && ' · Seen'}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const MemoizedMessageRow = MessageRow;
 
 export default function ChatPage() {
   const { chatId } = useParams();
   const { user } = useAuth();
-  const { on, emit, socket } = useSocket();
+  const { joinMessages, leaveChannel } = useSocket();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -20,52 +45,49 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
+  const channelRef = useRef(null);
+  const mountedRef = useRef(true);
 
-  // Load inbox
   useEffect(() => {
-    chatAPI.inbox().then(d => {
-      setChats(d.chats || d.data || []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
   }, []);
 
-  // Load messages when active chat changes
+  useEffect(() => {
+    chatAPI.inbox().then(d => {
+      if (mountedRef.current) setChats(d.chats || d.data || []);
+    }).catch(() => {}).finally(() => { if (mountedRef.current) setLoading(false); });
+  }, []);
+
   useEffect(() => {
     if (!active) return;
     chatAPI.messages(active).then(d => {
-      setMessages(d.messages || d.data || []);
+      if (mountedRef.current) setMessages(d.messages || d.data || []);
       chatAPI.seen(active).catch(() => {});
     }).catch(() => {});
   }, [active]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Real-time incoming messages
   useEffect(() => {
-    const off = on('newMessage', (data) => {
-      if (data.chatId === active) {
-        setMessages(prev => [...prev, data]);
+    if (!active) return;
+    const ch = joinMessages(active, {
+      onMessage: (msg) => {
+        if (!mountedRef.current) return;
+        setMessages(prev => [...prev, msg]);
         chatAPI.seen(active).catch(() => {});
-      } else {
-        toast('New message!', 'info');
-        setChats(prev => prev.map(c =>
-          c._id === data.chatId ? { ...c, unreadCount: (c.unreadCount || 0) + 1 } : c
-        ));
-      }
+      },
     });
-    return off;
-  }, [active, on]);
+    channelRef.current = ch;
+    return () => {
+      if (ch) leaveChannel(ch);
+      channelRef.current = null;
+    };
+  }, [active, joinMessages, leaveChannel]);
 
-  // Join chat rooms
-  useEffect(() => {
-    if (active && socket.current) {
-      socket.current.emit?.('joinChat', active);
-    }
-  }, [active]);
-
-  const handleSend = async (e) => {
+  const handleSend = useCallback(async (e) => {
     e.preventDefault();
     if (!text.trim() || !active || sending) return;
     setSending(true);
@@ -73,37 +95,55 @@ export default function ChatPage() {
     setText('');
     try {
       const data = await chatAPI.send(active, { message: msg });
-      setMessages(prev => [...prev, data.message || data]);
-    } catch { toast('Failed to send message', 'error'); setText(msg); }
-    finally { setSending(false); }
-  };
+      if (mountedRef.current) setMessages(prev => [...prev, data.message || data]);
+    } catch { toast('Failed to send message', 'error'); if (mountedRef.current) setText(msg); }
+    finally { if (mountedRef.current) setSending(false); }
+  }, [text, active, sending, toast]);
 
-  const formatTime = (iso) => {
+  const formatTime = useCallback((iso) => {
     if (!iso) return '';
     return new Date(iso).toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit' });
-  };
+  }, []);
 
-  const formatDate = (iso) => {
+  const formatDate = useCallback((iso) => {
     if (!iso) return '';
     const d = new Date(iso);
     const today = new Date();
     if (d.toDateString() === today.toDateString()) return 'Today';
     return d.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
-  };
+  }, []);
 
-  const activeChat = chats.find(c => c._id === active);
-  const otherParticipant = (p) => {
+  const activeChat = useMemo(() => chats.find(c => c._id === active), [chats, active]);
+
+  const otherParticipant = useCallback((p) => {
     const participants = p.participants || [];
     return participants.find(u => u._id !== user?.id) || participants[0];
-  };
+  }, [user]);
+
+  const messageItems = useMemo(() => messages.map((msg, i) => ({
+    key: msg._id || i,
+    msg,
+    isMine: msg.sender === user?.id || msg.sender?._id === user?.id,
+    showDate: i === 0 || formatDate(messages[i - 1]?.createdAt) !== formatDate(msg.createdAt),
+    formatDate,
+    formatTime,
+  })), [messages, user, formatDate, formatTime]);
+
+  const renderMessage = useCallback((item) => (
+    <MemoizedMessageRow
+      msg={item.msg}
+      isMine={item.isMine}
+      showDate={item.showDate}
+      formatDate={formatDate}
+      formatTime={formatTime}
+    />
+  ), [formatDate, formatTime]);
 
   if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   return (
     <div className="page" style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div className="chat-layout grid-sidebar-chat" style={{ flex: 1, overflow: 'hidden' }}>
-
-        {/* ─── Chat List ─── */}
         <div style={{
           borderRight: '1px solid var(--border)',
           background: 'var(--surface)',
@@ -178,10 +218,8 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* ─── Chat Window ─── */}
         {active ? (
           <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            {/* Header */}
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', alignItems: 'center', gap: 12 }}>
               {activeChat && (() => {
                 const other = otherParticipant(activeChat);
@@ -201,36 +239,16 @@ export default function ChatPage() {
               })()}
             </div>
 
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {messages.map((msg, i) => {
-                const isMine = msg.sender === user?.id || msg.sender?._id === user?.id;
-                const showDate = i === 0 || formatDate(messages[i - 1]?.createdAt) !== formatDate(msg.createdAt);
-                return (
-                  <div key={msg._id || i}>
-                    {showDate && (
-                      <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-dim)', margin: '8px 0' }}>
-                        {formatDate(msg.createdAt)}
-                      </div>
-                    )}
-                    <div style={{ display: 'flex', justifyContent: isMine ? 'flex-end' : 'flex-start' }}>
-                      <div>
-                        <div className={`chat-bubble ${isMine ? 'mine' : 'theirs'}`}>
-                          {msg.message || msg.content || msg.text}
-                        </div>
-                        <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: 3, textAlign: isMine ? 'right' : 'left' }}>
-                          {formatTime(msg.createdAt)}
-                          {isMine && msg.seen && ' · Seen'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={bottomRef} />
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <VirtualList
+                items={messageItems}
+                itemHeight={72}
+                gap={4}
+                renderItem={renderMessage}
+                className="chat-messages-scroll"
+              />
             </div>
 
-            {/* Input */}
             <form onSubmit={handleSend} style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', background: 'var(--surface)', display: 'flex', gap: 10 }}>
               <input
                 className="input"

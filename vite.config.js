@@ -15,6 +15,7 @@ export default defineConfig({
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           'supabase': ['@supabase/supabase-js'],
         },
+        experimentalMinChunkSize: 8192,
       },
     },
   },

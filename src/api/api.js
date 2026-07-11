@@ -2,6 +2,7 @@
 import { supabase } from '../lib/supabaseClient';
 import { formatKES as fmtKES } from '../utils/helpers';
 import { MOCK_CARS, BRANDS, TESTIMONIALS, filterMockCars, getMockCar } from '../data/mockCars';
+import { dedupedFetch, clearCache } from '../utils/requestCache';
 
 export const formatKES = fmtKES;
 export { BRANDS, TESTIMONIALS };
@@ -74,7 +75,7 @@ export const authAPI = {
     return { token: data.session?.access_token, user: profile };
   },
 
-  async me() {
+  async me(signal) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw { response: { status: 401, data: { message: 'Unauthorized' } } };
 
@@ -87,6 +88,10 @@ export const authAPI = {
     if (error) throw { response: { status: 500, data: { message: error.message } } };
     if (!profile) throw { response: { status: 404, data: { message: 'Profile not found' } } };
     return { user: profile };
+  },
+
+  invalidateCache() {
+    clearCache();
   },
 
   async logout() {
@@ -278,11 +283,44 @@ export const carsAPI = {
 
     if (error) throw { response: { status: 500, data: { message: error.message } } };
 
-    // Fallback to mock data for demo if no cars
     if (!data || data.length === 0) {
       return { cars: MOCK_CARS.slice(0, 5).map(c => ({ ...c, _id: c.id })), data: MOCK_CARS.slice(0, 5).map(c => ({ ...c, _id: c.id })) };
     }
     return { cars: data.map(transformCar), data: data.map(transformCar) };
+  },
+
+  async listPaginated(params = {}, page = 1, limit = 20) {
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+    let query = supabase
+      .from('cars')
+      .select('*, dealer:profiles!cars_dealer_id_fkey(id, name, business_name, dealer_rating, location, phone)', { count: 'exact' })
+      .is('deleted_at', null)
+      .eq('approved', true)
+      .range(from, to);
+
+    if (params.brand && params.brand !== 'All Brands') query = query.eq('brand', params.brand);
+    if (params.fuel && params.fuel !== 'All') query = query.eq('fuel', params.fuel);
+    if (params.transmission && params.transmission !== 'All') query = query.eq('transmission', params.transmission);
+    if (params.bodyType && params.bodyType !== 'All') query = query.eq('body_type', params.bodyType);
+    if (params.auctionStatus === 'live') query = query.eq('auction_status', 'live');
+    if (params.search) query = query.or(`title.ilike.%${params.search}%,brand.ilike.%${params.search}%`);
+    if (params.priceMax) query = query.lte('price', params.priceMax);
+
+    if (params.sort === 'price_asc') query = query.order('price', { ascending: true });
+    else if (params.sort === 'price_desc') query = query.order('price', { ascending: false });
+    else if (params.sort === 'year_desc') query = query.order('year', { ascending: false });
+    else query = query.order('is_promoted', { ascending: false }).order('created_at', { ascending: false });
+
+    const { data, error, count } = await query;
+    if (error) throw { response: { status: 500, data: { message: error.message } } };
+
+    if (!data || data.length === 0) {
+      const mockResults = filterMockCars(params);
+      const paged = mockResults.slice(from, to + 1);
+      return { cars: paged.map(c => ({ ...c, _id: c.id })), total: mockResults.length, page, pages: Math.ceil(mockResults.length / limit), hasMore: to < mockResults.length };
+    }
+    return { cars: data.map(transformCar), total: count, page, pages: Math.ceil((count || 0) / limit), hasMore: to < (count || 0) };
   },
 
   async analytics() {

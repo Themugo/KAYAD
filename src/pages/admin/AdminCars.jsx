@@ -1,9 +1,9 @@
-// src/pages/admin/AdminCars.jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI, carsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
+import { AdminCarRow } from '../../components/AdminTableRow';
 
 const STATUS_BADGE = {
   live:   'badge-green', draft: 'badge-muted', ended: 'badge-muted', sold: 'badge-gold',
@@ -35,7 +35,7 @@ export default function AdminCars() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async (car) => {
+  const handleDelete = useCallback(async (car) => {
     if (!window.confirm(`Delete "${car.title}"? Cannot be undone.`)) return;
     setActionId(car._id + '-del');
     try {
@@ -46,190 +46,83 @@ export default function AdminCars() {
       if (selected?._id === car._id) setSelected(null);
     } catch { toast('Delete failed', 'error'); }
     finally { setActionId(null); }
-  };
+  }, [selected, toast]);
 
-  const handleFeature = async (car) => {
-    setActionId(car._id + '-feat');
-    try {
-      await carsAPI.update(car._id, { isPromoted: !car.isPromoted });
-      setCars(prev => prev.map(c => c._id === car._id ? { ...c, isPromoted: !c.isPromoted } : c));
-      toast(car.isPromoted ? 'Removed from featured' : '⭐ Listing featured!', 'success');
-    } catch { toast('Failed', 'error'); }
-    finally { setActionId(null); }
-  };
+  const filteredStats = useMemo(() => {
+    const live = cars.filter(c => c.auction_status === 'live').length;
+    const sold = cars.filter(c => c.auction_status === 'sold').length;
+    const pending = cars.filter(c => c.auction_status === 'draft' || !c.auction_status).length;
+    return { total: cars.length, live, sold, pending };
+  }, [cars]);
 
-  const totalPages = Math.ceil(total / 20);
+  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   return (
     <div className="page">
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
+        <h2 style={{ marginBottom: 24 }}>🚗 Listing Management</h2>
 
-        <div style={{ marginBottom: 24 }}>
-          <div className="section-eyebrow">Admin</div>
-          <h2>Car Listings <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-body)', fontSize: '1rem', fontWeight: 400 }}>({total.toLocaleString()} total)</span></h2>
-        </div>
-
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <input className="input" placeholder="Search title, brand, dealer..." value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
-            style={{ maxWidth: 300 }} />
-          {['all', 'live', 'draft', 'ended', 'sold'].map(s => (
-            <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }}
-              className={`btn btn-sm ${statusFilter === s ? 'btn-gold' : 'btn-outline'}`}>
-              {s === 'live' ? '🔴 ' : ''}{s.charAt(0).toUpperCase() + s.slice(1)}
-            </button>
+        <div className="stat-grid" style={{ marginBottom: 24 }}>
+          {[
+            { label: 'Total Listings', value: filteredStats.total, color: 'var(--gold)' },
+            { label: 'Live Auctions', value: filteredStats.live, color: 'var(--green-400)' },
+            { label: 'Sold', value: filteredStats.sold, color: 'var(--gold)' },
+            { label: 'Pending', value: filteredStats.pending, color: 'var(--orange-400)' },
+          ].map(s => (
+            <div key={s.label} className="stat-box" style={{ textAlign: 'center', padding: 16 }}>
+              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
           ))}
         </div>
 
-        <div className="card">
-          <div className="table-wrap">
-            {loading ? (
-              <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
-            ) : cars.length === 0 ? (
-              <div className="empty-state" style={{ padding: 48 }}>
-                <div className="empty-icon">🚗</div>
-                <h3>No listings found</h3>
-              </div>
-            ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Listing</th><th>Dealer</th><th>Price</th>
-                    <th>Views</th><th>Bids</th><th>Trust</th>
-                    <th>Status</th><th>Date</th><th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cars.map(car => (
-                    <tr key={car._id}
-                      style={{ cursor: 'pointer', background: car.trustScore < 50 ? 'rgba(239,68,68,0.02)' : '' }}
-                      onClick={() => setSelected(car)}
-                    >
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 52, height: 36, borderRadius: 4, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
-                            {car.images?.[0]
-                              ? <img src={car.images[0]?.url || car.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>🚗</div>
-                            }
-                          </div>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 13, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{car.title}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                              {car.year} · {car.fuel} · {car.location?.city}
-                            </div>
-                            {car.isPromoted && <span className="badge badge-gold" style={{ fontSize: 9, marginTop: 3 }}>★ FEATURED</span>}
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ fontSize: 13 }}>
-                        <div style={{ fontWeight: 500 }}>{car.dealer?.name || '—'}</div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{car.dealer?.email}</div>
-                      </td>
-                      <td style={{ fontWeight: 700 }}>{formatKES(car.currentBid || car.price)}</td>
-                      <td style={{ color: 'var(--text-muted)' }}>{car.views || 0}</td>
-                      <td style={{ color: 'var(--text-muted)' }}>{car.bidsCount || 0}</td>
-                      <td>
-                        <span style={{
-                          fontWeight: 700, fontSize: 13,
-                          color: (car.trustScore ?? 100) >= 80 ? 'var(--green)'
-                            : (car.trustScore ?? 100) >= 50 ? 'var(--gold)'
-                            : 'var(--red)',
-                        }}>
-                          {car.trustScore ?? 100}%
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${STATUS_BADGE[car.auctionStatus] || 'badge-muted'}`}>
-                          {car.auctionStatus === 'live' && <span className="live-dot" style={{ width: 6, height: 6 }} />}
-                          {car.auctionStatus || 'listed'}
-                        </span>
-                      </td>
-                      <td style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-                        {car.createdAt ? timeAgo(car.createdAt) : '—'}
-                      </td>
-                      <td onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 100 }}>
-                          <Link to={`/cars/${car._id}`} target="_blank" className="btn btn-outline btn-sm">View</Link>
-                          <button className={`btn btn-sm ${car.isPromoted ? 'btn-outline' : 'btn-gold'}`}
-                            onClick={() => handleFeature(car)} disabled={actionId === car._id + '-feat'}>
-                            {car.isPromoted ? '★ Unfeature' : '⭐ Feature'}
-                          </button>
-                          <button className="btn btn-danger btn-sm" disabled={actionId === car._id + '-del'}
-                            onClick={() => handleDelete(car)}>
-                            {actionId === car._id + '-del' ? '...' : 'Delete'}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+        <div className="data-table-controls" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input className="input" placeholder="🔍 Search listings..." value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            style={{ flex: '1 1 260px', maxWidth: 360 }} aria-label="Search listings" />
+          <select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+            style={{ width: 'auto' }} aria-label="Filter by status">
+            <option value="all">All Status</option>
+            <option value="live">Live</option>
+            <option value="ended">Ended</option>
+            <option value="sold">Sold</option>
+            <option value="draft">Draft</option>
+          </select>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)', gap: 4 }}>
-              Page {page} of {totalPages}
-            </span>
-            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
-          </div>
-        )}
-      </div>
-
-      {/* Detail modal */}
-      {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
-          <div className="modal-box" style={{ maxWidth: 560 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Listing Detail</div>
-                <h3 style={{ marginTop: 4 }}>{selected.title}</h3>
-              </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
-            </div>
-
-            {selected.images?.[0] && (
-              <div style={{ aspectRatio: '16/9', borderRadius: 'var(--radius)', overflow: 'hidden', marginBottom: 20 }}>
-                <img src={selected.images[0]?.url || selected.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-              {[
-                { label: 'Price',       val: formatKES(selected.currentBid || selected.price) },
-                { label: 'Trust Score', val: `${selected.trustScore ?? 100}%` },
-                { label: 'Views',       val: selected.views || 0 },
-                { label: 'Bids',        val: selected.bidsCount || 0 },
-                { label: 'Dealer',      val: selected.dealer?.name || '—' },
-                { label: 'Status',      val: selected.auctionStatus || 'listed' },
-                { label: 'Listed',      val: selected.createdAt ? new Date(selected.createdAt).toLocaleDateString('en-KE') : '—' },
-                { label: 'ID',          val: `#${selected._id?.slice(-8)}`, mono: true },
-              ].map(r => (
-                <div key={r.label}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.label}</div>
-                  <div style={{ fontWeight: 600, marginTop: 4, fontSize: 14, fontFamily: r.mono ? 'monospace' : undefined }}>{r.val}</div>
-                </div>
+        <div className="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 56 }}>Image</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Vehicle</th>
+                <th>Status</th>
+                <th>Listed</th>
+                <th style={{ width: 100 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cars.map(c => (
+                <AdminCarRow key={c._id} car={c} onDelete={handleDelete} onSelect={setSelected} actionId={actionId} />
               ))}
-            </div>
+              {cars.length === 0 && (
+                <tr><td colSpan={7} style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)' }}>No listings found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-            <div style={{ display: 'flex', gap: 10 }}>
-              <Link to={`/cars/${selected._id}`} target="_blank" className="btn btn-outline" style={{ flex: 1, justifyContent: 'center' }}>
-                View Listing ↗
-              </Link>
-              <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => handleDelete(selected)}
-                disabled={actionId === selected._id + '-del'}>
-                {actionId === selected._id + '-del' ? 'Deleting...' : '🗑 Delete Listing'}
-              </button>
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 13, color: 'var(--text-muted)' }}>
+          <span>{total} total listings</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-sm btn-outline" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ padding: '4px 12px' }}>Page {page}</span>
+            <button className="btn btn-sm btn-outline" disabled={page * 20 >= total} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

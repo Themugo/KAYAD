@@ -1,35 +1,42 @@
-// src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Navigate, useLocation } from 'react-router-dom';
 
 const AuthCtx = createContext(null);
 
+async function fetchProfile(userId) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+  return data;
+}
+
 export function AuthProvider({ children }) {
   const [user, setUserState] = useState(null);
   const [loading, setLoading] = useState(true);
+  const initialLoadDone = useRef(false);
 
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!mounted) return;
 
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .maybeSingle();
+        const profile = await fetchProfile(session.user.id);
         if (mounted) setUserState(profile);
       }
+      initialLoadDone.current = true;
       if (mounted) setLoading(false);
     })();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (initialLoadDone.current && event === 'INITIAL_SESSION') return;
+
       (async () => {
         if (event === 'SIGNED_OUT' || !session) {
           setUserState(null);
@@ -38,11 +45,7 @@ export function AuthProvider({ children }) {
         }
 
         if (session?.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .maybeSingle();
+          const profile = await fetchProfile(session.user.id);
           if (mounted) setUserState(profile);
         }
         if (mounted) setLoading(false);
@@ -59,12 +62,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw { response: { status: 401, data: { message: error.message } } };
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', data.user.id)
-      .maybeSingle();
-
+    const profile = await fetchProfile(data.user.id);
     if (profile?.is_banned) {
       await supabase.auth.signOut();
       throw { response: { status: 403, data: { message: 'Your account has been suspended' } } };
@@ -91,11 +89,7 @@ export function AuthProvider({ children }) {
     if (error) throw { response: { status: 400, data: { message: error.message } } };
 
     if (data.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user.id)
-        .maybeSingle();
+      const profile = await fetchProfile(data.user.id);
       setUserState(profile);
       return { user: profile };
     }

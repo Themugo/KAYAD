@@ -1,9 +1,10 @@
-// src/pages/BrowsePage.jsx — World-class search experience
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { carsAPI, BRANDS, MOCK_CARS } from '../api/api';
 import CarCard from '../components/CarCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
+import { useInfiniteScroll } from '../utils/useInfiniteScroll';
+import { dedupedFetch, clearCache } from '../utils/requestCache';
 
 const FUELS = ['All', 'Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANSMISSIONS = ['All', 'Automatic', 'Manual', 'CVT'];
@@ -14,16 +15,21 @@ const SORTS = [
   { id: 'price_desc', label: 'Price: High → Low' },
   { id: 'year_desc',  label: 'Newest First' },
 ];
+const PAGE_SIZE = 24;
 
 export default function BrowsePage() {
   const [searchParams] = useSearchParams();
   const [sort, setSort] = useState('default');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [cars, setCars] = useState([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [view, setView] = useState('grid');
   const [activeChips, setActiveChips] = useState([]);
+  const filterKey = useRef(0);
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -38,44 +44,72 @@ export default function BrowsePage() {
     inspectedOnly: false,
   });
 
-  const fetchCars = useCallback(async () => {
-    setLoading(true);
+  const fetchCars = useCallback(async (pageNum = 1, append = false) => {
+    if (pageNum === 1) { setLoading(true); filterKey.current++; }
+    else setLoadingMore(true);
     try {
-      const params = { ...filters, sort, limit: 100 };
+      const params = { ...filters, sort, limit: PAGE_SIZE * pageNum };
       if (filters.brand === 'All') delete params.brand;
       if (filters.fuel === 'All') delete params.fuel;
       if (filters.transmission === 'All') delete params.transmission;
       if (filters.bodyType === 'All') delete params.bodyType;
       if (filters.auctionOnly) params.auctionStatus = 'live';
 
-      const data = await carsAPI.list(params);
-      setCars(data.cars || []);
+      const cacheKey = `cars:${JSON.stringify(params)}:page${pageNum}`;
+      const data = await dedupedFetch(cacheKey, () => carsAPI.listPaginated(params, pageNum, PAGE_SIZE), 15000);
+
+      if (append) {
+        setCars(prev => [...prev, ...(data.cars || [])]);
+      } else {
+        setCars(data.cars || []);
+      }
       setTotal(data.total || 0);
+      setHasMore(data.hasMore !== false);
+      setPage(pageNum);
     } catch {
-      setCars(MOCK_CARS);
+      if (!append) setCars(MOCK_CARS);
       setTotal(MOCK_CARS.length);
+      setHasMore(false);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   }, [filters, sort]);
 
-  useEffect(() => { fetchCars(); }, [fetchCars]);
+  useEffect(() => { fetchCars(1); }, [fetchCars]);
 
-  const setFilter = (key, val) => setFilters(p => ({ ...p, [key]: val }));
+  const handleLoadMore = useCallback(() => {
+    if (!loadingMore && hasMore) fetchCars(page + 1, true);
+  }, [loadingMore, hasMore, page, fetchCars]);
 
-  const toggleChip = (chip) => {
+  const sentinelRef = useInfiniteScroll(handleLoadMore, hasMore && !loading, 400);
+
+  const setFilter = useCallback((key, val) => {
+    setFilters(p => ({ ...p, [key]: val }));
+  }, []);
+
+  const toggleChip = useCallback((chip) => {
     setActiveChips(prev => prev.includes(chip) ? prev.filter(c => c !== chip) : [...prev, chip]);
     if (chip === 'Auction Only') setFilters(p => ({ ...p, auctionOnly: !p.auctionOnly }));
     if (chip === 'Verified') setFilters(p => ({ ...p, verifiedOnly: !p.verifiedOnly }));
     if (chip === 'Inspected') setFilters(p => ({ ...p, inspectedOnly: !p.inspectedOnly }));
-  };
+  }, []);
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setFilters({ search: '', brand: 'All', fuel: 'All', transmission: 'All', bodyType: 'All', priceMax: 20000000, mileageMax: 200000, auctionOnly: false, verifiedOnly: false, inspectedOnly: false });
     setActiveChips([]);
-  };
+  }, []);
 
-  const FilterContent = () => (
+  const resultLabel = useMemo(() => {
+    if (loading) return '';
+    return `${total} vehicle${total !== 1 ? 's' : ''} available across Kenya`;
+  }, [total, loading]);
+
+  const skeletonCards = useMemo(() => (
+    [...Array(8)].map((_, i) => <div key={i} className="skeleton-card" />)
+  ), []);
+
+  const FilterContent = useCallback(() => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div className="ui-input-group">
         <label className="ui-input-label">Search</label>
@@ -118,11 +152,10 @@ export default function BrowsePage() {
       </div>
       <Button variant="outline" size="sm" onClick={clearAll}>Clear All Filters</Button>
     </div>
-  );
+  ), [filters, activeChips, setFilter, toggleChip, clearAll]);
 
   return (
     <div className="page" style={{ paddingTop: 68 }}>
-      {/* Sticky header */}
       <div className="browse-header">
         <div className="container" style={{ padding: '0 24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -146,7 +179,6 @@ export default function BrowsePage() {
       </div>
 
       <div className="container" style={{ paddingBottom: 40 }}>
-        {/* Search bar */}
         <div className="glass" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', borderRadius: 'var(--radius-lg)', padding: 14 }}>
           <input className="ui-input" placeholder="🔍 Search vehicles…" style={{ flex: '1 1 220px' }}
             value={filters.search} onChange={e => setFilter('search', e.target.value)} aria-label="Search vehicles" />
@@ -158,7 +190,6 @@ export default function BrowsePage() {
           <Button variant="outline" icon="⚙" onClick={() => setDrawerOpen(true)}>Filters</Button>
         </div>
 
-        {/* Active filter chips */}
         {activeChips.length > 0 && (
           <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
             {activeChips.map(chip => (
@@ -170,29 +201,30 @@ export default function BrowsePage() {
           </div>
         )}
 
-        {/* Result count */}
         {!loading && cars.length > 0 && (
-          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
-            {total} vehicle{total !== 1 ? 's' : ''} available across Kenya
-          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>{resultLabel}</p>
         )}
 
-        {/* Results */}
         {loading ? (
-          <div className="car-grid">
-            {[...Array(8)].map((_, i) => <div key={i} className="skeleton-card" />)}
-          </div>
+          <div className="car-grid">{skeletonCards}</div>
         ) : cars.length === 0 ? (
           <EmptyState icon="🔍" title="No cars found" desc="Try adjusting your filters or search terms."
             action={() => clearAll()} actionLabel="Clear Filters" />
         ) : (
-          <div className="car-grid">
-            {cars.map(car => <CarCard key={car._id || car.id} car={car} />)}
-          </div>
+          <>
+            <div className="car-grid">
+              {cars.map(car => <CarCard key={car._id || car.id} car={car} />)}
+            </div>
+            {loadingMore && (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
+                <div className="spinner" />
+              </div>
+            )}
+            {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
+          </>
         )}
       </div>
 
-      {/* Filter Drawer */}
       <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)} title="Filters"
         footer={<><Button variant="ghost" onClick={clearAll}>Clear</Button><Button variant="primary" onClick={() => setDrawerOpen(false)} full>Apply Filters</Button></>}>
         <FilterContent />

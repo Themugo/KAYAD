@@ -1,10 +1,11 @@
-// src/pages/CarDetailPage.jsx — Premium Vehicle Detail Page
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
 import { Button, Badge, PriceTag, Breadcrumb, Card, MapPlaceholder, Avatar, Progress, EmptyState } from '../components/ui';
 import CarCard from '../components/CarCard';
+import OptimizedImg from '../components/OptimizedImg';
 import { formatKES, MOCK_CARS } from '../api/api';
+import { useAbortController } from '../utils/useAbortController';
 
 const TABS = [
   { id: 'specs',     label: 'Specifications', icon: '📋' },
@@ -14,9 +15,30 @@ const TABS = [
   { id: 'dealer',    label: 'Dealer',         icon: '🏪' },
 ];
 
+const inspectionItems = [
+  { label: 'Engine', score: 95 }, { label: 'Transmission', score: 90 },
+  { label: 'Body & Paint', score: 85 }, { label: 'Interior', score: 92 },
+  { label: 'Tyres & Brakes', score: 80 }, { label: 'Electrical', score: 88 },
+];
+
+const specRows = (car) => [
+  ['Make', car.brand], ['Model', car.model || '—'], ['Year', car.year],
+  ['Fuel Type', car.fuel], ['Transmission', car.transmission], ['Body Type', car.body_type || car.bodyType],
+  ['Mileage', typeof car.mileage === 'number' ? `${car.mileage.toLocaleString()} km` : car.mileage || '—'],
+  ['Color', car.color || '—'], ['Engine', car.engine || '—'],
+  ['Drivetrain', car.drivetrain || '—'], ['Condition', car.condition || 'Used'],
+];
+
+const trustFeatures = [
+  { icon: '🔒', label: 'Escrow Protected' },
+  { icon: '🔍', label: 'Inspection Available' },
+  { icon: '✓', label: 'Verified Dealer' },
+];
+
 export default function CarDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const getSignal = useAbortController();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImg, setActiveImg] = useState(0);
@@ -31,7 +53,6 @@ export default function CarDetailPage() {
     carsAPI.get(id).then(d => {
       if (mounted) setCar(d.car || d.data);
     }).catch(() => {
-      // Fallback to mock
       const mock = MOCK_CARS.find(c => String(c.id) === String(id));
       if (mounted) setCar(mock || MOCK_CARS[0]);
     }).finally(() => { if (mounted) setLoading(false); });
@@ -57,6 +78,15 @@ export default function CarDetailPage() {
     return MOCK_CARS.filter(c => c.id !== car.id && c.brand === car.brand).slice(0, 4);
   }, [car]);
 
+  const setActiveImgSafe = useCallback((dir) => {
+    setActiveImg(p => dir === 'prev'
+      ? (p - 1 + images.length) % images.length
+      : (p + 1) % images.length);
+  }, [images.length]);
+
+  const isAuction = car?.auction_status === 'live' || car?.isAuction;
+  const isVerified = car?.is_verified_dealer || car?.isVerified;
+
   if (loading) {
     return (
       <div className="page">
@@ -81,12 +111,8 @@ export default function CarDetailPage() {
     );
   }
 
-  const isAuction = car.auction_status === 'live' || car.isAuction;
-  const isVerified = car.is_verified_dealer || car.isVerified;
-
   return (
     <div className="page">
-      {/* Breadcrumb */}
       <div className="container" style={{ paddingTop: 20, paddingBottom: 0 }}>
         <Breadcrumb items={[
           { label: 'Home', href: '/' },
@@ -97,13 +123,10 @@ export default function CarDetailPage() {
 
       <div className="container" style={{ paddingTop: 16, paddingBottom: 48 }}>
         <div className="detail-grid">
-
-          {/* ── Left Column: Gallery + Info ── */}
           <div>
-            {/* Gallery */}
             <div style={{ marginBottom: 24 }}>
               <div className="gallery-main" style={{ aspectRatio: '16/10' }}>
-                <img src={images[activeImg]} alt={car.title} />
+                <OptimizedImg src={images[activeImg]} alt={car.title} className="gallery-main-img" cloudinaryTransform="q_auto,f_auto,w_1200" />
                 <div className="gallery-badges">
                   {isAuction && <Badge variant="live">Live Auction</Badge>}
                   {isVerified && <Badge variant="verified" icon="✓">Verified</Badge>}
@@ -114,8 +137,8 @@ export default function CarDetailPage() {
                 </div>
                 {images.length > 1 && (
                   <>
-                    <button className="gallery-nav gallery-nav--prev" onClick={() => setActiveImg(p => (p - 1 + images.length) % images.length)} aria-label="Previous">‹</button>
-                    <button className="gallery-nav gallery-nav--next" onClick={() => setActiveImg(p => (p + 1) % images.length)} aria-label="Next">›</button>
+                    <button className="gallery-nav gallery-nav--prev" onClick={() => setActiveImgSafe('prev')} aria-label="Previous">‹</button>
+                    <button className="gallery-nav gallery-nav--next" onClick={() => setActiveImgSafe('next')} aria-label="Next">›</button>
                   </>
                 )}
               </div>
@@ -124,14 +147,13 @@ export default function CarDetailPage() {
                   {images.map((img, i) => (
                     <button key={i} onClick={() => setActiveImg(i)}
                       className={`gallery-thumb${i === activeImg ? ' gallery-thumb--active' : ''}`}>
-                      <img src={img} alt={`View ${i + 1}`} />
+                      <OptimizedImg src={img} alt={`View ${i + 1}`} cloudinaryTransform="q_auto,f_auto,w_150,h_100" />
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Title + Price */}
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
                 <div>
@@ -155,7 +177,6 @@ export default function CarDetailPage() {
               </div>
             </div>
 
-            {/* Tabs */}
             <div style={{ marginBottom: 24 }}>
               <div className="ui-tabbar" style={{ marginBottom: 20 }}>
                 {TABS.map(t => (
@@ -168,13 +189,7 @@ export default function CarDetailPage() {
               {tab === 'specs' && (
                 <Card>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                    {[
-                      ['Make', car.brand], ['Model', car.model || '—'], ['Year', car.year],
-                      ['Fuel Type', car.fuel], ['Transmission', car.transmission], ['Body Type', car.body_type || car.bodyType],
-                      ['Mileage', typeof car.mileage === 'number' ? `${car.mileage.toLocaleString()} km` : car.mileage || '—'],
-                      ['Color', car.color || '—'], ['Engine', car.engine || '—'],
-                      ['Drivetrain', car.drivetrain || '—'], ['Condition', car.condition || 'Used'],
-                    ].map(([label, val]) => (
+                    {specRows(car).map(([label, val]) => (
                       <div key={label} style={{ padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
                         <div style={{ fontWeight: 600, marginTop: 2 }}>{val}</div>
@@ -200,11 +215,7 @@ export default function CarDetailPage() {
                     <Badge variant="green" icon="✓">Inspection Passed</Badge>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {[
-                      { label: 'Engine', score: 95 }, { label: 'Transmission', score: 90 },
-                      { label: 'Body & Paint', score: 85 }, { label: 'Interior', score: 92 },
-                      { label: 'Tyres & Brakes', score: 80 }, { label: 'Electrical', score: 88 },
-                    ].map(s => (
+                    {inspectionItems.map(s => (
                       <div key={s.label}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                           <span style={{ fontSize: 13 }}>{s.label}</span>
@@ -272,7 +283,6 @@ export default function CarDetailPage() {
               )}
             </div>
 
-            {/* Related vehicles */}
             {relatedCars.length > 0 && (
               <div>
                 <h3 style={{ marginBottom: 16, fontSize: '1.1rem' }}>Similar Vehicles</h3>
@@ -283,7 +293,6 @@ export default function CarDetailPage() {
             )}
           </div>
 
-          {/* ── Right Column: Sticky Inquiry Panel ── */}
           <div className="sticky-panel">
             <Card>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
@@ -318,7 +327,6 @@ export default function CarDetailPage() {
                 </div>
               </div>
 
-              {/* Financing Calculator */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 20 }}>
                 <h4 style={{ fontSize: 14, marginBottom: 16 }}>💳 Financing Calculator</h4>
                 <div style={{ marginBottom: 16 }}>
@@ -346,13 +354,8 @@ export default function CarDetailPage() {
                 </div>
               </div>
 
-              {/* Trust badges */}
               <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10, padding: '16px 0 0', borderTop: '1px solid var(--border)' }}>
-                {[
-                  { icon: '🔒', label: 'Escrow Protected' },
-                  { icon: '🔍', label: 'Inspection Available' },
-                  { icon: '✓', label: 'Verified Dealer' },
-                ].map(b => (
+                {trustFeatures.map(b => (
                   <div key={b.label} className="trust-feature">
                     <span className="trust-feature__check">{b.icon}</span> {b.label}
                   </div>
