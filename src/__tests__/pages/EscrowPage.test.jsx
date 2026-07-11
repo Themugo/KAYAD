@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import EscrowPage from '../../pages/EscrowPage';
 
@@ -11,7 +11,12 @@ vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: { _id: 'u1' }, isAuth: true }),
 }));
 vi.mock('../../context/SocketContext', () => ({
-  useSocket: () => ({ on: vi.fn(() => vi.fn()) }),
+  useSocket: () => ({ 
+    connected: true, 
+    emit: vi.fn(), 
+    on: vi.fn(() => vi.fn()), 
+    off: vi.fn() 
+  }),
 }));
 vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: vi.fn() }),
@@ -22,7 +27,7 @@ vi.mock('../../utils/helpers', () => ({
 }));
 
 describe('EscrowPage', () => {
-  afterEach(() => { cleanup(); });
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
   it('renders escrow heading', () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);

@@ -131,6 +131,8 @@ export const dealerAPI = {
   updateProfile: (body: any)  => api.put('/dealer/profile', body).then(unwrap),
   milestones:   ()       => api.get('/dealer/milestones').then(unwrap),
   upgrade:      (body: any) => api.post('/dealer/upgrade', body).then(unwrap),
+  getVerificationStatus: () => api.get('/dealer/verification').then(unwrap),
+  submitVerification: (stepId: string, body: any) => api.post(`/dealer/verification/${stepId}`, body).then(unwrap),
   leads:           (params?: any) => api.get('/leads', { params }).then(unwrap),
   updateLeadStage: (leadId: string, body: any) => api.put(`/leads/${leadId}/stage`, body).then(unwrap),
   archiveLead:     (leadId: string) => api.put(`/leads/${leadId}/archive`).then(unwrap),
@@ -176,6 +178,7 @@ export const adminAPI = {
   verifyDealer:    (userId: string, body: any) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
   verifyCar:       (carId: string, body: any) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
   moderateCar:     (carId: string, body: any) => api.post(`/admin/cars/${carId}/moderate`, body).then(unwrap),
+  getOperationsMetrics: () => api.get('/admin/operations/metrics').then(unwrap),
   getStaff:        ()            => api.get('/admin/staff').then(unwrap),
   createStaff:     (body: any)        => api.post('/admin/staff', body).then(unwrap),
   updateStaff:     (id: string, body: any)    => api.put(`/admin/staff/${id}`, body).then(unwrap),
@@ -276,6 +279,7 @@ export const chatAPI = {
   send:     (chatId: string, body: any)   => api.post(`/chat/${chatId}/message`, body).then(unwrap),
   seen:     (chatId: string)         => api.post(`/chat/${chatId}/seen`).then(unwrap),
   leave:    (chatId: string)         => api.delete(`/chat/${chatId}`).then(unwrap),
+  confirmDelivery: (chatId: string, body: any) => api.post(`/chat/${chatId}/confirm-delivery`, body).then(unwrap),
 };
 
 // ── SAVED SEARCHES ────────────────────────────────────

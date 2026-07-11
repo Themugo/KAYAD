@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { escrowAPI, formatKES } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useSocket } from '../context/SocketContext';
 import { timeAgo, formatDate } from '../utils/helpers';
 
 const STATUS_META = {
@@ -23,18 +24,92 @@ const HOW_IT_WORKS = [
 export default function EscrowPage() {
   const { isAuth, user } = useAuth();
   const { toast } = useToast();
+  const socket = useSocket();
   const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState('all');
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
+  // Reload escrows
+  const reloadEscrows = useCallback(async () => {
+    if (!isAuth) return;
+    try {
+      const d = await escrowAPI.mine();
+      setEscrows(d.escrows || d.data || []);
+    } catch {
+      toast('Failed to reload escrow records', 'error');
+    }
+  }, [isAuth, toast]);
+
+  // Load initial data
   useEffect(() => {
     if (!isAuth) { setLoading(false); return; }
     escrowAPI.mine()
       .then(d => setEscrows(d.escrows || d.data || []))
       .catch(() => toast('Failed to load escrow records', 'error'))
       .finally(() => setLoading(false));
-  }, [isAuth]);
+  }, [isAuth, toast]);
+
+  // Socket.io real-time payment updates
+  useEffect(() => {
+    if (!socket?.connected || !user?.id) return;
+
+    // Listen for payment success events
+    const handlePaymentSuccess = (data) => {
+      if (data.userId === user.id || data.dealerId === user.id) {
+        setPaymentStatus({ type: 'success', message: `Payment received! KES ${(data.amount / 1000).toFixed(0)}K received for ${data.carTitle || 'your purchase'}` });
+        toast.success(`Payment received! KES ${(data.amount / 1000).toFixed(0)}K`);
+        reloadEscrows();
+        // Clear status after 5 seconds
+        setTimeout(() => setPaymentStatus(null), 5000);
+      }
+    };
+
+    // Listen for payment failed events
+    const handlePaymentFailed = (data) => {
+      if (data.userId === user.id || data.dealerId === user.id) {
+        setPaymentStatus({ type: 'error', message: `Payment failed: ${data.reason || 'Unknown error'}` });
+        toast.error(`Payment failed: ${data.reason || 'Please try again'}`);
+        setTimeout(() => setPaymentStatus(null), 5000);
+      }
+    };
+
+    // Listen for escrow status updates
+    const handleEscrowUpdate = (data) => {
+      if (data.userId === user.id || data.dealerId === user.id) {
+        toast.info(`Escrow ${data.status}: ${data.carTitle || 'Your transaction'}`);
+        reloadEscrows();
+      }
+    };
+
+    // Listen for fund release notifications
+    const handleFundsReleased = (data) => {
+      if (data.userId === user.id || data.dealerId === user.id) {
+        setPaymentStatus({ type: 'success', message: `Funds released! KES ${(data.amount / 1000).toFixed(0)}K has been ${data.role === 'seller' ? 'deposited to your account' : 'refunded'}` });
+        toast.success(`Funds ${data.role === 'seller' ? 'deposited!' : 'refunded!'}`);
+        reloadEscrows();
+        setTimeout(() => setPaymentStatus(null), 5000);
+      }
+    };
+
+    // Join user's personal room for real-time updates
+    socket.emit('join', { room: `user_${user.id}`, type: 'user' });
+
+    // Subscribe to events
+    socket.on('payment:success', handlePaymentSuccess);
+    socket.on('payment:failed', handlePaymentFailed);
+    socket.on('escrow:updated', handleEscrowUpdate);
+    socket.on('escrow:released', handleFundsReleased);
+
+    // Cleanup
+    return () => {
+      socket.off('payment:success', handlePaymentSuccess);
+      socket.off('payment:failed', handlePaymentFailed);
+      socket.off('escrow:updated', handleEscrowUpdate);
+      socket.off('escrow:released', handleFundsReleased);
+    };
+  }, [socket, user?.id, toast, reloadEscrows]);
 
   const filtered = tab === 'all' ? escrows : escrows.filter(e => e.status === tab);
   const totalLocked   = escrows.filter(e => e.status === 'funded').reduce((s, e)   => s + (e.amount || 0), 0);
@@ -64,6 +139,50 @@ export default function EscrowPage() {
       </div>
 
       <div className="container" style={{ paddingTop: 48, paddingBottom: 56 }}>
+
+        {/* ── Real-time payment status banner ── */}
+        {paymentStatus && (
+          <div 
+            data-testid="payment-status-banner"
+            style={{
+              padding: '16px 20px',
+              marginBottom: 24,
+              borderRadius: 'var(--radius)',
+              background: paymentStatus.type === 'success' 
+                ? 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(16,185,129,0.05))'
+                : 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(220,38,38,0.05))',
+              border: `1px solid ${paymentStatus.type === 'success' ? 'rgba(34,197,94,0.3)' : 'rgba(239,68,68,0.3)'}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              animation: 'slideIn 0.3s ease-out',
+            }}
+          >
+            <span style={{ fontSize: 24 }}>
+              {paymentStatus.type === 'success' ? '✅' : '❌'}
+            </span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600, color: paymentStatus.type === 'success' ? 'var(--green)' : 'var(--red)' }}>
+                {paymentStatus.type === 'success' ? 'Payment Confirmed!' : 'Payment Failed'}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                {paymentStatus.message}
+              </div>
+            </div>
+            <button 
+              onClick={() => setPaymentStatus(null)}
+              style={{ 
+                background: 'transparent', 
+                border: 'none', 
+                color: 'var(--text-muted)', 
+                cursor: 'pointer',
+                fontSize: 18,
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
         {/* ── How it works (always visible) ── */}
         <div className="card" style={{ padding: '28px 24px', marginBottom: 40 }}>

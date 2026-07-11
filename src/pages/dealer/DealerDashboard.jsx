@@ -10,72 +10,28 @@ import {
 import { DealerHub, DealerMetric, DealerAction, DealerFunnel, DealerLeadsTable, DealerInventoryCard } from '../../components/dealer';
 import '../../styles/dealer.css';
 
-// Mock data
-const MOCK_STATS = {
-  totalViews: 12450,
-  totalInquiries: 89,
-  totalBids: 34,
-  totalRevenue: 12450000,
-  activeListings: 12,
-  pendingEscrows: 3,
-  avgRating: 4.8,
-  responseRate: 94,
-};
-
-const MOCK_LEADS = [
-  { id: 1, name: 'James Mwangi', phone: '+254 712 345 678', vehicle: 'Toyota Land Cruiser V8', status: 'new', value: 'KES 18.5M' },
-  { id: 2, name: 'Sarah Ochieng', phone: '+254 723 456 789', vehicle: 'Mercedes GLE 350d', status: 'contacted', value: 'KES 12.5M' },
-  { id: 3, name: 'Michael Kimani', phone: '+254 734 567 890', vehicle: 'BMW X5 xDrive30d', status: 'negotiating', value: 'KES 7.8M' },
-  { id: 4, name: 'Grace Wanjiku', phone: '+254 745 678 901', vehicle: 'Porsche Cayenne S', status: 'closed-won', value: 'KES 15.8M' },
-  { id: 5, name: 'David Otieno', phone: '+254 756 789 012', vehicle: 'Range Rover Autobiography', status: 'new', value: 'KES 22M' },
-];
-
-const MOCK_INVENTORY = [
-  { id: 1, title: 'Toyota Land Cruiser V8', price: 18500000, status: 'active', views: 2450, inquiries: 12, days: 14, featured: true, image: 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { id: 2, title: 'Mercedes-AMG G63', price: 22000000, status: 'active', views: 1890, inquiries: 8, days: 7, featured: true, image: 'https://images.pexels.com/photos/120049/pexels-photo-120049.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { id: 3, title: 'Nissan Patrol Safari', price: 7800000, status: 'pending', views: 890, inquiries: 4, days: 21, featured: false, image: 'https://images.pexels.com/photos/3311574/pexels-photo-3311574.jpeg?auto=compress&cs=tinysrgb&w=800' },
-  { id: 4, title: 'BMW X5 M Competition', price: 12400000, status: 'active', views: 1650, inquiries: 6, days: 3, featured: false, image: 'https://images.pexels.com/photos/1687325/pexels-photo-1687325.jpeg?auto=compress&cs=tinysrgb&w=800' },
-];
-
-const FUNNEL_STAGES = [
-  { type: 'new', label: 'New Leads', count: 24 },
-  { type: 'contacted', label: 'Contacted', count: 18 },
-  { type: 'negotiating', label: 'Negotiating', count: 12 },
-  { type: 'closed', label: 'Closed Won', count: 8 },
-];
-
-const QUICK_ACTIONS = [
-  { icon: <Plus size={24} />, label: 'Add Listing', description: 'Post a new vehicle', to: '/dealer/add-car', variant: 'gold' },
-  { icon: <BarChart3 size={24} />, label: 'Analytics', description: 'View performance', to: '/dealer/analytics' },
-  { icon: <MessageSquare size={24} />, label: 'Inquiries', description: '89 total received', to: '/dealer/leads' },
-  { icon: <DollarSign size={24} />, label: 'Earnings', description: 'View transactions', to: '/dealer/finance' },
-  { icon: <Car size={24} />, label: 'Inventory', description: '12 active listings', to: '/dealer/inventory' },
-  { icon: <Settings size={24} />, label: 'Settings', description: 'Manage account', to: '/dealer/settings' },
-];
-
-const METRICS = [
-  { icon: '👁️', label: 'Total Views', value: '12,450', trend: 15, accent: 'views' },
-  { icon: '💬', label: 'Inquiries', value: '89', trend: 8, accent: 'leads' },
-  { icon: '🎯', label: 'Conversion Rate', value: '24%', trend: 3, accent: 'sales' },
-  { icon: '⭐', label: 'Avg Rating', value: '4.8/5', accent: 'rating' },
-];
-
 export default function DealerDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [summary, setSummary] = useState(null);
   const [cars, setCars] = useState([]);
+  const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadDashboard = async () => {
     setLoading(true);
     try {
-      const [s, c] = await Promise.all([
-        dealerAPI.summary().catch(() => ({})),
-        dealerAPI.cars().catch(() => []),
+      const [s, c, analytics] = await Promise.all([
+        dealerAPI.summary().catch(() => null),
+        dealerAPI.cars().catch(() => ({ cars: [], data: [] })),
+        dealerAPI.analytics().catch(() => null),
       ]);
       setSummary(s);
       setCars(c.cars || c.data || []);
+      // Set leads from analytics if available
+      if (analytics?.leads) {
+        setLeads(analytics.leads.slice(0, 5));
+      }
     } catch { /* ignore */ }
     setLoading(false);
   };
@@ -117,7 +73,32 @@ export default function DealerDashboard() {
     );
   }
 
-  const stats = MOCK_STATS;
+  // Use real data from API, with loading state
+  const stats = summary || {};
+  const totalViews = stats.totalViews || 0;
+  const totalInquiries = stats.totalInquiries || 0;
+  const totalRevenue = stats.totalRevenue || 0;
+  const activeListings = stats.activeListings || cars.length;
+  const pendingEscrows = stats.pendingEscrows || 0;
+  const avgRating = stats.avgRating || 0;
+  const responseRate = stats.responseRate || 0;
+  const conversionRate = stats.conversionRate || 0;
+  const totalBids = stats.totalBids || 0;
+
+  // Funnel stages from API or defaults
+  const funnelStages = summary?.funnel || [
+    { type: 'new', label: 'New Leads', count: 0 },
+    { type: 'contacted', label: 'Contacted', count: 0 },
+    { type: 'negotiating', label: 'Negotiating', count: 0 },
+    { type: 'closed', label: 'Closed Won', count: 0 },
+  ];
+
+  // Format currency for display
+  const formatCurrency = (amount) => {
+    if (amount >= 1000000) return `KES ${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `KES ${(amount / 1000).toFixed(0)}K`;
+    return `KES ${amount}`;
+  };
 
   return (
     <DealerHub user={user}>
@@ -144,7 +125,7 @@ export default function DealerDashboard() {
             margin: '8px 0 0',
             fontSize: 'var(--dealer-text-sm)',
           }}>
-            {stats.activeListings} active listings · {stats.totalViews.toLocaleString()} total views this month
+            {activeListings} active listings · {totalViews.toLocaleString()} total views this month
           </p>
         </div>
         <Link to="/dealer/add-car" className="dealer-btn dealer-btn--primary">
@@ -155,21 +136,38 @@ export default function DealerDashboard() {
 
       {/* Metrics Grid */}
       <div className="dealer-metrics">
-        {METRICS.map((metric, i) => (
-          <DealerMetric
-            key={i}
-            icon={metric.icon}
-            label={metric.label}
-            value={metric.value}
-            trend={metric.trend}
-            accent={metric.accent}
-          />
-        ))}
+        <DealerMetric
+          icon="👁️"
+          label="Total Views"
+          value={loading ? '...' : totalViews.toLocaleString()}
+          trend={stats.viewsTrend}
+          accent="views"
+        />
+        <DealerMetric
+          icon="💬"
+          label="Inquiries"
+          value={loading ? '...' : totalInquiries.toString()}
+          trend={stats.inquiriesTrend}
+          accent="leads"
+        />
+        <DealerMetric
+          icon="🎯"
+          label="Conversion Rate"
+          value={loading ? '...' : `${conversionRate}%`}
+          trend={stats.conversionTrend}
+          accent="sales"
+        />
+        <DealerMetric
+          icon="⭐"
+          label="Avg Rating"
+          value={loading ? '...' : `${avgRating}/5`}
+          accent="rating"
+        />
         <DealerMetric
           icon="💰"
           label="Total Revenue"
-          value="KES 12.45M"
-          trend={22}
+          value={loading ? '...' : formatCurrency(totalRevenue)}
+          trend={stats.revenueTrend}
           accent="revenue"
           trendLabel="vs last month"
         />
@@ -186,16 +184,43 @@ export default function DealerDashboard() {
           Quick Actions
         </h2>
         <div className="dealer-actions">
-          {QUICK_ACTIONS.map((action, i) => (
-            <DealerAction
-              key={i}
-              icon={action.icon}
-              label={action.label}
-              description={action.description}
-              to={action.to}
-              variant={action.variant}
-            />
-          ))}
+          <DealerAction
+            icon={<Plus size={24} />}
+            label="Add Listing"
+            description="Post a new vehicle"
+            to="/dealer/add-car"
+            variant="gold"
+          />
+          <DealerAction
+            icon={<BarChart3 size={24} />}
+            label="Analytics"
+            description="View performance"
+            to="/dealer/analytics"
+          />
+          <DealerAction
+            icon={<MessageSquare size={24} />}
+            label="Inquiries"
+            description={`${totalInquiries} total received`}
+            to="/dealer/leads"
+          />
+          <DealerAction
+            icon={<DollarSign size={24} />}
+            label="Earnings"
+            description="View transactions"
+            to="/dealer/finance"
+          />
+          <DealerAction
+            icon={<Car size={24} />}
+            label="Inventory"
+            description={`${activeListings} active listings`}
+            to="/dealer/inventory"
+          />
+          <DealerAction
+            icon={<Settings size={24} />}
+            label="Settings"
+            description="Manage account"
+            to="/dealer/settings"
+          />
         </div>
       </div>
 
@@ -209,7 +234,7 @@ export default function DealerDashboard() {
         }}>
           Sales Pipeline
         </h2>
-        <DealerFunnel stages={FUNNEL_STAGES} />
+        <DealerFunnel stages={funnelStages} />
       </div>
 
       {/* Two Column Layout */}
@@ -221,7 +246,8 @@ export default function DealerDashboard() {
       }}>
         {/* Recent Leads */}
         <DealerLeadsTable 
-          leads={MOCK_LEADS.slice(0, 5)}
+          leads={leads.length > 0 ? leads : (loading ? [] : [])}
+          loading={loading}
           onView={(lead) => toast.info(`Viewing lead: ${lead.name}`)}
           onContact={(lead) => toast.info(`Contacting: ${lead.name}`)}
           onConvert={(lead) => toast.success(`Converting: ${lead.name}`)}
@@ -233,44 +259,58 @@ export default function DealerDashboard() {
             <h3 className="dealer-chart__title">Top Performers</h3>
             <span className="dealer-chart__period">This Month</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {MOCK_INVENTORY.slice(0, 4).map((car) => (
-              <div key={car.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: 12,
-                background: 'var(--dealer-elevated)',
-                borderRadius: 'var(--dealer-radius-md)',
-              }}>
-                <div style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 'var(--dealer-radius-sm)',
-                  background: 'var(--dealer-card)',
-                  overflow: 'hidden',
+          {loading ? (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--dealer-text-muted)' }}>
+              Loading...
+            </div>
+          ) : cars.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {cars.slice(0, 4).map((car) => (
+                <div key={car._id || car.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: 12,
+                  background: 'var(--dealer-elevated)',
+                  borderRadius: 'var(--dealer-radius-md)',
                 }}>
-                  <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 2 }}>
-                    {car.title}
+                  <div style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 'var(--dealer-radius-sm)',
+                    background: 'var(--dealer-card)',
+                    overflow: 'hidden',
+                  }}>
+                    {car.images?.[0] ? (
+                      <img src={car.images[0]} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚗</div>
+                    )}
                   </div>
-                  <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--dealer-text-muted)' }}>
-                    <span>👁️ {car.views.toLocaleString()}</span>
-                    <span>💬 {car.inquiries}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 2 }}>
+                      {car.title || car.name}
+                    </div>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 11, color: 'var(--dealer-text-muted)' }}>
+                      <span>👁️ {(car.views || 0).toLocaleString()}</span>
+                      <span>💬 {car.inquiries || 0}</span>
+                    </div>
+                  </div>
+                  <div style={{ 
+                    fontWeight: 700, 
+                    color: 'var(--dealer-gold)',
+                    fontSize: 13,
+                  }}>
+                    {formatCurrency(car.price || 0)}
                   </div>
                 </div>
-                <div style={{ 
-                  fontWeight: 700, 
-                  color: 'var(--dealer-gold)',
-                  fontSize: 13,
-                }}>
-                  KES {(car.price / 1000000).toFixed(1)}M
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: 20, textAlign: 'center', color: 'var(--dealer-text-muted)' }}>
+              No cars yet. <Link to="/dealer/add-car" style={{ color: 'var(--dealer-gold)' }}>Add your first listing</Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -294,94 +334,97 @@ export default function DealerDashboard() {
             View All <ChevronRight size={14} />
           </Link>
         </div>
-        <div className="dealer-inventory">
-          {MOCK_INVENTORY.map((car) => (
-            <DealerInventoryCard
-              key={car.id}
-              car={car}
-              onEdit={() => toast.info(`Edit: ${car.title}`)}
-              onPromote={() => toast.success(`Promoting: ${car.title}`)}
-              onDelete={() => handleDelete(car.id)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div style={{ padding: 20, textAlign: 'center', color: 'var(--dealer-text-muted)' }}>
+            Loading inventory...
+          </div>
+        ) : cars.length > 0 ? (
+          <div className="dealer-inventory">
+            {cars.map((car) => (
+              <DealerInventoryCard
+                key={car._id || car.id}
+                car={{
+                  id: car._id || car.id,
+                  title: car.title || car.name,
+                  price: car.price,
+                  status: car.status,
+                  views: car.views,
+                  inquiries: car.inquiries,
+                  days: car.daysOnMarket,
+                  featured: car.featured,
+                  image: car.images?.[0],
+                }}
+                onEdit={() => toast.info(`Edit: ${car.title}`)}
+                onPromote={() => toast.success(`Promoting: ${car.title}`)}
+                onDelete={() => handleDelete(car._id || car.id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: 32, textAlign: 'center', background: 'var(--dealer-surface)', borderRadius: 'var(--dealer-radius-lg)' }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>🚗</div>
+            <h3 style={{ marginBottom: 8, color: 'var(--dealer-text)' }}>No listings yet</h3>
+            <p style={{ color: 'var(--dealer-text-muted)', marginBottom: 16 }}>
+              Start selling by adding your first vehicle listing
+            </p>
+            <Link to="/dealer/add-car" className="dealer-btn dealer-btn--primary">
+              <Plus size={16} /> Add Your First Listing
+            </Link>
+          </div>
+        )}
       </div>
 
-      {/* AI Insights */}
-      <div style={{ 
-        background: 'linear-gradient(135deg, rgba(212, 196, 168, 0.08), rgba(168, 85, 247, 0.05))',
-        border: '1px solid var(--dealer-border-gold)',
-        borderRadius: 'var(--dealer-radius-xl)',
-        padding: 24,
-        marginBottom: 32,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-          <div style={{
-            width: 40,
-            height: 40,
-            borderRadius: 'var(--dealer-radius-md)',
-            background: 'linear-gradient(135deg, var(--dealer-gold), var(--dealer-gold-dark))',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 20,
-          }}>
-            🤖
-          </div>
-          <div>
-            <h3 style={{ margin: 0, fontSize: 'var(--dealer-text-lg)', fontWeight: 700, color: 'var(--dealer-text)' }}>
-              AI Dealer Insights
-            </h3>
-            <p style={{ margin: 0, fontSize: 'var(--dealer-text-xs)', color: 'var(--dealer-text-muted)' }}>
-              Powered by KAYAD Analytics
-            </p>
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-          <div style={{
-            padding: 16,
-            background: 'var(--dealer-surface)',
-            borderRadius: 'var(--dealer-radius-md)',
-            border: '1px solid var(--dealer-border)',
-          }}>
-            <div style={{ fontSize: 24, marginBottom: 8 }}>💡</div>
-            <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 4 }}>
-              Price Your SUVs Competitively
+      {/* AI Insights - Only show when we have real data */}
+      {!loading && summary && (
+        <div style={{ 
+          background: 'linear-gradient(135deg, rgba(212, 196, 168, 0.08), rgba(168, 85, 247, 0.05))',
+          border: '1px solid var(--dealer-border-gold)',
+          borderRadius: 'var(--dealer-radius-xl)',
+          padding: 24,
+          marginBottom: 32,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <div style={{
+              width: 40,
+              height: 40,
+              borderRadius: 'var(--dealer-radius-md)',
+              background: 'linear-gradient(135deg, var(--dealer-gold), var(--dealer-gold-dark))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 20,
+            }}>
+              🤖
             </div>
-            <div style={{ fontSize: 12, color: 'var(--dealer-text-muted)', lineHeight: 1.4 }}>
-              Similar Toyota Land Cruisers are priced 5% lower in your area. Consider adjusting your pricing strategy.
+            <div>
+              <h3 style={{ margin: 0, fontSize: 'var(--dealer-text-lg)', fontWeight: 700, color: 'var(--dealer-text)' }}>
+                AI Dealer Insights
+              </h3>
+              <p style={{ margin: 0, fontSize: 'var(--dealer-text-xs)', color: 'var(--dealer-text-muted)' }}>
+                Powered by KAYAD Analytics
+              </p>
             </div>
           </div>
-          <div style={{
-            padding: 16,
-            background: 'var(--dealer-surface)',
-            borderRadius: 'var(--dealer-radius-md)',
-            border: '1px solid var(--dealer-border)',
-          }}>
-            <div style={{ fontSize: 24, marginBottom: 8 }}>📸</div>
-            <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 4 }}>
-              Add More Photos
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--dealer-text-muted)', lineHeight: 1.4 }}>
-              Listings with 10+ photos get 3x more inquiries. Your Nissan Patrol has only 3 photos.
-            </div>
-          </div>
-          <div style={{
-            padding: 16,
-            background: 'var(--dealer-surface)',
-            borderRadius: 'var(--dealer-radius-md)',
-            border: '1px solid var(--dealer-border)',
-          }}>
-            <div style={{ fontSize: 24, marginBottom: 8 }}>⚡</div>
-            <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 4 }}>
-              Respond Faster
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--dealer-text-muted)', lineHeight: 1.4 }}>
-              68% of buyers contact multiple dealers. Your response rate is 94% — great job!
-            </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {(summary.insights || []).slice(0, 3).map((insight, i) => (
+              <div key={i} style={{
+                padding: 16,
+                background: 'var(--dealer-surface)',
+                borderRadius: 'var(--dealer-radius-md)',
+                border: '1px solid var(--dealer-border)',
+              }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>{insight.icon || '💡'}</div>
+                <div style={{ fontWeight: 600, color: 'var(--dealer-text)', fontSize: 13, marginBottom: 4 }}>
+                  {insight.title}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--dealer-text-muted)', lineHeight: 1.4 }}>
+                  {insight.description}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
     </DealerHub>
   );
 }
