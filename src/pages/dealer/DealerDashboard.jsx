@@ -462,12 +462,7 @@ export default function DealerDashboard() {
         )}
       </div>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .dealer-overview-grid { grid-template-columns: 1fr !important; }
-          .escrow-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
+      {/* responsive handled in index.css */}
     </div>
   );
 }

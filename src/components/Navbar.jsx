@@ -573,12 +573,10 @@ export default function Navbar() {
       )}
 
       <style>{`
+        .desktop-nav { display: flex !important; }
         @media (max-width: 900px) {
           .desktop-nav { display: none !important; }
-          .hamburger { display: block !important; background: none; border: none; cursor: pointer; padding: 6px; }
-        }
-        @media (min-width: 901px) {
-          .hamburger { display: none !important; }
+          .hamburger { display: block !important; }
         }
       `}</style>
     </>

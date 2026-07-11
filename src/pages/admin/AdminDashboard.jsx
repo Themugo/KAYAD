@@ -236,11 +236,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .admin-overview-grid, .admin-activity-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
+      {/* responsive handled in index.css */}
     </div>
   );
 }
