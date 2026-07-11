@@ -31,7 +31,7 @@ export class PerformanceMonitor {
           return duration;
         }
       } catch (e) {
-        console.warn(`Performance measure failed: ${name}`, e);
+        if (import.meta.env.DEV) console.warn(`Performance measure failed: ${name}`, e);
       }
     }
     return 0;
@@ -69,7 +69,7 @@ export class PerformanceMonitor {
         });
         observer.observe({ entryTypes: ['navigation', 'resource', 'paint', 'largest-contentful-paint'] });
       } catch (e) {
-        console.warn('PerformanceObserver not supported');
+        if (import.meta.env.DEV) console.warn('PerformanceObserver not supported');
       }
     }
   }

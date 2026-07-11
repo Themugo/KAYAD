@@ -65,9 +65,9 @@ export default function BrowsePage() {
 
   const toggleChip = (chip) => {
     setActiveChips(prev => prev.includes(chip) ? prev.filter(c => c !== chip) : [...prev, chip]);
-    if (chip === 'Auction Only') setFilter('auctionOnly', !filters.auctionOnly);
-    if (chip === 'Verified') setFilter('verifiedOnly', !filters.verifiedOnly);
-    if (chip === 'Inspected') setFilter('inspectedOnly', !filters.inspectedOnly);
+    if (chip === 'Auction Only') setFilters(p => ({ ...p, auctionOnly: !p.auctionOnly }));
+    if (chip === 'Verified') setFilters(p => ({ ...p, verifiedOnly: !p.verifiedOnly }));
+    if (chip === 'Inspected') setFilters(p => ({ ...p, inspectedOnly: !p.inspectedOnly }));
   };
 
   const clearAll = () => {

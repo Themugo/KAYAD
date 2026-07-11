@@ -12,10 +12,9 @@ import { BottomNav } from './components/ui';
 import HomePage from './pages/HomePage';
 import BrowsePage from './pages/BrowsePage';
 import NotFoundPage from './pages/NotFoundPage';
-import InspectionPage from './pages/InspectionPage';
-import SupportPage from './pages/SupportPage';
-
 // Lazy load: everything else for smaller initial bundle
+const InspectionPage = lazy(() => import('./pages/InspectionPage'));
+const SupportPage = lazy(() => import('./pages/SupportPage'));
 const AuctionPage = lazy(() => import('./pages/AuctionPage'));
 const CarDetailPage = lazy(() => import('./pages/CarDetailPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));

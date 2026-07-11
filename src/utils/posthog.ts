@@ -8,7 +8,7 @@ export const initPostHog = async (): Promise<void> => {
   try {
     const mod = await import("posthog-js").catch(() => null);
     if (!mod) {
-      console.warn("[PostHog] posthog-js not installed. Run: npm install posthog-js");
+      if (import.meta.env.DEV) console.warn("[PostHog] posthog-js not installed. Run: npm install posthog-js");
       return;
     }
 
@@ -24,13 +24,13 @@ export const initPostHog = async (): Promise<void> => {
 
     initialized = true;
   } catch (err) {
-    console.warn("[PostHog] Init failed:", (err as Error).message);
+    if (import.meta.env.DEV) console.warn("[PostHog] Init failed:", (err as Error).message);
   }
 };
 
 export const reportError = (err: Error, context: Record<string, unknown> = {}): void => {
   if (!initialized || !posthog) {
-    console.error("[Error]", err);
+    if (import.meta.env.DEV) console.error("[Error]", err);
     return;
   }
   posthog.captureException(err, context);

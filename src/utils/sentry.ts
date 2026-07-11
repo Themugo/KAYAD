@@ -24,7 +24,7 @@ export const initSentry = async (): Promise<void> => {
     // Dynamic import — won't crash if package not installed
     const mod = await import("@sentry/react").catch(() => null);
     if (!mod) {
-      console.warn("[Sentry] @sentry/react not installed. Run: npm install @sentry/react");
+      if (import.meta.env.DEV) console.warn("[Sentry] @sentry/react not installed. Run: npm install @sentry/react");
       return;
     }
 
@@ -60,14 +60,14 @@ export const initSentry = async (): Promise<void> => {
 
     initialized = true;
   } catch (err) {
-    console.warn("[Sentry] Init failed:", (err as Error).message);
+    if (import.meta.env.DEV) console.warn("[Sentry] Init failed:", (err as Error).message);
   }
 };
 
 // Manually report an error
 export const reportError = (err: Error, context: Record<string, unknown> = {}): void => {
   if (!initialized || !Sentry) {
-    console.error("[Error]", err);
+    if (import.meta.env.DEV) console.error("[Error]", err);
     return;
   }
   Sentry.withScope((scope) => {
