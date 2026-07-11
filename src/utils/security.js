@@ -47,7 +47,7 @@ export function sanitizeQueryObject(obj) {
     if (key.startsWith('$')) continue;
     if (key.includes('.')) continue;
     const value = obj[key];
-    sanitized[key] = typeof value === 'string' ? value.replace(/[\$\.]/g, '').trim() : typeof value === 'object' ? sanitizeQueryObject(value) : value;
+    sanitized[key] = typeof value === 'string' ? value.replace(/[$.]/g, '').trim() : typeof value === 'object' ? sanitizeQueryObject(value) : value;
   }
   return sanitized;
 }

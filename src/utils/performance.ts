@@ -68,7 +68,7 @@ export class PerformanceMonitor {
           });
         });
         observer.observe({ entryTypes: ['navigation', 'resource', 'paint', 'largest-contentful-paint'] });
-      } catch (e) {
+      } catch (_e) {
         if (import.meta.env.DEV) console.warn('PerformanceObserver not supported');
       }
     }
