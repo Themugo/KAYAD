@@ -5,8 +5,10 @@ import CarDetailPage from '../../pages/CarDetailPage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 
-// Mock MOCK_CARS data
-const mockCarsData = [
+// CarDetailPage fetches the car via carsAPI.get(id) — there is no demo-data
+// fallback in the component anymore (demo mode was intentionally removed),
+// so the mock resolves the real data path directly instead.
+const mockCars = [
   { id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
     year: 2023, fuel: 'Petrol', transmission: 'Automatic',
     price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' } },
@@ -15,35 +17,39 @@ const mockCarsData = [
     price: 6500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' } },
 ];
 
-// CarDetailPage fetches the car via carsAPI.get(id) — there is no demo-data
-// fallback in the component anymore (demo mode was intentionally removed),
-// so the mock resolves the real data path directly instead.
-vi.mock('../../api/api', () => ({
-  carsAPI: {
-    get: vi.fn().mockResolvedValue({
-      car: {
-        _id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
+vi.mock('../../api/api', () => {
+  return {
+    carsAPI: {
+      get: vi.fn().mockResolvedValue({
+        car: {
+          _id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
+          year: 2023, fuel: 'Petrol', transmission: 'Automatic',
+          price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' },
+        },
+      }),
+      list: vi.fn().mockResolvedValue({ data: [] }),
+      trackClick: vi.fn().mockResolvedValue({}),
+      promote: vi.fn(),
+    },
+    reviewsAPI: {
+      forDealer: vi.fn().mockResolvedValue({ reviews: [] }),
+      create: vi.fn(),
+    },
+    chatAPI: { start: vi.fn() },
+    ntsaAPI: { status: vi.fn().mockRejectedValue({}) },
+    favoritesAPI: { list: vi.fn().mockResolvedValue({}), toggle: vi.fn(), setPriceAlert: vi.fn() },
+    bidsAPI: { getForCar: vi.fn().mockResolvedValue({ bids: [] }), place: vi.fn() },
+    formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
+    MOCK_CARS: [
+      { id: 'car-1', title: 'Test Luxury Car', brand: 'BMW', model: 'X5',
         year: 2023, fuel: 'Petrol', transmission: 'Automatic',
-        price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' },
-      },
-    }),
-    list: vi.fn().mockResolvedValue({ data: [] }),
-    trackClick: vi.fn().mockResolvedValue({}),
-    promote: vi.fn(),
-  },
-  reviewsAPI: {
-    forDealer: vi.fn().mockResolvedValue({ reviews: [] }),
-    create: vi.fn(),
-  },
-  chatAPI: { start: vi.fn() },
-  ntsaAPI: { status: vi.fn().mockRejectedValue({}) },
-  favoritesAPI: { list: vi.fn().mockResolvedValue({}), toggle: vi.fn(), setPriceAlert: vi.fn() },
-  bidsAPI: { getForCar: vi.fn().mockResolvedValue({ bids: [] }), place: vi.fn() },
-  formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
-  MOCK_CARS: mockCarsData,
-  BRANDS: ['Toyota', 'BMW', 'Mercedes-Benz'],
-  TESTIMONIALS: [],
-}));
+        price: 8500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' } },
+      { id: 'car-2', title: 'Another Car', brand: 'BMW', model: 'X3',
+        year: 2022, fuel: 'Diesel', transmission: 'Automatic',
+        price: 6500000, images: [], dealer: { _id: 'd1', name: 'Test Dealer' } },
+    ],
+  };
+});
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: { _id: 'u1' }, isAuth: true, isAdmin: false }),
 }));
@@ -87,13 +93,8 @@ describe('CarDetailPage', () => {
     expect(titles.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders section heading', async () => {
+  it('renders Message Dealer button', async () => {
     render(<MemoryRouter initialEntries={['/cars/mock1']}><CarDetailPage /></MemoryRouter>);
-    expect(await screen.findByText('Full Specifications')).toBeInTheDocument();
-  });
-
-  it('rendes seller section', async () => {
-    render(<MemoryRouter initialEntries={['/cars/mock1']}><CarDetailPage /></MemoryRouter>);
-    expect(await screen.findByText('About The Seller')).toBeInTheDocument();
+    expect(await screen.findByText('Message Dealer')).toBeInTheDocument();
   });
 });

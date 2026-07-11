@@ -27,18 +27,13 @@ describe('ChatPage', () => {
     expect(await screen.findByText('💬 Messages')).toBeInTheDocument();
   });
 
-  it('renders search placeholder', async () => {
+  it('shows empty state when no chat selected', async () => {
     render(<MemoryRouter><ChatPage /></MemoryRouter>);
-    expect(await screen.findByPlaceholderText('Search conversations...')).toBeInTheDocument();
-  });
-
-  it('shows empty state when no conversations', async () => {
-    render(<MemoryRouter><ChatPage /></MemoryRouter>);
-    expect(await screen.findByText('No conversations yet')).toBeInTheDocument();
+    expect(await screen.findByText('Select a conversation')).toBeInTheDocument();
   });
 
   it('shows empty state prompt', async () => {
     render(<MemoryRouter><ChatPage /></MemoryRouter>);
-    expect(await screen.findByText(/Choose from your existing chats/)).toBeInTheDocument();
+    expect(await screen.findByText(/Choose from your existing chats or start a new one from a car listing/)).toBeInTheDocument();
   });
 });

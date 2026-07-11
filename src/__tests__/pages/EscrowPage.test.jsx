@@ -26,12 +26,12 @@ describe('EscrowPage', () => {
 
   it('renders escrow heading', () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText('🔒 My Escrow')).toBeInTheDocument();
+    expect(screen.getByText('🔒 Escrow Vault')).toBeInTheDocument();
   });
 
   it('renders description', () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText(/All your car purchase payments protected in escrow/)).toBeInTheDocument();
+    expect(screen.getByText(/Every purchase on gari motors is protected by m-pesa escrow/i)).toBeInTheDocument();
   });
 
   it('shows empty state', async () => {

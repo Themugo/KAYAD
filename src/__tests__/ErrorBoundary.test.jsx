@@ -23,7 +23,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-    expect(screen.getByText('Go Home')).toBeInTheDocument();
+    expect(screen.getByText('← Go Home')).toBeInTheDocument();
     console.error = orig;
   });
 });

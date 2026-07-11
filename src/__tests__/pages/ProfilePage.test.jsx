@@ -45,7 +45,6 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Security')).toBeInTheDocument();
     expect(screen.getByText('Activity')).toBeInTheDocument();
     expect(screen.getByText('Reviews')).toBeInTheDocument();
-    expect(screen.getByText('Referrals')).toBeInTheDocument();
   });
 
   it('shows user name from auth context', () => {

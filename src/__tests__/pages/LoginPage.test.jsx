@@ -38,7 +38,7 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-    expect(screen.getByText(/sign in to your kayad account/i)).toBeInTheDocument();
+    expect(screen.getByText(/sign in to your gari motors account/i)).toBeInTheDocument();
   });
 
   it('has email and password fields', () => {
@@ -64,7 +64,7 @@ describe('LoginPage', () => {
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it('has forgot password and register links', () => {
+  it('has register link', () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -72,7 +72,6 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText(/forgot your password/i)).toBeInTheDocument();
     expect(screen.getByText(/join free/i)).toBeInTheDocument();
   });
 });

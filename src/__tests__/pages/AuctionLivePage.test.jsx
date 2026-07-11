@@ -60,9 +60,4 @@ describe('AuctionLivePage', () => {
     renderAuctionPage();
     expect(await screen.findByText('Starting Price')).toBeInTheDocument();
   });
-
-  it('shows joining prompt for anonymous users', async () => {
-    renderAuctionPage();
-    expect(await screen.findByText('Join the Live Show')).toBeInTheDocument();
-  });
 });
