@@ -190,7 +190,7 @@ export function DashboardHeader({
             {(subtitle || date) && (
               <p style={{ color: EdsColors.textMuted, fontSize: 13, marginTop: 6 }}>
                 {subtitle}
-                {date && <span style={{ marginLeft: subtitle ? 8, opacity: 0.5 }}>·</span>} 
+                {date && <span style={{ marginLeft: subtitle ? 8 : 0, opacity: 0.5 }}>·</span>} 
                 {date && <span style={{ marginLeft: 8 }}>{date}</span>}
               </p>
             )}
