@@ -426,6 +426,6 @@ This document outlines the disaster recovery framework for the KAYAD platform, i
 
 ## References
 
-- [MongoDB Backup Best Practices](https://www.mongodb.com/docs/manual/administration/backup-restore/)
+- [Supabase Backup and Restore](https://supabase.com/docs/guides/database/overview#backups)
 - [Redis High Availability](https://redis.io/topics/sentinel)
 - [AWS Disaster Recovery](https://aws.amazon.com/disaster-recovery/)

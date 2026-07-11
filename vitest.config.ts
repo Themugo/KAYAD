@@ -9,11 +9,9 @@ export default defineConfig({
     setupFiles: ['./src/__tests__/setup.js'],
     env: {
       JWT_SECRET: 'test-secret-key',
-      // Placeholder so module-level `process.env.MONGO_URI ? describe : describe.skip`
-      // guards don't self-skip, and so server.ts's required-env-var startup check
-      // doesn't process.exit(1) when integration tests import it. Each test's own
-      // beforeAll overwrites this with a real MongoMemoryServer URI before connecting.
-      MONGO_URI: 'mongodb://placeholder-overwritten-by-mongo-memory-server/test',
+      // Supabase test configuration
+      SUPABASE_URL: 'https://placeholder.supabase.co',
+      SUPABASE_ANON_KEY: 'placeholder-key',
     },
     include: ['src/**/*.{test,spec}.{ts,tsx,jsx,js}', 'tests/**/*.{test,spec}.{ts,tsx,jsx,js}'],
     hookTimeout: 60000,

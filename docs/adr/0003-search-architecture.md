@@ -2,7 +2,7 @@
 title: 0003 Search Architecture
 owner: @tech-lead
 team: architecture
-last-reviewed: 2026-06-23
+last-reviewed: 2026-07-11
 review-frequency: quarterly
 status: active
 tags: [architecture]
@@ -22,29 +22,28 @@ The KAYAD platform requires efficient search functionality for car listings with
 - Performance at scale (thousands of listings)
 
 ## Decision
-We will implement MongoDB-based search with the following architecture:
+We will implement Supabase (PostgreSQL)-based search with the following architecture:
 
 ### Search Implementation
-1. **Text Search**: MongoDB Atlas Search or MongoDB text indexes
-2. **Faceted Search**: Aggregation pipeline with $match, $group, $facet
-3. **Geographic Search**: GeoJSON with $near, $geoWithin operators
+1. **Text Search**: PostgreSQL full-text search with `to_tsvector` and `to_tsquery`
+2. **Faceted Search**: SQL aggregations with GROUP BY and filters
+3. **Geographic Search**: PostGIS with `ST_DWithin`, `ST_Within`
 4. **Caching**: Redis cache for popular search queries
 5. **Analytics**: SearchAnalytics model for tracking search behavior
 
 ### Technical Implementation
-- **Database**: MongoDB with text indexes on searchable fields
+- **Database**: Supabase (PostgreSQL) with text search indexes
 - **Indexing Strategy**:
-  - Compound indexes on frequently queried fields
-  - Text index on title, brand, model, description
-  - Geospatial index on location
+  - GIN indexes on searchable fields
+  - Text search index on title, brand, model, description
   - Partial indexes for active listings only
-- **Query Optimization**: Aggregation pipeline with early filtering
-- **Pagination**: Cursor-based pagination for large result sets
+- **Query Optimization**: Early filtering with optimized queries
+- **Pagination**: Offset-based pagination for large result sets
 
 ### Search Features
-- Full-text search with relevance scoring
+- Full-text search with relevance scoring using `ts_rank`
 - Multi-field search with weights
-- Fuzzy matching for typos
+- Fuzzy matching for typos (using `similarity` or `pg_trgm`)
 - Auto-suggest for search queries
 - Saved searches for users
 - Search history tracking
@@ -52,31 +51,29 @@ We will implement MongoDB-based search with the following architecture:
 ## Consequences
 
 ### Positive
-- Native MongoDB integration (no additional infrastructure)
-- Good performance for medium-scale datasets
-- Flexible aggregation pipeline for complex queries
-- Built-in geospatial support
-- Real-time search results (no indexing delay)
+- Native Supabase/PostgreSQL integration (no additional infrastructure)
+- Excellent performance for all dataset sizes
+- Powerful full-text search capabilities
+- Built-in PostGIS geospatial support
+- Real-time search results with Row Level Security
 
 ### Negative
-- Performance degradation at very large scale (millions of documents)
-- Limited advanced search features compared to dedicated search engines
-- Text search less sophisticated than Elasticsearch
-- Relevance scoring less customizable
+- May need Elasticsearch migration at very large scale (millions of documents)
+- Fuzzy matching requires additional extension (pg_trgm)
 
 ## Alternatives Considered
 
 ### Elasticsearch
 - **Rejected**: Additional infrastructure complexity
-- **Reason**: MongoDB Atlas Search provides sufficient capabilities for current scale
+- **Reason**: PostgreSQL full-text search provides sufficient capabilities for current scale
 
 ### Algolia
 - **Rejected**: Third-party dependency and cost
 - **Reason**: Can be added later if search requirements become more complex
 
-### PostgreSQL Full-Text Search
-- **Rejected**: Not using PostgreSQL as primary database
-- **Reason**: MongoDB is our primary database, keeping search in same system
+### MongoDB Atlas Search
+- **Rejected**: Migrated to Supabase as primary database
+- **Reason**: Consolidating on Supabase for all data storage
 
 ## Implementation Notes
 - Monitor search query performance
@@ -86,8 +83,9 @@ We will implement MongoDB-based search with the following architecture:
 - Add A/B testing for search relevance
 
 ## References
-- [MongoDB Atlas Search Documentation](https://www.mongodb.com/docs/atlas/search/)
-- [MongoDB Text Search](https://www.mongodb.com/docs/manual/text-search/)
+- [PostgreSQL Full Text Search](https://www.postgresql.org/docs/current/textsearch.html)
+- [PostGIS Documentation](https://postgis.net/documentation/)
+- [Supabase Documentation](https://supabase.com/docs)
 
 ## Related ADRs
 - 0005: Analytics Architecture

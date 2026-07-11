@@ -89,8 +89,8 @@ We will implement MongoDB aggregation-based analytics with the following archite
 - Add real-time streaming for event processing (future)
 
 ## References
-- [MongoDB Aggregation Pipeline](https://www.mongodb.com/docs/manual/core/aggregation-pipeline/)
-- [MongoDB Performance Best Practices](https://www.mongodb.com/docs/manual/administration/analyzing-mongodb-performance/)
+- [PostgreSQL Window Functions](https://www.postgresql.org/docs/current/tutorial-window.html)
+- [PostgreSQL Performance Tips](https://wiki.postgresql.org/wiki/Performance_Optimization)
 
 ## Related ADRs
 - 0003: Search Architecture

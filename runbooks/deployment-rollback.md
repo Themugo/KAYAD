@@ -167,12 +167,13 @@ tail -100 backend/logs/app.log | grep -i deploy
 
 5. **Verify Data Integrity**
    ```bash
-   # Check document counts
-   mongosh --eval "
-   db = db.getSiblingDB('kayad');
-   print('Cars:', db.cars.countDocuments());
-   print('Users:', db.users.countDocuments());
-   "
+   # Check table row counts via Supabase Dashboard or API
+   curl -s -H "apikey: $SUPABASE_ANON_KEY" \
+     "https://$SUPABASE_REF.supabase.co/rest/v1/cars?select=id"
+
+   # Or check via Supabase SQL Editor
+   SELECT count(*) FROM cars;
+   SELECT count(*) FROM users;
    ```
 
 6. **Start Application**

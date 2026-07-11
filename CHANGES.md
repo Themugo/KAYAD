@@ -190,10 +190,10 @@ Eleven concrete bug fixes (eight identified up-front in the audit, three discove
 `middleware/role.js` re-exported `isWebhoist` from `./rbac.js`, but it was never defined there. The dangling re-export caused `server.js` to fail to load on import, which in turn meant **24 of 29 backend test suites failed at the import step** before running a single assertion. Implemented `isWebhoist(user)` that checks `user.email` against `process.env.WEBHOIST_EMAIL` (case-insensitive, whitespace-trimmed); `getEffectiveRole` now returns `"webhoist"` for the platform owner so existing role checks for `"webhoist"` resolve.
 
 **2. `tests/setup.js` — robust DB bootstrap.**
-- Pinned `mongodb-memory-server` binary to `7.0.14` (LTS) via `binary.version`, overridable by `MEMORY_DB_VERSION`. The auto-detected `8.2.6` does not exist on the public CDN for several common platforms (Ubuntu 24.04, Alpine).
+- Migrated from `mongodb-memory-server` to Supabase test environment setup.
 - Dropped `serverSelectionTimeoutMS` from 15 s → 5 s on the user-provided URI path to match production timing.
-- Added `isMockDB()` and `describeWithDb(name, fn)` helpers so DB-dependent suites can opt-in to `describe.skip` when no real or in-memory Mongo is reachable, instead of hanging on connection retries.
-- When falling back to mock mode, `mongoose.set("bufferCommands", false)` is set so DB-dependent queries fail in milliseconds instead of waiting for the default 10 s buffer timeout.
+- Added `isMockDB()` and `describeWithDb(name, fn)` helpers so DB-dependent suites can opt-in to `describe.skip` when no real or Supabase test environment is reachable, instead of hanging on connection retries.
+- When falling back to mock mode, proper async handling for DB-dependent queries.
 
 ### Frontend — structural bugs
 

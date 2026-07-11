@@ -163,7 +163,9 @@ Set these in server environment or `.env` file:
 ```bash
 NODE_ENV=production
 PORT=5000
-MONGO_URI=mongodb+srv://...
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 JWT_SECRET=your-secret-key
 FRONTEND_URL=https://www.kayad.space
 SENTRY_DSN=your-sentry-dsn

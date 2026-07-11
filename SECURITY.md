@@ -26,7 +26,7 @@ Contact the maintainer directly at the email listed in `.env.example` (`WEBHOIST
 - Payment amount validation (no negative values)
 - CORS origin whitelisting
 - Helmet security headers (CSP, HSTS, X-Frame-Options)
-- MongoDB injection protection via mongoSanitize
+- SQL injection protection via parameterized queries (Supabase client)
 - CSRF protection on token refresh
 
 ## Best Practices
@@ -89,6 +89,6 @@ REQUIRE_EMAIL_VERIFICATION=true
 | Transport | TLS 1.2/1.3 via Let's Encrypt, HSTS preload |
 | Application | Helmet, CORS whitelist, CSRF tokens, rate limiting (8 tiers) |
 | Auth | JWT with token version rotation, refresh tokens, bcrypt(12) |
-| API | Zod validation, mongoSanitize, XSS sanitization, pagination caps |
+| API | Zod validation, parameterized queries, XSS sanitization, pagination caps |
 | Payments | M-Pesa IP whitelist + callback payload validation, negative-amount guards |
 | Storage | Magic-byte upload validation, extension whitelist, non-root Docker user |

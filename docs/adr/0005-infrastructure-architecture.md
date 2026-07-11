@@ -2,7 +2,7 @@
 title: 0005 Infrastructure Architecture
 owner: @tech-lead
 team: architecture
-last-reviewed: 2026-06-23
+last-reviewed: 2026-07-11
 review-frequency: quarterly
 status: active
 tags: [architecture]
@@ -15,7 +15,7 @@ Accepted
 ## Context
 The KAYAD platform requires a scalable, reliable, and cost-effective infrastructure to support:
 - Web application hosting (frontend and backend)
-- Database hosting (MongoDB)
+- Database hosting (Supabase/PostgreSQL)
 - Caching layer (Redis)
 - File storage (images)
 - CI/CD pipeline
@@ -27,7 +27,7 @@ We will implement Render-based infrastructure with the following architecture:
 
 ### Infrastructure Components
 1. **Application Hosting**: Render for frontend (Vercel alternative) and backend
-2. **Database**: MongoDB Atlas (managed MongoDB)
+2. **Database**: Supabase (managed PostgreSQL)
 3. **Caching**: Redis (Render Redis or self-hosted)
 4. **File Storage**: Cloudinary for images
 5. **CI/CD**: GitHub Actions
@@ -37,7 +37,7 @@ We will implement Render-based infrastructure with the following architecture:
 ### Technical Implementation
 - **Frontend**: Vite build deployed to Render
 - **Backend**: Node.js/Express deployed to Render
-- **Database**: MongoDB Atlas (M10 cluster for production)
+- **Database**: Supabase (Pro tier for production)
 - **Redis**: Render Redis (with in-memory fallback)
 - **CDN**: Cloudinary CDN for image delivery
 - **Environment**: Development, Staging, Production
@@ -45,12 +45,12 @@ We will implement Render-based infrastructure with the following architecture:
 ### Deployment Strategy
 - **Frontend**: Automatic deployment on push to main
 - **Backend**: Automatic deployment on push to main
-- **Database**: Continuous backup with point-in-time recovery
+- **Database**: Continuous backup with point-in-time recovery via Supabase
 - **Rollback**: Git-based rollback capability
 - **Blue-Green Deployment**: Planned for zero-downtime deployments
 
 ### Disaster Recovery
-- **Database Backups**: Daily automated backups with 7-day retention
+- **Database Backups**: Daily automated backups with 7-day retention via Supabase
 - **Backup Verification**: Automated integrity checks
 - **Restore Testing**: Quarterly restore tests
 - **Multi-Region**: Planned for high availability
@@ -64,6 +64,7 @@ We will implement Render-based infrastructure with the following architecture:
 - Easy deployment with Git integration
 - Cost-effective for current scale
 - Good developer experience
+- Supabase provides excellent PostgreSQL management with real-time subscriptions
 
 ### Negative
 - Vendor lock-in with Render
@@ -95,7 +96,7 @@ We will implement Render-based infrastructure with the following architecture:
 
 ## References
 - [Render Documentation](https://render.com/docs)
-- [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/)
+- [Supabase Documentation](https://supabase.com/docs)
 - [Cloudinary Documentation](https://cloudinary.com/documentation)
 
 ## Related ADRs
