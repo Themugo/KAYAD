@@ -440,7 +440,7 @@ test.describe('Disputes Workflow', () => {
       });
 
       await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken;
+        window.localStorage.setItem('token', authToken);
       }, dealerToken);
       await page.goto(`/dealer/disputes/${dispute.data._id}`);
 

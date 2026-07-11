@@ -1,16 +1,8 @@
-// src/components/ui/index.js
-// Central export for all UI components
-
 export { default as Button } from './Button.jsx';
 export { default as Badge } from './Badge.jsx';
 export { default as Card } from './Card.jsx';
-export { default as Input } from './Input.jsx';
-export { default as Modal } from './Modal.jsx';
 export { default as Drawer } from './Drawer.jsx';
-export { default as Tabs } from './Tabs.jsx';
-export { default as Tabbar } from './Tabbar.jsx';
 export { default as Skeleton } from './Skeleton.jsx';
-export { default as Spinner } from './Spinner.jsx';
 export { default as Progress } from './Progress.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
 export { default as Avatar } from './Avatar.jsx';
@@ -22,11 +14,8 @@ export { default as Segmented } from './Segmented.jsx';
 export { default as Breadcrumb } from './Breadcrumb.jsx';
 export { default as Pagination } from './Pagination.jsx';
 export { default as PriceTag } from './PriceTag.jsx';
-export { default as Countdown } from './Countdown.jsx';
 export { default as FilterChip } from './FilterChip.jsx';
 export { default as RangeSlider } from './RangeSlider.jsx';
-export { default as Divider } from './Divider.jsx';
 export { default as ChartPlaceholder } from './ChartPlaceholder.jsx';
 export { default as MapPlaceholder } from './MapPlaceholder.jsx';
 export { default as BottomNav } from './BottomNav.jsx';
-export { default as Fab } from './Fab.jsx';

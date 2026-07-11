@@ -62,4 +62,7 @@ logs/
 api-governance-report.json
 .aider*
 
+# Test results
+test-results/
+
 .vercel

@@ -188,7 +188,7 @@ test.describe('Escrow Release Workflow', () => {
       });
 
       await page.addInitScript((authToken) => {
-        window.localStorage.setItem('token', authToken;
+        window.localStorage.setItem('token', authToken);
       }, buyerToken);
       await page.goto(`/buyer/escrow/${escrowId}`);
 

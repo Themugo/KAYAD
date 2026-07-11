@@ -104,7 +104,7 @@ export default function App() {
                     <Route path="/force-password-change" element={<RequireAuth><ForcePasswordChange /></RequireAuth>} />
                     <Route path="/profile" element={<RequireAuth><ProfilePage /></RequireAuth>} />
                     <Route path="/favorites" element={<RequireAuth><FavoritesPage /></RequireAuth>} />
-                    <Route path="/escrow" element={<EscrowPage />} />
+                    <Route path="/escrow" element={<RequireAuth><EscrowPage /></RequireAuth>} />
                     <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
                     <Route path="/chat/:chatId" element={<RequireAuth><ChatPage /></RequireAuth>} />
                     <Route path="/payments" element={<RequireAuth><PaymentsPage /></RequireAuth>} />
