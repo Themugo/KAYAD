@@ -4,13 +4,18 @@ Allow: /showroom
 Allow: /cars/
 
 # Block admin and private areas
-Disallow: /admin/
-Disallow: /dealer/
-Disallow: /dashboard/
-Disallow: /profile/
-Disallow: /escrow/
-Disallow: /chat/
-Disallow: /payments/
-Disallow: /checkout/
+Disallow: /admin/*
+Disallow: /dealer/*
+Disallow: /dashboard/*
+Disallow: /profile/*
+Disallow: /escrow/*
+Disallow: /chat/*
+Disallow: /payments/*
+Disallow: /checkout/*
+Disallow: /api/*
+Disallow: /seller/*
+Disallow: /inspector/*
+Disallow: /support/admin/*
+Disallow: /uploads/*
 
 Sitemap: https://www.kayad.space/sitemap.xml

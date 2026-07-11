@@ -82,6 +82,16 @@ export async function reseed() {
     return pw;
   };
 
+  // 🚨 CRITICAL: Fail fast in production if using insecure fallback passwords
+  const INSECURE_FALLBACK_PATTERNS = ['changeme', 'changeme123', 'demo', 'test', 'password', '123456', 'admin'];
+  const validateProductionPassword = (pw, label) => {
+    if (!isProd) return;
+    const lowerPw = pw.toLowerCase();
+    if (INSECURE_FALLBACK_PATTERNS.some(p => lowerPw.includes(p))) {
+      throw new Error(`INSECURE: ${label} uses a weak fallback password in production. Set SEED_${label}_PW env var.`);
+    }
+  };
+
   const hashPw = (pw) => bcrypt.hashSync(pw, 12);
 
   // 1. WEBHOST (SUPERADMIN)
@@ -94,7 +104,14 @@ export async function reseed() {
 
   for (const ownerEmail of ownerList) {
     const isPrimary = ownerEmail === (webhostEmail || ownerList[0])?.toLowerCase();
-    const pw = isPrimary ? webhostPassword : hashPw(process.env.SEED_WEBHOST_PW || "ChangeMe123!");
+    let pw;
+    if (isPrimary) {
+      pw = webhostPassword;
+      validateProductionPassword(pw, 'SEED_ADMIN_PASSWORD');
+    } else {
+      pw = hashPw(process.env.SEED_WEBHOST_PW || devFallback("SEED_WEBHOST_PW"));
+      validateProductionPassword(process.env.SEED_WEBHOST_PW || '', 'SEED_WEBHOST_PW');
+    }
     const name = isPrimary ? webhostName : "KAYAD Webhost";
     try {
       await upsert("users", "email", ownerEmail, {

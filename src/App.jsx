@@ -110,6 +110,41 @@ export default function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="skip-nav-link"
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 'auto',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+            zIndex: 9999,
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.position = 'fixed';
+            e.currentTarget.style.top = '10px';
+            e.currentTarget.style.left = '10px';
+            e.currentTarget.style.width = 'auto';
+            e.currentTarget.style.height = 'auto';
+            e.currentTarget.style.padding = '10px 20px';
+            e.currentTarget.style.background = '#000';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.zIndex = 9999;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.position = 'absolute';
+            e.currentTarget.style.left = '-9999px';
+            e.currentTarget.style.width = '1px';
+            e.currentTarget.style.height = '1px';
+          }}
+        >
+          Skip to main content
+        </a>
+      </ErrorBoundary>
+      <ErrorBoundary>
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
@@ -178,7 +213,7 @@ export default function App() {
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Suspense>
-                {!isMobile && <MobileNav />}
+                {isMobile && <MobileNav />}
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>
