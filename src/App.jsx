@@ -1,11 +1,12 @@
 // src/App.jsx
-import { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense, useMemo } from 'react';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
+import { BottomNav } from './components/ui';
 
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
@@ -26,6 +27,7 @@ const EscrowPage = lazy(() => import('./pages/EscrowPage'));
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 const AuctionLivePage = lazy(() => import('./pages/AuctionLivePage'));
+const DealerProfilePage = lazy(() => import('./pages/DealerProfilePage'));
 
 // Dealer pages
 const DealerDashboard = lazy(() => import('./pages/dealer/DealerDashboard'));
@@ -52,6 +54,31 @@ function LazyFallback() {
   );
 }
 
+const MOBILE_NAV_ITEMS = [
+  { id: '/',            label: 'Home',     icon: '🏠' },
+  { id: '/browse',      label: 'Gallery',  icon: '🚗' },
+  { id: '/auctions',    label: 'Auctions', icon: '⚡' },
+  { id: '/escrow',      label: 'Escrow',   icon: '🔒' },
+  { id: '/inspection',  label: 'Inspect',  icon: '🔍' },
+];
+
+function MobileNav() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const active = useMemo(() => {
+    const path = location.pathname;
+    const match = MOBILE_NAV_ITEMS.find(i => i.id !== '/' && path.startsWith(i.id));
+    return match ? match.id : (path === '/' ? '/' : null);
+  }, [location.pathname]);
+  return (
+    <BottomNav
+      items={MOBILE_NAV_ITEMS}
+      active={active}
+      onChange={(id) => navigate(id)}
+    />
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -68,6 +95,7 @@ export default function App() {
                     <Route path="/browse" element={<BrowsePage />} />
                     <Route path="/auctions" element={<AuctionPage />} />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
+                    <Route path="/dealer/:id" element={<DealerProfilePage />} />
                     <Route path="/auction/:id" element={<AuctionLivePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
@@ -106,6 +134,7 @@ export default function App() {
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Suspense>
+                <MobileNav />
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>

@@ -1,81 +1,84 @@
-// src/components/CarCard.jsx
+import { useState, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { formatKES } from '../api/api';
 
-export default function CarCard({ car, isComparing, onToggleCompare, compareCount }) {
-  const img = car.images?.[0]?.url || car.images?.[0] || car.image;
-  const carId = car._id || car.id;
-  const isLive = car.auctionStatus === 'live' || car.isAuction || car.isLive;
-  const linkTo = isLive ? `/auction/${carId}` : `/cars/${carId}`;
-  const mileage = typeof car.mileage === 'string' ? car.mileage : car.mileage ? `${Number(car.mileage).toLocaleString()} km` : '';
-  const location = car.location?.city || car.location;
+function CarCardInner({ car }) {
+  const [fav, setFav] = useState(false);
+
+  const id = car._id || car.id;
+  const images = car.images?.map(img => typeof img === 'string' ? img : img.url).filter(Boolean) || [];
+  const primaryImage = images[0] || car.image || 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800';
+
+  const isAuction = car.auction_status === 'live' || car.isAuction;
+  const isLive = car.auction_status === 'live' || car.isLive;
+
+  const price = isAuction && car.currentBid > 0 ? car.currentBid : car.price;
+  const dealer = car.dealer?.business_name || car.dealer?.name || car.dealerName || 'Nairobi Auto Hub Ltd';
+  const mileage = car.mileage != null
+    ? (typeof car.mileage === 'number' ? `${Math.round(car.mileage / 1000)}k km` : car.mileage)
+    : null;
+  const fuel = car.fuel || null;
+  const location = car.location?.city || (typeof car.location === 'string' ? car.location : null) || 'Nairobi';
+
+  const handleFav = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFav(f => !f);
+  }, []);
 
   return (
-    <Link to={linkTo} style={{ display: 'block' }}>
-      <div className="card" style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
-        <div className="car-img-wrap">
-          {img ? (
-            <img src={img} alt={car.title} loading="lazy" />
-          ) : (
-            <div className="car-img-placeholder">🚗</div>
-          )}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0,
-            height: '40%',
-            background: 'linear-gradient(transparent, rgba(10,22,40,0.85))',
-            pointerEvents: 'none',
-          }} />
-          {isLive && (
-            <div style={{ position: 'absolute', top: 10, left: 10 }}>
-              <span className="badge badge-green" style={{ fontSize: 10 }}>
-                <span className="live-dot" /> LIVE
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ padding: '14px 16px' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, marginBottom: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{car.title}</h3>
-
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
-            {car.year && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{car.year}</span>}
-            {car.fuel && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{car.fuel}</span>}
-            {mileage && <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface)', borderRadius: 4, padding: '2px 8px' }}>{mileage}</span>}
-          </div>
-
-          {location && (
-            <div style={{ fontSize: 11, color: 'var(--text-dim)', marginBottom: 8 }}>📍 {location}</div>
-          )}
-
-          <div className="gold-line" style={{ margin: '8px 0' }} />
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div className="price-tag" style={{ fontSize: '1.1rem' }}>
-              {isLive && car.currentBid > 0 ? formatKES(car.currentBid) : formatKES(car.price)}
-            </div>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>View →</span>
-          </div>
-        </div>
-
-        {onToggleCompare && (
-          <button
-            onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleCompare(); }}
-            title={isComparing ? 'Remove from compare' : compareCount >= 4 ? 'Max 4 for comparison' : 'Add to compare'}
-            style={{
-              position: 'absolute', top: 10, right: 10,
-              background: isComparing ? 'var(--gold)' : 'rgba(10,22,40,0.8)',
-              border: `1px solid ${isComparing ? 'var(--gold)' : 'var(--border)'}`,
-              borderRadius: 6, padding: '2px 7px', fontSize: 10,
-              color: isComparing ? '#0A1628' : 'var(--text)',
-              cursor: compareCount >= 4 && !isComparing ? 'not-allowed' : 'pointer',
-              fontWeight: 600, opacity: compareCount >= 4 && !isComparing ? 0.5 : 1,
-              backdropFilter: 'blur(4px)', zIndex: 5,
-            }}
-          >
-            {isComparing ? '✓' : '⇄'}
-          </button>
+    <Link
+      to={`/cars/${id}`}
+      className="kd-car-card"
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+    >
+      {/* Image */}
+      <div className="kd-car-card__img-wrap">
+        <img
+          src={primaryImage}
+          alt={car.title}
+          loading="lazy"
+          className="kd-car-card__img"
+        />
+        {isLive && (
+          <span className="kd-car-card__live-badge">
+            <span className="live-dot" /> LIVE
+          </span>
         )}
+        <button
+          className={`kd-car-card__fav${fav ? ' kd-car-card__fav--active' : ''}`}
+          onClick={handleFav}
+          aria-label={fav ? 'Remove from favorites' : 'Save'}
+        >
+          {fav ? '♥' : '♡'}
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="kd-car-card__body">
+        <h3 className="kd-car-card__title">{car.title}</h3>
+        <p className="kd-car-card__dealer">{dealer}</p>
+        <p className="kd-car-card__price">
+          KES {(price || 0).toLocaleString()}
+        </p>
+        <div className="kd-car-card__meta">
+          {mileage && (
+            <span className="kd-car-card__meta-item">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              {mileage}
+            </span>
+          )}
+          {fuel && (
+            <span className="kd-car-card__meta-item">{fuel}</span>
+          )}
+          <span className="kd-car-card__meta-item">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {location}
+          </span>
+        </div>
       </div>
     </Link>
   );
 }
+
+const CarCard = memo(CarCardInner);
+export default CarCard;
