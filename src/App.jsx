@@ -5,7 +5,6 @@ import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './contex
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import Navbar from './components/Navbar';
 import { BottomNav } from './components/ui';
 
 // Eager load: critical above-the-fold pages
@@ -92,7 +91,6 @@ export default function App() {
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
-              <Navbar />
               <ErrorBoundary>
                 <Suspense fallback={<LazyFallback />}>
                   <Routes>
