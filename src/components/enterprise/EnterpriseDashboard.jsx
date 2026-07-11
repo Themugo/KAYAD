@@ -1,5 +1,32 @@
 import { Link } from 'react-router-dom';
 
+// Enterprise Design Tokens
+export const EnterpriseTokens = {
+  gold: 'rgba(212, 168, 67, 1)',
+  goldLight: 'rgba(212, 168, 67, 0.8)',
+  goldBg: 'rgba(212, 168, 67, 0.1)',
+  goldBorder: 'rgba(212, 168, 67, 0.2)',
+  bg: '#050505',
+  card: '#0C0C0C',
+  surface: '#151520',
+  border: 'rgba(255, 255, 255, 0.06)',
+  borderLight: 'rgba(255, 255, 255, 0.1)',
+  success: '#22c55e',
+  successBg: 'rgba(34, 197, 94, 0.1)',
+  warning: '#f59e0b',
+  warningBg: 'rgba(245, 158, 11, 0.1)',
+  danger: '#ef4444',
+  dangerBg: 'rgba(239, 68, 68, 0.1)',
+  info: '#3b82f6',
+  infoBg: 'rgba(59, 130, 246, 0.1)',
+  purple: '#a855f7',
+  purpleBg: 'rgba(168, 85, 247, 0.1)',
+  textPrimary: '#ffffff',
+  textSecondary: 'rgba(255, 255, 255, 0.7)',
+  textMuted: 'rgba(255, 255, 255, 0.4)',
+  textDim: 'rgba(255, 255, 255, 0.25)',
+};
+
 const S = {
   card: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 0.2s, box-shadow 0.2s' },
   cardHover: { border: '1px solid var(--border)', transition: 'border-color 0.2s' },
@@ -80,23 +107,7 @@ export function EnterpriseStatus({ label, color = 'rgba(255,255,255,0.4)' }) {
   return <span style={S.badge(color)}>{label}</span>;
 }
 
-export function EnterpriseQuickActions({ actions }) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
-      {actions.map((a, i) => (
-        <Link key={i} to={a.to} style={S.actionLink}
-          onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--gold)'}
-          onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
-          <span style={{ fontSize: 22, flexShrink: 0 }}>{a.icon}</span>
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 13 }}>{a.label}</div>
-            {a.desc && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{a.desc}</div>}
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
-}
+
 
 export function EnterpriseNotification({ items, onDismiss }) {
   if (!items || items.length === 0) {
@@ -206,17 +217,211 @@ export function DashboardHeader({ badge, greeting, name, subtitle, actions }) {
   );
 }
 
-export function EnterpriseMetricRow({ items }) {
+export function EnterpriseMetricRow({ icon, label, value, sub, trend, color }) {
   return (
-    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-      {items.map((item, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)' }}>
-          <span style={{ fontSize: 16 }}>{item.icon}</span>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>{item.value}</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{item.label}</div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: '1px solid ' + S.card.border }}>
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: (color || '#D4C4A8') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: color || '#D4C4A8' }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{label}</div>
+        {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{sub}</div>}
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{value}</div>
+        {trend !== undefined && (
+          <div style={{ fontSize: 10, fontWeight: 700, color: trend >= 0 ? '#22c55e' : '#ef4444' }}>
+            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function EnterpriseRevenue({ label, value, sub, period }) {
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.1) 0%, #0C0C0C 100%)',
+      border: '1px solid rgba(212, 168, 67, 0.2)',
+      borderRadius: 14,
+      padding: '20px 22px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        position: 'absolute',
+        right: -30,
+        top: -30,
+        width: 120,
+        height: 120,
+        borderRadius: '50%',
+        border: '1px solid rgba(212, 168, 67, 0.2)',
+        opacity: 0.3,
+      }} />
+      <div style={{ fontSize: 10, fontWeight: 700, color: '#D4C4A8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{label}</div>
+      <div style={{ fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: '#D4C4A8', lineHeight: 1, marginBottom: 8 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{sub}</div>}
+      {period && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{period}</div>}
+    </div>
+  );
+}
+
+export function EnterpriseDonut({ value, max, label, color }) {
+  const percent = Math.round((value / max) * 100);
+  const r = 36;
+  const c = 2 * Math.PI * r;
+  const offset = c - (percent / 100) * c;
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <svg width="90" height="90" viewBox="0 0 90 90" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="45" cy="45" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+        <circle cx="45" cy="45" r={r} fill="none" stroke={color || '#D4C4A8'} strokeWidth="6"
+          strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
+      </svg>
+      <div style={{ marginTop: -65, fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>{percent}%</div>
+      {label && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{label}</div>}
+    </div>
+  );
+}
+
+export function EnterpriseProgress({ value, max, color, label, showPercent }) {
+  const percent = Math.round((value / max) * 100);
+  return (
+    <div>
+      {(label || showPercent) && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          {label && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{label}</span>}
+          {showPercent && <span style={{ fontSize: 11, fontWeight: 700, color: color || '#D4C4A8' }}>{percent}%</span>}
+        </div>
+      )}
+      <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{
+          height: '100%',
+          width: percent + '%',
+          background: color || '#D4C4A8',
+          borderRadius: 3,
+          transition: 'width 0.3s',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+export function EnterpriseNotifications({ items }) {
+  if (!items || items.length === 0) {
+    return <div style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No new notifications</div>;
+  }
+  return (
+    <div>
+      {items.map((n, i) => (
+        <div key={i} style={{
+          display: 'flex',
+          gap: 12,
+          padding: '14px 0',
+          borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+          cursor: n.to ? 'pointer' : 'default',
+        }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: (n.color || '#D4C4A8') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <span style={{ fontSize: 16 }}>{n.icon || '🔔'}</span>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: n.unread ? 700 : 500, color: '#fff' }}>{n.title}</div>
+            {n.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{n.description}</div>}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            {n.time && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{n.time}</span>}
+            {n.unread && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D4C4A8' }} />}
           </div>
         </div>
+      ))}
+    </div>
+  );
+}
+
+export function EnterpriseAction({ icon, label, desc, to, onClick, color }) {
+  const accent = color || '#D4C4A8';
+  return (
+    <Link to={to || '#'} onClick={onClick} style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '14px 16px',
+      background: '#151520',
+      border: '1px solid rgba(255,255,255,0.06)',
+      borderRadius: 12,
+      textDecoration: 'none',
+      transition: 'border-color 0.2s, transform 0.2s',
+    }}>
+      <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+      <div>
+        <div style={{ fontWeight: 600, fontSize: 13, color: '#fff' }}>{label}</div>
+        {desc && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{desc}</div>}
+      </div>
+    </Link>
+  );
+}
+
+export function EnterpriseQuickActions({ actions, cols = 4 }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
+      {actions.map((a, i) => <EnterpriseAction key={i} {...a} />)}
+    </div>
+  );
+}
+
+export function EnterpriseBadge({ label, color, variant = 'default' }) {
+  const bg = (color || '#D4C4A8') + '15';
+  const textColor = color || '#D4C4A8';
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: variant === 'pill' ? '4px 12px' : '3px 10px',
+      borderRadius: variant === 'pill' ? 9999 : 6,
+      fontSize: 10,
+      fontWeight: 700,
+      background: bg,
+      color: textColor,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+    }}>
+      {label}
+    </span>
+  );
+}
+
+export function EnterpriseTabs({ tabs, active, onChange }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 20 }}>
+      {tabs.map(tab => (
+        <button key={tab.id} onClick={() => onChange(tab.id)} style={{
+          padding: '12px 16px',
+          background: 'none',
+          border: 'none',
+          borderBottom: active === tab.id ? '2px solid #D4C4A8' : '2px solid transparent',
+          color: active === tab.id ? '#fff' : 'rgba(255,255,255,0.4)',
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: 'pointer',
+          transition: 'color 0.2s',
+        }}>
+          {tab.icon && <span style={{ marginRight: 6 }}>{tab.icon}</span>}
+          {tab.label}
+          {tab.count !== undefined && (
+            <span style={{
+              marginLeft: 6,
+              padding: '2px 8px',
+              background: active === tab.id ? 'rgba(212, 168, 67, 0.1)' : 'rgba(255,255,255,0.05)',
+              borderRadius: 9999,
+              fontSize: 10,
+              fontWeight: 700,
+              color: active === tab.id ? '#D4C4A8' : 'rgba(255,255,255,0.4)',
+            }}>
+              {tab.count}
+            </span>
+          )}
+        </button>
       ))}
     </div>
   );
