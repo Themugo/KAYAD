@@ -121,15 +121,14 @@ export default function BrowsePage() {
   );
 
   return (
-    <div className="page" style={{ paddingTop: 88 }}>
-      <div className="container" style={{ paddingBottom: 40 }}>
-        {/* Header */}
-        <div style={{ marginBottom: 24 }}>
-          <div className="section-eyebrow">Marketplace</div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+    <div className="page" style={{ paddingTop: 68 }}>
+      {/* Sticky header */}
+      <div className="browse-header">
+        <div className="container" style={{ padding: '0 24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h2>Browse Cars</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>{total} vehicles available across Kenya</p>
+              <div className="section-eyebrow" style={{ marginBottom: 2 }}>Marketplace</div>
+              <h2 style={{ fontSize: '1.3rem', margin: 0 }}>Browse Cars</h2>
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               <Segmented
@@ -137,22 +136,22 @@ export default function BrowsePage() {
                 value={view}
                 onChange={setView}
               />
-              <select className="ui-input ui-select" value={sort} onChange={e => setSort(e.target.value)} style={{ width: 'auto', fontSize: 13 }}>
+              <select className="ui-input ui-select" value={sort} onChange={e => setSort(e.target.value)}
+                style={{ width: 'auto', fontSize: 13, padding: '8px 32px 8px 12px' }} aria-label="Sort by">
                 {SORTS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Floating search bar */}
-        <div style={{
-          display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap',
-          background: 'var(--bg-card)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)', padding: 12,
-        }}>
-          <input className="ui-input" placeholder="🔍 Search vehicles…" style={{ flex: '1 1 200px' }}
-            value={filters.search} onChange={e => setFilter('search', e.target.value)} aria-label="Search" />
-          <select className="ui-input ui-select" value={filters.brand} onChange={e => setFilter('brand', e.target.value)} style={{ width: 'auto' }} aria-label="Brand">
+      <div className="container" style={{ paddingBottom: 40 }}>
+        {/* Search bar */}
+        <div className="glass" style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', borderRadius: 'var(--radius-lg)', padding: 14 }}>
+          <input className="ui-input" placeholder="🔍 Search vehicles…" style={{ flex: '1 1 220px' }}
+            value={filters.search} onChange={e => setFilter('search', e.target.value)} aria-label="Search vehicles" />
+          <select className="ui-input ui-select" value={filters.brand} onChange={e => setFilter('brand', e.target.value)}
+            style={{ width: 'auto', minWidth: 130 }} aria-label="Brand">
             <option value="All">All Brands</option>
             {BRANDS.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
           </select>
@@ -161,18 +160,27 @@ export default function BrowsePage() {
 
         {/* Active filter chips */}
         {activeChips.length > 0 && (
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
             {activeChips.map(chip => (
               <FilterChip key={chip} label={chip} active onRemove={() => toggleChip(chip)} onToggle={() => toggleChip(chip)} />
             ))}
-            <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer' }}>Clear all</button>
+            <button onClick={clearAll} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 13, cursor: 'pointer', padding: '4px 8px' }}>
+              Clear all
+            </button>
           </div>
+        )}
+
+        {/* Result count */}
+        {!loading && cars.length > 0 && (
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
+            {total} vehicle{total !== 1 ? 's' : ''} available across Kenya
+          </p>
         )}
 
         {/* Results */}
         {loading ? (
           <div className="car-grid">
-            {[...Array(8)].map((_, i) => <Skeleton key={i} variant="card" />)}
+            {[...Array(8)].map((_, i) => <div key={i} className="skeleton-card" />)}
           </div>
         ) : cars.length === 0 ? (
           <EmptyState icon="🔍" title="No cars found" desc="Try adjusting your filters or search terms."

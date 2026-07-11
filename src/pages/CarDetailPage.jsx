@@ -59,11 +59,11 @@ export default function CarDetailPage() {
 
   if (loading) {
     return (
-      <div className="page" style={{ paddingTop: 88 }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 32 }} className="detail-grid">
-            <div className="ui-skeleton" style={{ height: 400, borderRadius: 'var(--radius-lg)' }} />
-            <div className="ui-skeleton" style={{ height: 400, borderRadius: 'var(--radius-lg)' }} />
+      <div className="page">
+        <div className="container" style={{ paddingTop: 24 }}>
+          <div className="detail-grid">
+            <div className="skeleton-card" style={{ height: 400 }} />
+            <div className="skeleton-card" style={{ height: 400 }} />
           </div>
         </div>
       </div>
@@ -72,8 +72,8 @@ export default function CarDetailPage() {
 
   if (!car) {
     return (
-      <div className="page" style={{ paddingTop: 88 }}>
-        <div className="container">
+      <div className="page">
+        <div className="container" style={{ paddingTop: 24 }}>
           <EmptyState icon="🚗" title="Vehicle not found" desc="This listing may have been removed or sold."
             action={() => navigate('/browse')} actionLabel="Browse Cars" />
         </div>
@@ -85,7 +85,7 @@ export default function CarDetailPage() {
   const isVerified = car.is_verified_dealer || car.isVerified;
 
   return (
-    <div className="page" style={{ paddingTop: 68 }}>
+    <div className="page">
       {/* Breadcrumb */}
       <div className="container" style={{ paddingTop: 20, paddingBottom: 0 }}>
         <Breadcrumb items={[
@@ -96,37 +96,35 @@ export default function CarDetailPage() {
       </div>
 
       <div className="container" style={{ paddingTop: 16, paddingBottom: 48 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 32 }} className="detail-grid">
+        <div className="detail-grid">
 
-          {/* ── Left: Gallery + Info ── */}
+          {/* ── Left Column: Gallery + Info ── */}
           <div>
             {/* Gallery */}
             <div style={{ marginBottom: 24 }}>
-              <div className="ui-card" style={{ overflow: 'hidden', marginBottom: 12 }}>
-                <div style={{ aspectRatio: '16/10', background: 'var(--bg-elevated)', position: 'relative' }}>
-                  <img src={images[activeImg]} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  {/* Badges overlay */}
-                  <div style={{ position: 'absolute', top: 12, left: 12, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                    {isAuction && <Badge variant="live">Live Auction</Badge>}
-                    {isVerified && <Badge variant="verified" icon="✓">Verified</Badge>}
-                    {car.is_promoted && <Badge variant="premium" icon="★">Featured</Badge>}
-                  </div>
-                  {/* 360 badge */}
-                  <div style={{ position: 'absolute', bottom: 12, right: 12 }}>
-                    <Button variant="secondary" size="sm" icon="🔄">360° View</Button>
-                  </div>
+              <div className="gallery-main" style={{ aspectRatio: '16/10' }}>
+                <img src={images[activeImg]} alt={car.title} />
+                <div className="gallery-badges">
+                  {isAuction && <Badge variant="live">Live Auction</Badge>}
+                  {isVerified && <Badge variant="verified" icon="✓">Verified</Badge>}
+                  {car.is_promoted && <Badge variant="premium" icon="★">Featured</Badge>}
                 </div>
+                <div className="gallery-actions">
+                  <Button variant="secondary" size="sm" icon="🔄">360° View</Button>
+                </div>
+                {images.length > 1 && (
+                  <>
+                    <button className="gallery-nav gallery-nav--prev" onClick={() => setActiveImg(p => (p - 1 + images.length) % images.length)} aria-label="Previous">‹</button>
+                    <button className="gallery-nav gallery-nav--next" onClick={() => setActiveImg(p => (p + 1) % images.length)} aria-label="Next">›</button>
+                  </>
+                )}
               </div>
-              {/* Thumbnails */}
               {images.length > 1 && (
-                <div style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
+                <div className="gallery-thumbs">
                   {images.map((img, i) => (
-                    <button key={i} onClick={() => setActiveImg(i)} style={{
-                      width: 80, height: 60, borderRadius: 'var(--radius-sm)', overflow: 'hidden',
-                      border: i === activeImg ? '2px solid var(--gold-500)' : '1px solid var(--border)',
-                      cursor: 'pointer', flexShrink: 0, transition: 'border-color 0.2s',
-                    }}>
-                      <img src={img} alt={`View ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <button key={i} onClick={() => setActiveImg(i)}
+                      className={`gallery-thumb${i === activeImg ? ' gallery-thumb--active' : ''}`}>
+                      <img src={img} alt={`View ${i + 1}`} />
                     </button>
                   ))}
                 </div>
@@ -138,7 +136,7 @@ export default function CarDetailPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
                 <div>
                   <h1 style={{ fontSize: '1.5rem', marginBottom: 8 }}>{car.title}</h1>
-                  <div style={{ display: 'flex', gap: 12, fontSize: 13, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-muted)', flexWrap: 'wrap' }}>
                     <span>📍 {car.location?.city || car.location || 'Nairobi'}</span>
                     <span>🗓 {car.year}</span>
                     <span>🛣 {typeof car.mileage === 'number' ? car.mileage.toLocaleString() + ' km' : car.mileage || 'N/A'}</span>
@@ -147,7 +145,7 @@ export default function CarDetailPage() {
                 <div style={{ textAlign: 'right' }}>
                   {isAuction && car.currentBid > 0 ? (
                     <>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Bid</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Bid</div>
                       <PriceTag value={car.currentBid} size="lg" />
                     </>
                   ) : (
@@ -167,7 +165,6 @@ export default function CarDetailPage() {
                 ))}
               </div>
 
-              {/* Tab content */}
               {tab === 'specs' && (
                 <Card>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -211,7 +208,9 @@ export default function CarDetailPage() {
                       <div key={s.label}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                           <span style={{ fontSize: 13 }}>{s.label}</span>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: s.score >= 85 ? 'var(--green-400)' : 'var(--orange-400)' }}>{s.score}%</span>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: s.score >= 85 ? 'var(--green-400)' : 'var(--orange-400)' }}>
+                            {s.score}%
+                          </span>
                         </div>
                         <Progress value={s.score} variant={s.score >= 85 ? 'default' : 'error'} />
                       </div>
@@ -230,7 +229,10 @@ export default function CarDetailPage() {
                       { date: 'Jan 2021', event: 'First registered in Kenya', icon: '📄' },
                     ].map((h, i) => (
                       <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{h.icon}</div>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%', background: 'var(--bg-elevated)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
+                        }}>{h.icon}</div>
                         <div>
                           <div style={{ fontWeight: 600, fontSize: 14 }}>{h.event}</div>
                           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{h.date}</div>
@@ -250,12 +252,20 @@ export default function CarDetailPage() {
                         <h3 style={{ fontSize: '1.1rem' }}>Nairobi Auto Hub Ltd</h3>
                         <Badge variant="verified" icon="✓">Verified</Badge>
                       </div>
-                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>📍 Industrial Area, Nairobi · ★ 4.7 (42 reviews)</div>
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+                        📍 Industrial Area, Nairobi · ★ 4.7 (42 reviews)
+                      </div>
                     </div>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
-                    <div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Operating Hours</div><div style={{ fontWeight: 600, fontSize: 13 }}>Mon–Sat: 8am–6pm</div></div>
-                    <div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Response Time</div><div style={{ fontWeight: 600, fontSize: 13 }}>~2 hours</div></div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Operating Hours</div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>Mon–Sat: 8am–6pm</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Response Time</div>
+                      <div style={{ fontWeight: 600, fontSize: 13 }}>~2 hours</div>
+                    </div>
                   </div>
                   <MapPlaceholder label="Dealer Location" pin="📍" height={160} />
                 </Card>
@@ -265,7 +275,7 @@ export default function CarDetailPage() {
             {/* Related vehicles */}
             {relatedCars.length > 0 && (
               <div>
-                <h3 style={{ marginBottom: 16 }}>Similar Vehicles</h3>
+                <h3 style={{ marginBottom: 16, fontSize: '1.1rem' }}>Similar Vehicles</h3>
                 <div className="car-grid">
                   {relatedCars.map(c => <CarCard key={c.id} car={c} />)}
                 </div>
@@ -273,14 +283,13 @@ export default function CarDetailPage() {
             )}
           </div>
 
-          {/* ── Right: Inquiry Panel (Sticky) ── */}
-          <div style={{ position: 'sticky', top: 88, height: 'fit-content' }}>
+          {/* ── Right Column: Sticky Inquiry Panel ── */}
+          <div className="sticky-panel">
             <Card>
-              {/* Price section */}
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
                 {isAuction ? (
                   <>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Bid</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Bid</div>
                     <PriceTag value={car.currentBid || car.price} size="lg" />
                     <Badge variant="orange" style={{ marginTop: 8 }}>{car.totalBids || car.bids_count || 0} bids</Badge>
                   </>
@@ -294,22 +303,23 @@ export default function CarDetailPage() {
                 )}
               </div>
 
-              {/* Action buttons */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+              <div className="inquiry-form">
                 {isAuction ? (
                   <Button variant="primary" size="lg" full icon="🔴">Place Bid</Button>
                 ) : (
                   <Button variant="primary" size="lg" full icon="💳">Buy Now with Escrow</Button>
                 )}
                 <Button variant="outline" size="lg" full icon="💬" onClick={() => setShowInquiry(true)}>Message Dealer</Button>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <Button variant="secondary" icon={fav ? '♥' : '♡'} onClick={() => setFav(!fav)} style={{ flex: 1 }}>{fav ? 'Saved' : 'Save'}</Button>
+                <div className="quick-actions">
+                  <Button variant="secondary" icon={fav ? '♥' : '♡'} onClick={() => setFav(!fav)} style={{ flex: 1 }}>
+                    {fav ? 'Saved' : 'Save'}
+                  </Button>
                   <Button variant="secondary" icon="🔗" style={{ flex: 1 }}>Share</Button>
                 </div>
               </div>
 
               {/* Financing Calculator */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20 }}>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 20, marginTop: 20 }}>
                 <h4 style={{ fontSize: 14, marginBottom: 16 }}>💳 Financing Calculator</h4>
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -317,7 +327,7 @@ export default function CarDetailPage() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold-400)' }}>{financing.downPayment}%</span>
                   </div>
                   <input type="range" className="ui-range" min={0} max={50} step={5} value={financing.downPayment}
-                    onChange={e => setFinancing(p => ({ ...p, downPayment: Number(e.target.value) }))} />
+                    onChange={e => setFinancing(p => ({ ...p, downPayment: Number(e.target.value) }))} aria-label="Down payment percentage" />
                 </div>
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -325,11 +335,11 @@ export default function CarDetailPage() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold-400)' }}>{financing.months} months</span>
                   </div>
                   <input type="range" className="ui-range" min={12} max={72} step={6} value={financing.months}
-                    onChange={e => setFinancing(p => ({ ...p, months: Number(e.target.value) }))} />
+                    onChange={e => setFinancing(p => ({ ...p, months: Number(e.target.value) }))} aria-label="Loan term in months" />
                 </div>
-                <div style={{ background: 'var(--bg-elevated)', borderRadius: 'var(--radius-md)', padding: 16, textAlign: 'center' }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Monthly Payment</div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--gold-400)' }}>{formatKES(monthlyPayment)}</div>
+                <div className="finance-result">
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monthly Payment</div>
+                  <div className="premium-price premium-price--lg" style={{ marginTop: 4 }}>{formatKES(monthlyPayment)}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
                     {financing.downPayment}% down · 14% p.a. · {financing.months} months
                   </div>
@@ -337,14 +347,14 @@ export default function CarDetailPage() {
               </div>
 
               {/* Trust badges */}
-              <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10, padding: '16px 0 0', borderTop: '1px solid var(--border)' }}>
                 {[
                   { icon: '🔒', label: 'Escrow Protected' },
                   { icon: '🔍', label: 'Inspection Available' },
                   { icon: '✓', label: 'Verified Dealer' },
                 ].map(b => (
-                  <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)' }}>
-                    <span style={{ color: 'var(--green-400)' }}>{b.icon}</span> {b.label}
+                  <div key={b.label} className="trust-feature">
+                    <span className="trust-feature__check">{b.icon}</span> {b.label}
                   </div>
                 ))}
               </div>
@@ -352,12 +362,6 @@ export default function CarDetailPage() {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @media (max-width: 900px) {
-          .detail-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </div>
   );
 }

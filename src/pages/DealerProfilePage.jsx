@@ -40,7 +40,7 @@ export default function DealerProfilePage() {
   }, []);
 
   return (
-    <div className="page" style={{ paddingTop: 68 }}>
+    <div className="page">
       {/* Breadcrumb */}
       <div className="container" style={{ paddingTop: 20 }}>
         <Breadcrumb items={[
@@ -53,7 +53,6 @@ export default function DealerProfilePage() {
       <div className="container" style={{ paddingTop: 16, paddingBottom: 48 }}>
         {/* ── Dealer Header Card ── */}
         <Card style={{ marginBottom: 24, padding: 0, overflow: 'hidden' }}>
-          {/* Banner */}
           <div style={{
             height: 120,
             background: 'linear-gradient(135deg, var(--bg-elevated), var(--surface))',
@@ -64,11 +63,10 @@ export default function DealerProfilePage() {
               background: 'radial-gradient(ellipse at 30% 50%, rgba(200,150,42,0.08), transparent 70%)',
             }} />
           </div>
-          {/* Profile content */}
           <div style={{ padding: '0 24px 24px', marginTop: -48 }}>
             <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap' }}>
               <Avatar size="xl" variant="gold" initials={DEALER.initials}
-                style={{ border: '4px solid var(--card)', flexShrink: 0 }} />
+                className="avatar-ring" style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 200, paddingBottom: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <h1 style={{ fontSize: '1.4rem' }}>{DEALER.name}</h1>
@@ -87,18 +85,15 @@ export default function DealerProfilePage() {
               </div>
             </div>
 
-            {/* Bio */}
             <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-muted)', maxWidth: 600, lineHeight: 1.6 }}>
               {DEALER.bio}
             </p>
 
-            {/* Specialties */}
             <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {DEALER.specialties.map(s => <Badge key={s} variant="gold">{s}</Badge>)}
             </div>
 
-            {/* Stats row */}
-            <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+            <div className="stats-grid" style={{ marginTop: 24 }}>
               <StatCard icon="🚗" iconVariant="gold" label="Inventory" value={inventory.length} />
               <StatCard icon="✅" iconVariant="green" label="Sold" value={47} />
               <StatCard icon="⭐" iconVariant="gold" label="Rating" value={DEALER.rating} />
@@ -125,7 +120,7 @@ export default function DealerProfilePage() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
               <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{inventory.length} vehicles available</span>
-              <select value={sort} onChange={e => setSort(e.target.value)} className="ui-input" style={{ width: 'auto', padding: '6px 12px' }}>
+              <select value={sort} onChange={e => setSort(e.target.value)} className="ui-input" style={{ width: 'auto', padding: '6px 12px' }} aria-label="Sort">
                 <option value="newest">Newest First</option>
                 <option value="price-low">Price: Low to High</option>
                 <option value="price-high">Price: High to Low</option>
@@ -139,18 +134,16 @@ export default function DealerProfilePage() {
 
         {/* ── Reviews Tab ── */}
         {tab === 'reviews' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: 24 }} className="reviews-grid">
-            {/* Summary sidebar */}
+          <div className="reviews-grid">
             <Card>
               <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--gold-400)' }}>{DEALER.rating}</div>
+                <div className="premium-price" style={{ fontSize: '3rem' }}>{DEALER.rating}</div>
                 <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>out of 5</div>
-                <div style={{ marginTop: 8 }}>
-                  {'★★★★★'.slice(0, Math.round(DEALER.rating))}
+                <div style={{ marginTop: 8, fontSize: 18 }}>
+                  {'★'.repeat(Math.round(DEALER.rating))}{'☆'.repeat(5 - Math.round(DEALER.rating))}
                 </div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{DEALER.reviewsCount} reviews</div>
               </div>
-              {/* Rating bars */}
               {[5, 4, 3, 2, 1].map(stars => {
                 const pct = stars === 5 ? 68 : stars === 4 ? 22 : stars === 3 ? 6 : stars === 2 ? 2 : 2;
                 return (
@@ -165,7 +158,6 @@ export default function DealerProfilePage() {
               })}
             </Card>
 
-            {/* Review cards */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {REVIEWS.map((r, i) => (
                 <Card key={i} hover>
@@ -177,7 +169,9 @@ export default function DealerProfilePage() {
                         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.date}</div>
                       </div>
                     </div>
-                    <div style={{ color: 'var(--gold-400)', fontSize: 14 }}>{'★'.repeat(r.rating)}<span style={{ color: 'var(--text-muted)' }}>{'★'.repeat(5 - r.rating)}</span></div>
+                    <div style={{ color: 'var(--gold-400)', fontSize: 14 }}>
+                      {'★'.repeat(r.rating)}<span style={{ color: 'var(--text-muted)' }}>{'★'.repeat(5 - r.rating)}</span>
+                    </div>
                   </div>
                   <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>{r.text}</p>
                 </Card>
@@ -188,7 +182,7 @@ export default function DealerProfilePage() {
 
         {/* ── About Tab ── */}
         {tab === 'about' && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }} className="about-grid">
+          <div className="about-grid">
             <Card>
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>📍 Location & Contact</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14 }}>
@@ -207,13 +201,13 @@ export default function DealerProfilePage() {
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>ℹ About This Dealer</h3>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 16 }}>{DEALER.bio}</p>
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Specialties</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Specialties</div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {DEALER.specialties.map(s => <Badge key={s} variant="blue">{s}</Badge>)}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Connect</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Connect</div>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <Button variant="secondary" size="sm" icon="📘">Facebook</Button>
                   <Button variant="secondary" size="sm" icon="📷">Instagram</Button>
@@ -224,12 +218,6 @@ export default function DealerProfilePage() {
           </div>
         )}
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          .reviews-grid, .about-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </div>
   );
 }
