@@ -292,13 +292,32 @@ export const carsAPI = {
   async listPaginated(params = {}, page = 1, limit = 20) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
+    
+    // Use cursor-based pagination for better performance with large datasets
+    // Fallback to offset pagination for other cases
+    const useCursorPagination = params.cursor && page > 1;
+    
+    // Optimize: Select only needed columns to reduce payload
+    const columns = [
+      'id', 'title', 'brand', 'year', 'price', 'mileage', 'fuel', 
+      'transmission', 'body_type', 'location_city', 'images',
+      'auction_status', 'auction_end', 'current_bid', 'bids_count',
+      'is_promoted', 'approved', 'created_at', 'views_count',
+      'dealer_id'
+    ].join(',');
+    
     let query = supabase
       .from('cars')
-      .select('*, dealer:profiles!cars_dealer_id_fkey(id, name, business_name, dealer_rating, location, phone)', { count: 'exact' })
+      .select(columns, { count: 'exact' })
       .is('deleted_at', null)
       .eq('approved', true)
       .range(from, to);
 
+    if (useCursorPagination) {
+      query = query.gt('id', params.cursor);
+    }
+
+    // Filters
     if (params.brand && params.brand !== 'All Brands') query = query.eq('brand', params.brand);
     if (params.fuel && params.fuel !== 'All') query = query.eq('fuel', params.fuel);
     if (params.transmission && params.transmission !== 'All') query = query.eq('transmission', params.transmission);
@@ -306,10 +325,16 @@ export const carsAPI = {
     if (params.auctionStatus === 'live') query = query.eq('auction_status', 'live');
     if (params.search) query = query.or(`title.ilike.%${params.search}%,brand.ilike.%${params.search}%`);
     if (params.priceMax) query = query.lte('price', params.priceMax);
+    if (params.location) query = query.eq('location_city', params.location);
+    if (params.yearMin) query = query.gte('year', params.yearMin);
+    if (params.yearMax) query = query.lte('year', params.yearMax);
 
+    // Sorting
     if (params.sort === 'price_asc') query = query.order('price', { ascending: true });
     else if (params.sort === 'price_desc') query = query.order('price', { ascending: false });
     else if (params.sort === 'year_desc') query = query.order('year', { ascending: false });
+    else if (params.sort === 'views_desc') query = query.order('views_count', { ascending: false });
+    else if (params.sort === 'ending_soon') query = query.eq('auction_status', 'live').order('auction_end', { ascending: true });
     else query = query.order('is_promoted', { ascending: false }).order('created_at', { ascending: false });
 
     const { data, error, count } = await query;
@@ -318,9 +343,48 @@ export const carsAPI = {
     if (!data || data.length === 0) {
       const mockResults = filterMockCars(params);
       const paged = mockResults.slice(from, to + 1);
-      return { cars: paged.map(c => ({ ...c, _id: c.id })), total: mockResults.length, page, pages: Math.ceil(mockResults.length / limit), hasMore: to < mockResults.length };
+      return { 
+        cars: paged.map(c => ({ ...c, _id: c.id })), 
+        total: mockResults.length, 
+        page, 
+        pages: Math.ceil(mockResults.length / limit), 
+        hasMore: to < mockResults.length 
+      };
     }
-    return { cars: data.map(transformCar), total: count, page, pages: Math.ceil((count || 0) / limit), hasMore: to < (count || 0) };
+    
+    // Get dealer info separately for listed cars
+    const dealerIds = [...new Set(data.map(c => c.dealer_id).filter(Boolean))];
+    let dealersMap = {};
+    if (dealerIds.length > 0) {
+      const { data: dealers } = await supabase
+        .from('profiles')
+        .select('id, name, business_name, dealer_rating')
+        .in('id', dealerIds);
+      
+      if (dealers) {
+        dealersMap = dealers.reduce((acc, d) => {
+          acc[d.id] = d;
+          return acc;
+        }, {});
+      }
+    }
+    
+    const cars = data.map(car => {
+      const transformed = transformCar(car);
+      if (dealersMap[car.dealer_id]) {
+        transformed.dealer = dealersMap[car.dealer_id];
+      }
+      return transformed;
+    });
+    
+    return { 
+      cars, 
+      total: count, 
+      page, 
+      pages: Math.ceil((count || 0) / limit), 
+      hasMore: to < (count || 0),
+      nextCursor: data.length > 0 ? data[data.length - 1].id : null,
+    };
   },
 
   async analytics() {
