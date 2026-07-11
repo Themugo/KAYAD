@@ -5,6 +5,9 @@
 /* Mobile design system */
 @import './styles/mobile.css';
 
+/* Dealer platform design system */
+@import './styles/dealer.css';
+
 /* ---- Design Tokens ---- */
 :root {
   /* Brand colors */
