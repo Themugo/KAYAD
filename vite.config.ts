@@ -52,6 +52,20 @@ export default defineConfig({
             }
           },
           {
+            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'unsplash-images',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
@@ -70,6 +84,36 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/cars.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cars',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5 // 5 minutes
+              },
+              networkTimeoutSeconds: 3,
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /\/api\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-responses',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 1 // 1 minute
+              },
+              networkTimeoutSeconds: 5,
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
@@ -112,68 +156,136 @@ export default defineConfig({
     minify: 'esbuild',
     target: 'es2015',
     cssCodeSplit: true,
+    // Enable tree shaking
+    treeShaking: true,
+    // Optimize module resolution
+    modulePreload: {
+      polyfill: false,
+    },
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
+          // Vendor chunking - group related packages together
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // React core - should load first
+            if (id.includes('react-dom') || id.includes('react/')) {
               return 'react-vendor';
             }
+            // React Router - navigation
+            if (id.includes('react-router') || id.includes('react-router-dom')) {
+              return 'router-vendor';
+            }
+            // Animations - can load lazily
             if (id.includes('framer-motion')) {
               return 'animation-vendor';
             }
+            // HTTP client
             if (id.includes('axios')) {
               return 'http-vendor';
             }
-            if (id.includes('socket.io')) {
+            // WebSocket/Real-time
+            if (id.includes('socket.io-client') || id.includes('socket.io-parser')) {
               return 'socket-vendor';
             }
-            if (id.includes('@sentry')) {
-              return 'sentry-vendor';
-            }
-            if (id.includes('posthog')) {
-              return 'analytics-vendor';
-            }
+            // Icons - large, load lazily
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
             }
+            // Supabase
+            if (id.includes('@supabase')) {
+              return 'supabase-vendor';
+            }
+            // Error tracking
+            if (id.includes('@sentry')) {
+              return 'sentry-vendor';
+            }
+            // Analytics
+            if (id.includes('posthog')) {
+              return 'analytics-vendor';
+            }
+            // Date formatting
+            if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+              return 'date-vendor';
+            }
+            // JSON parsing
+            if (id.includes('lodash') || id.includes('clonedeep')) {
+              return 'utils-vendor';
+            }
+            // Default vendor chunk
             return 'vendor';
           }
+          
+          // Application code splitting
+          // Admin pages - typically not accessed, load lazily
           if (id.includes('src/pages/admin')) {
             return 'pages-admin';
           }
+          // Dealer pages
           if (id.includes('src/pages/dealer')) {
             return 'pages-dealer';
           }
-          if (id.includes('src/pages/buyer') || id.includes('src/pages/seller') || id.includes('src/pages/inspector') || id.includes('src/pages/showroom')) {
+          // Role-based pages
+          if (id.includes('src/pages/buyer') || 
+              id.includes('src/pages/seller') || 
+              id.includes('src/pages/inspector') || 
+              id.includes('src/pages/showroom')) {
             return 'pages-role';
           }
+          // Auction and car detail pages - popular, moderate priority
           if (id.includes('src/pages/auction') || id.includes('src/pages/car')) {
-            return 'pages-feature';
+            return 'pages-auction';
           }
+          // Other pages
           if (id.includes('src/pages')) {
-            return 'pages';
+            return 'pages-misc';
           }
+          // Components - heavy UI components
           if (id.includes('src/components')) {
             return 'components';
           }
+          // Context providers
           if (id.includes('src/context')) {
             return 'context';
           }
+          // API layer
           if (id.includes('src/api')) {
             return 'api';
+          }
+          // Hooks
+          if (id.includes('src/hooks')) {
+            return 'hooks';
+          }
+          // Utils
+          if (id.includes('src/utils')) {
+            return 'utils';
           }
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
-        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+        // Optimize for HTTP/2
+        hoistTransitiveImports: false,
       }
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 800, // Lower limit to catch potential issues
     // Optimize chunk loading
     commonjsOptions: {
       transformMixedEsModules: true
-    }
+    },
+    // Target specific browsers for better optimization
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
   },
-
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'lucide-react',
+      'axios',
+    ],
+    exclude: [
+      '@vitejs/plugin-react',
+    ]
+  },
 });
