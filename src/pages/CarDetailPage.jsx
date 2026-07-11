@@ -5,7 +5,7 @@ import { Button, Badge, PriceTag, Breadcrumb, Card, MapPlaceholder, Avatar, Prog
 import CarCard from '../components/CarCard';
 import OptimizedImg from '../components/OptimizedImg';
 import { formatKES, MOCK_CARS } from '../api/api';
-import { useAbortController } from '../utils/useAbortController';
+import { useAbortController } from '../hooks/useAbortController';
 
 const TABS = [
   { id: 'specs',     label: 'Specifications', icon: '📋' },

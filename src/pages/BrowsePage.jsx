@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { carsAPI, BRANDS, MOCK_CARS } from '../api/api';
 import CarCard from '../components/CarCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
-import { useInfiniteScroll } from '../utils/useInfiniteScroll';
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { dedupedFetch, clearCache } from '../utils/requestCache';
 
 const FUELS = ['All', 'Petrol', 'Diesel', 'Hybrid', 'Electric'];

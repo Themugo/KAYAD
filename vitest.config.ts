@@ -30,4 +30,9 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    alias: {
+      '@sentry/react': '/src/__tests__/__mocks__/sentry-react.js',
+    },
+  },
 });

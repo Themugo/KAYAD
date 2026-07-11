@@ -21,8 +21,16 @@ export const initSentry = async (): Promise<void> => {
   if (!dsn) return;
 
   try {
-    // Dynamic import — won't crash if package not installed
-    const mod = await import("@sentry/react").catch(() => null);
+    // Dynamic import — @vite-ignore prevents Vite from trying to resolve at build time
+    let mod: any;
+    try {
+      // eslint-disable-next-line import/no-unresolved
+      mod = await import(/* @vite-ignore */ "@sentry/react");
+    } catch {
+      if (import.meta.env.DEV) console.warn("[Sentry] @sentry/react not installed. Run: npm install @sentry/react");
+      return;
+    }
+
     if (!mod) {
       if (import.meta.env.DEV) console.warn("[Sentry] @sentry/react not installed. Run: npm install @sentry/react");
       return;
