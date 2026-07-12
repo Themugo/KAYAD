@@ -142,7 +142,7 @@ import { isRedisConnected } from "./utils/cache.js";
 import redisClient from "./config/redis.js";
 import { initSentry } from "./config/sentry.js";
 import { initOpenTelemetry } from "./config/opentelemetry.js";
-import { triggerAlert, ALERT_LEVELS } from "./config/alerting.js";
+import { triggerAlert, ALERT_LEVELS, validateAlertChannels } from "./config/alerting.js";
 import { recordHttpRequest, recordError } from "./config/metrics.js";
 const getRedisClient = () => redisClient;
 import { setIO } from "./utils/io.js";
@@ -171,6 +171,29 @@ initSentry();
 // 🔧 OPENTELEMETRY INITIALIZATION
 // =============================
 initOpenTelemetry();
+
+// =============================
+// 🔧 ALERT CHANNEL VALIDATION (FIX H3)
+// =============================
+const alertValidation = validateAlertChannels();
+
+// =============================
+// 🔧 REDIS REQUIREMENT CHECK (FIX C5)
+// =============================
+// Redis is REQUIRED for production with multiple server instances
+if (process.env.NODE_ENV === "production") {
+  if (!process.env.REDIS_URL && !process.env.REDIS_HOST) {
+    console.warn("⚠️ WARNING: Redis not configured!");
+    console.warn("⚠️ Redis is REQUIRED for production deployments with multiple instances.");
+    console.warn("⚠️ Auction state and user cache will not sync across instances!");
+    console.warn("⚠️ Set REDIS_URL or REDIS_HOST/REDIS_PORT environment variable.");
+  } else if (!isRedisConnected()) {
+    console.warn("⚠️ WARNING: Redis is not connected!");
+    console.warn("⚠️ Auction state and user cache may be inconsistent.");
+  } else {
+    console.log("✅ Redis connected - distributed caching enabled");
+  }
+}
 
 // ─── CONFIG ───────────────────────────────────────────────────
 const app = express();
