@@ -3,15 +3,13 @@
  * Provides offline support and caching for the mobile automotive marketplace
  */
 
-const CACHE_NAME = 'kayad-mobile-v1';
-const STATIC_CACHE = 'kayad-static-v1';
-const IMAGE_CACHE = 'kayad-images-v1';
-const API_CACHE = 'kayad-api-v1';
+const CACHE_NAME = 'kayad-mobile-v2';
+const STATIC_CACHE = 'kayad-static-v2';
+const IMAGE_CACHE = 'kayad-images-v2';
+const API_CACHE = 'kayad-api-v2';
 
-// Static assets to cache on install
+// Static assets to cache on install (only content-hashed assets, NOT index.html)
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.webmanifest',
 ];
 
@@ -145,13 +143,30 @@ async function handleApiRequest(request) {
   }
 }
 
-// Handle static assets with cache-first strategy
+// Handle static assets with network-first for HTML, cache-first for JS/CSS
 async function handleStaticRequest(request) {
-  const cachedResponse = await caches.match(request);
-  
-  if (cachedResponse) {
-    return cachedResponse;
+  const url = new URL(request.url);
+  const isHtml = url.pathname === '/' || url.pathname.endsWith('.html');
+
+  if (isHtml) {
+    // Network-first for HTML so new deploys take effect immediately
+    try {
+      const networkResponse = await fetch(request);
+      if (networkResponse.ok) {
+        const cache = await caches.open(STATIC_CACHE);
+        cache.put(request, networkResponse.clone());
+      }
+      return networkResponse;
+    } catch (error) {
+      const cachedResponse = await caches.match(request);
+      if (cachedResponse) return cachedResponse;
+      return caches.match('/index.html');
+    }
   }
+
+  // Cache-first for content-hashed JS/CSS/fonts
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) return cachedResponse;
 
   try {
     const networkResponse = await fetch(request);
@@ -161,10 +176,6 @@ async function handleStaticRequest(request) {
     }
     return networkResponse;
   } catch (error) {
-    // For navigation requests, return the cached index.html
-    if (request.mode === 'navigate') {
-      return caches.match('/index.html');
-    }
     throw error;
   }
 }
