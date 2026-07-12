@@ -97,6 +97,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: secrets.VERCEL_TOKEN != ''
 
     steps:
       - name: Checkout
@@ -156,3 +157,15 @@ jobs:
           vercel deploy --prod \
             --token=${{ secrets.VERCEL_TOKEN }} \
             --projectId=${{ vars.VERCEL_PROJECT_ID_KAYAD_SPACE }}
+
+  skip-deploy:
+    name: Deploy to Vercel
+    needs: validate
+    runs-on: ubuntu-latest
+    if: secrets.VERCEL_TOKEN == ''
+    
+    steps:
+      - name: Vercel Token Not Configured
+        run: |
+          echo "⚠️ VERCEL_TOKEN not configured. Skipping Vercel deployment."
+          echo "To enable deployment, add VERCEL_TOKEN to GitHub Secrets."
