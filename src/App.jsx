@@ -5,6 +5,7 @@ import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BottomNav } from './components/ui';
+import NavbarNew from './components/NavbarNew';
 
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
@@ -143,6 +144,9 @@ export default function App() {
         >
           Skip to main content
         </a>
+      </ErrorBoundary>
+      <ErrorBoundary>
+        <NavbarNew />
       </ErrorBoundary>
       <ErrorBoundary>
         <AuthProvider>

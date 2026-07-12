@@ -70,14 +70,36 @@ export default function CarDetailPage() {
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId = null;
     setLoading(true);
+
+    // Set a timeout to fall back to mock data after 5 seconds
+    timeoutId = setTimeout(() => {
+      if (mounted) {
+        const mock = MOCK_CARS.find(c => String(c.id) === String(id));
+        setCar(mock || MOCK_CARS[0]);
+        setLoading(false);
+      }
+    }, 5000);
+
     carsAPI.get(id).then(d => {
-      if (mounted) setCar(d.car || d.data);
+      if (mounted) {
+        clearTimeout(timeoutId);
+        setCar(d.car || d.data);
+        setLoading(false);
+      }
     }).catch(() => {
-      const mock = MOCK_CARS.find(c => String(c.id) === String(id));
-      if (mounted) setCar(mock || MOCK_CARS[0]);
-    }).finally(() => { if (mounted) setLoading(false); });
-    return () => { mounted = false; };
+      if (mounted) {
+        clearTimeout(timeoutId);
+        const mock = MOCK_CARS.find(c => String(c.id) === String(id));
+        setCar(mock || MOCK_CARS[0]);
+        setLoading(false);
+      }
+    });
+    return () => {
+      mounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [id]);
 
   useEffect(() => {

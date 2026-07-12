@@ -27,42 +27,72 @@ const FINANCING_FEATURES = [
   { icon: '🔒', title: 'Secured by Escrow', desc: 'Your down payment is protected until car handover' },
 ];
 
+const HERO_SLIDES = [
+  {
+    id: 1,
+    image: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Toyota Land Cruiser V8',
+    sub: '2021 · Diesel · Nairobi',
+    price: 'KES 3.2M',
+    badge: 'Featured',
+    badgeVariant: 'gold'
+  },
+  {
+    id: 2,
+    image: 'https://images.pexels.com/photos/1805053/pexels-photo-1805053.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'Mercedes-Benz GLE 350d',
+    sub: 'Live Auction · Ends in 2h',
+    price: 'KES 11.2M',
+    badge: 'Live Auction',
+    badgeVariant: 'live'
+  },
+  {
+    id: 3,
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    headline: 'BMW X5 M Sport',
+    sub: '2020 · Petrol · Mombasa',
+    price: 'KES 4.1M',
+    badge: 'Featured',
+    badgeVariant: 'gold'
+  },
+];
+
 export default function HomePage() {
   const [current, setCurrent] = useState(0);
   const [cars, setCars] = useState(MOCK_CARS);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState({ brand: '', bodyType: '', priceMax: '' });
+  const [heroHovered, setHeroHovered] = useState(false);
 
   useEffect(() => {
     let mounted = true;
+    let timeoutId = setTimeout(() => {
+      setCars(MOCK_CARS);
+      setLoading(false);
+    }, 2000);
+    
     (async () => {
       try {
         const data = await carsAPI.list({ limit: 50 });
-        if (mounted && data.cars?.length > 0) setCars(data.cars);
+        if (mounted && data.cars?.length > 0) {
+          clearTimeout(timeoutId);
+          setCars(data.cars);
+        }
       } catch { /* fallback to mock */ }
       finally { if (mounted) setLoading(false); }
     })();
-    return () => { mounted = false; };
+    return () => { mounted = false; clearTimeout(timeoutId); };
   }, []);
 
   const SLIDES = useMemo(() => {
-    return cars
-      .filter(c => c.featured || c.is_promoted)
-      .slice(0, 5)
-      .map(c => ({
-        id: c._id || c.id,
-        image: c.image || c.images?.[0]?.url || c.images?.[0] || 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1200',
-        headline: c.title,
-        sub: `${c.year} · ${c.fuel} · ${c.location?.city || c.location || 'Nairobi'}`,
-        price: c.price,
-      }));
-  }, [cars]);
+    return HERO_SLIDES;
+  }, []);
 
   useEffect(() => {
-    if (SLIDES.length === 0) return;
-    const t = setInterval(() => setCurrent(p => (p + 1) % SLIDES.length), 5000);
+    if (heroHovered) return;
+    const t = setInterval(() => setCurrent(p => (p + 1) % SLIDES.length), 6000);
     return () => clearInterval(t);
-  }, [SLIDES.length]);
+  }, [SLIDES.length, heroHovered]);
 
   const liveAuctions = cars.filter(c => c.isAuction || c.auction_status === 'live');
   const featuredCars = cars.filter(c => c.featured || c.is_promoted).slice(0, 8);
@@ -80,96 +110,486 @@ export default function HomePage() {
   return (
     <div className="page" style={{ paddingTop: 0 }}>
       {/* ═══════════════════════════════════════════════════
-          HERO SECTION
+          HERO SECTION - REDESIGNED
           ═══════════════════════════════════════════════════ */}
-      <section className="hero-section" aria-label="Featured vehicles">
+      <section 
+        className="hero-section" 
+        aria-label="Featured vehicles"
+        onMouseEnter={() => setHeroHovered(true)}
+        onMouseLeave={() => setHeroHovered(false)}
+        style={{ 
+          minHeight: '85vh',
+          position: 'relative',
+          overflow: 'hidden',
+          background: '#050505'
+        }}
+      >
+        {/* Background Images with Ken Burns Effect */}
         {SLIDES.map((slide, i) => (
-          <div key={slide.id} className={`hero-slide${i === current ? '' : ''}`}
-            style={{ opacity: i === current ? 1 : 0 }}>
-            <img src={slide.image} alt={slide.headline} loading={i === 0 ? 'eager' : 'lazy'} />
-            <div className="hero-overlay" />
+          <div
+            key={slide.id}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: i === current ? 1 : 0,
+              transition: 'opacity 1s ease-in-out',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                backgroundImage: `url(${slide.image})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)',
+                transition: 'transform 8s ease-out',
+              }}
+            />
+            {/* Gradient Overlays */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(135deg, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.4) 50%, rgba(5,5,5,0.6) 100%)',
+            }} />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'radial-gradient(ellipse at 30% 50%, transparent 0%, rgba(5,5,5,0.8) 70%)',
+            }} />
           </div>
         ))}
 
-        <div className="hero-content">
-          <div className="hero-content-inner">
-            <div className="hero-badge">
-              EAST AFRICA'S TRUSTED CAR MARKETPLACE
-            </div>
+        {/* Animated Accent Lines */}
+        <div style={{
+          position: 'absolute',
+          top: '20%',
+          left: 0,
+          right: 0,
+          height: 1,
+          background: 'linear-gradient(90deg, transparent, rgba(200, 150, 42, 0.3), transparent)',
+          animation: 'pulse-line 4s ease-in-out infinite',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '30%',
+          left: 0,
+          right: 0,
+          height: 1,
+          background: 'linear-gradient(90deg, transparent, rgba(200, 150, 42, 0.2), transparent)',
+          animation: 'pulse-line 4s ease-in-out infinite 2s',
+        }} />
 
-            <h1 className="hero-title">
-              Drive Your Dream<br />
-              <span className="hero-title-gradient">With Confidence</span>
-            </h1>
+        {/* Main Content */}
+        <div className="hero-content" style={{
+          position: 'relative',
+          zIndex: 10,
+          minHeight: '85vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+          padding: '120px 24px 80px',
+        }}>
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '8px 20px',
+            background: 'rgba(200, 150, 42, 0.15)',
+            border: '1px solid rgba(200, 150, 42, 0.3)',
+            borderRadius: 50,
+            marginBottom: 32,
+            backdropFilter: 'blur(10px)',
+          }}>
+            <div style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: '#c8962a',
+              animation: 'pulse-dot 2s ease-in-out infinite',
+            }} />
+            <span style={{
+              fontSize: 12,
+              fontWeight: 600,
+              color: '#c8962a',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+            }}>
+              East Africa's #1 Car Marketplace
+            </span>
+          </div>
 
-            <p className="hero-sub">
-              Buy, sell, and auction vehicles with M-Pesa escrow protection. Every car inspected, every payment secured.
-            </p>
+          {/* Main Title */}
+          <h1 style={{
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            fontWeight: 800,
+            color: '#fff',
+            lineHeight: 1.1,
+            marginBottom: 24,
+            textShadow: '0 4px 30px rgba(0,0,0,0.5)',
+            maxWidth: 900,
+          }}>
+            Find Your Perfect
+            <span style={{
+              display: 'block',
+              background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 50%, #c8962a 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              Drive Today
+            </span>
+          </h1>
 
-            <form onSubmit={handleSearch} className="hero-search">
-              <select className="ui-input ui-select" style={{ flex: '1 1 160px', minWidth: 130 }}
-                value={search.brand} onChange={e => setSearch(p => ({ ...p, brand: e.target.value }))} aria-label="Brand">
-                <option value="">All Brands</option>
-                {BRANDS.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
-              </select>
-              <select className="ui-input ui-select" style={{ flex: '1 1 140px', minWidth: 130 }}
-                value={search.bodyType} onChange={e => setSearch(p => ({ ...p, bodyType: e.target.value }))} aria-label="Body type">
-                <option value="">All Types</option>
-                <option value="SUV">SUV</option>
-                <option value="Sedan">Sedan</option>
-                <option value="Pickup">Pickup</option>
-                <option value="Coupe">Coupe</option>
-              </select>
-              <select className="ui-input ui-select" style={{ flex: '1 1 140px', minWidth: 130 }}
-                value={search.priceMax} onChange={e => setSearch(p => ({ ...p, priceMax: e.target.value }))} aria-label="Max price">
-                <option value="">Any Price</option>
-                <option value="3000000">Under 3M</option>
-                <option value="5000000">Under 5M</option>
-                <option value="10000000">Under 10M</option>
-                <option value="20000000">Under 20M</option>
-              </select>
-              <Button type="submit" variant="primary" size="lg" icon="🔍">Search</Button>
-            </form>
+          {/* Subtitle */}
+          <p style={{
+            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+            color: 'rgba(255,255,255,0.7)',
+            maxWidth: 600,
+            marginBottom: 48,
+            lineHeight: 1.7,
+          }}>
+            Buy, sell, and auction vehicles with M-Pesa escrow protection. 
+            Every car inspected, every payment secured.
+          </p>
 
-            <div className="hero-stats">
-              {[
-                { val: '12K+', label: 'Vehicles' },
-                { val: '450+', label: 'Dealers' },
-                { val: '100%', label: 'Escrow Protected' },
-              ].map(s => (
-                <div key={s.label}>
-                  <div className="hero-stat-value">{s.val}</div>
-                  <div className="hero-stat-label">{s.label}</div>
+          {/* Search Box */}
+          <form 
+            onSubmit={handleSearch} 
+            style={{
+              display: 'flex',
+              gap: 12,
+              background: 'rgba(13, 21, 32, 0.9)',
+              backdropFilter: 'blur(20px)',
+              padding: 12,
+              borderRadius: 16,
+              border: '1px solid rgba(255,255,255,0.1)',
+              maxWidth: 800,
+              width: '100%',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            }}
+          >
+            <select 
+              className="ui-input ui-select" 
+              style={{ flex: '1 1 180px', minWidth: 150, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              value={search.brand} 
+              onChange={e => setSearch(p => ({ ...p, brand: e.target.value }))} 
+              aria-label="Brand"
+            >
+              <option value="" style={{ background: '#0d1520' }}>All Brands</option>
+              {BRANDS.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
+            </select>
+            <select 
+              className="ui-input ui-select" 
+              style={{ flex: '1 1 160px', minWidth: 130, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              value={search.bodyType} 
+              onChange={e => setSearch(p => ({ ...p, bodyType: e.target.value }))} 
+              aria-label="Body type"
+            >
+              <option value="" style={{ background: '#0d1520' }}>All Types</option>
+              <option value="SUV" style={{ background: '#0d1520' }}>SUV</option>
+              <option value="Sedan" style={{ background: '#0d1520' }}>Sedan</option>
+              <option value="Pickup" style={{ background: '#0d1520' }}>Pickup</option>
+              <option value="Coupe" style={{ background: '#0d1520' }}>Coupe</option>
+            </select>
+            <select 
+              className="ui-input ui-select" 
+              style={{ flex: '1 1 160px', minWidth: 130, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              value={search.priceMax} 
+              onChange={e => setSearch(p => ({ ...p, priceMax: e.target.value }))} 
+              aria-label="Max price"
+            >
+              <option value="" style={{ background: '#0d1520' }}>Any Price</option>
+              <option value="3000000" style={{ background: '#0d1520' }}>Under 3M</option>
+              <option value="5000000" style={{ background: '#0d1520' }}>Under 5M</option>
+              <option value="10000000" style={{ background: '#0d1520' }}>Under 10M</option>
+              <option value="20000000" style={{ background: '#0d1520' }}>Under 20M</option>
+            </select>
+            <Button 
+              type="submit" 
+              variant="primary" 
+              size="lg" 
+              icon="🔍"
+              style={{
+                background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+                border: 'none',
+                boxShadow: '0 4px 20px rgba(200, 150, 42, 0.4)',
+              }}
+            >
+              Search
+            </Button>
+          </form>
+
+          {/* Quick Stats */}
+          <div style={{
+            display: 'flex',
+            gap: 48,
+            marginTop: 56,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}>
+            {[
+              { val: '12K+', label: 'Vehicles', icon: '🚗' },
+              { val: '450+', label: 'Verified Dealers', icon: '🏪' },
+              { val: '100%', label: 'Escrow Protected', icon: '🔒' },
+              { val: '8.5K+', label: 'Successful Sales', icon: '🤝' },
+            ].map((s, i) => (
+              <div key={s.label} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                animation: `fadeInUp 0.6s ease-out ${i * 0.1}s both`,
+              }}>
+                <div style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 12,
+                  background: 'rgba(200, 150, 42, 0.1)',
+                  border: '1px solid rgba(200, 150, 42, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                }}>
+                  {s.icon}
                 </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    color: '#c8962a',
+                    lineHeight: 1,
+                  }}>
+                    {s.val}
+                  </div>
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: 'rgba(255,255,255,0.6)',
+                    marginTop: 4,
+                  }}>
+                    {s.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Featured Car Preview */}
+          <div style={{
+            marginTop: 48,
+            maxWidth: 1000,
+            width: '100%',
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: 16,
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+            }}>
+              {SLIDES.map((slide, i) => (
+                <button
+                  key={slide.id}
+                  onClick={() => setCurrent(i)}
+                  style={{
+                    padding: 0,
+                    background: i === current ? 'rgba(200, 150, 42, 0.2)' : 'rgba(255,255,255,0.05)',
+                    border: i === current ? '2px solid #c8962a' : '2px solid transparent',
+                    borderRadius: 12,
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    width: 280,
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: 12, padding: 12 }}>
+                    <div style={{
+                      width: 80,
+                      height: 60,
+                      borderRadius: 8,
+                      backgroundImage: `url(${slide.image})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      flexShrink: 0,
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: '#fff',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {slide.headline}
+                      </div>
+                      <div style={{
+                        fontSize: 12,
+                        color: 'rgba(255,255,255,0.5)',
+                        marginTop: 2,
+                      }}>
+                        {slide.sub}
+                      </div>
+                      <div style={{
+                        fontSize: 14,
+                        fontWeight: 700,
+                        color: '#c8962a',
+                        marginTop: 4,
+                      }}>
+                        {slide.price}
+                      </div>
+                    </div>
+                  </div>
+                </button>
               ))}
             </div>
+          </div>
 
-            <div className="hero-press" style={{ marginTop: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, flexWrap: 'wrap', opacity: 0.6 }}>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>As featured in</span>
-              {['Business Daily', 'Nation', 'Standard', 'Citizen TV'].map(m => (
-                <span key={m} style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', letterSpacing: '0.04em' }}>{m}</span>
-              ))}
-            </div>
+          {/* Slide Indicators */}
+          <div style={{
+            display: 'flex',
+            gap: 8,
+            marginTop: 32,
+          }}>
+            {SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                style={{
+                  width: i === current ? 32 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  background: i === current ? '#c8962a' : 'rgba(255,255,255,0.3)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  padding: 0,
+                }}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
 
-            <div className="hero-cta-row" style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/browse"><Button variant="primary" size="lg" icon="🚗">Browse Cars to Buy</Button></Link>
-              <Link to="/register?role=broker"><Button variant="outline" size="lg" icon="💰">Sell Your Car</Button></Link>
-            </div>
+          {/* CTA Buttons */}
+          <div style={{
+            display: 'flex',
+            gap: 16,
+            marginTop: 40,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}>
+            <Link 
+              to="/browse"
+              style={{
+                padding: '14px 32px',
+                fontSize: 15,
+                fontWeight: 600,
+                color: '#0d1520',
+                background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+                borderRadius: 12,
+                textDecoration: 'none',
+                boxShadow: '0 8px 30px rgba(200, 150, 42, 0.4)',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 12px 40px rgba(200, 150, 42, 0.5)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 8px 30px rgba(200, 150, 42, 0.4)';
+              }}
+            >
+              🚗 Browse Cars
+            </Link>
+            <Link 
+              to="/auctions"
+              style={{
+                padding: '14px 32px',
+                fontSize: 15,
+                fontWeight: 600,
+                color: '#fff',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 12,
+                textDecoration: 'none',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+              }}
+            >
+              ⚡ Live Auctions
+            </Link>
           </div>
         </div>
 
-        {SLIDES.length > 1 && (
-          <>
-            <button className="hero-arrow hero-arrow--prev" onClick={() => setCurrent(p => (p - 1 + SLIDES.length) % SLIDES.length)} aria-label="Previous">‹</button>
-            <button className="hero-arrow hero-arrow--next" onClick={() => setCurrent(p => (p + 1) % SLIDES.length)} aria-label="Next">›</button>
-            <div className="hero-dots" role="tablist">
-              {SLIDES.map((_, i) => (
-                <button key={i} className={`hero-dot${i === current ? ' hero-dot--active' : ''}`}
-                  onClick={() => setCurrent(i)} aria-label={`Slide ${i + 1}`} role="tab" aria-selected={i === current} />
-              ))}
-            </div>
-          </>
-        )}
+        {/* Scroll Indicator */}
+        <div style={{
+          position: 'absolute',
+          bottom: 32,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 8,
+          color: 'rgba(255,255,255,0.5)',
+          animation: 'bounce 2s ease-in-out infinite',
+        }}>
+          <span style={{ fontSize: 12 }}>Scroll to explore</span>
+          <div style={{
+            width: 24,
+            height: 40,
+            border: '2px solid rgba(255,255,255,0.3)',
+            borderRadius: 12,
+            display: 'flex',
+            justifyContent: 'center',
+            paddingTop: 8,
+          }}>
+            <div style={{
+              width: 4,
+              height: 8,
+              background: '#c8962a',
+              borderRadius: 2,
+              animation: 'scroll-dot 2s ease-in-out infinite',
+            }} />
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes pulse-line {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+          }
+          @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+          }
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+          }
+          @keyframes scroll-dot {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(10px); opacity: 0.3; }
+          }
+        `}</style>
       </section>
 
       {/* ═══════════════════════════════════════════════════
