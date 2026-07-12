@@ -1204,7 +1204,7 @@
 .dealer-sidebar {
   width: 220px;
   transition: width 0.25s ease, transform 0.3s ease;
-  background: #080808;
+  background: var(--bg-card);
   border-right: 1px solid rgba(255,255,255,0.05);
   display: flex; flex-direction: column;
   overflow: hidden; flex-shrink: 0;
@@ -1246,13 +1246,13 @@
 
 /* ---- Layout ---- */
 .dealer-layout {
-  display: flex; min-height: 100vh; background: #050505;
+  display: flex; min-height: 100vh; background: var(--bg-base);
 }
 .dealer-main {
   flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
 }
 .dealer-topbar {
-  height: 48px; background: #080808;
+  height: 48px; background: var(--bg-base);
   border-bottom: 1px solid rgba(255,255,255,0.04);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 24px; flex-shrink: 0;
@@ -1262,7 +1262,7 @@
 }
 
 /* ---- Dashboard page ---- */
-.dealer-page { background: #0a0a0a; min-height: calc(100vh - 48px); }
+.dealer-page { background: var(--bg-base); min-height: calc(100vh - 48px); }
 .dealer-page-inner { max-width: 1400px; margin: 0 auto; padding: 36px 28px; }
 
 /* Dashboard header */

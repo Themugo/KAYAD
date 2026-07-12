@@ -57,6 +57,21 @@ const PrivateSellerDashboard = lazy(() => import('./pages/PrivateSellerDashboard
 const InspectorDashboard = lazy(() => import('./pages/InspectorDashboard'));
 const SupportDashboard = lazy(() => import('./pages/SupportDashboard'));
 
+// Additional pages
+const Showroom = lazy(() => import('./pages/Showroom'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
+
+// Seller pages
+const SellerAnalytics = lazy(() => import('./pages/seller/SellerAnalytics'));
+const SellerSupport = lazy(() => import('./pages/seller/SellerSupport'));
+const SellerGuide = lazy(() => import('./pages/seller/SellerGuide'));
+
+// Dealer pages
+const DealerOnboarding = lazy(() => import('./pages/dealer/DealerOnboarding'));
+const DealerSettlement = lazy(() => import('./pages/dealer/DealerSettlement'));
+const DealerAuctionSetup = lazy(() => import('./pages/dealer/DealerAuctionSetup'));
+
 function LazyFallback() {
   return (
     <div className="page loading-center">
@@ -171,11 +186,14 @@ export default function App() {
                     {/* Shared routes */}
                     <Route path="/gallery" element={<GalleryPage />} />
                     <Route path="/auctions" element={<AuctionPage />} />
+                    <Route path="/auctions/calendar" element={<AuctionCalendar />} />
+                    <Route path="/showroom" element={<Showroom />} />
                     <Route path="/cars/:id" element={<CarDetailPage />} />
                     <Route path="/dealer/:id" element={<DealerProfilePage />} />
                     <Route path="/auction/:id" element={<AuctionLivePage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
                     {/* Auth Required */}
                     <Route path="/force-password-change" element={<RequireAuth><ForcePasswordChange /></RequireAuth>} />
@@ -192,6 +210,10 @@ export default function App() {
                     <Route path="/dealer/edit/:id" element={<RequireDealer><EditCarPage /></RequireDealer>} />
                     <Route path="/dealer/analytics" element={<RequireDealer><DealerAnalytics /></RequireDealer>} />
                     <Route path="/dealer/settings" element={<RequireDealer><DealerSettings /></RequireDealer>} />
+                    <Route path="/dealer/onboarding" element={<RequireDealer><DealerOnboarding /></RequireDealer>} />
+                    <Route path="/dealer/settlement" element={<RequireDealer><DealerSettlement /></RequireDealer>} />
+                    <Route path="/dealer/auction-setup" element={<RequireDealer><DealerAuctionSetup /></RequireDealer>} />
+                    <Route path="/dealer/choose-plan" element={<RequireAuth><DealerSettings /></RequireAuth>} />
 
                     {/* Admin */}
                     <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
@@ -206,6 +228,10 @@ export default function App() {
                     {/* Dashboards */}
                     <Route path="/dashboard" element={<RequireAuth><BuyerDashboard /></RequireAuth>} />
                     <Route path="/seller" element={<RequireAuth><PrivateSellerDashboard /></RequireAuth>} />
+                    <Route path="/seller/analytics" element={<RequireAuth><SellerAnalytics /></RequireAuth>} />
+                    <Route path="/seller/support" element={<RequireAuth><SellerSupport /></RequireAuth>} />
+                    <Route path="/seller/guide" element={<RequireAuth><SellerGuide /></RequireAuth>} />
+                    <Route path="/sell" element={<RequireAuth><AddCarPage /></RequireAuth>} />
                     <Route path="/inspector" element={<RequireAuth><InspectorDashboard /></RequireAuth>} />
                     <Route path="/admin/support" element={<RequireAdmin><SupportDashboard /></RequireAdmin>} />
 

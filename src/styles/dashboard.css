@@ -4,7 +4,7 @@
    ============================================================ */
 
 /* ---- Page wrapper ---- */
-.dashboard-page { background: #0a0a0a; min-height: 100vh; }
+.dashboard-page { background: var(--bg-base); min-height: 100vh; }
 
 /* ---- Dashboard header ---- */
 .dash-header {
@@ -436,7 +436,7 @@
 
 /* ---- Private Seller Onboarding ---- */
 .form-card {
-  background: #0C0C0C;
+  background: var(--bg-elevated);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 16px;
   padding: 36px;

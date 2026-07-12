@@ -81,7 +81,7 @@
 .hero-btn-primary {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 14px 30px; border-radius: 10px;
-  background: var(--gold); color: #0a0a0a;
+  background: var(--gold); color: var(--bg-base);
   font-size: 14px; font-weight: 700; text-decoration: none;
   transition: all 0.2s; cursor: pointer; border: none;
   min-height: 48px;
@@ -131,7 +131,7 @@
 }
 
 /* ---- Trust strip ---- */
-.trust-strip { background: #0D0D0D; }
+.trust-strip { background: var(--bg-elevated); }
 
 /* ---- Featured vehicles ---- */
 .featured-section { padding: 72px 0; }

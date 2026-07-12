@@ -66,7 +66,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
 
   const quickActions = [
     { to: '/dealer/add-car', icon: Plus, label: 'New Listing', desc: 'List a vehicle', color: 'var(--gold)' },
-    { to: '/dealer/auctions', icon: Gavel, label: 'Start Auction', desc: 'Set up bidding', color: '#f97316' },
+    { to: '/dealer/auction-setup', icon: Gavel, label: 'Start Auction', desc: 'Set up bidding', color: '#f97316' },
     { to: '/dealer/analytics', icon: BarChart3, label: 'Analytics', desc: 'View reports', color: '#3b82f6' },
     { to: '/dealer/settings', icon: Settings, label: 'Settings', desc: 'Shop & payments', color: '#a855f7' },
   ];

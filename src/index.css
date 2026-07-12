@@ -1241,7 +1241,7 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: #111;
+  background: var(--bg-card);
 }
 .kd-car-card__img {
   width: 100%;

@@ -25,7 +25,7 @@
 
 /* ---- Bidding velocity ---- */
 .velocity-card {
-  background: #0C0C0C; border: 1px solid rgba(255,255,255,0.07);
+  background: var(--bg-elevated); border: 1px solid rgba(255,255,255,0.07);
   border-radius: 12px; padding: 16px 20px; margin-bottom: 20px;
 }
 .velocity-title {
@@ -57,7 +57,7 @@
 .compare-table { width: 100%; border-collapse: collapse; min-width: 600px; }
 .compare-th {
   text-align: left; padding: 14px 16px;
-  background: #0C0C0C;
+  background: var(--bg-elevated);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   font-size: 10px; color: rgba(255,255,255,0.3);
   font-weight: 700; text-transform: uppercase;
@@ -65,16 +65,16 @@
 }
 .compare-th-car {
   text-align: center; padding: 12px 10px;
-  background: #0C0C0C;
+  background: var(--bg-elevated);
   border-bottom: 1px solid rgba(255,255,255,0.06);
   border-left: 1px solid rgba(255,255,255,0.04);
 }
 .compare-thumb-wrap { position: relative; display: inline-block; }
 .compare-thumb {
   width: 80px; height: 60px; border-radius: 8px;
-  object-fit: cover; background: #111;
+  object-fit: cover; background: var(--bg-card);
 }
-.compare-thumb-placeholder { width: 80px; height: 60px; border-radius: 8px; background: #111; }
+.compare-thumb-placeholder { width: 80px; height: 60px; border-radius: 8px; background: var(--bg-card); }
 .compare-remove-btn {
   position: absolute; top: -4px; right: -4px;
   width: 18px; height: 18px; border-radius: 50%;
@@ -154,7 +154,7 @@
   width: 40px; height: 30px; border-radius: 5px;
   overflow: hidden; position: relative;
   border: 1px solid rgba(212,196,168,0.25);
-  background: #111; flex-shrink: 0;
+  background: var(--bg-card); flex-shrink: 0;
 }
 .compare-drawer-thumb-img {
   width: 100%; height: 100%; object-fit: cover;
