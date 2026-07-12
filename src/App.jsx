@@ -5,6 +5,8 @@ import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BottomNav } from './components/ui';
+
+// NavbarNew component
 import NavbarNew from './components/NavbarNew';
 
 // Eager load: critical above-the-fold pages
@@ -146,12 +148,10 @@ export default function App() {
         </a>
       </ErrorBoundary>
       <ErrorBoundary>
-        <NavbarNew />
-      </ErrorBoundary>
-      <ErrorBoundary>
         <AuthProvider>
           <SocketProvider>
             <ToastProvider>
+              <NavbarNew />
               <ErrorBoundary>
                 <Suspense fallback={<LazyFallback />}>
                   <Routes>
