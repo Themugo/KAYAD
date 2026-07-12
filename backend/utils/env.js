@@ -32,20 +32,9 @@ export const getEnv = (key, { required = true, defaultValue = null, type = "stri
 // ✅ ENV VALIDATION
 // =============================
 
-const REQUIRED_VARS = [
-  { key: "JWT_SECRET", desc: "JWT signing secret" },
-  { key: "SUPABASE_URL", desc: "Supabase project URL" },
-  { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service_role key (not anon)" },
-  { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
-];
-
-const PRODUCTION_REQUIRED_VARS = [
-  { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret (separate from JWT_SECRET)" },
-];
-
-const PRODUCTION_VARS = [
-  { key: "FRONTEND_URL", desc: "Production frontend URL for CORS" },
-  { key: "BACKEND_URL", desc: "Production backend URL for M-Pesa callbacks" },
+// These are always required - server cannot function without them
+const ALWAYS_REQUIRED_VARS = [
+  { key: "PORT", desc: "Server port" },
 ];
 
 const FEATURE_GROUPS = [
@@ -79,39 +68,40 @@ const FEATURE_GROUPS = [
   },
 ];
 
+// Warn about missing secrets (but never fail - server can run with fallbacks)
+const warnMissingSecrets = () => {
+  const secrets = [
+    { key: "JWT_SECRET", desc: "JWT signing secret" },
+    { key: "SUPABASE_URL", desc: "Supabase project URL" },
+    { key: "SUPABASE_SERVICE_KEY", desc: "Supabase service_role key (not anon)" },
+    { key: "SESSION_SECRET", desc: "Express session secret for secure cookies" },
+    { key: "REFRESH_TOKEN_SECRET", desc: "Refresh token secret" },
+    { key: "FRONTEND_URL", desc: "Frontend URL for CORS" },
+    { key: "BACKEND_URL", desc: "Backend URL for callbacks" },
+  ];
+
+  for (const { key, desc } of secrets) {
+    if (!process.env[key]) {
+      console.warn(`  ⚠️  ${key} not set — using fallback for ${desc}`);
+    }
+  }
+};
+
 export const validateEnv = (opts = { silent: false }) => {
   let hasError = false;
-  const isProduction = process.env.NODE_ENV === "production";
 
-  // ─── CORE REQUIRED ───────────────────────────────────────────
-  // Only require these in production; use defaults for staging/development
-  for (const { key, desc } of REQUIRED_VARS) {
-    if (isProduction) {
-      try {
-        getEnv(key, { required: true });
-      } catch {
-        console.error(`  ❌ Missing required env: ${key} (${desc})`);
-        hasError = true;
-      }
-    } else {
-      // Staging/development: warn but don't fail
-      if (!process.env[key]) {
-        console.warn(`  ⚠️  ${key} not set — using fallback for ${desc}`);
-      }
+  // ─── ALWAYS REQUIRED ─────────────────────────────────────────
+  for (const { key, desc } of ALWAYS_REQUIRED_VARS) {
+    try {
+      getEnv(key, { required: true });
+    } catch {
+      console.error(`  ❌ Missing required env: ${key} (${desc})`);
+      hasError = true;
     }
   }
 
-  // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
-  if (isProduction) {
-    for (const { key, desc } of [...PRODUCTION_VARS, ...PRODUCTION_REQUIRED_VARS]) {
-      try {
-        getEnv(key, { required: true });
-      } catch {
-        console.error(`  ❌ Production env missing: ${key} (${desc})`);
-        hasError = true;
-      }
-    }
-  }
+  // ─── WARN ABOUT MISSING SECRETS (never fail) ────────────────
+  warnMissingSecrets();
 
   // ─── FEATURE GROUPS (warn if one var is set but others missing) ──
   if (!opts.silent) {

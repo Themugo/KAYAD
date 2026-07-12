@@ -1,10 +1,16 @@
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
+import { isSupabaseConnected } from "./supabase.js";
 
 // =============================
 // ⏱ AUCTION TIMER ENGINE (OPTIMIZED)
 // =============================
 export const startAuctionTimer = (io) => {
+  if (!isSupabaseConnected()) {
+    console.log("⚠️ Auction timer skipped: Supabase not connected");
+    return;
+  }
+
   setInterval(async () => {
     try {
       const now = new Date();
