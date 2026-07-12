@@ -28,6 +28,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { authLimiter } from "../middleware/rateLimiter.js";
 import { validateAuth, validateResponse, authResponseSchema } from "../middleware/validate.js";
 import { accountLockout } from "../middleware/accountLockout.js";
+import { csrfProtection } from "../middleware/csrf.js";
 
 const router = express.Router();
 
@@ -105,7 +106,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/register", authLimiter, validateAuth, validateResponse(authResponseSchema), asyncHandler(register));
+router.post("/register", authLimiter, csrfProtection, validateAuth, validateResponse(authResponseSchema), asyncHandler(register));
 
 // 🔑 LOGIN
 /**
@@ -164,13 +165,13 @@ router.post("/register", authLimiter, validateAuth, validateResponse(authRespons
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/login", authLimiter, accountLockout, validateAuth, validateResponse(authResponseSchema), asyncHandler(login));
+router.post("/login", authLimiter, accountLockout, csrfProtection, validateAuth, validateResponse(authResponseSchema), asyncHandler(login));
 
 // 👤 DEMO LOGIN — one-click, no password required
-router.post("/demo-login", authLimiter, validateResponse(authResponseSchema), asyncHandler(demoLogin));
+router.post("/demo-login", authLimiter, csrfProtection, validateResponse(authResponseSchema), asyncHandler(demoLogin));
 
 // 🔁 REFRESH TOKEN (CRITICAL 🔥)
-router.post("/refresh", authLimiter, validateResponse(authResponseSchema), asyncHandler(refreshToken));
+router.post("/refresh", authLimiter, csrfProtection, validateResponse(authResponseSchema), asyncHandler(refreshToken));
 
 // =============================
 // 🔐 PROTECTED ROUTES
@@ -296,6 +297,7 @@ router.get(
 router.post(
   "/logout",
   protect, // 🔥 MUST be protected to invalidate tokenVersion
+  csrfProtection,
   asyncHandler(logout),
 );
 
@@ -346,7 +348,7 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/profile", protect, asyncHandler(updateProfile));
+router.put("/profile", protect, csrfProtection, asyncHandler(updateProfile));
 
 // =============================
 // 🔑 CHANGE PASSWORD
@@ -399,7 +401,7 @@ router.put("/profile", protect, asyncHandler(updateProfile));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/change-password", protect, asyncHandler(changePassword));
+router.put("/change-password", protect, csrfProtection, asyncHandler(changePassword));
 
 // =============================
 // 📧 EMAIL VERIFICATION
@@ -457,7 +459,7 @@ router.put("/change-password", protect, asyncHandler(changePassword));
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/verify-email/:token", authLimiter, asyncHandler(verifyEmail));
-router.post("/resend-verification", authLimiter, asyncHandler(resendVerification));
+router.post("/resend-verification", authLimiter, csrfProtection, asyncHandler(resendVerification));
 
 // =============================
 // 🔑 PASSWORD RESET (public)
@@ -537,8 +539,8 @@ router.post("/resend-verification", authLimiter, asyncHandler(resendVerification
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/forgot-password", authLimiter, asyncHandler(forgotPassword));
-router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
+router.post("/forgot-password", authLimiter, csrfProtection, asyncHandler(forgotPassword));
+router.post("/reset-password", authLimiter, csrfProtection, asyncHandler(resetPassword));
 
 // =============================
 // 🔐 SESSION MANAGEMENT (DASHBOARD)
@@ -646,14 +648,14 @@ router.post("/reset-password", authLimiter, asyncHandler(resetPassword));
  *               $ref: '#/components/schemas/Error'
  */
 router.get("/sessions", protect, asyncHandler(getSessions));
-router.delete("/sessions/:tokenId", protect, asyncHandler(revokeSession));
-router.post("/sessions/revoke-all", protect, asyncHandler(revokeAllSessions));
+router.delete("/sessions/:tokenId", protect, csrfProtection, asyncHandler(revokeSession));
+router.post("/sessions/revoke-all", protect, csrfProtection, asyncHandler(revokeAllSessions));
 
 // =============================
 // 📞 PHONE VERIFICATION
 // =============================
-router.post("/send-otp", protect, asyncHandler(sendPhoneOTP));
-router.post("/verify-phone", protect, asyncHandler(verifyPhoneOTP));
+router.post("/send-otp", protect, csrfProtection, asyncHandler(sendPhoneOTP));
+router.post("/verify-phone", protect, csrfProtection, asyncHandler(verifyPhoneOTP));
 router.get("/phone-status", protect, asyncHandler(checkPhoneVerification));
 
 export default router;
