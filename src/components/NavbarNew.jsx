@@ -111,10 +111,11 @@ export default function NavbarNew() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          background: scrolled ? 'rgba(7, 9, 12, 0.98)' : 'rgba(7, 9, 12, 0.92)',
+          background: scrolled ? 'rgba(255, 255, 255, 0.98)' : 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(200, 150, 42, 0.2)' : '1px solid transparent',
+          borderBottom: scrolled ? '1px solid rgba(226, 232, 240, 1)' : '1px solid transparent',
           transition: 'all 0.3s ease',
+          boxShadow: scrolled ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
         }}
         aria-label="Main navigation"
       >
@@ -140,21 +141,21 @@ export default function NavbarNew() {
               width: 40,
               height: 40,
               borderRadius: 10,
-              background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 20,
-              boxShadow: '0 4px 12px rgba(200, 150, 42, 0.3)',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
             }}>
               🚗
             </div>
             <span style={{
-              fontWeight: 800,
-              fontSize: '1.35rem',
-              letterSpacing: '0.06em',
-              color: '#fff',
-              textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+              fontWeight: 700,
+              fontSize: '1.4rem',
+              letterSpacing: '-0.02em',
+              color: '#0F172A',
+              fontFamily: 'Outfit, sans-serif',
             }}>KAYAD</span>
           </Link>
 
@@ -176,22 +177,22 @@ export default function NavbarNew() {
                     padding: '10px 18px',
                     fontSize: 14,
                     fontWeight: active ? 600 : 500,
-                    color: active ? '#c8962a' : 'rgba(255, 255, 255, 0.75)',
+                    color: active ? '#2563EB' : '#475569',
                     textDecoration: 'none',
                     borderRadius: 8,
                     transition: 'all 0.2s ease',
-                    background: active ? 'rgba(200, 150, 42, 0.1)' : 'transparent',
+                    background: active ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
                     position: 'relative',
                   }}
                   onMouseEnter={e => {
                     if (!active) {
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                      e.currentTarget.style.color = '#0F172A';
+                      e.currentTarget.style.background = 'rgba(15, 23, 42, 0.04)';
                     }
                   }}
                   onMouseLeave={e => {
                     if (!active) {
-                      e.currentTarget.style.color = 'rgba(255, 255, 255, 0.75)';
+                      e.currentTarget.style.color = '#475569';
                       e.currentTarget.style.background = 'transparent';
                     }
                   }}
@@ -206,7 +207,7 @@ export default function NavbarNew() {
                       transform: 'translateX(-50%)',
                       width: 20,
                       height: 3,
-                      background: 'linear-gradient(90deg, #c8962a, #f4c430)',
+                      background: 'linear-gradient(90deg, #3B82F6, #2563EB)',
                       borderRadius: 2,
                     }} />
                   )}
@@ -229,9 +230,9 @@ export default function NavbarNew() {
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.8)',
+                background: 'rgba(15, 23, 42, 0.04)',
+                border: '1px solid #E2E8F0',
+                color: '#475569',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -240,12 +241,14 @@ export default function NavbarNew() {
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(200, 150, 42, 0.3)';
+                e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                e.currentTarget.style.borderColor = '#3B82F6';
+                e.currentTarget.style.color = '#2563EB';
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.background = 'rgba(15, 23, 42, 0.04)';
+                e.currentTarget.style.borderColor = '#E2E8F0';
+                e.currentTarget.style.color = '#475569';
               }}
               aria-label="Search"
             >
@@ -261,9 +264,9 @@ export default function NavbarNew() {
                     width: 40,
                     height: 40,
                     borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    background: 'rgba(15, 23, 42, 0.04)',
+                    border: '1px solid #E2E8F0',
+                    color: '#475569',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -273,10 +276,12 @@ export default function NavbarNew() {
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                    e.currentTarget.style.borderColor = '#3B82F6';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    e.currentTarget.style.background = 'rgba(15, 23, 42, 0.04)';
+                    e.currentTarget.style.borderColor = '#E2E8F0';
                   }}
                   aria-label="Notifications"
                 >
@@ -289,7 +294,7 @@ export default function NavbarNew() {
                       width: 18,
                       height: 18,
                       borderRadius: '50%',
-                      background: '#ef4444',
+                      background: '#EF4444',
                       color: '#fff',
                       fontSize: 10,
                       fontWeight: 700,
@@ -309,28 +314,28 @@ export default function NavbarNew() {
                     top: 'calc(100% + 12px)',
                     right: 0,
                     width: 360,
-                    background: '#0d1520',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
                     borderRadius: 16,
-                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                    boxShadow: '0 20px 60px rgba(15, 23, 42, 0.15)',
                     overflow: 'hidden',
                     zIndex: 200,
                   }}>
                     <div style={{
                       padding: '16px 20px',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderBottom: '1px solid #E2E8F0',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}>
-                      <span style={{ fontWeight: 600, color: '#fff' }}>Notifications</span>
+                      <span style={{ fontWeight: 600, color: '#0F172A' }}>Notifications</span>
                       {unread > 0 && (
                         <button
                           onClick={markAllRead}
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: '#c8962a',
+                            color: '#3B82F6',
                             fontSize: 12,
                             cursor: 'pointer',
                           }}
@@ -341,18 +346,18 @@ export default function NavbarNew() {
                     </div>
                     <div style={{ maxHeight: 320, overflowY: 'auto' }}>
                       {notifs.length === 0 ? (
-                        <div style={{ padding: 32, textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                        <div style={{ padding: 32, textAlign: 'center', color: '#94A3B8' }}>
                           No notifications yet
                         </div>
                       ) : (
                         notifs.map(n => (
                           <div key={n._id || n.id} style={{
                             padding: '12px 20px',
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                            background: n.read ? 'transparent' : 'rgba(200, 150, 42, 0.05)',
+                            borderBottom: '1px solid #F1F5F9',
+                            background: n.read ? 'transparent' : 'rgba(59, 130, 246, 0.04)',
                           }}>
-                            <div style={{ fontSize: 13, color: '#fff', marginBottom: 4 }}>{n.title || n.message}</div>
-                            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{timeAgo(n.createdAt)}</div>
+                            <div style={{ fontSize: 13, color: '#0F172A', marginBottom: 4 }}>{n.title || n.message}</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8' }}>{timeAgo(n.createdAt)}</div>
                           </div>
                         ))
                       )}
@@ -369,20 +374,20 @@ export default function NavbarNew() {
                 padding: '10px 20px',
                 fontSize: 14,
                 fontWeight: 600,
-                color: '#0d1520',
-                background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+                color: '#FFFFFF',
+                background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
                 borderRadius: 10,
                 textDecoration: 'none',
-                boxShadow: '0 4px 12px rgba(200, 150, 42, 0.3)',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(200, 150, 42, 0.4)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(200, 150, 42, 0.3)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
               }}
             >
               🚗 Sell
@@ -399,23 +404,25 @@ export default function NavbarNew() {
                     gap: 10,
                     padding: '6px 12px',
                     borderRadius: 10,
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+                    e.currentTarget.style.background = '#F1F5F9';
+                    e.currentTarget.style.borderColor = '#3B82F6';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                    e.currentTarget.style.background = '#F8FAFC';
+                    e.currentTarget.style.borderColor = '#E2E8F0';
                   }}
                 >
-                  <Avatar size="sm" variant="gold" initials={initials(user?.name)} />
-                  <span style={{ color: '#fff', fontSize: 13, fontWeight: 500 }}>
+                  <Avatar size="sm" variant="blue" initials={initials(user?.name)} />
+                  <span style={{ color: '#0F172A', fontSize: 13, fontWeight: 500 }}>
                     {user?.name?.split(' ')[0]}
                   </span>
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>▾</span>
+                  <span style={{ color: '#94A3B8', fontSize: 12 }}>▾</span>
                 </button>
 
                 {/* User Dropdown */}
@@ -425,16 +432,16 @@ export default function NavbarNew() {
                     top: 'calc(100% + 12px)',
                     right: 0,
                     width: 240,
-                    background: '#0d1520',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
                     borderRadius: 16,
-                    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+                    boxShadow: '0 20px 60px rgba(15, 23, 42, 0.15)',
                     overflow: 'hidden',
                     zIndex: 200,
                   }}>
-                    <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                      <div style={{ fontWeight: 600, color: '#fff', marginBottom: 2 }}>{user?.name}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{user?.email}</div>
+                    <div style={{ padding: '16px 20px', borderBottom: '1px solid #E2E8F0' }}>
+                      <div style={{ fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>{user?.name}</div>
+                      <div style={{ fontSize: 12, color: '#94A3B8' }}>{user?.email}</div>
                     </div>
                     {[
                       { to: '/profile', icon: '👤', label: 'My Profile' },
@@ -448,19 +455,19 @@ export default function NavbarNew() {
                         alignItems: 'center',
                         gap: 12,
                         padding: '12px 20px',
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: '#475569',
                         textDecoration: 'none',
                         fontSize: 13,
                         transition: 'background 0.2s',
                       }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#0F172A'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; }}
                       >
                         <span style={{ fontSize: 16 }}>{item.icon}</span>
                         {item.label}
                       </Link>
                     ))}
-                    <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.1)', padding: '8px 0' }}>
+                    <div style={{ borderTop: '1px solid #E2E8F0', padding: '8px 0' }}>
                       <button
                         onClick={handleLogout}
                         style={{
@@ -471,12 +478,12 @@ export default function NavbarNew() {
                           padding: '12px 20px',
                           background: 'none',
                           border: 'none',
-                          color: '#ef4444',
+                          color: '#EF4444',
                           fontSize: 13,
                           cursor: 'pointer',
                           textAlign: 'left',
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.04)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                       >
                         <span style={{ fontSize: 16 }}>🚪</span>
@@ -493,19 +500,21 @@ export default function NavbarNew() {
                   padding: '10px 24px',
                   fontSize: 14,
                   fontWeight: 600,
-                  color: '#fff',
+                  color: '#0F172A',
                   background: 'transparent',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                  border: '1px solid #E2E8F0',
                   borderRadius: 10,
                   textDecoration: 'none',
                   transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                  e.currentTarget.style.borderColor = '#3B82F6';
+                  e.currentTarget.style.color = '#3B82F6';
+                  e.currentTarget.style.background = 'rgba(59, 130, 246, 0.04)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.25)';
+                  e.currentTarget.style.borderColor = '#E2E8F0';
+                  e.currentTarget.style.color = '#0F172A';
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
@@ -521,8 +530,8 @@ export default function NavbarNew() {
                 width: 40,
                 height: 40,
                 borderRadius: 10,
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
                 cursor: 'pointer',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -537,7 +546,7 @@ export default function NavbarNew() {
                 display: 'block',
                 width: 20,
                 height: 2,
-                background: '#fff',
+                background: '#0F172A',
                 borderRadius: 2,
                 transform: mobileOpen ? 'translateY(7px) rotate(45deg)' : 'none',
                 transition: 'transform 0.3s',
@@ -571,9 +580,9 @@ export default function NavbarNew() {
             top: '100%',
             left: 0,
             right: 0,
-            background: 'rgba(7, 9, 12, 0.98)',
+            background: 'rgba(255, 255, 255, 0.98)',
             backdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(200, 150, 42, 0.2)',
+            borderBottom: '1px solid #E2E8F0',
             padding: '24px 32px',
             zIndex: 99,
           }}>
@@ -587,8 +596,8 @@ export default function NavbarNew() {
                 flex: 1,
                 display: 'flex',
                 alignItems: 'center',
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
                 borderRadius: 12,
                 padding: '0 16px',
               }}>
@@ -604,7 +613,7 @@ export default function NavbarNew() {
                     background: 'transparent',
                     border: 'none',
                     outline: 'none',
-                    color: '#fff',
+                    color: '#0F172A',
                     fontSize: 15,
                     padding: '14px 0',
                   }}
@@ -615,10 +624,10 @@ export default function NavbarNew() {
                 type="submit"
                 style={{
                   padding: '14px 28px',
-                  background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+                  background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
                   border: 'none',
                   borderRadius: 12,
-                  color: '#0d1520',
+                  color: '#FFFFFF',
                   fontWeight: 600,
                   fontSize: 14,
                   cursor: 'pointer',
@@ -638,7 +647,7 @@ export default function NavbarNew() {
             position: 'fixed',
             inset: 0,
             zIndex: 999,
-            background: 'rgba(0, 0, 0, 0.7)',
+            background: 'rgba(0, 0, 0, 0.5)',
             backdropFilter: 'blur(4px)',
           }}
           onClick={() => setMobileOpen(false)}
@@ -650,8 +659,8 @@ export default function NavbarNew() {
               right: 0,
               bottom: 0,
               width: 'min(85vw, 320px)',
-              background: '#0d1520',
-              borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
+              background: '#FFFFFF',
+              borderLeft: '1px solid #E2E8F0',
               overflowY: 'auto',
               paddingTop: 80,
             }}
@@ -660,15 +669,15 @@ export default function NavbarNew() {
             {isAuth ? (
               <div style={{
                 padding: '20px 24px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.07)',
+                borderBottom: '1px solid #E2E8F0',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
               }}>
-                <Avatar size="md" variant="gold" initials={initials(user?.name)} />
+                <Avatar size="md" variant="blue" initials={initials(user?.name)} />
                 <div>
-                  <div style={{ fontWeight: 700, color: '#fff' }}>{user?.name}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{user?.email}</div>
+                  <div style={{ fontWeight: 700, color: '#0F172A' }}>{user?.name}</div>
+                  <div style={{ fontSize: 12, color: '#94A3B8' }}>{user?.email}</div>
                 </div>
               </div>
             ) : (
@@ -680,8 +689,8 @@ export default function NavbarNew() {
                     flex: 1,
                     justifyContent: 'center',
                     background: 'transparent',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    color: '#fff',
+                    border: '1px solid #E2E8F0',
+                    color: '#0F172A',
                   }}
                 >
                   Sign In
@@ -692,8 +701,8 @@ export default function NavbarNew() {
                   style={{
                     flex: 1,
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
-                    color: '#0d1520',
+                    background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                    color: '#FFFFFF',
                   }}
                 >
                   Join Free
@@ -715,10 +724,10 @@ export default function NavbarNew() {
                       padding: '14px 24px',
                       fontSize: 15,
                       fontWeight: active ? 600 : 400,
-                      color: active ? '#c8962a' : 'rgba(255, 255, 255, 0.7)',
+                      color: active ? '#3B82F6' : '#475569',
                       textDecoration: 'none',
-                      background: active ? 'rgba(200, 150, 42, 0.1)' : 'transparent',
-                      borderLeft: active ? '3px solid #c8962a' : '3px solid transparent',
+                      background: active ? 'rgba(59, 130, 246, 0.08)' : 'transparent',
+                      borderLeft: active ? '3px solid #3B82F6' : '3px solid transparent',
                     }}
                   >
                     {label}
@@ -732,7 +741,7 @@ export default function NavbarNew() {
                 <div style={{
                   padding: '12px 24px 4px',
                   fontSize: 10,
-                  color: 'rgba(255, 255, 255, 0.3)',
+                  color: '#94A3B8',
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
                 }}>
@@ -753,7 +762,7 @@ export default function NavbarNew() {
                       gap: 14,
                       padding: '12px 24px',
                       fontSize: 14,
-                      color: 'rgba(255, 255, 255, 0.7)',
+                      color: '#475569',
                       textDecoration: 'none',
                     }}
                   >
@@ -770,7 +779,7 @@ export default function NavbarNew() {
                       gap: 14,
                       padding: '12px 24px',
                       fontSize: 14,
-                      color: '#c8962a',
+                      color: '#3B82F6',
                       textDecoration: 'none',
                     }}
                   >
@@ -778,7 +787,7 @@ export default function NavbarNew() {
                     Dealer Hub
                   </Link>
                 )}
-                <div style={{ padding: '8px 0', borderTop: '1px solid rgba(255, 255, 255, 0.07)', marginTop: 8 }}>
+                <div style={{ padding: '8px 0', borderTop: '1px solid #E2E8F0', marginTop: 8 }}>
                   <button
                     onClick={handleLogout}
                     style={{
@@ -789,7 +798,7 @@ export default function NavbarNew() {
                       padding: '14px 24px',
                       background: 'none',
                       border: 'none',
-                      color: '#ef4444',
+                      color: '#EF4444',
                       fontSize: 14,
                       cursor: 'pointer',
                       textAlign: 'left',
