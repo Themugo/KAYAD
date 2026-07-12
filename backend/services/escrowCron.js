@@ -16,6 +16,7 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { STATES } from "./escrowStateMachine.js";
 import { findAll, findOne, create, update } from "../db/index.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
 const ENABLED = process.env.ESCROW_CRON_ENABLED !== "false";
@@ -144,6 +145,11 @@ let _cronHandle = null;
 export const startEscrowCron = () => {
   if (!ENABLED) {
     logWarn("EscrowCron disabled (ESCROW_CRON_ENABLED=false)");
+    return;
+  }
+
+  if (!isSupabaseConnected()) {
+    logWarn("EscrowCron skipped: Supabase not connected");
     return;
   }
 

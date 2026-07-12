@@ -1,7 +1,14 @@
 import { sendNotification } from "./notification.service.js";
 import { findAll } from "../db/index.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
+import { logWarn } from "../utils/logger.js";
 
 export const checkVerificationDeadlines = async () => {
+  if (!isSupabaseConnected()) {
+    logWarn("checkVerificationDeadlines skipped: Supabase not connected");
+    return;
+  }
+
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const stale = await findAll("dealer_verifications", {
     filters: { verificationStatus: "pending", updatedAt: { $lte: sevenDaysAgo } },

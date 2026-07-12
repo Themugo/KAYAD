@@ -1,8 +1,9 @@
 import { createNotification } from "../controllers/notificationController.js";
 import { sendSavedSearchAlertEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
-import { logInfo } from "../utils/logger.js";
+import { logInfo, logWarn } from "../utils/logger.js";
 import { findAll, findById, update } from "../db/index.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const CHECK_INTERVAL = 10 * 60 * 1000;
 
@@ -35,6 +36,11 @@ const shouldNotify = (prefs, channel) => {
 };
 
 export const startSavedSearchCron = () => {
+  if (!isSupabaseConnected()) {
+    logWarn("SavedSearchCron skipped: Supabase not connected");
+    return;
+  }
+
   const tick = async () => {
     try {
       const searches = await findAll("saved_searches", { filters: { notify: true } });

@@ -934,6 +934,12 @@ if (NODE_ENV !== "test") {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("unhandledRejection", async (err) => {
+    // Skip shutdown for Supabase connection errors - server can run without database
+    if (err.message && err.message.includes("Supabase not initialized")) {
+      logError("Supabase-related unhandled rejection (non-fatal)", err);
+      return;
+    }
+
     logError("Unhandled rejection", err);
     recordError("unhandled_rejection", String(err));
 

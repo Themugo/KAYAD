@@ -1,11 +1,16 @@
 import { sendNotification } from "./notification.service.js";
-import { logInfo } from "../utils/logger.js";
+import { logInfo, logWarn } from "../utils/logger.js";
 import { findAll, findOne, update } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const CHECK_INTERVAL = 15 * 60 * 1000;
 
 export function startPriceAlertCron() {
+  if (!isSupabaseConnected()) {
+    logWarn("PriceAlertCron skipped: Supabase not connected");
+    return;
+  }
+
   logInfo(`PriceAlertCron: ${CHECK_INTERVAL / 60000}-min cycle`);
   run();
   setInterval(run, CHECK_INTERVAL);

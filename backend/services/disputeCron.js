@@ -10,6 +10,7 @@ import { STATES } from "./disputeStateMachine.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { findAll, create } from "../db/index.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const ENABLED = process.env.DISPUTE_CRON_ENABLED !== "false";
 
@@ -85,6 +86,11 @@ let _cronHandle = null;
 export const startDisputeCron = () => {
   if (!ENABLED) {
     logWarn("DisputeCron disabled (DISPUTE_CRON_ENABLED=false)");
+    return;
+  }
+
+  if (!isSupabaseConnected()) {
+    logWarn("DisputeCron skipped: Supabase not connected");
     return;
   }
 

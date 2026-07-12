@@ -7,12 +7,12 @@
 //   AUCTION_REMINDER_ENABLED=true   (default: true)
 // ─────────────────────────────────────────────────────────────
 
-import { logInfo } from "../utils/logger.js";
+import { logInfo, logWarn } from "../utils/logger.js";
 import { getIO } from "../utils/io.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { addEmailJob } from "../queues/emailQueue.js";
 import { findAll, findById, create, update } from "../db/index.js";
-import { getSupabase } from "../utils/supabase.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 let cronEmailService = {};
 try {
@@ -121,6 +121,11 @@ let _cronHandle = null;
 export const startAuctionReminderCron = () => {
   if (!ENABLED) {
     logInfo("AuctionReminderCron disabled (AUCTION_REMINDER_ENABLED=false)");
+    return;
+  }
+
+  if (!isSupabaseConnected()) {
+    logWarn("AuctionReminderCron skipped: Supabase not connected");
     return;
   }
 

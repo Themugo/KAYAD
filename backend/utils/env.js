@@ -81,19 +81,28 @@ const FEATURE_GROUPS = [
 
 export const validateEnv = (opts = { silent: false }) => {
   let hasError = false;
+  const isProduction = process.env.NODE_ENV === "production";
 
   // ─── CORE REQUIRED ───────────────────────────────────────────
+  // Only require these in production; use defaults for staging/development
   for (const { key, desc } of REQUIRED_VARS) {
-    try {
-      getEnv(key, { required: true });
-    } catch {
-      console.error(`  ❌ Missing required env: ${key} (${desc})`);
-      hasError = true;
+    if (isProduction) {
+      try {
+        getEnv(key, { required: true });
+      } catch {
+        console.error(`  ❌ Missing required env: ${key} (${desc})`);
+        hasError = true;
+      }
+    } else {
+      // Staging/development: warn but don't fail
+      if (!process.env[key]) {
+        console.warn(`  ⚠️  ${key} not set — using fallback for ${desc}`);
+      }
     }
   }
 
   // ─── PRODUCTION-ONLY REQUIRED ────────────────────────────────
-  if (process.env.NODE_ENV === "production") {
+  if (isProduction) {
     for (const { key, desc } of [...PRODUCTION_VARS, ...PRODUCTION_REQUIRED_VARS]) {
       try {
         getEnv(key, { required: true });

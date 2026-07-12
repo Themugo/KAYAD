@@ -10,6 +10,7 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
 import { logInfo, logWarn, logError, logDebug } from "../utils/logger.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 // =============================
 // 🔧 CONFIG
@@ -282,6 +283,11 @@ const isAuctionActive = async (roomId) => {
 // 🚀 START AUCTION ENGINE (BOOTSTRAP)
 // =============================
 export const startAuctionEngine = async () => {
+  if (!isSupabaseConnected()) {
+    logWarn("Auction engine skipped: Supabase not connected");
+    return;
+  }
+
   try {
     logInfo("Bootstrapping auctions...");
     const now = Date.now();

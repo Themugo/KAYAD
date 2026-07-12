@@ -1,5 +1,6 @@
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { runIntegrityScan } from "./auctionIntegrityService.js";
+import { isSupabaseConnected } from "../utils/supabase.js";
 
 const ENABLED = process.env.AI_CRON_ENABLED !== "false";
 const SCAN_INTERVAL_HOURS = parseInt(process.env.AI_SCAN_INTERVAL_HOURS || "4");
@@ -29,6 +30,11 @@ const runDeepScan = async () => {
 export const startIntegrityCron = () => {
   if (!ENABLED) {
     logWarn("IntegrityCron disabled (AI_CRON_ENABLED=false)");
+    return;
+  }
+
+  if (!isSupabaseConnected()) {
+    logWarn("IntegrityCron skipped: Supabase not connected");
     return;
   }
 
