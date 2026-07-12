@@ -96,7 +96,7 @@ jobs:
     name: Deploy to Vercel
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -111,9 +111,6 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      - name: Pull Vercel Project Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Check if secrets are configured
         id: secrets-check
         run: |
@@ -122,6 +119,9 @@ jobs:
           else
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
           fi
+
+      - name: Pull Vercel Project Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project for Production (with secrets)
         if: steps.secrets-check.outputs.secrets_status == 'configured'
@@ -137,5 +137,22 @@ jobs:
           VITE_SUPABASE_URL: https://placeholder.supabase.co
           VITE_SUPABASE_ANON_KEY: placeholder-key
 
-      - name: Deploy to Vercel (Production)
+      # Deploy to giclan-motors (default project)
+      - name: Deploy to giclan-motors
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Deploy to kayad-motors (if configured)
+      - name: Deploy to kayad-motors
+        if: vars.VERCEL_PROJECT_ID_KAYAD_MOTORS != ''
+        run: |
+          vercel deploy --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --projectId=${{ vars.VERCEL_PROJECT_ID_KAYAD_MOTORS }}
+
+      # Deploy to kayad-space (if configured)
+      - name: Deploy to kayad-space
+        if: vars.VERCEL_PROJECT_ID_KAYAD_SPACE != ''
+        run: |
+          vercel deploy --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --projectId=${{ vars.VERCEL_PROJECT_ID_KAYAD_SPACE }}

@@ -13,13 +13,16 @@ if (typeof window !== 'undefined') {
 
 // ─── Service Worker Registration ──────────────────────────────
 
+// Development logger - only logs in development mode
+const devLog = import.meta.env.DEV ? console.log.bind(console, '[App]') : () => {};
+
 function registerServiceWorker() {
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('[App] Service Worker registered:', registration.scope);
+          devLog('Service Worker registered:', registration.scope);
           
           // Check for updates
           registration.addEventListener('updatefound', () => {
@@ -27,7 +30,7 @@ function registerServiceWorker() {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 // New content available
-                console.log('[App] New content available, refresh to update');
+                devLog('New content available, refresh to update');
               }
             });
           });
@@ -41,7 +44,7 @@ function registerServiceWorker() {
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
         refreshing = true;
-        console.log('[App] New SW active, reloading...');
+        devLog('New SW active, reloading...');
         window.location.reload();
       });
     });
@@ -50,7 +53,7 @@ function registerServiceWorker() {
     if (navigator.storage && navigator.storage.persist) {
       navigator.storage.persist().then((granted) => {
         if (granted) {
-          console.log('[App] Persistent storage granted');
+          devLog('Persistent storage granted');
         }
       });
     }
