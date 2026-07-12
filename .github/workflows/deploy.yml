@@ -91,3 +91,51 @@ jobs:
           ls -la dist/assets/
           grep -l "react" dist/assets/*.js || true
           echo "Critical file check passed"
+
+  deploy-vercel:
+    name: Deploy to Vercel
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Pull Vercel Project Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Check if secrets are configured
+        id: secrets-check
+        run: |
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "secrets_status=configured" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_status=missing" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build Project for Production (with secrets)
+        if: steps.secrets-check.outputs.secrets_status == 'configured'
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Build Project for Production (without secrets)
+        if: steps.secrets-check.outputs.secrets_status == 'missing'
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VITE_SUPABASE_URL: https://placeholder.supabase.co
+          VITE_SUPABASE_ANON_KEY: placeholder-key
+
+      - name: Deploy to Vercel (Production)
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
