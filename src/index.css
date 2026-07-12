@@ -108,6 +108,57 @@
   --color-error:   var(--red-500);
   --color-info:    var(--blue-500);
 
+  /* ---- Legacy "gold" accent — retired ----
+     125+ files across the app still reference --gold*.
+     These were never defined, so every one of those
+     rules was silently falling back to black/transparent —
+     the source of the leftover black-and-gold look.
+     Aliasing them here (instead of touching every file)
+     replaces it with the premium emerald accent sitewide,
+     in one place. */
+  --gold:             var(--emerald-500);
+  --gold-100:         var(--emerald-100);
+  --gold-200:         rgba(16, 185, 129, 0.2);
+  --gold-300:         #6EE7B7;
+  --gold-400:         #34D399;
+  --gold-500:         var(--emerald-500);
+  --gold-light:       var(--emerald-100);
+  --gold-dark:        var(--emerald-600);
+  --gold-muted:       rgba(16, 185, 129, 0.55);
+  --gold-glow:        rgba(16, 185, 129, 0.25);
+  --gold-glow-strong: rgba(16, 185, 129, 0.4);
+
+  /* ---- Undefined shorthand aliases — sitewide fix ----
+     These generic names (--text, --card, --bg, --radius, --red,
+     --green, --blue, --orange, --purple, --teal, --gray, --bg-deep,
+     etc.) are referenced by hundreds of call sites across the app
+     (admin panels, payment states, error pages, security logs,
+     dashboards, mobile headers) but were never defined anywhere —
+     so all of that text, all those card backgrounds, status colors
+     and corner radii were silently rendering as black/transparent/0
+     everywhere. Defining them here as aliases to the real premium
+     tokens fixes them all at once, without touching every file. */
+  --text:             var(--text-primary);
+  --card:             var(--bg-card);
+  --bg:               var(--bg-primary);
+  --bg-card-hover:    var(--card-hover);
+  --bg-deep:          var(--slate-900);
+  --radius:           var(--radius-md);
+  --font-body:        var(--font-sans);
+  --skeleton:         var(--bg-muted);
+  --gray:             var(--slate-500);
+  --red:              var(--red-500);
+  --green:            var(--emerald-500);
+  --blue:             var(--blue-500);
+  --blue-200:         #BFDBFE;
+  --blue-300:         #93C5FD;
+  --orange:           var(--orange-400);
+  --purple:           var(--purple-500);
+  --teal:             #14B8A6;
+  --dealer-radius:    var(--radius-lg);
+  --mobile-radius-full: var(--radius-full);
+  --mobile-z-dropdown:  var(--z-dropdown);
+
   /* Spacing scale (8px base) */
   --space-1:  4px;
   --space-2:  8px;
@@ -1010,16 +1061,20 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: rgba(15, 19, 24, 0.98);
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-around;
   z-index: var(--z-fixed);
 }
 .ui-bottom-nav__item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1027,16 +1082,20 @@
   padding: 8px 12px;
   border: none;
   background: none;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   color: var(--text-muted);
   font-size: 0.65rem;
   font-weight: 600;
-  transition: color var(--dur-fast) ease;
+  transition: color var(--dur-fast) ease, background var(--dur-fast) ease;
   text-decoration: none;
   flex: 1;
   max-width: 72px;
 }
-.ui-bottom-nav__item--active { color: var(--blue-400); }
+.ui-bottom-nav__item--active {
+  color: var(--blue-600);
+  background: var(--blue-100);
+}
 .ui-bottom-nav__icon { font-size: 1.3rem; }
 .ui-bottom-nav__badge {
   position: absolute;
@@ -2005,7 +2064,13 @@
   border-bottom: 1px solid var(--border);
 }
 
-/* ---- Image Gallery ---- */
+/* ---- Image Gallery ----
+   The main slider must always show the whole vehicle, no matter what
+   size or aspect ratio the dealer's photo was uploaded at — so we
+   never crop (object-fit: cover). Instead the true image is
+   letterboxed to fit entirely inside the frame, and a blurred,
+   zoomed copy of the same photo fills the background behind it so
+   there are no hard bars, just a soft premium backdrop. */
 .gallery-main {
   position: relative;
   border-radius: 14px;
@@ -2013,10 +2078,30 @@
   margin-bottom: 12px;
   background: var(--bg-elevated);
 }
-.gallery-main img {
+.gallery-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--gallery-main-bg, none);
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) brightness(0.85);
+  transform: scale(1.15);
+  z-index: 0;
+}
+.gallery-main .opt-img-wrap {
+  position: relative;
+  z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  background: transparent !important;
+}
+.gallery-main img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 .gallery-badges {

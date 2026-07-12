@@ -1,10 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MOCK_CARS, formatKES } from '../api/api';
+import { carsAPI, formatKES } from '../api/api';
 import { CountdownDisplay } from '../hooks/useCountdown';
 
 export default function AuctionPage() {
-  const auctions = MOCK_CARS.filter((c) => c.isAuction);
+  const [auctions, setAuctions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await carsAPI.list({ limit: 100 });
+        const cars = data.cars || data.data || [];
+        if (mounted) {
+          setAuctions(cars.filter(c => c.isAuction || c.auction_status === 'live'));
+        }
+      } catch { /* show empty state below */ }
+      if (mounted) setLoading(false);
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <div className="page">
@@ -22,7 +38,7 @@ export default function AuctionPage() {
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[
               { label: 'Live Auctions', value: auctions.length },
-              { label: 'Total Bids', value: auctions.reduce((a, c) => a + (c.totalBids || 0), 0) },
+              { label: 'Total Bids', value: auctions.reduce((a, c) => a + (c.bidsCount || c.totalBids || 0), 0) },
               { label: 'Avg. Saving', value: '12%' },
             ].map((s, i) => (
               <div key={i} className="stat-box" style={{ minWidth: 140 }}>
@@ -40,7 +56,11 @@ export default function AuctionPage() {
           <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>Bids update in real-time. Sign in to participate.</p>
         </div>
 
-        {auctions.length === 0 ? (
+        {loading ? (
+          <div className="car-grid">
+            {[...Array(6)].map((_, i) => <div key={i} className="skeleton-card" />)}
+          </div>
+        ) : auctions.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🔨</div>
             <h3>No active auctions</h3>
@@ -49,10 +69,10 @@ export default function AuctionPage() {
         ) : (
           <div className="car-grid">
             {auctions.map((car) => (
-              <Link key={car.id} to={`/auction/${car.id}`} style={{ display: 'block' }}>
+              <Link key={car._id || car.id} to={`/auction/${car._id || car.id}`} style={{ display: 'block' }}>
                 <div className="card" style={{ overflow: 'hidden', cursor: 'pointer' }}>
                   <div className="car-img-wrap" style={{ position: 'relative' }}>
-                    <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={car.images?.[0]?.url || car.images?.[0] || car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     <div style={{ position: 'absolute', top: 10, left: 10 }}>
                       <span className="badge badge-green"><span className="live-dot" /> LIVE</span>
                     </div>
@@ -70,9 +90,9 @@ export default function AuctionPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>Current Bid</div>
-                        <div className="price-tag" style={{ fontSize: '1.1rem' }}>{formatKES(car.currentBid)}</div>
+                        <div className="price-tag" style={{ fontSize: '1.1rem' }}>{formatKES(car.currentBid || car.price)}</div>
                       </div>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{car.totalBids} bids →</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{car.bidsCount || car.totalBids || 0} bids →</span>
                     </div>
                   </div>
                 </div>

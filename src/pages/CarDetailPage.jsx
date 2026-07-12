@@ -246,7 +246,7 @@ export default function CarDetailPage() {
         <div className="detail-grid">
           <div>
             <div style={{ marginBottom: 24 }}>
-              <div className="gallery-main" style={{ aspectRatio: '16/10' }}>
+              <div className="gallery-main" style={{ aspectRatio: '16/10', '--gallery-main-bg': images[activeImg] ? `url(${images[activeImg]})` : 'none' }}>
                 <OptimizedImg src={images[activeImg]} alt={car.title} className="gallery-main-img" cloudinaryTransform="q_auto,f_auto,w_1200" />
                 <div className="gallery-badges">
                   {isAuction && <Badge variant="live">Live Auction</Badge>}

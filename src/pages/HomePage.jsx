@@ -32,8 +32,27 @@ export default function HomePage() {
   ];
 
   const SLIDES = useMemo(() => {
-    const sliderCars = cars.filter(c => c.featured || c.isAuction || c.auction_status === 'live').slice(0, 5);
-    const sourceCars = sliderCars.length >= 3 ? sliderCars : [];
+    // Prefer live/featured cars first (they're the most compelling), but
+    // fall back to any car in the gallery that has a real photo — so the
+    // hero always has enough to shuffle from, not just a handful of
+    // specially-flagged listings.
+    const withImage = (c) => Boolean(c.images?.[0] || c.image);
+    const priority = cars.filter(c => withImage(c) && (c.featured || c.isAuction || c.auction_status === 'live'));
+    const rest = cars.filter(c => withImage(c) && !priority.includes(c));
+
+    // Fisher–Yates shuffle so the pick (and its order) is different each visit.
+    const shuffle = (arr) => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
+    const pool = [...shuffle(priority), ...shuffle(rest)];
+    const sourceCars = pool.slice(0, 5);
+
     return sourceCars.length >= 3 ? sourceCars.map((car, i) => ({
       id: car.id || i,
       image: car.images?.[0] || car.image || HERO_SLIDES[i % HERO_SLIDES.length].image,

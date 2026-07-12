@@ -12,7 +12,6 @@ import NavbarNew from './components/NavbarNew';
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
 import BrowsePage from './pages/BrowsePage';
-import GalleryPage from './pages/GalleryPage';
 // Mobile pages (eager loaded for instant mobile experience)
 import MobileHomePage from './pages/mobile/MobileHomePage';
 import MobileBrowsePage from './pages/mobile/MobileBrowsePage';
@@ -184,7 +183,11 @@ export default function App() {
                     )}
 
                     {/* Shared routes */}
-                    <Route path="/gallery" element={<GalleryPage />} />
+                    {/* "Gallery" tab now leads to the real, live-data browse
+                        experience (search/filter/infinite-scroll) instead of
+                        the old hardcoded demo GalleryPage, so desktop and
+                        mobile nav both land on the same working page. */}
+                    <Route path="/gallery" element={<BrowsePage />} />
                     <Route path="/auctions" element={<AuctionPage />} />
                     <Route path="/auctions/calendar" element={<AuctionCalendar />} />
                     <Route path="/showroom" element={<Showroom />} />
