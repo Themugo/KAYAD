@@ -105,7 +105,7 @@ export default function HomePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20, marginBottom: 40 }}>
             {FEATURED_CARS.map(car => (
-              <Link key={car.id} to={`/car/${car.id}`} style={{ background: '#111', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none', display: 'block' }}>
+              <Link key={car.id} to={`/cars/${car.id}`} style={{ background: '#111', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', textDecoration: 'none', display: 'block' }}>
                 <div style={{ position: 'relative', height: 180, overflow: 'hidden' }}>
                   <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
