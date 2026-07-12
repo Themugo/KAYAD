@@ -394,6 +394,67 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* Trust Features Cards */}
+          <div style={{
+            display: 'flex',
+            gap: 16,
+            marginTop: 40,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            maxWidth: 1000,
+          }}>
+            {[
+              { icon: '🔒', title: 'Escrow Protection', desc: 'Funds held until safe delivery' },
+              { icon: '🔍', title: 'Pre-Inspection', desc: 'Independent check before purchase' },
+              { icon: '✓', title: 'Verified Dealers', desc: 'All sellers vetted and approved' },
+              { icon: '🏷️', title: 'Auctions', desc: 'Transparent real-time bidding' },
+            ].map((feature, i) => (
+              <div key={feature.title} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '14px 20px',
+                background: 'rgba(200, 150, 42, 0.08)',
+                border: '1px solid rgba(200, 150, 42, 0.2)',
+                borderRadius: 12,
+                backdropFilter: 'blur(10px)',
+                animation: `fadeInUp 0.5s ease-out ${i * 0.1}s both`,
+                minWidth: 200,
+              }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  background: 'rgba(200, 150, 42, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 18,
+                  flexShrink: 0,
+                }}>
+                  {feature.icon}
+                </div>
+                <div>
+                  <div style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: '#fff',
+                    lineHeight: 1.3,
+                  }}>
+                    {feature.title}
+                  </div>
+                  <div style={{
+                    fontSize: 11,
+                    color: 'rgba(255,255,255,0.6)',
+                    marginTop: 2,
+                  }}>
+                    {feature.desc}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Quick Stats */}
           <div style={{
             display: 'flex',
