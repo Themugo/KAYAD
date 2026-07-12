@@ -27,6 +27,7 @@ const FINANCING_FEATURES = [
   { icon: '🔒', title: 'Secured by Escrow', desc: 'Your down payment is protected until car handover' },
 ];
 
+// Fallback hero slides for when API hasn't loaded
 const HERO_SLIDES = [
   {
     id: 1,
@@ -64,6 +65,7 @@ export default function HomePage() {
   const [search, setSearch] = useState({ brand: '', bodyType: '', priceMax: '' });
   const [heroHovered, setHeroHovered] = useState(false);
 
+  // Fetch cars for both display and hero slider
   useEffect(() => {
     let mounted = true;
     let timeoutId = setTimeout(() => {
@@ -84,15 +86,37 @@ export default function HomePage() {
     return () => { mounted = false; clearTimeout(timeoutId); };
   }, []);
 
+  // Create dynamic hero slides from featured/auction cars
   const SLIDES = useMemo(() => {
-    return HERO_SLIDES;
-  }, []);
+    // Get featured and auction cars for the hero slider
+    const sliderCars = cars
+      .filter(c => c.featured || c.is_promoted || c.isAuction || c.auction_status === 'live')
+      .slice(0, 5);
+    
+    // Fallback to first 5 cars if no featured/auction
+    const sourceCars = sliderCars.length >= 3 ? sliderCars : cars.slice(0, 5);
+    
+    return sourceCars.map((car, index) => ({
+      id: car.id || index,
+      image: car.images?.[0] || car.image || HERO_SLIDES[index % HERO_SLIDES.length].image,
+      headline: car.title || car.name,
+      sub: car.year ? `${car.year} · ${car.fuel || car.fuelType || 'Petrol'} · ${car.location || 'Nairobi'}` : car.location || 'Nairobi',
+      price: car.price ? `KES ${(car.price / 1000000).toFixed(1)}M` : (car.currentBid ? `KES ${(car.currentBid / 1000000).toFixed(1)}M` : ''),
+      badge: car.isAuction || car.auction_status === 'live' ? 'Live Auction' : (car.featured ? 'Featured' : 'Hot Deal'),
+      badgeVariant: car.isAuction || car.auction_status === 'live' ? 'live' : 'gold',
+      carId: car.id,
+    }));
+  }, [cars]);
+
+  // Fallback slides if API hasn't loaded yet
+  const fallbackSlides = useMemo(() => HERO_SLIDES, []);
+  const activeSlides = SLIDES.length >= 3 ? SLIDES : fallbackSlides;
 
   useEffect(() => {
     if (heroHovered) return;
-    const t = setInterval(() => setCurrent(p => (p + 1) % SLIDES.length), 6000);
+    const t = setInterval(() => setCurrent(p => (p + 1) % activeSlides.length), 6000);
     return () => clearInterval(t);
-  }, [SLIDES.length, heroHovered]);
+  }, [activeSlides.length, heroHovered]);
 
   const liveAuctions = cars.filter(c => c.isAuction || c.auction_status === 'live');
   const featuredCars = cars.filter(c => c.featured || c.is_promoted).slice(0, 8);
@@ -125,7 +149,7 @@ export default function HomePage() {
         }}
       >
         {/* Background Images with Ken Burns Effect */}
-        {SLIDES.map((slide, i) => (
+        {activeSlides.map((slide, i) => (
           <div
             key={slide.id}
             style={{
@@ -218,7 +242,7 @@ export default function HomePage() {
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
             }}>
-              East Africa's #1 Car Marketplace
+              EAST AFRICA'S TRUSTED CAR MARKETPLACE
             </span>
           </div>
 
@@ -232,7 +256,7 @@ export default function HomePage() {
             textShadow: '0 4px 30px rgba(0,0,0,0.5)',
             maxWidth: 900,
           }}>
-            Find Your Perfect
+            Drive Your
             <span style={{
               display: 'block',
               background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 50%, #c8962a 100%)',
@@ -240,7 +264,7 @@ export default function HomePage() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
-              Drive Today
+              Dream Today
             </span>
           </h1>
 
@@ -252,8 +276,7 @@ export default function HomePage() {
             marginBottom: 48,
             lineHeight: 1.7,
           }}>
-            Buy, sell, and auction vehicles with M-Pesa escrow protection. 
-            Every car inspected, every payment secured.
+            Buy, sell and auction vehicles with confidence.
           </p>
 
           {/* Search Box */}
@@ -325,6 +348,52 @@ export default function HomePage() {
             </Button>
           </form>
 
+          {/* Action Buttons */}
+          <div style={{
+            display: 'flex',
+            gap: 16,
+            marginTop: 32,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}>
+            <Link to="/browse">
+              <Button 
+                variant="primary" 
+                size="lg"
+                icon="🚗"
+                style={{
+                  background: 'linear-gradient(135deg, #c8962a 0%, #f4c430 100%)',
+                  border: 'none',
+                  boxShadow: '0 4px 20px rgba(200, 150, 42, 0.4)',
+                  color: '#0a0a0a',
+                  fontWeight: 700,
+                  minHeight: 48,
+                  padding: '12px 28px',
+                  borderRadius: 10,
+                }}
+              >
+                Browse Cars →
+              </Button>
+            </Link>
+            <Link to="/register?role=broker">
+              <Button 
+                variant="outline" 
+                size="lg"
+                icon="💰"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  color: 'rgba(255,255,255,0.9)',
+                  background: 'rgba(255,255,255,0.05)',
+                  minHeight: 48,
+                  padding: '12px 28px',
+                  borderRadius: 10,
+                }}
+              >
+                Sell a Vehicle
+              </Button>
+            </Link>
+          </div>
+
           {/* Quick Stats */}
           <div style={{
             display: 'flex',
@@ -391,7 +460,7 @@ export default function HomePage() {
               justifyContent: 'center',
               flexWrap: 'wrap',
             }}>
-              {SLIDES.map((slide, i) => (
+              {activeSlides.map((slide, i) => (
                 <button
                   key={slide.id}
                   onClick={() => setCurrent(i)}
@@ -456,7 +525,7 @@ export default function HomePage() {
             gap: 8,
             marginTop: 32,
           }}>
-            {SLIDES.map((_, i) => (
+            {activeSlides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
