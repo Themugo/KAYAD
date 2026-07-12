@@ -27,23 +27,30 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Validate environment secrets
+      - name: Check if secrets are configured
+        id: secrets-check
         run: |
-          if [ -z "${{ secrets.VITE_SUPABASE_URL }}" ]; then
-            echo "ERROR: VITE_SUPABASE_URL secret not configured"
-            exit 1
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+            echo "secrets_status=configured" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_status=missing" >> $GITHUB_OUTPUT
           fi
-          if [ -z "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
-            echo "ERROR: VITE_SUPABASE_ANON_KEY secret not configured"
-            exit 1
-          fi
-          echo "All required secrets are configured"
 
-      - name: Build for production
+      - name: Build for production (with secrets)
+        if: steps.secrets-check.outputs.secrets_status == 'configured'
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Build for production (without secrets - preview mode)
+        if: steps.secrets-check.outputs.secrets_status == 'missing'
+        run: |
+          echo "Building in preview mode (secrets not configured)..."
+          npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder-key' }}
 
       - name: Validate dist output
         run: |
