@@ -153,20 +153,39 @@ export default function HomePage() {
             </div>
             <div>
               <h4 style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 16, letterSpacing: '0.05em' }}>MARKETPLACE</h4>
-              {['Browse Cars', 'Live Auctions', 'Sell Your Car', 'Escrow Vault'].map(link => <Link key={link} to="/browse" style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link}</Link>)}
+              {[
+                { label: 'Browse Cars', to: '/browse' },
+                { label: 'Live Auctions', to: '/auctions' },
+                { label: 'Sell Your Car', to: '/register' },
+                { label: 'Escrow Vault', to: '/escrow' },
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
             </div>
             <div>
               <h4 style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 16, letterSpacing: '0.05em' }}>SERVICES</h4>
-              {['Pre-Inspection', 'Car Financing', 'Insurance', 'Become a Dealer'].map(link => <Link key={link} to="/browse" style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link}</Link>)}
+              {[
+                { label: 'Pre-Inspection', to: '/inspection' },
+                { label: 'Car Financing', to: '/support' },
+                { label: 'Insurance', to: '/support' },
+                { label: 'Become a Dealer', to: '/register' },
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
             </div>
             <div>
               <h4 style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.4)', marginBottom: 16, letterSpacing: '0.05em' }}>COMPANY</h4>
-              {['About KAYAD', 'How It Works', 'Support', 'Contact'].map(link => <Link key={link} to="/browse" style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link}</Link>)}
+              {[
+                { label: 'About KAYAD', to: '/support' },
+                { label: 'How It Works', to: '/support' },
+                { label: 'Support', to: '/support' },
+                { label: 'Contact', to: '/support' },
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
             </div>
           </div>
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>© 2026 KAYAD Motors Kenya Ltd. All rights reserved.</span>
-            <div style={{ display: 'flex', gap: 20 }}>{['Privacy Policy', 'Terms of Service', 'Support'].map(link => <Link key={link} to="/browse" style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>{link}</Link>)}</div>
+            <div style={{ display: 'flex', gap: 20 }}>{[
+              { label: 'Privacy Policy', to: '/support' },
+              { label: 'Terms of Service', to: '/support' },
+              { label: 'Support', to: '/support' },
+            ].map(link => <Link key={link.label} to={link.to} style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>{link.label}</Link>)}</div>
           </div>
         </div>
       </footer>
