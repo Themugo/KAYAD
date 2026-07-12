@@ -8,8 +8,6 @@ export default defineConfig({
     environment: 'jsdom', // Changed from 'node' to 'jsdom' for React component testing
     setupFiles: ['./src/__tests__/setup.js'],
     env: {
-      JWT_SECRET: 'test-secret-key',
-      // Supabase test configuration
       SUPABASE_URL: 'https://placeholder.supabase.co',
       SUPABASE_ANON_KEY: 'placeholder-key',
     },
@@ -19,7 +17,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.{ts,tsx,jsx}', 'routes/**/*.ts', 'services/**/*.ts', 'middleware/**/*.ts'],
+      include: ['src/**/*.{ts,tsx,jsx}'],
       thresholds: {
         branches: 50,
         functions: 50,
@@ -29,8 +27,6 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      '@sentry/react': '/src/__tests__/__mocks__/sentry-react.js',
-    },
+    alias: {},
   },
 });

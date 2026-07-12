@@ -4,20 +4,6 @@ import { vi } from 'vitest';
 
 globalThis.React = React;
 
-// Mock @sentry/react for tests - this must be before any imports of sentry.ts
-vi.mock('@sentry/react', () => ({
-  default: {
-    init: vi.fn(),
-    withScope: vi.fn(),
-    captureException: vi.fn(),
-    setUser: vi.fn(),
-  },
-  init: vi.fn(),
-  withScope: vi.fn(),
-  captureException: vi.fn(),
-  setUser: vi.fn(),
-}));
-
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {

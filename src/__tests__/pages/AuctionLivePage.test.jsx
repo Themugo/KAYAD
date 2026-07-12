@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
 import AuctionLivePage from '../../pages/AuctionLivePage';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
@@ -36,11 +35,9 @@ vi.mock('../../pages/auction/components/AuctionEffects', () => ({
 }));
 
 const renderAuctionPage = () => render(
-  <HelmetProvider>
-    <MemoryRouter initialEntries={['/auction/mock1']}>
-      <AuctionLivePage />
-    </MemoryRouter>
-  </HelmetProvider>,
+  <MemoryRouter initialEntries={['/auction/mock1']}>
+    <AuctionLivePage />
+  </MemoryRouter>,
 );
 
 describe('AuctionLivePage', () => {

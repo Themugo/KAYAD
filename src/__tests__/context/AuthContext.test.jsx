@@ -24,11 +24,6 @@ vi.mock('../../lib/supabaseClient', () => ({
   },
 }));
 
-vi.mock('../../utils/sentry', () => ({
-  setSentryUser: vi.fn(),
-  clearSentryUser: vi.fn(),
-}));
-
 vi.mock('../../utils/security', () => ({
   logSecurityEvent: vi.fn(),
   SecurityEvents: {},
