@@ -8,7 +8,7 @@ import { Badge, Avatar, Tooltip } from './ui';
 
 const NAV_LINKS = [
   { label: 'Home',           to: '/' },
-  { label: 'Gallery',        to: '/browse' },
+  { label: 'Gallery',        to: '/gallery' },
   { label: 'Auctions',       to: '/auctions' },
   { label: 'Escrow Vault',   to: '/escrow' },
   { label: 'Pre-Inspection', to: '/inspection' },
