@@ -36,9 +36,13 @@ function registerServiceWorker() {
           console.error('[App] Service Worker registration failed:', error);
         });
 
-      // Handle controller change (new SW activated)
+      // Handle controller change (new SW activated) — reload once to get fresh content
+      let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('[App] Service Worker controller changed');
+        if (refreshing) return;
+        refreshing = true;
+        console.log('[App] New SW active, reloading...');
+        window.location.reload();
       });
     });
 
