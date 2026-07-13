@@ -1,155 +1,128 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 const heroSlides = [
   {
-    image: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1920&q=80',
-    alt: 'Luxury showroom',
+    bg: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1920&q=80',
+    img: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=600&q=80',
+    name: 'BMW M5 Competition', meta: '2021 \u2022 34,000 km \u2022 Nairobi', price: 'KES 12,500,000',
   },
   {
-    image: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1920&q=80',
-    alt: 'Premium vehicle',
+    bg: 'https://images.unsplash.com/photo-1617788138017-80ad40651399?w=1920&q=80',
+    img: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&q=80',
+    name: 'Porsche 911 Carrera', meta: '2023 \u2022 4,200 km \u2022 Mombasa', price: 'KES 22,100,000',
   },
   {
-    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=1920&q=80',
-    alt: 'Car auction',
-  },
-]
-
-const featuredCars = [
-  {
-    image: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=800&q=80',
-    name: 'Mercedes-AMG G63',
-    meta: '2023 \u2022 8,500 km \u2022 Nairobi',
-    price: 'KES 18.5M',
+    bg: 'https://images.unsplash.com/photo-1503376763036-066120622c74?w=1920&q=80',
+    img: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=600&q=80',
+    name: 'Porsche Cayenne S', meta: '2020 \u2022 48,000 km \u2022 Nairobi', price: 'Auction Live',
   },
   {
-    image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80',
-    name: 'Porsche 911 Carrera',
-    meta: '2023 \u2022 4,200 km \u2022 Mombasa',
-    price: 'KES 22.1M',
+    bg: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=1920&q=80',
+    img: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=600&q=80',
+    name: 'Mercedes-AMG G63', meta: '2023 \u2022 8,500 km \u2022 Nairobi', price: 'KES 18,500,000',
   },
-  {
-    image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80',
-    name: 'BMW X7 M50i',
-    meta: '2022 \u2022 15,000 km \u2022 Kampala',
-    price: 'KES 14.8M',
-  },
-]
-
-const stats = [
-  { value: '12K+', label: 'Verified Cars' },
-  { value: 'KES 2.4B', label: 'Transactions' },
-  { value: '98%', label: 'Trust Score' },
 ]
 
 export default function Hero() {
-  const [current, setCurrent] = useState(0)
+  const [current, setCurrent] = useState(2)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrent((p) => (p + 1) % heroSlides.length), 6000)
     return () => clearInterval(timer)
   }, [])
 
-  const car = featuredCars[current % featuredCars.length]
+  const slide = heroSlides[current]
 
   return (
     <section className="lp-hero-section">
       <div className="lp-hero-bg">
-        {heroSlides.map((slide, i) => (
-          <div
-            key={i}
-            className={`lp-hero-bg-slide ${i === current ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-          >
-            <img src={slide.image} alt={slide.alt} />
+        {heroSlides.map((s, i) => (
+          <div key={i} className={`lp-hero-bg-slide ${i === current ? 'opacity-100' : 'opacity-0'}`}>
+            <img src={s.bg} alt="" />
           </div>
         ))}
         <div className="lp-hero-overlay" />
-        <div className="lp-hero-overlay-bottom" />
       </div>
 
       <div className="lp-hero-content lp-container">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="lp-animate-fade-in">
-            <div className="lp-gold-pill mb-8">
-              <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-              <span className="text-sm font-medium" style={{color: 'var(--accent)'}}>Live Auctions Active</span>
+          <div className="lp-animate-fade-in pt-16 lg:pt-0">
+            <div className="lp-tag mb-8" style={{ color: 'rgba(255,255,255,0.9)' }}>
+              <span className="lp-pulse" /> Live Auctions &middot; Real-Time Bidding
             </div>
 
-            <h1 className="lp-heading-xl mb-6">
-              East Africa&apos;s<br />Premium Car<br />Marketplace
+            <h1 className="lp-hero-heading" style={{ color: 'white' }}>
+              Bid Live.<br /><span className="lp-hero-subheading">Win Big.</span>
             </h1>
 
-            <p className="lp-body-lg max-w-lg mb-10">
-              Buy, sell, and auction verified vehicles with bank-grade escrow protection. 
-              Every car pre-inspected. Every transaction secured.
+            <p className="lp-hero-text" style={{ color: 'rgba(255,255,255,0.75)' }}>
+              Real-time auctions with M-Pesa escrow protection. Buy, sell and auction vehicles with confidence across East Africa.
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-12">
-              <Link to="/gallery" className="lp-btn-primary">
-                Explore Gallery <ArrowRight size={18} />
+            <div className="flex flex-wrap gap-4 mt-10">
+              <Link to="/gallery" className="lp-btn-primary" style={{ background: 'white', color: 'var(--lp-primary)' }}>
+                Browse Cars <ArrowRight size={18} />
               </Link>
-              <Link to="/sell" className="lp-btn-outline">
-                Sell Your Car
+              <Link to="/sell" className="lp-btn-outline" style={{ borderColor: 'rgba(255,255,255,0.35)', color: 'white' }}>
+                Sell a Vehicle
               </Link>
-            </div>
-
-            <div className="flex gap-12 pt-8 border-t" style={{borderColor: 'var(--border)'}}>
-              {stats.map((s, i) => (
-                <div key={i}>
-                  <div className="lp-space-grotesk text-3xl font-bold">{s.value}</div>
-                  <div className="text-xs uppercase tracking-wider mt-1" style={{color: 'var(--text-muted)'}}>{s.label}</div>
-                </div>
-              ))}
             </div>
           </div>
 
-          <div className="hidden lg:block lp-animate-fade-in" style={{animationDelay: '0.2s'}}>
-            <div className="lp-glass rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-50" />
-
-              <div className="flex items-center justify-between mb-6">
-                <span className="lp-space-grotesk font-semibold text-lg">Featured Auction</span>
-                <div className="flex gap-2">
-                  <button onClick={() => setCurrent((p) => (p - 1 + heroSlides.length) % heroSlides.length)} className="w-9 h-9 rounded-full border flex items-center justify-center transition-all" style={{borderColor: 'var(--border-light)', color: 'var(--text-secondary)'}} onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--primary)' }} onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
-                    <ChevronLeft size={16} />
-                  </button>
-                  <button onClick={() => setCurrent((p) => (p + 1) % heroSlides.length)} className="w-9 h-9 rounded-full border flex items-center justify-center transition-all" style={{borderColor: 'var(--border-light)', color: 'var(--text-secondary)'}} onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent)'; e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--primary)' }} onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.color = 'var(--text-secondary)' }}>
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="relative rounded-xl overflow-hidden aspect-[16/10] mb-5" style={{background: 'var(--primary)'}}>
-                <img src={car.image} alt={car.name} className="w-full h-full object-cover" />
-                <span className="absolute top-4 left-4 px-3 py-1.5 text-xs font-bold rounded-full uppercase tracking-wide" style={{background: 'var(--accent)', color: 'var(--primary)'}}>
-                  Live Auction
+          <div className="hidden lg:block lp-animate-fade-in" style={{ animationDelay: '0.2s', perspective: '1000px' }}>
+            <div className="hero-car-card" style={{
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 'var(--lp-radius)',
+              padding: 20,
+              transform: 'rotate(2deg)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'rotate(0deg) scale(1.03)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'rotate(2deg)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+            >
+              <div style={{ position: 'relative', borderRadius: 'var(--lp-radius-sm)', overflow: 'hidden', marginBottom: 16 }}>
+                <img src={slide.img} alt={slide.name} style={{ width: '100%', height: 200, objectFit: 'cover', transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                  onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                />
+                <span className="hero-car-badge" style={{
+                  position: 'absolute', top: 12, left: 12,
+                  background: 'var(--lp-accent)', color: 'white',
+                  padding: '5px 12px', borderRadius: 6,
+                  fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                }}>
+                  Featured
                 </span>
               </div>
-
-              <div className="flex justify-between items-end">
-                <div>
-                  <div className="lp-space-grotesk font-semibold text-xl mb-1">{car.name}</div>
-                  <div className="text-sm" style={{color: 'var(--text-secondary)'}}>{car.meta}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs uppercase tracking-wide mb-1" style={{color: 'var(--text-muted)'}}>Current Bid</div>
-                  <div className="lp-space-grotesk text-2xl font-bold" style={{color: 'var(--accent)'}}>{car.price}</div>
-                </div>
-              </div>
-
-              <div className="flex gap-2 mt-6 justify-center">
-                {heroSlides.map((_, i) => (
-                  <button key={i} onClick={() => setCurrent(i)}
-                    className="h-1 rounded-full transition-all duration-300"
-                    style={{width: i === current ? '3rem' : '2rem', background: i === current ? 'var(--accent)' : 'var(--border-light)'}}
-                  />
-                ))}
-              </div>
+              <h4 style={{ color: 'white', fontSize: '1.15rem', fontFamily: "'Playfair Display', serif", marginBottom: 4 }}>{slide.name}</h4>
+              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', marginBottom: 10 }}>{slide.meta}</p>
+              <div style={{ color: '#a8dadc', fontSize: '1.35rem', fontWeight: 700, fontFamily: "'Playfair Display', serif" }}>{slide.price}</div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="hero-dots" style={{
+        position: 'absolute', bottom: 48, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 10, zIndex: 3,
+      }}>
+        {heroSlides.map((_, i) => (
+          <span key={i} onClick={() => setCurrent(i)}
+            style={{
+              width: i === current ? 28 : 8, height: 8,
+              borderRadius: i === current ? 4 : '50%',
+              background: i === current ? 'white' : 'rgba(255,255,255,0.3)',
+              cursor: 'pointer', transition: 'all 0.25s ease',
+            }}
+          />
+        ))}
       </div>
     </section>
   )
