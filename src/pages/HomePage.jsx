@@ -68,12 +68,41 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, [SLIDES.length, heroHovered]);
 
-  const FEATURED_CARS = [
-    { id: 1, title: '2021 Toyota Hilux Double Cabin', year: 2021, mileage: '40k km', fuel: 'Diesel', location: 'Nairobi', price: '4,200,000', dealer: 'Nairobi Auto Hub Ltd', image: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 2, title: '2020 Land Rover Range Rover Sport', year: 2020, mileage: '35k km', fuel: 'Diesel', location: 'Nairobi', price: '15,000,000', dealer: 'Nairobi Auto Hub Ltd', image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 3, title: '2021 Mercedes-Benz GLE 350d', year: 2021, mileage: '22k km', fuel: 'Diesel', location: 'Nairobi', price: '11,200,000', dealer: 'Nairobi Auto Hub Ltd', image: 'https://images.pexels.com/photos/1805053/pexels-photo-1805053.jpeg?auto=compress&cs=tinysrgb&w=600' },
-    { id: 4, title: '2020 Porsche Cayenne S', year: 2020, mileage: '48k km', fuel: 'Petrol', location: 'Nairobi', price: '13,200,000', dealer: 'Nairobi Auto Hub Ltd', image: 'https://images.pexels.com/photos/1545743/pexels-photo-1545743.jpeg?auto=compress&cs=tinysrgb&w=600' },
-  ];
+  const FEATURED_CARS = useMemo(() => {
+    const withImage = (c) => Boolean(c.images?.[0] || c.image);
+    let eligible = cars.filter(c => withImage(c) && (c.isPromoted || c.featured));
+    if (eligible.length === 0) eligible = cars.filter(withImage); // fall back to real listings, never fake ones
+
+    // Verified dealers and verified private sellers first — but don't
+    // let either dominate; keep a healthy mix representing the whole
+    // marketplace rather than skewing to one seller type.
+    const verified = eligible.filter(c => c.dealer?.verified || c.isVerifiedDealer);
+    const rest = eligible.filter(c => !(c.dealer?.verified || c.isVerifiedDealer));
+
+    const shuffle = (arr) => {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
+    return [...shuffle(verified), ...shuffle(rest)].slice(0, 8).map((car) => ({
+      id: car.id || car._id,
+      title: car.title,
+      year: car.year,
+      mileage: car.mileage ? `${car.mileage}km` : '',
+      fuel: car.fuel,
+      location: car.location,
+      price: car.price ? Number(car.price).toLocaleString() : '',
+      dealer: car.dealer?.businessName || car.dealer?.name || 'Private Seller',
+      image: car.images?.[0] || car.image,
+      // Escrow is for private-seller transactions, not dealer sales —
+      // only show the badge where it actually applies.
+      hasEscrow: car.dealer?.role === 'individual_seller',
+    }));
+  }, [cars]);
 
   const WHY_KAYAD_FEATURES = [
     { icon: '💳', title: 'M-Pesa Escrow', desc: 'Your money is protected until you safely receive your car. No scams, no risk.' },
@@ -141,9 +170,11 @@ export default function HomePage() {
               <Link key={car.id} to={`/cars/${car.id}`} style={{ background: '#FFFFFF', borderRadius: 20, overflow: 'hidden', border: '1px solid #E2E8F0', textDecoration: 'none', display: 'block', transition: 'all 0.3s ease', boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)' }}>
                 <div style={{ position: 'relative', height: 200, overflow: 'hidden' }}>
                   <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} />
-                  <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(16, 185, 129, 0.9)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 14 }}>🔒</span><span style={{ fontSize: 11, color: '#FFFFFF', fontWeight: 600 }}>Escrow Protected</span>
-                  </div>
+                  {car.hasEscrow && (
+                    <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(16, 185, 129, 0.9)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontSize: 14 }}>🔒</span><span style={{ fontSize: 11, color: '#FFFFFF', fontWeight: 600 }}>Escrow Protected</span>
+                    </div>
+                  )}
                 </div>
                 <div style={{ padding: 20 }}>
                   <div style={{ fontSize: 11, color: '#64748B', marginBottom: 6, fontWeight: 500 }}>{car.year} · {car.dealer}</div>

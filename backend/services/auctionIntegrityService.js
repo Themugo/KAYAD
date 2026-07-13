@@ -110,7 +110,7 @@ const detectSelfBidding = async (scanUntil) => {
     if (a.carId) {
       const carId = a.carId.toString();
       try {
-        const car = await findById("cars", a.carId).select("dealer");
+        const car = await findById("cars", a.carId, "dealer");
         if (car && car.dealer) {
           carDealers[carId] = car.dealer.toString();
         }
@@ -180,9 +180,7 @@ const detectRelatedAccountBidding = async (scanUntil) => {
     const bidders = group.bidders;
     if (bidders.length < 2) continue;
 
-    const users = await findAll("users", { filters: { _id: { $in: bidders } } })
-      .select("_id name email phone referredBy")
-      ;
+    const users = await findAll("users", { filters: { _id: { $in: bidders } }, select: "id,name,email,phone,referredBy" });
 
     const phoneMap = {};
     const referralMap = {};
@@ -588,12 +586,9 @@ export const checkAuctionForIntegrity = async (auctionId) => {
 
   const selfBidCheck = await findOne("auction_integrity_flags", {auction: auctionId, category: "self_bidding", status: { $in: ["detected", "under_review", "confirmed"] },});
   if (!selfBidCheck && auction.carId?.dealer) {
-    const car = await findById("cars", auction.carId).select("dealer");
+    const car = await findById("cars", auction.carId, "dealer");
     if (car?.dealer) {
-      const recentBids = await findAll("bids", { filters: { carId: auction.carId, status: "paid" } })
-        .sort({ createdAt: -1 })
-        .limit(10)
-        ;
+      const recentBids = await findAll("bids", { filters: { carId: auction.carId, status: "paid" }, orderBy: "createdAt", ascending: false, limit: 10 });
       for (const bid of recentBids) {
         const bidderId = bid.user?.toString();
         if (bidderId && bidderId === car.dealer.toString()) {
@@ -651,9 +646,7 @@ export const getIntegrityDashboard = async () => {
         },
         { $sort: { _id: 1 } },
       ]),
-      findAll("auction_risk_profiles", { orderBy: "riskScore", ascending: false, limit: 10 })
-        .limit(10)
-        ,
+      findAll("auction_risk_profiles", { orderBy: "riskScore", ascending: false, limit: 10 }),
     ]);
 
   return {

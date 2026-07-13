@@ -158,9 +158,18 @@ export const validateParams = (schema) => (req, res, next) => {
 
 const OBJECT_ID_KEYS = ["id", "chatId", "carId", "bidId", "userId", "reviewId", "dealerId", "escrowId", "fraudId", "auditId", "jobId", "failureId", "reportId", "agentId", "ticketId", "carId", "alertId", "inspectorId", "dealerId", "reportId", "issueIndex"];
 
+// Supabase/Postgres primary keys are UUIDs (36 chars, e.g.
+// 550e8400-e29b-41d4-a716-446655440000), not MongoDB's 24-hex-char
+// ObjectId format. The old Mongo-era regex here rejected every real
+// ID in the current database — meaning this middleware, which sits
+// in front of nearly every parameterized route (cars, bids, chats,
+// reviews, escrow, dealers, tickets, ...), was 400-ing every
+// legitimate request before it ever reached a controller.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const validateObjectId = (req, res, next) => {
   const id = req.params.id || OBJECT_ID_KEYS.map((k) => req.params[k]).find(Boolean);
-  if (!id || !/^[0-9a-f]{24}$/i.test(id)) {
+  if (!id || !UUID_RE.test(id)) {
     return error(res, "Invalid ID format", 400);
   }
   req.params.id = id;

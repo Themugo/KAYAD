@@ -1,4 +1,5 @@
 import { getSupabase } from "../utils/supabase.js";
+import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, FIELD_ALIASES, camelToSnake, normalizeSelect } from "../utils/fieldMap.js";
 
 const TABLE_MAP = {
   User: "users", Car: "cars", Auction: "auctions", Bid: "bids",
@@ -45,18 +46,94 @@ const TABLE_MAP = {
   Ticket: "support_tickets",
 };
 
+// ────────────────────────────────────────────────────────────────
+// FIELD-NAME TRANSLATION LAYER
+//
+// The application code (controllers, models) was originally written
+// against MongoDB/Mongoose and still uses that field-naming
+// convention (camelCase, and several fields that were simply
+// *renamed* along the way — e.g. `brand` vs the real `make` column).
+// The actual database is now Postgres/Supabase with snake_case
+// columns. Previously NOTHING translated between the two, so any
+// filter, sort, or write using a field name that wasn't already
+// identical in both places (the common case for anything not a
+// single lowercase word) silently failed or errored. This layer
+// fixes that centrally, for every model, instead of touching every
+// controller.
+//
+// Two things happen:
+//  1. Generic camelCase -> snake_case conversion for anything not
+//     explicitly mapped (handles createdAt/created_at,
+//     isVerified/is_verified, bodyType/body_type, etc "for free").
+//  2. An explicit per-table alias table for real renames that a
+//     case-transform can't fix (brand -> make, fuel -> fuel_type,
+//     dealer -> dealer_id, etc).
+// ────────────────────────────────────────────────────────────────
+
+// field name -> table it relates to, for populate(). Defaults to
+// "users" for anything not listed (the overwhelming majority of
+// populated fields across this app are person/actor references).
+const RELATION_TABLE = {
+  car: "cars", vehicle: "cars", carId: "cars", relatedCar: "cars",
+  originalCar: "cars", matchedCars: "cars",
+  auction: "auctions", relatedAuctions: "auctions",
+  escrow: "escrows", relatedEscrow: "escrows", relatedEscrows: "escrows",
+  relatedPayment: "payments",
+};
+
+async function runPopulates(table, rowsOrRow, populates, sb) {
+  if (!populates || populates.length === 0 || !rowsOrRow) return rowsOrRow;
+  const rows = Array.isArray(rowsOrRow) ? rowsOrRow : [rowsOrRow];
+  if (rows.length === 0) return rowsOrRow;
+
+  for (const { field, select } of populates) {
+    const fkColumn = FIELD_ALIASES[table]?.[field]
+      || (field.toLowerCase().endsWith("id") ? camelToSnake(field) : `${camelToSnake(field)}_id`);
+    const targetTable = RELATION_TABLE[field] || "users";
+
+    const idSet = new Set();
+    for (const row of rows) {
+      const val = row?.[fkColumn] ?? row?.[field];
+      if (Array.isArray(val)) val.forEach((v) => v && idSet.add(v));
+      else if (val) idSet.add(val);
+    }
+    if (idSet.size === 0) continue;
+
+    const columns = select ? select.split(/\s+/).filter((c) => !c.startsWith("-")).join(",") || "*" : "*";
+    try {
+      const client = sb();
+      const { data, error } = await client.from(targetTable).select(columns).in("id", [...idSet]);
+      if (error || !data) continue;
+      const byId = new Map(data.map((d) => [d.id, mapRowIn(targetTable, d)]));
+      for (const row of rows) {
+        const val = row?.[fkColumn] ?? row?.[field];
+        if (Array.isArray(val)) {
+          row[field] = val.map((v) => byId.get(v)).filter(Boolean);
+        } else if (val) {
+          row[field] = byId.get(val) || row[field];
+        }
+      }
+    } catch { /* population is best-effort; leave the raw FK value in place */ }
+  }
+  return rowsOrRow;
+}
+
 function wrapDoc(doc, tableName, sb) {
   if (!doc) return null;
+  mapRowIn(tableName, doc);
   return Object.defineProperties(doc, {
     _id: { get() { return this.id; }, set(v) { this.id = v; }, enumerable: true, configurable: true },
     save: {
       value: async function () {
         const client = sb();
-        const { data, error } = await client.from(tableName).update(Object.fromEntries(
-          Object.entries(this).filter(([k]) => !["save","toObject","_id"].includes(k))
-        )).eq("id", this.id).select().single();
+        const payload = {};
+        for (const [k, v] of Object.entries(this)) {
+          if (["save", "toObject", "_id"].includes(k)) continue;
+          payload[mapKeyOut(tableName, k)] = v;
+        }
+        const { data, error } = await client.from(tableName).update(payload).eq("id", this.id).select().single();
         if (error) throw error;
-        if (data) Object.assign(this, data);
+        if (data) Object.assign(this, mapRowIn(tableName, data));
         return this;
       },
       writable: true, configurable: true,
@@ -78,10 +155,11 @@ function createQuery(tableName) {
     _limit: null,
     _skip: null,
     _findById: null,
+    _populates: [],
     _executor: null,
 
     select(fields) {
-      this._select = fields;
+      this._select = normalizeSelect(tableName, fields);
       return this;
     },
 
@@ -114,7 +192,8 @@ function createQuery(tableName) {
       return this._executor().then(rows => [...new Set(rows.map(r => r[field]).filter(Boolean))]);
     },
 
-    populate() {
+    populate(field, select) {
+      if (field) this._populates.push({ field, select });
       return this;
     },
 
@@ -144,27 +223,57 @@ export function createModel(name) {
     let q = supabaseQuery;
     for (const [k, v] of Object.entries(filters)) {
       if (v === undefined || v === null) continue;
-      if (k === "$or") {
-        const orParts = v.map((cond) =>
-          Object.entries(cond).map(([fk, fv]) => `${fk}.eq.${fv}`).join(",")
-        ).join(",");
-        q = q.or(orParts);
-      } else if (k === "$and") {
-        for (const cond of v) {
-          for (const [fk, fv] of Object.entries(cond)) q = q.eq(fk, fv);
+
+      if (k === "$text") {
+        const term = v?.$search;
+        const fields = SEARCHABLE_FIELDS[table];
+        if (term && fields?.length) {
+          const orExpr = fields.map((f) => `${f}.ilike.*${term.replace(/[,%]/g, "")}*`).join(",");
+          q = q.or(orExpr);
         }
-      } else if (k.startsWith("$")) continue;
-      else if (typeof v === "object" && v !== null) {
-        if (v.$gte) q = q.gte(k, v.$gte);
-        if (v.$lte) q = q.lte(k, v.$lte);
-        if (v.$gt) q = q.gt(k, v.$gt);
-        if (v.$lt) q = q.lt(k, v.$lt);
-        if (v.$ne) q = q.neq(k, v.$ne);
-        if (v.$in) q = q.in(k, v.$in);
-        if (v.$nin) q = q.not.in(k, v.$nin);
-        if (v.$regex) q = q.ilike(k, `%${v.$regex.source || v.$regex}%`);
+        continue;
+      }
+
+      if (k === "$or") {
+        const orExpr = v.map((cond) =>
+          Object.entries(cond).map(([fk, fv]) => {
+            const col = mapKeyOut(table, fk);
+            if (fv && typeof fv === "object" && fv.$regex) {
+              const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, "");
+              return `${col}.ilike.*${term}*`;
+            }
+            return `${col}.eq.${fv}`;
+          }).join(",")
+        ).join(",");
+        q = q.or(orExpr);
+        continue;
+      }
+
+      if (k === "$and") {
+        for (const cond of v) {
+          for (const [fk, fv] of Object.entries(cond)) q = q.eq(mapKeyOut(table, fk), fv);
+        }
+        continue;
+      }
+
+      if (k.startsWith("$")) continue;
+
+      const col = mapKeyOut(table, k);
+
+      if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+        if (v.$gte !== undefined) q = q.gte(col, v.$gte);
+        if (v.$lte !== undefined) q = q.lte(col, v.$lte);
+        if (v.$gt !== undefined) q = q.gt(col, v.$gt);
+        if (v.$lt !== undefined) q = q.lt(col, v.$lt);
+        if (v.$ne !== undefined) q = q.neq(col, v.$ne);
+        if (v.$in !== undefined) q = q.in(col, v.$in);
+        if (v.$nin !== undefined) q = q.not(col, "in", `(${v.$nin.join(",")})`);
+        if (v.$regex !== undefined) {
+          const term = (v.$regex.source || v.$regex).toString().replace(/[\^$]/g, "");
+          q = q.ilike(col, `%${term}%`);
+        }
       } else {
-        q = q.eq(k, v);
+        q = q.eq(col, v);
       }
     }
     return q;
@@ -183,14 +292,16 @@ export function createModel(name) {
         query = buildWhere(query, q._filters);
         if (q._sort) {
           for (const [k, dir] of Object.entries(q._sort)) {
-            query = query.order(k, { ascending: dir === 1 });
+            query = query.order(mapKeyOut(table, k), { ascending: dir === 1 });
           }
         }
         if (q._limit) query = query.limit(q._limit);
         if (q._skip) query = query.range(q._skip, q._skip + (q._limit || 1000) - 1);
         const { data, error } = await query;
         if (error) throw error;
-        return (data || []).map((d) => q._lean ? d : wrapDoc(d, table, sb));
+        const rows = (data || []).map((d) => q._lean ? mapRowIn(table, d) : wrapDoc(d, table, sb));
+        await runPopulates(table, rows, q._populates, sb);
+        return rows;
       };
       return q;
     },
@@ -203,7 +314,10 @@ export function createModel(name) {
         const client = sb();
         const { data, error } = await client.from(table).select(q._select).eq("id", q._findById).maybeSingle();
         if (error) throw error;
-        return data ? (q._lean ? data : wrapDoc(data, table, sb)) : null;
+        if (!data) return null;
+        const row = q._lean ? mapRowIn(table, data) : wrapDoc(data, table, sb);
+        await runPopulates(table, row, q._populates, sb);
+        return row;
       };
       return q;
     },
@@ -218,14 +332,18 @@ export function createModel(name) {
         const { data, error } = await query;
         if (error) throw error;
         const doc = data?.[0] || null;
-        return doc ? (q._lean ? doc : wrapDoc(doc, table, sb)) : null;
+        if (!doc) return null;
+        const row = q._lean ? mapRowIn(table, doc) : wrapDoc(doc, table, sb);
+        await runPopulates(table, row, q._populates, sb);
+        return row;
       };
       return q;
     },
 
     async create(data) {
       const client = sb();
-      const { data: created, error } = await client.from(table).insert(data).select().single();
+      const payload = Object.fromEntries(Object.entries(data).map(([k, v]) => [mapKeyOut(table, k), v]));
+      const { data: created, error } = await client.from(table).insert(payload).select().single();
       if (error) throw error;
       return wrapDoc(created, table, sb);
     },
@@ -263,7 +381,8 @@ export function createModel(name) {
         if (!k.startsWith("$")) updateData[k] = v;
       }
       if (Object.keys(updateData).length === 0) return await model.findById(id);
-      const q = client.from(table).update(updateData).eq("id", id);
+      const payload = Object.fromEntries(Object.entries(updateData).map(([k, v]) => [mapKeyOut(table, k), v]));
+      const q = client.from(table).update(payload).eq("id", id);
       if (options.new !== false) q.select();
       const { data, error } = await q;
       if (error) throw error;
@@ -301,8 +420,9 @@ export function createModel(name) {
       let q = client.from(table).delete();
       for (const [k, v] of Object.entries(filters)) {
         if (v === undefined) continue;
-        if (typeof v === "object" && v.$in) q = q.in(k, v.$in);
-        else q = q.eq(k, v);
+        const col = mapKeyOut(table, k);
+        if (typeof v === "object" && v.$in) q = q.in(col, v.$in);
+        else q = q.eq(col, v);
       }
       const { error, count } = await q;
       if (error) throw error;
@@ -323,7 +443,8 @@ export function createModel(name) {
           }
         }
       }
-      const { error } = await client.from(table).update(updateData).in("id", ids);
+      const payload = Object.fromEntries(Object.entries(updateData).map(([k, v]) => [mapKeyOut(table, k), v]));
+      const { error } = await client.from(table).update(payload).in("id", ids);
       if (error) throw error;
       return { modifiedCount: ids.length };
     },
@@ -331,9 +452,7 @@ export function createModel(name) {
     async countDocuments(filters = {}) {
       const client = sb();
       let q = client.from(table).select("*", { count: "exact", head: true });
-      for (const [k, v] of Object.entries(filters)) {
-        if (v !== undefined && v !== null) q = q.eq(k, v);
-      }
+      q = buildWhere(q, filters);
       const { count: c, error } = await q;
       if (error) throw error;
       return c || 0;
@@ -341,9 +460,10 @@ export function createModel(name) {
 
     async insertMany(docs) {
       const client = sb();
-      const { data, error } = await client.from(table).insert(docs).select();
+      const payload = docs.map((d) => Object.fromEntries(Object.entries(d).map(([k, v]) => [mapKeyOut(table, k), v])));
+      const { data, error } = await client.from(table).insert(payload).select();
       if (error) throw error;
-      return data || [];
+      return (data || []).map((d) => mapRowIn(table, d));
     },
 
     async distinct(field, filters = {}) {

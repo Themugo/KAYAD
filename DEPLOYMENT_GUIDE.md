@@ -36,7 +36,7 @@ Frontend (www.kayad.space)
 
 Backend (api.kayad.space)
   └─ VPS/Server (Node.js + PM2)
-      └─ MongoDB Atlas
+      └─ Supabase (Postgres)
       └─ Socket.io
       └─ M-Pesa Integration
 ```
@@ -54,7 +54,7 @@ Backend (api.kayad.space)
 - SSH access to production server
 - Node.js 18+ installed on server
 - PM2 installed globally
-- MongoDB Atlas connection string
+- Supabase project URL + service key
 - Environment variables configured
 - Git access on server
 
@@ -263,13 +263,12 @@ pm2 reload ecosystem.config.cjs
 - Check logs: `pm2 logs kayad-api`
 - Verify environment variables
 - Check port availability
-- Verify MongoDB connection
+- Verify Supabase connection
 
 **Database Connection Fails**
-- Verify MONGO_URI
-- Check MongoDB Atlas whitelist
+- Verify SUPABASE_URL and SUPABASE_SERVICE_KEY
+- Check Supabase project status/quota
 - Verify network connectivity
-- Check MongoDB Atlas status
 
 **M-Pesa Integration Fails**
 - Verify credentials

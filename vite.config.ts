@@ -154,6 +154,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
+    target: 'es2015',
     cssCodeSplit: true,
     // Enable tree shaking
     treeShaking: true,
@@ -182,6 +183,10 @@ export default defineConfig({
             if (id.includes('axios')) {
               return 'http-vendor';
             }
+            // WebSocket/Real-time
+            if (id.includes('socket.io-client') || id.includes('socket.io-parser')) {
+              return 'socket-vendor';
+            }
             // Icons - large, load lazily
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
@@ -190,9 +195,21 @@ export default defineConfig({
             if (id.includes('@supabase')) {
               return 'supabase-vendor';
             }
+            // Error tracking
+            if (id.includes('@sentry')) {
+              return 'sentry-vendor';
+            }
+            // Analytics
+            if (id.includes('posthog')) {
+              return 'analytics-vendor';
+            }
             // Date formatting
-            if (id.includes('date-fns')) {
+            if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
               return 'date-vendor';
+            }
+            // JSON parsing
+            if (id.includes('lodash') || id.includes('clonedeep')) {
+              return 'utils-vendor';
             }
             // Default vendor chunk
             return 'vendor';

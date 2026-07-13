@@ -5,7 +5,7 @@
 
 import EscrowAnomaly from "../models/EscrowAnomaly.js";
 import EscrowRiskScore from "../models/EscrowRiskScore.js";
-import { isValidObjectId } from "../utils/validateId.js";
+import { isValidId as isValidObjectId } from "../utils/validateId.js";
 import { logError, logInfo } from "../utils/logger.js";
 import { success, error, notFound } from "../utils/response.js";
 import { runAnomalyDetection, checkEscrowForAnomalies, getAnomalyDashboard } from "../services/escrowAnomalyDetectionService.js";

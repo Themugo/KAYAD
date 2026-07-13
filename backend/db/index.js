@@ -1,12 +1,21 @@
-﻿import { getSupabase } from '../utils/supabase.js';
+import { getSupabase } from '../utils/supabase.js';
+import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, normalizeSelect } from '../utils/fieldMap.js';
 
 /**
  * Generic database utility for Supabase/PostgreSQL operations.
  * Replaces mongoose model methods with Supabase queries.
+<<<<<<< HEAD
  * 
  * FIX C3: Added connection pool configuration
  * FIX H2: Added query pagination enforcement
  * FIX H6: Added query timeout
+=======
+ *
+ * This is the most widely-used data-access layer in the backend
+ * (60+ service files import from here directly). It shares its
+ * field-name translation logic with models/_base.js via
+ * utils/fieldMap.js — see that file for why the translation exists.
+>>>>>>> e945625d (feat: latest production updates, performance improvements and bug fixes)
  */
 
 // ── QUERY LIMITS (Security: prevent memory exhaustion) ────────────
@@ -27,62 +36,109 @@ function applyTimeout(query) {
 
 // ── FILTER HELPERS ──────────────────────────────────────────────
 
-const applyFilters = (query, filters) => {
+const applyFilters = (query, filters, table) => {
   if (!filters) return query;
   for (const [key, value] of Object.entries(filters)) {
     if (value === undefined || value === null) continue;
-    if (value instanceof Date) { query = query.eq(key, value.toISOString()); continue; }
+
+    if (key === '$text') {
+      const term = value?.$search;
+      const fields = SEARCHABLE_FIELDS[table];
+      if (term && fields?.length) {
+        const orExpr = fields.map((f) => `${f}.ilike.*${String(term).replace(/[,%]/g, '')}*`).join(',');
+        query = query.or(orExpr);
+      }
+      continue;
+    }
+
+    if (key === '$or') {
+      const orExpr = value.map((cond) =>
+        Object.entries(cond).map(([fk, fv]) => {
+          const col = mapKeyOut(table, fk);
+          if (fv && typeof fv === 'object' && fv.$regex) {
+            const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
+            return `${col}.ilike.*${term}*`;
+          }
+          return `${col}.eq.${fv}`;
+        }).join(',')
+      ).join(',');
+      query = query.or(orExpr);
+      continue;
+    }
+
+    if (key === '$and') {
+      for (const cond of value) {
+        for (const [fk, fv] of Object.entries(cond)) query = query.eq(mapKeyOut(table, fk), fv);
+      }
+      continue;
+    }
+
+    if (key.startsWith('$')) continue;
+
+    const col = mapKeyOut(table, key);
+
+    if (value instanceof Date) { query = query.eq(col, value.toISOString()); continue; }
+
     if (typeof value === 'object' && !Array.isArray(value)) {
       // Handle MongoDB-style operators
       for (const [op, val] of Object.entries(value)) {
         switch (op) {
-          case '$eq': case 'eq': query = query.eq(key, val); break;
-          case '$ne': case 'ne': query = query.neq(key, val); break;
-          case '$gt': case 'gt': query = query.gt(key, val); break;
-          case '$gte': case 'gte': query = query.gte(key, val); break;
-          case '$lt': case 'lt': query = query.lt(key, val); break;
-          case '$lte': case 'lte': query = query.lte(key, val); break;
-          case '$in': case 'in': query = query.in(key, Array.isArray(val) ? val : [val]); break;
-          case '$nin': case 'nin': query = query.not('in', `(${(Array.isArray(val) ? val : [val]).join(',')})`); break;
-          case '$like': case 'like': query = query.like(key, val); break;
-          case '$ilike': case 'ilike': query = query.ilike(key, val); break;
-          case '$is': case 'is': query = query.is(key, val); break;
-          case '$contains': case 'contains': query = query.contains(key, val); break;
-          case '$contained': case 'contained': query = query.contained(key, val); break;
+          case '$eq': case 'eq': query = query.eq(col, val); break;
+          case '$ne': case 'ne': query = query.neq(col, val); break;
+          case '$gt': case 'gt': query = query.gt(col, val); break;
+          case '$gte': case 'gte': query = query.gte(col, val); break;
+          case '$lt': case 'lt': query = query.lt(col, val); break;
+          case '$lte': case 'lte': query = query.lte(col, val); break;
+          case '$in': case 'in': query = query.in(col, Array.isArray(val) ? val : [val]); break;
+          case '$nin': case 'nin': query = query.not(col, 'in', `(${(Array.isArray(val) ? val : [val]).join(',')})`); break;
+          case '$like': case 'like': query = query.like(col, val); break;
+          case '$ilike': case 'ilike': query = query.ilike(col, val); break;
+          case '$regex': case 'regex': {
+            const term = (val.source || val).toString().replace(/[\^$]/g, '');
+            query = query.ilike(col, `%${term}%`);
+            break;
+          }
+          case '$is': case 'is': query = query.is(col, val); break;
+          case '$contains': case 'contains': query = query.contains(col, val); break;
+          case '$contained': case 'contained': query = query.contained(col, val); break;
           case '$exists': case 'exists':
-            if (val) query = query.not(key, 'is', null);
-            else query = query.is(key, null);
+            if (val) query = query.not(col, 'is', null);
+            else query = query.is(col, null);
             break;
           default:
             // If it's not a known operator, treat as a nested object or eq
-            query = query.eq(key, val);
+            query = query.eq(col, val);
         }
       }
     } else {
-      query = query.eq(key, value);
+      query = query.eq(col, value);
     }
   }
   return query;
 };
 
-const applyOrdering = (query, orderBy, ascending = false) => {
+const applyOrdering = (query, orderBy, ascending = false, table) => {
   if (orderBy) {
     if (Array.isArray(orderBy)) {
       for (const order of orderBy) {
-        if (typeof order === 'string') query = query.order(order, { ascending });
-        else query = query.order(order.field, { ascending: order.ascending ?? false });
+        if (typeof order === 'string') query = query.order(mapKeyOut(table, order), { ascending });
+        else query = query.order(mapKeyOut(table, order.field), { ascending: order.ascending ?? false });
       }
     } else {
-      query = query.order(orderBy, { ascending });
+      query = query.order(mapKeyOut(table, orderBy), { ascending });
     }
   }
   return query;
 };
+
+const mapRows = (table, rows) => (rows || []).map((r) => mapRowIn(table, r));
+const mapPayloadOut = (table, data) => Object.fromEntries(Object.entries(data).map(([k, v]) => [mapKeyOut(table, k), v]));
 
 // ── CRUD ──────────────────────────────────────────────────────
 
 export const findAll = async (table, options = {}) => {
   const sb = getSupabase();
+<<<<<<< HEAD
   // FIX H2: Enforce pagination limits to prevent memory exhaustion
   const limit = enforceLimit(options.limit);
   let query = sb.from(table).select(options.select || '*', options.count ? { count: 'exact', head: false } : {});
@@ -90,65 +146,74 @@ export const findAll = async (table, options = {}) => {
   if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending);
   query = query.limit(limit); // Always enforce limit
   if (options.offset) query = query.range(options.offset, options.offset + limit - 1);
+=======
+  let query = sb.from(table).select(normalizeSelect(table, options.select), options.count ? { count: 'exact', head: false } : {});
+  query = applyFilters(query, options.filters, table);
+  if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending, table);
+  if (options.limit) query = query.limit(options.limit);
+  if (options.offset) query = query.range(options.offset, options.offset + (options.limit || 20) - 1);
+>>>>>>> e945625d (feat: latest production updates, performance improvements and bug fixes)
   const { data, error, count } = await query;
   if (error) throw error;
-  return options.count ? { data, count } : data;
+  const rows = mapRows(table, data);
+  return options.count ? { data: rows, count } : rows;
 };
 
 export const findById = async (table, id, select = '*') => {
   const sb = getSupabase();
-  const { data, error } = await sb.from(table).select(select).eq('id', id).single();
+  const { data, error } = await sb.from(table).select(normalizeSelect(table, select)).eq('id', id).single();
   if (error) {
     if (error.code === 'PGRST116') return null;
     throw error;
   }
-  return data;
+  return mapRowIn(table, data);
 };
 
 export const findOne = async (table, filters, select = '*') => {
   const sb = getSupabase();
-  let query = sb.from(table).select(select).limit(1);
-  query = applyFilters(query, filters);
+  let query = sb.from(table).select(normalizeSelect(table, select)).limit(1);
+  query = applyFilters(query, filters, table);
   const { data, error } = await query;
   if (error) throw error;
-  return data?.[0] || null;
+  return data?.[0] ? mapRowIn(table, data[0]) : null;
 };
 
 export const create = async (table, data) => {
   const sb = getSupabase();
-  const { data: created, error } = await sb.from(table).insert(data).select().single();
+  const { data: created, error } = await sb.from(table).insert(mapPayloadOut(table, data)).select().single();
   if (error) throw error;
-  return created;
+  return mapRowIn(table, created);
 };
 
 export const createMany = async (table, data) => {
   const sb = getSupabase();
-  const { data: created, error } = await sb.from(table).insert(data).select();
+  const payload = data.map((d) => mapPayloadOut(table, d));
+  const { data: created, error } = await sb.from(table).insert(payload).select();
   if (error) throw error;
-  return created;
+  return mapRows(table, created);
 };
 
 export const update = async (table, id, data) => {
   const sb = getSupabase();
-  const { data: updated, error } = await sb.from(table).update(data).eq('id', id).select().single();
+  const { data: updated, error } = await sb.from(table).update(mapPayloadOut(table, data)).eq('id', id).select().single();
   if (error) throw error;
-  return updated;
+  return mapRowIn(table, updated);
 };
 
 export const updateMany = async (table, filters, data) => {
   const sb = getSupabase();
-  let query = sb.from(table).update(data);
-  query = applyFilters(query, filters);
+  let query = sb.from(table).update(mapPayloadOut(table, data));
+  query = applyFilters(query, filters, table);
   const { data: updated, error } = await query.select();
   if (error) throw error;
-  return updated;
+  return mapRows(table, updated);
 };
 
 export const upsert = async (table, data, conflictColumn = 'id') => {
   const sb = getSupabase();
-  const { data: upserted, error } = await sb.from(table).upsert(data, { onConflict: conflictColumn }).select();
+  const { data: upserted, error } = await sb.from(table).upsert(mapPayloadOut(table, data), { onConflict: mapKeyOut(table, conflictColumn) }).select();
   if (error) throw error;
-  return upserted;
+  return mapRows(table, upserted);
 };
 
 export const remove = async (table, id) => {
@@ -161,7 +226,7 @@ export const remove = async (table, id) => {
 export const removeMany = async (table, filters) => {
   const sb = getSupabase();
   let query = sb.from(table).delete();
-  query = applyFilters(query, filters);
+  query = applyFilters(query, filters, table);
   const { error } = await query;
   if (error) throw error;
   return true;
@@ -174,7 +239,7 @@ export const softDelete = async (table, id) => {
 export const count = async (table, filters = {}) => {
   const sb = getSupabase();
   let query = sb.from(table).select('*', { count: 'exact', head: true });
-  query = applyFilters(query, filters);
+  query = applyFilters(query, filters, table);
   const { count: c, error } = await query;
   if (error) throw error;
   return c;
@@ -182,11 +247,12 @@ export const count = async (table, filters = {}) => {
 
 export const distinct = async (table, column, filters = {}) => {
   const sb = getSupabase();
-  let query = sb.from(table).select(column);
-  query = applyFilters(query, filters);
+  const col = mapKeyOut(table, column);
+  let query = sb.from(table).select(col);
+  query = applyFilters(query, filters, table);
   const { data, error } = await query;
   if (error) throw error;
-  return [...new Set(data.map(row => row[column]))];
+  return [...new Set(data.map(row => row[col]))];
 };
 
 // ── AGGREGATION ──────────────────────────────────────────────
@@ -209,18 +275,19 @@ export const aggregate = async (table, pipeline = []) => {
   // If no grouping, just return filtered results
   if (!groupBy) {
     let query = sb.from(table).select(selectFields);
-    query = applyFilters(query, filters);
+    query = applyFilters(query, filters, table);
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    return mapRows(table, data);
   }
 
   // For grouped queries, use raw RPC or Supabase functions
   // This is a fallback — complex aggregations should use rawQuery
   let query = sb.from(table).select('*');
-  query = applyFilters(query, filters);
-  const { data, error } = await query;
+  query = applyFilters(query, filters, table);
+  const { data: rawData, error } = await query;
   if (error) throw error;
+  const data = mapRows(table, rawData);
 
   // Simple client-side grouping for common patterns
   if (groupBy._id === null || groupBy._id === undefined) {
@@ -284,9 +351,10 @@ export const aggregate = async (table, pipeline = []) => {
 
 export const upsertMany = async (table, data, conflictColumn = 'id') => {
   const sb = getSupabase();
-  const { data: upserted, error } = await sb.from(table).upsert(data, { onConflict: conflictColumn }).select();
+  const payload = data.map((d) => mapPayloadOut(table, d));
+  const { data: upserted, error } = await sb.from(table).upsert(payload, { onConflict: mapKeyOut(table, conflictColumn) }).select();
   if (error) throw error;
-  return upserted;
+  return mapRows(table, upserted);
 };
 
 // ── PAGINATION ─────────────────────────────────────────────────
@@ -297,14 +365,14 @@ export const paginate = async (table, options = {}) => {
   const limit = enforceLimit(options.limit);
   const offset = (page - 1) * limit;
   const sb = getSupabase();
-  let query = sb.from(table).select(options.select || '*', { count: 'exact' });
-  query = applyFilters(query, options.filters);
-  if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending);
+  let query = sb.from(table).select(normalizeSelect(table, options.select), { count: 'exact' });
+  query = applyFilters(query, options.filters, table);
+  if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending, table);
   query = query.range(offset, offset + limit - 1);
   const { data, error, count } = await query;
   if (error) throw error;
   return {
-    data,
+    data: mapRows(table, data),
     pagination: { page, limit, total: count, pages: Math.ceil(count / limit), hasMore: offset + limit < count },
   };
 };

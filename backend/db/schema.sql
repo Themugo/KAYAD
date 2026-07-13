@@ -817,3 +817,61 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+-- =============================
+-- MIGRATION: columns referenced by controllers/carController.js
+-- that were missing from the original schema. The Mongo-era app
+-- code assumes these fields exist on `cars`; without them, the
+-- primary listing/search endpoint (getCars) fails on its very
+-- first filter (isDemo), and auction/promotion filtering fails too.
+-- Added idempotently so this is safe to re-run.
+-- =============================
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_demo BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS auction_status TEXT;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS allow_bid BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS allow_buy BOOLEAN DEFAULT true;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_promoted BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS current_bid NUMERIC;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS bids_count INTEGER DEFAULT 0;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS trust_score NUMERIC;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS deal_rating NUMERIC;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_verified_dealer BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS ntsa_verified BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS duty_status TEXT;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS cover_image TEXT;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_at TIMESTAMPTZ;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS demo_edited_by UUID REFERENCES users(id);
+
+CREATE INDEX IF NOT EXISTS idx_cars_is_demo ON cars(is_demo);
+CREATE INDEX IF NOT EXISTS idx_cars_auction_status ON cars(auction_status);
+CREATE INDEX IF NOT EXISTS idx_cars_is_promoted ON cars(is_promoted);
+
+-- =============================
+-- MIGRATION: `users.verified` — referenced by carController's dealer
+-- populate select ("name businessName phone role logo verified") but
+-- never existed as a column (only email_verified/phone_verified did).
+-- Represents overall account verification (distinct from the
+-- per-channel flags), settable by admin review or derived from them.
+-- =============================
+ALTER TABLE users ADD COLUMN IF NOT EXISTS verified BOOLEAN DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_users_verified ON users(verified);
+
+-- =============================
+-- MIGRATION: composite indexes + trigram search for scale
+-- (500 dealers / 20,000 vehicles / 5,000 searches per day)
+-- =============================
+
+-- Composite indexes for the most common combined filters on the
+-- primary browse/search endpoint (status is applied on nearly every
+-- query, paired with price or recency).
+CREATE INDEX IF NOT EXISTS idx_cars_status_price ON cars(status, price);
+CREATE INDEX IF NOT EXISTS idx_cars_status_created ON cars(status, created_at DESC);
+
+-- Trigram index to make the ILIKE-based keyword search (see the
+-- $text handling in utils/fieldMap.js / models/_base.js) fast at
+-- scale instead of a sequential scan once inventory grows well
+-- past 20,000 rows.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_cars_title_trgm ON cars USING gin (title gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_cars_make_trgm ON cars USING gin (make gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_cars_model_trgm ON cars USING gin (model gin_trgm_ops);

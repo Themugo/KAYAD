@@ -19,7 +19,7 @@ export const logEscrowAction = async (escrowId, action, userId, req, options = {
     const requestId = req?.id || generateRequestId();
 
     // Get user details
-    const user = await findById("users", userId).select("name email role");
+    const user = await findById("users", userId, "name,email,role");
     if (!user) {
       logWarn("User not found for escrow audit", { userId, escrowId, action });
       return null;

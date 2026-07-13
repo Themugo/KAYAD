@@ -78,7 +78,7 @@ const runReminders = async () => {
         const { sendAuctionEndingSoonEmail } = cronEmailService;
 
         for (const userId of bidderIds) {
-          const user = await findById("users", userId).select("email name notifications");
+          const user = await findById("users", userId, "email,name,notifications");
           if (user?.email && user?.notifications?.email !== false && typeof sendAuctionEndingSoonEmail === "function") {
             // Use queue if enabled
             if (QUEUE_MODE) {

@@ -93,9 +93,7 @@ export const getOrganizationUsers = async (organizationId) => {
 
     const users = await findAll("users", { filters: {
       $or: [{ _id: organization.owner }, { _id: { $in: organization.admins } }],
-    } })
-      .select("name email role")
-      ;
+    }, select: "name,email,role" });
 
     return users;
   } catch (err) {

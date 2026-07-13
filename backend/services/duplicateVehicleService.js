@@ -62,7 +62,7 @@ export const detectDuplicates = async (carData, dealerId) => {
     }
 
     // Check partial matches (lower priority)
-    const dealer = await findById("users", dealerId).select("phone");
+    const dealer = await findById("users", dealerId, "phone");
     if (dealer?.phone) {
       const phoneMatches = await checkByPhone(dealer.phone, dealerId);
       if (phoneMatches.length > 0) {
@@ -119,9 +119,7 @@ export const checkByVIN = async (vin, excludeDealerId = null) => {
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await findAll("cars", { filters: query })
-      .select("_id title brand model year dealer vin status isFlaggedDuplicate")
-      ;
+    const matches = await findAll("cars", { filters: query, select: "id,title,brand,model,year,dealer,vin,status,isFlaggedDuplicate" });
 
     return matches;
   } catch (err) {
@@ -142,9 +140,7 @@ export const checkByChassis = async (chassisNumber, excludeDealerId = null) => {
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await findAll("cars", { filters: query })
-      .select("_id title brand model year dealer chassisNumber status isFlaggedDuplicate")
-      ;
+    const matches = await findAll("cars", { filters: query, select: "id,title,brand,model,year,dealer,chassisNumber,status,isFlaggedDuplicate" });
 
     return matches;
   } catch (err) {
@@ -165,9 +161,7 @@ export const checkByRegistration = async (registrationNumber, excludeDealerId = 
       query.dealer = { $ne: excludeDealerId };
     }
 
-    const matches = await findAll("cars", { filters: query })
-      .select("_id title brand model year dealer registrationNumber status isFlaggedDuplicate")
-      ;
+    const matches = await findAll("cars", { filters: query, select: "id,title,brand,model,year,dealer,registrationNumber,status,isFlaggedDuplicate" });
 
     return matches;
   } catch (err) {

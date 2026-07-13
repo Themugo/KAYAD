@@ -4,7 +4,7 @@ import PlatformConfig from "../models/PlatformConfig.js";
 import { cacheDelPattern } from "../utils/cache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
-import { logWarn } from "../utils/logger.js";
+import { logWarn, logError } from "../utils/logger.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
@@ -230,7 +230,7 @@ export const getCars = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ FETCH ERROR:", {
+    logError("FETCH ERROR", {
       message: err.message,
       name: err.name,
       code: err.code,
@@ -465,7 +465,7 @@ export const createCar = async (req, res) => {
         }
       } catch (err) {
         // Duplicate detection failure should not affect listing creation
-        console.warn("⚠️ Duplicate detection failed:", err.message);
+        logWarn("Duplicate detection failed", { error: err.message });
       }
     });
 
@@ -481,14 +481,14 @@ export const createCar = async (req, res) => {
             cleanupFiles(pendingFiles);
             break;
           } catch (e) {
-            console.warn(`⚠️ Cloudinary upload attempt ${attempt}/3 failed:`, e.message);
+            logWarn(`Cloudinary upload attempt ${attempt}/3 failed:`, { error: e.message });
             if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
           }
         }
       });
     }
   } catch (err) {
-    console.error("❌ CREATE ERROR:", err.message);
+    logError("CREATE ERROR", { error: err.message });
     cleanupFiles(req.files);
     const isDev = process.env.NODE_ENV === "development";
     if (!res.headersSent) {
@@ -635,7 +635,7 @@ export const updateCar = async (req, res) => {
 
     res.json({ success: true, data: car });
   } catch (err) {
-    console.error("❌ UPDATE ERROR:", err.message);
+    logError("UPDATE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to update car" });
   }
 };
@@ -687,7 +687,7 @@ export const deleteCar = async (req, res) => {
       message: "Deleted",
     });
   } catch (err) {
-    console.error("❌ DELETE ERROR:", err.message);
+    logError("DELETE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
   }
 };
@@ -743,7 +743,7 @@ export const deleteCarImage = async (req, res) => {
 
     res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
   } catch (err) {
-    console.error("❌ DELETE IMAGE ERROR:", err.message);
+    logError("DELETE IMAGE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to delete image" });
   }
 };
@@ -804,7 +804,7 @@ export const addCarImages = async (req, res) => {
 
     res.json({ success: true, data: { images: car.images } });
   } catch (err) {
-    console.error("❌ ADD IMAGES ERROR:", err.message);
+    logError("ADD IMAGES ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to add images" });
   }
 };
@@ -864,7 +864,7 @@ export const getCar = async (req, res) => {
 
     res.json({ success: true, data: car });
   } catch (err) {
-    console.error("❌ GET ONE ERROR:", err.message);
+    logError("GET ONE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to fetch car" });
   }
 };
@@ -908,7 +908,7 @@ export const placeBid = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ BID ERROR:", err.message);
+    logError("BID ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Bid failed" });
   }
 };
