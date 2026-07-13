@@ -6,7 +6,7 @@
 
 import DOMPurify from "isomorphic-dompurify";
 
-// ── 1. MONGO INJECTION PROTECTION ────────────────────────────
+// ── 1. INPUT SANITIZATION ───────────────────────────────────
 // Strips $ and . from req.body, req.query, req.params
 // Prevents: { "email": { "$gt": "" } } style attacks
 export const mongoSanitize = () => (req, res, next) => {

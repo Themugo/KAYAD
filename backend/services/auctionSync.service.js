@@ -2,7 +2,7 @@ import { logInfo } from "../utils/logger.js";
 import { findOne, update, create } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 
-export const syncBidToMongo = async ({ roomId, userId, bid, time }) => {
+export const syncBidToSupabase = async ({ roomId, userId, bid, time }) => {
   try {
     const existing = await findOne("auctions", { roomId });
     if (existing) {
