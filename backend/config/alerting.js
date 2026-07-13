@@ -1,8 +1,7 @@
-// backend/config/alerting.js - Production Hardened v7.1
+// backend/config/alerting.js - Production Hardened v7.0
 // ─────────────────────────────────────────────────────────────
 // Alerting system configuration
 // Provides alerting for critical events via multiple channels
-// FIX H3: Added startup validation for alert channels
 // ─────────────────────────────────────────────────────────────
 
 import { logError, logWarn, logInfo } from "../utils/logger.js";
@@ -277,48 +276,4 @@ export default {
   checkAlertRules,
   ALERT_LEVELS,
   ALERT_CHANNELS,
-};
-
-// =============================
-// 🔍 STARTUP VALIDATION (FIX H3)
-// =============================
-export const validateAlertChannels = () => {
-  const configured = [];
-  const missing = [];
-
-  if (process.env.ALERT_EMAIL_TO && process.env.EMAIL_HOST) {
-    configured.push("email");
-  } else if (process.env.ALERT_EMAIL_TO || process.env.EMAIL_HOST) {
-    missing.push("email (partial: need both ALERT_EMAIL_TO and EMAIL_HOST)");
-  }
-
-  if (process.env.ALERT_PHONE_TO && process.env.TWILIO_ACCOUNT_SID) {
-    configured.push("sms");
-  } else if (process.env.ALERT_PHONE_TO || process.env.TWILIO_ACCOUNT_SID) {
-    missing.push("sms (partial: need both ALERT_PHONE_TO and TWILIO_ACCOUNT_SID)");
-  }
-
-  if (process.env.SLACK_WEBHOOK_URL) {
-    configured.push("slack");
-  } else {
-    missing.push("slack (need SLACK_WEBHOOK_URL)");
-  }
-
-  if (process.env.ALERT_WEBHOOK_URL) {
-    configured.push("webhook");
-  } else {
-    missing.push("webhook (need ALERT_WEBHOOK_URL)");
-  }
-
-  if (configured.length === 0) {
-    logWarn("⚠️ NO ALERT CHANNELS CONFIGURED! Critical alerts will not fire!");
-    logWarn("Configure at least one of: SLACK_WEBHOOK_URL, ALERT_EMAIL_TO+EMAIL_HOST, or ALERT_WEBHOOK_URL");
-  } else {
-    logInfo(`Alert channels configured: ${configured.join(", ")}`);
-    if (missing.length > 0) {
-      logWarn(`Alert channels missing: ${missing.join(", ")}`);
-    }
-  }
-
-  return { configured, missing };
 };

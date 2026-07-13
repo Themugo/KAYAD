@@ -62,11 +62,11 @@ export default function AdminEscrowVault() {
   const filters = ['all', ...Object.keys(STATUS_META)];
 
   return (
-    <div style={{ padding: '32px', background: '#050505', minHeight: '100vh' }}>
+    <div style={{ padding: '32px', background: '#F8FAFC', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}>🔐 Escrow Vaults</h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginTop: 6 }}>Secure bank-backed P2P transaction vaults</p>
+          <p style={{ color: 'rgba(15, 23, 42, 0.35)', fontSize: 13, marginTop: 6 }}>Secure bank-backed P2P transaction vaults</p>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -94,19 +94,19 @@ export default function AdminEscrowVault() {
             {filtered.map(v => {
               const meta = STATUS_META[v.status] || { label: v.status, badge: '', icon: '🔐' };
               return (
-                <div key={v._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 22px' }}>
+                <div key={v._id} style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: '18px 22px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                     <div>
                       <div style={{ fontSize: 20, fontFamily: 'var(--font-display)', fontWeight: 700 }}>{formatKES(v.amount)}</div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{v.car?.title || 'Unknown'} — Ref: {v.bankTransferRef}</div>
+                      <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.4)', marginTop: 2 }}>{v.car?.title || 'Unknown'} — Ref: {v.bankTransferRef}</div>
                     </div>
                     <span className={meta.badge || 'badge'} style={{ fontSize: 11 }}>{meta.icon} {meta.label}</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-                    <div><span style={{ color: 'rgba(255,255,255,0.3)' }}>Buyer:</span> {v.buyer?.name || '—'}</div>
-                    <div><span style={{ color: 'rgba(255,255,255,0.3)' }}>Seller:</span> {v.seller?.name || '—'}</div>
-                    <div><span style={{ color: 'rgba(255,255,255,0.3)' }}>Created:</span> {v.createdAt ? new Date(v.createdAt).toLocaleDateString() : '—'}</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)' }}>
+                    <div><span style={{ color: 'rgba(15, 23, 42, 0.3)' }}>Buyer:</span> {v.buyer?.name || '—'}</div>
+                    <div><span style={{ color: 'rgba(15, 23, 42, 0.3)' }}>Seller:</span> {v.seller?.name || '—'}</div>
+                    <div><span style={{ color: 'rgba(15, 23, 42, 0.3)' }}>Created:</span> {v.createdAt ? new Date(v.createdAt).toLocaleDateString() : '—'}</div>
                   </div>
 
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -126,7 +126,7 @@ export default function AdminEscrowVault() {
                   </div>
 
                   {selected?._id === v._id && (
-                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid rgba(15, 23, 42, 0.06)', fontSize: 12, color: 'rgba(15, 23, 42, 0.5)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                       <div>Car: {v.car?.brand} {v.car?.model} ({v.car?._id})</div>
                       <div>Buyer: {v.buyer?.email || '—'}</div>
                       <div>Seller: {v.seller?.email || '—'}</div>

@@ -341,7 +341,7 @@ body {
 .mobile-search__container--focused {
   border-color: var(--gold-400);
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 4px rgba(212, 196, 168, 0.12);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
 .mobile-search__icon {
@@ -1002,7 +1002,7 @@ body {
   outline: none;
   border-color: var(--gold-400);
   background: var(--bg-elevated);
-  box-shadow: 0 0 0 4px rgba(212, 196, 168, 0.1);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
 
 .mobile-form__input--error {
@@ -1767,7 +1767,7 @@ body {
 
 /* Touch action utilities */
 .no-tap-highlight { -webkit-tap-highlight-color: transparent; }
-.tap-highlight-visible { -webkit-tap-highlight-color: rgba(212, 196, 168, 0.2); }
+.tap-highlight-visible { -webkit-tap-highlight-color: rgba(37, 99, 235, 0.2); }
 
 /* Selection color */
 ::selection {

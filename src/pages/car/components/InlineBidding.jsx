@@ -108,13 +108,13 @@ export default function InlineBidding({
               onClick={() => handleQuickBid(mult)}
               style={{
                 padding: '6px 12px', borderRadius: 6,
-                background: 'rgba(212,196,168,0.08)',
-                border: '1px solid rgba(212,196,168,0.15)',
+                background: 'rgba(37, 99, 235,0.08)',
+                border: '1px solid rgba(37, 99, 235,0.15)',
                 color: 'var(--gold)', fontSize: 11, fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.2s',
               }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,196,168,0.15)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,196,168,0.08)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(37, 99, 235,0.15)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'rgba(37, 99, 235,0.08)'}
             >
               +KES {(bidIncrement * mult).toLocaleString()}
             </button>
@@ -151,7 +151,7 @@ export default function InlineBidding({
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
                     padding: '6px 0', fontSize: 11, borderBottom: '1px solid rgba(255,255,255,0.05)',
                     animation: 'fadeInDown 0.3s ease',
-                    background: isTop ? 'rgba(212,196,168,0.04)' : 'transparent'
+                    background: isTop ? 'rgba(37, 99, 235,0.04)' : 'transparent'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -177,11 +177,11 @@ export default function InlineBidding({
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
           fontSize: 11, color: 'var(--gold)', marginTop: 12, textDecoration: 'none', 
           fontWeight: 600, padding: '8px', borderRadius: 6,
-          background: 'rgba(212,196,168,0.05)', border: '1px solid rgba(212,196,168,0.1)',
+          background: 'rgba(37, 99, 235,0.05)', border: '1px solid rgba(37, 99, 235,0.1)',
           transition: 'all 0.2s'
         }}
-        onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,196,168,0.1)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,196,168,0.05)'}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(37, 99, 235,0.1)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'rgba(37, 99, 235,0.05)'}
       >
         <Clock size={12} />
         Full Auction Room →

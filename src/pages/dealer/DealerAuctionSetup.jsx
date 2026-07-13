@@ -58,33 +58,33 @@ export default function DealerAuctionSetup() {
   ];
 
   const styles = useMemo(() => ({
-    container: { background: '#050505', minHeight: '100vh' },
+    container: { background: '#F8FAFC', minHeight: '100vh' },
     headerBar: {
-      background: 'linear-gradient(180deg, rgba(212,196,168,0.045) 0%, transparent 100%)',
-      borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '30px 0 0',
+      background: 'linear-gradient(180deg, rgba(37, 99, 235,0.045) 0%, transparent 100%)',
+      borderBottom: '1px solid rgba(15, 23, 42, 0.06)', padding: '30px 0 0',
     },
     inner: { maxWidth: 1180, margin: '0 auto', padding: '0 32px' },
     contentInner: { maxWidth: 1180, margin: '0 auto', padding: '30px 32px 64px' },
-    card: { background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.075)', borderRadius: 10, overflow: 'hidden', boxShadow: '0 18px 50px rgba(0,0,0,0.18)' },
+    card: { background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.075)', borderRadius: 10, overflow: 'hidden', boxShadow: '0 18px 50px rgba(0,0,0,0.18)' },
     cardHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 18, padding: '17px 20px', flexWrap: 'wrap' },
-    configPanel: { borderTop: '1px solid rgba(255,255,255,0.06)', padding: 20, background: 'rgba(255,255,255,0.015)' },
+    configPanel: { borderTop: '1px solid rgba(15, 23, 42, 0.06)', padding: 20, background: 'rgba(15, 23, 42, 0.015)' },
     panelHeader: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 18 },
     sectionKicker: { fontSize: 9, color: 'var(--gold)', fontWeight: 900, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 5 },
-    sectionTitle: { fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '1.25rem', color: '#fff', margin: 0 },
+    sectionTitle: { fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '1.25rem', color: '#0F172A', margin: 0 },
     formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 16, marginBottom: 18 },
-    timeline: { display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 48px minmax(140px, 1fr) 48px minmax(140px, 1fr)', alignItems: 'center', gap: 10, padding: 16, borderRadius: 10, border: '1px solid rgba(212,196,168,0.13)', background: 'rgba(212,196,168,0.045)', marginBottom: 16, overflowX: 'auto' },
-    timelineRule: { height: 1, background: 'rgba(212,196,168,0.28)' },
-    timelineLabel: { fontSize: 9, color: 'rgba(255,255,255,0.38)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800, marginBottom: 5 },
-    timelineValue: { color: '#fff', fontSize: 13, fontWeight: 800 },
+    timeline: { display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 48px minmax(140px, 1fr) 48px minmax(140px, 1fr)', alignItems: 'center', gap: 10, padding: 16, borderRadius: 10, border: '1px solid rgba(37, 99, 235,0.13)', background: 'rgba(37, 99, 235,0.045)', marginBottom: 16, overflowX: 'auto' },
+    timelineRule: { height: 1, background: 'rgba(37, 99, 235,0.28)' },
+    timelineLabel: { fontSize: 9, color: 'rgba(15, 23, 42, 0.38)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800, marginBottom: 5 },
+    timelineValue: { color: '#0F172A', fontSize: 13, fontWeight: 800 },
     livePanel: { display: 'flex', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap', padding: '4px 20px 20px' },
     liveMetaGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(120px, 1fr))', gap: 10, flex: '1 1 420px' },
-    metaBox: { padding: 13, borderRadius: 9, background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)' },
-    actionsRow: { borderTop: '1px solid rgba(255,255,255,0.06)', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
-    metricLabel: { fontSize: 9, fontWeight: 800, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 },
+    metaBox: { padding: 13, borderRadius: 9, background: 'rgba(15, 23, 42, 0.035)', border: '1px solid rgba(15, 23, 42, 0.07)' },
+    actionsRow: { borderTop: '1px solid rgba(15, 23, 42, 0.06)', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' },
+    metricLabel: { fontSize: 9, fontWeight: 800, color: 'rgba(15, 23, 42, 0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 },
     goldValue: { fontSize: 15, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic', whiteSpace: 'nowrap' },
-    whiteValue: { fontSize: 13, color: '#fff', fontWeight: 800, whiteSpace: 'nowrap' },
+    whiteValue: { fontSize: 13, color: '#0F172A', fontWeight: 800, whiteSpace: 'nowrap' },
     primaryButton: { padding: '11px 18px', background: 'var(--gold)', border: 'none', borderRadius: 8, color: '#000', fontSize: 12, fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: 8, textTransform: 'uppercase', letterSpacing: '0.06em' },
-    secondaryButton: { padding: '10px 14px', background: 'rgba(255,255,255,0.045)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' },
+    secondaryButton: { padding: '10px 14px', background: 'rgba(15, 23, 42, 0.045)', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, color: '#0F172A', fontSize: 12, fontWeight: 800, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' },
     blueButton: { padding: '10px 16px', background: 'rgba(59,130,246,0.11)', border: '1px solid rgba(59,130,246,0.24)', borderRadius: 8, color: '#60a5fa', fontSize: 12, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 7 },
     dangerButton: { padding: '10px 16px', background: 'rgba(239,68,68,0.11)', border: '1px solid rgba(239,68,68,0.24)', borderRadius: 8, color: '#ef4444', fontSize: 12, fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 7 },
     errorNote: { marginBottom: 14, padding: '10px 12px', borderRadius: 8, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#fca5a5', fontSize: 12, fontWeight: 700 },
@@ -149,8 +149,8 @@ export default function DealerAuctionSetup() {
           <div style={styles.sectionKicker}>Dealer Auctions</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 14, marginBottom: 24 }}>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.65rem,3vw,2.35rem)', color: '#fff', margin: 0 }}>Auction Setup</h1>
-              <p style={{ margin: '8px 0 0', color: 'rgba(255,255,255,0.48)', fontSize: 13 }}>Configure starting bids, reserve prices, countdown duration, live extensions, and auction endings.</p>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.65rem,3vw,2.35rem)', color: '#0F172A', margin: 0 }}>Auction Setup</h1>
+              <p style={{ margin: '8px 0 0', color: 'rgba(15, 23, 42, 0.48)', fontSize: 13 }}>Configure starting bids, reserve prices, countdown duration, live extensions, and auction endings.</p>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={fetchCars} style={styles.secondaryButton}><RefreshCw size={14} /> Refresh</button>
@@ -163,9 +163,9 @@ export default function DealerAuctionSetup() {
               const selected = activeTab === tab.key;
               return (
                 <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 18px', background: selected ? 'rgba(212,196,168,0.08)' : 'none', border: 'none', borderBottom: `2px solid ${selected ? 'var(--gold)' : 'transparent'}`, color: selected ? '#fff' : 'rgba(255,255,255,0.42)', fontSize: 13, fontWeight: 850, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '13px 18px', background: selected ? 'rgba(37, 99, 235,0.08)' : 'none', border: 'none', borderBottom: `2px solid ${selected ? 'var(--gold)' : 'transparent'}`, color: selected ? '#0F172A' : 'rgba(15, 23, 42, 0.42)', fontSize: 13, fontWeight: 850, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   <Icon size={15} /> {tab.label}
-                  <span style={{ minWidth: 22, height: 22, padding: '0 7px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: selected ? 'var(--gold)' : 'rgba(255,255,255,0.08)', color: selected ? '#000' : 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: 900 }}>{tab.count}</span>
+                  <span style={{ minWidth: 22, height: 22, padding: '0 7px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: selected ? 'var(--gold)' : 'rgba(15, 23, 42, 0.08)', color: selected ? '#000' : 'rgba(15, 23, 42, 0.55)', fontSize: 11, fontWeight: 900 }}>{tab.count}</span>
                 </button>
               );
             })}
@@ -177,10 +177,10 @@ export default function DealerAuctionSetup() {
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}><div className="spinner" /></div>
         ) : activeCars.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '64px 24px', background: '#0C0C0C', borderRadius: 10, border: '1px solid rgba(255,255,255,0.07)' }}>
-            <Gavel size={42} style={{ color: 'rgba(255,255,255,0.14)', marginBottom: 14 }} />
-            <div style={{ fontSize: 15, color: '#fff', fontWeight: 850, marginBottom: 6 }}>No {activeTab} auctions</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.42)' }}>
+          <div style={{ textAlign: 'center', padding: '64px 24px', background: '#FFFFFF', borderRadius: 10, border: '1px solid rgba(15, 23, 42, 0.07)' }}>
+            <Gavel size={42} style={{ color: 'rgba(15, 23, 42, 0.14)', marginBottom: 14 }} />
+            <div style={{ fontSize: 15, color: '#0F172A', fontWeight: 850, marginBottom: 6 }}>No {activeTab} auctions</div>
+            <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.42)' }}>
               {activeTab === 'draft' ? 'Add or edit a listing, then return here to configure its auction.' : 'Auctions will appear here after they move into this state.'}
             </div>
           </div>

@@ -59,7 +59,7 @@ export default function WebhoistOverview() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 26 }}>
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
             <Crown size={13} style={{ color: 'var(--gold)' }} />
             <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Webhoist · Owner</span>
           </div>
@@ -115,7 +115,7 @@ export default function WebhoistOverview() {
             <div style={{ padding: 28, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No recent activity</div>
           ) : logs.slice(0, 12).map((e, i) => (
             <div key={e._id || i} style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', borderBottom: i < Math.min(logs.length, 12) - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-              <code style={{ fontSize: 11, color: 'var(--gold)', fontFamily: 'monospace', background: 'rgba(212,196,168,0.08)', padding: '2px 8px', borderRadius: 6 }}>{e.action}</code>
+              <code style={{ fontSize: 11, color: 'var(--gold)', fontFamily: 'monospace', background: 'rgba(37, 99, 235,0.08)', padding: '2px 8px', borderRadius: 6 }}>{e.action}</code>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{e.admin || e.adminId?.name || 'System'}</span>
               <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 'auto' }}>
                 {e.createdAt ? new Date(e.createdAt).toLocaleString('en-KE') : ''}
@@ -126,7 +126,7 @@ export default function WebhoistOverview() {
       </div>
 
       {/* Access note */}
-      <div style={{ padding: '16px 20px', background: 'rgba(212,196,168,0.05)', borderRadius: 12, border: '1px solid rgba(212,196,168,0.15)' }}>
+      <div style={{ padding: '16px 20px', background: 'rgba(37, 99, 235,0.05)', borderRadius: 12, border: '1px solid rgba(37, 99, 235,0.15)' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--gold)', fontWeight: 600, marginBottom: 8 }}>
           <ShieldCheck size={15} /> Webhoist Access
         </div>

@@ -94,7 +94,7 @@ export function DemoBadge({ edited }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '2px 8px', borderRadius: 9999, fontSize: 9, fontWeight: 700,
-      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(212,196,168,0.1)',
+      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(37, 99, 235,0.1)',
       color: edited ? '#22c55e' : 'var(--gold)',
       textTransform: 'uppercase', letterSpacing: '0.06em',
     }}>

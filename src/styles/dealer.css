@@ -8,35 +8,41 @@
    ============================================================ */
 
 :root {
-  /* Dealer-specific colors */
-  --dealer-gold: #D4A843;
-  --dealer-gold-light: #E8B84B;
-  --dealer-gold-dark: #B8841F;
-  --dealer-gold-glow: rgba(212, 196, 168, 0.15);
-  
+  /* Dealer accent — previously a literal gold (#2563EB) on a fully
+     dark theme, completely disconnected from the light blue/white
+     premium theme used everywhere else in the app (landing, gallery,
+     vehicle details). Aligned here so the Dealer dashboard — the
+     most important dashboard, given 500 dealers onboarding — matches
+     the rest of the product instead of being its own dark-gold
+     identity. */
+  --dealer-gold: #2563EB;
+  --dealer-gold-light: #3B82F6;
+  --dealer-gold-dark: #1D4ED8;
+  --dealer-gold-glow: rgba(37, 99, 235, 0.12);
+
   /* Dealer backgrounds */
-  --dealer-bg: #07090C;
-  --dealer-surface: #0F1318;
-  --dealer-elevated: #151A21;
-  --dealer-card: #1A1F28;
-  
+  --dealer-bg: #F8FAFC;
+  --dealer-surface: #FFFFFF;
+  --dealer-elevated: #F1F5F9;
+  --dealer-card: #FFFFFF;
+
   /* Dealer text */
-  --dealer-text: #F1F1F1;
-  --dealer-text-secondary: #B0B8C4;
-  --dealer-text-muted: #6B7A8F;
-  --dealer-text-dim: #4A5568;
-  
+  --dealer-text: #0F172A;
+  --dealer-text-secondary: #475569;
+  --dealer-text-muted: #94A3B8;
+  --dealer-text-dim: #CBD5E1;
+
   /* Dealer borders */
-  --dealer-border: rgba(255, 255, 255, 0.06);
-  --dealer-border-light: rgba(255, 255, 255, 0.1);
-  --dealer-border-gold: rgba(212, 196, 168, 0.3);
-  
+  --dealer-border: rgba(15, 23, 42, 0.08);
+  --dealer-border-light: rgba(15, 23, 42, 0.14);
+  --dealer-border-gold: rgba(37, 99, 235, 0.25);
+
   /* Dealer shadows */
-  --dealer-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --dealer-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --dealer-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-  --dealer-shadow-glow: 0 0 30px rgba(212, 196, 168, 0.15);
-  
+  --dealer-shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --dealer-shadow-md: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --dealer-shadow-lg: 0 8px 40px rgba(15, 23, 42, 0.12);
+  --dealer-shadow-glow: 0 0 30px rgba(37, 99, 235, 0.15);
+
   /* Dealer spacing */
   --dealer-space-1: 4px;
   --dealer-space-2: 8px;
@@ -225,7 +231,7 @@
 .dealer-metric__icon--views { background: rgba(59, 130, 246, 0.15); }
 .dealer-metric__icon--leads { background: rgba(168, 85, 247, 0.15); }
 .dealer-metric__icon--sales { background: rgba(34, 197, 94, 0.15); }
-.dealer-metric__icon--revenue { background: rgba(212, 196, 168, 0.15); }
+.dealer-metric__icon--revenue { background: rgba(37, 99, 235, 0.15); }
 .dealer-metric__icon--inventory { background: rgba(251, 146, 60, 0.15); }
 .dealer-metric__icon--rating { background: rgba(236, 72, 153, 0.15); }
 
@@ -1136,12 +1142,12 @@
 .dealer-btn--primary {
   background: linear-gradient(135deg, var(--dealer-gold), var(--dealer-gold-dark));
   color: #000;
-  box-shadow: 0 4px 16px rgba(212, 196, 168, 0.3);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
 }
 
 .dealer-btn--primary:hover {
   filter: brightness(1.05);
-  box-shadow: 0 6px 24px rgba(212, 196, 168, 0.4);
+  box-shadow: 0 6px 24px rgba(37, 99, 235, 0.4);
   transform: translateY(-1px);
 }
 
@@ -1236,7 +1242,7 @@
 .dealer-sidebar-link:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); }
 .dealer-sidebar-link.active {
   color: var(--gold);
-  background: rgba(212,196,168,0.06);
+  background: rgba(37, 99, 235,0.06);
 }
 .dealer-sidebar-link svg { flex-shrink: 0; }
 .dealer-sidebar-bottom {
@@ -1302,7 +1308,7 @@
   text-decoration: none; transition: all 0.2s;
 }
 .dash-action-card:hover {
-  border-color: rgba(212,196,168,0.2);
+  border-color: rgba(37, 99, 235,0.2);
   transform: translateY(-2px);
 }
 .dash-action-icon {

@@ -23,7 +23,7 @@ export default function NotFoundState({
     <div className="min-h-[50vh] flex items-center justify-center px-8">
       <div className="text-center max-w-md">
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-          style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)' }}
+          style={{ background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)' }}
         >
           <Icon size={32} className="text-gold/60" />
         </div>

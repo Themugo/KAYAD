@@ -34,7 +34,7 @@ export default function DealerFinancePage() {
             <DealerEarningsTab earnings={earnings} />
             <div style={{ marginTop: 24 }}>
               <Link to="/dealer/settlement"
-                style={{ padding: '10px 20px', borderRadius: 10, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                style={{ padding: '10px 20px', borderRadius: 10, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.2)', color: 'var(--gold)', fontSize: 12, fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                 <DollarSign size={14} /> View Settlements
               </Link>
             </div>

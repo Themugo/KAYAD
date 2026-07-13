@@ -1,18 +1,23 @@
 import { Link } from 'react-router-dom';
 
 // Enterprise Design Tokens
+// Previously a separate dark black-and-gold theme (#050505 background,
+// literal gold accent) completely disconnected from the premium
+// light blue/white theme used everywhere else in the app — meaning
+// every dashboard using this file rendered inconsistently with the
+// rest of the product. Aligned to the same design system here.
 export const EnterpriseTokens = {
-  gold: 'rgba(212, 168, 67, 1)',
-  goldLight: 'rgba(212, 168, 67, 0.8)',
-  goldBg: 'rgba(212, 168, 67, 0.1)',
-  goldBorder: 'rgba(212, 168, 67, 0.2)',
-  bg: '#050505',
-  card: '#0C0C0C',
-  surface: '#151520',
-  border: 'rgba(255, 255, 255, 0.06)',
-  borderLight: 'rgba(255, 255, 255, 0.1)',
-  success: '#22c55e',
-  successBg: 'rgba(34, 197, 94, 0.1)',
+  gold: '#2563EB',
+  goldLight: 'rgba(37, 99, 235, 0.8)',
+  goldBg: 'rgba(37, 99, 235, 0.08)',
+  goldBorder: 'rgba(37, 99, 235, 0.2)',
+  bg: '#F8FAFC',
+  card: '#FFFFFF',
+  surface: '#F1F5F9',
+  border: 'rgba(15, 23, 42, 0.08)',
+  borderLight: 'rgba(15, 23, 42, 0.14)',
+  success: '#10B981',
+  successBg: 'rgba(16, 185, 129, 0.1)',
   warning: '#f59e0b',
   warningBg: 'rgba(245, 158, 11, 0.1)',
   danger: '#ef4444',
@@ -21,10 +26,10 @@ export const EnterpriseTokens = {
   infoBg: 'rgba(59, 130, 246, 0.1)',
   purple: '#a855f7',
   purpleBg: 'rgba(168, 85, 247, 0.1)',
-  textPrimary: '#ffffff',
-  textSecondary: 'rgba(255, 255, 255, 0.7)',
-  textMuted: 'rgba(255, 255, 255, 0.4)',
-  textDim: 'rgba(255, 255, 255, 0.25)',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#94A3B8',
+  textDim: '#CBD5E1',
 };
 
 const S = {
@@ -64,7 +69,7 @@ export function EnterpriseCard({ children, header, action, className, onMouseEnt
   );
 }
 
-export function EnterpriseKPI({ icon, label, value, sub, trend, accent = 'rgba(212,168,67,1)' }) {
+export function EnterpriseKPI({ icon, label, value, sub, trend, accent = 'rgba(37, 99, 235,1)' }) {
   return (
     <div style={S.kpi}>
       <div style={{ ...S.kpiBg, background: accent }} />
@@ -196,7 +201,7 @@ export function EnterpriseTable({ columns, rows, emptyMessage = 'No data' }) {
 
 export function DashboardHeader({ badge, greeting, name, subtitle, actions }) {
   return (
-    <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid var(--border)', padding: '40px 0 36px' }}>
+    <div style={{ background: 'linear-gradient(180deg, rgba(37, 99, 235,0.04) 0%, transparent 100%)', borderBottom: '1px solid var(--border)', padding: '40px 0 36px' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
           <div>
@@ -242,8 +247,8 @@ export function EnterpriseMetricRow({ icon, label, value, sub, trend, color }) {
 export function EnterpriseRevenue({ label, value, sub, period }) {
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(212, 168, 67, 0.1) 0%, #0C0C0C 100%)',
-      border: '1px solid rgba(212, 168, 67, 0.2)',
+      background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, #FFFFFF 100%)',
+      border: '1px solid rgba(37, 99, 235, 0.2)',
       borderRadius: 14,
       padding: '20px 22px',
       position: 'relative',
@@ -256,7 +261,7 @@ export function EnterpriseRevenue({ label, value, sub, period }) {
         width: 120,
         height: 120,
         borderRadius: '50%',
-        border: '1px solid rgba(212, 168, 67, 0.2)',
+        border: '1px solid rgba(37, 99, 235, 0.2)',
         opacity: 0.3,
       }} />
       <div style={{ fontSize: 10, fontWeight: 700, color: '#D4C4A8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{label}</div>
@@ -412,7 +417,7 @@ export function EnterpriseTabs({ tabs, active, onChange }) {
             <span style={{
               marginLeft: 6,
               padding: '2px 8px',
-              background: active === tab.id ? 'rgba(212, 168, 67, 0.1)' : 'rgba(255,255,255,0.05)',
+              background: active === tab.id ? 'rgba(37, 99, 235, 0.1)' : 'rgba(255,255,255,0.05)',
               borderRadius: 9999,
               fontSize: 10,
               fontWeight: 700,

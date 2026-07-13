@@ -159,7 +159,7 @@ export default function InspectionPage() {
                     <span className="price-tag" style={{ fontSize: 14 }}>KES {pkg?.price?.toLocaleString()}</span>
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 11, background: 'rgba(212,168,67,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--gold)' }}>
+                    <span style={{ fontSize: 11, background: 'rgba(37, 99, 235,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--gold)' }}>
                       ⏳ Only {slotsLeft} slots left today
                     </span>
                     <span style={{ fontSize: 11, background: 'rgba(82,196,26,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--green)' }}>

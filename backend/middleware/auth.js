@@ -1,43 +1,48 @@
 // backend/middleware/auth.js
-// FIX C2: User cache migrated to Redis for horizontal scaling
 
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { OWNER_EMAILS, isOwnerEmail } from "../config/owners.js";
 import { logError, logWarn } from "../utils/logger.js";
-import { redisGet, redisSet, redisDel } from "../config/redis.js";
 
 // OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
 // comma-separated WEBHOIST_EMAIL list (multiple platform owners).
 
 // =============================
-// ⚡ LIGHTWEIGHT USER CACHE (Redis-backed)
-// FIX C2: Cache now uses Redis instead of in-memory Map
-// This enables distributed cache across multiple server instances
+// ⚡ LIGHTWEIGHT USER CACHE
+// FIX: protect() ran a DB query on every single authenticated request.
+// Under load (live auctions, many bidders) this creates a thundering-herd
+// of identical lookups. Cache the lean user doc for 20s per user ID.
+// Cache is invalidated automatically whenever tokenVersion changes
+// (logout, password change, ban) since the cached copy becomes stale
+// and the next read just re-fetches — worst case is a 20s staleness
+// window on non-security fields like name/avatar, which is acceptable.
 // =============================
-const USER_CACHE_PREFIX = "user:cache:";
-const USER_CACHE_TTL_SECONDS = 20;
+const USER_CACHE_TTL_MS = 20_000;
+const userCache = new Map(); // id -> { user, expiresAt }
 
-async function getCachedUser(id) {
-  const key = `${USER_CACHE_PREFIX}${id}`;
-  const cached = await redisGet(key);
-  if (!cached) return null;
-  try {
-    return JSON.parse(cached);
-  } catch {
+function getCachedUser(id) {
+  const entry = userCache.get(id);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    userCache.delete(id);
     return null;
+  }
+  return entry.user;
+}
+
+function setCachedUser(id, user) {
+  userCache.set(id, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
+  // Periodic cleanup so the map doesn't grow unbounded on a long-running process
+  if (userCache.size > 5000) {
+    const now = Date.now();
+    for (const [k, v] of userCache) if (now > v.expiresAt) userCache.delete(k);
   }
 }
 
-async function setCachedUser(id, user) {
-  const key = `${USER_CACHE_PREFIX}${id}`;
-  await redisSet(key, JSON.stringify(user), { EX: USER_CACHE_TTL_SECONDS });
-}
-
-export async function invalidateUserCache(id) {
-  const key = `${USER_CACHE_PREFIX}${String(id)}`;
-  await redisDel(key);
+export function invalidateUserCache(id) {
+  userCache.delete(String(id));
 }
 
 // =============================
@@ -90,14 +95,13 @@ export const protect = async (req, res, next) => {
     }
 
     // =============================
-    // 🔍 FETCH USER (CACHED IN REDIS, LEAN 🔥)
-    // FIX C2: Now uses Redis cache instead of in-memory
+    // 🔍 FETCH USER (CACHED, LEAN 🔥)
     // =============================
-    let user = await getCachedUser(decoded.id);
+    let user = getCachedUser(decoded.id);
     if (!user) {
       user = await User.findById(decoded.id).select("-password +tokenVersion").lean();
       if (user) {
-        await setCachedUser(decoded.id, user);
+        setCachedUser(decoded.id, user);
       }
     }
 

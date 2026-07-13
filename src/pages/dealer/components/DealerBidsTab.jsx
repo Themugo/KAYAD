@@ -14,8 +14,8 @@ export default function DealerBidsTab({ bids, setBids, toast }) {
           {['all', 'pending', 'accepted', 'rejected'].map(status => (
             <button key={status} onClick={() => setBidFilter(status)} style={{
               padding: '6px 14px', borderRadius: 8,
-              background: bidFilter === status ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${bidFilter === status ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.07)'}`,
+              background: bidFilter === status ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${bidFilter === status ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.07)'}`,
               color: bidFilter === status ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
               fontSize: 11, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
             }}>

@@ -92,7 +92,7 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
                 role="button" tabIndex={0} aria-label={`Set photo ${i + 1} as cover image`}
                 style={{
                   aspectRatio: '4/3', borderRadius: 10, overflow: 'hidden', position: 'relative',
-                  border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(212,196,168,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                  border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(37, 99, 235,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
                   transition: 'all 0.15s', cursor: 'grab', opacity: dragIdx === i ? 0.5 : 1,
                   transform: overIdx === i ? 'scale(1.03)' : 'none',
                 }}>

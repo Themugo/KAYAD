@@ -326,7 +326,7 @@ export default function OptimizedSearchBar({
         border: `1px solid ${isFocused ? 'var(--gold)' : 'var(--border)'}`,
         borderRadius: 12,
         transition: 'border-color 0.2s, box-shadow 0.2s',
-        boxShadow: isFocused ? '0 0 0 3px rgba(212, 196, 168, 0.15)' : 'none',
+        boxShadow: isFocused ? '0 0 0 3px rgba(37, 99, 235, 0.15)' : 'none',
       }}>
         {isLoadingSuggestions ? (
           <Loader size={20} style={{ color: 'var(--gold)', animation: 'spin 1s linear infinite' }} />
@@ -459,7 +459,7 @@ export default function OptimizedSearchBar({
                 gap: 8,
                 width: '100%',
                 padding: '12px 16px',
-                background: 'rgba(212, 196, 168, 0.1)',
+                background: 'rgba(37, 99, 235, 0.1)',
                 border: 'none',
                 borderTop: '1px solid var(--border)',
                 cursor: 'pointer',

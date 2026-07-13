@@ -257,7 +257,7 @@ export default function AdminDealerVerifications() {
                     {doc.url && (
                       <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{
                         color: 'var(--gold)', padding: '4px 10px', borderRadius: 6,
-                        background: 'rgba(212,196,168,0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600,
+                        background: 'rgba(37, 99, 235,0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600,
                       }}><Eye size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> View</a>
                     )}
                   </div>

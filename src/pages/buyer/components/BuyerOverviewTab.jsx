@@ -121,7 +121,7 @@ export default function BuyerOverviewTab({
                 <div className="activity-list">
                   {myBids.slice(0, 3).map(bid => (
                     <div key={bid._id} className="activity-row">
-                      <div className="activity-icon-box" style={{ background: 'rgba(212,196,168,0.1)' }}>🔨</div>
+                      <div className="activity-icon-box" style={{ background: 'rgba(37, 99, 235,0.1)' }}>🔨</div>
                       <div className="activity-info">
                         <div className="activity-title">Bid placed on {bid.car?.title || 'a vehicle'}</div>
                         <div className="activity-meta">KES {Number(bid.amount || 0).toLocaleString()} · {bid.createdAt ? new Date(bid.createdAt).toLocaleDateString() : ''}</div>

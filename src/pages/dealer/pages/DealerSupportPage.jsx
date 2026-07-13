@@ -22,7 +22,7 @@ export default function DealerSupportPage() {
           {SUPPORT_ITEMS.map(item => (
             <Link key={item.label} to={item.action}
               style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: 24, textDecoration: 'none', transition: 'all 0.2s', display: 'block' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'}
               onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}>
               <div style={{ width: 44, height: 44, borderRadius: 10, background: `${item.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
                 <item.icon size={20} style={{ color: item.color }} />

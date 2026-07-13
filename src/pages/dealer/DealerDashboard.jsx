@@ -377,7 +377,7 @@ export default function DealerDashboard() {
       {/* AI Insights - Only show when we have real data */}
       {!loading && summary && (
         <div style={{ 
-          background: 'linear-gradient(135deg, rgba(212, 196, 168, 0.08), rgba(168, 85, 247, 0.05))',
+          background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(168, 85, 247, 0.05))',
           border: '1px solid var(--dealer-border-gold)',
           borderRadius: 'var(--dealer-radius-xl)',
           padding: 24,

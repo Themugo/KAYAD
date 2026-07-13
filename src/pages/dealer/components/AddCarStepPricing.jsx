@@ -82,7 +82,7 @@ export default function AddCarStepPricing({ form, set, user }) {
       </div>
 
       {user?.role === 'individual_seller' && form.allowBuy && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(212,196,168,0.2)', borderRadius: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(37, 99, 235,0.2)', borderRadius: 10 }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>🛡️ Escrow Protection</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Payment held in escrow until buyer confirms receipt</div>
@@ -97,7 +97,7 @@ export default function AddCarStepPricing({ form, set, user }) {
         <div onClick={() => set('escrowEnabled', !form.escrowEnabled)}
           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set('escrowEnabled', !form.escrowEnabled); } }}
           role="switch" aria-checked={!!form.escrowEnabled} tabIndex={0} aria-label="Escrow Protection"
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${form.escrowEnabled ? 'rgba(212,196,168,0.2)' : 'var(--border)'}`, borderRadius: 10, cursor: 'pointer' }}>
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${form.escrowEnabled ? 'rgba(37, 99, 235,0.2)' : 'var(--border)'}`, borderRadius: 10, cursor: 'pointer' }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>🛡️ Escrow Protection</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{form.escrowEnabled ? 'Payment held in escrow until buyer confirms receipt' : 'Buyer pays directly — no escrow holding'}</div>

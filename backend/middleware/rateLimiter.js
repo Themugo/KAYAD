@@ -197,24 +197,6 @@ export const adminLimiter = rateLimit({
 });
 
 // =============================
-// 🔍 SEARCH LIMITER (prevents search abuse)
-// FIX H5: Added specific rate limiting for search endpoints
-// =============================
-export const searchLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: parseInt(process.env.SEARCH_RATE_LIMIT_MAX || "30"),
-  keyGenerator,
-  handler: (req, res) => {
-    logWarn("RATE LIMIT (SEARCH)", {
-      user: req.user?.id || "guest",
-      ip: req.ip,
-      path: req.originalUrl,
-    });
-    res.status(429).json(rateLimitMessage("Too many search requests. Please wait a moment."));
-  },
-});
-
-// =============================
 // ⚡ SOCKET RATE LIMIT
 // =============================
 const userHits = new Map();

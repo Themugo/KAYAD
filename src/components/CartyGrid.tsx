@@ -174,7 +174,7 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
               </div>
             )}
             {car.isPromoted && !isSold && (
-              <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(212,196,168,0.9)', color: '#000', letterSpacing: '0.08em' }}>
+              <div style={{ position: 'absolute', bottom: 10, left: 10, padding: '2px 8px', borderRadius: 9999, fontSize: 8, fontWeight: 700, background: 'rgba(37, 99, 235,0.9)', color: '#000', letterSpacing: '0.08em' }}>
                 Featured
               </div>
             )}

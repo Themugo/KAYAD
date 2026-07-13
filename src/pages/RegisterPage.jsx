@@ -123,13 +123,13 @@ export default function RegisterPage() {
             </div>
 
             {isFromCar && !isDealerFlow && (
-              <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
+              <div style={{ background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.12)', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
                 Sign up to bid, buy, or message the dealer about this car. You'll be redirected back after registration.
               </div>
             )}
 
             {(role === 'dealer' || role === 'broker') && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(212,168,67,0.08), rgba(212,168,67,0.02))', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ background: 'linear-gradient(135deg, rgba(37, 99, 235,0.08), rgba(37, 99, 235,0.02))', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 10, padding: 16, marginBottom: 16 }}>
                 <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--gold)', marginBottom: 8 }}>
                   {role === 'dealer' ? '🏪 Why Become a Dealer?' : '💰 Why Sell on KAYAD?'}
                 </div>
@@ -203,7 +203,7 @@ export default function RegisterPage() {
                     <label className="input-label">Location / City</label>
                     <input className="input" placeholder="Nairobi, Westlands" value={form.location} onChange={e => set('location', e.target.value)} />
                   </div>
-                  <div style={{ background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
+                  <div style={{ background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 8, padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>
                     {role === 'dealer' ? 'Dealer accounts require admin approval before you can list cars. You\'ll receive an email once approved.' : 'Broker accounts require admin approval before you can list cars. You\'ll be notified once approved.'}
                   </div>
                 </>

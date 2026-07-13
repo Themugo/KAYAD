@@ -5,7 +5,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateCar, validateQuery, carListQuerySchema, validateResponse, carResponseSchema, carListResponseSchema } from "../middleware/validate.js";
 
 import upload, { handleUploadError } from "../middleware/upload.js";
-import { uploadLimiter, createLimiter, searchLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
 import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
 import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
 import { trackCarSearch } from "../middleware/searchTracking.js";
@@ -139,7 +139,7 @@ router.get(
  *                     meta:
  *                       $ref: '#/components/schemas/PaginationMeta'
  */
-router.get("/", searchLimiter, validateQuery(carListQuerySchema), validateResponse(carListResponseSchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
+router.get("/", validateQuery(carListQuerySchema), validateResponse(carListResponseSchema), cacheVehicleSearch, trackVehicleSearchLatency, trackCarSearch, asyncHandler(getCars));
 
 // 🔎 GET SINGLE CAR
 /**

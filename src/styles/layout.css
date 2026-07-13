@@ -30,7 +30,7 @@
   transition: box-shadow 0.2s, transform 0.2s;
 }
 .bottom-nav-sell-btn-active {
-  box-shadow: 0 0 24px rgba(212,196,168,0.5);
+  box-shadow: 0 0 24px rgba(37, 99, 235,0.5);
 }
 .bottom-nav-sell-btn-inactive {
   box-shadow: 0 6px 16px rgba(0,0,0,0.4);
@@ -52,7 +52,7 @@
 }
 .search-sidebar-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(212,196,168,0.15) transparent;
+  scrollbar-color: rgba(37, 99, 235,0.15) transparent;
 }
 .search-sidebar-mobile {
   width: 100%; height: 100%; position: relative;
@@ -118,7 +118,7 @@
 .search-section-label-active { color: var(--gold); }
 .search-section-label-inactive { color: rgba(255,255,255,0.55); }
 .search-section-count-badge {
-  background: rgba(212,196,168,0.15); color: var(--gold);
+  background: rgba(37, 99, 235,0.15); color: var(--gold);
   font-size: 10px; font-weight: 800; border-radius: 9999px; padding: 2px 8px;
 }
 .search-section-chevron {
@@ -140,7 +140,7 @@
   font-size: 14.5px; cursor: pointer; transition: all 0.15s; text-align: left;
 }
 .search-chip-active {
-  background: rgba(212,196,168,0.1);
+  background: rgba(37, 99, 235,0.1);
   border-left-color: var(--gold);
   color: var(--gold); font-weight: 700;
 }
@@ -186,7 +186,7 @@
   transition: border-color 0.2s;
 }
 .search-range-input:focus {
-  border-color: rgba(212,196,168,0.4);
+  border-color: rgba(37, 99, 235,0.4);
 }
 .search-range-sep {
   color: rgba(255,255,255,0.2); align-self: center; font-size: 12px;
@@ -207,7 +207,7 @@
   font-size: 13.5px; outline: none; box-sizing: border-box;
   transition: border-color 0.2s;
 }
-.search-brand-input:focus { border-color: rgba(212,196,168,0.4); }
+.search-brand-input:focus { border-color: rgba(37, 99, 235,0.4); }
 .search-show-more-btn {
   width: 100%; padding: 8px 16px; background: none; border: none;
   color: var(--gold); font-size: 11px; font-weight: 600; cursor: pointer; text-align: left;
@@ -228,7 +228,7 @@
 }
 .search-color-swatch-active {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(212,196,168,0.2);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235,0.2);
 }
 .search-color-check {
   position: absolute; inset: 0; display: flex;

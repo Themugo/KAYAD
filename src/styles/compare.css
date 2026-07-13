@@ -94,7 +94,7 @@
 
 /* ---- Table body ---- */
 .compare-section-row { border-bottom: 1px solid rgba(255,255,255,0.04); }
-.compare-section-row-alt { background: rgba(212,196,168,0.02); }
+.compare-section-row-alt { background: rgba(37, 99, 235,0.02); }
 .compare-section-row-even { background: rgba(255,255,255,0.01); }
 .compare-label-cell {
   padding: 10px 16px; font-size: 11px; font-weight: 700;
@@ -114,8 +114,8 @@
 /* ---- Feature tags ---- */
 .feature-tag-compare {
   font-size: 9px; padding: 2px 6px; border-radius: 4px;
-  background: rgba(212,196,168,0.08);
-  border: 1px solid rgba(212,196,168,0.12);
+  background: rgba(37, 99, 235,0.08);
+  border: 1px solid rgba(37, 99, 235,0.12);
   color: rgba(255,255,255,0.6);
 }
 .feature-more-count {
@@ -135,7 +135,7 @@
   position: fixed; bottom: 16px; left: 50%;
   transform: translateX(-50%); z-index: 9999;
   background: rgba(12,12,12,0.94);
-  border: 1px solid rgba(212,196,168,0.25);
+  border: 1px solid rgba(37, 99, 235,0.25);
   box-shadow: 0 8px 36px rgba(0,0,0,0.55);
   border-radius: 9999px;
   padding: 7px 10px 7px 14px;
@@ -153,7 +153,7 @@
 .compare-drawer-thumb {
   width: 40px; height: 30px; border-radius: 5px;
   overflow: hidden; position: relative;
-  border: 1px solid rgba(212,196,168,0.25);
+  border: 1px solid rgba(37, 99, 235,0.25);
   background: var(--bg-card); flex-shrink: 0;
 }
 .compare-drawer-thumb-img {

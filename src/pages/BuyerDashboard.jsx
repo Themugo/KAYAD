@@ -279,7 +279,7 @@ export default function BuyerDashboard() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
                     {trending.slice(0, 4).map(car => (
                       <Link key={car._id} to={`/cars/${car._id}`} style={{ display: 'flex', gap: 12, padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none', transition: 'all 0.2s' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(212,168,67,0.2)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'; }}>
                         <div style={{ width: 80, height: 56, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
                           <img src={car.images?.[0] || car.coverImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
@@ -337,19 +337,19 @@ export default function BuyerDashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                           {search.brand && search.brand !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(212,196,168,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.brand}</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.brand}</span>
                           )}
                           {search.bodyType && search.bodyType !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(212,196,168,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.bodyType}</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.bodyType}</span>
                           )}
                           {search.priceMax && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(212,196,168,0.1)', padding: '2px 6px', borderRadius: 4 }}>Under KES {(Number(search.priceMax) / 1000000).toFixed(0)}M</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>Under KES {(Number(search.priceMax) / 1000000).toFixed(0)}M</span>
                           )}
                           {search.fuel && search.fuel !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(212,196,168,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.fuel}</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.fuel}</span>
                           )}
                           {search.transmission && search.transmission !== 'All' && (
-                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(212,196,168,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.transmission}</span>
+                            <span style={{ fontSize: 11, color: 'var(--gold)', background: 'rgba(37, 99, 235,0.1)', padding: '2px 6px', borderRadius: 4 }}>{search.transmission}</span>
                           )}
                         </div>
                       </div>

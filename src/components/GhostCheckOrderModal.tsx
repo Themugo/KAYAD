@@ -64,7 +64,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
     return (
       <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', padding: 16 }}>
         <div style={{ background: 'var(--card)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', maxWidth: 400, width: '100%', padding: 32, textAlign: 'center' }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <ShieldCheck size={24} style={{ color: 'var(--gold)' }} />
           </div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: '#fff', margin: '0 0 8px' }}>Sign In Required</h3>
@@ -196,7 +196,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
                 </ul>
               </div>
 
-              <div style={{ background: 'rgba(212,196,168,0.04)', border: '1px solid rgba(212,196,168,0.1)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ background: 'rgba(37, 99, 235,0.04)', border: '1px solid rgba(37, 99, 235,0.1)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                   <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Inspection Fee</span>
                   <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--gold)', fontFamily: 'var(--font-display)', fontStyle: 'italic' }}>{formatKES(INSPECTION_FEE)}</span>
@@ -216,7 +216,7 @@ export default function GhostCheckOrderModal({ carId, location, onClose, onInspe
                         background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
                         borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, outline: 'none',
                       }}
-                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.3)'; }}
+                      onFocus={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.3)'; }}
                       onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; }} />
                   </div>
                 </div>

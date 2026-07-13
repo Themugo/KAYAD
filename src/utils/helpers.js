@@ -93,7 +93,7 @@ export const getCarImage = (car, index = 0) => {
 export const DEAL_META = {
   great:      { label: '🔥 Great Deal', color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
   good:       { label: '👍 Good Price', color: 'var(--blue)',   bg: 'rgba(59,130,246,0.1)' },
-  fair:       { label: '✓ Fair Price',  color: 'var(--gold)',   bg: 'rgba(212,168,67,0.1)' },
+  fair:       { label: '✓ Fair Price',  color: 'var(--gold)',   bg: 'rgba(37, 99, 235,0.1)' },
   overpriced: { label: '↑ High Price',  color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
 };
 

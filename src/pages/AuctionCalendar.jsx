@@ -197,7 +197,7 @@ export default function AuctionCalendar() {
                       overflow: 'hidden', transition: 'transform 0.25s, box-shadow 0.25s',
                       border: '1px solid var(--border)', position: 'relative',
                     }}
-                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)'; e.currentTarget.style.borderColor = 'rgba(212,196,168,0.25)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.25)'; }}
                       onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'var(--border)'; }}>
                       <div style={{ height: 2, background: isLive ? 'linear-gradient(90deg, #22c55e, var(--gold))' : 'linear-gradient(90deg, var(--gold-dark), var(--gold-muted))' }} />
                       <div style={{ aspectRatio: '16/10', background: 'var(--surface)', overflow: 'hidden' }}>

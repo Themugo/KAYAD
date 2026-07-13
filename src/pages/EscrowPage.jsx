@@ -192,7 +192,7 @@ export default function EscrowPage() {
               <div key={s.step} style={{ position: 'relative' }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: '50%',
-                  background: 'var(--gold-glow)', border: '1px solid rgba(212,168,67,0.3)',
+                  background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.3)',
                   color: 'var(--gold)', fontWeight: 700, fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   margin: '0 auto 10px',
@@ -376,7 +376,7 @@ export default function EscrowPage() {
               ))}
             </div>
 
-            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
               Need help with this escrow? Contact <a href="mailto:support@gari.co.ke" style={{ color: 'var(--gold)' }}>support@gari.co.ke</a>
             </div>
           </div>

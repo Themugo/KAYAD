@@ -144,7 +144,7 @@ export default function AdminCarModeration() {
         ) : (
           <>
           {selectedIds.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(212,196,168,0.08)', borderRadius: 10, marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(37, 99, 235,0.08)', borderRadius: 10, marginBottom: 16 }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{selectedIds.length} selected</span>
               <button
                 className="btn btn-sm"

@@ -84,7 +84,7 @@ export default function SearchBar({
           background: focused ? 'rgba(255,255,255,0.045)' : 'rgba(255,255,255,0.02)',
           border: `1px solid ${focused ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
           borderRadius: 10,
-          boxShadow: focused ? '0 0 0 3px rgba(212,196,168,0.10)' : 'none',
+          boxShadow: focused ? '0 0 0 3px rgba(37, 99, 235,0.10)' : 'none',
           transition: 'all 0.2s ease',
         }}
       >

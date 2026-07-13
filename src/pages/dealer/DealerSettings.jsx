@@ -201,7 +201,7 @@ export default function DealerSettings() {
                   onChange={e => setPayments(p => ({ ...p, bankAccount: e.target.value }))} />
               </Field>
 
-              <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
+              <div style={{ background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
                 Your payment details are encrypted and only used for escrow payouts.
               </div>
             </div>
@@ -267,7 +267,7 @@ export default function DealerSettings() {
                   </label>
                 ))}
               </div>
-              <div style={{ background: 'rgba(212,168,67,0.06)', border: '1px solid rgba(212,168,67,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
+              <div style={{ background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
                 Changes take effect immediately on all your active listings.
               </div>
             </div>

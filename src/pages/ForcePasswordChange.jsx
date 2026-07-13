@@ -76,7 +76,7 @@ export default function ForcePasswordChange() {
                 required />
             </div>
 
-            <div style={{ background: 'rgba(212,168,67,0.08)', border: '1px solid rgba(212,168,67,0.15)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
               👑 As system owner, you have full access to all sections. Set a strong password you'll remember.
             </div>
 

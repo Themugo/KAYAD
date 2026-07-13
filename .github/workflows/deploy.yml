@@ -96,7 +96,7 @@ jobs:
     name: Deploy to Vercel
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -108,19 +108,11 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
-      - name: Check if Vercel token is configured
-        id: vercel-check
-        run: |
-          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
-            echo "vercel_configured=false" >> $GITHUB_OUTPUT
-            echo "VERCEL_TOKEN not configured, skipping deployment"
-          else
-            echo "vercel_configured=true" >> $GITHUB_OUTPUT
-          fi
-
       - name: Install Vercel CLI
-        if: steps.vercel-check.outputs.vercel_configured == 'true'
         run: npm install -g vercel
+
+      - name: Pull Vercel Project Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Check if secrets are configured
         id: secrets-check
@@ -131,41 +123,19 @@ jobs:
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
           fi
 
-      - name: Pull Vercel Project Information
-        if: steps.vercel-check.outputs.vercel_configured == 'true'
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
       - name: Build Project for Production (with secrets)
-        if: steps.vercel-check.outputs.vercel_configured == 'true' && steps.secrets-check.outputs.secrets_status == 'configured'
+        if: steps.secrets-check.outputs.secrets_status == 'configured'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Build Project for Production (without secrets)
-        if: steps.vercel-check.outputs.vercel_configured == 'true' && steps.secrets-check.outputs.secrets_status == 'missing'
+        if: steps.secrets-check.outputs.secrets_status == 'missing'
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VITE_SUPABASE_URL: https://placeholder.supabase.co
           VITE_SUPABASE_ANON_KEY: placeholder-key
 
-      # Deploy to giclan-motors (default project)
-      - name: Deploy to giclan-motors
-        if: steps.vercel-check.outputs.vercel_configured == 'true'
+      - name: Deploy to Vercel (Production)
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      # Deploy to kayad-motors (if configured)
-      - name: Deploy to kayad-motors
-        if: steps.vercel-check.outputs.vercel_configured == 'true' && vars.VERCEL_PROJECT_ID_KAYAD_MOTORS != ''
-        run: |
-          vercel deploy --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --projectId=${{ vars.VERCEL_PROJECT_ID_KAYAD_MOTORS }}
-
-      # Deploy to kayad-space (if configured)
-      - name: Deploy to kayad-space
-        if: steps.vercel-check.outputs.vercel_configured == 'true' && vars.VERCEL_PROJECT_ID_KAYAD_SPACE != ''
-        run: |
-          vercel deploy --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --projectId=${{ vars.VERCEL_PROJECT_ID_KAYAD_SPACE }}

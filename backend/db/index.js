@@ -4,35 +4,12 @@ import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, normalizeSelect } from '../util
 /**
  * Generic database utility for Supabase/PostgreSQL operations.
  * Replaces mongoose model methods with Supabase queries.
-<<<<<<< HEAD
- * 
- * FIX C3: Added connection pool configuration
- * FIX H2: Added query pagination enforcement
- * FIX H6: Added query timeout
-=======
  *
  * This is the most widely-used data-access layer in the backend
  * (60+ service files import from here directly). It shares its
  * field-name translation logic with models/_base.js via
  * utils/fieldMap.js — see that file for why the translation exists.
->>>>>>> e945625d (feat: latest production updates, performance improvements and bug fixes)
  */
-
-// ── QUERY LIMITS (Security: prevent memory exhaustion) ────────────
-const DEFAULT_LIMIT = 50;
-const MAX_LIMIT = 1000;
-const QUERY_TIMEOUT_MS = 30000; // 30 second timeout
-
-function enforceLimit(limit) {
-  if (!limit) return DEFAULT_LIMIT;
-  return Math.min(Math.max(1, parseInt(limit, 10) || DEFAULT_LIMIT), MAX_LIMIT);
-}
-
-function applyTimeout(query) {
-  // Supabase JS doesn't have direct timeout, but we log a warning
-  // Production should set statement_timeout at the PostgreSQL level
-  return query;
-}
 
 // ── FILTER HELPERS ──────────────────────────────────────────────
 
@@ -138,21 +115,11 @@ const mapPayloadOut = (table, data) => Object.fromEntries(Object.entries(data).m
 
 export const findAll = async (table, options = {}) => {
   const sb = getSupabase();
-<<<<<<< HEAD
-  // FIX H2: Enforce pagination limits to prevent memory exhaustion
-  const limit = enforceLimit(options.limit);
-  let query = sb.from(table).select(options.select || '*', options.count ? { count: 'exact', head: false } : {});
-  query = applyFilters(query, options.filters);
-  if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending);
-  query = query.limit(limit); // Always enforce limit
-  if (options.offset) query = query.range(options.offset, options.offset + limit - 1);
-=======
   let query = sb.from(table).select(normalizeSelect(table, options.select), options.count ? { count: 'exact', head: false } : {});
   query = applyFilters(query, options.filters, table);
   if (options.orderBy) query = applyOrdering(query, options.orderBy, options.ascending, table);
   if (options.limit) query = query.limit(options.limit);
   if (options.offset) query = query.range(options.offset, options.offset + (options.limit || 20) - 1);
->>>>>>> e945625d (feat: latest production updates, performance improvements and bug fixes)
   const { data, error, count } = await query;
   if (error) throw error;
   const rows = mapRows(table, data);
@@ -361,8 +328,7 @@ export const upsertMany = async (table, data, conflictColumn = 'id') => {
 
 export const paginate = async (table, options = {}) => {
   const page = options.page || 1;
-  // FIX H2: Enforce pagination limits
-  const limit = enforceLimit(options.limit);
+  const limit = options.limit || 20;
   const offset = (page - 1) * limit;
   const sb = getSupabase();
   let query = sb.from(table).select(normalizeSelect(table, options.select), { count: 'exact' });

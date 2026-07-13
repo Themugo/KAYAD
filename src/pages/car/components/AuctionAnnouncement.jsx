@@ -30,7 +30,7 @@ export default function AuctionAnnouncement({ car }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 8,
-            background: 'rgba(212,196,168,0.15)', border: '1px solid rgba(212,196,168,0.3)',
+            background: 'rgba(37, 99, 235,0.15)', border: '1px solid rgba(37, 99, 235,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Gavel size={18} style={{ color: 'var(--gold)' }} />
@@ -46,12 +46,12 @@ export default function AuctionAnnouncement({ car }) {
         <Link to="/auctions/calendar" style={{
           display: 'block', textAlign: 'center', padding: '10px 0',
           borderRadius: 8, fontWeight: 700, fontSize: 12,
-          background: 'rgba(212,196,168,0.1)', color: 'var(--gold)',
-          border: '1px solid rgba(212,196,168,0.3)',
+          background: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)',
+          border: '1px solid rgba(37, 99, 235,0.3)',
           textDecoration: 'none', transition: 'all 0.2s',
         }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(212,196,168,0.2)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(212,196,168,0.1)'; }}>
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37, 99, 235,0.2)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(37, 99, 235,0.1)'; }}>
           Browse Auction House →
         </Link>
       </div>
@@ -61,7 +61,7 @@ export default function AuctionAnnouncement({ car }) {
   return (
     <div style={{
       background: 'var(--card)', borderRadius: 12,
-      border: `1px solid ${isLive ? 'rgba(239,68,68,0.3)' : 'rgba(212,196,168,0.3)'}`, overflow: 'hidden',
+      border: `1px solid ${isLive ? 'rgba(239,68,68,0.3)' : 'rgba(37, 99, 235,0.3)'}`, overflow: 'hidden',
       marginBottom: 16,
     }}>
       {/* Top banner */}
@@ -78,8 +78,8 @@ export default function AuctionAnnouncement({ car }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 40, height: 40, borderRadius: 10,
-              background: isLive ? 'rgba(239,68,68,0.15)' : 'rgba(212,196,168,0.15)',
-              border: `1px solid ${isLive ? 'rgba(239,68,68,0.3)' : 'rgba(212,196,168,0.3)'}`,
+              background: isLive ? 'rgba(239,68,68,0.15)' : 'rgba(37, 99, 235,0.15)',
+              border: `1px solid ${isLive ? 'rgba(239,68,68,0.3)' : 'rgba(37, 99, 235,0.3)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <Gavel size={20} style={{ color: isLive ? '#ef4444' : 'var(--gold)' }} />

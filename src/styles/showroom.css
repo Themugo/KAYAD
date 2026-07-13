@@ -9,8 +9,8 @@
 .showroom-hero {
   position: relative;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(212,196,168,0.10), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(212,196,168,0.04), transparent),
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235,0.10), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(37, 99, 235,0.04), transparent),
     var(--bg, var(--bg-base));
   overflow: hidden;
 }
@@ -18,7 +18,7 @@
 .showroom-hero-mobile  { padding: 32px 0 24px; }
 .showroom-hero-hairline {
   position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212,196,168,0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(37, 99, 235,0.25), transparent);
 }
 .showroom-hero-inner { text-align: center; max-width: 720px; margin: 0 auto; }
 .showroom-hero-overline {
@@ -81,7 +81,7 @@
 .pill-btn-desktop { padding: 7px 16px; font-size: 12px; }
 .pill-btn-mobile  { padding: 10px 16px; font-size: 13px; min-height: 44px; }
 .pill-btn-active {
-  background: rgba(212,196,168,0.10);
+  background: rgba(37, 99, 235,0.10);
   border-color: var(--gold, #D4C4A8);
   color: var(--gold, #D4C4A8);
 }
@@ -131,7 +131,7 @@
 .view-btn-desktop { padding: 6px 9px; }
 .view-btn-mobile  { padding: 10px 12px; min-height: 44px; }
 .view-btn-active {
-  background: rgba(212,196,168,0.12);
+  background: rgba(37, 99, 235,0.12);
   color: var(--gold, #D4C4A8);
 }
 .view-btn-inactive {
@@ -146,8 +146,8 @@
   font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .filter-btn-mobile-active {
-  background: rgba(212,196,168,0.12);
-  border: 1px solid rgba(212,196,168,0.3);
+  background: rgba(37, 99, 235,0.12);
+  border: 1px solid rgba(37, 99, 235,0.3);
   color: var(--gold, #D4C4A8);
 }
 .filter-btn-mobile-inactive {
@@ -172,8 +172,8 @@
 .filter-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 10px; border-radius: 9999px;
-  background: rgba(212,196,168,0.08);
-  border: 1px solid rgba(212,196,168,0.18);
+  background: rgba(37, 99, 235,0.08);
+  border: 1px solid rgba(37, 99, 235,0.18);
   font-size: 11px; font-weight: 600;
   color: rgba(255,255,255,0.85);
 }
@@ -183,7 +183,7 @@
 }
 .filter-chip-remove {
   background: none; border: none; padding: 0;
-  color: rgba(212,196,168,0.7); cursor: pointer;
+  color: rgba(37, 99, 235,0.7); cursor: pointer;
   display: flex; line-height: 1;
 }
 
@@ -197,8 +197,8 @@
   font-size: 11px; font-weight: 700; cursor: pointer;
 }
 .btn-save {
-  background: rgba(212,196,168,0.06);
-  border: 1px solid rgba(212,196,168,0.18);
+  background: rgba(37, 99, 235,0.06);
+  border: 1px solid rgba(37, 99, 235,0.18);
   color: var(--gold, #D4C4A8);
 }
 .btn-saved {
@@ -212,8 +212,8 @@
   color: rgba(255,255,255,0.7);
 }
 .btn-saved-active {
-  background: rgba(212,196,168,0.08);
-  border: 1px solid rgba(212,196,168,0.2);
+  background: rgba(37, 99, 235,0.08);
+  border: 1px solid rgba(37, 99, 235,0.2);
   color: var(--gold, #D4C4A8);
 }
 .btn-clear {
@@ -258,7 +258,7 @@
 .save-prompt-wrap-mobile { padding: 12px 16px 0; }
 .save-prompt-card {
   background: var(--bg-elevated);
-  border: 1px solid rgba(212,196,168,0.18);
+  border: 1px solid rgba(37, 99, 235,0.18);
   border-radius: 10px; padding: 12px 14px;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
@@ -328,8 +328,8 @@
 /* Empty state icon box */
 .empty-state-icon-box {
   width: 72px; height: 72px; border-radius: 16px;
-  background: rgba(212,196,168,0.1);
-  border: 1px solid rgba(212,196,168,0.2);
+  background: rgba(37, 99, 235,0.1);
+  border: 1px solid rgba(37, 99, 235,0.2);
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 20px;
 }

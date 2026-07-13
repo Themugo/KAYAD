@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext';
 const STATUS_META = {
   pending:  { label: 'Pending',  icon: '⏳', color: '#f97316' },
   credited: { label: 'Credited', icon: '✅', color: '#22c55e' },
-  expired:  { label: 'Expired',  icon: '⌛', color: 'rgba(255,255,255,0.3)' },
+  expired:  { label: 'Expired',  icon: '⌛', color: 'rgba(15, 23, 42, 0.3)' },
 };
 
 export default function AdminReferrals() {
@@ -75,11 +75,11 @@ export default function AdminReferrals() {
   const pages = Math.ceil(total / 20);
 
   return (
-    <div style={{ padding: '32px', background: '#050505', minHeight: '100vh' }}>
+    <div style={{ padding: '32px', background: '#F8FAFC', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}> Referral Management</h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginTop: 6 }}>Referral analytics, payout oversight, and user tree lookup</p>
+          <p style={{ color: 'rgba(15, 23, 42, 0.35)', fontSize: 13, marginTop: 6 }}>Referral analytics, payout oversight, and user tree lookup</p>
         </div>
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
@@ -99,12 +99,12 @@ export default function AdminReferrals() {
                 { label: 'Total Referrals', value: stats.totalReferrals, color: '#3b82f6' },
                 { label: 'Pending', value: stats.pendingCount, color: '#f97316' },
                 { label: 'Credited', value: stats.creditedCount, color: '#22c55e' },
-                { label: 'Expired', value: stats.expiredCount, color: 'rgba(255,255,255,0.4)' },
+                { label: 'Expired', value: stats.expiredCount, color: 'rgba(15, 23, 42, 0.4)' },
                 { label: 'Total Bonus Paid', value: formatKES(stats.totalBonus), color: 'var(--gold)' },
               ].map(s => (
-                <div key={s.label} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 22 }}>
+                <div key={s.label} style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: 22 }}>
                   <div style={{ fontSize: 24, fontFamily: 'var(--font-display)', fontWeight: 700, color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -115,13 +115,13 @@ export default function AdminReferrals() {
           <div>
             <input placeholder="Enter user ID to look up referral tree…"
               value={userSearch} onChange={e => setUserSearch(e.target.value)}
-              style={{ width: '100%', maxWidth: 400, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '10px 14px', color: '#fff', fontSize: 13, outline: 'none', marginBottom: 24 }} />
+              style={{ width: '100%', maxWidth: 400, background: 'rgba(15, 23, 42, 0.04)', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '10px 14px', color: '#0F172A', fontSize: 13, outline: 'none', marginBottom: 24 }} />
             {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
             : userTree ? (
               <div>
-                <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 18, marginBottom: 16 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{userTree.user?.name || 'Unknown'}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                <div style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: 18, marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>{userTree.user?.name || 'Unknown'}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.4)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                     <div>Email: {userTree.user?.email}</div>
                     <div>Referral Code: {userTree.user?.referralCode || '—'}</div>
                     <div>Earnings: {formatKES(userTree.user?.referralEarnings || 0)}</div>
@@ -130,21 +130,21 @@ export default function AdminReferrals() {
                   </div>
                 </div>
                 {userTree.referredBy && (
-                  <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: 18, marginBottom: 16 }}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Referred By</div>
+                  <div style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: 18, marginBottom: 16 }}>
+                    <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Referred By</div>
                     <div style={{ fontSize: 13, color: 'var(--gold)' }}>{userTree.referredBy.referrer?.name || '—'} ({userTree.referredBy.referrer?.email || '—'})</div>
                   </div>
                 )}
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>People they referred ({userTree.referred?.length || 0})</div>
+                <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.4)', marginBottom: 12 }}>People they referred ({userTree.referred?.length || 0})</div>
                 {userTree.referred?.length === 0 ? (
                   <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon">👥</div><h3>No referrals</h3></div>
                 ) : (
                   <div style={{ display: 'grid', gap: 8 }}>
                     {userTree.referred?.map(r => (
-                      <div key={r._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={r._id} style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                          <div style={{ fontSize: 13, color: '#fff', fontWeight: 600 }}>{r.referee?.name || '—'}</div>
-                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{r.referee?.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
+                          <div style={{ fontSize: 13, color: '#0F172A', fontWeight: 600 }}>{r.referee?.name || '—'}</div>
+                          <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.3)' }}>{r.referee?.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
                         </div>
                         <span style={{ fontSize: 11, fontWeight: 600, color: STATUS_META[r.status]?.color || '#fff' }}>{STATUS_META[r.status]?.icon} {STATUS_META[r.status]?.label}</span>
                       </div>
@@ -175,15 +175,15 @@ export default function AdminReferrals() {
               <>
                 <div style={{ display: 'grid', gap: 12 }}>
                   {referrals.map(r => {
-                    const meta = STATUS_META[r.status] || { label: r.status, icon: '👥', color: '#fff' };
+                    const meta = STATUS_META[r.status] || { label: r.status, icon: '👥', color: '#0F172A' };
                     return (
-                      <div key={r._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 22px' }}>
+                      <div key={r._id} style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: '18px 22px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                           <div>
-                            <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 4 }}>
-                              {r.referrer?.name || 'Unknown'} <span style={{ color: 'rgba(255,255,255,0.3)', fontWeight: 400 }}>→</span> {r.referee?.name || 'Unknown'}
+                            <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>
+                              {r.referrer?.name || 'Unknown'} <span style={{ color: 'rgba(15, 23, 42, 0.3)', fontWeight: 400 }}>→</span> {r.referee?.name || 'Unknown'}
                             </div>
-                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
+                            <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.4)' }}>
                               {r.referrer?.email} · {r.referee?.email}
                               {r.bonusAmount > 0 && <> · Bonus: {formatKES(r.bonusAmount)}</>}
                               {r.creditedAt && <> · Credited: {new Date(r.creditedAt).toLocaleDateString()}</>}
@@ -209,7 +209,7 @@ export default function AdminReferrals() {
                           )}
                         </div>
                         {selected?._id === r._id && (
-                          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 11, color: 'rgba(255,255,255,0.35)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(15, 23, 42, 0.06)', fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                             <div>Referrer Code: {r.referrer?.referralCode || '—'}</div>
                             <div>Referrer ID: {r.referrer?._id}</div>
                             <div>Referee ID: {r.referee?._id}</div>

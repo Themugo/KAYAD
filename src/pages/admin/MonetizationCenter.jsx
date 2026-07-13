@@ -100,7 +100,7 @@ export default function MonetizationCenter() {
             background: 'rgba(255,255,255,0.02)', padding: 20,
             transition: 'all 0.2s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -127,7 +127,7 @@ export default function MonetizationCenter() {
                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
                 color: '#fff', fontSize: 13, transition: 'all 0.2s',
               }}
-              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
+              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
               onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
             />
           </div>
@@ -302,7 +302,7 @@ export default function MonetizationCenter() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
                 width: 36, height: 36, borderRadius: 8,
-                background: 'rgba(212,196,168,0.15)', border: '1px solid rgba(212,196,168,0.3)',
+                background: 'rgba(37, 99, 235,0.15)', border: '1px solid rgba(37, 99, 235,0.3)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <TrendingUp size={18} style={{ color: 'var(--gold)' }} />
@@ -328,7 +328,7 @@ export default function MonetizationCenter() {
                 border: '1px solid rgba(255,255,255,0.04)',
                 transition: 'all 0.2s',
               }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.04)'; }}
               >
                 <div style={{ width: 56, height: 40, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>

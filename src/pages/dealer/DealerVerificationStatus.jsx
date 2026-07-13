@@ -185,7 +185,7 @@ export default function DealerVerificationStatus() {
           {isFullyVerified && (
             <div style={{
               padding: 16,
-              background: 'linear-gradient(135deg, rgba(212, 196, 168, 0.08), rgba(168, 85, 247, 0.05))',
+              background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(168, 85, 247, 0.05))',
               border: '1px solid var(--dealer-border-gold)',
               borderRadius: 'var(--dealer-radius-lg)',
               display: 'flex',

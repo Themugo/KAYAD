@@ -33,16 +33,16 @@ export default function AddCarStepIndicator({ step, setStep, completed = {} }) {
               role="tab" aria-selected={isCurrent} tabIndex={0} aria-label={s.label || `Step ${s.id}`}
               style={{
                 flex: 1, textAlign: 'center', padding: '12px 8px', borderRadius: 12,
-                background: isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${isCurrent ? 'rgba(212,196,168,0.3)' : isCompleted ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                background: isCurrent ? 'rgba(37, 99, 235,0.12)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${isCurrent ? 'rgba(37, 99, 235,0.3)' : isCompleted ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
                 cursor: isUpcoming ? 'not-allowed' : 'pointer',
                 fontSize: 13, fontWeight: isCurrent ? 600 : 500,
                 color: isCurrent ? 'var(--gold)' : isCompleted ? '#22C55E' : 'rgba(255,255,255,0.5)',
                 transition: 'all 0.2s', opacity: isUpcoming ? 0.5 : 1,
                 position: 'relative',
               }}
-              onMouseEnter={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(212,196,168,0.18)' : 'rgba(255,255,255,0.05)'; } }}
-              onMouseLeave={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.02)'; } }}
+              onMouseEnter={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(37, 99, 235,0.18)' : 'rgba(255,255,255,0.05)'; } }}
+              onMouseLeave={e => { if (!isUpcoming) { e.currentTarget.style.background = isCurrent ? 'rgba(37, 99, 235,0.12)' : 'rgba(255,255,255,0.02)'; } }}
             >
               {/* Step number with status */}
               <div style={{

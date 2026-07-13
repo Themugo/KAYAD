@@ -105,7 +105,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Inventory Value Added</div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Listing value by month · last 6 months</div>
             </div>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--gold)', fontWeight: 700, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.18)', borderRadius: 8, padding: '5px 10px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--gold)', fontWeight: 700, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.18)', borderRadius: 8, padding: '5px 10px' }}>
               <TrendingUp size={12} /> KES
             </span>
           </div>

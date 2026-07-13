@@ -1293,7 +1293,7 @@
 .kd-car-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.45);
-  border-color: rgba(212,168,67,0.35);
+  border-color: rgba(37, 99, 235,0.35);
 }
 .kd-car-card__img-wrap {
   position: relative;
@@ -1370,7 +1370,7 @@
   font-size: 1.3rem;
   font-weight: 700;
   font-style: italic;
-  color: var(--blue-400, #d4a843);
+  color: var(--blue-400, #2563eb);
   margin: 0 0 16px;
   letter-spacing: -0.01em;
 }

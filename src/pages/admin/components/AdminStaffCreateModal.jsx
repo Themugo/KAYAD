@@ -16,7 +16,7 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
   return (
     <div style={{ position: 'relative' }}>
       <input type={type === 'password' && v ? 'text' : type} value={value} onChange={onChange} placeholder={placeholder}
-        style={{ width: '100%', padding: type === 'password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius: 9, border: `1px solid ${f ? 'rgba(212,196,168,0.4)' : 'rgba(255,255,255,0.09)'}`, background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
+        style={{ width: '100%', padding: type === 'password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius: 9, border: `1px solid ${f ? 'rgba(37, 99, 235,0.4)' : 'rgba(255,255,255,0.09)'}`, background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
         onFocus={() => setF(true)} onBlur={() => setF(false)} />
       {type === 'password' && (
         <button type="button" onClick={() => setV(x => !x)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', display: 'flex' }}>

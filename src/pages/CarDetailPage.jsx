@@ -300,8 +300,8 @@ export default function CarDetailPage() {
                 <div style={{
                   marginTop: 12,
                   padding: '8px 12px',
-                  background: 'rgba(212, 196, 168, 0.08)',
-                  border: '1px solid rgba(212, 196, 168, 0.15)',
+                  background: 'rgba(37, 99, 235, 0.08)',
+                  border: '1px solid rgba(37, 99, 235, 0.15)',
                   borderRadius: 8,
                   fontSize: 12,
                   color: 'var(--gold)',

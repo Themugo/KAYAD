@@ -57,8 +57,8 @@ export default function NtsaStatusCard({ car, ntsaStatus, ntsaLoading, canManage
     return {
       icon: ShieldCheck,
       color: 'var(--gold)',
-      bgColor: 'rgba(212,196,168,0.1)',
-      borderColor: 'rgba(212,196,168,0.3)',
+      bgColor: 'rgba(37, 99, 235,0.1)',
+      borderColor: 'rgba(37, 99, 235,0.3)',
       badge: 'NOT VERIFIED',
       badgeColor: 'rgba(255,255,255,0.5)',
       badgeBg: 'rgba(255,255,255,0.1)',

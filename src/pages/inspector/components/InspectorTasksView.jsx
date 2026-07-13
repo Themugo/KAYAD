@@ -57,9 +57,9 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
             <button key={t.key} onClick={() => setTab(t.key)}
               style={{
                 padding: '7px 16px', borderRadius: 8,
-                background: tab === t.key ? 'rgba(212,196,168,0.1)' : 'transparent',
+                background: tab === t.key ? 'rgba(37, 99, 235,0.1)' : 'transparent',
                 border: '1px solid',
-                borderColor: tab === t.key ? 'rgba(212,196,168,0.2)' : 'transparent',
+                borderColor: tab === t.key ? 'rgba(37, 99, 235,0.2)' : 'transparent',
                 color: tab === t.key ? 'var(--gold)' : 'rgba(255,255,255,0.35)',
                 fontSize: 11, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s',
               }}>
@@ -102,7 +102,7 @@ export default function InspectorTasksView({ tasks, loading, tab, setTab, totalP
                 const img = car.images?.[0]?.url || car.images?.[0] || car.image;
                 return (
                   <div key={t._id} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '16px 20px', transition: 'border-color 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(212,196,168,0.2)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}>
                     <InspectorWorkflowProgress status={t.status} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>

@@ -158,7 +158,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
         })}
       </div>
 
-      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(212,196,168,0.06)', borderRadius: 8, border: '1px solid rgba(212,196,168,0.15)' }}>
+      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(37, 99, 235,0.06)', borderRadius: 8, border: '1px solid rgba(37, 99, 235,0.15)' }}>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Business Insights</div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
           {total.views > 0 && total.chatted === 0 && (

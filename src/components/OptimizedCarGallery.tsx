@@ -163,7 +163,7 @@ const GridCard = memo(function GridCard({ car, onFav }: { car: Car; onFav?: (id:
           transition: 'border-color 0.2s, transform 0.2s',
           borderColor: hovered ? 'var(--gold)' : 'var(--border)',
           transform: hovered ? 'translateY(-4px)' : 'none',
-          boxShadow: hovered ? '0 8px 30px rgba(212, 196, 168, 0.15)' : 'none',
+          boxShadow: hovered ? '0 8px 30px rgba(37, 99, 235, 0.15)' : 'none',
         }}>
           {/* Image */}
           <div style={{ position: 'relative', aspectRatio: '16/9', background: '#0A0A0A' }}>
