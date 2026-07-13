@@ -1,14 +1,18 @@
 # Supabase Setup Guide for KAYAD
 
-## Prerequisites
+> ⚠️ **This is part of a larger integration guide.** For all services, see: [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
 
-- A Supabase account ([signup](https://supabase.com))
+## Quick Reference
+
+- **Dashboard**: https://supabase.com/dashboard
+- **Docs**: https://supabase.com/docs
+- **Signup**: https://supabase.com
 
 ---
 
 ## Step 1: Create a Supabase Project
 
-1. Go to [supabase.com](https://supabase.com) and sign in
+1. Go to [supabase.com/dashboard](https://supabase.com/dashboard)
 2. Click **New Project**
 3. Configure your project:
    - **Organization**: Choose your organization or create one
