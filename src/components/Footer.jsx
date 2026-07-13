@@ -1,75 +1,85 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
+import { Mail, Phone, MapPin } from 'lucide-react'
+
+const footerLinks = {
+  Marketplace: [
+    { label: 'Browse Gallery', href: '/gallery' },
+    { label: 'Live Auctions', href: '/auction' },
+    { label: 'Buy Now', href: '/gallery' },
+    { label: 'New Arrivals', href: '/gallery' },
+  ],
+  Services: [
+    { label: 'Escrow Vault', href: '/escrow' },
+    { label: 'Pre-Inspection', href: '/inspection' },
+    { label: 'Sell Your Car', href: '/sell' },
+    { label: 'Vehicle Financing', href: '/support' },
+  ],
+  Company: [
+    { label: 'About KAYAD', href: '/support' },
+    { label: 'How It Works', href: '/support' },
+    { label: 'Trust & Safety', href: '/escrow' },
+    { label: 'Contact Us', href: '/support' },
+  ],
+}
 
 export default function Footer() {
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <div className="kd-footer-logo">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-              </svg>
-              <span>KAYAD</span>
-            </div>
-            <p className="footer-desc">
-              East Africa's trusted car marketplace. Buy, sell, and bid on verified vehicles with secure M-Pesa escrow and real-time live auctions.
+    <footer className="lp-root" style={{background: 'var(--secondary)', borderTop: '1px solid var(--border)', color: 'var(--text)', fontFamily: "'Inter', sans-serif"}}>
+      <div className="lp-container">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 py-16">
+          <div className="lg:col-span-2">
+            <Link to="/" className="flex items-center gap-3 mb-6" style={{textDecoration: 'none', color: 'inherit'}}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{background: 'var(--accent)'}}>
+                <span className="font-bold text-lg" style={{color: 'var(--primary)', fontFamily: "'Space Grotesk', sans-serif"}}>K</span>
+              </div>
+              <span className="font-bold text-2xl" style={{fontFamily: "'Space Grotesk', sans-serif"}}>KAYAD</span>
+            </Link>
+            <p className="text-sm leading-relaxed max-w-sm mb-6" style={{color: 'var(--text-secondary)'}}>
+              East Africa&apos;s most trusted premium car marketplace. Verified vehicles, 
+              secure escrow, and certified inspections for Kenya, Uganda, Tanzania, and Rwanda.
             </p>
-            <div className="footer-social">
-              {['𝕏', 'f', 'in', '▶'].map((icon, i) => (
-                <button key={i} className="social-icon" aria-label={`Social ${i}`}>{icon}</button>
+            <div className="space-y-3">
+              {[
+                { icon: Mail, text: 'support@kayad.space' },
+                { icon: Phone, text: '+254 700 000 000' },
+                { icon: MapPin, text: 'Nairobi, Kenya' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm" style={{color: 'var(--text-muted)'}}>
+                  <item.icon size={16} />
+                  <span>{item.text}</span>
+                </div>
               ))}
             </div>
           </div>
 
-          <div>
-            <div className="footer-col-title">Marketplace</div>
-            <div className="footer-links">
-              <Link to="/browse">Gallery</Link>
-              <Link to="/auctions">Live Auctions</Link>
-              <Link to="/browse?type=new">New Arrivals</Link>
-              <Link to="/browse?type=featured">Featured</Link>
+          {Object.entries(footerLinks).map(([title, links]) => (
+            <div key={title}>
+              <h4 className="text-sm font-semibold uppercase tracking-wider mb-6" style={{color: 'var(--text)'}}>{title}</h4>
+              <ul className="space-y-3">
+                {links.map((link) => (
+                  <li key={link.label}>
+                    <Link to={link.href} className="text-sm transition-colors" style={{color: 'var(--text-secondary)', textDecoration: 'none'}} onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent)')} onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}>
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          <div>
-            <div className="footer-col-title">Services</div>
-            <div className="footer-links">
-              <a href="#">Escrow Vault</a>
-              <a href="#">Pre-Inspection</a>
-              <a href="#">Sell a Vehicle</a>
-              <a href="#">Dealer Registration</a>
-            </div>
-          </div>
-
-          <div>
-            <div className="footer-col-title">Support</div>
-            <div className="footer-links">
-              <a href="#">Help Center</a>
-              <a href="#">Contact Us</a>
-              <a href="#">Report Fraud</a>
-            </div>
-            <div style={{ marginTop: '20px' }}>
-              <div className="footer-col-title">Contact</div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: 1.8 }}>
-                +254 700 123 456<br />
-                hello@kayad.co.ke<br />
-                Westlands, Nairobi
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
 
-        <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} KAYAD Ltd. All rights reserved. Registered in Kenya.</p>
-          <div className="footer-bottom-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
+        <div className="border-t py-6 flex flex-col md:flex-row justify-between items-center gap-4" style={{borderColor: 'var(--border)'}}>
+          <p className="text-sm" style={{color: 'var(--text-muted)'}}>&copy; 2026 KAYAD. All rights reserved. Licensed by Central Bank of Kenya.</p>
+          <div className="flex items-center gap-4">
+            <span className="text-sm" style={{color: 'var(--text-muted)'}}>Secured by</span>
+            <div className="flex items-center gap-3">
+              {['M-Pesa', 'NTSA', 'SSL'].map(badge => (
+                <span key={badge} className="text-xs font-medium px-2 py-1 rounded" style={{color: 'var(--text-secondary)', background: 'var(--surface)', border: '1px solid var(--border)'}}>{badge}</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </footer>
-  );
+  )
 }
