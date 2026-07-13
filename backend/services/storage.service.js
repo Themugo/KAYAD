@@ -15,10 +15,29 @@ const SUPABASE_URL = process.env.SUPABASE_URL || "";
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY || "";
 const SUPABASE_BUCKET = process.env.SUPABASE_BUCKET || "kayad-images";
 
+// Placeholder values that should be replaced
+const PLACEHOLDER_PATTERNS = [
+  "placeholder",
+  "your-project",
+  "your_supabase",
+];
+
+const isPlaceholder = (value) => {
+  if (!value) return true;
+  const lower = value.toLowerCase();
+  return PLACEHOLDER_PATTERNS.some(p => lower.includes(p));
+};
+
 let supabaseClient = null;
 let supabaseConnected = false;
 
 const initSupabaseStorage = () => {
+  // Check if placeholder values are used
+  if (isPlaceholder(SUPABASE_URL) || isPlaceholder(SUPABASE_SERVICE_KEY)) {
+    logWarn("Supabase storage not configured — using Cloudinary fallback");
+    return false;
+  }
+
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     logWarn("Supabase storage not configured — set SUPABASE_URL and SUPABASE_SERVICE_KEY");
     return false;
