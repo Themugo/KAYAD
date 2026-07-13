@@ -9,7 +9,10 @@
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "setup": "npm install && cd backend && npm install",
+    "setup:env": "node scripts/setup-supabase.js",
+    "setup:verify": "node scripts/setup-supabase.js --verify"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.2",
