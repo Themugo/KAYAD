@@ -3,6 +3,7 @@ import path from "path";
 import crypto from "crypto";
 import { logWarn, logError } from "../utils/logger.js";
 import { uploadImage } from "../config/cloudinary.js";
+import { uploadToSupabase, isStorageConnected } from "../services/storage.service.js";
 
 const MAGIC_BYTES = {
   "image/jpeg": [0xFF, 0xD8, 0xFF],
@@ -82,10 +83,17 @@ export const uploadEvidenceToCloudinary = async (file, type = "document") => {
   if (!file) throw new Error("No file provided");
   const folder = `kayad/evidence/${type}`;
   const isVideo = file.mimetype.startsWith("video/");
-  const result = await uploadImage(file, folder, {
-    generateVariants: !isVideo,
-    preserveOriginal: true,
-  });
+
+  let result;
+  if (isStorageConnected()) {
+    result = await uploadToSupabase(file, folder);
+  } else {
+    result = await uploadImage(file, folder, {
+      generateVariants: !isVideo,
+      preserveOriginal: true,
+    });
+  }
+
   return {
     url: result.url,
     public_id: result.public_id,
