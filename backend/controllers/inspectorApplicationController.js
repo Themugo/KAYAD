@@ -1,6 +1,7 @@
 import InspectorApplication from "../models/InspectorApplication.js";
 import User from "../models/User.js";
 import { sendNotification } from "../services/notification.service.js";
+import { logError } from "../utils/logger.js";
 
 const INSPECTOR_REVIEW_ROLES = ["admin", "superadmin", "hr", "technical_support"];
 
@@ -69,6 +70,21 @@ export const submitApplication = async (req, res) => {
   } catch (err) {
     console.error("❌ INSPECTOR APPLY ERROR:", err);
     res.status(500).json({ success: false, message: "Application failed" });
+  }
+};
+
+// =============================
+// 👥 LIST ACTIVE INSPECTORS (public)
+// =============================
+export const listActiveInspectors = async (req, res) => {
+  try {
+    const inspectors = await User.find({ isInspector: true, status: "approved" })
+      .select("name avatar bio inspectionSpecialty locationCity rating inspectionsCompleted")
+      .lean();
+    res.json({ success: true, inspectors });
+  } catch (err) {
+    logError("LIST ACTIVE INSPECTORS ERROR", { error: err.message });
+    res.status(500).json({ success: false, message: "Failed to load inspectors" });
   }
 };
 

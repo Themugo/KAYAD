@@ -489,9 +489,19 @@ export function createModel(name) {
         } else if (stage.$group) {
           const grouped = {};
           for (const d of result) {
-            const key = stage.$group._id ? d[stage.$group._id] : null;
-            if (!grouped[key]) grouped[key] = { _id: key, count: 0 };
-            grouped[key].count++;
+            const groupField = typeof stage.$group._id === "string" ? stage.$group._id.replace("$", "") : null;
+            const key = groupField ? d[groupField] : null;
+            // Accumulator fields (count, sum, avg, etc.) are populated
+            // entirely by the loop below, driven by whatever the
+            // caller's $group actually asked for — no implicit
+            // "count" is auto-added here. It used to unconditionally
+            // increment a hardcoded `count` field AND let the $sum:1
+            // logic below increment the same field again, silently
+            // doubling every grouped count across every admin
+            // analytics endpoint that uses the standard
+            // `{ count: { $sum: 1 } }` pattern (fraud stats, dispute
+            // stats, audit logs, and more).
+            if (!grouped[key]) grouped[key] = { _id: key };
             for (const [k, v] of Object.entries(stage.$group)) {
               if (k === "_id") continue;
               if (v.$sum === 1) grouped[key][k] = (grouped[key][k] || 0) + 1;

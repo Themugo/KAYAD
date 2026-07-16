@@ -3,7 +3,7 @@ import { detectFraud } from "../services/fraud.service.js";
 import { emitBidUpdate, emitAuctionEnd, emitAuctionPhase } from "../socket/socket.js";
 import { SNIPE_WINDOW_MS, EXTENSION_MS, applyRedisSnipingProtection } from "../utils/snipeGuard.js";
 
-import { syncBidToSupabase, syncAuctionEnd } from "../services/auctionSync.service.js";
+import { syncBidToMongo, syncAuctionEnd } from "../services/auctionSync.service.js";
 
 import Auction from "../models/Auction.js";
 import Car from "../models/Car.js";
@@ -147,9 +147,9 @@ export const placeBid = async ({ roomId, bid, userId }) => {
     }
 
     // =============================
-    // 💾 SYNC DATABASE (ALWAYS)
+    // 💾 SYNC MONGO (ALWAYS)
     // =============================
-    await syncBidToSupabase({
+    await syncBidToMongo({
       roomId,
       userId,
       bid,

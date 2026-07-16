@@ -19,11 +19,11 @@ import Ad from "../models/Ad.js";
 import AdminAlert from "../models/AdminAlert.js";
 import GlobalSettings from "../models/GlobalSettings.js";
 import Review from "../models/Review.js";
+import Dispute from "../models/Dispute.js";
 import Referral from "../models/Referral.js";
 import Transaction from "../models/Transaction.js";
 import Chat from "../models/Chat.js";
 import MarketData from "../models/MarketData.js";
-import Contact from "../models/Contact.js";
 import SupportTicket from "../models/SupportTicket.js";
 import FraudDetection from "../models/FraudDetection.js";
 import DealerVerification from "../models/DealerVerification.js";
@@ -152,31 +152,40 @@ router.get(
       verificationQueue,
       supportQueue,
       fraudAlerts,
+      activeListings,
     ] = await Promise.all([
-      User.countDocuments(),
-      Car.countDocuments(),
-      Car.countDocuments({ auctionStatus: "live" }),
-      Escrow.countDocuments(),
-      User.countDocuments({ role: "dealer" }),
-      User.countDocuments({ role: "dealer", approved: true }),
-      Bid.countDocuments({ createdAt: { $gte: today } }),
-      Payment.countDocuments({ status: "success" }),
-      User.countDocuments({ role: "dealer", approved: false }),
-      Car.countDocuments({ status: "pending" }),
-      Escrow.countDocuments({ status: "held" }),
-      Escrow.countDocuments({ status: "disputed" }),
-      Escrow.aggregate([{ $match: { status: "released" } }, { $group: { _id: null, total: { $sum: "$commission" } } }]),
-      Bid.countDocuments(),
-      Car.aggregate([{ $group: { _id: null, total: { $sum: "$favoritesCount" } } }]),
-      Bid.countDocuments({ status: "pending" }),
-      AdminAlert.countDocuments({ read: false }),
-      User.countDocuments({ role: "individual_seller" }),
-      User.countDocuments({ isDemo: true }),
-      Car.countDocuments({ sold: true }),
-      Contact.countDocuments({ read: false }),
-      DealerVerification.countDocuments({ verificationStatus: { $in: ["pending", "under_review"] } }),
-      SupportTicket.countDocuments({ status: { $in: ["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated"] } }),
-      FraudDetection.countDocuments({ severity: { $in: ["critical", "high"] }, status: { $nin: ["dismissed", "action_taken"] } }),
+      User.countDocuments(),                                                          // totalUsers
+      Car.countDocuments(),                                                           // totalCars
+      Car.countDocuments({ auctionStatus: "live" }),                                  // activeAuctions
+      Escrow.countDocuments(),                                                        // totalEscrows
+      User.countDocuments({ role: "dealer" }),                                        // totalDealers
+      User.countDocuments({ role: "dealer", approved: true }),                        // verifiedDealers
+      Bid.countDocuments({ createdAt: { $gte: today } }),                             // bidsTodayCount
+      Payment.countDocuments({ status: "success" }),                                  // totalPayments
+      User.countDocuments({ role: "dealer", approved: false }),                       // pendingDealers
+      Car.countDocuments({ status: "pending" }),                                      // pendingCars
+      Escrow.countDocuments({ status: "held" }),                                      // openEscrows
+      Escrow.countDocuments({ status: "disputed" }),                                  // disputedEscrows
+      Escrow.aggregate([{ $match: { status: "released" } }, { $group: { _id: null, total: { $sum: "$commission" } } }]), // revenueAgg
+      Bid.countDocuments(),                                                           // totalBidsAll
+      Car.aggregate([{ $group: { _id: null, total: { $sum: "$favoritesCount" } } }]),  // totalFavorites
+      // Fixed from a pre-existing bug: these two positions were
+      // pointed at the wrong models entirely (pendingReviews was
+      // counting pending BIDS; pendingReports was counting unread
+      // Contacts — and the `reports` table it should logically
+      // reference is actually a generated-analytics-file table with
+      // no "pending" concept, so `disputes` is the real "reports
+      // needing admin action" source instead).
+      Review.countDocuments({ status: "pending" }),                                   // pendingReviews
+      AdminAlert.countDocuments({ read: false }),                                      // activeAlerts
+      User.countDocuments({ role: "individual_seller" }),                              // individualSellers
+      User.countDocuments({ isDemo: true }),                                           // demoUsers
+      Car.countDocuments({ status: "sold" }),                                          // carsSold
+      Dispute.countDocuments({ status: { $in: ["open", "investigating"] } }),          // pendingReports
+      DealerVerification.countDocuments({ verificationStatus: { $in: ["pending", "under_review"] } }), // verificationQueue
+      SupportTicket.countDocuments({ status: { $in: ["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated"] } }), // supportQueue
+      FraudDetection.countDocuments({ severity: { $in: ["critical", "high"] }, status: { $nin: ["dismissed", "action_taken"] } }), // fraudAlerts
+      Car.countDocuments({ status: "available" }),                                    // activeListings
     ]);
 
     const totalRevenue = revenueAgg[0]?.total || 0;
@@ -209,6 +218,7 @@ router.get(
         verificationQueue,
         supportQueue,
         fraudAlerts,
+        activeListings,
       },
     });
   }),

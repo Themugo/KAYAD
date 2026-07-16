@@ -28,9 +28,29 @@ export const FIELD_ALIASES = {
     engine: "engine_capacity",
     isAuction: "has_auction",
     dealer: "dealer_id",
+    city: "location",
+    highestBidder: "highest_bidder_id",
   },
   users: {
     logo: "avatar",
+    averageRating: "rating",
+    completedChecks: "inspections_completed",
+  },
+  inspector_applications: {
+    user: "user_id",
+  },
+  inspection_orders: {
+    buyer: "requested_by",
+    car: "car_id",
+    inspector: "inspector_id",
+    payment: "payment_id",
+  },
+  payments: {
+    user: "user_id",
+    car: "car_id",
+  },
+  escrows: {
+    payment: "payment_id",
   },
 };
 

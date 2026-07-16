@@ -154,7 +154,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+    target: 'es2015',
     cssCodeSplit: true,
     // Enable tree shaking
     treeShaking: true,
@@ -272,6 +272,8 @@ export default defineConfig({
     commonjsOptions: {
       transformMixedEsModules: true
     },
+    // Target specific browsers for better optimization
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
   },
   // Optimize dependencies
   optimizeDeps: {

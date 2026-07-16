@@ -48,7 +48,7 @@ export const initOpenTelemetry = () => {
         "@opentelemetry/instrumentation-express": {
           enabled: true,
         },
-        "@opentelemetry/instrumentation-pg": {
+        "@opentelemetry/instrumentation-mongodb": {
           enabled: true,
         },
         "@opentelemetry/instrumentation-redis": {

@@ -127,7 +127,7 @@ export default function EscrowPage() {
           <div className="section-eyebrow" style={{ justifyContent: 'center' }}>Secure Transactions</div>
           <h1 style={{ marginBottom: 16 }}>🔒 Escrow Vault</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 15, maxWidth: 520, margin: '0 auto 32px', lineHeight: 1.7 }}>
-            Every purchase on Gari Motors is protected by M-Pesa escrow. Your money is held safely and only released when you confirm you have received the vehicle.
+            Every purchase on KAYAD is protected by M-Pesa escrow. Your money is held safely and only released when you confirm you have received the vehicle.
           </p>
           {!isAuth && (
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -186,27 +186,33 @@ export default function EscrowPage() {
 
         {/* ── How it works (always visible) ── */}
         <div className="card" style={{ padding: '28px 24px', marginBottom: 40 }}>
-          <h3 style={{ marginBottom: 20, textAlign: 'center' }}>How Escrow Works</h3>
-          <div className="grid-4" style={{ textAlign: 'center' }}>
+          <h3 style={{ marginBottom: 24, textAlign: 'center' }}>How Escrow Works</h3>
+          <div className="grid-4" style={{ textAlign: 'center', position: 'relative' }}>
             {HOW_IT_WORKS.map((s, i) => (
               <div key={s.step} style={{ position: 'relative' }}>
+                {i < HOW_IT_WORKS.length - 1 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: 20,
+                    left: '50%',
+                    width: '100%',
+                    height: 2,
+                    background: 'linear-gradient(90deg, var(--gold-glow) 0%, var(--border) 100%)',
+                    zIndex: 0,
+                  }} />
+                )}
                 <div style={{
                   width: 40, height: 40, borderRadius: '50%',
-                  background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.3)',
+                  background: '#EFF6FF', border: '1px solid rgba(37, 99, 235,0.3)',
                   color: 'var(--gold)', fontWeight: 700, fontSize: 14,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  margin: '0 auto 10px',
+                  margin: '0 auto 10px', position: 'relative', zIndex: 1,
                 }}>
                   {s.step}
                 </div>
                 <div style={{ fontSize: 24, marginBottom: 6 }}>{s.icon}</div>
                 <div style={{ fontWeight: 600, fontSize: 13 }}>{s.label}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, lineHeight: 1.5 }}>{s.desc}</div>
-                {i < HOW_IT_WORKS.length - 1 && (
-                  <div style={{
-                    display: 'none',
-                  }} className="how-arrow" />
-                )}
               </div>
             ))}
           </div>
@@ -377,7 +383,7 @@ export default function EscrowPage() {
             </div>
 
             <div style={{ marginTop: 20, padding: '14px 16px', background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-              Need help with this escrow? Contact <a href="mailto:support@gari.co.ke" style={{ color: 'var(--gold)' }}>support@gari.co.ke</a>
+              Need help with this escrow? Contact <a href="mailto:support@kayad.co.ke" style={{ color: 'var(--gold)' }}>support@kayad.co.ke</a>
             </div>
           </div>
         </div>

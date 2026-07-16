@@ -24,6 +24,19 @@ export const authAPI = {
 // ── CARS ──────────────────────────────────────────────
 export const carsAPI = {
   list: (params: any) => api.get('/cars', { params }).then(unwrap),
+  // BrowsePage and MobileBrowsePage both call this, but it never
+  // existed — every call threw immediately and silently fell back to
+  // hardcoded mock data. Wraps the real /cars endpoint with the
+  // page/limit params it actually expects, and normalizes its
+  // { data, cars, pagination: { total, pages } } response into the
+  // flat { cars, total, hasMore } shape both pages consume.
+  listPaginated: async (params: any, pageNum: number, pageSize: number) => {
+    const res: any = await api.get('/cars', { params: { ...params, page: pageNum, limit: pageSize } }).then(unwrap);
+    const cars = res.cars || res.data || [];
+    const total = res.pagination?.total ?? cars.length;
+    const pages = res.pagination?.pages ?? Math.ceil(total / pageSize);
+    return { cars, total, hasMore: pageNum < pages };
+  },
   get:  (id: string)     => api.get(`/cars/${id}`).then(unwrap),
   insights: (id: string) => api.get(`/cars/${id}/insights`).then(unwrap),
   priceHistory: (id: string) => api.get(`/cars/${id}/price-history`).then(unwrap),
@@ -401,6 +414,7 @@ export const marketAPI = {
 // ── INSPECTOR ─────────────────────────────────────────
 export const inspectorAPI = {
   apply: (body: any) => api.post('/inspector-applications/apply', body).then(unwrap),
+  listActive: () => api.get('/inspector-applications/active').then(unwrap),
 };
 
 // ── ADMIN PAYMENTS ────────────────────────────────────

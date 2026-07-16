@@ -4,7 +4,7 @@ import { carsAPI } from '../api/api';
 import { Button, Badge, PriceTag, Breadcrumb, Card, MapPlaceholder, Avatar, Progress, EmptyState } from '../components/ui';
 import CarCard from '../components/CarCard';
 import OptimizedImg from '../components/OptimizedImg';
-import { formatKES, MOCK_CARS } from '../api/api';
+import { formatKES } from '../api/api';
 import { useAbortController } from '../hooks/useAbortController';
 
 const TABS = [
@@ -60,6 +60,7 @@ export default function CarDetailPage() {
   const getSignal = useAbortController();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
   const [tab, setTab] = useState('specs');
   const [financing, setFinancing] = useState({ downPayment: 20, months: 60 });
@@ -68,39 +69,32 @@ export default function CarDetailPage() {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
-  useEffect(() => {
+  const fetchCar = useCallback(() => {
     let mounted = true;
-    let timeoutId = null;
     setLoading(true);
-
-    // Set a timeout to fall back to mock data after 5 seconds
-    timeoutId = setTimeout(() => {
-      if (mounted) {
-        const mock = MOCK_CARS.find(c => String(c.id) === String(id));
-        setCar(mock || MOCK_CARS[0]);
-        setLoading(false);
-      }
-    }, 5000);
-
+    setLoadError(false);
     carsAPI.get(id).then(d => {
       if (mounted) {
-        clearTimeout(timeoutId);
         setCar(d.car || d.data);
         setLoading(false);
       }
     }).catch(() => {
+      // A vehicle detail page showing the WRONG car with no
+      // indication is actively harmful in a marketplace with real
+      // money and escrow — a slow or failed fetch must show a real
+      // error, never silently substitute an unrelated vehicle.
       if (mounted) {
-        clearTimeout(timeoutId);
-        const mock = MOCK_CARS.find(c => String(c.id) === String(id));
-        setCar(mock || MOCK_CARS[0]);
+        setCar(null);
+        setLoadError(true);
         setLoading(false);
       }
     });
-    return () => {
-      mounted = false;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    return () => { mounted = false; };
   }, [id]);
+
+  useEffect(() => {
+    return fetchCar();
+  }, [fetchCar]);
 
   useEffect(() => {
     if (!car) return;
@@ -126,9 +120,16 @@ export default function CarDetailPage() {
     return Math.round(principal * rate * Math.pow(1 + rate, n) / (Math.pow(1 + rate, n) - 1));
   }, [car, financing]);
 
-  const relatedCars = useMemo(() => {
-    if (!car) return [];
-    return MOCK_CARS.filter(c => c.id !== car.id && c.brand === car.brand).slice(0, 4);
+  const [relatedCars, setRelatedCars] = useState([]);
+  useEffect(() => {
+    if (!car) { setRelatedCars([]); return; }
+    let mounted = true;
+    carsAPI.list({ brand: car.brand, limit: 5 }).then(d => {
+      if (!mounted) return;
+      const cars = (d.cars || d.data || []).filter(c => (c.id || c._id) !== (car.id || car._id));
+      setRelatedCars(cars.slice(0, 4));
+    }).catch(() => { if (mounted) setRelatedCars([]); });
+    return () => { mounted = false; };
   }, [car]);
 
   const viewingHistory = useMemo(() => {
@@ -216,6 +217,17 @@ export default function CarDetailPage() {
             <div className="skeleton-card" style={{ height: 400 }} />
             <div className="skeleton-card" style={{ height: 400 }} />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!car && loadError) {
+    return (
+      <div className="page">
+        <div className="container" style={{ paddingTop: 24 }}>
+          <EmptyState icon="⚠️" title="Couldn't load this vehicle" desc="Something went wrong reaching our servers. Please try again."
+            action={fetchCar} actionLabel="Retry" />
         </div>
       </div>
     );

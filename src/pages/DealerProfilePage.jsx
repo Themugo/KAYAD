@@ -1,62 +1,76 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Button, Badge, Card, Avatar, Breadcrumb, MapPlaceholder, StatCard } from '../components/ui';
+import { Button, Badge, Card, Avatar, Breadcrumb, MapPlaceholder, StatCard, EmptyState, Skeleton } from '../components/ui';
 import CarCard from '../components/CarCard';
-import { MOCK_CARS } from '../data/mockCars';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-
-const DEALER = {
-  name: 'Nairobi Auto Hub Ltd',
-  initials: 'NA',
-  verified: true,
-  rating: 4.7,
-  reviewsCount: 42,
-  location: 'Industrial Area, Nairobi',
-  phone: '+254 712 345 678',
-  email: 'sales@nairobiautohub.co.ke',
-  whatsapp: '+254712345678',
-  hours: 'Mon–Sat: 8am–6pm',
-  responseTime: '~2 hours',
-  joined: 'Jan 2024',
-  bio: 'Premium pre-owned vehicles in Kenya. Every car undergoes a 120-point inspection. M-Pesa escrow accepted.',
-  specialties: ['SUVs', 'Luxury Sedans', 'Commercial Trucks'],
-  social: { facebook: '#', instagram: '#', twitter: '#' },
-};
-
-const REVIEWS = [
-  { name: 'James K.', rating: 5, date: '2 weeks ago', text: 'Smooth purchase, escrow made me feel safe. Car was exactly as described.' },
-  { name: 'Aisha M.', rating: 4, date: '1 month ago', text: 'Good service, responsive dealer. Inspection report was thorough.' },
-  { name: 'Peter O.', rating: 5, date: '2 months ago', text: 'Bought my Land Cruiser here. Professional and trustworthy.' },
-  { name: 'Grace W.', rating: 5, date: '3 months ago', text: 'Best car buying experience in Nairobi. Highly recommend.' },
-];
+import { carsAPI } from '../api/api';
 
 export default function DealerProfilePage() {
   const { id } = useParams();
-  const { isAuth } = useAuth();
-  const { toast } = useToast();
   const [tab, setTab] = useState('inventory');
   const [sort, setSort] = useState('newest');
-  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' });
-  const [contactSent, setContactSent] = useState(false);
-  const [contactLoading, setContactLoading] = useState(false);
+  const [inventory, setInventory] = useState([]);
+  const [dealer, setDealer] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
-  const handleContactSubmit = async (e) => {
-    e.preventDefault();
-    if (!contactForm.name || !contactForm.phone || !contactForm.message) {
-      toast('Please fill in your name, phone and message', 'warning');
-      return;
-    }
-    setContactLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setContactSent(true);
-    toast('Message sent! The dealer will respond within 2 hours.', 'success');
-    setContactLoading(false);
-  };
+  useEffect(() => {
+    let mounted = true;
+    carsAPI.list({ dealer: id, limit: 50 }).then(d => {
+      if (!mounted) return;
+      const cars = d.cars || d.data || [];
+      setInventory(cars);
+      // No dedicated public "dealer profile" endpoint exists yet — the
+      // dealer's real info comes from the populated `dealer` field on
+      // their own listings, which is the same real data the backend
+      // already resolves for car detail pages.
+      const dlr = cars[0]?.dealer;
+      if (dlr) {
+        setDealer(dlr);
+      } else {
+        setNotFound(true);
+      }
+      setLoading(false);
+    }).catch(() => {
+      if (mounted) { setNotFound(true); setLoading(false); }
+    });
+    return () => { mounted = false; };
+  }, [id]);
 
-  const inventory = useMemo(() => {
-    return MOCK_CARS.slice(0, 8);
-  }, []);
+  const sortedInventory = useMemo(() => {
+    const arr = [...inventory];
+    if (sort === 'price-low') arr.sort((a, b) => (a.price || 0) - (b.price || 0));
+    else if (sort === 'price-high') arr.sort((a, b) => (b.price || 0) - (a.price || 0));
+    else arr.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return arr;
+  }, [inventory, sort]);
+
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="container" style={{ paddingTop: 24 }}>
+          <Skeleton height={200} style={{ marginBottom: 24 }} />
+          <div className="car-grid">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} height={220} />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (notFound || !dealer) {
+    return (
+      <div className="page">
+        <div className="container" style={{ paddingTop: 24 }}>
+          <EmptyState icon="🏪" title="Dealer not found" desc="This dealer profile doesn't exist or has no active listings yet."
+            action={() => window.history.back()} actionLabel="Go Back" />
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = dealer.businessName || dealer.name || 'Dealer';
+  const initials = displayName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+  const phoneDigits = (dealer.phone || '').replace(/[^\d+]/g, '');
 
   return (
     <div className="page">
@@ -65,7 +79,7 @@ export default function DealerProfilePage() {
         <Breadcrumb items={[
           { label: 'Home', href: '/' },
           { label: 'Dealers', href: '/browse' },
-          { label: DEALER.name },
+          { label: displayName },
         ]} />
       </div>
 
@@ -79,44 +93,42 @@ export default function DealerProfilePage() {
           }}>
             <div style={{
               position: 'absolute', inset: 0,
-              background: 'radial-gradient(ellipse at 30% 50%, rgba(200,150,42,0.08), transparent 70%)',
+              background: 'radial-gradient(ellipse at 30% 50%, rgba(37,99,235,0.08), transparent 70%)',
             }} />
           </div>
           <div style={{ padding: '0 24px 24px', marginTop: -48 }}>
             <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-              <Avatar size="xl" variant="gold" initials={DEALER.initials}
+              <Avatar size="xl" variant="gold" initials={initials}
                 className="avatar-ring" style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 200, paddingBottom: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <h1 style={{ fontSize: '1.4rem' }}>{DEALER.name}</h1>
-                  {DEALER.verified && <Badge variant="verified" icon="✓">Verified Dealer</Badge>}
+                  <h1 style={{ fontSize: '1.4rem' }}>{displayName}</h1>
+                  {dealer.verified && <Badge variant="verified" icon="✓">Verified Dealer</Badge>}
                 </div>
                 <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-muted)', marginTop: 6, flexWrap: 'wrap' }}>
-                  <span>📍 {DEALER.location}</span>
-                  <span>★ {DEALER.rating} ({DEALER.reviewsCount} reviews)</span>
-                  <span>📅 Joined {DEALER.joined}</span>
-                  <span>⚡ Responds in {DEALER.responseTime}</span>
+                  {dealer.location && <span>📍 {dealer.location}</span>}
+                  {dealer.rating && <span>★ {dealer.rating}</span>}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 10, paddingBottom: 4 }}>
-                <Button variant="primary" icon="💬">Message</Button>
-                <Button variant="outline" icon="📞" onClick={() => window.open(`tel:${DEALER.phone}`)}>Call</Button>
+                {phoneDigits && (
+                  <Button variant="outline" icon="📞" onClick={() => window.open(`tel:${phoneDigits}`)}>Call</Button>
+                )}
+                {phoneDigits && (
+                  <Button variant="primary" icon="📱" onClick={() => window.open(`https://wa.me/${phoneDigits.replace('+', '')}`, '_blank')}>WhatsApp</Button>
+                )}
               </div>
             </div>
 
-            <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-muted)', maxWidth: 600, lineHeight: 1.6 }}>
-              {DEALER.bio}
-            </p>
-
-            <div style={{ marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {DEALER.specialties.map(s => <Badge key={s} variant="gold">{s}</Badge>)}
-            </div>
+            {dealer.bio && (
+              <p style={{ marginTop: 20, fontSize: 14, color: 'var(--text-muted)', maxWidth: 600, lineHeight: 1.6 }}>
+                {dealer.bio}
+              </p>
+            )}
 
             <div className="stats-grid" style={{ marginTop: 24 }}>
-              <StatCard icon="🚗" iconVariant="gold" label="Inventory" value={inventory.length} />
-              <StatCard icon="✅" iconVariant="green" label="Sold" value={47} />
-              <StatCard icon="⭐" iconVariant="gold" label="Rating" value={DEALER.rating} />
-              <StatCard icon="👁" iconVariant="blue" label="Total Views" value="12.4K" trend={8} trendLabel="this month" />
+              <StatCard icon="🚗" iconVariant="gold" label="Active Listings" value={inventory.length} />
+              {dealer.rating != null && <StatCard icon="⭐" iconVariant="gold" label="Rating" value={dealer.rating} />}
             </div>
           </div>
         </Card>
@@ -126,9 +138,6 @@ export default function DealerProfilePage() {
           <button className={`ui-tabbar__item ${tab === 'inventory' ? 'ui-tabbar__item--active' : ''}`} onClick={() => setTab('inventory')}>
             🚗 Inventory ({inventory.length})
           </button>
-          <button className={`ui-tabbar__item ${tab === 'reviews' ? 'ui-tabbar__item--active' : ''}`} onClick={() => setTab('reviews')}>
-            ⭐ Reviews ({REVIEWS.length})
-          </button>
           <button className={`ui-tabbar__item ${tab === 'about' ? 'ui-tabbar__item--active' : ''}`} onClick={() => setTab('about')}>
             🏪 About
           </button>
@@ -137,65 +146,23 @@ export default function DealerProfilePage() {
         {/* ── Inventory Tab ── */}
         {tab === 'inventory' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-              <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{inventory.length} vehicles available</span>
-              <select value={sort} onChange={e => setSort(e.target.value)} className="ui-input" style={{ width: 'auto', padding: '6px 12px' }} aria-label="Sort">
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-              </select>
-            </div>
-            <div className="car-grid">
-              {inventory.map(car => <CarCard key={car.id} car={car} />)}
-            </div>
-          </div>
-        )}
-
-        {/* ── Reviews Tab ── */}
-        {tab === 'reviews' && (
-          <div className="reviews-grid">
-            <Card>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div className="premium-price" style={{ fontSize: '3rem' }}>{DEALER.rating}</div>
-                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>out of 5</div>
-                <div style={{ marginTop: 8, fontSize: 18 }}>
-                  {'★'.repeat(Math.round(DEALER.rating))}{'☆'.repeat(5 - Math.round(DEALER.rating))}
+            {inventory.length === 0 ? (
+              <EmptyState icon="🚗" title="No active listings" desc="This dealer doesn't have any vehicles listed right now." />
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                  <span style={{ fontSize: 14, color: 'var(--text-muted)' }}>{inventory.length} vehicles available</span>
+                  <select value={sort} onChange={e => setSort(e.target.value)} className="ui-input" style={{ width: 'auto', padding: '6px 12px' }} aria-label="Sort">
+                    <option value="newest">Newest First</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{DEALER.reviewsCount} reviews</div>
-              </div>
-              {[5, 4, 3, 2, 1].map(stars => {
-                const pct = stars === 5 ? 68 : stars === 4 ? 22 : stars === 3 ? 6 : stars === 2 ? 2 : 2;
-                return (
-                  <div key={stars} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 12, width: 20 }}>{stars}★</span>
-                    <div style={{ flex: 1, height: 6, background: 'var(--bg-elevated)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: `${pct}%`, height: '100%', background: 'var(--gold-500)', borderRadius: 3 }} />
-                    </div>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 30, textAlign: 'right' }}>{pct}%</span>
-                  </div>
-                );
-              })}
-            </Card>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {REVIEWS.map((r, i) => (
-                <Card key={i} hover>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Avatar size="sm" variant="gold" initials={r.name.split(' ').map(n => n[0]).join('')} />
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.date}</div>
-                      </div>
-                    </div>
-                    <div style={{ color: 'var(--gold-400)', fontSize: 14 }}>
-                      {'★'.repeat(r.rating)}<span style={{ color: 'var(--text-muted)' }}>{'★'.repeat(5 - r.rating)}</span>
-                    </div>
-                  </div>
-                  <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5 }}>{r.text}</p>
-                </Card>
-              ))}
-            </div>
+                <div className="car-grid">
+                  {sortedInventory.map(car => <CarCard key={car.id || car._id} car={car} />)}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -205,34 +172,24 @@ export default function DealerProfilePage() {
             <Card>
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>📍 Location & Contact</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, fontSize: 14 }}>
-                <div><span style={{ color: 'var(--text-muted)' }}>Address:</span> {DEALER.location}</div>
-                <div><span style={{ color: 'var(--text-muted)' }}>Phone:</span> {DEALER.phone}</div>
-                <div><span style={{ color: 'var(--text-muted)' }}>Email:</span> {DEALER.email}</div>
-                <div><span style={{ color: 'var(--text-muted)' }}>WhatsApp:</span> {DEALER.whatsapp}</div>
-                <div><span style={{ color: 'var(--text-muted)' }}>Hours:</span> {DEALER.hours}</div>
+                {dealer.location && <div><span style={{ color: 'var(--text-muted)' }}>Address:</span> {dealer.location}</div>}
+                {dealer.phone && <div><span style={{ color: 'var(--text-muted)' }}>Phone:</span> {dealer.phone}</div>}
+                {dealer.email && <div><span style={{ color: 'var(--text-muted)' }}>Email:</span> {dealer.email}</div>}
               </div>
-              <div style={{ marginTop: 16 }}>
-                <MapPlaceholder label={DEALER.location} pin="📍" height={180} />
-              </div>
+              {dealer.location && (
+                <div style={{ marginTop: 16 }}>
+                  <MapPlaceholder label={dealer.location} pin="📍" height={180} />
+                </div>
+              )}
             </Card>
 
             <Card>
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>ℹ About This Dealer</h3>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 16 }}>{DEALER.bio}</p>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Specialties</div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {DEALER.specialties.map(s => <Badge key={s} variant="blue">{s}</Badge>)}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Connect</div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <Button variant="secondary" size="sm" icon="📘">Facebook</Button>
-                  <Button variant="secondary" size="sm" icon="📷">Instagram</Button>
-                  <Button variant="secondary" size="sm" icon="🐦">Twitter</Button>
-                </div>
-              </div>
+              {dealer.bio ? (
+                <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 16 }}>{dealer.bio}</p>
+              ) : (
+                <p style={{ fontSize: 14, color: 'var(--text-dim)', lineHeight: 1.6, marginBottom: 16 }}>This dealer hasn't added a bio yet.</p>
+              )}
               <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
                 <Link to={`/register?role=dealer&redirect=${encodeURIComponent(window.location.pathname)}`}>
                   <Button variant="outline" size="sm" full icon="🏪">Become a Dealer Like This</Button>
@@ -242,32 +199,22 @@ export default function DealerProfilePage() {
 
             <Card>
               <h3 style={{ fontSize: '1rem', marginBottom: 16 }}>💬 Contact This Dealer</h3>
-              {contactSent ? (
-                <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                  <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-                  <div style={{ fontWeight: 600, marginBottom: 8 }}>Message Sent!</div>
-                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>The dealer will contact you at {contactForm.phone} within 2 hours.</p>
-                  <Button variant="outline" size="sm" style={{ marginTop: 16 }} onClick={() => { setContactSent(false); setContactForm({ name: '', email: '', phone: '', message: '' }); }}>
-                    Send Another
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleContactSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <input className="input" placeholder="Your Name *" value={contactForm.name} onChange={e => setContactForm(p => ({ ...p, name: e.target.value }))} required />
-                  <input className="input" placeholder="Your Phone *" value={contactForm.phone} onChange={e => setContactForm(p => ({ ...p, phone: e.target.value }))} required />
-                  <input className="input" type="email" placeholder="Your Email (optional)" value={contactForm.email} onChange={e => setContactForm(p => ({ ...p, email: e.target.value }))} />
-                  <textarea className="input" rows={3} placeholder="Message * — e.g. I'm interested in the Toyota Prado..." value={contactForm.message} onChange={e => setContactForm(p => ({ ...p, message: e.target.value }))} required />
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Button variant="primary" type="submit" disabled={contactLoading} full>
-                      {contactLoading ? 'Sending...' : 'Send Message'}
-                    </Button>
-                    <Button variant="outline" icon="📱" onClick={() => window.open(`https://wa.me/${DEALER.whatsapp}`, '_blank')}>WhatsApp</Button>
-                  </div>
-                  <p style={{ fontSize: 11, color: 'var(--text-dim)', textAlign: 'center' }}>
-                    Messages are sent directly to the dealer. Your details stay private.
-                  </p>
-                </form>
-              )}
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                Reach out directly — no in-app messaging system connects to this dealer yet, so calling or WhatsApp gets the fastest response.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {phoneDigits ? (
+                  <>
+                    <Button variant="primary" icon="📞" full onClick={() => window.open(`tel:${phoneDigits}`)}>Call {dealer.phone}</Button>
+                    <Button variant="outline" icon="📱" full onClick={() => window.open(`https://wa.me/${phoneDigits.replace('+', '')}`, '_blank')}>Message on WhatsApp</Button>
+                  </>
+                ) : (
+                  <p style={{ fontSize: 13, color: 'var(--text-dim)' }}>No contact number available for this dealer yet.</p>
+                )}
+                {dealer.email && (
+                  <Button variant="outline" icon="✉️" full onClick={() => window.open(`mailto:${dealer.email}`)}>Email</Button>
+                )}
+              </div>
             </Card>
           </div>
         )}

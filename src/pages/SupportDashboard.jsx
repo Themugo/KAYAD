@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   EnterpriseCard, EnterpriseKPI, EnterpriseTimeline,
@@ -6,6 +6,7 @@ import {
   EnterpriseMetricRow, DashboardHeader, EnterpriseTabs, EnterpriseProgress,
   EnterpriseNotifications, EnterpriseTokens
 } from "../components/enterprise/EnterpriseDashboard";
+import { supportTicketAdminAPI } from "../api/api";
 
 const MOCK_STATS = {
   openTickets: 23,
@@ -24,13 +25,6 @@ const TICKETS_TREND = [
   { label: "Sun", value: 6 },
 ];
 
-const OPEN_TICKETS = [
-  { id: "#1029", subject: "Escrow payment not received", user: "James M.", priority: "High", status: "Open", time: "5m ago" },
-  { id: "#1028", subject: "Vehicle listing issue", user: "Sarah O.", priority: "Medium", status: "Open", time: "1h ago" },
-  { id: "#1027", subject: "Dealer verification request", user: "David K.", priority: "Medium", status: "Open", time: "2h ago" },
-  { id: "#1026", subject: "Inspection report query", user: "John W.", priority: "Low", status: "Open", time: "3h ago" },
-];
-
 const ACTIONS = [
   { icon: "🎫", label: "New Ticket", desc: "Create support ticket", to: "/support/new" },
   { icon: "📋", label: "All Tickets", desc: "View all tickets", to: "/support/tickets" },
@@ -40,7 +34,21 @@ const ACTIONS = [
 
 export default function SupportDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
-  const stats = MOCK_STATS;
+  const [stats, setStats] = useState({ openTickets: 0, resolvedToday: 0 });
+  const [recentTickets, setRecentTickets] = useState([]);
+
+  useEffect(() => {
+    supportTicketAdminAPI.stats()
+      .then(d => {
+        const s = d.stats || {};
+        const open = (s.open || 0) + (s.in_progress || 0) + (s.waiting_on_user || 0) + (s.waiting_on_internal || 0) + (s.escalated || 0);
+        setStats({ openTickets: open, resolvedToday: d.resolvedToday || 0 });
+      })
+      .catch(() => {});
+    supportTicketAdminAPI.list({ status: 'open', limit: 3 })
+      .then(d => setRecentTickets(d.tickets || []))
+      .catch(() => {});
+  }, []);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: "📊" },
@@ -76,9 +84,7 @@ export default function SupportDashboard() {
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 24 }}>
               <EnterpriseKPI icon="🎫" label="Open Tickets" value={stats.openTickets} accent={EnterpriseTokens.warning} />
-              <EnterpriseKPI icon="✅" label="Resolved Today" value={stats.resolvedToday} trend={15} accent={EnterpriseTokens.success} />
-              <EnterpriseKPI icon="⏱️" label="Avg Response" value={stats.avgResponseTime + "m"} accent={EnterpriseTokens.info} />
-              <EnterpriseKPI icon="⭐" label="Satisfaction" value={stats.satisfaction + "%"} accent={EnterpriseTokens.gold} />
+              <EnterpriseKPI icon="✅" label="Resolved Today" value={stats.resolvedToday} accent={EnterpriseTokens.success} />
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
@@ -88,8 +94,10 @@ export default function SupportDashboard() {
 
               <EnterpriseCard header="Open Tickets" icon="🎫">
                 <div>
-                  {OPEN_TICKETS.slice(0, 3).map((t, i) => (
-                    <div key={i} style={{
+                  {recentTickets.length === 0 ? (
+                    <p style={{ fontSize: 12, color: EnterpriseTokens.textMuted, padding: "10px 0" }}>No open tickets right now.</p>
+                  ) : recentTickets.slice(0, 3).map((t, i) => (
+                    <div key={t.id || t._id || i} style={{
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -97,10 +105,10 @@ export default function SupportDashboard() {
                       borderBottom: i < 2 ? "1px solid " + EnterpriseTokens.border : "none",
                     }}>
                       <div>
-                        <div style={{ fontWeight: 600, fontSize: 13, color: "#fff" }}>{t.subject}</div>
-                        <div style={{ fontSize: 11, color: EnterpriseTokens.textMuted }}>{t.id} - {t.time}</div>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: EnterpriseTokens.textPrimary }}>{t.subject}</div>
+                        <div style={{ fontSize: 11, color: EnterpriseTokens.textMuted }}>{t.ticketNumber || `#${(t.id || t._id || '').slice(-6)}`} · {new Date(t.createdAt).toLocaleDateString()}</div>
                       </div>
-                      <EnterpriseBadge label={t.priority} color={t.priority === "High" ? EnterpriseTokens.danger : EnterpriseTokens.warning} />
+                      <EnterpriseBadge label={t.priority} color={t.priority === "high" || t.priority === "urgent" ? EnterpriseTokens.danger : EnterpriseTokens.warning} />
                     </div>
                   ))}
                 </div>

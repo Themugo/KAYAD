@@ -9,10 +9,12 @@ import {
   rejectApplication,
   listApplications,
   getApplication,
+  listActiveInspectors,
 } from "../controllers/inspectorApplicationController.js";
 
 const router = Router();
 
+router.get("/active", asyncHandler(listActiveInspectors));
 router.post("/apply", asyncHandler(submitApplication));
 
 router.get(

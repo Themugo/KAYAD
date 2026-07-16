@@ -29,12 +29,12 @@ export const sendDigitalReceipt = async (transaction) => {
   };
 
   const emailHtml = `
-    <div style="font-family:monospace;background:#050505;color:white;padding:40px;max-width:500px;">
-      <h2 style="color:#D4AF37;">KAYAD Receipt</h2>
+    <div style="font-family:monospace;background:#F8FAFC;color:#0F172A;padding:40px;max-width:500px;border:1px solid #E2E8F0;">
+      <h2 style="color:#2563EB;">KAYAD Receipt</h2>
       <p>Amount: KES ${receiptData.amount}</p>
       <p>Car: ${receiptData.car}</p>
       <p>Ref: ${receiptData.ref}</p>
-      <hr style="border-color:#333;" />
+      <hr style="border-color:#E2E8F0;" />
       <p style="font-size:11px;color:#666;">Thank you for using KAYAD.</p>
     </div>
   `;

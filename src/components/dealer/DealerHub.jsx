@@ -326,7 +326,7 @@ export default function DealerHub({ children, user }) {
                 {item.badge > 0 && (
                   <span style={{
                     background: 'var(--dealer-gold)',
-                    color: '#000',
+                    color: '#FFFFFF',
                     fontSize: 10,
                     fontWeight: 700,
                     padding: '2px 6px',

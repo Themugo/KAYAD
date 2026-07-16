@@ -8,7 +8,6 @@ import { BottomNav } from './components/ui';
 
 // NavbarNew component
 import NavbarNew from './components/NavbarNew';
-import Footer from './components/Footer';
 
 // Eager load: critical above-the-fold pages
 import HomePage from './pages/HomePage';
@@ -248,7 +247,6 @@ export default function App() {
                   </Routes>
                 </Suspense>
                 {isMobile && <MobileNav />}
-                <Footer />
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>

@@ -12,7 +12,7 @@ export class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     if (import.meta.env.DEV) {
-      console.error('[Gari Motors] Uncaught error:', error, info);
+      console.error('[KAYAD] Uncaught error:', error, info);
     }
   }
 

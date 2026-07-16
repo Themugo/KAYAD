@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { paymentsAPI, formatKES } from '../api/api';
-import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 
 const TYPE_META = {
@@ -16,13 +15,12 @@ const TYPE_META = {
   },
   listing: {
     label: 'Listing Fee',
-    desc: 'One-time listing fee paid to Gari Motors platform to publish your car listing.',
+    desc: 'One-time listing fee paid to KAYAD platform to publish your car listing.',
     sub: 'Platform fee · One-time payment',
   },
 };
 
 export default function PaymentModal({ onClose, amount, carId, type = 'escrow', onSuccess, title }) {
-  const { on } = useSocket();
   const { toast } = useToast();
 
   const meta = TYPE_META[type] || TYPE_META.escrow;
@@ -31,35 +29,13 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
   const [loading, setLoading]       = useState(false);
   const [stage, setStage]           = useState('input');
   const [checkoutId, setCheckoutId] = useState(null);
-  const [pollInterval, setPoll]     = useState(null);
-
-  useEffect(() => {
-    if (!checkoutId) return;
-
-    const offSuccess = on('paymentSuccess', (data) => {
-      if (data.checkoutID === checkoutId) {
-        clearInterval(pollInterval);
-        setStage('success');
-        toast('Payment confirmed!', 'success');
-        setTimeout(() => { onSuccess?.(); onClose(); }, 2000);
-      }
-    });
-
-    const offFailed = on('paymentFailed', (data) => {
-      if (data.checkoutID === checkoutId) {
-        clearInterval(pollInterval);
-        setStage('failed');
-        toast('Payment failed or cancelled.', 'error');
-      }
-    });
-
-    return () => { offSuccess(); offFailed(); };
-  }, [checkoutId, pollInterval]);
 
   useEffect(() => {
     if (stage !== 'waiting' || !checkoutId) return;
 
+    let attempts = 0;
     const interval = setInterval(async () => {
+      attempts++;
       try {
         const data = await paymentsAPI.byCheckout(checkoutId);
         if (data.payment?.status === 'success') {
@@ -72,9 +48,13 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
           setStage('failed');
         }
       } catch {}
+      if (attempts >= 24) { // ~2 minutes at 5s intervals
+        clearInterval(interval);
+        setStage('failed');
+        toast('Payment confirmation timed out — please try again.', 'error');
+      }
     }, 5000);
 
-    setPoll(interval);
     return () => clearInterval(interval);
   }, [stage, checkoutId]);
 

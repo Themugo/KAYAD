@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { 
   Search, SlidersHorizontal, Grid3X3, List, 
@@ -22,112 +22,9 @@ import {
 } from '../../components/mobile';
 
 import { toast } from '../../components/mobile/MobileToast';
+import { carsAPI } from '../../api/api';
 
-// Demo data
-const MOCK_CARS = [
-  {
-    _id: '1',
-    title: 'Toyota Land Cruiser V8',
-    price: 18500000,
-    year: 2023,
-    mileage: 12000,
-    fuel: 'Petrol',
-    transmission: 'Automatic',
-    location: { city: 'Nairobi' },
-    image: 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800',
-    isAuction: true,
-    auction_status: 'live',
-    verified: true,
-  },
-  {
-    _id: '2',
-    title: 'Mercedes-AMG G63',
-    price: 22000000,
-    year: 2024,
-    mileage: 5000,
-    fuel: 'Petrol',
-    transmission: 'Automatic',
-    location: { city: 'Mombasa' },
-    image: 'https://images.pexels.com/photos/120049/pexels-photo-120049.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: true,
-    inspected: true,
-  },
-  {
-    _id: '3',
-    title: 'Nissan Patrol Super Safari',
-    price: 7800000,
-    year: 2022,
-    mileage: 45000,
-    fuel: 'Diesel',
-    transmission: 'Manual',
-    location: { city: 'Kisumu' },
-    image: 'https://images.pexels.com/photos/3311574/pexels-photo-3311574.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: true,
-  },
-  {
-    _id: '4',
-    title: 'Toyota Prado TXL',
-    price: 9500000,
-    year: 2023,
-    mileage: 18000,
-    fuel: 'Petrol',
-    transmission: 'Automatic',
-    location: { city: 'Nairobi' },
-    image: 'https://images.pexels.com/photos/2446057/pexels-photo-2446057.jpeg?auto=compress&cs=tinysrgb&w=800',
-    auction_status: 'live',
-    isAuction: true,
-    verified: true,
-  },
-  {
-    _id: '5',
-    title: 'BMW X5 M Competition',
-    price: 12400000,
-    year: 2021,
-    mileage: 32000,
-    fuel: 'Petrol',
-    transmission: 'Automatic',
-    location: { city: 'Nairobi' },
-    image: 'https://images.pexels.com/photos/1687325/pexels-photo-1687325.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: true,
-    inspected: true,
-  },
-  {
-    _id: '6',
-    title: 'Range Rover Autobiography',
-    price: 18900000,
-    year: 2022,
-    mileage: 28000,
-    fuel: 'Diesel',
-    transmission: 'Automatic',
-    location: { city: 'Nairobi' },
-    image: 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: true,
-  },
-  {
-    _id: '7',
-    title: 'Subaru WRX STI',
-    price: 6800000,
-    year: 2020,
-    mileage: 35000,
-    fuel: 'Petrol',
-    transmission: 'Manual',
-    location: { city: 'Nairobi' },
-    image: 'https://images.pexels.com/photos/2446057/pexels-photo-2446057.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: false,
-  },
-  {
-    _id: '8',
-    title: 'Audi RS6 Avant',
-    price: 14500000,
-    year: 2023,
-    mileage: 8000,
-    fuel: 'Petrol',
-    transmission: 'Automatic',
-    location: { city: 'Mombasa' },
-    image: 'https://images.pexels.com/photos/1687325/pexels-photo-1687325.jpeg?auto=compress&cs=tinysrgb&w=800',
-    verified: true,
-  },
-];
+const PAGE_SIZE = 8;
 
 const SORTS = [
   { id: 'default', label: 'Best Match' },
@@ -154,6 +51,7 @@ export default function MobileBrowsePage() {
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   
   const [filters, setFilters] = useState({
     brand: searchParams.get('brand') || 'All',
@@ -183,94 +81,66 @@ export default function MobileBrowsePage() {
     return chips;
   }, [filters]);
 
-  // Filter and sort cars
-  const filteredCars = useMemo(() => {
-    let result = [...MOCK_CARS];
+  // Fetch real cars from the backend, matching the pattern already
+  // proven on the desktop BrowsePage — no more client-side filtering
+  // of a static mock array.
+  const sortParam = useMemo(() => ({
+    default: undefined,
+    price_asc: 'price_asc',
+    price_desc: 'price_desc',
+    year_desc: 'year_desc',
+    mileage_asc: 'mileage_asc',
+  }[sortBy]), [sortBy]);
 
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(car =>
-        car.title.toLowerCase().includes(query) ||
-        car.fuel?.toLowerCase().includes(query) ||
-        car.transmission?.toLowerCase().includes(query)
-      );
-    }
+  const requestKeyRef = useRef(0);
 
-    // Apply filters
-    if (filters.brand !== 'All') {
-      result = result.filter(car => car.title.toLowerCase().includes(filters.brand.toLowerCase()));
-    }
-    if (filters.fuel !== 'All') {
-      result = result.filter(car => car.fuel === filters.fuel);
-    }
-    if (filters.transmission !== 'All') {
-      result = result.filter(car => car.transmission === filters.transmission);
-    }
-    if (filters.auctionOnly) {
-      result = result.filter(car => car.isAuction || car.auction_status === 'live');
-    }
-    if (filters.verifiedOnly) {
-      result = result.filter(car => car.verified);
-    }
-    if (filters.inspectedOnly) {
-      result = result.filter(car => car.inspected);
-    }
-
-    // Apply sort
-    switch (sortBy) {
-      case 'price_asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'year_desc':
-        result.sort((a, b) => (b.year || 0) - (a.year || 0));
-        break;
-      case 'mileage_asc':
-        result.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
-        break;
-    }
-
-    return result;
-  }, [searchQuery, filters, sortBy]);
-
-  // Simulate loading
-  useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setCars(filteredCars.slice(0, 8));
-      setHasMore(filteredCars.length > 8);
+  const fetchCars = useCallback(async (pageNum = 1, append = false) => {
+    let requestKey = requestKeyRef.current;
+    if (pageNum === 1) { setIsLoading(true); requestKeyRef.current++; requestKey = requestKeyRef.current; } else { setIsLoadingMore(true); }
+    try {
+      const params = {
+        search: searchQuery || undefined,
+        brand: filters.brand !== 'All' ? filters.brand : undefined,
+        fuel: filters.fuel !== 'All' ? filters.fuel : undefined,
+        transmission: filters.transmission !== 'All' ? filters.transmission : undefined,
+        bodyType: filters.bodyType !== 'All' ? filters.bodyType : undefined,
+        auctionOnly: filters.auctionOnly || undefined,
+        verifiedOnly: filters.verifiedOnly || undefined,
+        inspectedOnly: filters.inspectedOnly || undefined,
+        sort: sortParam,
+      };
+      const data = await carsAPI.listPaginated(params, pageNum, PAGE_SIZE);
+      // Drop this response if a newer fetch has started since —
+      // otherwise rapid search/filter changes could let an older,
+      // slower request overwrite the newer results already shown.
+      if (pageNum === 1 && requestKey !== requestKeyRef.current) return;
+      const newCars = data.cars || [];
+      setCars(prev => append ? [...prev, ...newCars] : newCars);
+      setTotal(data.total || newCars.length);
+      setHasMore(data.hasMore !== false);
+      setPage(pageNum);
+    } catch {
+      if (pageNum === 1 && requestKey !== requestKeyRef.current) return;
+      if (!append) { setCars([]); setTotal(0); }
+      setHasMore(false);
+    } finally {
       setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [filteredCars]);
+      setIsLoadingMore(false);
+    }
+  }, [searchQuery, filters, sortParam]);
+
+  useEffect(() => {
+    fetchCars(1, false);
+  }, [searchQuery, filters, sortParam]);
+
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore || isLoading) return;
+    fetchCars(page + 1, true);
+  }, [isLoadingMore, hasMore, isLoading, page, fetchCars]);
 
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
   }, []);
-
-  const handleLoadMore = useCallback(() => {
-    if (isLoadingMore || !hasMore) return;
-    
-    setIsLoadingMore(true);
-    setTimeout(() => {
-      const nextPage = page + 1;
-      const start = (page - 1) * 8;
-      const end = nextPage * 8;
-      const newCars = filteredCars.slice(start, end);
-      
-      if (newCars.length > 0) {
-        setCars(prev => [...prev, ...newCars]);
-        setPage(nextPage);
-        setHasMore(end < filteredCars.length);
-      } else {
-        setHasMore(false);
-      }
-      setIsLoadingMore(false);
-    }, 800);
-  }, [isLoadingMore, hasMore, page, filteredCars]);
 
   const handleRemoveFilter = useCallback((key) => {
     if (key === 'brand') setFilters(p => ({ ...p, brand: 'All' }));
@@ -388,7 +258,7 @@ export default function MobileBrowsePage() {
             marginTop: 12,
           }}>
             <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-              {isLoading ? 'Loading...' : `${filteredCars.length} vehicles`}
+              {isLoading ? 'Loading...' : `${total} vehicles`}
             </div>
             
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -536,7 +406,7 @@ export default function MobileBrowsePage() {
               <MobileCardSkeleton key={i} />
             ))}
           </div>
-        ) : filteredCars.length === 0 ? (
+        ) : cars.length === 0 ? (
           // Empty state
           <MobileEmptyState
             template="search"

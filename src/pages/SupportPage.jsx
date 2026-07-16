@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
+import { supportAPI } from '../api/api';
 
 const FAQS = [
   {
@@ -39,19 +41,45 @@ const FAQS = [
 
 export default function SupportPage() {
   const { toast } = useToast();
+  const { isAuth } = useAuth();
   const [openFaq, setOpenFaq] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [tickets, setTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isAuth) { setTicketsLoading(false); return; }
+    supportAPI.myTickets()
+      .then(d => setTickets(d.tickets || d.data || []))
+      .catch(() => {})
+      .finally(() => setTicketsLoading(false));
+  }, [isAuth]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) { toast('Please fill all required fields', 'warning'); return; }
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSubmitted(true);
-    toast('Message sent! We\'ll reply within 2 hours.', 'success');
-    setSubmitting(false);
+    try {
+      await supportAPI.create(form);
+      setSubmitted(true);
+      toast('Message sent! We\'ll reply within 2 hours.', 'success');
+      if (isAuth) {
+        supportAPI.myTickets().then(d => setTickets(d.tickets || d.data || [])).catch(() => {});
+      }
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to send message. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const TICKET_STATUS_META = {
+    open:        { label: 'Open',        badge: 'badge-blue' },
+    in_progress: { label: 'In Progress', badge: 'badge-orange' },
+    resolved:    { label: 'Resolved',    badge: 'badge-green' },
+    closed:      { label: 'Closed',      badge: 'badge-muted' },
   };
 
   return (
@@ -72,7 +100,7 @@ export default function SupportPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 56 }}>
           {[
             { icon: '📞', label: 'Phone', value: '+254 700 100 200', sub: 'Mon–Sat 8am–8pm', href: 'tel:+254700100200' },
-            { icon: '✉️', label: 'Email', value: 'support@gari.co.ke', sub: 'Reply within 2 hours', href: 'mailto:support@gari.co.ke' },
+            { icon: '✉️', label: 'Email', value: 'support@kayad.co.ke', sub: 'Reply within 2 hours', href: 'mailto:support@kayad.co.ke' },
             { icon: '💬', label: 'WhatsApp', value: '+254 700 100 200', sub: 'Quick chat support', href: 'https://wa.me/254700100200' },
             { icon: '📍', label: 'Office', value: 'Westlands, Nairobi', sub: 'By appointment only', href: null },
           ].map(c => (
@@ -145,6 +173,35 @@ export default function SupportPage() {
                 ))}
               </div>
             </div>
+
+            {/* My Tickets — real status tracking, signed-in users only */}
+            {isAuth && (
+              <div className="card" style={{ padding: 24, marginTop: 28 }}>
+                <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>My Support Tickets</h3>
+                {ticketsLoading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[...Array(2)].map((_, i) => <div key={i} className="skeleton-card" style={{ height: 48 }} />)}
+                  </div>
+                ) : tickets.length === 0 ? (
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>No support tickets yet. Send a message and it'll show up here.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {tickets.slice(0, 5).map((t) => {
+                      const meta = TICKET_STATUS_META[t.status] || { label: t.status, badge: 'badge-muted' };
+                      return (
+                        <div key={t.id || t._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.subject || t.message?.slice(0, 40) || 'Support request'}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-dim)' }}>{new Date(t.createdAt || t.created_at).toLocaleDateString()}</div>
+                          </div>
+                          <span className={`badge ${meta.badge}`} style={{ flexShrink: 0 }}>{meta.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Contact form */}

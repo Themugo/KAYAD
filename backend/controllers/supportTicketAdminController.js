@@ -254,10 +254,18 @@ export const getTicketStats = async (req, res) => {
 
     const total = Object.values(result).reduce((a, b) => a + b, 0);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const resolvedToday = await SupportTicket.countDocuments({
+      status: "resolved",
+      updatedAt: { $gte: today },
+    });
+
     res.json({
       success: true,
       stats: result,
       total,
+      resolvedToday,
     });
   } catch (err) {
     logError("Get ticket stats error", err);

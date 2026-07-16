@@ -142,8 +142,7 @@ vi.mock('lucide-react', () => {
     'Signal2', 'Signal3', 'Signal4', 'Signal5', 'Bug', 'BugOff', 'Ant', 'Worm',
     'Pest', 'Locust', 'Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Lime',
     'Orange', 'Peach', 'Pear', 'Pepper', 'Watermelon', 'Carrot', 'Eggplant',
-    'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn',
-    'Gavel', 'Smartphone'];
+    'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn'];
   return icons.reduce((acc, icon) => {
     acc[icon] = () => React.createElement('span', { 'data-testid': `icon-${icon.toLowerCase()}` }, icon);
     return acc;

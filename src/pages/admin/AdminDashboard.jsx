@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { adminAPI } from "../../api/api";
 import { 
   EnterpriseCard, EnterpriseKPI, EnterpriseRevenue, EnterpriseTimeline,
   EnterpriseNotifications, EnterpriseChart, EnterpriseDonut,
@@ -9,15 +10,6 @@ import {
   EnterpriseProgress, EnterpriseQuickActions,
   EnterpriseTokens
 } from "../../components/enterprise/EnterpriseDashboard";
-
-const MOCK_STATS = {
-  totalUsers: 2847,
-  totalDealers: 156,
-  totalCars: 1842,
-  activeListings: 892,
-  activeEscrows: 34,
-  supportTickets: 23,
-};
 
 const MONTHLY_REVENUE = [
   { label: "Jan", value: 18500000 },
@@ -88,12 +80,33 @@ const PLATFORM_QUICK_ACTIONS = [
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
-  const stats = MOCK_STATS;
+  const [stats, setStats] = useState({
+    totalUsers: 0, totalDealers: 0, totalCars: 0, activeListings: 0,
+    activeEscrows: 0, supportTickets: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  useEffect(() => {
+    adminAPI.stats()
+      .then(d => {
+        const s = d.stats || {};
+        setStats({
+          totalUsers: s.totalUsers || 0,
+          totalDealers: s.totalDealers || 0,
+          totalCars: s.totalCars || 0,
+          activeListings: s.activeListings || 0,
+          activeEscrows: s.openEscrows || 0,
+          supportTickets: s.supportQueue || 0,
+        });
+      })
+      .catch(() => toast('Failed to load dashboard stats', 'error'))
+      .finally(() => setStatsLoading(false));
+  }, []);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: "📊" },
-    { id: "dealers", label: "Dealers", icon: "👥", count: 156 },
-    { id: "listings", label: "Listings", icon: "🚗", count: 892 },
+    { id: "dealers", label: "Dealers", icon: "👥", count: stats.totalDealers },
+    { id: "listings", label: "Listings", icon: "🚗", count: stats.activeListings },
     { id: "finances", label: "Finances", icon: "💰" },
   ];
 

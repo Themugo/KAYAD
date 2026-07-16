@@ -35,18 +35,18 @@ export function LoginPage() {
   };
 
   return (
-    <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <div style={{ width: '100%', maxWidth: 420, padding: '0 20px' }}>
+    <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px 20px' }}>
+      <div style={{ width: '100%', maxWidth: 420 }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>🚗</div>
-          <h2 style={{ marginBottom: 6 }}>Welcome Back</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Sign in to your Gari Motors account</p>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--space-10)' }}>
+          <div style={{ fontSize: 40, marginBottom: 'var(--space-3)' }}>🚗</div>
+          <h1 style={{ fontSize: 'var(--text-2xl)', marginBottom: 'var(--space-2)' }}>Welcome Back</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>Sign in to your KAYAD account</p>
         </div>
 
-        <div className="card" style={{ padding: 32 }}>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="card" style={{ padding: 'var(--space-8)' }}>
+          <form onSubmit={handleSubmit} className="stack">
             <div className="input-group">
               <label className="input-label">Email</label>
               <input
@@ -61,7 +61,10 @@ export function LoginPage() {
             </div>
 
             <div className="input-group">
-              <label className="input-label">Password</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <label className="input-label">Password</label>
+                <Link to="/forgot-password" style={{ fontSize: 'var(--text-xs)', color: 'var(--gold)', fontWeight: 600 }}>Forgot password?</Link>
+              </div>
               <div style={{ position: 'relative' }}>
                 <input
                   className="input"
@@ -72,7 +75,7 @@ export function LoginPage() {
                   required
                   style={{ paddingRight: 44 }}
                 />
-                <button type="button" onClick={() => setShowPwd(!showPwd)}
+                <button type="button" onClick={() => setShowPwd(!showPwd)} aria-label={showPwd ? 'Hide password' : 'Show password'}
                   style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 16 }}>
                   {showPwd ? '🙈' : '👁'}
                 </button>
@@ -84,12 +87,25 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="gold-line" />
+          <div className="gold-line" style={{ margin: 'var(--space-6) 0' }} />
 
-          <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text-muted)' }}>
+          <p style={{ textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
             Don't have an account?{' '}
             <Link to="/register" style={{ color: 'var(--gold)', fontWeight: 600 }}>Join Free</Link>
           </p>
+        </div>
+
+        {/* Trust messaging */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-6)', marginTop: 'var(--space-6)', flexWrap: 'wrap' }}>
+          {[
+            { icon: '🔒', label: 'Secure login' },
+            { icon: '🛡️', label: 'Escrow protected' },
+            { icon: '✓', label: '500+ verified dealers' },
+          ].map((t, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+              <span>{t.icon}</span><span>{t.label}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

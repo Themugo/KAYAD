@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { inspectorAPI, inspectionAPI } from '../api/api';
 
 const INSPECTION_TYPES = [
   { id: 'standard', label: 'Standard Inspection', price: 3500, duration: '2-3 hours', items: ['Exterior condition', 'Interior condition', 'Engine & fluids', 'Tyres & brakes', 'Test drive', 'Written report'] },
@@ -19,12 +20,54 @@ const HOW_IT_WORKS = [
 export default function InspectionPage() {
   const { isAuth } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selected, setSelected] = useState('comprehensive');
   const [form, setForm] = useState({ carUrl: searchParams.get('carUrl') || '', location: '', date: '', name: '', phone: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [slotsLeft, ] = useState(Math.floor(Math.random() * 3) + 3); // 3-5 slots left today
+  const [awaitingPayment, setAwaitingPayment] = useState(false);
+  const [checkoutId, setCheckoutId] = useState(null);
+  const [inspectors, setInspectors] = useState([]);
+  const [inspectorsLoading, setInspectorsLoading] = useState(true);
+
+  useEffect(() => {
+    inspectorAPI.listActive()
+      .then(d => setInspectors(d.inspectors || d.data || []))
+      .catch(() => {})
+      .finally(() => setInspectorsLoading(false));
+  }, []);
+
+  // Poll for the real M-Pesa payment confirmation rather than rely
+  // on a push notification — polling is verifiable against the real
+  // order status and doesn't depend on assumptions about exactly
+  // when/whether a push event fires.
+  useEffect(() => {
+    if (!checkoutId) return;
+    let cancelled = false;
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts++;
+      try {
+        const d = await inspectionAPI.myOrders();
+        const orders = d.orders || d.data || [];
+        const order = orders.find(o => o.checkoutRequestID === checkoutId);
+        if (order && ['paid', 'assigned', 'in_progress'].includes(order.status)) {
+          if (cancelled) return;
+          clearInterval(interval);
+          setAwaitingPayment(false);
+          setSubmitted(true);
+          toast('Payment confirmed — inspection booked!', 'success');
+        }
+      } catch { /* keep polling */ }
+      if (attempts >= 30 && !cancelled) { // ~90s at 3s intervals
+        clearInterval(interval);
+        setAwaitingPayment(false);
+        toast('Still waiting on payment confirmation — check "My Inspections" shortly.', 'info');
+      }
+    }, 3000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [checkoutId, toast]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,11 +75,30 @@ export default function InspectionPage() {
       toast('Please fill all required fields', 'warning');
       return;
     }
+    if (!isAuth) {
+      toast('Please sign in to book an inspection', 'warning');
+      navigate(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      return;
+    }
+    const carIdMatch = form.carUrl.match(/\/cars\/([a-zA-Z0-9-]+)/);
+    const carId = carIdMatch ? carIdMatch[1] : form.carUrl.trim();
     setSubmitting(true);
-    await new Promise(r => setTimeout(r, 1200));
-    setSubmitted(true);
-    toast('Inspection request submitted! We will contact you within 2 hours.', 'success');
-    setSubmitting(false);
+    try {
+      const data = await inspectionAPI.order({ carId, phone: form.phone, location: form.location });
+      if (data.checkoutRequestID) {
+        setCheckoutId(data.checkoutRequestID);
+        setAwaitingPayment(true);
+        toast('STK push sent — check your phone to complete payment', 'info');
+      } else {
+        // Mock/dev payment mode confirms instantly server-side
+        setSubmitted(true);
+        toast('Inspection booked!', 'success');
+      }
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed to book inspection. Please try again.', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const pkg = INSPECTION_TYPES.find(t => t.id === selected);
@@ -80,6 +142,40 @@ export default function InspectionPage() {
             ))}
           </div>
         </div>
+
+        {/* Meet Our Inspectors — real data only, no fabricated profiles */}
+        {!inspectorsLoading && inspectors.length > 0 && (
+          <div style={{ marginBottom: 56 }}>
+            <div className="section-header centered" style={{ marginBottom: 32 }}>
+              <div className="section-eyebrow">Certified Team</div>
+              <h2 className="section-title">Meet Our Inspectors</h2>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20 }}>
+              {inspectors.map((insp) => (
+                <div key={insp.id || insp._id} className="card" style={{ padding: 24, textAlign: 'center' }}>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: '50%', margin: '0 auto 12px',
+                    background: insp.avatar ? `url(${insp.avatar}) center/cover` : 'var(--gold-glow)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
+                  }}>
+                    {!insp.avatar && '🔧'}
+                  </div>
+                  <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{insp.name}</div>
+                  {insp.inspectionSpecialty && (
+                    <div style={{ fontSize: 12, color: 'var(--gold)', marginBottom: 4 }}>{insp.inspectionSpecialty}</div>
+                  )}
+                  {insp.locationCity && (
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>📍 {insp.locationCity}</div>
+                  )}
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+                    {insp.rating && <span>⭐ {insp.rating}</span>}
+                    {insp.inspectionsCompleted != null && <span>{insp.inspectionsCompleted} inspections</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: 40, alignItems: 'start' }}>
           {/* Left: packages */}
@@ -141,12 +237,23 @@ export default function InspectionPage() {
             {submitted ? (
               <div className="card" style={{ padding: 40, textAlign: 'center' }}>
                 <div style={{ fontSize: 60, marginBottom: 16 }}>✅</div>
-                <h3>Request Submitted!</h3>
+                <h3>Inspection Booked!</h3>
                 <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>
-                  We'll contact you at <strong>{form.phone}</strong> within 2 hours to confirm your inspection booking.
+                  Payment confirmed. An inspector will be assigned and will reach out at <strong>{form.phone}</strong> to confirm the schedule.
                 </p>
                 <button className="btn btn-outline btn-full" onClick={() => { setSubmitted(false); setForm({ carUrl: '', location: '', date: '', name: '', phone: '', notes: '' }); }}>
                   Book Another
+                </button>
+              </div>
+            ) : awaitingPayment ? (
+              <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+                <div className="spinner" style={{ margin: '0 auto 16px' }} />
+                <h3>Check Your Phone</h3>
+                <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>
+                  An M-Pesa payment prompt was sent to <strong>{form.phone}</strong>. Enter your PIN to confirm and complete the booking.
+                </p>
+                <button className="btn btn-outline btn-full" onClick={() => setAwaitingPayment(false)}>
+                  Cancel
                 </button>
               </div>
             ) : (
@@ -160,7 +267,7 @@ export default function InspectionPage() {
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 11, background: 'rgba(37, 99, 235,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--gold)' }}>
-                      ⏳ Only {slotsLeft} slots left today
+                      📅 Same-day slots available
                     </span>
                     <span style={{ fontSize: 11, background: 'rgba(82,196,26,0.1)', borderRadius: 4, padding: '3px 8px', color: 'var(--green)' }}>
                       ✅ 100% refund if not completed

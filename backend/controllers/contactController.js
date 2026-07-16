@@ -14,8 +14,8 @@ export const submitContact = async (req, res) => {
     sendRawEmail({
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
       subject: `Contact form: ${subject}`,
-      html: `<div style="font-family:sans-serif;background:#050505;color:#E2DDD5;padding:24px;max-width:500px;">
-        <h2 style="color:#D4AF37;">New Contact Form Submission</h2>
+      html: `<div style="font-family:sans-serif;background:#F8FAFC;color:#0F172A;padding:24px;max-width:500px;border:1px solid #E2E8F0;">
+        <h2 style="color:#2563EB;">New Contact Form Submission</h2>
         <p><strong>Name:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Subject:</strong> ${subject}</p>

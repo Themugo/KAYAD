@@ -51,7 +51,7 @@ export const monitoringConfig = {
 
   // Service dependencies
   dependencies: {
-    supabase: {
+    mongodb: {
       checkInterval: 60000,
       timeout: 5000
     },

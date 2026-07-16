@@ -875,3 +875,202 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_cars_title_trgm ON cars USING gin (title gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_cars_make_trgm ON cars USING gin (make gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_cars_model_trgm ON cars USING gin (model gin_trgm_ops);
+
+-- =============================
+-- MIGRATION: inspector fields on users — referenced by
+-- inspectorApplicationController.js's approveApplication() but
+-- never existed as columns, meaning every approval attempt threw a
+-- "column does not exist" error and failed.
+-- =============================
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_inspector BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS inspection_specialty TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS location_city TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS rating NUMERIC(2,1);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS inspections_completed INTEGER DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_users_is_inspector ON users(is_inspector);
+
+-- Missing table entirely — TABLE_MAP references "inspector_applications"
+-- but it was never created. Columns matched exactly against every
+-- field controllers/inspectorApplicationController.js actually reads
+-- and writes (submitApplication/approveApplication).
+CREATE TABLE IF NOT EXISTS inspector_applications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  id_number TEXT NOT NULL,
+  location TEXT,
+  years_of_experience INTEGER,
+  specialties TEXT[],
+  certifications TEXT[],
+  tools_available TEXT,
+  preferred_regions TEXT[],
+  cv_url TEXT,
+  certification_docs TEXT[],
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMPTZ,
+  review_notes TEXT,
+  assigned_specialty TEXT,
+  assigned_region TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_inspector_applications_status ON inspector_applications(status);
+CREATE INDEX IF NOT EXISTS idx_inspector_applications_email ON inspector_applications(email);
+
+-- =============================
+-- MIGRATION: remaining cars fields referenced by carController.js's
+-- createCar/updateCar (allowedFields whitelist + create-time fields)
+-- that still didn't exist as columns.
+-- =============================
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS chat_disabled BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS dealer_phone TEXT;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS escrow_enabled BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS logbook_verified BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS auction_start_time TIMESTAMPTZ;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS auction_end TIMESTAMPTZ;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS starting_bid NUMERIC;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS reserve_price NUMERIC;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS reserve_mode TEXT;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS promotion_expires_at TIMESTAMPTZ;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS price_history JSONB DEFAULT '[]';
+
+-- =============================
+-- MIGRATION: users.approved and cars.favorites_count — referenced by
+-- the /admin/stats aggregation (routes/adminRoutes.js) but never
+-- existed, so that Promise.all([...]) threw and the whole admin
+-- stats endpoint failed — which is why the admin dashboard was
+-- showing hardcoded fake numbers instead of real ones.
+-- =============================
+ALTER TABLE users ADD COLUMN IF NOT EXISTS approved BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS favorites_count INTEGER DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_users_approved ON users(approved);
+
+-- =============================
+-- MIGRATION: two tables referenced throughout the codebase
+-- (verificationController.js, contactController.js, adminRoutes.js
+-- stats aggregation) that never existed at all.
+-- =============================
+CREATE TABLE IF NOT EXISTS dealer_verifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  dealer_id UUID REFERENCES users(id),
+  verification_status TEXT NOT NULL DEFAULT 'pending' CHECK (verification_status IN ('pending','under_review','approved','rejected')),
+  rejection_reason TEXT,
+  rejection_details JSONB DEFAULT '{}',
+  submitted_at TIMESTAMPTZ,
+  reviewed_at TIMESTAMPTZ,
+  reviewed_by UUID REFERENCES users(id),
+  admin_notes TEXT,
+  suspension_reason TEXT,
+  suspension_expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_dealer_verifications_status ON dealer_verifications(verification_status);
+CREATE INDEX IF NOT EXISTS idx_dealer_verifications_user ON dealer_verifications(user_id);
+
+CREATE TABLE IF NOT EXISTS contacts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT,
+  message TEXT NOT NULL,
+  read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_contacts_read ON contacts(read);
+
+-- =============================
+-- MIGRATION: inspection_orders — the routes/inspectionRoutes.js
+-- controller creates/reads/updates fields (fee, payment,
+-- checkoutRequestID, location, checklist, overallScore,
+-- conditionRating, inspectorNotes, images) that never existed as
+-- columns, and filters by `buyer`/`car`/`inspector` which don't
+-- match the real `requested_by`/`car_id`/`inspector_id` columns
+-- (fixed via field aliases in utils/fieldMap.js). This means the
+-- entire inspection booking + payment + report flow was broken.
+-- =============================
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS fee NUMERIC;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS payment_id UUID REFERENCES payments(id);
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS location TEXT;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS checklist JSONB DEFAULT '[]';
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS overall_score NUMERIC;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS condition_rating TEXT;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS inspector_notes TEXT;
+ALTER TABLE inspection_orders ADD COLUMN IF NOT EXISTS images TEXT[] DEFAULT '{}';
+CREATE INDEX IF NOT EXISTS idx_inspection_orders_requested_by ON inspection_orders(requested_by);
+CREATE INDEX IF NOT EXISTS idx_inspection_orders_checkout ON inspection_orders(checkout_request_id);
+
+-- =============================
+-- MIGRATION: payments / mpesa_transactions — services/paymentService.js
+-- and paymentCallback.service.js write and read fields that never
+-- existed as columns (car, referenceId, referenceModel,
+-- checkoutRequestId, mode, mpesaReceiptNumber, paidAt, processed on
+-- payments; checkoutRequestID, status, carId, mpesaReceipt on
+-- mpesa_transactions), and the payments.status CHECK constraint
+-- didn't even allow 'success' — the literal value the entire
+-- payment-confirmation flow writes on every successful payment.
+-- This means payment status lookups (used by PaymentModal's polling,
+-- which is the ONLY working confirmation path after the broken
+-- socket effect was removed) could never actually detect success.
+-- =============================
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS car_id UUID REFERENCES cars(id);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference_id UUID;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference_model TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS mode TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS mpesa_receipt_number TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS processed BOOLEAN DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_payments_checkout_request_id ON payments(checkout_request_id);
+
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;
+ALTER TABLE payments ADD CONSTRAINT payments_status_check
+  CHECK (status IN ('pending','processing','success','completed','failed','refunded'));
+
+ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;
+ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS status TEXT;
+ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS car_id UUID REFERENCES cars(id);
+ALTER TABLE mpesa_transactions ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
+CREATE INDEX IF NOT EXISTS idx_mpesa_transactions_checkout ON mpesa_transactions(checkout_request_id);
+
+-- =============================
+-- MIGRATION: final batch of fields found while tracing the full
+-- payment confirmation flow (paymentService.js) — cars.isPaid/
+-- paymentStatus, payments.resultDesc, and escrows.payment (aliased)
+-- were all referenced but never existed.
+-- =============================
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS is_paid BOOLEAN DEFAULT false;
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS payment_status TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS result_desc TEXT;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS payment_id UUID REFERENCES payments(id);
+
+-- =============================
+-- MIGRATION: bids/auctions/cars/payments — the bid-payment
+-- completion flow (paymentCallback.service.js) references
+-- bids.carId (bids only relate via auction_id, no direct car
+-- reference existed), sets bid status to 'paid' and auction status
+-- to 'completed'/'pending_payment' — none of which the CHECK
+-- constraints allowed — and sets cars.highestBidder, which never
+-- existed as a column.
+-- =============================
+ALTER TABLE bids ADD COLUMN IF NOT EXISTS car_id UUID REFERENCES cars(id);
+ALTER TABLE bids ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
+ALTER TABLE bids ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+ALTER TABLE bids ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;
+CREATE INDEX IF NOT EXISTS idx_bids_car_id ON bids(car_id);
+
+ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_status_check;
+ALTER TABLE bids ADD CONSTRAINT bids_status_check
+  CHECK (status IN ('active','pending','paid','outbid','won','lost','cancelled','refunded'));
+
+ALTER TABLE auctions DROP CONSTRAINT IF EXISTS auctions_status_check;
+ALTER TABLE auctions ADD CONSTRAINT auctions_status_check
+  CHECK (status IN ('pending','pending_payment','active','paused','completed','ended','cancelled'));
+
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS bid_id UUID REFERENCES bids(id);

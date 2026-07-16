@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { carsAPI, BRANDS, MOCK_CARS } from '../api/api';
+import { carsAPI, BRANDS } from '../api/api';
 import CarCard from '../components/CarCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
@@ -63,6 +63,7 @@ export default function BrowsePage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [cars, setCars] = useState([]);
   const [total, setTotal] = useState(0);
+  const [fetchError, setFetchError] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [view, setView] = useState('grid');
@@ -110,7 +111,8 @@ export default function BrowsePage() {
   });
 
   const fetchCars = useCallback(async (pageNum = 1, append = false) => {
-    if (pageNum === 1) { setLoading(true); filterKey.current++; }
+    let requestKey = filterKey.current;
+    if (pageNum === 1) { setLoading(true); filterKey.current++; requestKey = filterKey.current; }
     else setLoadingMore(true);
     try {
       const params = { ...filters, sort, limit: PAGE_SIZE * pageNum };
@@ -123,6 +125,12 @@ export default function BrowsePage() {
       const cacheKey = `cars:${JSON.stringify(params)}:page${pageNum}`;
       const data = await dedupedFetch(cacheKey, () => carsAPI.listPaginated(params, pageNum, PAGE_SIZE), 15000);
 
+      // If a newer fetch has started since this one was kicked off
+      // (rapid filter changes), this response is stale — drop it
+      // rather than let it overwrite what the newer request will
+      // return, or already has.
+      if (pageNum === 1 && requestKey !== filterKey.current) return;
+
       if (append) {
         setCars(prev => [...prev, ...(data.cars || [])]);
       } else {
@@ -131,10 +139,16 @@ export default function BrowsePage() {
       setTotal(data.total || 0);
       setHasMore(data.hasMore !== false);
       setPage(pageNum);
+      setFetchError(false);
     } catch {
-      if (!append) setCars(MOCK_CARS);
-      setTotal(MOCK_CARS.length);
+      if (pageNum === 1 && requestKey !== filterKey.current) return;
+      // Show a genuine error state instead of silently substituting
+      // fake data — a buyer acting on wrong vehicle info in a
+      // marketplace with real money and escrow is worse than an
+      // honest "couldn't load" message.
+      if (!append) { setCars([]); setTotal(0); }
       setHasMore(false);
+      setFetchError(true);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -331,6 +345,9 @@ export default function BrowsePage() {
 
         {loading ? (
           <div className="car-grid">{skeletonCards}</div>
+        ) : cars.length === 0 && fetchError ? (
+          <EmptyState icon="⚠️" title="Couldn't load listings" desc="Something went wrong reaching our servers. Please try again."
+            action={() => fetchCars(1, false)} actionLabel="Retry" />
         ) : cars.length === 0 ? (
           <EmptyState icon="🔍" title="No cars found" desc="Try adjusting your filters or search terms."
             action={() => clearAll()} actionLabel="Clear Filters" />

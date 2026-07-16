@@ -2,43 +2,14 @@ import Car from "../models/Car.js";
 import User from "../models/User.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import { cacheDelPattern } from "../utils/cache.js";
-import { uploadMultiple as uploadToCloudinary, deleteImage as deleteFromCloudinary } from "../config/cloudinary.js";
-import { uploadToSupabase, deleteFromSupabase, isStorageConnected } from "../services/storage.service.js";
+import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
-import { logWarn, logInfo } from "../utils/logger.js";
+import { logWarn, logError } from "../utils/logger.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
-
-// =============================
-// 🧠 UNIFIED UPLOAD FUNCTION
-// =============================
-
-const uploadImages = async (files, folder) => {
-  if (isStorageConnected()) {
-    logInfo("Using Supabase Storage for uploads");
-    // Upload to Supabase (supports multiple files)
-    const results = [];
-    for (const file of files) {
-      const result = await uploadToSupabase(file, folder);
-      results.push(result);
-    }
-    return results;
-  } else {
-    logInfo("Using Cloudinary for uploads");
-    return uploadToCloudinary(files, folder);
-  }
-};
-
-const deleteImage = async (publicId) => {
-  if (isStorageConnected()) {
-    return deleteFromSupabase(publicId);
-  } else {
-    return deleteFromCloudinary(publicId);
-  }
-};
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -404,11 +375,14 @@ export const createCar = async (req, res) => {
       body.demoEditedAt = new Date();
       body.demoEditedBy = req.user.id;
     }
-    if (!body.location && (body.city || body.address)) {
-      body.location = {
-        city: body.city || seller.location || "",
-        address: body.address || "",
-      };
+    // `location` is a flat TEXT column (and every display site across
+    // the app — HomePage, BrowsePage, etc. — reads car.location as a
+    // plain string). This previously built a nested {city, address}
+    // object here, which would fail against the real column type.
+    if (!body.location) {
+      body.location = [body.city || seller.location || "", body.address || ""]
+        .filter(Boolean)
+        .join(", ");
     }
     delete body.city;
     delete body.address;
@@ -417,10 +391,10 @@ export const createCar = async (req, res) => {
     const cloudinaryConfigured =
       process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
-    if (!cloudinaryConfigured && !isStorageConnected() && req.files && req.files.length > 0) {
+    if (!cloudinaryConfigured && req.files && req.files.length > 0) {
       return res.status(500).json({
         success: false,
-        message: "Storage not configured. Please set CLOUDINARY or SUPABASE credentials.",
+        message: "Cloud storage not configured. Please set CLOUDINARY credentials.",
       });
     }
 
@@ -500,17 +474,17 @@ export const createCar = async (req, res) => {
 
     res.status(201).json({ success: true, data: car });
 
-    // ── BACKGROUND: Upload images after response ──
-    if (pendingFiles && (cloudinaryConfigured || isStorageConnected())) {
+    // ── BACKGROUND: Upload images to Cloudinary after response ──
+    if (pendingFiles && cloudinaryConfigured) {
       setImmediate(async () => {
         for (let attempt = 1; attempt <= 3; attempt++) {
           try {
-            const uploaded = await uploadImages(pendingFiles, "kayad/cars");
+            const uploaded = await uploadMultiple(pendingFiles, "kayad/cars");
             await Car.findByIdAndUpdate(car._id, { $set: { images: uploaded } });
             cleanupFiles(pendingFiles);
             break;
           } catch (e) {
-            logWarn(`Image upload attempt ${attempt}/3 failed:`, { error: e.message });
+            logWarn(`Cloudinary upload attempt ${attempt}/3 failed:`, { error: e.message });
             if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 2000));
           }
         }
@@ -581,8 +555,8 @@ export const updateCar = async (req, res) => {
       "model",
       "year",
       "price",
-      "location.city",
-      "location.address",
+      "city",
+      "address",
       "fuel",
       "transmission",
       "mileage",
@@ -609,8 +583,17 @@ export const updateCar = async (req, res) => {
       "dutyStatus",
       "logbookVerified",
     ];
+    // `location` is a flat string (see createCar) — if the edit form
+    // ever sends city/address, fold them into that same flat format
+    // instead of setting them as their own (nonexistent) columns.
+    if (req.body.city || req.body.address) {
+      const cityPart = req.body.city ?? (car.location || "").split(",")[0]?.trim() ?? "";
+      const addressPart = req.body.address ?? "";
+      req.body.location = [cityPart, addressPart].filter(Boolean).join(", ");
+    }
     for (const key of Object.keys(req.body)) {
-      if (allowedFields.includes(key)) {
+      if (key === "city" || key === "address") continue; // folded into location above
+      if (allowedFields.includes(key) || key === "location") {
         car.set(key, req.body[key]);
       }
     }
@@ -810,15 +793,15 @@ export const addCarImages = async (req, res) => {
     const cloudinaryConfigured =
       process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
-    if (!cloudinaryConfigured && !isStorageConnected()) {
+    if (!cloudinaryConfigured) {
       cleanupFiles(req.files);
       return res.status(500).json({
         success: false,
-        message: "Storage not configured. Please set CLOUDINARY or SUPABASE credentials.",
+        message: "Cloud storage not configured. Please set CLOUDINARY credentials.",
       });
     }
 
-    const newImages = await uploadImages(req.files, "kayad/cars");
+    const newImages = await uploadMultiple(req.files, "kayad/cars");
     cleanupFiles(req.files);
 
     car.images = [...(car.images || []), ...newImages];
