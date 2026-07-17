@@ -193,7 +193,18 @@ function createQuery(tableName) {
     },
 
     populate(field, select) {
-      if (field) this._populates.push({ field, select });
+      if (!field) return this;
+      // Two Mongoose populate forms are used across this codebase:
+      // .populate("fieldA fieldB") — space-separated multi-field
+      // shorthand — and .populate({ path: "field", select: "..." }).
+      // Previously only a single plain field name was handled, so
+      // both of these silently populated nothing.
+      if (typeof field === "object" && field !== null) {
+        if (field.path) this._populates.push({ field: field.path, select: field.select });
+        return this;
+      }
+      const fields = String(field).trim().split(/\s+/);
+      for (const f of fields) this._populates.push({ field: f, select });
       return this;
     },
 

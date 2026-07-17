@@ -1074,3 +1074,50 @@ ALTER TABLE auctions ADD CONSTRAINT auctions_status_check
   CHECK (status IN ('pending','pending_payment','active','paused','completed','ended','cancelled'));
 
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS bid_id UUID REFERENCES bids(id);
+
+-- =============================
+-- MIGRATION: escrows.status CHECK constraint didn't match the real
+-- state machine (services/escrowStateMachine.js). The state machine
+-- transitions through 'vehicle_confirmed', 'delivered', and 'closed'
+-- — none of which the constraint allowed, meaning the escrow
+-- lifecycle would break as soon as it tried to move past 'funded'.
+-- Old constraint values kept for backward compatibility with any
+-- existing rows/other callers.
+-- =============================
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_status_check;
+ALTER TABLE escrows ADD CONSTRAINT escrows_status_check
+  CHECK (status IN ('pending','funded','vehicle_confirmed','delivered','inspecting','approved','released','refunded','disputed','cancelled','closed'));
+
+-- =============================
+-- MIGRATION: escrows — services/escrow.service.js (the actual
+-- escrow state machine logic: fund/confirm/deliver/release/refund/
+-- dispute/close) references a large number of fields that never
+-- existed as columns at all. This is the core money-holding
+-- mechanism of the marketplace; none of these lifecycle transitions
+-- could have persisted correctly before this fix.
+-- =============================
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS commission NUMERIC;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS seller_amount NUMERIC;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS history JSONB DEFAULT '[]';
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS last_action_key TEXT;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS funded_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS auto_release_eligible_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS timeline JSONB DEFAULT '{}';
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS release_window_days INTEGER DEFAULT 3;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS vehicle_confirmed_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS delivery_confirmed BOOLEAN DEFAULT false;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS delivery_confirmed_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS released_by UUID REFERENCES users(id);
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS refunded_by UUID REFERENCES users(id);
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS dispute_reason TEXT;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS disputed_at TIMESTAMPTZ;
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS disputed_by UUID REFERENCES users(id);
+ALTER TABLE escrows ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_escrows_last_action_key ON escrows(last_action_key);
+
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS platform_fee NUMERIC;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS dealer_amount NUMERIC;
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;
+ALTER TABLE payments ADD CONSTRAINT payments_status_check
+  CHECK (status IN ('pending','processing','success','completed','released','failed','refunded'));

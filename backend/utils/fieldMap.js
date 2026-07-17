@@ -51,6 +51,9 @@ export const FIELD_ALIASES = {
   },
   escrows: {
     payment: "payment_id",
+    buyer: "buyer_id",
+    seller: "seller_id",
+    car: "car_id",
   },
 };
 
