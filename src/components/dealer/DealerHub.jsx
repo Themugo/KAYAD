@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/dealer' },
   { id: 'inventory', label: 'Inventory', icon: Car, to: '/dealer/inventory' },
   { id: 'leads', label: 'Leads', icon: Users, to: '/dealer/leads', badge: 12 },
-  { id: 'messages', label: 'Messages', icon: MessageSquare, to: '/dealer/messages', badge: 5 },
+  { id: 'messages', label: 'Messages', icon: MessageSquare, to: '/chat', badge: 5 },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, to: '/dealer/analytics' },
 ];
 

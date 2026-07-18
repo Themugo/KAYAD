@@ -39,6 +39,9 @@ const AddCarPage = lazy(() => import('./pages/dealer/AddCarPage'));
 const EditCarPage = lazy(() => import('./pages/dealer/EditCarPage'));
 const DealerAnalytics = lazy(() => import('./pages/dealer/DealerAnalytics'));
 const DealerSettings = lazy(() => import('./pages/dealer/DealerSettings'));
+const DealerLeadsPage = lazy(() => import('./pages/dealer/pages/DealerLeadsPage'));
+const DealerFinancePage = lazy(() => import('./pages/dealer/pages/DealerFinancePage'));
+const DealerInventoryPage = lazy(() => import('./pages/dealer/pages/DealerInventoryPage'));
 
 // Admin pages
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -49,6 +52,9 @@ const AdminEscrows = lazy(() => import('./pages/admin/AdminEscrows'));
 const AdminAuctions = lazy(() => import('./pages/admin/AdminAuctions'));
 const AdminSellers = lazy(() => import('./pages/admin/AdminSellers'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
+const AdminInspections = lazy(() => import('./pages/admin/AdminInspections'));
+const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
+const AdminSecurityLog = lazy(() => import('./pages/admin/AdminSecurityLog'));
 
 // Dashboards
 const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
@@ -217,7 +223,10 @@ export default function App() {
                     <Route path="/dealer/onboarding" element={<RequireDealer><DealerOnboarding /></RequireDealer>} />
                     <Route path="/dealer/settlement" element={<RequireDealer><DealerSettlement /></RequireDealer>} />
                     <Route path="/dealer/auction-setup" element={<RequireDealer><DealerAuctionSetup /></RequireDealer>} />
-                    <Route path="/dealer/choose-plan" element={<RequireAuth><DealerSettings /></RequireAuth>} />
+                    <Route path="/dealer/choose-plan" element={<RequireDealer><DealerSettings /></RequireDealer>} />
+                    <Route path="/dealer/leads" element={<RequireDealer><DealerLeadsPage /></RequireDealer>} />
+                    <Route path="/dealer/finance" element={<RequireDealer><DealerFinancePage /></RequireDealer>} />
+                    <Route path="/dealer/inventory" element={<RequireDealer><DealerInventoryPage /></RequireDealer>} />
 
                     {/* Admin */}
                     <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
@@ -227,6 +236,9 @@ export default function App() {
                     <Route path="/admin/escrows" element={<RequireAdmin><AdminEscrows /></RequireAdmin>} />
                     <Route path="/admin/auctions" element={<RequireAdmin><AdminAuctions /></RequireAdmin>} />
                     <Route path="/admin/sellers" element={<RequireAdmin><AdminSellers /></RequireAdmin>} />
+                    <Route path="/admin/inspections" element={<RequireAdmin><AdminInspections /></RequireAdmin>} />
+                    <Route path="/admin/reports" element={<RequireAdmin><AdminReports /></RequireAdmin>} />
+                    <Route path="/admin/security-log" element={<RequireAdmin><AdminSecurityLog /></RequireAdmin>} />
                     <Route path="/admin/settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
 
                     {/* Dashboards */}

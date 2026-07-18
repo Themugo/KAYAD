@@ -16,7 +16,7 @@ const OP_CARDS = [
     label: 'Pending Listings',
     key: 'pendingCars',
     color: '#8b5cf6',
-    to: '/admin/moderation',
+    to: '/admin/cars',
     desc: 'Listings awaiting moderation',
   },
   {
@@ -25,7 +25,7 @@ const OP_CARDS = [
     label: 'Pending Reports',
     key: 'pendingReports',
     color: '#eab308',
-    to: '/admin/contact-submissions',
+    to: '/admin/support',
     desc: 'Unread contact submissions',
   },
   {
@@ -52,7 +52,7 @@ const OP_CARDS = [
     label: 'Fraud Alerts',
     key: 'fraudAlerts',
     color: '#ef4444',
-    to: '/admin/fraud-alerts',
+    to: '/admin/security',
     desc: 'Critical/high severity alerts',
   },
   {

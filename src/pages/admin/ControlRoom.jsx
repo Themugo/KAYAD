@@ -9,9 +9,9 @@ import { ErrorBoundary } from '../../components/ErrorBoundary';
 const SECTIONS = [
   { key: 'users', label: 'Users', desc: 'Manage all accounts', icon: Users, path: '/admin/users' },
   { key: 'cars', label: 'Listings', desc: 'Vehicle listings', icon: Car, path: '/admin/cars' },
-  { key: 'staff', label: 'Staff Team', desc: 'Department accounts', icon: Shield, path: '/admin/staff' },
+  { key: 'staff', label: 'Staff Team', desc: 'Department accounts', icon: Shield, path: '/admin/users' },
   { key: 'settings', label: 'Platform Config', desc: 'System settings', icon: Settings, path: '/admin/settings' },
-  { key: 'panic', label: 'Panic Room', desc: 'Emergency controls', icon: AlertTriangle, path: '/admin/panic-room', danger: true },
+  { key: 'panic', label: 'Security Log', desc: 'Security & emergency controls', icon: AlertTriangle, path: '/admin/security', danger: true },
 ];
 
 function SectionCard({ title, children, accent = 'var(--gold)' }) {
@@ -219,13 +219,13 @@ export default function ControlRoom() {
         <SectionCard title="Staff Departments" accent="#8b5cf6">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
             {[
-              { role: 'marketing', label: 'Marketing', icon: Megaphone, color: '#8b5cf6', path: '/admin/ads' },
+              { role: 'marketing', label: 'Marketing', icon: Megaphone, color: '#8b5cf6', path: '/admin/reports' },
               { role: 'technical_support', label: 'Tech Support', icon: Users, color: '#22c55e', path: '/admin/users' },
               { role: 'hr', label: 'HR', icon: Users, color: '#f97316', path: '/admin/sellers' },
-              { role: 'accounts', label: 'Accounts', icon: DollarSign, color: '#06b6d4', path: '/admin/transactions' },
+              { role: 'accounts', label: 'Accounts', icon: DollarSign, color: '#06b6d4', path: '/admin/reports' },
               { role: 'escrow_officer', label: 'Escrow', icon: Shield, color: '#22c55e', path: '/admin/escrows' },
-              { role: 'ad_manager', label: 'Ad Manager', icon: Megaphone, color: '#f97316', path: '/admin/ads' },
-              { role: 'moderator', label: 'Moderator', icon: Shield, color: '#3b82f6', path: '/admin/moderation' },
+              { role: 'ad_manager', label: 'Ad Manager', icon: Megaphone, color: '#f97316', path: '/admin/reports' },
+              { role: 'moderator', label: 'Moderator', icon: Shield, color: '#3b82f6', path: '/admin/cars' },
             ].map(d => (
               <Link key={d.role} to={d.path} style={{ textDecoration: 'none' }}>
                 <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)', fontSize: 12, textAlign: 'center' }}>

@@ -155,7 +155,7 @@ export default function MonetizationCenter() {
       {/* Quick Links */}
       <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', marginTop: 40 }}>
         {[
-          { icon: Megaphone, label: 'Homepage Ads', desc: 'Manage banner ads, sponsored placements, and promotional campaigns', to: '/admin/ads', color: '#8B5CF6' },
+          { icon: Megaphone, label: 'Homepage Ads', desc: 'Manage banner ads, sponsored placements, and promotional campaigns', to: '/admin/reports', color: '#8B5CF6' },
           { icon: Settings, label: 'Platform Config', desc: 'System settings, branding, and global platform configuration', to: '/admin/settings', color: '#3B82F6' },
           { icon: Car, label: 'Featured Vehicles', desc: 'Manage all vehicle listings and toggle featured status', to: '/admin/cars', color: '#22C55E' },
         ].map((item, i) => (

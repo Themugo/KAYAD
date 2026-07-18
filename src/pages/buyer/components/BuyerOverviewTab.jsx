@@ -110,7 +110,7 @@ export default function BuyerOverviewTab({
                 <span className="overview-icon">📋</span>
                 <span className="activity-title">Recent Activity</span>
               </div>
-              <Link to="/notifications" className="dash-section-link">View All →</Link>
+              <Link to="/dashboard" className="dash-section-link">View All →</Link>
             </div>
             <div className="activity-body">
               {myBids.length === 0 && escrows.length === 0 && chats.length === 0 ? (

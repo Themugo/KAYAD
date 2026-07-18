@@ -5,9 +5,9 @@ const STAT_DEFS = [
   { emoji: '👥', label: 'Total Users',     key: 'totalUsers',     color: '#3b82f6',  to: '/admin/users' },
   { emoji: '🚗', label: 'Total Cars',      key: 'totalCars',      color: 'var(--gold)', to: '/admin/cars' },
   { emoji: '🔨', label: 'Active Auctions', key: 'activeAuctions', color: '#f97316',   to: '/admin/auctions' },
-  { emoji: '💰', label: 'Total Revenue',   key: 'totalRevenue',   color: 'var(--gold)', to: '/admin/transactions', kes: true },
+  { emoji: '💰', label: 'Total Revenue',   key: 'totalRevenue',   color: 'var(--gold)', to: '/admin/reports', kes: true },
   { emoji: '⏳', label: 'Pending Dealers',  key: 'pendingDealers', color: '#f97316',   to: '/admin/sellers' },
-  { emoji: '📋', label: 'Pending Cars',    key: 'pendingCars',    color: '#8b5cf6',   to: '/admin/moderation' },
+  { emoji: '📋', label: 'Pending Cars',    key: 'pendingCars',    color: '#8b5cf6',   to: '/admin/cars' },
   { emoji: '🔔', label: 'Active Alerts',   key: 'activeAlerts',   color: '#ef4444' },
   { emoji: '🏷️', label: 'Total Bids',      key: 'totalBids',      color: '#06b6d4',   to: '/admin/bids' },
 ];

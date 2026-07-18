@@ -26,10 +26,10 @@ const TICKETS_TREND = [
 ];
 
 const ACTIONS = [
-  { icon: "🎫", label: "New Ticket", desc: "Create support ticket", to: "/support/new" },
-  { icon: "📋", label: "All Tickets", desc: "View all tickets", to: "/support/tickets" },
-  { icon: "📊", label: "Reports", desc: "View analytics", to: "/support/reports" },
-  { icon: "⚙️", label: "Settings", desc: "Configure", to: "/support/settings" },
+  { icon: "🎫", label: "New Ticket", desc: "Create support ticket", to: "/admin/support" },
+  { icon: "📋", label: "All Tickets", desc: "View all tickets", to: "/admin/support" },
+  { icon: "📊", label: "Reports", desc: "View analytics", to: "/admin/support" },
+  { icon: "⚙️", label: "Settings", desc: "Configure", to: "/admin/support" },
 ];
 
 export default function SupportDashboard() {
@@ -62,7 +62,7 @@ export default function SupportDashboard() {
         greeting="Support Dashboard"
         subtitle={stats.openTickets + " open tickets"}
         actions={
-          <Link to="/support/new" style={{
+          <Link to="/admin/support" style={{
             padding: "8px 16px",
             borderRadius: 10,
             background: EnterpriseTokens.goldBg,

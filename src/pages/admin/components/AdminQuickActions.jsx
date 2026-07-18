@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import { PlusCircle, Users, Lock, AlertTriangle, ChevronRight, Activity } from 'lucide-react';
 
 const ACTIONS = [
-  { to: '/admin/cars/new', icon: PlusCircle, label: 'Add Car', desc: 'Create a new vehicle listing', color: 'var(--gold)' },
+  { to: '/admin/cars', icon: PlusCircle, label: 'Manage Cars', desc: 'View and manage all listings', color: 'var(--gold)' },
   { to: '/admin/users', icon: Users, label: 'Manage Users', desc: 'Accounts, roles & permissions', color: '#3b82f6' },
   { to: '/admin/escrows', icon: Lock, label: 'View All Escrows', desc: 'Active escrow ledger', color: 'var(--green)' },
-  { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', desc: 'Emergency system controls', color: 'var(--red)', danger: true },
+  { to: '/admin/security', icon: AlertTriangle, label: 'Security', desc: 'Security logs & system controls', color: 'var(--red)', danger: true },
 ];
 
 export default function AdminQuickActions() {

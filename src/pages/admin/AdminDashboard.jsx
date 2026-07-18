@@ -69,8 +69,8 @@ const TABLE_COLUMNS = [
 ];
 
 const PLATFORM_QUICK_ACTIONS = [
-  { icon: "👥", label: "Manage Dealers", desc: "156 registered", to: "/admin/dealers" },
-  { icon: "🚗", label: "Moderate Listings", desc: "8 pending review", to: "/admin/listings" },
+  { icon: "👥", label: "Manage Dealers", desc: "156 registered", to: "/admin/sellers" },
+  { icon: "🚗", label: "Moderate Listings", desc: "8 pending review", to: "/admin/cars" },
   { icon: "💰", label: "Escrow Overview", desc: "34 active", to: "/admin/escrows" },
   { icon: "🔍", label: "Inspection Queue", desc: "12 scheduled", to: "/admin/inspections" },
   { icon: "🎫", label: "Support Tickets", desc: "23 open", to: "/admin/support" },
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
               </EnterpriseCard>
             </div>
 
-            <EnterpriseCard header="Top Performing Dealers" icon="🏆" action={{ label: "View All", to: "/admin/dealers" }}>
+            <EnterpriseCard header="Top Performing Dealers" icon="🏆" action={{ label: "View All", to: "/admin/sellers" }}>
               <EnterpriseTable
                 columns={TABLE_COLUMNS}
                 data={TOP_DEALERS.map((d) => ({

@@ -35,7 +35,7 @@ export default function WebhoistOverview() {
     { icon: '🔨', label: 'Active Auctions', value: s.activeAuctions, color: '#f97316', to: '/admin/auctions' },
     { icon: '🔒', label: 'Open Escrows',    value: s.openEscrows ?? s.totalEscrows, color: '#ef4444', to: '/admin/escrows' },
     { icon: '🏷️', label: 'Total Bids',      value: s.totalBids,      color: '#06b6d4', to: '/admin/bids' },
-    { icon: '💰', label: 'Total Revenue',   value: s.totalRevenue,   color: 'var(--gold)', to: '/admin/transactions', kes: true },
+    { icon: '💰', label: 'Total Revenue',   value: s.totalRevenue,   color: 'var(--gold)', to: '/admin/reports', kes: true },
   ];
 
   // Real platform composition from the stats payload
