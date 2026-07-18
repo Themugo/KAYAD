@@ -122,14 +122,14 @@ export default function HomePage() {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #081C2E 0%, rgba(8, 28, 46, 0.85) 50%, rgba(8, 28, 46, 0.6) 100%)' }} />
           </div>
         ))}
-        {/* Content - No box, text directly on navy */}
+        {/* Content - All text unified on navy */}
         <div style={{ position: 'relative', zIndex: 10, maxWidth: 900, margin: '0 auto', padding: '100px 32px 80px' }}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#18B6A5', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 16 }}>
-            Kenya's Trusted Automotive Marketplace
-          </p>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2.75rem, 6vw, 4rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, marginBottom: 24 }}>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2.75rem, 6vw, 4rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, marginBottom: 16 }}>
             Find Your Perfect Vehicle
           </h1>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 24, letterSpacing: '0.05em' }}>
+            Kenya's Trusted Automotive Marketplace
+          </p>
           <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', color: 'rgba(255,255,255,0.75)', maxWidth: 600, marginBottom: 40, lineHeight: 1.7 }}>
             Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
           </p>
