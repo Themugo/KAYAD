@@ -111,6 +111,13 @@ export default function HomePage() {
     { icon: '🏷️', title: 'Live Auctions', desc: 'Bid on rare finds in real-time. Transparent pricing, no hidden fees.' },
   ];
 
+  const TRUST_BADGES = [
+    { icon: '💰', title: 'Escrow Protection', desc: 'Funds held until safe delivery' },
+    { icon: '🔎', title: 'Pre-Inspection', desc: 'Independent check before purchase' },
+    { icon: '✓', title: 'Verified Dealers', desc: 'All sellers vetted and approved' },
+    { icon: '🏷️', title: 'Live Auctions', desc: 'Transparent real-time bidding' },
+  ];
+
   return (
     <div style={{ background: 'var(--ivory-100)', minHeight: '100vh' }}>
       {/* HERO SECTION - Pure Deep Navy */}
@@ -119,17 +126,32 @@ export default function HomePage() {
         {SLIDES.map((slide, i) => (
           <div key={slide.id} style={{ position: 'absolute', inset: 0, opacity: i === current ? 0.12 : 0, transition: 'opacity 1s', backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
         ))}
-        {/* Content - Clean typography on pure navy */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 800, margin: '0 auto', padding: '120px 32px 100px', textAlign: 'center' }}>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.01em' }}>
-            Find Your Perfect Vehicle
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 900, margin: '0 auto', padding: '120px 32px 100px', textAlign: 'center' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1, marginBottom: 20, letterSpacing: '-0.01em' }}>
+            Drive Your Dream Today
           </h1>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: 'rgba(255,255,255,0.75)', maxWidth: 560, lineHeight: 1.7, margin: '0 auto 48px' }}>
-            Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
+            Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/browse"><button className="btn-gold">Browse Vehicles</button></Link>
-            <Link to="/register?role=broker"><button className="btn-outline-dark">Sell Your Vehicle</button></Link>
+            <Link to="/browse"><button className="btn-gold">Browse Cars</button></Link>
+            <Link to="/register?role=broker"><button className="btn-outline-dark">Sell a Vehicle</button></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST BADGES */}
+      <section style={{ background: '#F7F3EA', padding: '48px 32px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
+            {TRUST_BADGES.map(badge => (
+              <div key={badge.title} style={{ textAlign: 'center', padding: '20px' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>{badge.icon}</div>
+                <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 600, color: '#081C2E', marginBottom: 6 }}>{badge.title}</h3>
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: '#64748B', margin: 0 }}>{badge.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -195,10 +217,9 @@ export default function HomePage() {
       <section style={{ background: 'var(--ivory-100)', padding: '60px 32px 80px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <p className="section-label" style={{ marginBottom: 12 }}>Premium Selection</p>
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#081C2E', margin: '0 0 12px 0' }}>Featured Vehicles</h2>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#64748B', maxWidth: 480, margin: '0 auto 24px' }}>Handpicked quality cars from verified dealers across Kenya</p>
-            <Link to="/browse" style={{ fontFamily: 'var(--font-sans)', display: 'inline-flex', alignItems: 'center', gap: 8, color: '#14B8A6', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>View all vehicles →</Link>
+            <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 700, color: '#081C2E', margin: '0 0 12px 0' }}>Premium Selection</h2>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#64748B', maxWidth: 480, margin: '0 auto 24px' }}>Handpicked quality cars from verified dealers across Kenya</p>
+            <Link to="/browse" style={{ fontFamily: "'Inter', sans-serif", display: 'inline-flex', alignItems: 'center', gap: 8, color: '#18B6A5', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>View all vehicles →</Link>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
             {FEATURED_CARS.map(car => (
@@ -231,9 +252,8 @@ export default function HomePage() {
       {/* WHY KAYAD */}
       <section style={{ background: 'var(--ivory-100)', padding: '80px 32px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
-          <p className="section-label" style={{ marginBottom: 12 }}>Why Choose Us</p>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#081C2E', margin: '0 0 16px 0' }}>Built for Kenya</h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#64748B', maxWidth: 520, margin: '0 auto 56px' }}>We understand the Kenyan car market. Here's why thousands trust KAYAD.</p>
+          <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 700, color: '#081C2E', margin: '0 0 16px 0' }}>Built for Kenya</h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#64748B', maxWidth: 520, margin: '0 auto 56px' }}>We understand the Kenyan car market. Here's why thousands trust KAYAD.</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
             {WHY_KAYAD_FEATURES.map(f => (
               <div key={f.title} style={{ textAlign: 'center', padding: '32px 24px', background: '#FFFFFF', borderRadius: 12, border: '1px solid #E2E8F0' }}>
@@ -249,10 +269,10 @@ export default function HomePage() {
       {/* CTA SECTION - Deep Navy */}
       <section style={{ background: '#081C2E', padding: '80px 32px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', margin: '0 0 16px 0' }}>Ready to Find Your Perfect Vehicle?</h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'rgba(255,255,255,0.75)', maxWidth: 520, margin: '0 auto 32px' }}>Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.</p>
+          <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 700, color: '#FFFFFF', margin: '0 0 16px 0' }}>Ready to Find Your Dream Car?</h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: 'rgba(255,255,255,0.75)', maxWidth: 520, margin: '0 auto 32px' }}>Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.</p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/browse"><button className="btn-gold">Browse Vehicles</button></Link>
+            <Link to="/browse"><button className="btn-gold">Start Browsing</button></Link>
             <Link to="/register"><button className="btn-outline-dark">Become a Dealer</button></Link>
           </div>
         </div>
