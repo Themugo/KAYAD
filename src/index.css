@@ -2,8 +2,8 @@
    KAYAD — Premium Automotive Marketplace Design System
    ============================================================ */
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+/* Google Fonts - Playfair Display for serif + Inter for sans */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600;700&display=swap');
 
 /* Mobile design system */
 @import './styles/mobile.css';
@@ -184,6 +184,42 @@
   --dealer-radius:    var(--radius-lg);
   --mobile-radius-full: var(--radius-full);
   --mobile-z-dropdown:  var(--z-dropdown);
+
+  /* ---- Premium Charcoal & Gold Theme (from zip) ---- */
+  /* Charcoal palette */
+  --charcoal-950: #0D0C0A;
+  --charcoal-900: #141210;
+  --charcoal-800: #1C1A17;
+  --charcoal-700: #252220;
+  --charcoal-600: #2E2B28;
+
+  /* Cream palette */
+  --cream-50: #FDFAF5;
+  --cream-100: #F7F2E8;
+  --cream-200: #EDE7D9;
+  --cream-300: #E0D8C8;
+  --cream-400: #CEC4B0;
+
+  /* Warm tones */
+  --warm-100: #F5EFE6;
+  --warm-200: #E8DFD0;
+  --warm-300: #C8BFB0;
+  --warm-400: #9A9088;
+  --warm-500: #6E6660;
+  --warm-600: #4A4540;
+  --warm-700: #2E2B28;
+
+  /* Premium Gold accent */
+  --gold-300: #99F6F0;
+  --gold-400: #2DD4CC;
+  --gold-500: #14B8A6;
+  --gold-600: #0D9488;
+  --gold-700: #0F766E;
+  --gold-600-solid: #0D9488;
+
+  /* Font families */
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans-premium: 'Inter', system-ui, sans-serif;
 
   /* Spacing scale (8px base) */
   --space-1:  4px;
@@ -2392,6 +2428,175 @@ label, .text-label {
 
 /* Gold accent line */
 .gold-line { width: 40px; height: 3px; background: linear-gradient(90deg, var(--blue-400), var(--blue-600)); border-radius: 2px; margin-top: 6px; }
+
+/* ---- Premium Component Classes (from zip) ---- */
+
+/* Premium Buttons */
+.btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold-600, #0D9488);
+  color: white;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+.btn-gold:hover { background: #0F766E; }
+.btn-gold:active { transform: scale(0.95); }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--gold-400, #2DD4CC);
+  color: var(--gold-400, #2DD4CC);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+.btn-outline:hover { background: rgba(45, 212, 204, 0.15); color: #99F6F0; }
+.btn-outline:active { transform: scale(0.95); }
+
+.btn-outline-dark {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--warm-600, #4A4540);
+  color: var(--warm-600, #4A4540);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+.btn-outline-dark:hover { background: var(--warm-600, #4A4540); color: white; }
+
+/* Section Labels & Headings */
+.section-label {
+  color: var(--gold-700, #0F766E);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.section-heading {
+  font-family: var(--font-serif);
+  font-size: 2.5rem;
+  color: var(--slate-900, #0F172A);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Filter Pills */
+.pill-active {
+  background: var(--gold-600, #0D9488);
+  color: white;
+  border: 1px solid var(--gold-600, #0D9488);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.pill-inactive {
+  background: transparent;
+  color: var(--warm-600, #4A4540);
+  border: 1px solid var(--warm-300, #C8BFB0);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+.pill-inactive:hover { border-color: #0F766E; color: #0F766E; }
+
+/* Nav Links */
+.nav-link {
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-link:hover { color: white; }
+.nav-link.active { color: var(--gold-400, #2DD4CC); font-weight: 600; }
+
+/* Card Badge */
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+/* Premium Backgrounds */
+.bg-charcoal-900 { background-color: var(--charcoal-900, #141210); }
+.bg-charcoal-800 { background-color: var(--charcoal-800, #1C1A17); }
+.bg-cream-50 { background-color: var(--cream-50, #FDFAF5); }
+.bg-cream-100 { background-color: var(--cream-100, #F7F2E8); }
+.bg-charcoal-950 { background-color: var(--charcoal-950, #0D0C0A); }
+
+/* Hero gradient */
+.bg-hero-gradient { background: linear-gradient(to right, rgba(20,18,16,0.95) 45%, rgba(20,18,16,0.5) 100%); }
+.bg-dark-gradient { background: linear-gradient(180deg, rgba(20,18,16,0) 0%, rgba(20,18,16,0.85) 100%); }
+
+/* Premium text colors */
+.text-gold-400 { color: var(--gold-400, #2DD4CC); }
+.text-gold-600 { color: var(--gold-600, #0D9488); }
+.text-gold-700 { color: var(--gold-700, #0F766E); }
+.text-charcoal-900 { color: var(--charcoal-900, #141210); }
+.text-warm-400 { color: var(--warm-400, #9A9088); }
+.text-warm-500 { color: var(--warm-500, #6E6660); }
+
+/* Charcoal borders */
+.border-gold-500 { border-color: var(--gold-500, #14B8A6); }
+.border-cream-200 { border-color: var(--cream-200, #EDE7D9); }
+.border-charcoal-900 { border-color: var(--charcoal-900, #141210); }
+
+/* Premium card styles */
+.premium-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  border: 1px solid var(--cream-200, #EDE7D9);
+  transition: all 0.3s ease;
+}
+.premium-card:hover {
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  border-color: rgba(13, 148, 136, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream-100, #F7F2E8); }
+::-webkit-scrollbar-thumb { background: var(--gold-600, #0D9488); border-radius: 3px; }
 
 /* ---- Reusable Utility Classes ---- */
 .flex-between { display: flex; justify-content: space-between; align-items: center; }

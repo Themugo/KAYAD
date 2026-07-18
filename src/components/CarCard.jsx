@@ -1,14 +1,15 @@
 import { useState, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
+import { Calendar, Gauge, Fuel, MapPin, Shield, Gavel, ChevronRight } from 'lucide-react';
 
-function CarCardInner({ car }) {
+function CarCardInner({ car, variant = 'default' }) {
   const [fav, setFav] = useState(false);
 
   const id = car._id || car.id;
   const images = car.images?.map(img => typeof img === 'string' ? img : img.url).filter(Boolean) || [];
   const primaryImage = images[0] || car.image || 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800';
 
-  const isAuction = car.auction_status === 'live' || car.isAuction;
+  const isAuction = car.auction_status === 'live' || car.isAuction || car.badges?.includes('auction');
   const isLive = car.auction_status === 'live' || car.isLive;
   const isVerified = car.is_verified_dealer || car.isVerified;
   const hasInspection = car.has_inspection || car.inspectionStatus === 'completed' || car.inspectionAvailable;
@@ -18,6 +19,7 @@ function CarCardInner({ car }) {
   const dealRating = car.deal_rating || car.dealRating || null;
   const marketPrice = car.market_price || car.marketPrice;
   const avgMarket = car.avg_market_price || car.avgMarketPrice;
+  const carType = car.type || car.vehicleType;
 
   const price = isAuction && car.currentBid > 0 ? car.currentBid : car.price;
   const dealer = car.dealer?.business_name || car.dealer?.name || car.dealerName || 'Nairobi Auto Hub Ltd';
@@ -26,6 +28,7 @@ function CarCardInner({ car }) {
     ? (typeof car.mileage === 'number' ? `${Math.round(car.mileage / 1000)}k km` : car.mileage)
     : null;
   const fuel = car.fuel || null;
+  const year = car.year || null;
   const location = car.location?.city || (typeof car.location === 'string' ? car.location : null) || 'Nairobi';
 
   const priceVsMarket = marketPrice && price
@@ -49,6 +52,129 @@ function CarCardInner({ car }) {
 
   const trustLabel = trustScore ? getTrustLabel(trustScore) : null;
 
+  // Premium variant styling (from zip)
+  if (variant === 'premium') {
+    return (
+      <Link
+        to={`/cars/${id}`}
+        style={{ textDecoration: 'none', display: 'block' }}
+      >
+        <div className="premium-card">
+          {/* Image */}
+          <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: '4/3' }}>
+            <img
+              src={primaryImage}
+              alt={car.title}
+              loading="lazy"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'transform 0.5s ease',
+              }}
+              className="group-hover:scale-105"
+            />
+            {/* Badges */}
+            <div style={{ position: 'absolute', top: 12, left: 12, right: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {isVerified && (
+                  <span className="card-badge" style={{ background: 'rgba(13, 12, 10, 0.9)', color: 'white', backdropFilter: 'blur(4px)' }}>
+                    <Shield size={10} /> ESCROW
+                  </span>
+                )}
+              </div>
+              {isAuction && (
+                <span className="card-badge" style={{ background: 'var(--gold-600, #0D9488)', color: 'white' }}>
+                  <Gavel size={10} /> AUCTION
+                </span>
+              )}
+            </div>
+            {carType && (
+              <div style={{ position: 'absolute', bottom: 12, right: 12 }}>
+                <span style={{ background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)', color: 'var(--warm-600)', fontSize: 11, fontWeight: 600, padding: '4px 12px', borderRadius: 9999 }}>
+                  {carType}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Details */}
+          <div style={{ padding: 20 }}>
+            <p className="section-label" style={{ marginBottom: 4 }}>{car.make || car.title?.split(' ')[0]}</p>
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--charcoal-900, #141210)', fontWeight: 600, marginBottom: 12 }}>
+              {car.model || car.title}
+            </h3>
+
+            {/* Price */}
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontSize: 10, fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--gold-600, #0D9488)', textTransform: 'uppercase' }}>Price</p>
+              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', color: 'var(--charcoal-900, #141210)', fontWeight: 600 }}>
+                KES {price?.toLocaleString('en-KE')}
+              </p>
+            </div>
+
+            {/* Specs grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px 16px', paddingTop: 16, borderTop: '1px solid rgba(13, 148, 136, 0.2)' }}>
+              {year && (
+                <div>
+                  <p style={{ fontSize: 9, fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--warm-400)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                    <Calendar size={9} /> Year
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--slate-900, #0F172A)' }}>{year}</p>
+                </div>
+              )}
+              {mileage && (
+                <div>
+                  <p style={{ fontSize: 9, fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--warm-400)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                    <Gauge size={9} /> Mileage
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--slate-900, #0F172A)' }}>{mileage}</p>
+                </div>
+              )}
+              {fuel && (
+                <div>
+                  <p style={{ fontSize: 9, fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--warm-400)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                    <Fuel size={9} /> Fuel
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--slate-900, #0F172A)' }}>{fuel}</p>
+                </div>
+              )}
+              <div>
+                <p style={{ fontSize: 9, fontFamily: 'var(--font-sans)', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--warm-400)', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                  <MapPin size={9} /> City
+                </p>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: 'var(--slate-900, #0F172A)' }}>{location}</p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <button style={{
+              marginTop: 16,
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              color: 'var(--gold-600, #0D9488)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: 13,
+              fontWeight: 600,
+              padding: '10px',
+              border: '1px solid rgba(13, 148, 136, 0.3)',
+              borderRadius: 12,
+              background: 'transparent',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}>
+              View Details <ChevronRight size={15} />
+            </button>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  // Default variant - enhanced existing style
   return (
     <Link
       to={`/cars/${id}`}
