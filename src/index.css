@@ -11,36 +11,20 @@
 /* Dealer platform design system */
 @import './styles/dealer.css';
 
-/* ---- Premium Design Tokens ---- */
+/* ---- KAYAD Design System v2 ---- */
 :root {
   /* Deep Navy - Premium sections only */
-  --navy-950: #0A0F1A;
-  --navy-900: #0F172A;
-  --navy-800: #1E293B;
-  --navy-700: #334155;
-  --navy-600: #475569;
+  --navy-950: #040D17;
+  --navy-900: #081C2E;
+  --navy-800: #0F2840;
+  --navy-700: #1A3A52;
+  --navy-600: #2B5068;
 
-  /* Warm Ivory / Light Beige - DEFAULT background */
-  --ivory-50: #FDFAF8;
-  --ivory-100: #FAF8F5;
-  --ivory-200: #F5F0E8;
-  --ivory-300: #EDE7DB;
-
-  /* Cream palette for cards */
-  --cream-50: #FDFAF5;
-  --cream-100: #F7F2E8;
-  --cream-200: #EDE7D9;
-  --cream-300: #E0D8C8;
-  --cream-400: #CEC4B0;
-
-  /* Warm tones */
-  --warm-100: #F5EFE6;
-  --warm-200: #E8DFD0;
-  --warm-300: #C8BFB0;
-  --warm-400: #9A9088;
-  --warm-500: #6E6660;
-  --warm-600: #4A4540;
-  --warm-700: #2E2B28;
+  /* Warm Ivory - DEFAULT background */
+  --ivory-50: #FDFBF8;
+  --ivory-100: #F6F1E7;
+  --ivory-200: #EDE4D8;
+  --ivory-300: #E0D4C6;
 
   /* Elegant Teal - PRIMARY ACCENT */
   --teal-300: #5EEAD4;
@@ -55,14 +39,14 @@
   --slate-800: var(--navy-800);
   --slate-700: var(--navy-700);
   --slate-600: var(--navy-600);
-  --slate-500: var(--warm-500);
-  --slate-400: var(--warm-400);
-  --slate-300: var(--warm-300);
-  --slate-200: var(--warm-200);
-  --slate-100: var(--warm-100);
-  --slate-50: var(--ivory-50);
+  --slate-500: #64748B;
+  --slate-400: #94A3B8;
+  --slate-300: #CBD5E1;
+  --slate-200: #E2E8F0;
+  --slate-100: #F1F5F9;
+  --slate-50: #F8FAFC;
 
-  /* Aliases for old code */
+  /* Aliases */
   --charcoal-950: var(--navy-950);
   --charcoal-900: var(--navy-900);
   --charcoal-800: var(--navy-800);
@@ -75,15 +59,15 @@
   --gold-700: var(--teal-700);
 
   /* Accent */
-  --blue-accent: var(--teal-600);
+  --blue-accent: var(--teal-500);
   --blue-500: var(--teal-500);
   --blue-600: var(--teal-600);
   --blue-700: var(--teal-700);
   --blue-400: var(--teal-400);
-  --blue-100: rgba(13, 148, 136, 0.12);
-  --blue-glow: rgba(13, 148, 136, 0.25);
+  --blue-100: rgba(20, 184, 166, 0.12);
+  --blue-glow: rgba(20, 184, 166, 0.25);
 
-  /* Accent 2: Emerald for success/trust */
+  /* Emerald for success/trust */
   --emerald-500: #10B981;
   --emerald-600: #059669;
   --emerald-100: rgba(16, 185, 129, 0.12);
@@ -103,18 +87,19 @@
   --bg-premium-dark: var(--navy-950);
 
   /* Borders */
-  --border: var(--ivory-300);
-  --border-soft: var(--ivory-200);
-  --border-light: var(--ivory-300);
-  --border-focus: var(--teal-600);
+  --border: #E2E8F0;
+  --border-soft: #F1F5F9;
+  --border-light: #E2E8F0;
+  --border-focus: var(--teal-500);
 
-  /* Text - Dark on light */
-  --text-primary: #1E293B;
+  /* Text */
+  --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #94A3B8;
   --text-dim: #CBD5E1;
   --text-on-dark: #FFFFFF;
-  --text-on-dark-secondary: rgba(255, 255, 255, 0.7);
+  --text-on-dark-secondary: rgba(255, 255, 255, 0.75);
+  --text-on-dark-muted: rgba(255, 255, 255, 0.6);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -348,6 +333,8 @@ body, p {
   line-height: 1.6;
   color: var(--text-secondary);
   background-color: var(--ivory-100);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 small, .text-caption {
   font-size: var(--text-xs);
@@ -2486,72 +2473,101 @@ label, .text-label {
 /* Gold accent line */
 .gold-line { width: 40px; height: 3px; background: linear-gradient(90deg, var(--blue-400), var(--blue-600)); border-radius: 2px; margin-top: 6px; }
 
-/* ---- Premium Component Classes ---- */
+/* ---- KAYAD Premium Buttons ---- */
 
-/* Premium Buttons - Elegant Teal */
+/* Primary Button - Elegant Teal */
 .btn-gold {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  background: var(--teal-600);
+  background: #14B8A6;
   color: white;
   font-family: var(--font-sans);
   font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 9999px;
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.btn-gold:hover { background: #0D9488; }
+.btn-gold:active { transform: scale(0.98); }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Secondary Button - White Outline */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid #14B8A6;
+  color: #14B8A6;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.btn-outline:hover { background: rgba(20, 184, 166, 0.08); }
+.btn-outline:active { transform: scale(0.98); }
+
+/* Dark Outline - For use on dark backgrounds */
+.btn-outline-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+.btn-outline-dark:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.6); }
+
+/* Ghost Button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
   text-decoration: none;
 }
-.btn-gold:hover { background: var(--teal-700); }
-.btn-gold:active { transform: scale(0.95); }
+.btn-ghost:hover { background: rgba(20, 184, 166, 0.08); color: #14B8A6; }
 
-.btn-outline {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--teal-500);
-  color: var(--teal-600);
-  font-family: var(--font-sans);
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 9999px;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  text-decoration: none;
-}
-.btn-outline:hover { background: rgba(13, 148, 136, 0.1); color: var(--teal-700); }
-.btn-outline:active { transform: scale(0.95); }
-
-.btn-outline-dark {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  font-family: var(--font-sans);
-  font-weight: 600;
-  padding: 14px 28px;
-  border-radius: 9999px;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  text-decoration: none;
-}
-.btn-outline-dark:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.5); }
-
-/* Section Labels & Headings */
+/* Section Labels */
 .section-label {
-  color: var(--teal-600);
+  color: #14B8A6;
   font-family: var(--font-sans);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
@@ -2561,6 +2577,7 @@ label, .text-label {
   color: var(--navy-900);
   font-weight: 400;
   font-style: italic;
+  line-height: 1.2;
 }
 
 /* Filter Pills */

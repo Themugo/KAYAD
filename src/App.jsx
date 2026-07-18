@@ -201,7 +201,7 @@ export default function App() {
             <ToastProvider>
               <NavbarNew />
               <ErrorBoundary>
-                <main id="main-content" style={{ backgroundColor: 'var(--cream-100)', minHeight: '100vh' }}>
+                <main id="main-content" style={{ backgroundColor: 'var(--ivory-100)', minHeight: '100vh' }}>
                   <Suspense fallback={<LazyFallback />}>
                     <Routes>
                     {/* Mobile-optimized routes */}

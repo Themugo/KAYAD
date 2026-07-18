@@ -113,98 +113,140 @@ export default function HomePage() {
 
   return (
     <div style={{ background: 'var(--ivory-100)', minHeight: '100vh' }}>
-      {/* HERO SECTION - Deep Navy for premium impact */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: '#0F172A' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
+      {/* HERO SECTION - Deep Navy #081C2E */}
+      <section style={{ position: 'relative', overflow: 'hidden', background: '#081C2E' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
         {/* Background images with navy overlay */}
         {SLIDES.map((slide, i) => (
           <div key={slide.id} style={{ position: 'absolute', inset: 0, opacity: i === current ? 1 : 0, transition: 'opacity 1s' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 8s', opacity: 0.25 }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #0F172A 0%, #0F172A 40%, rgba(15, 23, 42, 0.7) 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 8s', opacity: 0.3 }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #081C2E 0%, rgba(8, 28, 46, 0.85) 50%, rgba(8, 28, 46, 0.6) 100%)' }} />
           </div>
         ))}
         {/* Content */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '120px 32px 80px' }}>
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '100px 32px 60px' }}>
           <div style={{ maxWidth: 700 }}>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, color: '#2DD4BF', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 20 }}>
-              EAST AFRICA'S TRUSTED CAR MARKETPLACE
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#14B8A6', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 16 }}>
+              Kenya's Trusted Automotive Marketplace
             </p>
-            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(2.5rem, 5vw, 3.75rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, marginBottom: 20 }}>
-              Drive Your Dream Today
+            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2.75rem, 6vw, 4rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, marginBottom: 24 }}>
+              Find Your Perfect Vehicle
             </h1>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', color: 'rgba(255,255,255,0.75)', maxWidth: 520, marginBottom: 40, lineHeight: 1.7, fontWeight: 400 }}>
-              Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', color: 'rgba(255,255,255,0.75)', maxWidth: 540, marginBottom: 40, lineHeight: 1.7 }}>
+              Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
             </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-              <Link to="/browse"><button className="btn-gold">Browse Cars 🚗</button></Link>
-              <Link to="/register?role=broker"><button className="btn-outline-dark">Sell a Vehicle 💰</button></Link>
+              <Link to="/browse"><button className="btn-gold">Browse Vehicles</button></Link>
+              <Link to="/register?role=broker"><button className="btn-outline-dark">Sell Your Vehicle</button></Link>
             </div>
-          </div>
-        </div>
-        {/* Trust badges */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {[{ icon: '🔒', title: 'Escrow Protection', desc: 'Funds held until safe delivery' }, { icon: '🔍', title: 'Pre-Inspection', desc: 'Independent check before purchase' }, { icon: '✓', title: 'Verified Dealers', desc: 'All sellers vetted and approved' }, { icon: '🏷️', title: 'Live Auctions', desc: 'Transparent real-time bidding' }].map(f => (
-              <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(12px)', border: '1px solid rgba(45, 212, 191, 0.2)', borderRadius: 12 }}>
-                <div style={{ fontSize: 20 }}>{f.icon}</div>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.3 }}>{f.title}</div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{f.desc}</div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
+      {/* SEARCH CARD */}
+      <div style={{ maxWidth: 1200, margin: '-40px auto 0', padding: '0 32px', position: 'relative', zIndex: 20 }}>
+        <div style={{ background: '#FFFFFF', borderRadius: 16, boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)', padding: '24px 32px', display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: '1 1 200px', minWidth: 180 }}>
+            <label style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#64748B', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Make</label>
+            <select style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid #E2E8F0', fontFamily: 'var(--font-sans)', fontSize: 14, color: '#0F172A', background: '#FFFFFF' }}>
+              <option>Any Make</option>
+              <option>Toyota</option>
+              <option>Mercedes-Benz</option>
+              <option>BMW</option>
+              <option>Land Rover</option>
+            </select>
+          </div>
+          <div style={{ flex: '1 1 200px', minWidth: 180 }}>
+            <label style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#64748B', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Model</label>
+            <select style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid #E2E8F0', fontFamily: 'var(--font-sans)', fontSize: 14, color: '#0F172A', background: '#FFFFFF' }}>
+              <option>Any Model</option>
+            </select>
+          </div>
+          <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+            <label style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#64748B', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Price</label>
+            <select style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid #E2E8F0', fontFamily: 'var(--font-sans)', fontSize: 14, color: '#0F172A', background: '#FFFFFF' }}>
+              <option>Any Price</option>
+              <option>Under 1M</option>
+              <option>1M - 3M</option>
+              <option>3M - 5M</option>
+              <option>5M - 10M</option>
+              <option>Over 10M</option>
+            </select>
+          </div>
+          <div style={{ flex: '1 1 160px', minWidth: 140 }}>
+            <label style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#64748B', display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Location</label>
+            <select style={{ width: '100%', padding: '12px 16px', borderRadius: 8, border: '1px solid #E2E8F0', fontFamily: 'var(--font-sans)', fontSize: 14, color: '#0F172A', background: '#FFFFFF' }}>
+              <option>All Kenya</option>
+              <option>Nairobi</option>
+              <option>Mombasa</option>
+              <option>Kisumu</option>
+            </select>
+          </div>
+          <div style={{ flex: '0 0 auto' }}>
+            <button className="btn-gold">Search</button>
+          </div>
+        </div>
+      </div>
+
+      {/* STATISTICS */}
+      <section style={{ background: 'var(--ivory-100)', padding: '80px 32px 40px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
+          {[{ number: '10,000+', label: 'Vehicles Listed' }, { number: '500+', label: 'Verified Dealers' }, { number: '50,000+', label: 'Happy Buyers' }, { number: '4.9/5', label: 'Average Rating' }].map(stat => (
+            <div key={stat.label} style={{ textAlign: 'center' }}>
+              <p style={{ fontFamily: 'Georgia, serif', fontSize: '2.5rem', fontWeight: 400, color: '#081C2E', lineHeight: 1, marginBottom: 8 }}>{stat.number}</p>
+              <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#64748B' }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* FEATURED VEHICLES */}
-      <section style={{ background: 'var(--ivory-100)', padding: '80px 24px' }}>
+      <section style={{ background: 'var(--ivory-100)', padding: '60px 32px 80px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <div style={{ display: 'inline-block', padding: '6px 16px', background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: 50, marginBottom: 16 }}>
-              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, color: '#0D9488', letterSpacing: '0.15em', textTransform: 'uppercase' }}>Premium Selection</span>
-            </div>
-            <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#0F172A', margin: '0 0 12px 0' }}>Featured Vehicles</h2>
-            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#475569', maxWidth: 480, margin: '0 auto 24px' }}>Handpicked quality cars from verified dealers across Kenya</p>
-            <Link to="/browse" style={{ fontFamily: 'var(--font-sans)', display: 'inline-flex', alignItems: 'center', gap: 8, color: '#0D9488', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>View all vehicles →</Link>
+            <p className="section-label" style={{ marginBottom: 12 }}>Premium Selection</p>
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#081C2E', margin: '0 0 12px 0' }}>Featured Vehicles</h2>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#64748B', maxWidth: 480, margin: '0 auto 24px' }}>Handpicked quality cars from verified dealers across Kenya</p>
+            <Link to="/browse" style={{ fontFamily: 'var(--font-sans)', display: 'inline-flex', alignItems: 'center', gap: 8, color: '#14B8A6', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>View all vehicles →</Link>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 24 }}>
             {FEATURED_CARS.map(car => (
-              <Link key={car.id} to={`/cars/${car.id}`} style={{ background: '#FFFFFF', borderRadius: 16, overflow: 'hidden', border: '1px solid #E2E8F0', textDecoration: 'none', display: 'block', transition: 'all 0.3s ease', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <Link key={car.id} to={`/cars/${car.id}`} style={{ background: '#FFFFFF', borderRadius: 12, overflow: 'hidden', border: '1px solid #E2E8F0', textDecoration: 'none', display: 'block', transition: 'all 0.3s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                 <div style={{ position: 'relative', height: 200, overflow: 'hidden' }}>
-                  <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }} />
+                  <img src={car.image} alt={car.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   {car.hasEscrow && (
-                    <div style={{ position: 'absolute', top: 12, left: 12, background: 'rgba(13, 148, 136, 0.95)', backdropFilter: 'blur(8px)', padding: '6px 12px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 14 }}>🔒</span><span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#FFFFFF', fontWeight: 600 }}>Escrow Protected</span>
+                    <div style={{ position: 'absolute', top: 12, left: 12, background: '#14B8A6', padding: '6px 12px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#FFFFFF', fontWeight: 600 }}>Escrow Protected</span>
                     </div>
                   )}
                 </div>
                 <div style={{ padding: 20 }}>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: '#94A3B8', marginBottom: 6, fontWeight: 500 }}>{car.year} · {car.dealer}</div>
-                  <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: '#0F172A', margin: '0 0 12px 0', lineHeight: 1.4 }}>{car.title}</h3>
-                  <div style={{ display: 'flex', gap: 12, fontFamily: 'var(--font-sans)', fontSize: 12, color: '#64748B', marginBottom: 16 }}>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: '#94A3B8', marginBottom: 8 }}>{car.year} · {car.dealer}</div>
+                  <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: '#081C2E', margin: '0 0 12px 0', lineHeight: 1.4 }}>{car.title}</h3>
+                  <div style={{ display: 'flex', gap: 12, fontFamily: 'var(--font-sans)', fontSize: 13, color: '#64748B', marginBottom: 12 }}>
                     <span>{car.mileage}</span><span>·</span><span>{car.fuel}</span><span>·</span><span>{car.location}</span>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 20, fontWeight: 700, color: '#0D9488' }}>KES {car.price}</div>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 18, fontWeight: 700, color: '#14B8A6' }}>KES {car.price}</div>
                 </div>
               </Link>
             ))}
           </div>
           <div style={{ textAlign: 'center', marginTop: 48 }}>
-            <Link to="/browse"><button className="btn-gold">Browse All Cars →</button></Link>
+            <Link to="/browse"><button className="btn-gold">Browse All Vehicles</button></Link>
           </div>
         </div>
       </section>
 
-      {/* WHY CHOOSE KAYAD */}
-      <section style={{ background: 'var(--ivory-50)', padding: '80px 24px' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#0F172A', margin: '0 0 16px 0' }}>Built for Kenya</h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#64748B', maxWidth: 500, margin: '0 auto 56px' }}>We understand the Kenyan car market. Here's why thousands trust KAYAD.</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 32 }}>
+      {/* WHY KAYAD */}
+      <section style={{ background: 'var(--ivory-100)', padding: '80px 32px' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', textAlign: 'center' }}>
+          <p className="section-label" style={{ marginBottom: 12 }}>Why Choose Us</p>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#081C2E', margin: '0 0 16px 0' }}>Built for Kenya</h2>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: '#64748B', maxWidth: 520, margin: '0 auto 56px' }}>We understand the Kenyan car market. Here's why thousands trust KAYAD.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
             {WHY_KAYAD_FEATURES.map(f => (
-              <div key={f.title} style={{ textAlign: 'center', padding: '32px 24px', background: 'var(--ivory-100)', borderRadius: 16, border: '1px solid #E2E8F0' }}>
-                <div style={{ width: 72, height: 72, borderRadius: 16, background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>{f.icon}</div>
-                <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 18, fontWeight: 600, color: '#0F172A', margin: '0 0 12px 0' }}>{f.title}</h3>
+              <div key={f.title} style={{ textAlign: 'center', padding: '32px 24px', background: '#FFFFFF', borderRadius: 12, border: '1px solid #E2E8F0' }}>
+                <div style={{ width: 64, height: 64, borderRadius: 16, background: 'rgba(20, 184, 166, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 20px', color: '#14B8A6' }}>{f.icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: '#081C2E', margin: '0 0 12px 0' }}>{f.title}</h3>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#64748B', margin: 0, lineHeight: 1.6 }}>{f.desc}</p>
               </div>
             ))}
@@ -212,22 +254,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA SECTION - Deep Navy for premium impact */}
-      <section style={{ background: '#0F172A', padding: '80px 24px' }}>
+      {/* CTA SECTION - Deep Navy */}
+      <section style={{ background: '#081C2E', padding: '80px 32px' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', margin: '0 0 16px 0' }}>Ready to Find Your Dream Car?</h2>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'rgba(255,255,255,0.7)', maxWidth: 500, margin: '0 auto 32px' }}>Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.</p>
+          <h2 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', margin: '0 0 16px 0' }}>Ready to Find Your Perfect Vehicle?</h2>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: '1rem', color: 'rgba(255,255,255,0.75)', maxWidth: 520, margin: '0 auto 32px' }}>Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.</p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/browse"><button className="btn-gold">Start Browsing</button></Link>
+            <Link to="/browse"><button className="btn-gold">Browse Vehicles</button></Link>
             <Link to="/register"><button className="btn-outline-dark">Become a Dealer</button></Link>
           </div>
         </div>
       </section>
 
       {/* FOOTER - Deep Navy */}
-      <footer style={{ background: '#0A0F1A', borderTop: '1px solid rgba(45, 212, 191, 0.2)', padding: '60px 24px 32px' }}>
+      <footer style={{ background: '#040D17', borderTop: '1px solid rgba(20, 184, 166, 0.2)', padding: '60px 32px 32px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 48, marginBottom: 48 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 48, marginBottom: 48 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚗</div>
