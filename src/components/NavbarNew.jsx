@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { notifAPI } from '../api/api';
 import { initials, timeAgo } from '../utils/helpers';
-import { Badge, Avatar, Tooltip } from './ui';
+import { Avatar } from './ui';
 
 const NAV_LINKS = [
   { label: 'Home',           to: '/' },
   { label: 'Gallery',        to: '/gallery' },
-  { label: 'Auctions',       to: '/auctions' },
+  { label: 'Auction',        to: '/auctions' },
   { label: 'Escrow Vault',   to: '/escrow' },
   { label: 'Pre-Inspection', to: '/inspection' },
   { label: 'Support',        to: '/support' },
@@ -111,51 +111,49 @@ export default function NavbarNew() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          background: scrolled ? 'rgba(15, 23, 42, 0.98)' : 'rgba(15, 23, 42, 0.95)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(241, 245, 249, 0.1)' : '1px solid transparent',
+          background: scrolled ? 'rgba(15, 15, 16, 0.98)' : '#0F0F10',
+          backdropFilter: 'blur(12px)',
           transition: 'all 0.3s ease',
-          boxShadow: scrolled ? '0 1px 3px rgba(15, 23, 42, 0.08)' : 'none',
+          boxShadow: scrolled ? '0 1px 0 rgba(255,255,255,0.04)' : 'none',
         }}
         aria-label="Main navigation"
       >
         <div style={{
           maxWidth: 1400,
           margin: '0 auto',
-          padding: '0 32px',
-          height: 72,
+          padding: '0 40px',
+          height: 68,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 24,
+          gap: 32,
         }}>
           {/* Logo */}
           <Link to="/" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             textDecoration: 'none',
             flexShrink: 0,
           }} aria-label="KAYAD — Home">
             <div style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #F97316 0%, #C2410C 100%)',
+              width: 36,
+              height: 36,
+              borderRadius: 8,
+              background: '#18B6A5',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontSize: 20,
-              boxShadow: '0 4px 12px rgba(249, 115, 22, 0.35)',
+              fontSize: 18,
             }}>
               🚗
             </div>
             <span style={{
+              fontFamily: "'Inter', sans-serif",
               fontWeight: 700,
-              fontSize: '1.4rem',
-              letterSpacing: '-0.02em',
-              color: '#F1F5F9',
-              fontFamily: 'Outfit, sans-serif',
+              fontSize: '1.1rem',
+              letterSpacing: '0.08em',
+              color: '#FFFFFF',
             }}>KAYAD</span>
           </Link>
 
@@ -163,7 +161,7 @@ export default function NavbarNew() {
           <div className="desktop-nav" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
+            gap: 8,
             flex: 1,
             justifyContent: 'center',
           }}>
@@ -174,27 +172,20 @@ export default function NavbarNew() {
                   key={to}
                   to={to}
                   style={{
-                    padding: '10px 18px',
-                    fontSize: 14,
-                    fontWeight: active ? 600 : 500,
-                    color: active ? '#FDBA74' : 'rgba(241, 245, 249, 0.65)',
+                    padding: '8px 20px',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: 16,
+                    fontWeight: 500,
+                    color: active ? '#18B6A5' : '#B8B8B8',
                     textDecoration: 'none',
-                    borderRadius: 8,
-                    transition: 'all 0.2s ease',
-                    background: active ? 'rgba(249, 115, 22, 0.14)' : 'transparent',
+                    transition: 'color 0.2s ease',
                     position: 'relative',
                   }}
                   onMouseEnter={e => {
-                    if (!active) {
-                      e.currentTarget.style.color = '#F1F5F9';
-                      e.currentTarget.style.background = 'rgba(15, 23, 42, 0.04)';
-                    }
+                    if (!active) e.currentTarget.style.color = '#FFFFFF';
                   }}
                   onMouseLeave={e => {
-                    if (!active) {
-                      e.currentTarget.style.color = 'rgba(241, 245, 249, 0.65)';
-                      e.currentTarget.style.background = 'transparent';
-                    }
+                    if (!active) e.currentTarget.style.color = '#B8B8B8';
                   }}
                   aria-current={active ? 'page' : undefined}
                 >
@@ -202,13 +193,13 @@ export default function NavbarNew() {
                   {active && (
                     <div style={{
                       position: 'absolute',
-                      bottom: 2,
+                      bottom: -2,
                       left: '50%',
                       transform: 'translateX(-50%)',
-                      width: 20,
-                      height: 3,
-                      background: 'linear-gradient(90deg, #F97316, #C2410C)',
-                      borderRadius: 2,
+                      width: 'calc(100% - 40px)',
+                      height: 2,
+                      background: '#18B6A5',
+                      borderRadius: 1,
                     }} />
                   )}
                 </Link>
@@ -220,39 +211,34 @@ export default function NavbarNew() {
           <div className="desktop-nav" style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            gap: 16,
             flexShrink: 0,
           }}>
             {/* Search Button */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: 'rgba(255, 255, 255, 0.06)',
-                border: '1px solid rgba(241, 245, 249, 0.12)',
-                color: 'rgba(241, 245, 249, 0.75)',
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: 'transparent',
+                border: 'none',
+                color: '#FFFFFF',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 16,
-                transition: 'all 0.2s ease',
+                transition: 'color 0.2s ease',
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = 'rgba(249, 115, 22, 0.14)';
-                e.currentTarget.style.borderColor = '#F97316';
-                e.currentTarget.style.color = '#FDBA74';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                e.currentTarget.style.borderColor = 'rgba(241, 245, 249, 0.12)';
-                e.currentTarget.style.color = '#475569';
-              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#18B6A5'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#FFFFFF'; }}
               aria-label="Search"
             >
-              🔍
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
             </button>
 
             {/* Notifications (Auth Only) */}
@@ -371,26 +357,21 @@ export default function NavbarNew() {
             <Link
               to={isAuth ? "/dealer/add-car" : "/register"}
               style={{
-                padding: '10px 20px',
-                fontSize: 14,
-                fontWeight: 600,
-                color: '#FFFFFF',
-                background: 'linear-gradient(135deg, #F97316 0%, #C2410C 100%)',
-                borderRadius: 10,
+                padding: '8px 16px',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 15,
+                fontWeight: 500,
+                color: '#18B6A5',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: 8,
                 textDecoration: 'none',
-                boxShadow: '0 4px 12px rgba(249, 115, 22, 0.35)',
-                transition: 'all 0.2s ease',
+                transition: 'color 0.2s ease',
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#FFFFFF'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#18B6A5'; }}
             >
-              🚗 Sell
+              Sell
             </Link>
 
             {/* User Menu / Sign In */}
@@ -401,28 +382,28 @@ export default function NavbarNew() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 10,
+                    gap: 8,
                     padding: '6px 12px',
-                    borderRadius: 10,
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
+                    borderRadius: 999,
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.15)',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease',
                   }}
                   onMouseEnter={e => {
-                    e.currentTarget.style.background = '#F1F5F9';
-                    e.currentTarget.style.borderColor = '#3B82F6';
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)';
                   }}
                   onMouseLeave={e => {
-                    e.currentTarget.style.background = '#F8FAFC';
-                    e.currentTarget.style.borderColor = '#E2E8F0';
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
                   }}
                 >
-                  <Avatar size="sm" variant="blue" initials={initials(user?.name)} />
-                  <span style={{ color: '#F1F5F9', fontSize: 13, fontWeight: 500 }}>
+                  <Avatar size="sm" variant="teal" initials={initials(user?.name)} />
+                  <span style={{ fontFamily: "'Inter', sans-serif", color: '#FFFFFF', fontSize: 14, fontWeight: 500 }}>
                     {user?.name?.split(' ')[0]}
                   </span>
-                  <span style={{ color: '#94A3B8', fontSize: 12 }}>▾</span>
+                  <span style={{ color: '#B8B8B8', fontSize: 12 }}>▾</span>
                 </button>
 
                 {/* User Dropdown */}
@@ -498,24 +479,21 @@ export default function NavbarNew() {
                 to="/login"
                 style={{
                   padding: '10px 24px',
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 14,
                   fontWeight: 600,
-                  color: '#F1F5F9',
-                  background: 'transparent',
-                  border: '1px solid rgba(241, 245, 249, 0.18)',
-                  borderRadius: 10,
+                  color: '#0F0F10',
+                  background: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: 999,
                   textDecoration: 'none',
                   transition: 'all 0.2s ease',
                 }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = '#F97316';
-                  e.currentTarget.style.color = '#FDBA74';
-                  e.currentTarget.style.background = 'rgba(249, 115, 22, 0.1)';
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.9)';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'rgba(241, 245, 249, 0.18)';
-                  e.currentTarget.style.color = '#F1F5F9';
-                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.background = '#FFFFFF';
                 }}
               >
                 Sign In
@@ -529,9 +507,9 @@ export default function NavbarNew() {
                 display: 'none',
                 width: 40,
                 height: 40,
-                borderRadius: 10,
-                background: '#F8FAFC',
-                border: '1px solid #E2E8F0',
+                borderRadius: 8,
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.15)',
                 cursor: 'pointer',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -544,9 +522,9 @@ export default function NavbarNew() {
             >
               <span style={{
                 display: 'block',
-                width: 20,
+                width: 18,
                 height: 2,
-                background: '#F1F5F9',
+                background: '#FFFFFF',
                 borderRadius: 2,
                 transform: mobileOpen ? 'translateY(7px) rotate(45deg)' : 'none',
                 transition: 'transform 0.3s',

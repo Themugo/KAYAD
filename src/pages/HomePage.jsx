@@ -123,14 +123,14 @@ export default function HomePage() {
           </div>
         ))}
         {/* Content - All text unified on navy */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 900, margin: '0 auto', padding: '100px 32px 80px' }}>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2.75rem, 6vw, 4rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.1, marginBottom: 16 }}>
-            Find Your Perfect Vehicle
-          </h1>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 24, letterSpacing: '0.05em' }}>
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 900, margin: '0 auto', padding: '120px 32px 100px' }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 600, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: 24 }}>
             Kenya's Trusted Automotive Marketplace
           </p>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', color: 'rgba(255,255,255,0.75)', maxWidth: 600, marginBottom: 40, lineHeight: 1.7 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.05, marginBottom: 32 }}>
+            Find Your Perfect Vehicle
+          </h1>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: '#D0D4D8', maxWidth: 520, lineHeight: 1.7, marginBottom: 48 }}>
             Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
           </p>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -264,52 +264,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTER - Deep Navy */}
-      <footer style={{ background: '#040D17', borderTop: '1px solid rgba(20, 184, 166, 0.2)', padding: '60px 32px 32px' }}>
+      {/* FOOTER - Deep Charcoal */}
+      <footer style={{ background: '#0F0F10', padding: '64px 32px 32px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 48, marginBottom: 48 }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚗</div>
-                <span style={{ fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 700, color: '#FFFFFF' }}>KAYAD</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#18B6A5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>🚗</div>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 700, color: '#FFFFFF', letterSpacing: '0.05em' }}>KAYAD</span>
               </div>
-              <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0, maxWidth: 240 }}>Kenya's premium car marketplace. Buy, sell, and auction vehicles with M-Pesa escrow protection.</p>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: '#B8B8B8', lineHeight: 1.7, margin: 0, maxWidth: 240 }}>Kenya's premium automotive marketplace. Buy, sell, and auction vehicles with M-Pesa escrow protection.</p>
             </div>
             <div>
-              <h4 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700, color: '#2DD4BF', marginBottom: 16, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Marketplace</h4>
+              <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 11, fontWeight: 600, color: '#18B6A5', marginBottom: 20, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Marketplace</h4>
               {[
                 { label: 'Browse Cars', to: '/browse' },
                 { label: 'Live Auctions', to: '/auctions' },
                 { label: 'Sell Your Car', to: '/sell' },
                 { label: 'Escrow Vault', to: '/escrow' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: 'var(--font-sans)', display: 'block', fontSize: 14, color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: "'Inter', sans-serif", display: 'block', fontSize: 14, color: '#B8B8B8', textDecoration: 'none', marginBottom: 12, transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#FFFFFF'} onMouseLeave={e => e.target.style.color = '#B8B8B8'}>{link.label}</Link>)}
             </div>
             <div>
-              <h4 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700, color: '#2DD4BF', marginBottom: 16, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Services</h4>
+              <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 11, fontWeight: 600, color: '#18B6A5', marginBottom: 20, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Services</h4>
               {[
                 { label: 'Pre-Inspection', to: '/inspection' },
                 { label: 'Car Financing', to: '/support' },
                 { label: 'Insurance', to: '/support' },
                 { label: 'Become a Dealer', to: '/register' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: 'var(--font-sans)', display: 'block', fontSize: 14, color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: "'Inter', sans-serif", display: 'block', fontSize: 14, color: '#B8B8B8', textDecoration: 'none', marginBottom: 12, transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#FFFFFF'} onMouseLeave={e => e.target.style.color = '#B8B8B8'}>{link.label}</Link>)}
             </div>
             <div>
-              <h4 style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700, color: '#2DD4BF', marginBottom: 16, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Company</h4>
+              <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 11, fontWeight: 600, color: '#18B6A5', marginBottom: 20, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Company</h4>
               {[
                 { label: 'About KAYAD', to: '/support' },
                 { label: 'How It Works', to: '/support' },
                 { label: 'Support', to: '/support' },
                 { label: 'Contact', to: '/support' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: 'var(--font-sans)', display: 'block', fontSize: 14, color: 'rgba(255, 255, 255, 0.6)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: "'Inter', sans-serif", display: 'block', fontSize: 14, color: '#B8B8B8', textDecoration: 'none', marginBottom: 12, transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#FFFFFF'} onMouseLeave={e => e.target.style.color = '#B8B8B8'}>{link.label}</Link>)}
             </div>
           </div>
-          <div style={{ borderTop: '1px solid rgba(45, 212, 191, 0.15)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'rgba(255, 255, 255, 0.4)' }}>© 2026 KAYAD Motors Kenya Ltd. All rights reserved.</span>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: '#6B6B6B' }}>© 2026 KAYAD Motors Kenya Ltd. All rights reserved.</span>
             <div style={{ display: 'flex', gap: 24 }}>{[
               { label: 'Privacy Policy', to: '/support' },
               { label: 'Terms of Service', to: '/support' },
               { label: 'Support', to: '/support' },
-            ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: 'var(--font-sans)', fontSize: 13, color: 'rgba(255, 255, 255, 0.4)', textDecoration: 'none' }}>{link.label}</Link>)}</div>
+            ].map(link => <Link key={link.label} to={link.to} style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: '#6B6B6B', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.target.style.color = '#B8B8B8'} onMouseLeave={e => e.target.style.color = '#6B6B6B'}>{link.label}</Link>)}</div>
           </div>
         </div>
       </footer>

@@ -108,20 +108,20 @@ export default function InspectionPage() {
       {/* Hero */}
       <div style={{ background: '#081C2E', padding: '80px 0 60px' }}>
         <div className="container" style={{ textAlign: 'center', maxWidth: 800 }}>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#18B6A5', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 16 }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 600, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: 24 }}>
             Vehicle Protection
           </p>
-          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', marginBottom: 20, lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#FFFFFF', marginBottom: 24, lineHeight: 1.1 }}>
             Pre-Purchase Inspection
           </h1>
-          <p style={{ fontFamily: 'var(--font-sans)', color: 'rgba(255,255,255,0.75)', fontSize: 16, maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", color: '#D0D4D8', fontSize: 18, maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Don't buy blind. Our certified inspectors check every vehicle before you commit — giving you peace of mind and negotiating power.
           </p>
-          <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 48, justifyContent: 'center', flexWrap: 'wrap' }}>
             {[['500+', 'Inspections done'], ['98%', 'Customer satisfaction'], ['24h', 'Report delivery'], ['Certified', 'Mechanics']].map(([val, label]) => (
               <div key={label} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.6rem', fontWeight: 400, color: '#FFFFFF' }}>{val}</div>
-                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{label}</div>
+                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '1.8rem', fontWeight: 700, color: '#FFFFFF' }}>{val}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>{label}</div>
               </div>
             ))}
           </div>
