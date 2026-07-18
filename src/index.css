@@ -68,27 +68,27 @@
   --emerald-600: #059669;
   --emerald-100: rgba(16, 185, 129, 0.12);
 
-  /* Background layers - ALL DARK */
-  --bg-base: var(--charcoal-900);
-  --bg-primary: var(--charcoal-900);
-  --bg-secondary: var(--charcoal-800);
-  --bg-tertiary: var(--charcoal-700);
-  --bg-card: var(--charcoal-800);
-  --bg-elevated: var(--charcoal-700);
-  --bg-muted: var(--charcoal-700);
-  --surface: var(--charcoal-800);
+  /* Background layers - LIGHT CREAM */
+  --bg-base: var(--cream-100);
+  --bg-primary: var(--cream-100);
+  --bg-secondary: var(--cream-50);
+  --bg-tertiary: var(--cream-200);
+  --bg-card: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-muted: var(--cream-100);
+  --surface: #FFFFFF;
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-soft: rgba(255, 255, 255, 0.05);
-  --border-light: rgba(255, 255, 255, 0.1);
+  --border: #EDE7D9;
+  --border-soft: #F7F2E8;
+  --border-light: #E0D8C8;
   --border-focus: var(--gold-500);
 
-  /* Text - Light on dark */
-  --text-primary: #FFFFFF;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.5);
-  --text-dim: rgba(255, 255, 255, 0.3);
+  /* Text - Dark on light */
+  --text-primary: #1C1A17;
+  --text-secondary: #4A4540;
+  --text-muted: #9A9088;
+  --text-dim: #C8BFB0;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -321,7 +321,7 @@ body, p {
   font-size: var(--text-base);
   line-height: 1.6;
   color: var(--text-secondary);
-  background-color: var(--charcoal-900);
+  background-color: var(--cream-100);
 }
 small, .text-caption {
   font-size: var(--text-xs);
