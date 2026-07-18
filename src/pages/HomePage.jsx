@@ -113,23 +113,27 @@ export default function HomePage() {
 
   return (
     <div style={{ background: 'var(--cream-100)', minHeight: '100vh' }}>
-      {/* HERO SECTION */}
-      <section style={{ minHeight: '92vh', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
+      {/* HERO SECTION - Dark charcoal with image background (matching PreInspection style) */}
+      <section style={{ position: 'relative', overflow: 'hidden', background: '#141210' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
+        {/* Background images */}
         {SLIDES.map((slide, i) => (
           <div key={slide.id} style={{ position: 'absolute', inset: 0, opacity: i === current ? 1 : 0, transition: 'opacity 1s' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 8s' }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(20, 18, 16, 0.95) 0%, rgba(20, 18, 16, 0.6) 50%, rgba(20, 18, 16, 0.75) 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 8s', opacity: 0.2 }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(20,18,16,0.95) 45%, rgba(20,18,16,0.6) 100%)' }} />
           </div>
         ))}
-        <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 1200, margin: '0 auto', padding: '120px 32px 80px' }}>
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '120px 32px 80px' }}>
           <div style={{ maxWidth: 700 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', background: 'rgba(13, 148, 136, 0.15)', border: '1px solid rgba(13, 148, 136, 0.3)', borderRadius: 50, marginBottom: 24 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#2DD4CC', letterSpacing: '0.2em' }}>EAST AFRICA'S TRUSTED CAR MARKETPLACE</span>
-            </div>
-            <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.75rem)', fontWeight: 400, color: '#FFFFFF', lineHeight: 1.15, marginBottom: 20, fontFamily: 'Playfair Display, serif', fontStyle: 'italic' }}>
-              Drive Your <span style={{ color: '#2DD4CC' }}>Dream</span> Today
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, color: '#2DD4CC', letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 20 }}>
+              EAST AFRICA'S TRUSTED CAR MARKETPLACE
+            </p>
+            <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: 'clamp(2.5rem, 5vw, 3.75rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', lineHeight: 1.15, marginBottom: 20 }}>
+              Drive Your Dream Today
             </h1>
-            <p style={{ fontSize: 'clamp(1rem, 1.5vw, 1.25rem)', color: 'rgba(255,255,255,0.7)', maxWidth: 520, marginBottom: 40, lineHeight: 1.7, fontWeight: 400 }}>Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.</p>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 'clamp(1rem, 1.5vw, 1.125rem)', color: 'rgba(255,255,255,0.7)', maxWidth: 520, marginBottom: 40, lineHeight: 1.7, fontWeight: 400 }}>
+              Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.
+            </p>
             <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
               <Link to="/browse"><button className="btn-gold">Browse Cars 🚗</button></Link>
               <Link to="/register?role=broker"><button className="btn-outline">Sell a Vehicle 💰</button></Link>
@@ -137,19 +141,17 @@ export default function HomePage() {
           </div>
         </div>
         {/* Trust badges */}
-        <div style={{ position: 'absolute', bottom: 40, left: 0, right: 0, zIndex: 10 }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px' }}>
-            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
-              {[{ icon: '🔒', title: 'Escrow Protection', desc: 'Funds held until safe delivery' }, { icon: '🔍', title: 'Pre-Inspection', desc: 'Independent check before purchase' }, { icon: '✓', title: 'Verified Dealers', desc: 'All sellers vetted and approved' }, { icon: '🏷️', title: 'Live Auctions', desc: 'Transparent real-time bidding' }].map(f => (
-                <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: 'rgba(20, 18, 16, 0.9)', backdropFilter: 'blur(12px)', border: '1px solid rgba(13, 148, 136, 0.3)', borderRadius: 12 }}>
-                  <div style={{ fontSize: 20 }}>{f.icon}</div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.3 }}>{f.title}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{f.desc}</div>
-                  </div>
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1200, margin: '0 auto', padding: '0 32px 48px' }}>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+            {[{ icon: '🔒', title: 'Escrow Protection', desc: 'Funds held until safe delivery' }, { icon: '🔍', title: 'Pre-Inspection', desc: 'Independent check before purchase' }, { icon: '✓', title: 'Verified Dealers', desc: 'All sellers vetted and approved' }, { icon: '🏷️', title: 'Live Auctions', desc: 'Transparent real-time bidding' }].map(f => (
+              <div key={f.title} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(20, 18, 16, 0.9)', backdropFilter: 'blur(12px)', border: '1px solid rgba(13, 148, 136, 0.3)', borderRadius: 12 }}>
+                <div style={{ fontSize: 20 }}>{f.icon}</div>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600, color: '#FFFFFF', lineHeight: 1.3 }}>{f.title}</div>
+                  <div style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{f.desc}</div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
