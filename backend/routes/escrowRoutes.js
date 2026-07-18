@@ -12,6 +12,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateResponse, escrowResponseSchema } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
+import { findAll } from "../db/index.js";
 
 import {
   getAllEscrows,
@@ -28,6 +29,42 @@ import {
 } from "../controllers/escrowController.js";
 
 const router = express.Router();
+
+// =============================
+// 📊 GET: PUBLIC ESCROW STATS
+// =============================
+router.get("/stats", asyncHandler(async (req, res) => {
+  try {
+    const allEscrows = await findAll("escrows", {
+      select: "status,amount,created_at",
+    });
+    
+    const stats = {
+      totalEscrows: allEscrows.length,
+      totalValue: allEscrows.reduce((s, e) => s + (e.amount || 0), 0),
+      fundedCount: allEscrows.filter(e => e.status === "funded").length,
+      fundedValue: allEscrows.filter(e => e.status === "funded").reduce((s, e) => s + (e.amount || 0), 0),
+      releasedCount: allEscrows.filter(e => e.status === "released").length,
+      releasedValue: allEscrows.filter(e => e.status === "released").reduce((s, e) => s + (e.amount || 0), 0),
+      disputedCount: allEscrows.filter(e => e.status === "disputed").length,
+    };
+    
+    res.json({ success: true, data: stats });
+  } catch (err) {
+    res.json({ 
+      success: true, 
+      data: { 
+        totalEscrows: 0, 
+        totalValue: 0,
+        fundedCount: 0,
+        fundedValue: 0,
+        releasedCount: 0,
+        releasedValue: 0,
+        disputedCount: 0,
+      } 
+    });
+  }
+}));
 
 // =============================
 // 📄 GET: USER ESCROWS

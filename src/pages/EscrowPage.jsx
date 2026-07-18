@@ -27,9 +27,17 @@ export default function EscrowPage() {
   const socket = useSocket();
   const [escrows, setEscrows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [publicStats, setPublicStats] = useState(null);
   const [selected, setSelected] = useState(null);
   const [tab, setTab] = useState('all');
   const [paymentStatus, setPaymentStatus] = useState(null);
+
+  // Load public escrow stats (no auth required)
+  useEffect(() => {
+    escrowAPI.stats()
+      .then(d => setPublicStats(d.data || d))
+      .catch(() => setPublicStats(null));
+  }, []);
 
   // Reload escrows
   const reloadEscrows = useCallback(async () => {
@@ -42,7 +50,7 @@ export default function EscrowPage() {
     }
   }, [isAuth, toast]);
 
-  // Load initial data
+  // Load user escrows if authenticated
   useEffect(() => {
     if (!isAuth) { setLoading(false); return; }
     escrowAPI.mine()
@@ -236,17 +244,40 @@ export default function EscrowPage() {
 
         {/* ── Auth-gated section ── */}
         {!isAuth ? (
-          <div className="card" style={{ padding: '48px 32px', textAlign: 'center' }}>
-            <div style={{ fontSize: 64, marginBottom: 16 }}>🔐</div>
-            <h3 style={{ marginBottom: 10 }}>Sign in to access your Escrow</h3>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 380, margin: '0 auto 28px' }}>
-              Track all your car purchase payments, request releases, and view your full escrow history.
-            </p>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/login" className="btn btn-gold btn-lg">Sign In</Link>
-              <Link to="/register" className="btn btn-outline btn-lg">Create Account</Link>
+          <>
+            {/* Public escrow statistics */}
+            {publicStats && (
+              <div className="grid-3" style={{ marginBottom: 28 }}>
+                {[
+                  { label: 'Total Escrows', val: publicStats.totalEscrows || 0, icon: '🔒', color: 'var(--text)' },
+                  { label: 'Value Protected', val: formatKES(publicStats.totalValue || 0), icon: '💰', color: 'var(--blue)' },
+                  { label: 'Successful Releases', val: publicStats.releasedCount || 0, icon: '✅', color: 'var(--green)' },
+                ].map(s => (
+                  <div key={s.label} className="stat-box">
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <div>
+                        <div className="stat-label">{s.label}</div>
+                        <div className="stat-value" style={{ color: s.color, fontSize: '1.3rem' }}>{s.val}</div>
+                      </div>
+                      <span style={{ fontSize: 24 }}>{s.icon}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <div className="card" style={{ padding: '48px 32px', textAlign: 'center' }}>
+              <div style={{ fontSize: 64, marginBottom: 16 }}>🔐</div>
+              <h3 style={{ marginBottom: 10 }}>Sign in to access your Escrow</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 380, margin: '0 auto 28px' }}>
+                Track all your car purchase payments, request releases, and view your full escrow history.
+              </p>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Link to="/login" className="btn btn-gold btn-lg">Sign In</Link>
+                <Link to="/register" className="btn btn-outline btn-lg">Create Account</Link>
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <>
             {/* ── Summary stats ── */}

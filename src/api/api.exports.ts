@@ -112,9 +112,12 @@ export const paymentsAPI = {
 
 // ── ESCROW ────────────────────────────────────────────
 export const escrowAPI = {
+  // Public endpoint - no auth required
+  stats: () => api.get('/escrow/stats').then(unwrap),
+  // Protected endpoints
   mine:    ()              => api.get('/escrow/my').then(unwrap),
-  all:     (params: any)        => api.get('/escrow', { params }).then(unwrap),
-  get:     (id: string)            => api.get(`/escrow/${id}`).then(unwrap),
+  all:     (params: any)  => api.get('/escrow', { params }).then(unwrap),
+  get:     (id: string)   => api.get(`/escrow/${id}`).then(unwrap),
   release:        (id: string)          => api.post(`/escrow/${id}/release`).then(unwrap),
   refund:         (id: string)          => api.post(`/escrow/${id}/refund`).then(unwrap),
   dispute:        (id: string, reason: string) => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),
