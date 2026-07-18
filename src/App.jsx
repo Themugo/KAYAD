@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { AuthProvider, RequireAuth, RequireDealer, RequireAdmin } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { ToastProvider } from './context/ToastContext';
@@ -55,6 +55,34 @@ const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminInspections = lazy(() => import('./pages/admin/AdminInspections'));
 const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 const AdminSecurityLog = lazy(() => import('./pages/admin/AdminSecurityLog'));
+// Additional admin pages (previously orphaned - now registered)
+const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
+const AdminBroadcast = lazy(() => import('./pages/admin/AdminBroadcast'));
+const AdminCarModeration = lazy(() => import('./pages/admin/AdminCarModeration'));
+const AdminChatModeration = lazy(() => import('./pages/admin/AdminChatModeration'));
+const AdminDealerVerifications = lazy(() => import('./pages/admin/AdminDealerVerifications'));
+const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
+const AdminEscrowVault = lazy(() => import('./pages/admin/AdminEscrowVault'));
+const AdminInspectorApplications = lazy(() => import('./pages/admin/AdminInspectorApplications'));
+const AdminMarketData = lazy(() => import('./pages/admin/AdminMarketData'));
+const AdminNtsaQueue = lazy(() => import('./pages/admin/AdminNtsaQueue'));
+const AdminReferrals = lazy(() => import('./pages/admin/AdminReferrals'));
+const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
+const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
+const AdminSupportTickets = lazy(() => import('./pages/admin/AdminSupportTickets'));
+const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
+const AdminSettingsBranding = lazy(() => import('./pages/admin/AdminSettingsBranding'));
+const AdminSettingsGeneral = lazy(() => import('./pages/admin/AdminSettingsGeneral'));
+const AdminSettingsPackages = lazy(() => import('./pages/admin/AdminSettingsPackages'));
+const AdminSettingsPayments = lazy(() => import('./pages/admin/AdminSettingsPayments'));
+const AuctionIntegrityPage = lazy(() => import('./pages/admin/AuctionIntegrityPage'));
+const ControlRoom = lazy(() => import('./pages/admin/ControlRoom'));
+const MonetizationCenter = lazy(() => import('./pages/admin/MonetizationCenter'));
+const OperationsControlRoom = lazy(() => import('./pages/admin/OperationsControlRoom'));
+const OperationsDashboard = lazy(() => import('./pages/admin/OperationsDashboard'));
+const PanicRoom = lazy(() => import('./pages/admin/PanicRoom'));
+const WebhoistOverview = lazy(() => import('./pages/admin/WebhoistOverview'));
+const AdManager = lazy(() => import('./pages/admin/AdManager'));
 
 // Dashboards
 const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
@@ -190,11 +218,8 @@ export default function App() {
                     )}
 
                     {/* Shared routes */}
-                    {/* "Gallery" tab now leads to the real, live-data browse
-                        experience (search/filter/infinite-scroll) instead of
-                        the old hardcoded demo GalleryPage, so desktop and
-                        mobile nav both land on the same working page. */}
-                    <Route path="/gallery" element={<BrowsePage />} />
+                    {/* /gallery redirects to /browse for canonical URL - both show BrowsePage */}
+                    <Route path="/gallery" element={<Navigate to="/browse" replace />} />
                     <Route path="/auctions" element={<AuctionPage />} />
                     <Route path="/auctions/calendar" element={<AuctionCalendar />} />
                     <Route path="/showroom" element={<Showroom />} />
@@ -240,6 +265,34 @@ export default function App() {
                     <Route path="/admin/reports" element={<RequireAdmin><AdminReports /></RequireAdmin>} />
                     <Route path="/admin/security-log" element={<RequireAdmin><AdminSecurityLog /></RequireAdmin>} />
                     <Route path="/admin/settings" element={<RequireAdmin><AdminSettings /></RequireAdmin>} />
+                    {/* Additional Admin Routes (previously orphaned) */}
+                    <Route path="/admin/feedback" element={<RequireAdmin><AdminFeedback /></RequireAdmin>} />
+                    <Route path="/admin/broadcast" element={<RequireAdmin><AdminBroadcast /></RequireAdmin>} />
+                    <Route path="/admin/car-moderation" element={<RequireAdmin><AdminCarModeration /></RequireAdmin>} />
+                    <Route path="/admin/chat-moderation" element={<RequireAdmin><AdminChatModeration /></RequireAdmin>} />
+                    <Route path="/admin/dealer-verifications" element={<RequireAdmin><AdminDealerVerifications /></RequireAdmin>} />
+                    <Route path="/admin/disputes" element={<RequireAdmin><AdminDisputes /></RequireAdmin>} />
+                    <Route path="/admin/escrow-vault" element={<RequireAdmin><AdminEscrowVault /></RequireAdmin>} />
+                    <Route path="/admin/inspector-applications" element={<RequireAdmin><AdminInspectorApplications /></RequireAdmin>} />
+                    <Route path="/admin/market-data" element={<RequireAdmin><AdminMarketData /></RequireAdmin>} />
+                    <Route path="/admin/ntsa-queue" element={<RequireAdmin><AdminNtsaQueue /></RequireAdmin>} />
+                    <Route path="/admin/referrals" element={<RequireAdmin><AdminReferrals /></RequireAdmin>} />
+                    <Route path="/admin/reviews" element={<RequireAdmin><AdminReviews /></RequireAdmin>} />
+                    <Route path="/admin/staff" element={<RequireAdmin><AdminStaff /></RequireAdmin>} />
+                    <Route path="/admin/support-tickets" element={<RequireAdmin><AdminSupportTickets /></RequireAdmin>} />
+                    <Route path="/admin/transactions" element={<RequireAdmin><AdminTransactions /></RequireAdmin>} />
+                    <Route path="/admin/settings/branding" element={<RequireAdmin><AdminSettingsBranding /></RequireAdmin>} />
+                    <Route path="/admin/settings/general" element={<RequireAdmin><AdminSettingsGeneral /></RequireAdmin>} />
+                    <Route path="/admin/settings/packages" element={<RequireAdmin><AdminSettingsPackages /></RequireAdmin>} />
+                    <Route path="/admin/settings/payments" element={<RequireAdmin><AdminSettingsPayments /></RequireAdmin>} />
+                    <Route path="/admin/auction-integrity" element={<RequireAdmin><AuctionIntegrityPage /></RequireAdmin>} />
+                    <Route path="/admin/control-room" element={<RequireAdmin><ControlRoom /></RequireAdmin>} />
+                    <Route path="/admin/monetization" element={<RequireAdmin><MonetizationCenter /></RequireAdmin>} />
+                    <Route path="/admin/operations" element={<RequireAdmin><OperationsDashboard /></RequireAdmin>} />
+                    <Route path="/admin/operations/control-room" element={<RequireAdmin><OperationsControlRoom /></RequireAdmin>} />
+                    <Route path="/admin/panic" element={<RequireAdmin><PanicRoom /></RequireAdmin>} />
+                    <Route path="/admin/webhoist" element={<RequireAdmin><WebhoistOverview /></RequireAdmin>} />
+                    <Route path="/admin/ads" element={<RequireAdmin><AdManager /></RequireAdmin>} />
 
                     {/* Dashboards */}
                     <Route path="/dashboard" element={<RequireAuth><BuyerDashboard /></RequireAuth>} />

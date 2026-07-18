@@ -18,4 +18,7 @@ export { default as RangeSlider } from './RangeSlider.jsx';
 export { default as ChartPlaceholder } from './ChartPlaceholder.jsx';
 export { default as MapPlaceholder } from './MapPlaceholder.jsx';
 export { default as BottomNav } from './BottomNav.jsx';
+export { default as Modal } from './Modal.jsx';
+export { default as Alert } from './Alert.jsx';
+export { default as Table } from './Table.jsx';
 export { default as Skeleton, SkeletonCard, SkeletonGrid, SkeletonRow, SkeletonText, SkeletonStat } from '../Skeleton.jsx';
