@@ -101,10 +101,10 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
         </div>
 
         <div style={{
-          background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.2)',
+          border: '1px solid #18B6A5',
           borderRadius: 'var(--radius)', padding: '16px', marginBottom: 24, textAlign: 'center',
         }}>
-          <div style={{ fontSize: 11, color: 'var(--gold)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
+          <div style={{ fontSize: 11, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Amount</div>
           <div className="price-tag" style={{ fontSize: '2rem', marginTop: 4 }}>{formatKES(amount)}</div>
         </div>
 

@@ -301,14 +301,14 @@ export default function BrowsePage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div style={{ padding: 12, background: 'var(--surface)', borderRadius: 8, fontSize: 13 }}>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {filters.brand !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.brand}</span>}
-                    {filters.bodyType !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.bodyType}</span>}
-                    {filters.fuel !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.fuel}</span>}
-                    {filters.transmission !== 'All' && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>{filters.transmission}</span>}
-                    {filters.priceMax < 20000000 && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Under KES {(filters.priceMax / 1000000).toFixed(0)}M</span>}
-                    {filters.auctionOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Auction Only</span>}
-                    {filters.verifiedOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Verified</span>}
-                    {filters.inspectedOnly && <span style={{ background: 'var(--gold-glow)', padding: '2px 8px', borderRadius: 4, fontSize: 12 }}>Inspected</span>}
+                    {filters.brand !== 'All' && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>{filters.brand}</span>}
+                    {filters.bodyType !== 'All' && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>{filters.bodyType}</span>}
+                    {filters.fuel !== 'All' && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>{filters.fuel}</span>}
+                    {filters.transmission !== 'All' && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>{filters.transmission}</span>}
+                    {filters.priceMax < 20000000 && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>Under KES {(filters.priceMax / 1000000).toFixed(0)}M</span>}
+                    {filters.auctionOnly && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>Auction Only</span>}
+                    {filters.verifiedOnly && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>Verified</span>}
+                    {filters.inspectedOnly && <span style={{ border: '1px solid #18B6A5', padding: '2px 8px', borderRadius: 4, fontSize: 12, color: '#18B6A5' }}>Inspected</span>}
                   </div>
                 </div>
                 <input

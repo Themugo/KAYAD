@@ -197,7 +197,7 @@ export default function EscrowPage() {
                     left: '50%',
                     width: '100%',
                     height: 2,
-                    background: 'linear-gradient(90deg, var(--gold-glow) 0%, var(--border) 100%)',
+                    background: 'linear-gradient(90deg, #18B6A5 0%, #E2E8F0 100%)',
                     zIndex: 0,
                   }} />
                 )}

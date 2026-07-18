@@ -187,13 +187,13 @@
   --gold-100:         var(--emerald-100);
   --gold-200:         rgba(16, 185, 129, 0.2);
   --gold-300:         #6EE7B7;
-  --gold-400:         #34D399;
-  --gold-500:         var(--emerald-500);
-  --gold-light:       var(--emerald-100);
-  --gold-dark:        var(--emerald-600);
-  --gold-muted:       rgba(16, 185, 129, 0.55);
-  --gold-glow:        rgba(16, 185, 129, 0.25);
-  --gold-glow-strong: rgba(16, 185, 129, 0.4);
+  --gold-400:         #4FE0D4;
+  --gold-500:         #18B6A5;
+  --gold-light:       rgba(24, 182, 165, 0.1);
+  --gold-dark:        #14999F;
+  --gold-muted:       rgba(24, 182, 165, 0.55);
+  --gold-glow:        rgba(24, 182, 165, 0.25);
+  --gold-glow-strong: rgba(24, 182, 165, 0.4);
 
   /* ---- Undefined shorthand aliases — sitewide fix ----
      These generic names (--text, --card, --bg, --radius, --red,

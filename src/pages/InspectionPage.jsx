@@ -187,11 +187,11 @@ export default function InspectionPage() {
                   key={pkg.id}
                   onClick={() => setSelected(pkg.id)}
                   style={{
-                    border: `2px solid ${selected === pkg.id ? 'var(--gold)' : 'var(--border)'}`,
+                    border: `2px solid ${selected === pkg.id ? '#18B6A5' : 'var(--border)'}`,
                     borderRadius: 'var(--radius-lg)',
                     padding: '20px 24px',
                     cursor: 'pointer',
-                    background: selected === pkg.id ? 'var(--gold-glow)' : 'var(--card)',
+                    background: selected === pkg.id ? 'rgba(24, 182, 165, 0.05)' : 'var(--card)',
                     transition: 'border-color 0.2s, background 0.2s',
                   }}
                 >

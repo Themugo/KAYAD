@@ -305,8 +305,8 @@ export default function ChatPage() {
                   style={{
                     padding: '14px 20px',
                     cursor: 'pointer',
-                    background: isActive ? 'var(--gold-glow)' : 'transparent',
-                    borderLeft: `2px solid ${isActive ? 'var(--gold)' : 'transparent'}`,
+                    background: isActive ? 'rgba(24, 182, 165, 0.08)' : 'transparent',
+                    borderLeft: `2px solid ${isActive ? '#18B6A5' : 'transparent'}`,
                     borderBottom: '1px solid var(--border)',
                     transition: 'all 0.15s',
                   }}
