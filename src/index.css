@@ -11,9 +11,9 @@
 /* Dealer platform design system */
 @import './styles/dealer.css';
 
-/* ---- KAYAD Design System v2 ---- */
+/* ---- KAYAD Design System v3 ---- */
 :root {
-  /* Deep Navy - Premium sections only */
+  /* Deep Navy - Premium sections */
   --navy-950: #040D17;
   --navy-900: #081C2E;
   --navy-800: #0F2840;
@@ -21,18 +21,18 @@
   --navy-600: #2B5068;
 
   /* Warm Ivory - DEFAULT background */
-  --ivory-50: #FDFBF8;
-  --ivory-100: #F6F1E7;
-  --ivory-200: #EDE4D8;
+  --ivory-50: #FDFCFA;
+  --ivory-100: #F7F3EA;
+  --ivory-200: #EDE7DB;
   --ivory-300: #E0D4C6;
 
   /* Elegant Teal - PRIMARY ACCENT */
-  --teal-300: #5EEAD4;
-  --teal-400: #2DD4BF;
-  --teal-500: #14B8A6;
-  --teal-600: #0D9488;
-  --teal-700: #0F766E;
-  --teal-800: #115E59;
+  --teal-300: #6EE7DE;
+  --teal-400: #4FE0D4;
+  --teal-500: #18B6A5;
+  --teal-600: #14999F;
+  --teal-700: #0F7A7A;
+  --teal-800: #0A5C5C;
 
   /* Legacy color aliases */
   --slate-900: var(--navy-900);
@@ -64,8 +64,8 @@
   --blue-600: var(--teal-600);
   --blue-700: var(--teal-700);
   --blue-400: var(--teal-400);
-  --blue-100: rgba(20, 184, 166, 0.12);
-  --blue-glow: rgba(20, 184, 166, 0.25);
+  --blue-100: rgba(24, 182, 165, 0.12);
+  --blue-glow: rgba(24, 182, 165, 0.2);
 
   /* Emerald for success/trust */
   --emerald-500: #10B981;
@@ -221,7 +221,7 @@
   --blue-300:         #93C5FD;
   --orange:           var(--orange-400);
   --purple:           var(--purple-500);
-  --teal:             #14B8A6;
+  --teal:             #18B6A5;
   --dealer-radius:    var(--radius-lg);
   --mobile-radius-full: var(--radius-full);
   --mobile-z-dropdown:  var(--z-dropdown);
@@ -253,10 +253,10 @@
   /* Premium Gold accent */
   --gold-300: #99F6F0;
   --gold-400: #2DD4CC;
-  --gold-500: #14B8A6;
-  --gold-600: #0D9488;
-  --gold-700: #0F766E;
-  --gold-600-solid: #0D9488;
+  --gold-500: #18B6A5;
+  --gold-600: #14999F;
+  --gold-700: #0F7A7A;
+  --gold-600-solid: #14999F;
 
   /* Font families */
   --font-serif: 'Playfair Display', Georgia, serif;
@@ -332,7 +332,7 @@ body, p {
   font-size: var(--text-base);
   line-height: 1.6;
   color: var(--text-secondary);
-  background-color: var(--ivory-100);
+  background-color: #F7F3EA;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -2481,7 +2481,7 @@ label, .text-label {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: #14B8A6;
+  background: #18B6A5;
   color: white;
   font-family: var(--font-sans);
   font-weight: 600;
@@ -2494,7 +2494,7 @@ label, .text-label {
   text-decoration: none;
   letter-spacing: 0.01em;
 }
-.btn-gold:hover { background: #0D9488; }
+.btn-gold:hover { background: #14999F; }
 .btn-gold:active { transform: scale(0.98); }
 .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -2504,8 +2504,8 @@ label, .text-label {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1.5px solid #14B8A6;
-  color: #14B8A6;
+  border: 1.5px solid #18B6A5;
+  color: #18B6A5;
   font-family: var(--font-sans);
   font-weight: 600;
   padding: 14px 32px;
@@ -2517,7 +2517,7 @@ label, .text-label {
   text-decoration: none;
   letter-spacing: 0.01em;
 }
-.btn-outline:hover { background: rgba(20, 184, 166, 0.08); }
+.btn-outline:hover { background: rgba(24, 182, 165, 0.08); }
 .btn-outline:active { transform: scale(0.98); }
 
 /* Dark Outline - For use on dark backgrounds */
@@ -2559,11 +2559,11 @@ label, .text-label {
   font-size: 14px;
   text-decoration: none;
 }
-.btn-ghost:hover { background: rgba(20, 184, 166, 0.08); color: #14B8A6; }
+.btn-ghost:hover { background: rgba(24, 182, 165, 0.08); color: #18B6A5; }
 
 /* Section Labels */
 .section-label {
-  color: #14B8A6;
+  color: #18B6A5;
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
@@ -2582,9 +2582,9 @@ label, .text-label {
 
 /* Filter Pills */
 .pill-active {
-  background: var(--teal-600);
+  background: var(--teal-500);
   color: white;
-  border: 1px solid var(--teal-600);
+  border: 1px solid var(--teal-500);
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 13px;
@@ -2595,8 +2595,8 @@ label, .text-label {
 
 .pill-inactive {
   background: transparent;
-  color: var(--warm-600);
-  border: 1px solid var(--ivory-300);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 13px;
@@ -2604,7 +2604,7 @@ label, .text-label {
   border-radius: 9999px;
   transition: all 0.2s ease;
 }
-.pill-inactive:hover { border-color: var(--teal-600); color: var(--teal-600); }
+.pill-inactive:hover { border-color: var(--teal-500); color: var(--teal-500); }
 
 /* Nav Links */
 .nav-link {
