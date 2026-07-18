@@ -72,6 +72,19 @@ export default function BrowsePage() {
   const [searchName, setSearchName] = useState('');
   const filterKey = useRef(0);
 
+  const [filters, setFilters] = useState({
+    search: searchParams.get('search') || '',
+    brand: searchParams.get('brand') || 'All',
+    fuel: 'All',
+    transmission: 'All',
+    bodyType: searchParams.get('bodyType') || 'All',
+    priceMax: 20000000,
+    mileageMax: 200000,
+    auctionOnly: false,
+    verifiedOnly: false,
+    inspectedOnly: false,
+  });
+
   const hasActiveFilters = useMemo(() => {
     return filters.search || filters.brand !== 'All' || filters.fuel !== 'All' || 
            filters.transmission !== 'All' || filters.bodyType !== 'All' || 
@@ -96,19 +109,6 @@ export default function BrowsePage() {
       toast('Failed to save search', 'error');
     }
   };
-
-  const [filters, setFilters] = useState({
-    search: searchParams.get('search') || '',
-    brand: searchParams.get('brand') || 'All',
-    fuel: 'All',
-    transmission: 'All',
-    bodyType: searchParams.get('bodyType') || 'All',
-    priceMax: 20000000,
-    mileageMax: 200000,
-    auctionOnly: false,
-    verifiedOnly: false,
-    inspectedOnly: false,
-  });
 
   const fetchCars = useCallback(async (pageNum = 1, append = false) => {
     let requestKey = filterKey.current;

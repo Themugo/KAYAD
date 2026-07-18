@@ -154,7 +154,6 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: false,
     minify: 'esbuild',
-    target: 'es2015',
     cssCodeSplit: true,
     // Enable tree shaking
     treeShaking: true,

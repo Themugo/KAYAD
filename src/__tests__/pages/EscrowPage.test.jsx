@@ -36,7 +36,7 @@ describe('EscrowPage', () => {
 
   it('renders description', () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText(/Every purchase on gari motors is protected by m-pesa escrow/i)).toBeInTheDocument();
+    expect(screen.getByText(/Every purchase on KAYAD is protected by M-Pesa escrow/i)).toBeInTheDocument();
   });
 
   it('shows empty state', async () => {

@@ -38,7 +38,7 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Welcome Back')).toBeInTheDocument();
-    expect(screen.getByText(/sign in to your gari motors account/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sign in to your KAYAD account/i)).toBeInTheDocument();
   });
 
   it('has email and password fields', () => {

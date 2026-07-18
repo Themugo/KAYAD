@@ -167,8 +167,9 @@ export default function App() {
             <ToastProvider>
               <NavbarNew />
               <ErrorBoundary>
-                <Suspense fallback={<LazyFallback />}>
-                  <Routes>
+                <main id="main-content">
+                  <Suspense fallback={<LazyFallback />}>
+                    <Routes>
                     {/* Mobile-optimized routes */}
                     {isMobile ? (
                       <>
@@ -247,6 +248,7 @@ export default function App() {
                   </Routes>
                 </Suspense>
                 {isMobile && <MobileNav />}
+              </main>
               </ErrorBoundary>
             </ToastProvider>
           </SocketProvider>

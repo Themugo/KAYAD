@@ -511,7 +511,7 @@ setIO(io);
 io.use((socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
-    if (token) socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    if (token) socket.user = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
     next();
   } catch {
     next(); // allow unauthenticated viewers
