@@ -4,7 +4,10 @@ import { MemoryRouter } from 'react-router-dom';
 import EscrowPage from '../../pages/EscrowPage';
 
 vi.mock('../../api/api', () => ({
-  escrowAPI: { mine: vi.fn().mockResolvedValue({ escrows: [] }) },
+  escrowAPI: { 
+    mine: vi.fn().mockResolvedValue({ escrows: [] }),
+    stats: vi.fn().mockResolvedValue({ data: { totalEscrows: 0, totalLocked: 0, totalReleased: 0 } }),
+  },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
 }));
 vi.mock('../../context/AuthContext', () => ({
@@ -31,7 +34,7 @@ describe('EscrowPage', () => {
 
   it('renders escrow heading', () => {
     render(<MemoryRouter><EscrowPage /></MemoryRouter>);
-    expect(screen.getByText('🔒 Escrow Vault')).toBeInTheDocument();
+    expect(screen.getByText('Escrow Vault')).toBeInTheDocument();
   });
 
   it('renders description', () => {
