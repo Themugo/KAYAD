@@ -1,28 +1,39 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI } from '../api/api';
+import { useVehicles } from '../hooks/useVehicles';
 
 const DEFAULT_HERO_IMG = 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=1600';
 
+// Fallback data for when API is unavailable
+const FALLBACK_CARS = [
+  { id: 'fallback-1', title: 'Toyota Land Cruiser V8', make: 'Toyota', model: 'Land Cruiser V8', year: 2021, price: 8500000, fuel_type: 'Diesel', transmission: 'Automatic', mileage: 45000, body_type: 'SUV', images: ['https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?w=600&h=400&fit=crop'], location: 'Nairobi', featured: true },
+  { id: 'fallback-2', title: 'Mercedes-Benz GLE 350d', make: 'Mercedes-Benz', model: 'GLE 350d', year: 2022, price: 12000000, fuel_type: 'Diesel', transmission: 'Automatic', mileage: 22000, body_type: 'SUV', images: ['https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=600&h=400&fit=crop'], location: 'Nairobi', featured: true },
+  { id: 'fallback-3', title: 'BMW X5 M Sport', make: 'BMW', model: 'X5 M Sport', year: 2020, price: 6200000, fuel_type: 'Petrol', transmission: 'Automatic', mileage: 38000, body_type: 'SUV', images: ['https://images.unsplash.com/photo-1555215695-3004980ad54e?w=600&h=400&fit=crop'], location: 'Mombasa', featured: false },
+  { id: 'fallback-4', title: 'Mazda CX-5', make: 'Mazda', model: 'CX-5', year: 2023, price: 4200000, fuel_type: 'Petrol', transmission: 'Automatic', mileage: 12000, body_type: 'SUV', images: ['https://images.unsplash.com/photo-1553440569-bcc63803a83d?w=600&h=400&fit=crop'], location: 'Nairobi', featured: true },
+  { id: 'fallback-5', title: 'Toyota Hilux Double Cabin', make: 'Toyota', model: 'Hilux Double Cabin', year: 2021, price: 4200000, fuel_type: 'Diesel', transmission: 'Automatic', mileage: 40000, body_type: 'Pickup', images: ['https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=400&fit=crop'], location: 'Kisumu', featured: true },
+  { id: 'fallback-6', title: 'Audi A4 2.0 TFSI', make: 'Audi', model: 'A4 2.0 TFSI', year: 2021, price: 3800000, fuel_type: 'Petrol', transmission: 'Automatic', mileage: 25000, body_type: 'Sedan', images: ['https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=600&h=400&fit=crop'], location: 'Nairobi', featured: false },
+];
+
 export default function HomePage() {
   const [current, setCurrent] = useState(0);
-  const [cars, setCars] = useState([]);
   const [heroHovered, setHeroHovered] = useState(false);
   const touchX = useRef(null);
 
+  // Use unified vehicle hook with fallback data
+  const { vehicles: apiVehicles, loading, error } = useVehicles({ limit: 50 }, 50);
+  
+  // Use API vehicles if available, otherwise use fallback data
+  const cars = useMemo(() => {
+    if (apiVehicles && apiVehicles.length > 0) {
+      return apiVehicles;
+    }
+    return FALLBACK_CARS;
+  }, [apiVehicles]);
+
+  // Fetch vehicles on mount
   useEffect(() => {
-    let mounted = true;
-    const timeoutId = setTimeout(() => {}, 2000);
-    (async () => {
-      try {
-        const data = await carsAPI.list({ limit: 50 });
-        if (mounted && data.cars?.length > 0) {
-          clearTimeout(timeoutId);
-          setCars(data.cars);
-        }
-      } catch { /* fallback */ }
-    })();
-    return () => { mounted = false; clearTimeout(timeoutId); };
+    // useVehicles hook handles fetching automatically
   }, []);
 
   const HERO_SLIDES = [

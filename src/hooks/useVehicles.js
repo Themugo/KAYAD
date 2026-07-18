@@ -1,15 +1,16 @@
 // src/hooks/useVehicles.js
 // UNIFIED VEHICLE HOOKS - Single source of truth for vehicle data fetching
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { carsAPI } from '../api/api';
 
 // ─────────────────────────────────────────────────────────────
 // useVehicles - Fetch paginated vehicle list with filters
+// Returns both 'vehicles' and 'cars' for backwards compatibility
 // ─────────────────────────────────────────────────────────────
 export function useVehicles(initialFilters = {}, pageSize = 24) {
   const [filters, setFilters] = useState(initialFilters);
   const [page, setPage] = useState(1);
-  const [cars, setCars] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -28,9 +29,9 @@ export function useVehicles(initialFilters = {}, pageSize = 24) {
       const result = await carsAPI.listPaginated(filters, pageNum, pageSize);
       
       if (append) {
-        setCars(prev => [...prev, ...(result.cars || [])]);
+        setVehicles(prev => [...prev, ...(result.cars || [])]);
       } else {
-        setCars(result.cars || []);
+        setVehicles(result.cars || []);
       }
       setTotal(result.total || 0);
       setHasMore(result.hasMore !== false);
@@ -39,7 +40,7 @@ export function useVehicles(initialFilters = {}, pageSize = 24) {
       console.error('useVehicles fetch error:', err);
       setError(err);
       if (!append) {
-        setCars([]);
+        setVehicles([]);
         setTotal(0);
       }
       setHasMore(false);
@@ -70,7 +71,8 @@ export function useVehicles(initialFilters = {}, pageSize = 24) {
   }, [fetchCars]);
 
   return {
-    cars,
+    vehicles,      // Primary name
+    cars: vehicles, // Alias for backwards compatibility
     total,
     loading,
     loadingMore,

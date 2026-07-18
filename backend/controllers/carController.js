@@ -824,10 +824,10 @@ export const getCar = async (req, res) => {
       Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed (fallback)", { error: e.message }));
     }
 
-    res.json({ success: true, data: car });
+    res.json({ success: true, data: car, car });
   } catch (err) {
     logError("GET ONE ERROR", { error: err.message });
-    res.status(500).json({ success: false, message: "Failed to fetch car" });
+    res.status(500).json({ success: false, message: "Failed to fetch car", data: null, car: null });
   }
 };
 
