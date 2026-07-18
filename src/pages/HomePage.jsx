@@ -113,21 +113,18 @@ export default function HomePage() {
 
   return (
     <div style={{ background: 'var(--ivory-100)', minHeight: '100vh' }}>
-      {/* HERO SECTION - Deep Navy #081C2E */}
-      <section style={{ position: 'relative', overflow: 'hidden', background: '#081C2E' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
-        {/* Background images with navy overlay */}
+      {/* HERO SECTION - Pure Deep Navy */}
+      <section style={{ position: 'relative', overflow: 'hidden', background: '#081C2E', minHeight: '70vh' }} onMouseEnter={() => setHeroHovered(true)} onMouseLeave={() => setHeroHovered(false)} onTouchStart={e => { touchX.current = e.touches[0].clientX; }} onTouchEnd={e => { if (touchX.current !== null) { const diff = touchX.current - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) { setCurrent(p => (p + (diff > 0 ? 1 : SLIDES.length - 1)) % SLIDES.length); } touchX.current = null; } }}>
+        {/* Subtle background image */}
         {SLIDES.map((slide, i) => (
-          <div key={slide.id} style={{ position: 'absolute', inset: 0, opacity: i === current ? 1 : 0, transition: 'opacity 1s' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center', transform: i === current && !heroHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 8s', opacity: 0.3 }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #081C2E 0%, rgba(8, 28, 46, 0.85) 50%, rgba(8, 28, 46, 0.6) 100%)' }} />
-          </div>
+          <div key={slide.id} style={{ position: 'absolute', inset: 0, opacity: i === current ? 0.12 : 0, transition: 'opacity 1s', backgroundImage: `url(${slide.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }} onError={e => { e.currentTarget.style.backgroundImage = `url(${DEFAULT_HERO_IMG})`; }} />
         ))}
         {/* Content - Clean typography on pure navy */}
         <div style={{ position: 'relative', zIndex: 10, maxWidth: 800, margin: '0 auto', padding: '120px 32px 100px', textAlign: 'center' }}>
           <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.01em' }}>
             Find Your Perfect Vehicle
           </h1>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: 'rgba(255,255,255,0.7)', maxWidth: 560, lineHeight: 1.7, margin: '0 auto 48px' }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: 'rgba(255,255,255,0.75)', maxWidth: 560, lineHeight: 1.7, margin: '0 auto 48px' }}>
             Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
           </p>
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -240,7 +237,7 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
             {WHY_KAYAD_FEATURES.map(f => (
               <div key={f.title} style={{ textAlign: 'center', padding: '32px 24px', background: '#FFFFFF', borderRadius: 12, border: '1px solid #E2E8F0' }}>
-                <div style={{ width: 64, height: 64, borderRadius: 16, background: 'rgba(20, 184, 166, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 20px', color: '#14B8A6' }}>{f.icon}</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, margin: '0 auto 16px', color: '#18B6A5' }}>{f.icon}</div>
                 <h3 style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600, color: '#081C2E', margin: '0 0 12px 0' }}>{f.title}</h3>
                 <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: '#64748B', margin: 0, lineHeight: 1.6 }}>{f.desc}</p>
               </div>
