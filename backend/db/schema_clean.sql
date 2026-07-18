@@ -779,22 +779,22 @@ CREATE TABLE IF NOT EXISTS demand_signals (
 -- HELPER: updated_at trigger
 -- =============================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS 
+RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
- LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- =============================
 -- RPC: increment_car_views
 -- =============================
 CREATE OR REPLACE FUNCTION increment_car_views(car_id UUID, increment_by INTEGER)
-RETURNS void AS 
+RETURNS void AS $$
 BEGIN
   UPDATE cars SET views = COALESCE(views, 0) + increment_by WHERE id = car_id;
 END;
- LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 -- Distributed locks
 CREATE TABLE IF NOT EXISTS distributed_locks (
