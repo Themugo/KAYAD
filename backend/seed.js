@@ -114,14 +114,14 @@ export async function reseed() {
     }
     const name = isPrimary ? webhostName : "KAYAD Webhost";
     try {
-      await upsert("users", "email", ownerEmail, {
+      await upsert("users", {
         name,
         email: ownerEmail,
         password: pw,
         role: "superadmin",
         is_demo: false,
         email_verified: true,
-      });
+      }, "email");
       created.webhost.push(ownerEmail);
     } catch (err) {
       logError("Failed to upsert webhost", { email: ownerEmail, error: err.message });
@@ -130,14 +130,14 @@ export async function reseed() {
 
   // 2. PLATFORM ADMIN
   const adminPw = hashPw(process.env.SEED_ADMIN_PW || process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PW"));
-  await upsert("users", "email", "admin@kayad.space", {
+  await upsert("users", {
     name: "Platform Admin",
     email: "admin@kayad.space",
     password: adminPw,
     role: "admin",
     email_verified: true,
     must_change_password: true,
-  });
+  }, "email");
   created.admin.push("admin@kayad.space");
 
   // 3. DEMO ACCOUNTS
@@ -148,7 +148,7 @@ export async function reseed() {
   ];
 
   for (const acc of demos) {
-    await upsert("users", "email", acc.email, { ...acc, must_change_password: true, email_verified: true });
+    await upsert("users", { ...acc, must_change_password: true, email_verified: true }, "email");
     created.demos.push(acc.email);
   }
 
@@ -159,7 +159,7 @@ export async function reseed() {
   ];
 
   for (const acc of extraDealers) {
-    await upsert("users", "email", acc.email, { ...acc, must_change_password: true, email_verified: true });
+    await upsert("users", { ...acc, must_change_password: true, email_verified: true }, "email");
     created.dealers.push(acc.email);
   }
 
@@ -176,7 +176,7 @@ export async function reseed() {
 
   const staffPw = hashPw(process.env.SEED_STAFF_PW || devFallback("SEED_STAFF_PW"));
   for (const acc of staffAccounts) {
-    await upsert("users", "email", acc.email, { ...acc, password: staffPw, must_change_password: true, email_verified: true });
+    await upsert("users", { ...acc, password: staffPw, must_change_password: true, email_verified: true }, "email");
     created.staff.push(acc.email);
   }
 
