@@ -119,20 +119,23 @@ export default function EscrowPage() {
     <div className="page">
       {/* ── Hero banner ── */}
       <div style={{
-        background: 'linear-gradient(135deg, #0A1628 0%, #0d1f3c 100%)',
-        padding: '64px 0 48px',
-        borderBottom: '1px solid var(--border)',
+        background: '#081C2E',
+        padding: '80px 0 60px',
       }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <div className="section-eyebrow" style={{ justifyContent: 'center' }}>Secure Transactions</div>
-          <h1 style={{ marginBottom: 16 }}>🔒 Escrow Vault</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 15, maxWidth: 520, margin: '0 auto 32px', lineHeight: 1.7 }}>
+        <div className="container" style={{ textAlign: 'center', maxWidth: 800 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#18B6A5', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 16 }}>
+            Secure Transactions
+          </p>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', marginBottom: 20, lineHeight: 1.2 }}>
+            Escrow Vault
+          </h1>
+          <p style={{ fontFamily: 'var(--font-sans)', color: 'rgba(255,255,255,0.75)', fontSize: 16, maxWidth: 560, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Every purchase on KAYAD is protected by M-Pesa escrow. Your money is held safely and only released when you confirm you have received the vehicle.
           </p>
           {!isAuth && (
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link to="/login" className="btn btn-gold btn-lg">Sign In to View Your Escrow</Link>
-              <Link to="/register" className="btn btn-outline btn-lg">Create Account</Link>
+              <Link to="/login" className="btn-gold">Sign In to View Your Escrow</Link>
+              <Link to="/register" className="btn-outline-dark">Create Account</Link>
             </div>
           )}
         </div>

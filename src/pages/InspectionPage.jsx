@@ -106,18 +106,22 @@ export default function InspectionPage() {
   return (
     <div className="page">
       {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, #0A1628 0%, #0d1f3c 100%)', padding: '80px 0 60px', borderBottom: '1px solid var(--border)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <div className="section-eyebrow" style={{ justifyContent: 'center' }}>Vehicle Protection</div>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', margin: '16px 0 20px' }}>Pre-Purchase Inspection</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 16, maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
+      <div style={{ background: '#081C2E', padding: '80px 0 60px' }}>
+        <div className="container" style={{ textAlign: 'center', maxWidth: 800 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: '#18B6A5', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 16 }}>
+            Vehicle Protection
+          </p>
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, fontStyle: 'italic', color: '#FFFFFF', marginBottom: 20, lineHeight: 1.2 }}>
+            Pre-Purchase Inspection
+          </h1>
+          <p style={{ fontFamily: 'var(--font-sans)', color: 'rgba(255,255,255,0.75)', fontSize: 16, maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Don't buy blind. Our certified inspectors check every vehicle before you commit — giving you peace of mind and negotiating power.
           </p>
           <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap' }}>
             {[['500+', 'Inspections done'], ['98%', 'Customer satisfaction'], ['24h', 'Report delivery'], ['Certified', 'Mechanics']].map(([val, label]) => (
               <div key={label} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--gold)' }}>{val}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.6rem', fontWeight: 400, color: '#FFFFFF' }}>{val}</div>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>{label}</div>
               </div>
             ))}
           </div>
