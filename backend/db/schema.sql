@@ -1121,3 +1121,34 @@ ALTER TABLE payments ADD COLUMN IF NOT EXISTS dealer_amount NUMERIC;
 ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;
 ALTER TABLE payments ADD CONSTRAINT payments_status_check
   CHECK (status IN ('pending','processing','success','completed','released','failed','refunded'));
+
+-- =============================
+-- MIGRATION: disputes — controllers/disputeController.js references
+-- evidence/internalNotes/mediation/appeal/timeline fields and calls
+-- a Mongoose-style dispute.addTimelineEntry() instance method, none
+-- of which existed (the method is fixed generically in
+-- models/_base.js instead). The status CHECK constraint also didn't
+-- allow 'under_review'/'mediation' — two of the six real states in
+-- services/disputeStateMachine.js.
+-- =============================
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS evidence JSONB DEFAULT '[]';
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS internal_notes JSONB DEFAULT '[]';
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS mediation JSONB DEFAULT '{}';
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS appeal JSONB DEFAULT '{}';
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS timeline JSONB DEFAULT '[]';
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS appealed_at TIMESTAMPTZ;
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS mediation_started_at TIMESTAMPTZ;
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS under_review_at TIMESTAMPTZ;
+ALTER TABLE disputes ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
+
+ALTER TABLE disputes DROP CONSTRAINT IF EXISTS disputes_status_check;
+ALTER TABLE disputes ADD CONSTRAINT disputes_status_check
+  CHECK (status IN ('open','under_review','mediation','investigating','resolved','appealed','closed'));
+
+-- =============================
+-- MIGRATION: cars.winner — referenced across bidController.js,
+-- escrowVaultController.js, and auction routes as a JSONB object
+-- ({user, amount}), holding the winning bidder of a completed
+-- auction. Never existed as a column at all.
+-- =============================
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS winner JSONB;

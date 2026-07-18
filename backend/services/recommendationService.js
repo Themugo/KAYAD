@@ -48,7 +48,7 @@ const getRecommendedCars = async (userId, userActivity) => {
 const getRecommendedAuctions = async (userId, userActivity) => {
   try {
     const { viewedCars } = userActivity;
-    const query = { allowBid: true, auctionEnd: { $gt: new Date().toISOString() }, status: "active" };
+    const query = { allowBid: true, auctionEnd: { $gt: new Date().toISOString() }, status: "available" };
     const auctions = await findAll("cars", { filters: query, orderBy: "auctionEnd", ascending: true, limit: 20 });
     const scoredAuctions = auctions.map((auction) => ({ ...auction, recommendationScore: calculateAuctionScore(auction, userActivity), recommendationReason: getRecommendationReason(auction, userActivity) }));
     scoredAuctions.sort((a, b) => b.recommendationScore - a.recommendationScore);
@@ -88,7 +88,7 @@ const extractPreferences = (searchHistory) => {
 };
 
 const buildPreferenceQuery = (preferences) => {
-  const query = { status: "active" };
+  const query = { status: "available" };
   if (preferences.makes.length > 0) query.make = { $in: preferences.makes };
   if (preferences.models.length > 0) query.model = { $in: preferences.models };
   if (preferences.priceRange.min > 0 || preferences.priceRange.max < Infinity) {

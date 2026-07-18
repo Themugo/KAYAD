@@ -686,14 +686,13 @@ router.post(
       views: 0,
       bidsCount: 0,
       favoritesCount: 0,
-      sold: false,
       auctionStatus: "draft",
       auctionStartTime: undefined,
       auctionEnd: undefined,
       currentBid: 0,
       winner: undefined,
       isPromoted: false,
-      status: "active",
+      status: "available",
     });
 
     await logActionFromReq(req, "duplicate_listing", {

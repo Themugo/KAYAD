@@ -519,7 +519,7 @@ router.post(
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     if (action === "approve") {
-      car.status = "active";
+      car.status = "available";
     } else {
       car.status = "rejected";
     }

@@ -12,7 +12,7 @@ export const searchCars = async ({
   page = 1,
   limit = 12,
 }) => {
-  const filters = { status: "active" };
+  const filters = { status: "available" };
 
   if (brand) filters.brand = brand;
   if (year) filters.year = Number(year);

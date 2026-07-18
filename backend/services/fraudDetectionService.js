@@ -417,7 +417,7 @@ export const detectPriceManipulation = async (carId) => {
     make: car.make,
     model: car.model,
     year: { $gte: car.year - 2, $lte: car.year + 2 },
-    status: "active",
+    status: "available",
   } });
 
   if (similarCars.length < 3) return null;

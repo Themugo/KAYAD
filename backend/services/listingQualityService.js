@@ -260,7 +260,7 @@ export const generateQualityReport = async (dealerId) => {
 
 export const bulkRecalculateDealerQuality = async (dealerId) => {
   try {
-    const cars = await findAll("cars", { filters: { dealer: dealerId, status: "active" } });
+    const cars = await findAll("cars", { filters: { dealer: dealerId, status: "available" } });
 
     const results = [];
     for (const car of cars) {

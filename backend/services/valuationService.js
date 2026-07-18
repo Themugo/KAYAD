@@ -177,7 +177,7 @@ export const getDemandSignals = async (filters = {}) => {
 
 export const getSimilarCars = async (car, options = {}) => {
   const yearRange = options.yearRange || 2;
-  return findAll("cars", { filters: { brand: car.brand, model: car.model, year: { $gte: car.year - yearRange, $lte: car.year + yearRange }, status: "active" }, limit: options.limit || 20 });
+  return findAll("cars", { filters: { brand: car.brand, model: car.model, year: { $gte: car.year - yearRange, $lte: car.year + yearRange }, status: "available" }, limit: options.limit || 20 });
 };
 
 export const calculateMarketAverage = (cars) => {

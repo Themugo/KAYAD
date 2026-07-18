@@ -30,7 +30,7 @@ export const analyzeListingQuality = async (carId) => {
 
     if (car.price && car.price > 0) {
       const similarCars = await findAll("cars", {
-        filters: { make: car.make, model: car.model, year: { $gte: car.year - 2, $lte: car.year + 2 }, status: "active", price: { $gt: 0 } },
+        filters: { make: car.make, model: car.model, year: { $gte: car.year - 2, $lte: car.year + 2 }, status: "available", price: { $gt: 0 } },
       });
       if (similarCars.length >= 3) {
         const prices = similarCars.map((c) => c.price);

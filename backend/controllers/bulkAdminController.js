@@ -22,7 +22,7 @@ export const bulkModerateCars = async (req, res) => {
       });
     }
 
-    const newStatus = action === "approve" ? "active" : "rejected";
+    const newStatus = action === "approve" ? "available" : "hidden";
 
     const cars = await Car.find({ _id: { $in: carIds } }).populate("dealer", "_id email name");
 

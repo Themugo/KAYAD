@@ -5,7 +5,7 @@ const BASE_URL = "https://www.kayad.space";
 export const generateVehicleSitemap = async () => {
   try {
     const cars = await findAll("cars", {
-      filters: { status: "active" },
+      filters: { status: "available" },
       select: "id,updatedAt",
     });
 

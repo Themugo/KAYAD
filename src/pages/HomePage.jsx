@@ -223,51 +223,51 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ background: '#FFFFFF', borderTop: '1px solid #E2E8F0', padding: '60px 24px 32px' }}>
+      <footer style={{ background: '#0F172A', borderTop: '1px solid rgba(241, 245, 249, 0.08)', padding: '60px 24px 32px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 48, marginBottom: 48 }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚗</div>
-                <span style={{ fontSize: 22, fontWeight: 700, color: '#0F172A', fontFamily: 'Outfit, sans-serif' }}>KAYAD</span>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'linear-gradient(135deg, #F97316 0%, #C2410C 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🚗</div>
+                <span style={{ fontSize: 22, fontWeight: 700, color: '#F1F5F9', fontFamily: 'Outfit, sans-serif' }}>KAYAD</span>
               </div>
-              <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.7, margin: 0, maxWidth: 240 }}>Kenya's premium car marketplace. Buy, sell, and auction vehicles with M-Pesa escrow protection.</p>
+              <p style={{ fontSize: 14, color: 'rgba(241, 245, 249, 0.55)', lineHeight: 1.7, margin: 0, maxWidth: 240 }}>Kenya's premium car marketplace. Buy, sell, and auction vehicles with M-Pesa escrow protection.</p>
             </div>
             <div>
-              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Marketplace</h4>
+              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#F1F5F9', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Marketplace</h4>
               {[
                 { label: 'Browse Cars', to: '/browse' },
                 { label: 'Live Auctions', to: '/auctions' },
                 { label: 'Sell Your Car', to: '/sell' },
                 { label: 'Escrow Vault', to: '/escrow' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: '#64748B', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: 'rgba(241, 245, 249, 0.55)', textDecoration: 'none', marginBottom: 10, transition: 'color 0.2s' }}>{link.label}</Link>)}
             </div>
             <div>
-              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Services</h4>
+              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#F1F5F9', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Services</h4>
               {[
                 { label: 'Pre-Inspection', to: '/inspection' },
                 { label: 'Car Financing', to: '/support' },
                 { label: 'Insurance', to: '/support' },
                 { label: 'Become a Dealer', to: '/register' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: '#64748B', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: 'rgba(241, 245, 249, 0.55)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
             </div>
             <div>
-              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#0F172A', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Company</h4>
+              <h4 style={{ fontSize: 12, fontWeight: 700, color: '#F1F5F9', marginBottom: 16, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Company</h4>
               {[
                 { label: 'About KAYAD', to: '/support' },
                 { label: 'How It Works', to: '/support' },
                 { label: 'Support', to: '/support' },
                 { label: 'Contact', to: '/support' },
-              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: '#64748B', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
+              ].map(link => <Link key={link.label} to={link.to} style={{ display: 'block', fontSize: 14, color: 'rgba(241, 245, 249, 0.55)', textDecoration: 'none', marginBottom: 10 }}>{link.label}</Link>)}
             </div>
           </div>
-          <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
-            <span style={{ fontSize: 13, color: '#94A3B8' }}>© 2026 KAYAD Motors Kenya Ltd. All rights reserved.</span>
+          <div style={{ borderTop: '1px solid rgba(241, 245, 249, 0.08)', paddingTop: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
+            <span style={{ fontSize: 13, color: 'rgba(241, 245, 249, 0.4)' }}>© 2026 KAYAD Motors Kenya Ltd. All rights reserved.</span>
             <div style={{ display: 'flex', gap: 24 }}>{[
               { label: 'Privacy Policy', to: '/support' },
               { label: 'Terms of Service', to: '/support' },
               { label: 'Support', to: '/support' },
-            ].map(link => <Link key={link.label} to={link.to} style={{ fontSize: 13, color: '#94A3B8', textDecoration: 'none' }}>{link.label}</Link>)}</div>
+            ].map(link => <Link key={link.label} to={link.to} style={{ fontSize: 13, color: 'rgba(241, 245, 249, 0.4)', textDecoration: 'none' }}>{link.label}</Link>)}</div>
           </div>
         </div>
       </footer>

@@ -419,7 +419,7 @@ export const adminRefund = async (req, res) => {
       if (car) {
         await Car.findByIdAndUpdate(
           car._id,
-          { status: "active", winner: undefined, paymentStatus: "refunded", isPaid: false, currentBid: 0, highestBidder: undefined },
+          { status: "available", winner: undefined, paymentStatus: "refunded", isPaid: false, currentBid: 0, highestBidder: undefined },
           { session },
         );
       }
@@ -434,7 +434,7 @@ export const adminRefund = async (req, res) => {
     });
 
     if (vault.car?._id) {
-      emitListingUpdate(vault.car._id.toString(), { status: "active", paymentStatus: "refunded" });
+      emitListingUpdate(vault.car._id.toString(), { status: "available", paymentStatus: "refunded" });
     }
 
     await sendNotification({

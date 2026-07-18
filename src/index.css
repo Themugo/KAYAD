@@ -108,6 +108,32 @@
   --color-error:   var(--red-500);
   --color-info:    var(--blue-500);
 
+  /* ---- Premium brand identity ----
+     Moves away from generic "blue and white" — dark charcoal-navy
+     chrome (nav + footer, bracketing the light content area, a
+     common premium pattern) with a warm amber-orange as the primary
+     brand accent instead of plain blue. Blue remains available as a
+     secondary/info color. Badge colors are intentionally varied
+     (not one flat accent) so the car grid reads as lively rather
+     than monochrome. */
+  --nav-bg:        #0F172A;
+  --nav-bg-scrolled: #0F172AF2;
+  --nav-text:      #F1F5F9;
+  --nav-text-muted: rgba(241, 245, 249, 0.65);
+  --nav-border:    rgba(241, 245, 249, 0.08);
+  --nav-hover-bg:  rgba(249, 115, 22, 0.14);
+
+  --brand:         #F97316;
+  --brand-dark:    #C2410C;
+  --brand-light:   #FDBA74;
+  --brand-glow:    rgba(249, 115, 22, 0.22);
+
+  --badge-verified:  #10B981;
+  --badge-featured:  #F59E0B;
+  --badge-auction:   #EF4444;
+  --badge-certified: #8B5CF6;
+  --badge-new:       #06B6D4;
+
   /* ---- Legacy "gold" accent — retired ----
      125+ files across the app still reference --gold*.
      These were never defined, so every one of those
@@ -1347,7 +1373,7 @@ label, .text-label {
 .kd-car-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.45);
-  border-color: rgba(37, 99, 235,0.35);
+  border-color: rgba(249, 115, 22, 0.4);
 }
 .kd-car-card__img-wrap {
   position: relative;
@@ -1422,9 +1448,9 @@ label, .text-label {
 }
 .kd-car-card__price {
   font-size: 1.3rem;
-  font-weight: 700;
-  font-style: italic;
-  color: var(--blue-400, #2563eb);
+  font-weight: 800;
+  font-style: normal;
+  color: #EA580C;
   margin: 0 0 16px;
   letter-spacing: -0.01em;
 }

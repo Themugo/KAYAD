@@ -202,7 +202,7 @@ export const getDealerPerformance = async (req, res) => {
           },
           activeCount: {
             $sum: {
-              $cond: [{ $eq: ["$status", "active"] }, 1, 0],
+              $cond: [{ $eq: ["$status", "available"] }, 1, 0],
             },
           },
           totalValue: {

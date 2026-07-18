@@ -135,7 +135,7 @@ export const getBrandModelSearchStats = async (period = 7) => {
 export const getMissingInventoryReport = async () => {
   try {
     const noResultSearches = await getNoResultSearches(50, 30);
-    const inventory = await findAll("cars", { filters: { status: "active" } });
+    const inventory = await findAll("cars", { filters: { status: "available" } });
     const missingInventory = [];
 
     for (const search of noResultSearches) {
@@ -216,7 +216,7 @@ export const getDealerDemandInsights = async (period = 30) => {
     const brandModelStats = await getBrandModelSearchStats(period);
     const priceRangeStats = await getPriceRangeSearchStats(period);
     const missingInventory = await getMissingInventoryReport();
-    const inventory = await findAll("cars", { filters: { status: "active" } });
+    const inventory = await findAll("cars", { filters: { status: "available" } });
 
     const inventoryByBrand = {};
     inventory.forEach((car) => { if (car.brand) inventoryByBrand[car.brand] = (inventoryByBrand[car.brand] || 0) + 1; });

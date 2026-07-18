@@ -62,7 +62,7 @@ export const calculateActiveBuyers = async (startDate, endDate) => {
 export const calculateVehicleMetrics = async (startDate, endDate) => {
   try {
     const vehiclesListed = await count("cars", {
-      status: "active",
+      status: "available",
       deletedAt: null,
     });
 
@@ -73,7 +73,7 @@ export const calculateVehicleMetrics = async (startDate, endDate) => {
     });
 
     const newListings = await count("cars", {
-      status: "active",
+      status: "available",
       createdAt: { $gte: startDate, $lte: endDate },
       deletedAt: null,
     });

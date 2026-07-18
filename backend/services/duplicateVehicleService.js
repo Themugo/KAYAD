@@ -188,7 +188,7 @@ export const checkByPhone = async (phone, excludeDealerId = null) => {
 
     const matches = await findAll("cars", { filters: {
       dealer: { $in: dealerIds },
-      status: "active",
+      status: "available",
     } })
       .select("_id title brand model year dealer status isFlaggedDuplicate")
       .limit(20)
@@ -210,7 +210,7 @@ export const checkByDealer = async (dealerId, carData, similarityThreshold = 0.7
     const recentListings = await findAll("cars", { 
       filters: {
         dealer: dealerId,
-        status: "active",
+        status: "available",
         createdAt: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) }, // Last 90 days
       }
     })

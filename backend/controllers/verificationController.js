@@ -440,7 +440,7 @@ export const approveVerification = async (req, res) => {
     if (verification.user) {
       await Car.updateMany(
         { dealer: verification.user._id || verification.user, status: "pending" },
-        { $set: { status: "active", isVerifiedDealer: true } },
+        { $set: { status: "available", isVerifiedDealer: true } },
       );
     }
 

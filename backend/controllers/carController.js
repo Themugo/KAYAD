@@ -59,7 +59,7 @@ export const getCars = async (req, res) => {
     // never trigger an unbounded query (pagination cap — Issue: security test).
     const limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    const query = { status: "active", isDemo: { $ne: true } };
+    const query = { status: "available", isDemo: { $ne: true } };
 
     if (keyword) {
       const trimmed = keyword.trim();
@@ -367,7 +367,7 @@ export const createCar = async (req, res) => {
       views: 0,
       bidsCount: 0,
       trustScore: 0,
-      status: isDemoSeller ? "active" : (seller.status === "approved" ? "active" : "pending"),
+      status: isDemoSeller ? "available" : (seller.status === "approved" ? "available" : "pending"),
       isVerifiedDealer: seller.status === "approved",
       isDemo: isDemoSeller,
     };
@@ -836,7 +836,7 @@ export const getCar = async (req, res) => {
 
     const isOwner = req.user && String(car.dealer?._id) === String(req.user.id);
     const isAdmin = req.user && STAFF_ROLES.includes(req.user.role);
-    if (car.status !== "active" && car.status !== "sold" && !isOwner && !isAdmin) {
+    if (car.status !== "available" && car.status !== "sold" && !isOwner && !isAdmin) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
