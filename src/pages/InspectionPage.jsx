@@ -107,14 +107,11 @@ export default function InspectionPage() {
     <div className="page">
       {/* Hero */}
       <div style={{ background: '#081C2E', padding: '80px 0 60px' }}>
-        <div className="container" style={{ textAlign: 'center', maxWidth: 800 }}>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 600, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: 24 }}>
-            Vehicle Protection
-          </p>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#FFFFFF', marginBottom: 24, lineHeight: 1.1 }}>
+        <div className="container" style={{ textAlign: 'center', maxWidth: 700 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#FFFFFF', marginBottom: 20, lineHeight: 1.1 }}>
             Pre-Purchase Inspection
           </h1>
-          <p style={{ fontFamily: "'Inter', sans-serif", color: '#D0D4D8', fontSize: 18, maxWidth: 540, margin: '0 auto 32px', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", color: 'rgba(255,255,255,0.7)', fontSize: 18, maxWidth: 520, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Don't buy blind. Our certified inspectors check every vehicle before you commit — giving you peace of mind and negotiating power.
           </p>
           <div style={{ display: 'flex', gap: 48, justifyContent: 'center', flexWrap: 'wrap' }}>

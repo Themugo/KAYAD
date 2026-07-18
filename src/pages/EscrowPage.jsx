@@ -122,14 +122,11 @@ export default function EscrowPage() {
         background: '#081C2E',
         padding: '80px 0 60px',
       }}>
-        <div className="container" style={{ textAlign: 'center', maxWidth: 800 }}>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 600, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: 24 }}>
-            Secure Transactions
-          </p>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#FFFFFF', marginBottom: 24, lineHeight: 1.1 }}>
+        <div className="container" style={{ textAlign: 'center', maxWidth: 700 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 700, color: '#FFFFFF', marginBottom: 20, lineHeight: 1.1 }}>
             Escrow Vault
           </h1>
-          <p style={{ fontFamily: "'Inter', sans-serif", color: '#D0D4D8', fontSize: 18, maxWidth: 560, margin: '0 auto 32px', lineHeight: 1.7 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", color: 'rgba(255,255,255,0.7)', fontSize: 18, maxWidth: 520, margin: '0 auto 32px', lineHeight: 1.7 }}>
             Every purchase on KAYAD is protected by M-Pesa escrow. Your money is held safely and only released when you confirm you have received the vehicle.
           </p>
           {!isAuth && (

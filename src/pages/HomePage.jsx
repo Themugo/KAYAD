@@ -122,18 +122,15 @@ export default function HomePage() {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #081C2E 0%, rgba(8, 28, 46, 0.85) 50%, rgba(8, 28, 46, 0.6) 100%)' }} />
           </div>
         ))}
-        {/* Content - All text unified on navy */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 900, margin: '0 auto', padding: '120px 32px 100px' }}>
-          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 14, fontWeight: 600, color: '#18B6A5', textTransform: 'uppercase', letterSpacing: '4px', marginBottom: 24 }}>
-            Kenya's Trusted Automotive Marketplace
-          </p>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.05, marginBottom: 32 }}>
+        {/* Content - Clean typography on pure navy */}
+        <div style={{ position: 'relative', zIndex: 10, maxWidth: 800, margin: '0 auto', padding: '120px 32px 100px', textAlign: 'center' }}>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 700, color: '#FFFFFF', lineHeight: 1.1, marginBottom: 24, letterSpacing: '-0.01em' }}>
             Find Your Perfect Vehicle
           </h1>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: '#D0D4D8', maxWidth: 520, lineHeight: 1.7, marginBottom: 48 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 18, fontWeight: 400, color: 'rgba(255,255,255,0.7)', maxWidth: 560, lineHeight: 1.7, margin: '0 auto 48px' }}>
             Discover verified dealers, private sellers, secure escrow protection, and professional inspections. Your trusted destination for vehicles in Kenya.
           </p>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link to="/browse"><button className="btn-gold">Browse Vehicles</button></Link>
             <Link to="/register?role=broker"><button className="btn-outline-dark">Sell Your Vehicle</button></Link>
           </div>
