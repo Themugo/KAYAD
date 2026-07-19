@@ -3,6 +3,7 @@ import {
   ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
   CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
   MessageCircle, Star, ChevronRight, Lock, Clock,
+  ChevronLeft, ChevronRight as ChevronRightAlt, X, ZoomIn,
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import { CARS } from '../data/cars';
@@ -36,6 +37,23 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
   const [tab, setTab]     = useState<Tab>('overview');
   const fmt = (n: number) => n.toLocaleString('en-KE');
 
+  // Image gallery state
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  // Generate multiple images for gallery
+  const carImages = [
+    car.image,
+    car.image.replace('600x400', '800x600'),
+    car.image,
+    car.image.replace('600x400', '700x500'),
+    car.image,
+    car.image.replace('600x400', '900x600'),
+  ];
+
+  const nextImage = () => setCurrentImageIndex(i => (i + 1) % carImages.length);
+  const prevImage = () => setCurrentImageIndex(i => (i - 1 + carImages.length) % carImages.length);
+
   const features = FEATURES[car.type] ?? FEATURES.SUV;
   const similar  = CARS.filter(c => c.type === car.type && c.id !== car.id).slice(0, 3);
 
@@ -66,17 +84,64 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
         </div>
       </div>
 
-      {/* ── HERO IMAGE ─────────────────────────────────────────────── */}
+      {/* ── HERO IMAGE GALLERY ───────────────────────────────────── */}
       <div className="relative h-[58vh] min-h-[380px] bg-charcoal-900 overflow-hidden">
-        <img
-          src={car.image}
-          alt={`${car.make} ${car.model}`}
-          className="w-full h-full object-cover"
-        />
+        {/* Main Image */}
+        <div className="relative h-full">
+          <img
+            src={carImages[currentImageIndex]}
+            alt={`${car.make} ${car.model} - Image ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover transition-opacity duration-300"
+          />
+          
+          {/* Navigation Arrows */}
+          <button
+            onClick={prevImage}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={nextImage}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
+          >
+            <ChevronRightAlt size={20} />
+          </button>
+
+          {/* Zoom Button */}
+          <button
+            onClick={() => setLightboxOpen(true)}
+            className="absolute top-4 right-4 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
+          >
+            <ZoomIn size={18} />
+          </button>
+
+          {/* Image Counter */}
+          <div className="absolute bottom-4 right-4 px-3 py-1 bg-charcoal-900/80 backdrop-blur-sm text-white text-xs font-medium rounded-full">
+            {currentImageIndex + 1} / {carImages.length}
+          </div>
+        </div>
+
+        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-900/25 to-transparent" />
-        {/* Teal glow at base of image */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-40 bg-gold-400/10 blur-3xl rounded-full pointer-events-none" />
 
+        {/* Thumbnail Strip */}
+        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4">
+          {carImages.map((img, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentImageIndex(idx)}
+              className={`w-16 h-10 rounded-lg overflow-hidden border-2 transition-all ${
+                idx === currentImageIndex ? 'border-gold-400 scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+              }`}
+            >
+              <img src={img} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+
+        {/* Car Info Overlay */}
         <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-6 lg:px-8 pb-8 max-w-7xl mx-auto">
           <p className="section-label text-gold-400 mb-2">{car.make}</p>
           <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-3 leading-tight">
@@ -99,6 +164,42 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* ── LIGHTBOX ──────────────────────────────────────────────── */}
+      {lightboxOpen && (
+        <div 
+          className="fixed inset-0 z-[100] bg-charcoal-950/95 flex items-center justify-center"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
+          >
+            <X size={24} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); prevImage(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); nextImage(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
+          >
+            <ChevronRightAlt size={24} />
+          </button>
+          <img
+            src={carImages[currentImageIndex]}
+            alt={`${car.make} ${car.model}`}
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white text-sm font-medium">
+            {currentImageIndex + 1} / {carImages.length}
+          </div>
+        </div>
+      )}
 
       {/* ── QUICK STATS STRIP ──────────────────────────────────────── */}
       <div className="bg-charcoal-800 border-b border-white/10">
