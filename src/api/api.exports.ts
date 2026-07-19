@@ -1,5 +1,6 @@
 ﻿// src/api/api.exports.ts
 // All the per-route API objects.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api, unwrap } from "./api";
 
 // ── AUTH ──────────────────────────────────────────────

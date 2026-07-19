@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusCircle, Trophy, User, Heart, BarChart3 } from 'lucide-react';
+import { Home, Search, User, Heart, BarChart3 } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  authUser?: any;
+  authUser?: Record<string, unknown>;
 }
 
 export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {

@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench, Loader } from 'lucide-react';
+import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import HeroCarousel from '../components/HeroCarousel';
 import { carsAPI } from '../api/api';
 import { useToast } from '../context/ToastContext';
-import { SkeletonCard } from '../components/Skeleton';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
 

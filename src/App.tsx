@@ -197,6 +197,7 @@ function AppContent() {
 
   const currentPage = getCurrentPage();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderPage = () => {
     switch (page) {
       case 'home':

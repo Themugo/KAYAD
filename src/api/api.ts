@@ -3,6 +3,7 @@
 // KAYAD — FULL API LAYER
 // Every backend route mapped exactly to the Express routes
 // ============================================================
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { demoAPI } from '../data/demoAPI';

@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
 import { ChevronDown, X, SlidersHorizontal, Search } from 'lucide-react';
-import '../styles/layout.css';
 
 const BRANDS = ['BMW','Mercedes','Toyota','Nissan','Subaru','Mitsubishi','Volkswagen','Mazda','Audi','Range Rover','Lexus','Isuzu','Honda','Ford','Jeep','Kia','Hyundai'];
 const LOCATIONS = ['Nairobi','Mombasa','Kisumu','Nakuru','Eldoret','Thika','Malindi','Meru'];

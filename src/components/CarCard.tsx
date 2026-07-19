@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Gauge, Fuel, MapPin, Shield, Gavel, ChevronRight, Heart, BarChart3 } from 'lucide-react';
+import { MapPin, Shield, Heart, BarChart3 } from 'lucide-react';
 import LazyImage from './LazyImage';
 import { formatKES } from '../utils/helpers';
 
@@ -34,7 +34,6 @@ interface CarCardProps {
   onClick?: () => void;
   onToggleCompare?: () => void;
   isComparing?: boolean;
-  compareCount?: number;
   onFavorite?: (carId: number) => void;
   isFavorited?: boolean;
   showCompare?: boolean;
@@ -46,7 +45,6 @@ export default function CarCard({
   onClick,
   onToggleCompare,
   isComparing = false,
-  compareCount = 0,
   onFavorite,
   isFavorited = false,
   showCompare = true,
