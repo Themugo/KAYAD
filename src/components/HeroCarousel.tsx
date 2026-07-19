@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Shield, Star, Eye, Clock } from 'lucide-react';
 import { formatKES, timeAgo } from '../utils/helpers';
+import { carsAPI } from '../api/api';
 
 interface FeaturedCar {
   _id: string;
@@ -35,21 +36,17 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch featured cars (promoted or top-viewed)
+  // Fetch featured cars (promoted or top-viewed) using API client
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        // Try to fetch from API
-        const response = await fetch('/api/cars?page=1&limit=10&status=active');
-        if (response.ok) {
-          const data = await response.json();
-          const fetchedCars = data?.cars || data?.data || [];
-          // Filter for promoted or top viewed
-          const featured = fetchedCars.filter((car: FeaturedCar) => 
-            car.isPromoted || (car.views && car.views > 100)
-          ).slice(0, 5);
-          setCars(featured.length > 0 ? featured : fetchedCars.slice(0, 5));
-        }
+        const data = await carsAPI.list({ page: 1, limit: 20, status: 'active' });
+        const fetchedCars = data?.cars || data?.data || [];
+        // Filter for promoted or top viewed
+        const featured = fetchedCars.filter((car: FeaturedCar) => 
+          car.isPromoted || (car.views && car.views > 100)
+        ).slice(0, 5);
+        setCars(featured.length > 0 ? featured : fetchedCars.slice(0, 5));
       } catch {
         // API not available, will use demo data
       } finally {
