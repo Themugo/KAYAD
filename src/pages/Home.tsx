@@ -61,7 +61,7 @@ export default function Home({ setPage, viewCar }: HomeProps) {
         const data = await carsAPI.list({ page: 1, limit: 50 });
         const carList = data?.cars || data?.data || [];
         setCars(carList);
-      } catch (error) {
+      } catch {
         toast('Failed to load vehicles. Please try again.', 'error');
       } finally {
         setLoading(false);
@@ -122,11 +122,9 @@ export default function Home({ setPage, viewCar }: HomeProps) {
   return (
     <div className="min-h-screen">
 
-      {/* ── HERO CAROUSEL ──────────────────────────────────────────── */}
-      <section className="relative bg-charcoal-900 pt-16 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <HeroCarousel onViewCar={handleCarouselView} />
-        </div>
+      {/* ── HERO CAROUSEL - Full Viewport ──────────────────────────── */}
+      <section className="relative">
+        <HeroCarousel onViewCar={handleCarouselView} />
       </section>
 
       {/* ── TRUST BADGES ──────────────────────────────────────────── */}
