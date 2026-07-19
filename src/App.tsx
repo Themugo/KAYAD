@@ -12,10 +12,12 @@ import Compare from './pages/Compare';
 import Favorites from './pages/Favorites';
 import Auction from './pages/Auction';
 import EscrowVault from './pages/EscrowVault';
+import EscrowPage from './pages/EscrowPage';
 import PreInspection from './pages/PreInspection';
 import Support from './pages/Support';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
+import Payments from './pages/Payments';
 import Chat from './pages/Chat';
 import DealerProfile from './pages/DealerProfile';
 import CarDetail from './pages/CarDetail';
@@ -73,10 +75,12 @@ export default function App() {
     if (path === '/favorites') return 'favorites';
     if (path === '/profile') return 'profile';
     if (path === '/notifications') return 'notifications';
+    if (path === '/payments') return 'payments';
     if (path === '/chat') return 'chat';
     if (path === '/dealer/:id') return 'dealer-profile';
     if (path === '/auction') return 'auction';
     if (path === '/escrow') return 'escrow';
+    if (path === '/escrow-transactions') return 'escrow-transactions';
     if (path === '/pre-inspection') return 'pre-inspection';
     if (path === '/support') return 'support';
     if (path.startsWith('/car/')) return 'car-detail';
@@ -103,10 +107,14 @@ export default function App() {
         return <Profile setPage={handleSetPage} authUser={authUser} />;
       case 'notifications':
         return <Notifications />;
+      case 'payments':
+        return <Payments />;
       case 'chat':
         return <Chat />;
       case 'dealer-profile':
         return <DealerProfile setPage={handleSetPage} viewCar={viewCar} />;
+      case 'escrow-transactions':
+        return <EscrowPage />;
       case 'showroom':
         return <Showroom />;
       case 'auction':
