@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate, BrowserRouter } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, BrowserRouter } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CompareDrawer from './components/CompareDrawer';
@@ -145,7 +145,7 @@ function Public({ children }: { children: React.ReactNode }) {
   return children;
 }
 
-export default function App() {
+function AppContent() {
   const [page, setPage] = useState('home');
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
@@ -250,6 +250,127 @@ export default function App() {
   };
 
   return (
+    <>
+      <Suspense fallback={<LoadingPage />}>
+        <Routes>
+          {/* Legacy routes for backward compatibility */}
+          <Route path="/" element={renderPage()} />
+          <Route path="/:page" element={renderPage()} />
+          <Route path="/car/:id" element={renderPage()} />
+
+          {/* Public pages */}
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/showroom" element={<Showroom />} />
+          <Route path="/car/:id" element={<CarDetailPage />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/auction-calendar" element={<AuctionCalendar />} />
+          <Route path="/auction/:id" element={<AuctionLivePage />} />
+          <Route path="/escrow-vault" element={<EscrowVaultPortal />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/ghost-checker" element={<GhostCheckerInfo />} />
+
+          {/* Auth pages */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/phone-verify" element={<PhoneVerifyPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/force-password-change" element={<ForcePasswordChange />} />
+
+          {/* Authenticated user pages */}
+          <Route path="/buyer" element={<User><BuyerDashboard /></User>} />
+          <Route path="/profile" element={<User><ProfilePage /></User>} />
+          <Route path="/payments" element={<User><PaymentsPage /></User>} />
+          <Route path="/chat" element={<User><ChatPage /></User>} />
+          <Route path="/chat/:threadId" element={<User><ChatPage /></User>} />
+          <Route path="/notifications" element={<User><NotificationsPage /></User>} />
+          <Route path="/favorites" element={<User><FavoritesPage /></User>} />
+          <Route path="/escrow/:id" element={<User><EscrowPage /></User>} />
+          <Route path="/disputes" element={<User><DisputesPage /></User>} />
+          <Route path="/disputes/:id" element={<User><DisputeDetailPage /></User>} />
+
+          {/* Inspector pages */}
+          <Route path="/inspector/apply" element={<User><InspectorApply /></User>} />
+          <Route path="/inspector" element={<User><InspectorDashboard /></User>} />
+          <Route path="/inspector/dashboard" element={<User><InspectorDashboard /></User>} />
+
+          {/* Dealer/Seller pages */}
+          <Route path="/dealer" element={<Dealer><DealerDashboardPage /></Dealer>} />
+          <Route path="/dealer/onboarding" element={<RequireAuth><DealerOnboarding /></RequireAuth>} />
+          <Route path="/dealer/setup" element={<Dealer><DealerSetup /></Dealer>} />
+          <Route path="/dealer/add-car" element={<Dealer><AddCarPage /></Dealer>} />
+          <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
+          <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
+          <Route path="/dealer/auction-setup" element={<Dealer><DealerAuctionSetup /></Dealer>} />
+          <Route path="/dealer/auctions" element={<Dealer><DealerAuctionSetup /></Dealer>} />
+          <Route path="/dealer/analytics" element={<Dealer><DealerAnalytics /></Dealer>} />
+          <Route path="/dealer/settlement" element={<Dealer><DealerSettlement /></Dealer>} />
+          <Route path="/dealer/team" element={<Dealer><DealerTeam /></Dealer>} />
+          <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
+          <Route path="/dealer/settings" element={<Dealer><DealerSettings /></Dealer>} />
+          <Route path="/dealer/choose-plan" element={<Dealer><PostRegPackageSelect /></Dealer>} />
+
+          {/* Admin pages */}
+          <Route path="/admin" element={<Admin><AdminDashboard /></Admin>} />
+          <Route path="/admin/users" element={<SecureAdmin roles={["superadmin","admin","technical_support","hr","moderator"]}><AdminUsers /></SecureAdmin>} />
+          <Route path="/admin/sellers" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminSellers /></SecureAdmin>} />
+          <Route path="/admin/cars" element={<SecureAdmin roles={["superadmin","admin","moderator","technical_support"]}><AdminCars /></SecureAdmin>} />
+          <Route path="/admin/moderation" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminCarModeration /></SecureAdmin>} />
+          <Route path="/admin/auctions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminAuctions /></SecureAdmin>} />
+          <Route path="/admin/bids" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBids /></SecureAdmin>} />
+          <Route path="/admin/escrows" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrows /></SecureAdmin>} />
+          <Route path="/admin/escrow-vault" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrowVault /></SecureAdmin>} />
+          <Route path="/admin/reviews" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReviews /></SecureAdmin>} />
+          <Route path="/admin/referrals" element={<SecureAdmin roles={["superadmin","admin"]}><AdminReferrals /></SecureAdmin>} />
+          <Route path="/admin/chats" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminChatModeration /></SecureAdmin>} />
+          <Route path="/admin/market-data" element={<SecureAdmin roles={["superadmin","admin"]}><AdminMarketData /></SecureAdmin>} />
+          <Route path="/admin/transactions" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminTransactions /></SecureAdmin>} />
+          <Route path="/admin/ntsa-queue" element={<SecureAdmin roles={["superadmin","admin"]}><AdminNtsaQueue /></SecureAdmin>} />
+          <Route path="/admin/inspections" element={<SecureAdmin roles={["superadmin","admin","ghost_checker"]}><AdminInspections /></SecureAdmin>} />
+          <Route path="/admin/inspector-applications" element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
+          <Route path="/admin/security-log" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSecurityLog /></SecureAdmin>} />
+          <Route path="/admin/ads" element={<SecureAdmin roles={["superadmin","admin","marketing","ad_manager"]}><AdManager /></SecureAdmin>} />
+          <Route path="/admin/settings" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSettings /></SecureAdmin>} />
+          <Route path="/admin/staff" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminStaff /></SecureAdmin>} />
+          <Route path="/admin/staff-permissions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminStaffPermissions /></SecureAdmin>} />
+          <Route path="/admin/control-room" element={<SecureAdmin roles={["superadmin","admin"]}><ControlRoom /></SecureAdmin>} />
+          <Route path="/admin/panic-room" element={<SecureAdmin roles={["superadmin"]}><PanicRoom /></SecureAdmin>} />
+          <Route path="/admin/webhoist" element={<SecureAdmin roles={["superadmin"]}><WebhoistOverview /></SecureAdmin>} />
+          <Route path="/admin/operations-dashboard" element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
+          <Route path="/admin/disputes" element={<SecureAdmin><AdminDisputes /></SecureAdmin>} />
+          <Route path="/admin/disputes/:id" element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
+          <Route path="/admin/auction-integrity" element={<SecureAdmin><AuctionIntegrityPage /></SecureAdmin>} />
+          <Route path="/admin/dealer-verifications" element={<SecureAdmin><AdminDealerVerifications /></SecureAdmin>} />
+          <Route path="/admin/reports" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdmin>} />
+          <Route path="/admin/support-tickets" element={<SecureAdmin roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdmin>} />
+          <Route path="/admin/broadcast" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdmin>} />
+          <Route path="/admin/feedback" element={<SecureAdmin roles={["superadmin","admin"]}><AdminFeedback /></SecureAdmin>} />
+
+          {/* 404 */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+      <Navbar
+        currentPage={currentPage}
+        setPage={handleSetPage}
+        authUser={authUser}
+        onSignOut={handleSignOut}
+      />
+      <Footer setPage={handleSetPage} />
+      <CompareDrawer />
+      <MobileBottomNav authUser={authUser} />
+      <DemoModeBanner />
+      <SWUpdateBanner />
+    </>
+  );
+}
+
+export default function App() {
+  return (
     <ErrorBoundary>
       <BrowserRouter>
         <ToastProvider>
@@ -258,120 +379,7 @@ export default function App() {
               <SocketProvider>
                 <NotificationProvider>
                   <CompareProvider>
-                    <Suspense fallback={<LoadingPage />}>
-                      <Routes>
-                        {/* Legacy routes for backward compatibility */}
-                        <Route path="/" element={renderPage()} />
-                        <Route path="/:page" element={renderPage()} />
-                        <Route path="/car/:id" element={renderPage()} />
-
-                        {/* Public pages */}
-                        <Route path="/home" element={<HomePage />} />
-                        <Route path="/showroom" element={<Showroom />} />
-                        <Route path="/car/:id" element={<CarDetailPage />} />
-                        <Route path="/compare" element={<ComparePage />} />
-                        <Route path="/auction-calendar" element={<AuctionCalendar />} />
-                        <Route path="/auction/:id" element={<AuctionLivePage />} />
-                        <Route path="/escrow-vault" element={<EscrowVaultPortal />} />
-                        <Route path="/terms" element={<TermsPage />} />
-                        <Route path="/privacy" element={<PrivacyPage />} />
-                        <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/about" element={<AboutPage />} />
-                        <Route path="/ghost-checker" element={<GhostCheckerInfo />} />
-
-                        {/* Auth pages */}
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/phone-verify" element={<PhoneVerifyPage />} />
-                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                        <Route path="/reset-password" element={<ResetPasswordPage />} />
-                        <Route path="/verify-email" element={<VerifyEmail />} />
-                        <Route path="/force-password-change" element={<ForcePasswordChange />} />
-
-                        {/* Authenticated user pages */}
-                        <Route path="/buyer" element={<User><BuyerDashboard /></User>} />
-                        <Route path="/profile" element={<User><ProfilePage /></User>} />
-                        <Route path="/payments" element={<User><PaymentsPage /></User>} />
-                        <Route path="/chat" element={<User><ChatPage /></User>} />
-                        <Route path="/chat/:threadId" element={<User><ChatPage /></User>} />
-                        <Route path="/notifications" element={<User><NotificationsPage /></User>} />
-                        <Route path="/favorites" element={<User><FavoritesPage /></User>} />
-                        <Route path="/escrow/:id" element={<User><EscrowPage /></User>} />
-                        <Route path="/disputes" element={<User><DisputesPage /></User>} />
-                        <Route path="/disputes/:id" element={<User><DisputeDetailPage /></User>} />
-
-                        {/* Inspector pages */}
-                        <Route path="/inspector/apply" element={<User><InspectorApply /></User>} />
-                        <Route path="/inspector" element={<User><InspectorDashboard /></User>} />
-                        <Route path="/inspector/dashboard" element={<User><InspectorDashboard /></User>} />
-
-                        {/* Dealer/Seller pages */}
-                        <Route path="/dealer" element={<Dealer><DealerDashboardPage /></Dealer>} />
-                        <Route path="/dealer/onboarding" element={<RequireAuth><DealerOnboarding /></RequireAuth>} />
-                        <Route path="/dealer/setup" element={<Dealer><DealerSetup /></Dealer>} />
-                        <Route path="/dealer/add-car" element={<Dealer><AddCarPage /></Dealer>} />
-                        <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
-                        <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
-                        <Route path="/dealer/auction-setup" element={<Dealer><DealerAuctionSetup /></Dealer>} />
-                        <Route path="/dealer/auctions" element={<Dealer><DealerAuctionSetup /></Dealer>} />
-                        <Route path="/dealer/analytics" element={<Dealer><DealerAnalytics /></Dealer>} />
-                        <Route path="/dealer/settlement" element={<Dealer><DealerSettlement /></Dealer>} />
-                        <Route path="/dealer/team" element={<Dealer><DealerTeam /></Dealer>} />
-                        <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
-                        <Route path="/dealer/settings" element={<Dealer><DealerSettings /></Dealer>} />
-                        <Route path="/dealer/choose-plan" element={<Dealer><PostRegPackageSelect /></Dealer>} />
-
-                        {/* Admin pages */}
-                        <Route path="/admin" element={<Admin><AdminDashboard /></Admin>} />
-                        <Route path="/admin/users" element={<SecureAdmin roles={["superadmin","admin","technical_support","hr","moderator"]}><AdminUsers /></SecureAdmin>} />
-                        <Route path="/admin/sellers" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminSellers /></SecureAdmin>} />
-                        <Route path="/admin/cars" element={<SecureAdmin roles={["superadmin","admin","moderator","technical_support"]}><AdminCars /></SecureAdmin>} />
-                        <Route path="/admin/moderation" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminCarModeration /></SecureAdmin>} />
-                        <Route path="/admin/auctions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminAuctions /></SecureAdmin>} />
-                        <Route path="/admin/bids" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBids /></SecureAdmin>} />
-                        <Route path="/admin/escrows" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrows /></SecureAdmin>} />
-                        <Route path="/admin/escrow-vault" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrowVault /></SecureAdmin>} />
-                        <Route path="/admin/reviews" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReviews /></SecureAdmin>} />
-                        <Route path="/admin/referrals" element={<SecureAdmin roles={["superadmin","admin"]}><AdminReferrals /></SecureAdmin>} />
-                        <Route path="/admin/chats" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminChatModeration /></SecureAdmin>} />
-                        <Route path="/admin/market-data" element={<SecureAdmin roles={["superadmin","admin"]}><AdminMarketData /></SecureAdmin>} />
-                        <Route path="/admin/transactions" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminTransactions /></SecureAdmin>} />
-                        <Route path="/admin/ntsa-queue" element={<SecureAdmin roles={["superadmin","admin"]}><AdminNtsaQueue /></SecureAdmin>} />
-                        <Route path="/admin/inspections" element={<SecureAdmin roles={["superadmin","admin","ghost_checker"]}><AdminInspections /></SecureAdmin>} />
-                        <Route path="/admin/inspector-applications" element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
-                        <Route path="/admin/security-log" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSecurityLog /></SecureAdmin>} />
-                        <Route path="/admin/ads" element={<SecureAdmin roles={["superadmin","admin","marketing","ad_manager"]}><AdManager /></SecureAdmin>} />
-                        <Route path="/admin/settings" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSettings /></SecureAdmin>} />
-                        <Route path="/admin/staff" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminStaff /></SecureAdmin>} />
-                        <Route path="/admin/staff-permissions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminStaffPermissions /></SecureAdmin>} />
-                        <Route path="/admin/control-room" element={<SecureAdmin roles={["superadmin","admin"]}><ControlRoom /></SecureAdmin>} />
-                        <Route path="/admin/panic-room" element={<SecureAdmin roles={["superadmin"]}><PanicRoom /></SecureAdmin>} />
-                        <Route path="/admin/webhoist" element={<SecureAdmin roles={["superadmin"]}><WebhoistOverview /></SecureAdmin>} />
-                        <Route path="/admin/operations-dashboard" element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
-                        <Route path="/admin/disputes" element={<SecureAdmin><AdminDisputes /></SecureAdmin>} />
-                        <Route path="/admin/disputes/:id" element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
-                        <Route path="/admin/auction-integrity" element={<SecureAdmin><AuctionIntegrityPage /></SecureAdmin>} />
-                        <Route path="/admin/dealer-verifications" element={<SecureAdmin><AdminDealerVerifications /></SecureAdmin>} />
-                        <Route path="/admin/reports" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdmin>} />
-                        <Route path="/admin/support-tickets" element={<SecureAdmin roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdmin>} />
-                        <Route path="/admin/broadcast" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdmin>} />
-                        <Route path="/admin/feedback" element={<SecureAdmin roles={["superadmin","admin"]}><AdminFeedback /></SecureAdmin>} />
-
-                        {/* 404 */}
-                        <Route path="*" element={<NotFoundPage />} />
-                      </Routes>
-                    </Suspense>
-                    <Navbar
-                      currentPage={currentPage}
-                      setPage={handleSetPage}
-                      authUser={authUser}
-                      onSignOut={handleSignOut}
-                    />
-                    <Footer setPage={handleSetPage} />
-                    <CompareDrawer />
-                    <MobileBottomNav authUser={authUser} />
-                    <DemoModeBanner />
-                    <SWUpdateBanner />
+                    <AppContent />
                   </CompareProvider>
                 </NotificationProvider>
               </SocketProvider>
