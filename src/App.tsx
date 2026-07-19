@@ -17,6 +17,7 @@ import Support from './pages/Support';
 import Profile from './pages/Profile';
 import Notifications from './pages/Notifications';
 import Chat from './pages/Chat';
+import DealerProfile from './pages/DealerProfile';
 import CarDetail from './pages/CarDetail';
 import Dashboard from './pages/Dashboard';
 import CreateAccount from './pages/CreateAccount';
@@ -73,6 +74,7 @@ export default function App() {
     if (path === '/profile') return 'profile';
     if (path === '/notifications') return 'notifications';
     if (path === '/chat') return 'chat';
+    if (path === '/dealer/:id') return 'dealer-profile';
     if (path === '/auction') return 'auction';
     if (path === '/escrow') return 'escrow';
     if (path === '/pre-inspection') return 'pre-inspection';
@@ -103,6 +105,8 @@ export default function App() {
         return <Notifications />;
       case 'chat':
         return <Chat />;
+      case 'dealer-profile':
+        return <DealerProfile setPage={handleSetPage} viewCar={viewCar} />;
       case 'showroom':
         return <Showroom />;
       case 'auction':
