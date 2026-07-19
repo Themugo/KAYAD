@@ -122,8 +122,8 @@ export default function Home({ setPage, viewCar }: HomeProps) {
   return (
     <div className="min-h-screen">
 
-      {/* ── HERO CAROUSEL - Full Viewport ──────────────────────────── */}
-      <section className="relative">
+      {/* ── HERO CAROUSEL ─────────────────────────────────────────── */}
+      <section className="relative bg-charcoal-900">
         <HeroCarousel onViewCar={handleCarouselView} />
       </section>
 

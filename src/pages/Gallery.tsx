@@ -1,13 +1,15 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Search, SlidersHorizontal, X, Grid3X3, List, 
-  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart, RefreshCw
+  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart, RefreshCw, Filter
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
+import SearchSidebar from '../components/SearchSidebar';
 import { SkeletonGrid } from '../components/SkeletonCard';
 import { carsAPI } from '../api/api';
 import { useCompare } from '../context/CompareContext';
 import { useToast } from '../context/ToastContext';
+import '../styles/layout.css';
 
 type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
 type SortOption = 'default' | 'price_asc' | 'price_desc' | 'newest' | 'year_desc';
@@ -39,6 +41,25 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  
+  // Sidebar filter state
+  const [sidebarFilters, setSidebarFilters] = useState({
+    filter: 'all',
+    brand: '',
+    location: '',
+    priceMin: '',
+    priceMax: '',
+    yearMin: '',
+    yearMax: '',
+    body: '',
+    fuel: '',
+    transmission: '',
+    condition: '',
+    mileageMin: '',
+    mileageMax: '',
+    dealerType: '',
+  });
   
   // API data state
   const [allCars, setAllCars] = useState<any[]>([]);
@@ -269,24 +290,53 @@ export default function Gallery({ viewCar }: GalleryProps) {
   }, [toggleCar]);
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
+    <div className="min-h-screen bg-charcoal-900 pt-16">
       {/* Header */}
-      <div className="relative bg-charcoal-900 pt-16 pb-14 overflow-hidden">
+      <div className="relative bg-charcoal-900 pt-16 pb-6 overflow-hidden">
         <div className="absolute bottom-0 right-0 w-1/2 h-full bg-gold-400/6 blur-3xl rounded-full pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">{allCars.length} vehicles available</p>
+          <p className="font-sans text-white/50 text-sm">{totalCount || allCars.length} vehicles available</p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Search + Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-3 mb-6">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-400" />
-            <input
+      {/* Main Content with Sidebar */}
+      <div className="flex max-w-7xl mx-auto">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <SearchSidebar 
+            cars={allCars}
+            filters={sidebarFilters}
+            onFilterChange={(key, value) => {
+              setSidebarFilters(prev => ({ ...prev, [key]: value }));
+              setPage(1);
+            }}
+            onBrandChange={(brand) => {
+              setSidebarFilters(prev => ({ ...prev, brand }));
+              setPage(1);
+            }}
+            isMobile={false}
+          />
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
+          {/* Search + Filter Bar */}
+          <div className="flex flex-col lg:flex-row gap-3 mb-6">
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="lg:hidden flex items-center justify-center gap-2 px-4 py-3 bg-white border border-cream-300 rounded-xl text-charcoal-800 font-sans text-sm font-medium"
+            >
+              <Filter size={16} />
+              <span>Filters</span>
+            </button>
+
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-400" />
+              <input
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search by make, model, or city..."
@@ -582,6 +632,30 @@ export default function Gallery({ viewCar }: GalleryProps) {
           </div>
         )}
       </div>
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="absolute right-0 top-0 bottom-0 w-[85%] max-w-sm bg-charcoal-900 overflow-y-auto">
+            <SearchSidebar 
+              cars={allCars}
+              filters={sidebarFilters}
+              onFilterChange={(key, value) => {
+                setSidebarFilters(prev => ({ ...prev, [key]: value }));
+                setPage(1);
+              }}
+              onBrandChange={(brand) => {
+                setSidebarFilters(prev => ({ ...prev, brand }));
+                setPage(1);
+              }}
+              isMobile={true}
+              onClose={() => setMobileFiltersOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
