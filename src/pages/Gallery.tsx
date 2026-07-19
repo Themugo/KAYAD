@@ -290,19 +290,20 @@ export default function Gallery({ viewCar }: GalleryProps) {
   }, [toggleCar]);
 
   return (
-    <div className="min-h-screen bg-charcoal-900 pt-16">
-      {/* Header */}
-      <div className="relative bg-charcoal-900 pt-16 pb-6 overflow-hidden">
+    <div className="min-h-screen">
+      {/* ── HEADER ─────────────────────────────────────────── */}
+      <section className="relative bg-charcoal-900 pt-16 pb-10 overflow-hidden">
         <div className="absolute bottom-0 right-0 w-1/2 h-full bg-gold-400/6 blur-3xl rounded-full pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
           <p className="font-sans text-white/50 text-sm">{totalCount || allCars.length} vehicles available</p>
         </div>
-      </div>
+      </section>
 
-      {/* Main Content with Sidebar */}
-      <div className="flex max-w-7xl mx-auto">
+      {/* ── MAIN CONTENT ─────────────────────────────────── */}
+      <div className="bg-cream-100">
+        <div className="flex max-w-7xl mx-auto">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <SearchSidebar 
@@ -631,6 +632,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
             </button>
           </div>
         )}
+      </div>
       </div>
       </div>
 
