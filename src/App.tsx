@@ -4,6 +4,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
+import Compare from './pages/Compare';
+import Favorites from './pages/Favorites';
 import Auction from './pages/Auction';
 import EscrowVault from './pages/EscrowVault';
 import PreInspection from './pages/PreInspection';
@@ -59,6 +61,8 @@ export default function App() {
     const path = location.pathname;
     if (path === '/' || path === '') return 'home';
     if (path === '/gallery') return 'gallery';
+    if (path === '/compare') return 'compare';
+    if (path === '/favorites') return 'favorites';
     if (path === '/auction') return 'auction';
     if (path === '/escrow') return 'escrow';
     if (path === '/pre-inspection') return 'pre-inspection';
@@ -79,6 +83,10 @@ export default function App() {
         return <Home setPage={handleSetPage} viewCar={viewCar} />;
       case 'gallery':
         return <Gallery viewCar={viewCar} />;
+      case 'compare':
+        return <Compare setPage={handleSetPage} viewCar={viewCar} />;
+      case 'favorites':
+        return <Favorites setPage={handleSetPage} viewCar={viewCar} />;
       case 'showroom':
         return <Showroom />;
       case 'auction':

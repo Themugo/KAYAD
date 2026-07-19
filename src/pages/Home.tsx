@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
+import HeroCarousel from '../components/HeroCarousel';
 import { CARS } from '../data/cars';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
@@ -56,34 +57,31 @@ export default function Home({ setPage, viewCar }: HomeProps) {
 
   const filters: Filter[] = ['All', 'SUV', 'Pickup', 'Auctions'];
 
+  // Handle carousel car click - convert to local format
+  const handleCarouselView = (car: any) => {
+    const localCar: Car = {
+      id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : 1,
+      make: car.brand || car.make || '',
+      model: car.model || car.title || '',
+      price: car.price || car.currentBid || 0,
+      year: car.year || 2024,
+      mileage: car.mileage || '0 km',
+      fuel: car.fuel || 'Petrol',
+      city: car.location?.city || 'Nairobi',
+      type: 'SUV' as const,
+      badges: [],
+      image: car.images?.[0] || car.images?.[0]?.url || car.image || '',
+    };
+    viewCar(localCar);
+  };
+
   return (
     <div className="min-h-screen">
 
-      {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section className="relative bg-charcoal-900 pt-16 sm:pt-28 pb-12 sm:pb-20 overflow-hidden">
-        {/* Ambient teal glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-2/3 bg-gold-400/8 blur-3xl rounded-full" />
-          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-gold-500/4 blur-3xl rounded-full" />
-        </div>
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="section-label text-gold-400 mb-4 sm:mb-5 tracking-widest2">
-            EAST AFRICA'S TRUSTED CAR MARKETPLACE
-          </p>
-          <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl text-white font-bold leading-tight mb-5 sm:mb-6">
-            Drive Your Dream Today
-          </h1>
-          <p className="font-sans text-white/55 text-base sm:text-lg leading-relaxed mb-7 sm:mb-10 max-w-xl mx-auto">
-            Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button onClick={() => nav('gallery')} className="btn-gold">
-              Browse Cars <ArrowRight size={16} />
-            </button>
-            <button onClick={() => nav('create-account')} className="btn-outline">
-              Sell a Vehicle
-            </button>
-          </div>
+      {/* ── HERO CAROUSEL ──────────────────────────────────────────── */}
+      <section className="relative bg-charcoal-900 pt-16 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <HeroCarousel onViewCar={handleCarouselView} />
         </div>
       </section>
 
