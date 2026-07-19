@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import CompareDrawer from './components/CompareDrawer';
+import MobileBottomNav from './components/MobileBottomNav';
+import ErrorBoundary from './components/ErrorBoundary';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Compare from './pages/Compare';
@@ -10,6 +13,9 @@ import Auction from './pages/Auction';
 import EscrowVault from './pages/EscrowVault';
 import PreInspection from './pages/PreInspection';
 import Support from './pages/Support';
+import Profile from './pages/Profile';
+import Notifications from './pages/Notifications';
+import Chat from './pages/Chat';
 import CarDetail from './pages/CarDetail';
 import Dashboard from './pages/Dashboard';
 import CreateAccount from './pages/CreateAccount';
@@ -63,6 +69,9 @@ export default function App() {
     if (path === '/gallery') return 'gallery';
     if (path === '/compare') return 'compare';
     if (path === '/favorites') return 'favorites';
+    if (path === '/profile') return 'profile';
+    if (path === '/notifications') return 'notifications';
+    if (path === '/chat') return 'chat';
     if (path === '/auction') return 'auction';
     if (path === '/escrow') return 'escrow';
     if (path === '/pre-inspection') return 'pre-inspection';
@@ -87,6 +96,12 @@ export default function App() {
         return <Compare setPage={handleSetPage} viewCar={viewCar} />;
       case 'favorites':
         return <Favorites setPage={handleSetPage} viewCar={viewCar} />;
+      case 'profile':
+        return <Profile setPage={handleSetPage} authUser={authUser} />;
+      case 'notifications':
+        return <Notifications />;
+      case 'chat':
+        return <Chat />;
       case 'showroom':
         return <Showroom />;
       case 'auction':
@@ -115,23 +130,27 @@ export default function App() {
   };
 
   return (
-    <CompareProvider>
-      <div className="min-h-screen flex flex-col">
-        <Navbar
-          currentPage={currentPage}
-          setPage={handleSetPage}
-          authUser={authUser}
-          onSignOut={handleSignOut}
-        />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={renderPage()} />
-            <Route path="/:page" element={renderPage()} />
-            <Route path="/car/:id" element={renderPage()} />
-          </Routes>
-        </main>
-        <Footer setPage={handleSetPage} />
-      </div>
-    </CompareProvider>
+    <ErrorBoundary>
+      <CompareProvider>
+        <div className="min-h-screen flex flex-col">
+          <Navbar
+            currentPage={currentPage}
+            setPage={handleSetPage}
+            authUser={authUser}
+            onSignOut={handleSignOut}
+          />
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={renderPage()} />
+              <Route path="/:page" element={renderPage()} />
+              <Route path="/car/:id" element={renderPage()} />
+            </Routes>
+          </main>
+          <Footer setPage={handleSetPage} />
+          <CompareDrawer />
+          <MobileBottomNav authUser={authUser} />
+        </div>
+      </CompareProvider>
+    </ErrorBoundary>
   );
 }

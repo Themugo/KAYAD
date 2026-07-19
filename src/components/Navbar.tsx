@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Search, X, Menu, LogIn, LogOut, LayoutDashboard,
   ChevronDown, Home, Images, Gavel, Shield, ClipboardCheck,
-  MessageCircle, Tag,
+  MessageCircle, Tag, Heart, BarChart3, Bell, User,
 } from 'lucide-react';
 
 interface AuthUser {
@@ -20,12 +20,12 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: 'Home',           page: 'home',           icon: Home          },
-  { label: 'Gallery',        page: 'gallery',        icon: Images        },
-  { label: 'Auction',        page: 'auction',        icon: Gavel         },
-  { label: 'Escrow Vault',   page: 'escrow',         icon: Shield        },
-  { label: 'Pre-Inspection', page: 'pre-inspection', icon: ClipboardCheck},
-  { label: 'Support',        page: 'support',        icon: MessageCircle },
+  { label: 'Home',           page: 'home',           href: '/'          },
+  { label: 'Gallery',        page: 'gallery',        href: '/gallery'   },
+  { label: 'Auction',        page: 'auction',        href: '/auction'   },
+  { label: 'Escrow Vault',   page: 'escrow',         href: '/escrow'    },
+  { label: 'Pre-Inspection', page: 'pre-inspection', href: '/pre-inspection' },
+  { label: 'Support',        page: 'support',        href: '/support'   },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -171,7 +171,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   </button>
 
                   {userMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-52 bg-charcoal-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-charcoal-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden">
                       <div className="px-4 py-3 border-b border-white/10">
                         <p className="font-sans text-xs font-bold text-white truncate">{authUser.name}</p>
                         <p className="font-sans text-[10px] text-white/40 truncate">{authUser.email}</p>
@@ -180,16 +180,41 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                         </span>
                       </div>
                       <button
-                        onClick={() => handleNav('dashboard')}
-                        className="w-full flex items-center gap-2.5 px-4 py-3 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
+                        onClick={() => handleNav('profile')}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
                       >
-                        <LayoutDashboard size={13} /> Dashboard
+                        <User size={14} /> My Profile
+                      </button>
+                      <button
+                        onClick={() => handleNav('favorites')}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
+                      >
+                        <Heart size={14} /> Saved Vehicles
+                      </button>
+                      <button
+                        onClick={() => handleNav('compare')}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
+                      >
+                        <BarChart3 size={14} /> Compare
+                      </button>
+                      <button
+                        onClick={() => handleNav('notifications')}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
+                      >
+                        <Bell size={14} /> Notifications
+                      </button>
+                      <div className="border-t border-white/10" />
+                      <button
+                        onClick={() => handleNav('dashboard')}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
+                      >
+                        <LayoutDashboard size={14} /> Dashboard
                       </button>
                       <button
                         onClick={() => { onSignOut(); setUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-2.5 px-4 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 font-sans text-xs font-semibold transition-colors text-left border-t border-white/10"
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 font-sans text-xs font-semibold transition-colors text-left border-t border-white/10"
                       >
-                        <LogOut size={13} /> Sign Out
+                        <LogOut size={14} /> Sign Out
                       </button>
                     </div>
                   )}
