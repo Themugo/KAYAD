@@ -117,17 +117,42 @@ export default function Gallery({ viewCar }: GalleryProps) {
       const carList = data?.cars || data?.data || [];
       const total = data?.total || carList.length;
       
-      if (reset) {
-        setAllCars(carList);
+      // Fallback to demo data if API returns empty
+      if (carList.length === 0 && reset) {
+        const { CARS } = await import('../data/cars');
+        const demoCars = CARS.map((c: any) => ({
+          _id: String(c.id),
+          id: c.id,
+          brand: c.make,
+          title: `${c.make} ${c.model}`,
+          model: c.model,
+          price: c.price,
+          year: c.year,
+          mileage: c.mileage,
+          fuel: c.fuel,
+          type: c.type,
+          city: c.city,
+          image: c.image,
+          images: [c.image],
+          badges: c.badges || [],
+          status: 'active',
+        }));
+        setAllCars(demoCars);
+        setTotalCount(demoCars.length);
+        setHasMore(false);
       } else {
-        setAllCars(prev => [...prev, ...carList]);
+        if (reset) {
+          setAllCars(carList);
+        } else {
+          setAllCars(prev => [...prev, ...carList]);
+        }
+        setTotalCount(total);
+        setHasMore(carList.length >= 24 && (reset ? carList.length : allCars.length + carList.length) < total);
       }
-      setTotalCount(total);
-      setHasMore(carList.length >= 24 && (reset ? carList.length : allCars.length + carList.length) < total);
       setPage(pageNum);
     } catch (error) {
       console.error('Failed to fetch cars:', error);
-      // Fallback to demo data
+      // Fallback to demo data on error
       const { CARS } = await import('../data/cars');
       const demoCars = CARS.map((c: any) => ({
         _id: String(c.id),
@@ -185,6 +210,19 @@ export default function Gallery({ viewCar }: GalleryProps) {
     if (selectedCity !== 'All') count++;
     return count;
   }, [typeFilter, maxPrice, minYear, selectedMake, selectedCity]);
+
+  // Type count memoization
+  const typeCounts = useMemo(() => {
+    const counts = { All: allCars.length, SUV: 0, Pickup: 0, Sedan: 0, Wagon: 0 };
+    allCars.forEach(c => {
+      const t = (c.type || '').toUpperCase();
+      if (t === 'SUV') counts.SUV++;
+      else if (t === 'PICKUP') counts.Pickup++;
+      else if (t === 'SEDAN') counts.Sedan++;
+      else if (t === 'WAGON') counts.Wagon++;
+    });
+    return counts;
+  }, [allCars]);
 
   // Convert API car to CarCard format
   const toCardCar = useCallback((car: any): Car => ({
@@ -475,18 +513,23 @@ export default function Gallery({ viewCar }: GalleryProps) {
 
         {/* Type Pills (always visible) */}
         <div className="flex items-center gap-2 flex-wrap mb-8">
-          {types.map(t => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
-            >
-              {t}
-              <span className="ml-1.5 text-xs opacity-60">
-                ({allCars.filter(c => t === 'All' || c.type === t).length})
-              </span>
-            </button>
-          ))}
+          {types.map(t => {
+            const count = t === 'All' 
+              ? allCars.length 
+              : allCars.filter(c => (c.type || '').toUpperCase() === t.toUpperCase()).length;
+            return (
+              <button
+                key={t}
+                onClick={() => setTypeFilter(t)}
+                className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
+              >
+                {t}
+                <span className="ml-1.5 text-xs opacity-60">
+                  ({count})
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Grid / List View */}
