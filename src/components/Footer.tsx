@@ -1,11 +1,9 @@
-type Page = 'home' | 'gallery' | 'auction' | 'escrow' | 'pre-inspection' | 'support';
-
 interface FooterProps {
-  setPage: (page: Page) => void;
+  setPage: (page: string) => void;
 }
 
 export default function Footer({ setPage }: FooterProps) {
-  const nav = (page: Page) => {
+  const nav = (page: string) => {
     setPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -37,10 +35,10 @@ export default function Footer({ setPage }: FooterProps) {
             <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Marketplace</h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'Browse Cars', page: 'gallery' as Page },
-                { label: 'Live Auctions', page: 'auction' as Page },
-                { label: 'Sell Your Car', page: 'gallery' as Page },
-                { label: 'Escrow Vault', page: 'escrow' as Page },
+                { label: 'Browse Cars', page: 'gallery' },
+                { label: 'Live Auctions', page: 'auction' },
+                { label: 'Sell Your Car', page: 'gallery' },
+                { label: 'Escrow Vault', page: 'escrow' },
               ].map(({ label, page }) => (
                 <li key={label}>
                   <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">
@@ -56,10 +54,10 @@ export default function Footer({ setPage }: FooterProps) {
             <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Services</h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'Pre-Inspection', page: 'pre-inspection' as Page },
-                { label: 'Car Financing', page: 'support' as Page },
-                { label: 'Insurance', page: 'support' as Page },
-                { label: 'Become a Dealer', page: 'support' as Page },
+                { label: 'Pre-Inspection', page: 'pre-inspection' },
+                { label: 'Car Financing', page: 'support' },
+                { label: 'Insurance', page: 'support' },
+                { label: 'Become a Dealer', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
                   <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">
@@ -75,10 +73,10 @@ export default function Footer({ setPage }: FooterProps) {
             <h4 className="text-gold-400 font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'About KAYAD', page: 'home' as Page },
-                { label: 'How It Works', page: 'home' as Page },
-                { label: 'Support', page: 'support' as Page },
-                { label: 'Contact', page: 'support' as Page },
+                { label: 'About KAYAD', page: 'home' },
+                { label: 'How It Works', page: 'home' },
+                { label: 'Support', page: 'support' },
+                { label: 'Contact', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
                   <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-gold-400 transition-colors duration-200">

@@ -1,0 +1,233 @@
+import { useState, useEffect } from 'react';
+import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench, Loader2 } from 'lucide-react';
+import CarCard from '../components/CarCard';
+import type { Car } from '../types';
+import { carsAPI } from '../api/client';
+
+type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
+
+interface HomeProps {
+  setPage: (page: string) => void;
+  viewCar: (car: Car) => void;
+}
+
+const TRUST_BADGES = [
+  { icon: Shield, title: 'Escrow Protection', desc: 'Funds held until safe delivery' },
+  { icon: Search, title: 'Pre-Inspection', desc: 'Independent check before purchase' },
+  { icon: CheckCircle, title: 'Verified Dealers', desc: 'All sellers vetted and approved' },
+  { icon: Tag, title: 'Live Auctions', desc: 'Transparent real-time bidding' },
+];
+
+const FEATURES = [
+  {
+    icon: CreditCard,
+    title: 'M-Pesa Escrow',
+    desc: 'Your money is protected until you safely receive your car. No scams, no risk.',
+  },
+  {
+    icon: Wrench,
+    title: '150-Point Inspection',
+    desc: 'Certified mechanics inspect every vehicle before you commit to buying.',
+  },
+  {
+    icon: CheckCircle,
+    title: 'Verified Dealers',
+    desc: 'All dealers are vetted, licensed, and rated by real buyers like you.',
+  },
+  {
+    icon: Tag,
+    title: 'Live Auctions',
+    desc: 'Bid on rare finds in real-time. Transparent pricing, no hidden fees.',
+  },
+];
+
+export default function Home({ setPage, viewCar }: HomeProps) {
+  const [filter, setFilter] = useState<Filter>('All');
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const nav = (page: string) => {
+    setPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        setLoading(true);
+        const response = await carsAPI.list({ page: 1, limit: 8 });
+        const carsList = response?.cars || response?.data || response || [];
+        setCars(Array.isArray(carsList) ? carsList : []);
+      } catch (err) {
+        console.error('Failed to fetch cars:', err);
+        setCars([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCars();
+  }, []);
+
+  // Filter cars based on selected filter
+  const filteredCars = cars.filter(car => {
+    if (filter === 'All') return true;
+    if (filter === 'Auctions') return car.auction?.isActive || car.badges?.includes('auction');
+    return car.bodyType === filter || car.type === filter;
+  }).slice(0, 4);
+
+  const filters: Filter[] = ['All', 'SUV', 'Pickup', 'Auctions'];
+
+  return (
+    <div className="min-h-screen">
+
+      {/* ── HERO ──────────────────────────────────────────────────── */}
+      <section className="relative bg-charcoal-900 pt-16 sm:pt-28 pb-12 sm:pb-20 overflow-hidden">
+        {/* Ambient teal glow */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-2/3 bg-gold-400/8 blur-3xl rounded-full" />
+          <div className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-gold-500/4 blur-3xl rounded-full" />
+        </div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="section-label text-gold-400 mb-4 sm:mb-5 tracking-widest2">
+            EAST AFRICA'S TRUSTED CAR MARKETPLACE
+          </p>
+          <h1 className="font-serif text-3xl sm:text-5xl lg:text-7xl text-white font-bold leading-tight mb-5 sm:mb-6">
+            Drive Your Dream Today
+          </h1>
+          <p className="font-sans text-white/55 text-base sm:text-lg leading-relaxed mb-7 sm:mb-10 max-w-xl mx-auto">
+            Buy, sell and auction vehicles with confidence. Trusted by thousands of Kenyan car buyers.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button onClick={() => nav('gallery')} className="btn-gold">
+              Browse Cars <ArrowRight size={16} />
+            </button>
+            <button onClick={() => nav('create-account')} className="btn-outline">
+              Sell a Vehicle
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRUST BADGES ──────────────────────────────────────────── */}
+      <section className="bg-charcoal-800 border-t border-white/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 lg:divide-x divide-gold-700/40">
+            {TRUST_BADGES.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-6 py-6">
+                <div className="w-10 h-10 rounded-lg bg-gold-400/25 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-400/30">
+                  <Icon size={20} className="text-gold-400" />
+                </div>
+                <div>
+                  <p className="font-sans text-sm font-semibold text-white">{title}</p>
+                  <p className="font-sans text-xs text-white/40 mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURED VEHICLES ─────────────────────────────────────── */}
+      <section className="bg-cream-100 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <p className="section-label mb-3">Premium Selection</p>
+            <h2 className="section-heading mb-3">Featured Vehicles</h2>
+            <p className="font-sans text-warm-400 text-sm">
+              Handpicked quality cars from verified dealers across Kenya
+            </p>
+          </div>
+
+          {/* Filter pills */}
+          <div className="flex justify-center gap-2 flex-wrap mb-8">
+            {filters.map(f => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={filter === f ? 'pill-active' : 'pill-inactive'}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 size={40} className="animate-spin text-gold-600" />
+            </div>
+          ) : filteredCars.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredCars.map(car => (
+                <CarCard key={car._id || car.id} car={car} onClick={() => viewCar(car)} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-warm-400 py-8">No vehicles available at the moment.</p>
+          )}
+
+          <div className="flex flex-wrap justify-center gap-4 mt-10">
+            <button
+              onClick={() => nav('gallery')}
+              className="font-sans text-sm text-gold-700 font-semibold hover:text-gold-600 transition-colors flex items-center gap-1"
+            >
+              View all vehicles <ArrowRight size={14} />
+            </button>
+            <button
+              onClick={() => nav('gallery')}
+              className="btn-outline-dark"
+            >
+              Browse All Cars <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── BUILT FOR KENYA ───────────────────────────────────────── */}
+      <section className="bg-cream-50 py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="section-heading mb-3">Built for Kenya</h2>
+            <p className="font-sans text-warm-400 text-sm max-w-md mx-auto">
+              We understand the Kenyan car market. Here's why thousands trust KAYAD.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {FEATURES.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 bg-white p-6 rounded-2xl border border-cream-200 hover:shadow-md hover:border-gold-600/40 transition-all duration-200">
+                <div className="w-11 h-11 rounded-xl bg-gold-600/15 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-600/20">
+                  <Icon size={20} className="text-gold-700" />
+                </div>
+                <div>
+                  <h3 className="font-sans font-semibold text-charcoal-900 mb-1">{title}</h3>
+                  <p className="font-sans text-sm text-warm-500 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ───────────────────────────────────────────────────── */}
+      <section className="relative bg-charcoal-900 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-full bg-gold-500/6 blur-3xl rounded-full" />
+        </div>
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-20">
+          <h2 className="font-serif text-2xl sm:text-4xl text-white font-bold mb-4">Ready to Find Your Dream Car?</h2>
+          <p className="font-sans text-white/50 text-base mb-8">
+            Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button onClick={() => nav('gallery')} className="btn-gold">
+              Start Browsing
+            </button>
+            <button onClick={() => nav('support')} className="btn-outline">
+              Become a Dealer
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  );
+}
