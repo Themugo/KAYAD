@@ -9,7 +9,7 @@ import DemoModeBanner from './components/DemoModeBanner';
 import LoadingPage from './components/LoadingPage';
 import SWUpdateBanner from './components/SWUpdateBanner';
 import { ToastProvider } from './context/ToastContext';
-import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer, RequireSeller, RequireEmailVerified } from './context/AuthContext';
+import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { BrandingProvider } from './context/BrandingContext';
@@ -138,11 +138,6 @@ function SecureAdmin({ children, roles }: { children: React.ReactNode; roles?: s
 
 function Dealer({ children }: { children: React.ReactNode }) {
   return <RequireDealer>{children}</RequireDealer>;
-}
-
-function Public({ children }: { children: React.ReactNode }) {
-  const { isAuth } = require('./context/AuthContext').useAuth?.() || { isAuth: false };
-  return children;
 }
 
 function AppContent() {
