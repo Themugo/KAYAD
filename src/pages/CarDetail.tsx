@@ -1,12 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
   CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
   MessageCircle, Star, ChevronRight, Lock, Clock,
-  ChevronLeft, ChevronRight as ChevronRightAlt, X, ZoomIn,
+  ChevronLeft, X, ZoomIn, BarChart3,
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import { CARS } from '../data/cars';
+import { formatKES } from '../utils/helpers';
+import {
+  GalleryImage,
+  GalleryThumbnails,
+  SpecItem,
+  CompareToggle,
+  GalleryModal,
+  NtsaStatusCard,
+  InlineBidding,
+  AuctionAnnouncement,
+  CarDetailReviews,
+} from './car/components';
 
 type AnyPage = string;
 
@@ -15,6 +27,24 @@ interface CarDetailProps {
   setPage: (page: AnyPage) => void;
   viewCar: (car: Car) => void;
 }
+
+// Convert Car to format expected by components
+const toApiCar = (car: Car) => ({
+  ...car,
+  _id: String(car.id),
+  title: `${car.make} ${car.model}`,
+  brand: car.make,
+  mileage: car.mileage,
+  location: { city: car.city },
+  images: [car.image, car.image, car.image],
+  auctionStatus: car.badges.includes('auction') ? 'live' : undefined,
+  auctionEnd: car.badges.includes('auction') ? new Date(Date.now() + 3600000).toISOString() : undefined,
+  currentBid: car.badges.includes('auction') ? Math.floor(car.price * 0.9) : undefined,
+  bidsCount: car.badges.includes('auction') ? 3 : 0,
+  ntsaVerified: car.badges.includes('verified'),
+  isPromoted: false,
+  isDemo: false,
+});
 
 const FEATURES: Record<string, string[]> = {
   SUV:    ['Leather Seats', 'Panoramic Sunroof', 'Apple CarPlay', 'Rear Camera', 'Adaptive Cruise', 'Blind Spot Monitor'],
@@ -30,16 +60,16 @@ const INSPECTION_CATS = [
   { label: 'Interior & Safety',   icon: Shield, score: 94 },
 ];
 
-type Tab = 'overview' | 'inspection' | 'financing';
+type Tab = 'overview' | 'inspection' | 'financing' | 'reviews';
 
 export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
   const [saved, setSaved] = useState(false);
   const [tab, setTab]     = useState<Tab>('overview');
-  const fmt = (n: number) => n.toLocaleString('en-KE');
-
-  // Image gallery state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+
+  const apiCar = toApiCar(car);
 
   // Generate multiple images for gallery
   const carImages = [
@@ -56,6 +86,33 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
 
   const features = FEATURES[car.type] ?? FEATURES.SUV;
   const similar  = CARS.filter(c => c.type === car.type && c.id !== car.id).slice(0, 3);
+
+  const specs = [
+    { icon: Calendar, label: 'Year', value: car.year },
+    { icon: Gauge, label: 'Mileage', value: car.mileage },
+    { icon: Fuel, label: 'Fuel', value: car.fuel },
+    { icon: MapPin, label: 'Location', value: car.city },
+  ];
+
+  // Demo reviews
+  useEffect(() => {
+    setReviews([
+      {
+        _id: '1',
+        user: { name: 'James M.' },
+        rating: 5,
+        comment: 'Excellent service! The dealer was very professional and the car was exactly as described.',
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      },
+      {
+        _id: '2',
+        user: { name: 'Sarah K.' },
+        rating: 4,
+        comment: 'Good experience overall. The escrow process gave me peace of mind.',
+        createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
+      },
+    ]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
