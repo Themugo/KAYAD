@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { CountdownDisplay } from '../../hooks/useCountdown';
+import { Button, Badge, SpinnerPage, Modal } from '../../components/ui';
 
 export default function AdminAuctions() {
   const { toast } = useToast();
@@ -154,7 +155,7 @@ export default function AdminAuctions() {
         </div>
 
         {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
+          <SpinnerPage label="Loading auctions..." />
         ) : displayed.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">⚡</div>
@@ -253,17 +254,10 @@ export default function AdminAuctions() {
         )}
       </div>
 
-      {/* ─── Start Auction Modal ─── */}
-      {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
-          <div className="modal-box">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Start Auction</div>
-                <h3 style={{ marginTop: 4 }}>{selected.title}</h3>
-              </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
-            </div>
+      <Modal open={!!selected} onClose={() => setSelected(null)} title="Start Auction">
+        {selected && (
+          <>
+            <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{selected.title}</div>
 
             <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Starting Price</div>
@@ -274,12 +268,13 @@ export default function AdminAuctions() {
               <label className="input-label">Auction Duration</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {[6, 12, 24, 48, 72].map(h => (
-                  <button key={h}
-                    className={`btn btn-sm ${startForm.hours === h ? 'btn-gold' : 'btn-outline'}`}
+                  <Button key={h}
+                    variant={startForm.hours === h ? 'primary' : 'outline'}
+                    size="sm"
                     onClick={() => setStartForm({ hours: h })}
                   >
                     {h}h
-                  </button>
+                  </Button>
                 ))}
               </div>
               <div style={{ marginTop: 8 }}>
@@ -292,25 +287,17 @@ export default function AdminAuctions() {
               </div>
             </div>
 
-            <button className="btn btn-gold btn-full btn-lg" onClick={handleStart} disabled={actionId === selected._id}>
-              {actionId === selected._id ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Starting...</> : '🔴 Go Live Now'}
-            </button>
-          </div>
-        </div>
-      )}
+            <Button variant="primary" full size="lg" onClick={handleStart} loading={actionId === selected._id}>
+              Go Live Now
+            </Button>
+          </>
+        )}
+      </Modal>
 
-      {/* ─── Set Winner Modal ─── */}
-      {winnerModal && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setWinnerModal(null)}>
-          <div className="modal-box" style={{ maxWidth: 540 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Declare Winner</div>
-                <h3 style={{ marginTop: 4 }}>{winnerModal.car.title}</h3>
-              </div>
-              <button onClick={() => setWinnerModal(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
-            </div>
-
+      <Modal open={!!winnerModal} onClose={() => setWinnerModal(null)} title="Declare Winner" size="md">
+        {winnerModal && (
+          <>
+            <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{winnerModal.car.title}</div>
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
               Select the winning bid. The winner will be notified and an escrow will be initiated automatically.
             </p>
@@ -333,7 +320,7 @@ export default function AdminAuctions() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {i === 0 && <span>👑</span>}
                         <span style={{ fontWeight: 600, fontSize: 14 }}>{bid.user?.name || 'Bidder'}</span>
-                        {bid.mpesaPaid && <span className="badge badge-green" style={{ fontSize: 9 }}>✓ M-Pesa Paid</span>}
+                        {bid.mpesaPaid && <Badge variant="green" size="sm">✓ M-Pesa Paid</Badge>}
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                         {bid.phone} · {new Date(bid.createdAt).toLocaleString('en-KE')}
@@ -341,21 +328,22 @@ export default function AdminAuctions() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div className="price-tag">{formatKES(bid.amount)}</div>
-                      <button
-                        className={`btn btn-sm ${i === 0 ? 'btn-gold' : 'btn-outline'}`}
+                      <Button
+                        variant={i === 0 ? 'primary' : 'outline'}
+                        size="sm"
                         onClick={() => handleSetWinner(bid._id)}
-                        disabled={actionId === bid._id}
+                        loading={actionId === bid._id}
                       >
-                        {actionId === bid._id ? '...' : '🏆 Select'}
-                      </button>
+                        Select
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

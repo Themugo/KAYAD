@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Gavel, Play, Clock, RefreshCw } from 'lucide-react';
 import { dealerAPI, dealerAuctionAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { Button, SpinnerInline } from '../../components/ui';
 import DealerAuctionDraftCard from './components/DealerAuctionDraftCard';
 import DealerAuctionLiveCard from './components/DealerAuctionLiveCard';
 import DealerAuctionEndedCard from './components/DealerAuctionEndedCard';
@@ -153,8 +154,8 @@ export default function DealerAuctionSetup() {
               <p style={{ margin: '8px 0 0', color: 'rgba(15, 23, 42, 0.48)', fontSize: 13 }}>Configure starting bids, reserve prices, countdown duration, live extensions, and auction endings.</p>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button onClick={fetchCars} style={styles.secondaryButton}><RefreshCw size={14} /> Refresh</button>
-              <Link to="/dealer" style={{ ...styles.secondaryButton, textDecoration: 'none' }}>Back to Dashboard</Link>
+              <Button variant="secondary" size="sm" onClick={fetchCars}><RefreshCw size={14} /> Refresh</Button>
+              <Link to="/dealer" style={{ textDecoration: 'none' }}><Button variant="secondary" size="sm">Back to Dashboard</Button></Link>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 4, overflowX: 'auto' }}>
@@ -175,7 +176,7 @@ export default function DealerAuctionSetup() {
 
       <div style={styles.contentInner}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}><div className="spinner" /></div>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '64px 0' }}><SpinnerInline /></div>
         ) : activeCars.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '64px 24px', background: '#FFFFFF', borderRadius: 10, border: '1px solid rgba(15, 23, 42, 0.07)' }}>
             <Gavel size={42} style={{ color: 'rgba(15, 23, 42, 0.14)', marginBottom: 14 }} />

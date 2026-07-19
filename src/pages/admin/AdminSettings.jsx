@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
+import { Button, Badge, SpinnerPage } from '../../components/ui';
 
 const DEFAULTS = {
   platformName: 'Giclan Motors',
@@ -144,7 +145,7 @@ export default function AdminSettings() {
     return (
       <div className="page">
         <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 900 }}>
-          <div className="loading-center"><div className="spinner" /></div>
+          <SpinnerPage label="Loading settings..." />
         </div>
       </div>
     );
@@ -219,9 +220,9 @@ export default function AdminSettings() {
                 </label>
               ))}
               <div style={{ marginTop: 16 }}>
-                <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving} style={{ width: '100%' }}>
-                  {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save General Settings'}
-                </button>
+                <Button variant="primary" full onClick={() => saveConfig('general')} loading={saving}>
+                  Save General Settings
+                </Button>
               </div>
             </div>
 
@@ -232,11 +233,11 @@ export default function AdminSettings() {
         {tab === 'payments' && (
           <div style={{ display: 'grid', gap: 20 }}>
             <div className="card" style={{ padding: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <h3 style={{ fontSize: 18 }}>📱 Daraja / M-Pesa</h3>
-                <span className={`badge ${daraja.environment === 'production' ? 'badge-orange' : 'badge-green'}`} style={{ textTransform: 'uppercase' }}>
+                <Badge variant={daraja.environment === 'production' ? 'orange' : 'green'}>
                   {daraja.environment}
-                </span>
+                </Badge>
               </div>
 
               <div style={{ display: 'grid', gap: 16, maxWidth: 700 }}>
@@ -288,9 +289,9 @@ export default function AdminSettings() {
                         onChange={e => setTestAmount(Number(e.target.value))}
                         style={{ width: 100, height: 38 }} />
                     </div>
-                    <button className="btn btn-gold" onClick={testMpesa} disabled={testingMpesa} style={{ height: 38 }}>
-                      {testingMpesa ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Sending...</> : '💳 Send Test Payment'}
-                    </button>
+                    <Button variant="primary" onClick={testMpesa} loading={testingMpesa} style={{ height: 38 }}>
+                      Send Test Payment
+                    </Button>
                   </div>
                   <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
                     Sends a real STK Push to the test phone via Daraja.
@@ -298,9 +299,9 @@ export default function AdminSettings() {
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <button className="btn btn-gold" onClick={() => saveConfig('payments')} disabled={saving}>
-                    {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Payment Settings'}
-                  </button>
+                  <Button variant="primary" onClick={() => saveConfig('payments')} loading={saving}>
+                    Save Payment Settings
+                  </Button>
                 </div>
               </div>
             </div>
@@ -381,9 +382,9 @@ export default function AdminSettings() {
               </Field>
             </div>
             <div style={{ marginTop: 20 }}>
-              <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving}>
-                {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Reconciliation Settings'}
-              </button>
+              <Button variant="primary" onClick={() => saveConfig('reconciliation')} loading={saving}>
+                Save Reconciliation Settings
+              </Button>
             </div>
           </div>
         )}

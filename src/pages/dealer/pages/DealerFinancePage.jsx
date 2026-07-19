@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { dealerAPI } from '../../../api/api';
 import { useToast } from '../../../context/ToastContext';
 import { DollarSign } from 'lucide-react';
+import { SpinnerInline } from '../../../components/ui';
 import DealerEarningsTab from '../components/DealerEarningsTab';
 
 export default function DealerFinancePage() {
@@ -28,7 +29,7 @@ export default function DealerFinancePage() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><SpinnerInline /></div>
         ) : (
           <>
             <DealerEarningsTab earnings={earnings} />

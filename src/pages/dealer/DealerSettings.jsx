@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { authAPI } from '../../api/api';
+import { Button } from '../../components/ui';
 
 export default function DealerSettings() {
   const { user } = useAuth();
@@ -275,9 +276,9 @@ export default function DealerSettings() {
 
           {tab !== 'notifications' && (
             <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
-              <button className="btn btn-gold btn-lg" onClick={handleSave} disabled={saving}>
-                {saving ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Saving...</> : '💾 Save Settings'}
-              </button>
+              <Button variant="primary" size="lg" onClick={handleSave} loading={saving}>
+                💾 Save Settings
+              </Button>
             </div>
           )}
         </div>

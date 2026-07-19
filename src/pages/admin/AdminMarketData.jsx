@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { Button, SpinnerPage, Pagination } from '../../components/ui';
 
 const EMPTY_FORM = { brand: '', model: '', year: '', bodyType: '', fuel: '', transmission: '', engineCC: '', lowPrice: '', avgPrice: '', highPrice: '', sampleSize: 1, source: 'platform' };
 
@@ -177,7 +178,7 @@ export default function AdminMarketData() {
 
         {/* Table */}
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
+          <SpinnerPage label="Loading market data..." />
         ) : entries.length === 0 ? (
           <div className="empty-state" style={{ padding: 48 }}><div className="empty-icon">📊</div><h3>No market data found</h3><p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Add your first pricing entry or adjust filters</p></div>
         ) : (

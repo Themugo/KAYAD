@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { carsAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { calculateListingQualityScore, getQualityScoreColor, getQualityScoreGradient } from '../../utils/listingQualityScore';
+import { Button } from '../../components/ui';
 
 const BRANDS  = ['Toyota','Mercedes-Benz','BMW','Land Rover','Subaru','Mazda','Nissan','Honda','Volkswagen','Lexus','Audi','Mitsubishi','Hyundai','Kia','Ford','Jeep','Peugeot','Isuzu'];
 const FUELS   = ['Petrol','Diesel','Hybrid','Electric','LPG'];
@@ -345,15 +346,13 @@ export default function AddCarPage() {
         {/* Navigation Buttons */}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
           {step > 1 ? (
-            <button className="btn btn-outline" onClick={() => setStep(s => s - 1)}>← Back</button>
+            <Button variant="outline" onClick={() => setStep(s => s - 1)}>← Back</Button>
           ) : <div />}
 
           {step < 4 ? (
-            <button className="btn btn-gold" onClick={() => setStep(s => s + 1)}>Continue →</button>
+            <Button variant="primary" onClick={() => setStep(s => s + 1)}>Continue →</Button>
           ) : (
-            <button className="btn btn-gold btn-lg" onClick={handleSubmit} disabled={loading}>
-              {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Publishing...</> : '🚗 Publish Listing'}
-            </button>
+            <Button variant="primary" size="lg" onClick={handleSubmit} loading={loading}>🚗 Publish Listing</Button>
           )}
         </div>
       </div>

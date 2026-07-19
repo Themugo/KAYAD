@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Filter, TrendingUp, Users, DollarSign, Shield } from 'lucide-react';
 import api from '../../../api/api';
+import { Card, SpinnerInline } from '../../../components/ui';
 
 const widgetStyle = {
   background: 'var(--card)',
@@ -86,25 +87,25 @@ export default function ConversionFunnelDashboard({ dealerId }) {
 
   if (loading) {
     return (
-      <div style={widgetStyle}>
+      <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Loading analytics...</div>
-      </div>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}><SpinnerInline label="Loading analytics..." /></div>
+      </Card>
     );
   }
 
   if (!analytics) {
     return (
-      <div style={widgetStyle}>
+      <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No analytics data available</div>
-      </div>
+      </Card>
     );
   }
 
@@ -115,7 +116,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
   };
 
   return (
-    <div style={widgetStyle}>
+    <Card>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
         <Filter size={16} style={{ color: 'var(--gold)' }} />
         <span style={widgetHeader}>Conversion Funnel</span>
@@ -175,6 +176,6 @@ export default function ConversionFunnelDashboard({ dealerId }) {
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

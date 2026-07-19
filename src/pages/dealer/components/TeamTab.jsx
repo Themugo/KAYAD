@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { dealerAPI } from '../../../api/api';
 import { Shield, UserPlus, Mail, X, Check, Users } from 'lucide-react';
+import { Button, SpinnerInline } from '../../../components/ui';
 
 export const DEALER_ROLES = [
   { id: 'manager',        label: 'Manager',        color: '#f97316', desc: 'Full control except team deletion' },
@@ -119,9 +120,9 @@ export default function TeamTab({ toast }) {
             style={{ padding: '10px 14px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: 'var(--card)', color: '#fff', fontSize: 13, outline: 'none', flex: 1, minWidth: 160 }}>
             {DEALER_ROLES.map(r => <option key={r.id} value={r.id} style={{ background: 'var(--card)' }}>{r.label}</option>)}
           </select>
-          <button onClick={invite} disabled={inviting || !invEmail.trim()} style={{ padding: '10px 22px', background: invEmail.trim() ? 'var(--gold)' : 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 9, color: invEmail.trim() ? '#000' : 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 900, cursor: invEmail.trim() ? 'pointer' : 'default', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
+          <Button onClick={invite} disabled={inviting || !invEmail.trim()} variant="primary" size="sm">
             {inviting ? 'Sending…' : 'Send Invite'}
-          </button>
+          </Button>
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.22)', marginTop: 10 }}>
           They'll receive an email to join your dealership's team. Access is instant once they accept.
@@ -138,7 +139,7 @@ export default function TeamTab({ toast }) {
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><SpinnerInline /></div>
       ) : team.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px', background: 'var(--card)', borderRadius: 'var(--radius-lg)', border: '1px solid rgba(255,255,255,0.06)' }}>
           <Users size={36} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: 14 }} />
@@ -169,14 +170,12 @@ export default function TeamTab({ toast }) {
                   <span style={{ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: `${statusColor[m.status] || '#666'}15`, color: statusColor[m.status] || '#666', textTransform: 'uppercase', letterSpacing: '0.06em', flexShrink: 0 }}>
                     {m.status}
                   </span>
-                  <button onClick={() => setExpanded(isExp ? null : m._id)}
-                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                  <Button variant={isExp ? 'primary' : 'ghost'} size="sm" onClick={() => setExpanded(isExp ? null : m._id)}>
                     Permissions
-                  </button>
-                  <button onClick={() => remove(m._id)}
-                    style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.14)', color: 'rgba(239,68,68,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  </Button>
+                  <Button variant="danger" size="icon" onClick={() => remove(m._id)}>
                     <X size={13} />
-                  </button>
+                  </Button>
                 </div>
 
                 {isExp && (
@@ -186,13 +185,15 @@ export default function TeamTab({ toast }) {
                       {Object.entries(PERM_LABELS).map(([key, label]) => {
                         const on = m.permissions?.[key] ?? false;
                         return (
-                          <button key={key} onClick={() => togglePerm(m._id, key)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 12px', borderRadius: 8, border: `1px solid ${on ? 'rgba(34,197,94,0.25)' : 'rgba(255,255,255,0.07)'}`, background: on ? 'rgba(34,197,94,0.07)' : 'rgba(255,255,255,0.03)', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: on ? '#22c55e' : 'rgba(255,255,255,0.4)', transition: 'all 0.15s' }}>
+                          <Button key={key} onClick={() => togglePerm(m._id, key)}
+                            variant={on ? 'success' : 'ghost'}
+                            size="sm"
+                            style={{ display: 'flex', alignItems: 'center', gap: 7, justifyContent: 'flex-start' }}>
                             <div style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${on ? '#22c55e' : 'rgba(255,255,255,0.2)'}`, background: on ? '#22c55e' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                               {on && <Check size={9} style={{ color: '#000' }} />}
                             </div>
                             {label}
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>

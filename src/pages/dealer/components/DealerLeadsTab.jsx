@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { dealerAPI } from '../../../api/api';
 import { MessageSquare, Mail, Phone, Search, X, Archive } from 'lucide-react';
 import { timeAgo } from './DashboardWidgets';
+import { Button, SpinnerInline } from '../../../components/ui';
 
 const STAGE_CONFIG = {
   new:             { label: 'New',           color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
@@ -86,26 +87,22 @@ export default function DealerLeadsTab({ toast }) {
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        <button onClick={() => setFilter('')}
-          style={{ padding: '5px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
-            background: !filter ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${!filter ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
-            color: !filter ? '#000' : 'rgba(255,255,255,0.5)' }}>
+        <Button onClick={() => setFilter('')}
+          variant={!filter ? 'primary' : 'ghost'}
+          size="xs">
           All
-        </button>
+        </Button>
         {Object.entries(STAGE_CONFIG).map(([key, cfg]) => (
-          <button key={key} onClick={() => setFilter(key === filter ? '' : key)}
-            style={{ padding: '5px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
-              background: filter === key ? cfg.bg : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${filter === key ? cfg.color + '40' : 'rgba(255,255,255,0.08)'}`,
-              color: filter === key ? cfg.color : 'rgba(255,255,255,0.5)' }}>
+          <Button key={key} onClick={() => setFilter(key === filter ? '' : key)}
+            variant={filter === key ? 'primary' : 'ghost'}
+            size="xs">
             {cfg.label}
-          </button>
+          </Button>
         ))}
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><SpinnerInline /></div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.35)' }}>
           <MessageSquare size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
@@ -178,10 +175,9 @@ export default function DealerLeadsTab({ toast }) {
                       <option key={s} value={s}>{STAGE_CONFIG[s]?.label || s}</option>
                     ))}
                   </select>
-                  <button onClick={() => handleArchive(lead._id)} title="Archive"
-                    style={{ padding: '5px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', fontSize: 10, cursor: 'pointer' }}>
+                  <Button variant="ghost" size="icon" onClick={() => handleArchive(lead._id)} title="Archive">
                     <Archive size={12} />
-                  </button>
+                  </Button>
                 </div>
               </div>
             );

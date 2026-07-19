@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { inspectionAPI, formatKES } from '../../api/api';
 import { UserCheck, ClipboardCheck } from 'lucide-react';
+import { Button, Badge, SpinnerPage } from '../../components/ui';
 
 const STATUS_COLORS = {
   pending_payment: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -79,7 +80,7 @@ export default function AdminInspections() {
         </div>
 
         {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
+          <SpinnerPage label="Loading inspections..." />
         ) : orders.length === 0 ? (
           <div className="empty-state" style={{ padding: 48 }}>
             <ClipboardCheck size={40} style={{ opacity: 0.2 }} />
@@ -105,10 +106,11 @@ export default function AdminInspections() {
                       </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{
-                        fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em',
-                        padding: '3px 10px', borderRadius: 6, background: sc.bg, color: sc.color,
-                      }}>{o.status}</span>
+                      <Badge variant={
+                        o.status === 'completed' ? 'green' : o.status === 'cancelled' ? 'red' : o.status === 'paid' || o.status === 'assigned' ? 'blue' : 'orange'
+                      }>
+                        {o.status}
+                      </Badge>
                     </div>
                   </div>
 

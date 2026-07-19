@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ntsaAPI } from '../../api/api';
-import { ShieldCheck, Search, CheckCircle, XCircle, FileText, X } from 'lucide-react';
+import { ShieldCheck, Search, CheckCircle, XCircle, FileText } from 'lucide-react';
+import { Button, Badge, SpinnerPage, Modal } from '../../components/ui';
+
+const STATUS_VARIANT = {
+  pending: 'orange',
+  in_review: 'blue',
+  passed: 'green',
+  failed: 'red',
+};
 
 const STATUS_COLORS = {
   pending: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -8,30 +16,6 @@ const STATUS_COLORS = {
   passed: { bg: 'rgba(34,197,94,0.1)', color: '#22c55e' },
   failed: { bg: 'rgba(239,68,68,0.1)', color: '#ef4444' },
 };
-
-function Modal({ title, children, onClose }) {
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-    }} onClick={onClose} role="presentation">
-      <div onClick={e => e.stopPropagation()} role="presentation" style={{
-        background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)',
-        borderRadius: 16, padding: 28, width: 420, maxWidth: '90vw',
-        position: 'relative',
-      }}>
-        <button onClick={onClose} style={{
-          position: 'absolute', top: 12, right: 12,
-          background: 'none', border: 'none', color: 'rgba(15, 23, 42, 0.3)',
-          cursor: 'pointer', fontSize: 18,
-        }}><X size={18} /></button>
-        <h3 style={{ marginTop: 0, marginBottom: 18 }}>{title}</h3>
-        {children}
-      </div>
-    </div>
-  );
-}
 
 export default function AdminNtsaQueue() {
   const [requests, setRequests] = useState([]);

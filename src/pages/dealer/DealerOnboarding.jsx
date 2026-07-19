@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { authAPI, verificationAPI } from '../../api/api';
 import { Check, ChevronRight, ChevronLeft, Building2, Banknote, FileText, CheckCircle } from 'lucide-react';
+import { Button, SpinnerPage } from '../../components/ui';
 
 const STEPS = [
   { label: 'Business', icon: Building2 },
@@ -139,7 +140,7 @@ export default function DealerOnboarding() {
     }
   };
 
-  if (!user) return <div className="page loading-center"><div className="spinner" /></div>;
+  if (!user) return <div className="page"><SpinnerPage /></div>;
 
   if (user.onboardingComplete) {
     return (
@@ -150,9 +151,9 @@ export default function DealerOnboarding() {
           <p style={{ color: 'rgba(15, 23, 42, 0.5)', marginBottom: 24 }}>
             Your seller profile is all set up.
           </p>
-          <button onClick={() => navigate('/dealer')} className="btn btn-gold">
+          <Button variant="primary" onClick={() => navigate('/dealer')}>
             Go to Dealer Hub
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -347,36 +348,18 @@ export default function DealerOnboarding() {
 
           {/* Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: '1px solid rgba(15, 23, 42, 0.05)' }}>
-            <button onClick={() => setStep(s => s - 1)} disabled={step === 0} style={{
-              padding: '10px 20px', borderRadius: 10,
-              background: 'rgba(15, 23, 42, 0.04)', border: '1px solid rgba(15, 23, 42, 0.08)',
-              color: step === 0 ? 'rgba(15, 23, 42, 0.15)' : 'rgba(15, 23, 42, 0.6)',
-              cursor: step === 0 ? 'not-allowed' : 'pointer',
-              fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6,
-            }}>
+            <Button onClick={() => setStep(s => s - 1)} disabled={step === 0} variant="ghost">
               <ChevronLeft size={14} /> Back
-            </button>
+            </Button>
             {step < STEPS.length - 1 ? (
-              <button onClick={handleNext} disabled={!canNext()} style={{
-                padding: '10px 24px', borderRadius: 10,
-                background: canNext() ? 'var(--gold)' : 'rgba(15, 23, 42, 0.08)',
-                border: 'none', color: canNext() ? '#000' : 'rgba(15, 23, 42, 0.2)',
-                cursor: canNext() ? 'pointer' : 'not-allowed',
-                fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6,
-              }}>
+              <Button onClick={handleNext} disabled={!canNext()} variant="primary">
                 Next <ChevronRight size={14} />
-              </button>
+              </Button>
             ) : (
-              <button onClick={handleSubmit} disabled={saving} style={{
-                padding: '10px 28px', borderRadius: 10,
-                background: 'var(--gold)', border: 'none', color: '#000',
-                cursor: saving ? 'not-allowed' : 'pointer',
-                fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6,
-                opacity: saving ? 0.6 : 1,
-              }}>
-                {saving ? 'Saving...' : 'Complete Setup'}
+              <Button onClick={handleSubmit} loading={saving} variant="primary">
+                Complete Setup
                 {!saving && <CheckCircle size={14} />}
-              </button>
+              </Button>
             )}
           </div>
         </div>

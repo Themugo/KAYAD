@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { dealerAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, compactNumber } from '../../utils/helpers';
+import { Button, Badge, SpinnerPage } from '../../components/ui';
 
 const BAR_COLORS = ['var(--gold)', 'var(--gold-muted)', 'var(--blue)', 'var(--green)', 'var(--orange)'];
 
@@ -43,7 +44,7 @@ export default function DealerAnalytics() {
     .finally(() => setLoading(false));
   }, [period]);
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
+  if (loading) return <div className="page"><SpinnerPage /></div>;
 
   const topCars = analytics?.topCars || analytics?.cars || [];
   const maxViews = Math.max(...topCars.map(c => c.views || 0), 1);
@@ -69,11 +70,12 @@ export default function DealerAnalytics() {
               { val: '90',  label: '3 Months' },
               { val: '365', label: '1 Year' },
             ].map(p => (
-              <button key={p.val}
-                className={`btn btn-sm ${period === p.val ? 'btn-gold' : 'btn-outline'}`}
+              <Button key={p.val}
+                variant={period === p.val ? 'primary' : 'outline'}
+                size="sm"
                 onClick={() => setPeriod(p.val)}>
                 {p.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -207,9 +209,9 @@ export default function DealerAnalytics() {
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
                   <div className="price-tag" style={{ fontSize: '0.85rem' }}>{formatKES(car.currentBid || car.price)}</div>
-                  <span className={`badge ${car.auctionStatus === 'live' ? 'badge-green' : car.status === 'sold' ? 'badge-gold' : 'badge-muted'}`} style={{ marginTop: 3, fontSize: 9 }}>
+                  <Badge variant={car.auctionStatus === 'live' ? 'green' : car.status === 'sold' ? 'gold' : 'muted'} style={{ marginTop: 3, fontSize: 9 }}>
                     {car.auctionStatus === 'live' ? '🔴 LIVE' : car.status || 'Active'}
-                  </span>
+                  </Badge>
                 </div>
               </div>
             ))}

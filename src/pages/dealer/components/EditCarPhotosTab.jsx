@@ -1,4 +1,5 @@
 import { Trash2, Upload, Pin } from 'lucide-react';
+import { Button } from '../../../components/ui';
 
 export default function EditCarPhotosTab({ images, coverImage, handleSetCover, handleDeleteImage, handleUploadImages, handleDeleteSelected, selectedSet, toggleSelect, deletingIdx, uploading }) {
   return (
@@ -10,9 +11,9 @@ export default function EditCarPhotosTab({ images, coverImage, handleSetCover, h
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {selectedSet.size > 0 && (
-            <button onClick={handleDeleteSelected} disabled={deletingIdx === -1} style={{ padding: '8px 14px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: deletingIdx === -1 ? 'pointer' : 'wait', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Button variant="danger" size="sm" onClick={handleDeleteSelected} loading={deletingIdx !== -1}>
               <Trash2 size={14} /> {deletingIdx === -1 ? `Delete (${selectedSet.size})` : 'Deleting...'}
-            </button>
+            </Button>
           )}
           <label style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: uploading ? 'rgba(37, 99, 235,0.1)' : 'rgba(37, 99, 235,0.15)', border: '1px solid rgba(37, 99, 235,0.25)', borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--gold)', transition: 'all 0.2s' }}>
             <Upload size={14} /> {uploading ? 'Uploading...' : 'Upload Photos'}

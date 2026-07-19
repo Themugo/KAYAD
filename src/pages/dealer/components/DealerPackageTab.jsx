@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useToast } from '../../../context/ToastContext';
 import { dealerAPI } from '../../../api/api';
 import { Loader } from 'lucide-react';
+import { Button } from '../../../components/ui';
 
 export default function DealerPackageTab({ user, listingsCount }) {
   const { toast } = useToast();
@@ -98,24 +99,18 @@ export default function DealerPackageTab({ user, listingsCount }) {
                       autoFocus
                     />
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => handleUpgrade(pkg.id)} disabled={upgrading === pkg.id}
-                        style={{ flex: 1, padding: '9px', borderRadius: 9, background: 'var(--gold)', border: 'none', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                        {upgrading === pkg.id ? <><Loader size={13} className="spinner" /> Processing...</> : `Pay KES ${pkg.id === 'starter' ? '2,500' : pkg.id === 'growth' ? '6,500' : '14,000'}`}
-                      </button>
-                      <button onClick={() => { setShowPhoneInput(null); setPhone(''); }}
-                        style={{ padding: '9px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)', fontSize: 11, cursor: 'pointer' }}>
+                      <Button variant="primary" size="sm" onClick={() => handleUpgrade(pkg.id)} loading={upgrading === pkg.id} full>
+                        {upgrading === pkg.id ? 'Processing...' : `Pay KES ${pkg.id === 'starter' ? '2,500' : pkg.id === 'growth' ? '6,500' : '14,000'}`}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => { setShowPhoneInput(null); setPhone(''); }}>
                         Cancel
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => setShowPhoneInput(pkg.id)}
-                    style={{ display: 'block', width: '100%', padding: '9px', borderRadius: 9, background: `${pkg.color}12`, border: `1px solid ${pkg.color}30`, color: pkg.color, fontSize: 12, fontWeight: 700, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.background = `${pkg.color}22`}
-                    onMouseLeave={e => e.currentTarget.style.background = `${pkg.color}12`}
-                  >
+                  <Button variant="secondary" size="sm" full onClick={() => setShowPhoneInput(pkg.id)}>
                     Upgrade
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>

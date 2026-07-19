@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
 import { CheckCircle, XCircle, Clock, Search, Eye, Loader } from 'lucide-react';
+import { Button, Badge, SpinnerPage, Modal } from '../../components/ui';
 
 const STATUS_BADGE = {
   pending:  'badge-muted',
@@ -135,7 +136,7 @@ export default function AdminCarModeration() {
         </div>
 
         {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
+          <SpinnerPage label="Loading listings..." />
         ) : cars.length === 0 ? (
           <div className="empty-state">
             <Clock size={48} style={{ opacity: 0.3, marginBottom: 12 }} />
@@ -146,26 +147,26 @@ export default function AdminCarModeration() {
           {selectedIds.length > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(37, 99, 235,0.08)', borderRadius: 10, marginBottom: 16 }}>
               <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{selectedIds.length} selected</span>
-              <button
-                className="btn btn-sm"
-                style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+              <Button
+                variant="success"
+                size="sm"
                 disabled={bulkAction !== null}
                 onClick={() => handleBulkModerate('approve')}>
                 <CheckCircle size={12} style={{ marginRight: 4 }} />
                 {bulkAction === 'approve' ? '…' : 'Approve Selected'}
-              </button>
-              <button
-                className="btn btn-sm"
-                style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
                 disabled={bulkAction !== null}
                 onClick={() => handleBulkModerate('reject')}>
                 <XCircle size={12} style={{ marginRight: 4 }} />
                 {bulkAction === 'reject' ? '…' : 'Reject Selected'}
-              </button>
-              <button className="btn btn-sm btn-outline" onClick={() => setSelectedIds([])} disabled={bulkAction !== null}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setSelectedIds([])} disabled={bulkAction !== null}
                 style={{ marginLeft: 'auto', fontSize: 11 }}>
                 Clear
-              </button>
+              </Button>
             </div>
           )}
 
@@ -218,27 +219,27 @@ export default function AdminCarModeration() {
                     <td>
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}
                         onClick={e => e.stopPropagation()} role="presentation">
-                        <button
-                          className="btn btn-sm"
-                          style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                        <Button
+                          variant="success"
+                          size="sm"
                           disabled={actionId === car._id}
                           onClick={() => handleModerate(car._id, 'approve')}>
                           <CheckCircle size={12} style={{ marginRight: 4 }} />
                           Approve
-                        </button>
-                        <button
-                          className="btn btn-sm"
-                          style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
                           disabled={actionId === car._id}
                           onClick={() => handleModerate(car._id, 'reject')}>
                           <XCircle size={12} style={{ marginRight: 4 }} />
                           Reject
-                        </button>
-                        <button className="btn btn-sm btn-outline"
+                        </Button>
+                        <Button variant="outline" size="sm"
                           onClick={() => setSelected(car)}>
                           <Eye size={12} style={{ marginRight: 4 }} />
                           View
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -259,14 +260,13 @@ export default function AdminCarModeration() {
         {hasMore && cars.length > 0 && <div ref={sentinelRef} style={{ height: 1 }} />}
       </div>
 
-      {selected && (
-        <div className="modal-overlay" role="presentation" onClick={e => e.target === e.currentTarget && setSelected(null)}>
-          <div className="modal-box" style={{ maxWidth: 560 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ margin: 0 }}>{selected.title || `${selected.brand} ${selected.model || ''}`}</h2>
-              <span className={`badge ${STATUS_BADGE[selected.status] || 'badge-muted'}`}>
+      <Modal open={!!selected} onClose={() => setSelected(null)} title={selected ? (selected.title || `${selected.brand} ${selected.model || ''}`) : ''} size="md">
+        {selected && (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+              <Badge variant={STATUS_BADGE[selected.status]?.replace('badge-', '') || 'muted'}>
                 {selected.status}
-              </span>
+              </Badge>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 14, marginBottom: 16 }}>
@@ -287,24 +287,22 @@ export default function AdminCarModeration() {
 
             {selected.status === 'pending' && (
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                <button className="btn btn-sm btn-outline" onClick={() => setSelected(null)}>Cancel</button>
-                <button className="btn btn-sm"
-                  style={{ background: '#22c55e', color: '#000', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
-                  disabled={actionId === selected._id}
+                <Button variant="outline" size="sm" onClick={() => setSelected(null)}>Cancel</Button>
+                <Button variant="success" size="sm"
+                  loading={actionId === selected._id}
                   onClick={() => { handleModerate(selected._id, 'approve'); setSelected(null); }}>
                   <CheckCircle size={14} style={{ marginRight: 6 }} /> Approve Listing
-                </button>
-                <button className="btn btn-sm"
-                  style={{ background: '#ef4444', color: '#fff', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
-                  disabled={actionId === selected._id}
+                </Button>
+                <Button variant="danger" size="sm"
+                  loading={actionId === selected._id}
                   onClick={() => { handleModerate(selected._id, 'reject'); setSelected(null); }}>
                   <XCircle size={14} style={{ marginRight: 6 }} /> Reject Listing
-                </button>
+                </Button>
               </div>
             )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

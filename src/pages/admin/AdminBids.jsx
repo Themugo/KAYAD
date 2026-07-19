@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { bidsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
+import { Button, Badge, SpinnerPage, Pagination, Modal } from '../../components/ui';
 
 const FRAUD_META = {
   low:    { label: 'Low',    color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
@@ -132,7 +133,7 @@ export default function AdminBids() {
         <div className="card">
           <div className="table-wrap">
             {loading ? (
-              <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
+              <SpinnerPage label="Loading bids..." />
             ) : display.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}>
                 <div className="empty-icon">⚡</div>
@@ -177,12 +178,9 @@ export default function AdminBids() {
                         </td>
                         <td>
                           {bid.fraudScore !== undefined ? (
-                            <span style={{
-                              fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100,
-                              background: fm.bg, color: fm.color,
-                            }}>
+                            <Badge variant={fraudLevel === 'high' ? 'red' : fraudLevel === 'medium' ? 'orange' : 'green'}>
                               {fm.label} ({bid.fraudScore}%)
-                            </span>
+                            </Badge>
                           ) : (
                             <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>—</span>
                           )}
@@ -207,9 +205,7 @@ export default function AdminBids() {
 
         {tab === 'all' && totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
-            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
+            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
           </div>
         )}
       </div>

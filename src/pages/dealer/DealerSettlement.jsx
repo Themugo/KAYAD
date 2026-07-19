@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import usePageMeta from '../../hooks/usePageMeta';
+import { Button, SpinnerPage } from '../../components/ui';
 
 export default function DealerSettlement() {
   const { toast } = useToast();
@@ -37,7 +38,7 @@ export default function DealerSettlement() {
     }
   };
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
+  if (loading) return <div className="page"><SpinnerPage /></div>;
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
@@ -133,13 +134,15 @@ export default function DealerSettlement() {
           </div>
         </div>
 
-        <button
-          className="btn btn-gold btn-full btn-lg"
+        <Button
+          variant="primary"
+          full
+          size="lg"
           onClick={handleSave}
-          disabled={saving}
+          loading={saving}
         >
-          {saving ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Saving...</> : '💾 Save Settlement Configuration'}
-        </button>
+          💾 Save Settlement Configuration
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { Zap } from 'lucide-react';
+import { Button } from '../../../components/ui';
 
 function FieldGroup({ label, children }) {
   return (
@@ -29,18 +30,17 @@ export default function EditCarAuctionTab({ form, set, isLive, auctionAction, se
       </div>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         {!isLive ? (
-          <button onClick={handleAuctionStart} disabled={!!auctionAction || !form.auctionEnd} style={{ padding: '12px 24px', background: form.auctionEnd ? 'rgba(239,68,68,0.9)' : 'rgba(15, 23, 42, 0.05)', border: 'none', borderRadius: 10, color: form.auctionEnd ? '#fff' : 'rgba(15, 23, 42, 0.25)', fontSize: 13, fontWeight: 900, cursor: form.auctionEnd ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Zap size={14} /> {auctionAction === 'starting' ? 'Starting...' : 'Start Live Auction'}
-          </button>
+          <Button variant="danger" onClick={handleAuctionStart} loading={auctionAction === 'starting'} disabled={!form.auctionEnd}>
+            <Zap size={14} /> Start Live Auction
+          </Button>
         ) : (
           <>
-            <button onClick={handleAuctionEnd} disabled={!!auctionAction} style={{ padding: '12px 24px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              {auctionAction === 'ending' ? 'Ending...' : 'End Auction'}
-            </button>
-            <button onClick={async () => { setAuctionAction('extending'); try { await dealerAuctionAPI.extend(id, extendHours); toast('Extended by ' + extendHours + 'h', 'success'); } catch { toast('Failed', 'error'); } finally { setAuctionAction(null); } }} disabled={!!auctionAction}
-              style={{ padding: '12px 24px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: 10, color: '#3b82f6', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-              {auctionAction === 'extending' ? 'Extending...' : '+ Extend ' + extendHours + 'h'}
-            </button>
+            <Button variant="danger" onClick={handleAuctionEnd} loading={auctionAction === 'ending'}>
+              End Auction
+            </Button>
+            <Button variant="secondary" onClick={async () => { setAuctionAction('extending'); try { await dealerAuctionAPI.extend(id, extendHours); toast('Extended by ' + extendHours + 'h', 'success'); } catch { toast('Failed', 'error'); } finally { setAuctionAction(null); } }} loading={auctionAction === 'extending'}>
+              + Extend {extendHours}h
+            </Button>
           </>
         )}
       </div>

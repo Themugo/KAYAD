@@ -3,6 +3,7 @@ import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, formatDate, initials } from '../../utils/helpers';
 import { AdminUserRow } from '../../components/AdminTableRow';
+import { Button, Badge, SpinnerPage, Pagination } from '../../components/ui';
 
 const ROLE_BADGE  = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red' };
 const ROLE_ICON   = { user: '👤', dealer: '🏪', admin: '🔑' };
@@ -68,7 +69,7 @@ export default function AdminUsers() {
     return { total, admins, dealers, banned, pending };
   }, [users]);
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
+  if (loading) return <SpinnerPage label="Loading users..." />;
 
   return (
     <div className="page">
@@ -144,11 +145,7 @@ export default function AdminUsers() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 13, color: 'var(--text-muted)' }}>
           <span>{total} total users</span>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-sm btn-outline" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span style={{ padding: '4px 12px' }}>Page {page}</span>
-            <button className="btn btn-sm btn-outline" disabled={page * 20 >= total} onClick={() => setPage(p => p + 1)}>Next →</button>
-          </div>
+          <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} />
         </div>
       </div>
     </div>

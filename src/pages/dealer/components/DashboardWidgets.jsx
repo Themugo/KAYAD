@@ -2,6 +2,9 @@
 
 import { Link } from 'react-router-dom';
 import { Check } from 'lucide-react';
+import { timeAgo } from '../../../utils/helpers';
+
+export { timeAgo };
 
 export const TABS_CONFIG = [
   { id: 'overview', label: 'Overview' },
@@ -34,18 +37,6 @@ export const ESCROW_STEPS = [
   { key: 'released', label: 'Released', color: '#22c55e' },
   { key: 'refunded', label: 'Refunded', color: '#6b7280' },
 ];
-
-export function timeAgo(date) {
-  const diff = Date.now() - new Date(date).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d ago`;
-  return new Date(date).toLocaleDateString();
-}
 
 export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, trend }) {
   const isUp = trend > 0;

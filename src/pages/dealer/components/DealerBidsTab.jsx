@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { dealerAPI } from '../../../api/api';
 import { StatusBadge, BID_STATUS_CONFIG, timeAgo } from './DashboardWidgets';
+import { Button } from '../../../components/ui';
 
 export default function DealerBidsTab({ bids, setBids, toast }) {
   const [bidFilter, setBidFilter] = useState('all');
@@ -12,15 +13,11 @@ export default function DealerBidsTab({ bids, setBids, toast }) {
         <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>Incoming Bids</h2>
         <div style={{ display: 'flex', gap: 6 }}>
           {['all', 'pending', 'accepted', 'rejected'].map(status => (
-            <button key={status} onClick={() => setBidFilter(status)} style={{
-              padding: '6px 14px', borderRadius: 8,
-              background: bidFilter === status ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${bidFilter === status ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.07)'}`,
-              color: bidFilter === status ? 'var(--gold)' : 'rgba(255,255,255,0.4)',
-              fontSize: 11, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize',
-            }}>
+            <Button key={status} onClick={() => setBidFilter(status)}
+              variant={bidFilter === status ? 'primary' : 'ghost'}
+              size="sm">
               {status === 'all' ? 'All' : status}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -59,12 +56,12 @@ export default function DealerBidsTab({ bids, setBids, toast }) {
             </div>
             {b.status === 'pending' && (
               <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.acceptBid(carId, b._id); toast(`Bid accepted — sale completed!`, 'success'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch (e) { toast(e?.response?.data?.message || 'Failed to accept bid', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                <Button variant="success" size="sm" onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.acceptBid(carId, b._id); toast(`Bid accepted — sale completed!`, 'success'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch (e) { toast(e?.response?.data?.message || 'Failed to accept bid', 'error'); } }}>
                   Accept
-                </button>
-                <button onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.rejectBid(carId, b._id); toast('Bid rejected', 'info'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch { toast('Failed to reject', 'error'); } }} style={{ padding: '7px 14px', borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                </Button>
+                <Button variant="danger" size="sm" onClick={async () => { try { const carId = b.carId?._id || b.carId; await dealerAPI.rejectBid(carId, b._id); toast('Bid rejected', 'info'); dealerAPI.bids({ limit: 50 }).then(d => setBids(d.bids || [])).catch(() => {}); } catch { toast('Failed to reject', 'error'); } }}>
                   Decline
-                </button>
+                </Button>
               </div>
             )}
           </div>

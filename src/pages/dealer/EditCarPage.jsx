@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { Button, Badge, SpinnerPage } from '../../components/ui';
 
 
 export default function EditCarPage() {
@@ -100,7 +101,7 @@ export default function EditCarPage() {
     finally { setAuctionAction(null); }
   };
 
-  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
+  if (loading) return <div className="page"><SpinnerPage /></div>;
   if (!car) return <div className="page loading-center"><h3>Car not found</h3></div>;
   if (ownershipError) return (
     <div className="page loading-center" style={{ flexDirection: 'column', gap: 16 }}>
@@ -110,8 +111,8 @@ export default function EditCarPage() {
         You can only edit your own listings. This car was listed by <strong>{car.dealer?.name}</strong>.
       </p>
       <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-        <button className="btn btn-outline" onClick={() => navigate(-1)}>← Go Back</button>
-        <button className="btn btn-gold" onClick={() => navigate('/dealer')}>My Listings</button>
+        <Button variant="outline" onClick={() => navigate(-1)}>← Go Back</Button>
+        <Button variant="primary" onClick={() => navigate('/dealer')}>My Listings</Button>
       </div>
     </div>
   );
@@ -170,19 +171,20 @@ export default function EditCarPage() {
                   { key: 'allowBuy', label: '💳 Allow Direct Buy' },
                   { key: 'allowBid', label: '⚡ Allow Bidding' },
                 ].map(t => (
-                  <button
+                  <Button
                     key={t.key}
                     onClick={() => set(t.key, !form[t.key])}
-                    className={`btn btn-sm ${form[t.key] ? 'btn-gold' : 'btn-outline'}`}
+                    variant={form[t.key] ? 'primary' : 'outline'}
+                    size="sm"
                   >
                     {form[t.key] ? '✓ ' : ''}{t.label}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
-              <button className="btn btn-gold" onClick={handleSave} disabled={saving} style={{ alignSelf: 'flex-start' }}>
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
+              <Button variant="primary" onClick={handleSave} loading={saving} style={{ alignSelf: 'flex-start' }}>
+                Save Changes
+              </Button>
             </div>
           </div>
 
@@ -191,10 +193,10 @@ export default function EditCarPage() {
             <div className="card" style={{ padding: 28 }}>
               <h3 style={{ marginBottom: 8 }}>⚡ Auction Controls</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                <span className={`badge ${car.auctionStatus === 'live' ? 'badge-green' : car.auctionStatus === 'ended' ? 'badge-muted' : 'badge-orange'}`}>
+                <Badge variant={car.auctionStatus === 'live' ? 'green' : car.auctionStatus === 'ended' ? 'muted' : 'orange'}>
                   {car.auctionStatus === 'live' && <span className="live-dot" />}
                   {car.auctionStatus}
-                </span>
+                </Badge>
                 <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
                   {car.bidsCount || 0} bids · Current: {formatKES(car.currentBid || car.price)}
                 </span>
@@ -207,25 +209,25 @@ export default function EditCarPage() {
                       <input className="input" type="datetime-local" value={form.auctionEnd}
                         onChange={e => set('auctionEnd', e.target.value)} />
                     </Field>
-                    <button className="btn btn-gold" onClick={handleAuctionStart} disabled={!!auctionAction}>
-                      {auctionAction === 'starting' ? '...' : '🔴 Start Live Auction'}
-                    </button>
+                    <Button variant="primary" onClick={handleAuctionStart} loading={auctionAction === 'starting'}>
+                      🔴 Start Live Auction
+                    </Button>
                   </>
                 )}
 
                 {car.auctionStatus === 'live' && (
                   <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    <button className="btn btn-danger" onClick={handleAuctionEnd} disabled={!!auctionAction}>
+                    <Button variant="danger" onClick={handleAuctionEnd} loading={auctionAction === 'ending'}>
                       🏁 End Auction Now
-                    </button>
+                    </Button>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <select className="input" value={extendHours} onChange={e => setExtendHours(Number(e.target.value))}
                         style={{ width: 100 }}>
                         {[1, 2, 4, 6, 12, 24].map(h => <option key={h} value={h}>+{h}h</option>)}
                       </select>
-                      <button className="btn btn-outline" onClick={handleExtend} disabled={!!auctionAction}>
+                      <Button variant="outline" onClick={handleExtend} loading={auctionAction === 'extending'}>
                         Extend
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}

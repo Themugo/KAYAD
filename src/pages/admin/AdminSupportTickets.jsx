@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supportTicketAdminAPI } from '../../api/api';
 import { timeAgo } from '../../utils/helpers';
 import { useToast } from '../../context/ToastContext';
+import { Button, SpinnerPage } from '../../components/ui';
 
 const STATUS_BADGE = {
   open: 'badge-muted',
@@ -37,7 +38,7 @@ export default function AdminSupportTickets() {
       <div className="container" style={{ paddingTop: 40, paddingBottom: 80 }}>
         <h1 style={{ marginBottom: 24 }}>Support Tickets</h1>
         {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
+          <SpinnerPage label="Loading tickets..." />
         ) : tickets.length === 0 ? (
           <div className="empty-state"><p>No tickets yet.</p></div>
         ) : (
@@ -61,10 +62,10 @@ export default function AdminSupportTickets() {
                     <td style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{timeAgo(t.createdAt)}</td>
                     <td>
                       {t.status === 'open' && (
-                        <button className="btn btn-sm" style={{ background: '#f59e0b', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleStatus(t._id, 'in_progress')}>Start</button>
+                        <Button variant="primary" size="sm" onClick={() => handleStatus(t._id, 'in_progress')}>Start</Button>
                       )}
                       {t.status === 'in_progress' && (
-                        <button className="btn btn-sm" style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleStatus(t._id, 'resolved')}>Resolve</button>
+                        <Button variant="success" size="sm" onClick={() => handleStatus(t._id, 'resolved')}>Resolve</Button>
                       )}
                     </td>
                   </tr>

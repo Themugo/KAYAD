@@ -6,6 +6,7 @@ import { useSocket } from '../../context/SocketContext';
 import { timeAgo } from '../../utils/helpers';
 import { Shield, Search, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { LoadingPage } from '../../components/LoadingPage';
+import { Button, Badge, Pagination } from '../../components/ui';
 
 const STATUS_META = {
   open:          { label: 'Open',           badge: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: '🆕' },
@@ -202,10 +203,11 @@ export default function AdminDisputes() {
                       </div>
                     </td>
                     <td style={{ padding: 16 }}>
-                      <span style={{
-                        padding: '4px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700,
-                        background: `${statusColor}20`, color: statusColor, border: `1px solid ${statusColor}40`,
-                      }}>{meta.label}</span>
+                      <Badge variant={
+                        d.status === 'open' ? 'orange' : d.status === 'under_review' ? 'blue' : d.status === 'mediation' ? 'muted' : d.status === 'resolved' ? 'green' : d.status === 'appealed' ? 'orange' : 'muted'
+                      }>
+                        {meta.label}
+                      </Badge>
                     </td>
                     <td style={{ padding: 16, fontSize: 12, fontWeight: 600, color: priorityColor }}>{d.priority || 'medium'}</td>
                     <td style={{ padding: 16, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{d.openedBy?.name || 'Unknown'}</td>
@@ -234,20 +236,7 @@ export default function AdminDisputes() {
       {/* Pagination */}
       {pagination && pagination.pages > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24 }}>
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(p => (
-            <button key={p} onClick={() => setPage(p)}
-              style={{
-                width: 40, height: 40, borderRadius: 10, fontSize: 13, fontWeight: 600,
-                background: page === p ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
-                color: page === p ? '#0A1628' : 'rgba(255,255,255,0.5)',
-                border: 'none', cursor: 'pointer', transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { if (page !== p) e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-              onMouseLeave={e => { if (page !== p) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-            >
-              {p}
-            </button>
-          ))}
+          <Pagination page={page} totalPages={pagination.pages} onChange={setPage} />
         </div>
       )}
     </div>
