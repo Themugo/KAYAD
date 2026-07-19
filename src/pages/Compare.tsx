@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, X, Trash2, ArrowRight, Calendar, Gauge, Fuel, MapPin, Settings } from 'lucide-react';
+import { ArrowLeft, X, Trash2, ArrowRight, Calendar, Gauge, Fuel, MapPin, Settings, Loader } from 'lucide-react';
 import { useCompare } from '../context/CompareContext';
-import { CARS } from '../data/cars';
+import { carsAPI } from '../api/api';
 import { formatKES } from '../utils/helpers';
+import { useToast } from '../context/ToastContext';
 
 interface CompareProps {
   setPage: (page: string) => void;
@@ -12,13 +13,62 @@ interface CompareProps {
 
 export default function Compare({ setPage, viewCar }: CompareProps) {
   const { compareIds, removeCar, clearAll, compareCount } = useCompare();
+  const { toast } = useToast();
+  const [cars, setCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Get car data from CARS array
-  const compareCars = useMemo(() => {
-    return compareIds
-      .map(id => CARS.find(car => String(car.id) === id))
-      .filter(Boolean);
+  // Fetch car details for compared IDs from API
+  useEffect(() => {
+    if (compareIds.length === 0) {
+      setCars([]);
+      setLoading(false);
+      return;
+    }
+
+    const fetchCarDetails = async () => {
+      setLoading(true);
+      try {
+        const carDetails = await Promise.all(
+          compareIds.map(async (id) => {
+            try {
+              const data = await carsAPI.get(id);
+              return data.car || data.data || data;
+            } catch {
+              return null;
+            }
+          })
+        );
+        setCars(carDetails.filter(Boolean));
+      } catch (error) {
+        toast('Failed to load vehicle details', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCarDetails();
   }, [compareIds]);
+
+  // Convert API car to comparison format
+  const toCompareCar = (car: any) => ({
+    _id: car._id,
+    id: car._id || car.id,
+    make: car.brand || car.make || '',
+    model: car.model || car.title || '',
+    price: car.price || car.currentBid || 0,
+    year: car.year || 2024,
+    mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || 'N/A'),
+    fuel: car.fuel || 'N/A',
+    transmission: car.transmission || 'N/A',
+    city: car.location?.city || car.city || 'N/A',
+    type: car.type || car.bodyType || 'SUV',
+    image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+    badges: car.badges || [],
+  });
+
+  const compareCars = useMemo(() => {
+    return cars.map(toCompareCar);
+  }, [cars]);
 
   const specs = [
     { key: 'year', label: 'Year', icon: Calendar },

@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench, Loader } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import HeroCarousel from '../components/HeroCarousel';
-import { CARS } from '../data/cars';
+import { carsAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
+import { SkeletonCard } from '../components/Skeleton';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
 
@@ -43,17 +45,44 @@ const FEATURES = [
 
 export default function Home({ setPage, viewCar }: HomeProps) {
   const [filter, setFilter] = useState<Filter>('All');
+  const [cars, setCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const nav = (page: string) => {
     setPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const featured = CARS.filter(car => {
-    if (filter === 'All') return true;
-    if (filter === 'Auctions') return car.badges.includes('auction');
-    return car.type === filter;
-  }).slice(0, 4);
+  // Fetch cars from API
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const data = await carsAPI.list({ page: 1, limit: 50 });
+        const carList = data?.cars || data?.data || [];
+        setCars(carList);
+      } catch (error) {
+        toast('Failed to load vehicles. Please try again.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCars();
+  }, []);
+
+  // Filter cars based on selected filter
+  const featured = useMemo(() => {
+    let filtered = cars;
+    if (filter === 'Auctions') {
+      filtered = cars.filter(car => 
+        car.auctionStatus === 'live' || 
+        (car.auctionStartTime && car.auctionEnd && new Date(car.auctionStartTime) <= new Date() && new Date(car.auctionEnd) > new Date())
+      );
+    } else if (filter !== 'All') {
+      filtered = cars.filter(car => car.type === filter || car.bodyType === filter);
+    }
+    return filtered.slice(0, 4);
+  }, [cars, filter]);
 
   const filters: Filter[] = ['All', 'SUV', 'Pickup', 'Auctions'];
 
@@ -65,15 +94,30 @@ export default function Home({ setPage, viewCar }: HomeProps) {
       model: car.model || car.title || '',
       price: car.price || car.currentBid || 0,
       year: car.year || 2024,
-      mileage: car.mileage || '0 km',
+      mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || '0 km'),
       fuel: car.fuel || 'Petrol',
       city: car.location?.city || 'Nairobi',
-      type: 'SUV' as const,
+      type: (car.type || car.bodyType || 'SUV') as Car['type'],
       badges: [],
-      image: car.images?.[0] || car.images?.[0]?.url || car.image || '',
+      image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
     };
     viewCar(localCar);
   };
+
+  // Convert API car to CarCard format
+  const toCardCar = (car: any): Car => ({
+    id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : 1,
+    make: car.brand || car.make || '',
+    model: car.model || car.title || '',
+    price: car.price || car.currentBid || 0,
+    year: car.year || 2024,
+    mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || '0 km'),
+    fuel: car.fuel || 'Petrol',
+    city: car.location?.city || 'Nairobi',
+    type: (car.type || car.bodyType || 'SUV') as Car['type'],
+    badges: [],
+    image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+  });
 
   return (
     <div className="min-h-screen">
@@ -129,9 +173,34 @@ export default function Home({ setPage, viewCar }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featured.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
-            ))}
+            {loading ? (
+              <>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm animate-pulse">
+                    <div className="aspect-[4/3] bg-cream-200" />
+                    <div className="p-5">
+                      <div className="h-4 bg-cream-200 rounded w-1/2 mb-2" />
+                      <div className="h-6 bg-cream-200 rounded w-3/4 mb-2" />
+                      <div className="h-4 bg-cream-200 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : featured.length > 0 ? (
+              featured.map(car => (
+                <CarCard key={car._id || car.id} car={toCardCar(car)} onClick={() => viewCar(toCardCar(car))} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-warm-400">No vehicles found</p>
+                <button
+                  onClick={() => setFilter('All')}
+                  className="mt-2 text-gold-600 hover:text-gold-700"
+                >
+                  View all vehicles
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 mt-10">

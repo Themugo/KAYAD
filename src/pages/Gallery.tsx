@@ -1,12 +1,13 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Search, SlidersHorizontal, X, Grid3X3, List, 
-  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart
+  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart, RefreshCw
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import { SkeletonGrid } from '../components/SkeletonCard';
-import { CARS } from '../data/cars';
+import { carsAPI } from '../api/api';
 import { useCompare } from '../context/CompareContext';
+import { useToast } from '../context/ToastContext';
 
 type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
 type SortOption = 'default' | 'price_asc' | 'price_desc' | 'newest' | 'year_desc';
@@ -26,28 +27,9 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Infinite scroll hook
-function useInfiniteScroll(callback: () => void, hasMore: boolean) {
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
-    if (observerRef.current) observerRef.current.disconnect();
-    if (node && hasMore) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting) {
-            callback();
-          }
-        },
-        { rootMargin: '200px' }
-      );
-      observerRef.current.observe(node);
-    }
-  }, [callback, hasMore]);
-  return sentinelRef;
-}
-
 export default function Gallery({ viewCar }: GalleryProps) {
   const { compareIds, toggleCar, isComparing, compareCount } = useCompare();
+  const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<VehicleType>('All');
   const [maxPrice, setMaxPrice] = useState(20000000);
@@ -58,13 +40,32 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
   
-  // Pagination state
+  // API data state
+  const [allCars, setAllCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const ITEMS_PER_PAGE = 12;
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   
   // Debounced search
   const debouncedQuery = useDebounce(query, 300);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect();
+    if (node && hasMore && !loadingMore) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            loadMoreCars();
+          }
+        },
+        { rootMargin: '200px' }
+      );
+      observerRef.current.observe(node);
+    }
+  }, [hasMore, loadingMore]);
 
   const types: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan', 'Wagon'];
   
@@ -76,72 +77,76 @@ export default function Gallery({ viewCar }: GalleryProps) {
     { value: 'price_desc', label: 'Price: High to Low' },
   ];
 
-  // Get unique values for filters
+  // Get unique values for filters from API data
   const { makes, cities, years } = useMemo(() => {
-    const makes = [...new Set(CARS.map(c => c.make))].sort();
-    const cities = [...new Set(CARS.map(c => c.city))].sort();
-    const years = [...new Set(CARS.map(c => c.year))].sort((a, b) => b - a);
+    const makes = [...new Set(allCars.map(c => c.brand || c.make))].filter(Boolean).sort();
+    const cities = [...new Set(allCars.map(c => c.location?.city || c.city))].filter(Boolean).sort();
+    const years = [...new Set(allCars.map(c => c.year))].filter(Boolean).sort((a, b) => b - a);
     return { makes, cities, years };
-  }, []);
+  }, [allCars]);
 
   const [selectedMake, setSelectedMake] = useState('All');
   const [selectedCity, setSelectedCity] = useState('All');
 
-  // Filter all results
-  const allResults = useMemo(() => {
-    let filtered = CARS.filter(car => {
-      const q = debouncedQuery.toLowerCase();
-      const matchQuery =
-        !q ||
-        car.make.toLowerCase().includes(q) ||
-        car.model.toLowerCase().includes(q) ||
-        car.city.toLowerCase().includes(q);
-      const matchType = typeFilter === 'All' || car.type === typeFilter;
-      const matchPrice = car.price <= maxPrice;
-      const matchYear = car.year >= minYear;
-      const matchMake = selectedMake === 'All' || car.make === selectedMake;
-      const matchCity = selectedCity === 'All' || car.city === selectedCity;
-      return matchQuery && matchType && matchPrice && matchYear && matchMake && matchCity;
-    });
-
-    // Sort
-    switch (sortBy) {
-      case 'price_asc':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => (b.listedDate ? 1 : 0) - (a.listedDate ? 1 : 0));
-        break;
-      case 'year_desc':
-        filtered.sort((a, b) => b.year - a.year);
-        break;
+  // Fetch cars from API
+  const fetchCars = useCallback(async (pageNum: number = 1, reset: boolean = false) => {
+    try {
+      if (reset) setLoading(true);
+      setFetchError(null);
+      
+      const params: any = {
+        page: pageNum,
+        limit: 24,
+        status: 'active',
+      };
+      
+      // Add filter params
+      if (debouncedQuery) params.keyword = debouncedQuery;
+      if (typeFilter !== 'All') params.body = typeFilter;
+      if (selectedMake !== 'All') params.brand = selectedMake;
+      if (selectedCity !== 'All') params.location = selectedCity;
+      if (maxPrice < 20000000) params.priceMax = maxPrice;
+      if (minYear > 2000) params.yearMin = minYear;
+      
+      // Add sorting
+      if (sortBy === 'price_asc') params.sort = 'price_asc';
+      else if (sortBy === 'price_desc') params.sort = 'price_desc';
+      else if (sortBy === 'newest' || sortBy === 'year_desc') params.sort = 'newest';
+      
+      const data = await carsAPI.list(params);
+      const carList = data?.cars || data?.data || [];
+      const total = data?.total || carList.length;
+      
+      if (reset) {
+        setAllCars(carList);
+      } else {
+        setAllCars(prev => [...prev, ...carList]);
+      }
+      setTotalCount(total);
+      setHasMore(carList.length >= 24 && (reset ? carList.length : allCars.length + carList.length) < total);
+      setPage(pageNum);
+    } catch (error) {
+      console.error('Failed to fetch cars:', error);
+      setFetchError('Failed to load vehicles. Please try again.');
+      toast('Failed to load vehicles', 'error');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
     }
-    return filtered;
-  }, [debouncedQuery, typeFilter, maxPrice, minYear, selectedMake, selectedCity, sortBy]);
+  }, [debouncedQuery, typeFilter, selectedMake, selectedCity, maxPrice, minYear, sortBy]);
 
-  // Paginated results
-  const results = useMemo(() => {
-    return allResults.slice(0, page * ITEMS_PER_PAGE);
-  }, [allResults, page]);
+  // Initial fetch and refetch on filter changes
+  useEffect(() => {
+    fetchCars(1, true);
+  }, [debouncedQuery, typeFilter, selectedMake, selectedCity, maxPrice, minYear, sortBy]);
 
-  const hasMore = results.length < allResults.length;
-
-  // Infinite scroll callback
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setLoading(true);
-      // Simulate API delay
-      setTimeout(() => {
-        setPage(p => p + 1);
-        setLoading(false);
-      }, 300);
+  // Load more
+  const loadMoreCars = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      setLoadingMore(true);
+      fetchCars(page + 1, false);
     }
-  }, [loading, hasMore]);
-
-  const sentinelRef = useInfiniteScroll(loadMore, hasMore);
+  }, [loadingMore, hasMore, page, fetchCars]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -158,6 +163,21 @@ export default function Gallery({ viewCar }: GalleryProps) {
     if (selectedCity !== 'All') count++;
     return count;
   }, [typeFilter, maxPrice, minYear, selectedMake, selectedCity]);
+
+  // Convert API car to CarCard format
+  const toCardCar = useCallback((car: any): Car => ({
+    id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : 1,
+    make: car.brand || car.make || '',
+    model: car.model || car.title || '',
+    price: car.price || car.currentBid || 0,
+    year: car.year || 2024,
+    mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || '0 km'),
+    fuel: car.fuel || 'Petrol',
+    city: car.location?.city || 'Nairobi',
+    type: (car.type || car.bodyType || 'SUV') as Car['type'],
+    badges: [],
+    image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+  }), []);
 
   const clearAllFilters = useCallback(() => {
     setQuery('');

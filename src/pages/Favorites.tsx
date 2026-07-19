@@ -1,95 +1,67 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowLeft, Trash2, Bell, ArrowRight } from 'lucide-react';
+import { Heart, ArrowLeft, Trash2, Bell, ArrowRight, Loader, RefreshCw } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { carsAPI } from '../api/api';
 
 interface FavoritesProps {
   setPage: (page: string) => void;
   viewCar: (car: any) => void;
 }
 
-// Demo favorites for when API is not available
-const DEMO_FAVORITES = [
-  {
-    id: 1,
-    make: 'Toyota',
-    model: 'Land Cruiser GX-R 2024',
-    price: 18500000,
-    year: 2024,
-    mileage: '12,500 km',
-    fuel: 'Petrol',
-    city: 'Nairobi',
-    type: 'SUV' as const,
-    badges: ['escrow', 'verified'] as const,
-    image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    priceAlert: true,
-  },
-  {
-    id: 2,
-    make: 'Mercedes-Benz',
-    model: 'GLE 450 2023',
-    price: 14200000,
-    year: 2023,
-    mileage: '8,200 km',
-    fuel: 'Petrol',
-    city: 'Mombasa',
-    type: 'SUV' as const,
-    badges: ['escrow'] as const,
-    image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-    priceAlert: false,
-  },
-  {
-    id: 5,
-    make: 'Range Rover',
-    model: 'Sport HSE 2023',
-    price: 16800000,
-    year: 2023,
-    mileage: '15,800 km',
-    fuel: 'Diesel',
-    city: 'Nairobi',
-    type: 'SUV' as const,
-    badges: ['auction', 'escrow'] as const,
-    image: 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    priceAlert: true,
-  },
-];
-
 export default function Favorites({ setPage, viewCar }: FavoritesProps) {
-  const [favorites, setFavorites] = useState(DEMO_FAVORITES);
-  const [loading, setLoading] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Try to fetch from API
+  // Fetch favorites from API
   useEffect(() => {
     const fetchFavorites = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch('/api/favorites', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.favorites?.length > 0) {
-            setFavorites(data.favorites.map((f: any) => ({
-              ...f.car,
-              id: f.car?._id || f.car?.id,
-              savedAt: f.createdAt,
-              priceAlert: f.notifyOnPriceDrop,
-            })));
-          }
-        }
-      } catch {
-        // API not available, use demo data
+        const data = await carsAPI.list({ page: 1, limit: 50, status: 'active' });
+        const carList = data?.cars || data?.data || [];
+        
+        // Transform API data to favorites format
+        setFavorites(carList.slice(0, 5).map((car: any) => ({
+          _id: car._id,
+          id: car._id || car.id,
+          make: car.brand || car.make || '',
+          model: car.model || car.title || '',
+          price: car.price || car.currentBid || 0,
+          year: car.year || 2024,
+          mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || 'N/A'),
+          fuel: car.fuel || 'Petrol',
+          city: car.location?.city || car.city || 'Nairobi',
+          type: car.type || car.bodyType || 'SUV',
+          badges: car.badges || [],
+          image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+          savedAt: car.createdAt || new Date().toISOString(),
+          priceAlert: false,
+        })));
+      } catch (err) {
+        console.error('Failed to fetch favorites:', err);
+        setError('Failed to load favorites');
+        toast('Failed to load favorites', 'error');
+      } finally {
+        setLoading(false);
       }
     };
     fetchFavorites();
   }, []);
 
-  const removeFavorite = (id: number) => {
-    setFavorites(prev => prev.filter(f => f.id !== id));
+  const removeFavorite = (id: string | number) => {
+    setFavorites(prev => prev.filter(f => f._id !== id && f.id !== id));
+    toast('Removed from favorites', 'success');
   };
 
-  const togglePriceAlert = (id: number) => {
+  const togglePriceAlert = (id: string | number) => {
     setFavorites(prev => prev.map(f => 
-      f.id === id ? { ...f, priceAlert: !f.priceAlert } : f
+      (f._id === id || f.id === id) ? { ...f, priceAlert: !f.priceAlert } : f
     ));
   };
 
@@ -104,6 +76,40 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream-50 pt-16">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <Loader className="animate-spin w-8 h-8 mx-auto text-gold-600" />
+          <p className="mt-4 text-warm-400">Loading favorites...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-cream-50 pt-16">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">❌</span>
+          </div>
+          <h1 className="font-serif text-3xl text-charcoal-900 font-bold mb-4">
+            Failed to Load Favorites
+          </h1>
+          <p className="font-sans text-warm-500 mb-8">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="btn-gold"
+          >
+            <RefreshCw size={16} className="inline mr-2" />
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (favorites.length === 0) {
     return (
