@@ -1,10 +1,12 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Search, SlidersHorizontal, X, Grid3X3, List, 
-  ChevronDown, ArrowUpDown, RotateCcw 
+  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
+import { SkeletonGrid } from '../components/SkeletonCard';
 import { CARS } from '../data/cars';
+import { useCompare } from '../context/CompareContext';
 
 type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
 type SortOption = 'default' | 'price_asc' | 'price_desc' | 'newest' | 'year_desc';
@@ -24,7 +26,28 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
+// Infinite scroll hook
+function useInfiniteScroll(callback: () => void, hasMore: boolean) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) observerRef.current.disconnect();
+    if (node && hasMore) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          if (entries[0]?.isIntersecting) {
+            callback();
+          }
+        },
+        { rootMargin: '200px' }
+      );
+      observerRef.current.observe(node);
+    }
+  }, [callback, hasMore]);
+  return sentinelRef;
+}
+
 export default function Gallery({ viewCar }: GalleryProps) {
+  const { compareIds, toggleCar, isComparing, compareCount } = useCompare();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<VehicleType>('All');
   const [maxPrice, setMaxPrice] = useState(20000000);
@@ -33,6 +56,12 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const ITEMS_PER_PAGE = 12;
   
   // Debounced search
   const debouncedQuery = useDebounce(query, 300);
@@ -58,8 +87,8 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [selectedMake, setSelectedMake] = useState('All');
   const [selectedCity, setSelectedCity] = useState('All');
 
-  // Filter and sort results
-  const results = useMemo(() => {
+  // Filter all results
+  const allResults = useMemo(() => {
     let filtered = CARS.filter(car => {
       const q = debouncedQuery.toLowerCase();
       const matchQuery =
@@ -93,6 +122,32 @@ export default function Gallery({ viewCar }: GalleryProps) {
     return filtered;
   }, [debouncedQuery, typeFilter, maxPrice, minYear, selectedMake, selectedCity, sortBy]);
 
+  // Paginated results
+  const results = useMemo(() => {
+    return allResults.slice(0, page * ITEMS_PER_PAGE);
+  }, [allResults, page]);
+
+  const hasMore = results.length < allResults.length;
+
+  // Infinite scroll callback
+  const loadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      setLoading(true);
+      // Simulate API delay
+      setTimeout(() => {
+        setPage(p => p + 1);
+        setLoading(false);
+      }, 300);
+    }
+  }, [loading, hasMore]);
+
+  const sentinelRef = useInfiniteScroll(loadMore, hasMore);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, typeFilter, maxPrice, minYear, selectedMake, selectedCity, sortBy]);
+
   // Active filters count
   const activeFiltersCount = useMemo(() => {
     let count = 0;
@@ -112,9 +167,26 @@ export default function Gallery({ viewCar }: GalleryProps) {
     setSelectedMake('All');
     setSelectedCity('All');
     setSortBy('default');
+    setPage(1);
   }, []);
 
   const hasActiveFilters = activeFiltersCount > 0 || query;
+
+  const toggleFavorite = useCallback((carId: number) => {
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(carId)) {
+        next.delete(carId);
+      } else {
+        next.add(carId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleToggleCompare = useCallback((carId: number) => {
+    toggleCar(String(carId));
+  }, [toggleCar]);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -124,7 +196,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">{results.length} vehicles available</p>
+          <p className="font-sans text-white/50 text-sm">{allResults.length} vehicles available</p>
         </div>
       </div>
 
@@ -149,6 +221,17 @@ export default function Gallery({ viewCar }: GalleryProps) {
 
           {/* Controls Row */}
           <div className="flex items-center gap-2">
+            {/* Compare indicator */}
+            {compareCount > 0 && (
+              <button
+                onClick={() => {/* Navigate to compare page */}}
+                className="flex items-center gap-2 bg-gold-500 text-charcoal-900 font-sans text-sm font-semibold px-4 py-3 rounded-xl hover:bg-gold-400 transition-all"
+              >
+                <BarChart3 size={14} />
+                <span>Compare ({compareCount})</span>
+              </button>
+            )}
+
             {/* Sort Dropdown */}
             <div className="relative">
               <button
@@ -358,7 +441,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
             >
               {t}
               <span className="ml-1.5 text-xs opacity-60">
-                ({CARS.filter(c => t === 'All' || c.type === t).length})
+                ({allResults.filter(c => t === 'All' || c.type === t).length})
               </span>
             </button>
           ))}
@@ -366,15 +449,41 @@ export default function Gallery({ viewCar }: GalleryProps) {
 
         {/* Grid / List View */}
         {results.length > 0 ? (
-          <div className={
-            viewMode === 'grid'
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-              : 'flex flex-col gap-4'
-          }>
-            {results.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
-            ))}
-          </div>
+          <>
+            <div className={
+              viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'flex flex-col gap-4'
+            }>
+              {results.map(car => (
+                <CarCard
+                  key={car.id}
+                  car={car}
+                  onClick={() => viewCar(car)}
+                  onToggleCompare={() => handleToggleCompare(car.id)}
+                  isComparing={isComparing(String(car.id))}
+                  compareCount={compareCount}
+                  onFavorite={toggleFavorite}
+                  isFavorited={favorites.has(car.id)}
+                  listView={viewMode === 'list'}
+                />
+              ))}
+            </div>
+
+            {/* Infinite scroll sentinel */}
+            {hasMore && (
+              <div ref={sentinelRef} className="flex justify-center py-8">
+                {loading && <SkeletonGrid count={4} />}
+              </div>
+            )}
+
+            {/* End of results */}
+            {!hasMore && results.length > 0 && (
+              <p className="text-center text-warm-400 py-8">
+                Showing all {results.length} vehicles
+              </p>
+            )}
+          </>
         ) : (
           <div className="text-center py-24">
             <p className="font-serif text-2xl text-warm-400 mb-2">No vehicles found</p>

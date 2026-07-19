@@ -13,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import CreateAccount from './pages/CreateAccount';
 import SignIn from './pages/SignIn';
 import Showroom from './pages/Showroom';
+import { CompareProvider } from './context/CompareContext';
 import type { Car, User } from './types';
 
 export type { Car, User };
@@ -106,21 +107,23 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar
-        currentPage={currentPage}
-        setPage={handleSetPage}
-        authUser={authUser}
-        onSignOut={handleSignOut}
-      />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={renderPage()} />
-          <Route path="/:page" element={renderPage()} />
-          <Route path="/car/:id" element={renderPage()} />
-        </Routes>
-      </main>
-      <Footer setPage={handleSetPage} />
-    </div>
+    <CompareProvider>
+      <div className="min-h-screen flex flex-col">
+        <Navbar
+          currentPage={currentPage}
+          setPage={handleSetPage}
+          authUser={authUser}
+          onSignOut={handleSignOut}
+        />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={renderPage()} />
+            <Route path="/:page" element={renderPage()} />
+            <Route path="/car/:id" element={renderPage()} />
+          </Routes>
+        </main>
+        <Footer setPage={handleSetPage} />
+      </div>
+    </CompareProvider>
   );
 }
