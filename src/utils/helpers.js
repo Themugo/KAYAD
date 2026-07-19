@@ -6,6 +6,10 @@ export const formatKES = (n) =>
 export const parseKES = (str) =>
   Number(String(str).replace(/[^0-9.]/g, '')) || 0;
 
+// Simple number formatter for inline use
+export const fmt = (n) =>
+  Number(n || 0).toLocaleString('en-KE');
+
 // ─── Phone ──────────────────────────────────────────────
 export const formatPhone = (phone) => {
   const clean = String(phone).replace(/\D/g, '');

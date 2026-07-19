@@ -127,8 +127,30 @@ export default function Gallery({ viewCar }: GalleryProps) {
       setPage(pageNum);
     } catch (error) {
       console.error('Failed to fetch cars:', error);
-      setFetchError('Failed to load vehicles. Please try again.');
-      toast('Failed to load vehicles', 'error');
+      // Fallback to demo data
+      const { CARS } = await import('../data/cars');
+      const demoCars = CARS.map((c: any) => ({
+        _id: String(c.id),
+        id: c.id,
+        brand: c.make,
+        title: `${c.make} ${c.model}`,
+        model: c.model,
+        price: c.price,
+        year: c.year,
+        mileage: c.mileage,
+        fuel: c.fuel,
+        type: c.type,
+        city: c.city,
+        image: c.image,
+        images: [c.image],
+        badges: c.badges || [],
+        status: 'active',
+      }));
+      if (reset) {
+        setAllCars(demoCars);
+      }
+      setTotalCount(demoCars.length);
+      setHasMore(false);
     } finally {
       setLoading(false);
       setLoadingMore(false);
@@ -216,7 +238,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">{allResults.length} vehicles available</p>
+          <p className="font-sans text-white/50 text-sm">{allCars.length} vehicles available</p>
         </div>
       </div>
 
@@ -461,21 +483,21 @@ export default function Gallery({ viewCar }: GalleryProps) {
             >
               {t}
               <span className="ml-1.5 text-xs opacity-60">
-                ({allResults.filter(c => t === 'All' || c.type === t).length})
+                ({allCars.filter(c => t === 'All' || c.type === t).length})
               </span>
             </button>
           ))}
         </div>
 
         {/* Grid / List View */}
-        {results.length > 0 ? (
+        {allCars.length > 0 ? (
           <>
             <div className={
               viewMode === 'grid'
                 ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
                 : 'flex flex-col gap-4'
             }>
-              {results.map(car => (
+              {allCars.map(car => (
                 <CarCard
                   key={car.id}
                   car={car}
@@ -497,10 +519,10 @@ export default function Gallery({ viewCar }: GalleryProps) {
               </div>
             )}
 
-            {/* End of results */}
-            {!hasMore && results.length > 0 && (
+            {/* End of allCars */}
+            {!hasMore && allCars.length > 0 && (
               <p className="text-center text-warm-400 py-8">
-                Showing all {results.length} vehicles
+                Showing all {allCars.length} vehicles
               </p>
             )}
           </>

@@ -20,12 +20,12 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: 'Home',           page: 'home',           href: '/'          },
-  { label: 'Gallery',        page: 'gallery',        href: '/gallery'   },
-  { label: 'Auction',        page: 'auction',        href: '/auction'   },
-  { label: 'Escrow Vault',   page: 'escrow',         href: '/escrow'    },
-  { label: 'Pre-Inspection', page: 'pre-inspection', href: '/pre-inspection' },
-  { label: 'Support',        page: 'support',        href: '/support'   },
+  { label: 'Home',           page: 'home',           href: '/',          icon: Home },
+  { label: 'Gallery',        page: 'gallery',        href: '/gallery',   icon: Images },
+  { label: 'Auction',        page: 'auction',        href: '/auction',   icon: Gavel },
+  { label: 'Escrow Vault',   page: 'escrow',         href: '/escrow',    icon: Shield },
+  { label: 'Pre-Inspection', page: 'pre-inspection', href: '/pre-inspection', icon: ClipboardCheck },
+  { label: 'Support',        page: 'support',        href: '/support',   icon: MessageCircle },
 ];
 
 const ROLE_LABEL: Record<string, string> = {

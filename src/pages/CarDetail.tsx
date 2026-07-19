@@ -3,11 +3,11 @@ import {
   ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
   CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
   MessageCircle, Star, ChevronRight, Lock, Clock,
-  ChevronLeft, X, ZoomIn, BarChart3,
+  ChevronLeft, X, ZoomIn, BarChart3, ArrowRight,
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import { CARS } from '../data/cars';
-import { formatKES } from '../utils/helpers';
+import { formatKES, fmt } from '../utils/helpers';
 import {
   GalleryImage,
   GalleryThumbnails,
@@ -162,7 +162,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             onClick={nextImage}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
           >
-            <ChevronRightAlt size={20} />
+            <ArrowRight size={20} />
           </button>
 
           {/* Zoom Button */}
@@ -244,7 +244,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             onClick={(e) => { e.stopPropagation(); nextImage(); }}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
           >
-            <ChevronRightAlt size={24} />
+            <ArrowRight size={24} />
           </button>
           <img
             src={carImages[currentImageIndex]}

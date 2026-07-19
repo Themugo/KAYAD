@@ -37,7 +37,8 @@ import type { Car, User } from './types';
 
 // Lazy-loaded pages for code splitting
 const HomePage = lazy(() => import('./pages/Home'));
-const CarDetailPage = lazy(() => import('./pages/CarDetail'));
+const ComparePage = lazy(() => import('./pages/Compare'));
+const CarDetailPage = lazy(() => import('./pages/CarDetailPage'));
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
 const AuctionLivePage = lazy(() => import('./pages/AuctionLivePage'));
 const EscrowVaultPortal = lazy(() => import('./pages/EscrowVault'));
@@ -58,6 +59,7 @@ const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
 const ProfilePage = lazy(() => import('./pages/Profile'));
 const ChatPage = lazy(() => import('./pages/Chat'));
 const NotificationsPage = lazy(() => import('./pages/Notifications'));
+const PaymentsPage = lazy(() => import('./pages/Payments'));
 const FavoritesPage = lazy(() => import('./pages/Favorites'));
 const DisputesPage = lazy(() => import('./pages/DisputesPage'));
 const DisputeDetailPage = lazy(() => import('./pages/DisputeDetailPage'));
@@ -248,19 +250,22 @@ function AppContent() {
     <>
       <Suspense fallback={<LoadingPage />}>
         <Routes>
-          {/* Legacy routes for backward compatibility */}
-          <Route path="/" element={renderPage()} />
-          <Route path="/:page" element={renderPage()} />
-          <Route path="/car/:id" element={renderPage()} />
-
-          {/* Public pages */}
+          {/* Main routes */}
+          <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/showroom" element={<Showroom />} />
-          <Route path="/car/:id" element={<CarDetailPage />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/compare" element={<ComparePage />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/car/:id" element={<CarDetailPage />} />
+          <Route path="/auction" element={<Auction />} />
           <Route path="/auction-calendar" element={<AuctionCalendar />} />
           <Route path="/auction/:id" element={<AuctionLivePage />} />
           <Route path="/escrow-vault" element={<EscrowVaultPortal />} />
+          <Route path="/escrow" element={<EscrowVault />} />
+          <Route path="/pre-inspection" element={<PreInspection />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/dealer/:id" element={<DealerProfile />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact" element={<ContactPage />} />
