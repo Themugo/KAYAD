@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, X, Loader2 } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import CarCard from '../components/CarCard';
 import type { Car } from '../types';
 import { carsAPI } from '../api/client';
@@ -18,6 +18,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const types: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan', 'Wagon'];
 
@@ -38,10 +39,15 @@ export default function Gallery({ viewCar }: GalleryProps) {
       // Handle different response formats
       const carsList = response?.cars || response?.data || response || [];
       setCars(Array.isArray(carsList) ? carsList : []);
+      setHasLoaded(true);
     } catch (err) {
       console.error('Failed to fetch cars:', err);
-      setError('Failed to load vehicles. Please try again.');
+      const errorMessage = err && typeof err === 'object' && 'response' in err
+        ? 'Server unavailable. Please check if the backend is running.'
+        : 'Failed to load vehicles. Please try again.';
+      setError(errorMessage);
       setCars([]);
+      setHasLoaded(true);
     } finally {
       setLoading(false);
     }
@@ -51,14 +57,6 @@ export default function Gallery({ viewCar }: GalleryProps) {
     fetchCars();
   }, [fetchCars]);
 
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchCars();
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [query, fetchCars]);
-
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
       {/* Header */}
@@ -67,12 +65,13 @@ export default function Gallery({ viewCar }: GalleryProps) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">{results.length} vehicles available</p>
+          <p className="font-sans text-white/50 text-sm">
+            {loading ? 'Loading...' : `${cars.length} vehicles available`}
+          </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <p className="font-sans text-white/50 text-sm mb-4">{cars.length} vehicles available</p>
         {/* Search + filter bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
           <div className="relative flex-1">
@@ -159,14 +158,29 @@ export default function Gallery({ viewCar }: GalleryProps) {
           </div>
         )}
 
-        {/* Error state */}
+        {/* Error state - Backend unavailable */}
         {error && !loading && (
-          <div className="text-center py-24">
-            <p className="font-serif text-2xl text-red-500 mb-2">Error loading vehicles</p>
-            <p className="font-sans text-sm text-warm-400 mb-4">{error}</p>
-            <button onClick={fetchCars} className="btn-outline-dark">
-              Try Again
-            </button>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle size={32} className="text-red-500" />
+            </div>
+            <p className="font-serif text-2xl text-charcoal-900 mb-2">Unable to Load Vehicles</p>
+            <p className="font-sans text-sm text-warm-500 mb-6 max-w-md mx-auto">{error}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button onClick={fetchCars} className="btn-gold mx-auto">
+                <RefreshCw size={16} className="mr-2" />
+                Retry Connection
+              </button>
+              <button 
+                onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); }} 
+                className="btn-outline-dark mx-auto"
+              >
+                Clear Filters
+              </button>
+            </div>
+            <p className="font-sans text-xs text-warm-400 mt-6">
+              Make sure the backend server is running on port 3001
+            </p>
           </div>
         )}
 
@@ -179,12 +193,19 @@ export default function Gallery({ viewCar }: GalleryProps) {
           </div>
         )}
 
-        {/* Empty state */}
-        {!loading && !error && cars.length === 0 && (
-          <div className="text-center py-24">
-            <p className="font-serif text-2xl text-warm-400 mb-2">No vehicles found</p>
-            <p className="font-sans text-sm text-warm-400">Try adjusting your search or filters</p>
-            <button onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); fetchCars(); }} className="mt-4 text-gold-700 font-sans text-sm font-medium hover:underline">
+        {/* Empty state - No cars found */}
+        {!loading && !error && cars.length === 0 && hasLoaded && (
+          <div className="text-center py-16">
+            <p className="font-serif text-2xl text-charcoal-900 mb-2">No vehicles found</p>
+            <p className="font-sans text-sm text-warm-500 mb-6">
+              {query || typeFilter !== 'All' || maxPrice < 20000000
+                ? 'Try adjusting your search or filters'
+                : 'No vehicles are currently available'}
+            </p>
+            <button 
+              onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); }} 
+              className="btn-outline-dark"
+            >
               Clear all filters
             </button>
           </div>
