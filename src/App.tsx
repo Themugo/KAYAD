@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import CompareDrawer from './components/CompareDrawer';
 import MobileBottomNav from './components/MobileBottomNav';
 import ErrorBoundary from './components/ErrorBoundary';
+import DemoModeBanner from './components/DemoModeBanner';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Compare from './pages/Compare';
@@ -149,6 +150,7 @@ export default function App() {
           <Footer setPage={handleSetPage} />
           <CompareDrawer />
           <MobileBottomNav authUser={authUser} />
+          <DemoModeBanner />
         </div>
       </CompareProvider>
     </ErrorBoundary>
