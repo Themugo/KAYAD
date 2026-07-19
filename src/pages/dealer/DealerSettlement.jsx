@@ -23,7 +23,7 @@ export default function DealerSettlement() {
       .then(d => { if (d.settlement) setSettlement(d.settlement); })
       .catch(() => toast('Failed to load settlement config', 'error'))
       .finally(() => setLoading(false));
-  }, [toast]);
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -126,7 +126,7 @@ export default function DealerSettlement() {
         </div>
 
         {/* Guardrail Info */}
-        <div className="card" style={{ padding: 16, marginBottom: 20, background: 'rgba(37, 99, 235,0.06)' }}>
+        <div className="card" style={{ padding: 16, marginBottom: 20, background: 'rgba(212,196,168,0.06)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
             <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 4 }}>🛡️ Guardrail</strong>
             The independent seller P2P flow (bank transfer escrow) is used automatically when the seller is not a certified dealer.

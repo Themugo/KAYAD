@@ -49,7 +49,7 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
           minWidth: dims.box, height: dims.box,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-          border: `1px solid ${urgent ? 'rgba(239,68,68,0.4)' : 'rgba(37, 99, 235,0.22)'}`,
+          border: `1px solid ${urgent ? 'rgba(239,68,68,0.4)' : 'rgba(212,196,168,0.22)'}`,
           borderRadius: 10,
           fontFamily: "'JetBrains Mono', 'SF Mono', ui-monospace, monospace",
           fontSize: dims.num, fontWeight: 800, color: '#fff',

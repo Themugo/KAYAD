@@ -36,7 +36,7 @@ export default function DealerPackageTab({ user, listingsCount }) {
         <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No per-listing fees. Upgrade anytime to list more vehicles and unlock premium placement.</p>
       </div>
 
-      <div style={{ background: 'var(--card)', border: '1px solid rgba(37, 99, 235,0.18)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: 28 }}>
+      <div style={{ background: 'var(--card)', border: '1px solid rgba(212,196,168,0.18)', borderRadius: 'var(--radius-lg)', padding: '24px', marginBottom: 28 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', marginBottom: 6 }}>Current Plan</div>

@@ -1,11 +1,11 @@
+// src/pages/admin/AdminEscrows.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { escrowAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { Button, Badge, SpinnerPage, Pagination, Modal } from '../../components/ui';
 
 const STATUS_META = {
   pending:  { label: 'Pending',  badge: 'badge-orange', icon: '⏳' },
-  funded:   { label: 'Funded',   badge: 'badge-blue',   icon: '💰' },
+  held:     { label: 'Held',     badge: 'badge-blue',   icon: '💰' },
   released: { label: 'Released', badge: 'badge-green',  icon: '✅' },
   refunded: { label: 'Refunded', badge: 'badge-red',    icon: '↩️' },
   disputed: { label: 'Disputed', badge: 'badge-red',    icon: '⚠️' },
@@ -67,8 +67,8 @@ export default function AdminEscrows() {
     return acc;
   }, {});
 
-  const fundedTotal = escrows
-    .filter(e => e.status === 'funded')
+  const heldTotal = escrows
+    .filter(e => e.status === 'held')
     .reduce((acc, e) => acc + (e.amount || 0), 0);
 
   return (
@@ -87,8 +87,8 @@ export default function AdminEscrows() {
         <div className="grid-4" style={{ marginBottom: 28 }}>
           {[
             { label: 'Total Escrows', val: total, icon: '🔒', color: 'var(--text)' },
-            { label: 'Awaiting Release', val: counts.funded || 0, icon: '💰', color: 'var(--blue)' },
-            { label: 'Funds Locked (KES)', val: formatKES(fundedTotal), icon: '⏳', color: 'var(--gold-light)' },
+            { label: 'Awaiting Release', val: counts.held || 0, icon: '💰', color: 'var(--blue)' },
+            { label: 'Funds Locked (KES)', val: formatKES(heldTotal), icon: '⏳', color: 'var(--gold-light)' },
             { label: 'Disputes', val: counts.disputed || 0, icon: '⚠️', color: 'var(--red)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
@@ -103,8 +103,8 @@ export default function AdminEscrows() {
           ))}
         </div>
 
-        {/* Alert: funded escrows need action */}
-        {(counts.funded || 0) > 0 && (
+        {/* Alert: held escrows need action */}
+        {(counts.held || 0) > 0 && (
           <div style={{
             background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)',
             borderRadius: 'var(--radius)', padding: '14px 18px', marginBottom: 20,
@@ -113,21 +113,21 @@ export default function AdminEscrows() {
             <span style={{ fontSize: 22 }}>💰</span>
             <div>
               <div style={{ fontWeight: 600, color: 'var(--blue)', fontSize: 14 }}>
-                {counts.funded} escrow{counts.funded !== 1 ? 's' : ''} awaiting your action
+                {counts.held} escrow{counts.held !== 1 ? 's' : ''} awaiting your action
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                Review funded escrows and release or refund funds accordingly.
+                Review held escrows and release or refund funds accordingly.
               </div>
             </div>
-            <Button variant="outline" size="sm" style={{ marginLeft: 'auto' }} onClick={() => setFilter('funded')}>
-              Show Funded →
-            </Button>
+            <button className="btn btn-outline btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setFilter('held')}>
+              Show Held →
+            </button>
           </div>
         )}
 
         {/* Filter tabs */}
         <div className="tabs">
-          {['all', 'pending', 'funded', 'released', 'refunded', 'disputed'].map(f => (
+          {['all', 'pending', 'held', 'released', 'refunded', 'disputed'].map(f => (
             <button key={f} className={`tab-btn ${filter === f ? 'active' : ''}`}
               onClick={() => { setFilter(f); setPage(1); }}>
               {STATUS_META[f]?.icon} {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -141,7 +141,7 @@ export default function AdminEscrows() {
         </div>
 
         {loading ? (
-          <SpinnerPage label="Loading escrows..." />
+          <div className="loading-center"><div className="spinner" /></div>
         ) : escrows.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🔒</div>
@@ -166,9 +166,9 @@ export default function AdminEscrows() {
                 <tbody>
                   {escrows.map(e => {
                     const meta = STATUS_META[e.status] || { label: e.status, badge: 'badge-muted', icon: '•' };
-                    const isFunded = e.status === 'funded';
+                    const isHeld = e.status === 'held';
                     return (
-                      <tr key={e._id} style={{ background: isFunded ? 'rgba(59,130,246,0.03)' : '' }}>
+                      <tr key={e._id} style={{ background: isHeld ? 'rgba(59,130,246,0.03)' : '' }}>
                         <td style={{ fontSize: 12, fontFamily: 'monospace', color: 'var(--text-muted)' }}>
                           #{e._id?.slice(-8)}
                         </td>
@@ -203,7 +203,7 @@ export default function AdminEscrows() {
                             >
                               🔍 Details
                             </button>
-                            {isFunded && (
+                            {isHeld && (
                               <>
                                 <button className="btn btn-gold btn-sm" disabled={actionId === e._id}
                                   onClick={() => handleRelease(e._id)}>
@@ -229,17 +229,25 @@ export default function AdminEscrows() {
         {/* Pagination */}
         {total > 20 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} />
+            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+              Page {page} of {Math.ceil(total / 20)}
+            </span>
+            <button className="btn btn-outline btn-sm" disabled={page >= Math.ceil(total / 20)} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         )}
       </div>
 
       {/* ─── Detail Modal ─── */}
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Escrow Detail" size="md">
-        {selected && (
-          <>
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{selected.car?.title || 'Car Purchase'}</div>
+      {selected && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+          <div className="modal-box" style={{ maxWidth: 540 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Escrow Detail</div>
+                <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Car Purchase'}</h3>
+              </div>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
@@ -260,21 +268,21 @@ export default function AdminEscrows() {
               ))}
             </div>
 
-            {selected.status === 'funded' && (
+            {selected.status === 'held' && (
               <div style={{ display: 'flex', gap: 12 }}>
-                <Button variant="primary" full loading={actionId === selected._id}
+                <button className="btn btn-gold btn-full" disabled={actionId === selected._id}
                   onClick={() => handleRelease(selected._id)}>
-                  Release Funds to Seller
-                </Button>
-                <Button variant="danger" full loading={actionId === selected._id}
+                  {actionId === selected._id ? '...' : '✅ Release Funds to Seller'}
+                </button>
+                <button className="btn btn-danger btn-full" disabled={actionId === selected._id}
                   onClick={() => handleRefund(selected._id)}>
-                  Refund to Buyer
-                </Button>
+                  {actionId === selected._id ? '...' : '↩️ Refund to Buyer'}
+                </button>
               </div>
             )}
-          </>
-        )}
-      </Modal>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

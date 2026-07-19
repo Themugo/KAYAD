@@ -5,9 +5,9 @@ const STAT_DEFS = [
   { emoji: '👥', label: 'Total Users',     key: 'totalUsers',     color: '#3b82f6',  to: '/admin/users' },
   { emoji: '🚗', label: 'Total Cars',      key: 'totalCars',      color: 'var(--gold)', to: '/admin/cars' },
   { emoji: '🔨', label: 'Active Auctions', key: 'activeAuctions', color: '#f97316',   to: '/admin/auctions' },
-  { emoji: '💰', label: 'Total Revenue',   key: 'totalRevenue',   color: 'var(--gold)', to: '/admin/reports', kes: true },
+  { emoji: '💰', label: 'Total Revenue',   key: 'totalRevenue',   color: 'var(--gold)', to: '/admin/transactions', kes: true },
   { emoji: '⏳', label: 'Pending Dealers',  key: 'pendingDealers', color: '#f97316',   to: '/admin/sellers' },
-  { emoji: '📋', label: 'Pending Cars',    key: 'pendingCars',    color: '#8b5cf6',   to: '/admin/cars' },
+  { emoji: '📋', label: 'Pending Cars',    key: 'pendingCars',    color: '#8b5cf6',   to: '/admin/moderation' },
   { emoji: '🔔', label: 'Active Alerts',   key: 'activeAlerts',   color: '#ef4444' },
   { emoji: '🏷️', label: 'Total Bids',      key: 'totalBids',      color: '#06b6d4',   to: '/admin/bids' },
 ];
@@ -18,9 +18,9 @@ export default function AdminQuickStats({ stats, formatValue }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 165px), 1fr))', gap: 12, marginBottom: 24 }}>
       {STAT_DEFS.map(qs => {
         const val = s[qs.key];
-        const _activeColor = qs.key === 'activeAlerts' && Number(val||0) > 0 ? '#ef4444' : (qs.color || 'rgba(255,255,255,0.3)');
+        const activeColor = qs.key === 'activeAlerts' && Number(val||0) > 0 ? '#ef4444' : (qs.color || 'rgba(255,255,255,0.3)');
         const inner = (
-          <div role="presentation" style={{
+          <div style={{
             background: 'var(--card)', border: '1px solid var(--border)',
             borderRadius: 'var(--radius-lg)', padding: '18px 20px',
             transition: 'border-color 0.2s, transform 0.2s',

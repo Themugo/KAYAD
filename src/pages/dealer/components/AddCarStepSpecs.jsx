@@ -62,7 +62,7 @@ export default function AddCarStepSpecs({ form, set, featureInput, setFeatureInp
             {form.features.map((f, i) => (
               <span key={i} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                background: 'rgba(37, 99, 235,0.1)', border: '1px solid rgba(37, 99, 235,0.2)',
+                background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)',
                 borderRadius: 8, padding: '6px 12px', fontSize: 13, color: 'rgba(255,255,255,0.8)',
               }}>
                 {f}

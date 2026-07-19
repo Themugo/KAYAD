@@ -1,10 +1,8 @@
+// src/pages/dealer/components/DashboardWidgets.jsx
 // Shared widgets and constants for the dealer dashboard
 
 import { Link } from 'react-router-dom';
-import { Check } from 'lucide-react';
-import { timeAgo } from '../../../utils/helpers';
-
-export { timeAgo };
+import { ArrowUpRight, Check } from 'lucide-react';
 
 export const TABS_CONFIG = [
   { id: 'overview', label: 'Overview' },
@@ -38,11 +36,23 @@ export const ESCROW_STEPS = [
   { key: 'refunded', label: 'Refunded', color: '#6b7280' },
 ];
 
+export function timeAgo(date) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(date).toLocaleDateString();
+}
+
 export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, trend }) {
   const isUp = trend > 0;
   const showTrend = trend !== undefined && trend !== null;
   const inner = (
-    <div role="presentation" style={{
+    <div style={{
       background: 'var(--card)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden',
       transition: 'border-color 0.2s, transform 0.2s',
@@ -85,7 +95,7 @@ export function DemoBadge({ edited }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '2px 8px', borderRadius: 9999, fontSize: 9, fontWeight: 700,
-      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(37, 99, 235,0.1)',
+      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(212,196,168,0.1)',
       color: edited ? '#22c55e' : 'var(--gold)',
       textTransform: 'uppercase', letterSpacing: '0.06em',
     }}>

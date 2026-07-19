@@ -185,7 +185,7 @@ export default function InspectorDashboard() {
         images: [],
       });
 
-      toast(`Inspection submitted! Score: ${calcScore}/100`, 'success');
+      toast(`Ghost Check submitted! Score: ${calcScore}/100`, 'success');
       setActiveTask(null);
       loadTasks();
     } catch (error) {
@@ -194,13 +194,13 @@ export default function InspectorDashboard() {
     }
   };
 
-  if (!user || user.role !== 'inspector') {
+  if (!user || user.role !== 'ghost_checker') {
     return (
       <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px', fontSize: 28 }}><Shield size={32} style={{ color: '#ef4444' }} /></div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.6rem', color: '#fff', marginBottom: 10 }}>Access Denied</h2>
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>This area is restricted to certified Inspectors. If you believe this is an error, contact support.</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>This area is restricted to certified Ghost Checkers. If you believe this is an error, contact support.</p>
           <button onClick={() => navigate('/')} style={{ padding: '11px 28px', background: 'var(--gold)', color: '#000', borderRadius: 9999, fontWeight: 900, fontSize: 11, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.08em', border: 'none', cursor: 'pointer' }}>Return Home</button>
         </div>
       </div>

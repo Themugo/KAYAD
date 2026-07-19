@@ -6,11 +6,11 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
-      <div style={{ background:'#FFFFFF', border:'1px solid rgba(15, 23, 42, 0.07)', borderRadius:16, padding:24 }}>
+      <div style={{ background:'#0C0C0C', border:'1px solid rgba(255,255,255,0.07)', borderRadius:16, padding:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
           <div>
-            <h3 style={{ fontSize:'1rem', margin:0, color:'#0F172A' }}>Listing Packages</h3>
-            <p style={{ fontSize:13, color:'rgba(15, 23, 42, 0.35)', marginTop:6 }}>
+            <h3 style={{ fontSize:'1rem', margin:0, color:'#fff' }}>Listing Packages</h3>
+            <p style={{ fontSize:13, color:'rgba(255,255,255,0.35)', marginTop:6 }}>
               Edit package prices and limits here. Toggle isFree to waive payment for any package.
             </p>
           </div>
@@ -22,7 +22,7 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
 
         <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
           {packages.map((pkg, i) => (
-            <div key={pkg.id || i} style={{ background: '#FFFFFF', border:`1px solid ${pkg.isFree ? 'rgba(34,197,94,0.2)' : 'rgba(15, 23, 42, 0.06)'}`, borderRadius:12, padding:'18px 20px' }}>
+            <div key={pkg.id || i} style={{ background:'#111', border:`1px solid ${pkg.isFree ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`, borderRadius:12, padding:'18px 20px' }}>
               <div style={{ display:'grid', gridTemplateColumns:'1.5fr 1fr 1fr 1fr 1fr 1fr auto', gap:12, alignItems:'center' }}>
                 {[
                   { label:'Name', value:pkg.name, onChange:e => setPackages(p => p.map((x, j) => j === i ? {...x, name:e.target.value} : x)), type:'text' },
@@ -30,31 +30,31 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
                   { label:'Listing Max (0=∞)', value:pkg.listingMax, onChange:e => setPackages(p => p.map((x, j) => j === i ? {...x, listingMax:Number(e.target.value)} : x)), type:'number', min:0 },
                 ].map(f => (
                   <div key={f.label}>
-                    <div style={{ fontSize:9, color:'rgba(15, 23, 42, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>{f.label}</div>
+                    <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>{f.label}</div>
                     <input type={f.type} min={f.min} value={f.value} onChange={f.onChange}
-                      style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(15, 23, 42, 0.1)', background:'rgba(15, 23, 42, 0.05)', color:'#0F172A', fontSize:13, outline:'none', boxSizing:'border-box' }} />
+                      style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'rgba(255,255,255,0.05)', color:'#fff', fontSize:13, outline:'none', boxSizing:'border-box' }} />
                   </div>
                 ))}
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(15, 23, 42, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>For</div>
+                  <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>For</div>
                   <select value={pkg.forRole} onChange={e => setPackages(p => p.map((x, j) => j === i ? {...x, forRole:e.target.value} : x))}
-                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(15, 23, 42, 0.1)', background: '#FFFFFF', color:'#0F172A', fontSize:12, outline:'none' }}>
+                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'#111', color:'#fff', fontSize:12, outline:'none' }}>
                     <option value="dealer">Dealer</option>
                     <option value="seller">Seller</option>
                     <option value="both">Both</option>
                   </select>
                 </div>
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(15, 23, 42, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Free</div>
+                  <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Free</div>
                   <button onClick={() => setPackages(p => p.map((x, j) => j === i ? {...x, isFree:!x.isFree} : x))}
-                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isFree ? 'rgba(34,197,94,0.3)' : 'rgba(15, 23, 42, 0.1)'}`, background:pkg.isFree ? 'rgba(34,197,94,0.1)' : 'rgba(15, 23, 42, 0.04)', color:pkg.isFree ? '#22c55e' : 'rgba(15, 23, 42, 0.4)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
+                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isFree ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`, background:pkg.isFree ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)', color:pkg.isFree ? '#22c55e' : 'rgba(255,255,255,0.4)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
                     {pkg.isFree ? '✓ Free' : 'Paid'}
                   </button>
                 </div>
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(15, 23, 42, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Active</div>
+                  <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Active</div>
                   <button onClick={() => setPackages(p => p.map((x, j) => j === i ? {...x, isActive:!x.isActive} : x))}
-                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isActive ? 'rgba(37, 99, 235,0.3)' : 'rgba(15, 23, 42, 0.08)'}`, background:pkg.isActive ? 'rgba(37, 99, 235,0.08)' : 'rgba(15, 23, 42, 0.03)', color:pkg.isActive ? 'var(--gold)' : 'rgba(15, 23, 42, 0.3)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
+                    style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isActive ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.08)'}`, background:pkg.isActive ? 'rgba(212,196,168,0.08)' : 'rgba(255,255,255,0.03)', color:pkg.isActive ? 'var(--gold)' : 'rgba(255,255,255,0.3)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
                     {pkg.isActive ? 'On' : 'Off'}
                   </button>
                 </div>
@@ -64,7 +64,7 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
               <div style={{ marginTop:10 }}>
                 <input placeholder="Description (shown to users)" value={pkg.description || ''}
                   onChange={e => setPackages(p => p.map((x, j) => j === i ? {...x, description:e.target.value} : x))}
-                  style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(15, 23, 42, 0.07)', background:'rgba(15, 23, 42, 0.03)', color:'rgba(15, 23, 42, 0.6)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                  style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.03)', color:'rgba(255,255,255,0.6)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
               </div>
             </div>
           ))}

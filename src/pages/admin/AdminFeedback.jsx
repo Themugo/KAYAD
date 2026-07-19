@@ -3,7 +3,6 @@ import { feedbackAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
 import { MessageSquare, Eye } from 'lucide-react';
-import { Button, SpinnerPage, Pagination, Modal } from '../../components/ui';
 
 const TYPE_BADGE = {
   general: 'badge-blue',
@@ -94,7 +93,7 @@ export default function AdminFeedback() {
         <div className="card">
           <div className="table-wrap">
             {loading ? (
-              <SpinnerPage label="Loading feedback..." />
+              <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
             ) : items.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}>
                 <div className="empty-icon"><MessageSquare size={40} /></div>
@@ -143,7 +142,7 @@ export default function AdminFeedback() {
                           {f.status || 'new'}
                         </span>
                       </td>
-                      <td onClick={e => e.stopPropagation()} role="presentation">
+                      <td onClick={e => e.stopPropagation()}>
                         <button className="btn btn-sm btn-outline" onClick={() => setSelected(f)}>
                           <Eye size={12} style={{ marginRight: 4 }} />
                           View
@@ -159,24 +158,32 @@ export default function AdminFeedback() {
 
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         )}
       </div>
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title={selected?.subject || 'Feedback Detail'} size="md">
-        {selected && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <Badge variant={TYPE_BADGE[selected.type]?.replace('badge-', '') || 'muted'}>
-                {TYPE_LABELS[selected.type] || selected.type}
-              </Badge>
-              <Badge variant={STATUS_BADGE[selected.status]?.replace('badge-', '') || 'muted'}>
-                {selected.status || 'new'}
-              </Badge>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', marginLeft: 'auto' }}>
-                {selected.name || selected.user?.name} · {selected.email || selected.user?.email} · {timeAgo(selected.createdAt)}
-              </span>
+      {selected && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+          <div className="modal-box" style={{ maxWidth: 540 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span className={`badge ${TYPE_BADGE[selected.type] || 'badge-muted'}`}>
+                    {TYPE_LABELS[selected.type] || selected.type}
+                  </span>
+                  <span className={`badge ${STATUS_BADGE[selected.status] || 'badge-muted'}`} style={{ textTransform: 'capitalize' }}>
+                    {selected.status || 'new'}
+                  </span>
+                </div>
+                <h3 style={{ margin: '4px 0 0' }}>{selected.subject}</h3>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  {selected.name || selected.user?.name} &middot; {selected.email || selected.user?.email} &middot; {timeAgo(selected.createdAt)}
+                </div>
+              </div>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
             </div>
 
             <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
@@ -185,21 +192,21 @@ export default function AdminFeedback() {
 
             <div style={{ display: 'flex', gap: 8, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
               {selected.status !== 'read' && (
-                <Button variant="outline" size="sm" loading={actionId === selected._id}
+                <button className="btn btn-outline btn-sm" disabled={actionId === selected._id}
                   onClick={() => handleUpdate(selected._id, 'read')}>
-                  Mark as Read
-                </Button>
+                  {actionId === selected._id ? '...' : 'Mark as Read'}
+                </button>
               )}
               {selected.status !== 'addressed' && (
-                <Button variant="primary" size="sm" loading={actionId === selected._id}
+                <button className="btn btn-gold btn-sm" disabled={actionId === selected._id}
                   onClick={() => handleUpdate(selected._id, 'addressed')}>
-                  Mark as Addressed
-                </Button>
+                  {actionId === selected._id ? '...' : 'Mark as Addressed'}
+                </button>
               )}
             </div>
-          </>
-        )}
-      </Modal>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

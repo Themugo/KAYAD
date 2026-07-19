@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { disputeAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useSocket } from '../../context/SocketContext';
 import { timeAgo } from '../../utils/helpers';
-import { Shield, Search, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { Shield, Search, Filter, BarChart3, Clock, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
 import { LoadingPage } from '../../components/LoadingPage';
-import { Button, Badge, Pagination } from '../../components/ui';
 
 const STATUS_META = {
   open:          { label: 'Open',           badge: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: '🆕' },
@@ -17,7 +16,7 @@ const STATUS_META = {
   closed:        { label: 'Closed',         badge: 'bg-gray-500/20 text-gray-400 border-gray-500/30',     icon: '🔒' },
 };
 
-const _PRIORITY_COLORS = {
+const PRIORITY_COLORS = {
   urgent: 'text-red-400',
   high:   'text-orange-400',
   medium: 'text-yellow-400',
@@ -35,7 +34,7 @@ export default function AdminDisputes() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState(null);
 
-  const load = useCallback((p = page) => {
+  const load = (p = page) => {
     setLoading(true);
     const params = { page: p, limit: 20 };
     if (filter !== 'all') params.status = filter;
@@ -50,14 +49,14 @@ export default function AdminDisputes() {
       })
       .catch(err => toast(err?.response?.data?.message || 'Failed to load', 'error'))
       .finally(() => setLoading(false));
-  }, [filter, page, toast]);
+  };
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(); }, [filter, page]);
 
   useEffect(() => {
     const offNew = on?.('newDispute', () => load());
     return () => offNew?.();
-  }, [on, load]);
+  }, [on]);
 
   const filtered = disputes.filter(d => {
     if (search) {
@@ -70,152 +69,89 @@ export default function AdminDisputes() {
   if (loading && disputes.length === 0) return <LoadingPage />;
 
   return (
-    <div style={{ padding: '40px 28px', maxWidth: 1400, margin: '0 auto', background: '#0a0a0a', minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ marginBottom: 36, position: 'relative' }}>
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 1,
-          background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
-          opacity: 0.5,
-        }} />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: 12,
-              background: 'linear-gradient(135deg, #EF4444, #DC2626)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Shield size={24} style={{ color: '#fff' }} />
-            </div>
-            <div>
-              <div style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 4 }}>
-                Admin Hub
-              </div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
-                Dispute Management
-              </h1>
-            </div>
-          </div>
-          <button onClick={() => load()} style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
-            borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-            color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-          >
-            <RefreshCw size={14} /> Refresh
-          </button>
+    <div className="p-6 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-100">Dispute Management</h1>
+          <p className="text-sm text-gray-500 mt-1">Enterprise dispute resolution with full state machine workflow</p>
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 14, marginTop: 12, maxWidth: 600, lineHeight: 1.6 }}>
-          Enterprise dispute resolution with full state machine workflow and real-time updates
-        </p>
+        <button onClick={() => load()} className="flex items-center gap-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-300 hover:bg-gray-700">
+          <RefreshCw size={14} /> Refresh
+        </button>
       </div>
 
-      {/* Stats */}
       {stats && (
-        <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', marginBottom: 32 }}>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {[
-            { label: 'Total', count: stats.total, icon: <Shield size={16} />, color: '#3B82F6' },
-            { label: 'Open', count: stats.statusBreakdown?.open || 0, icon: <AlertTriangle size={16} />, color: '#F59E0B' },
-            { label: 'Review', count: stats.statusBreakdown?.under_review || 0, icon: <Search size={16} />, color: '#3B82F6' },
-            { label: 'Mediation', count: stats.statusBreakdown?.mediation || 0, icon: <Clock size={16} />, color: '#8B5CF6' },
-            { label: 'Resolved', count: stats.statusBreakdown?.resolved || 0, icon: <CheckCircle size={16} />, color: '#22C55E' },
-            { label: 'Appealed', count: stats.statusBreakdown?.appealed || 0, icon: <RefreshCw size={16} />, color: '#F97316' },
-            { label: 'Evidence Files', count: stats.totalEvidence || 0, icon: <BarChart3 size={16} />, color: '#06B6D4' },
+            { label: 'Total', count: stats.total, icon: <Shield size={16} />, color: 'text-blue-400' },
+            { label: 'Open', count: stats.statusBreakdown?.open || 0, icon: <AlertTriangle size={16} />, color: 'text-yellow-400' },
+            { label: 'Review', count: stats.statusBreakdown?.under_review || 0, icon: <Search size={16} />, color: 'text-blue-400' },
+            { label: 'Mediation', count: stats.statusBreakdown?.mediation || 0, icon: <Clock size={16} />, color: 'text-purple-400' },
+            { label: 'Resolved', count: stats.statusBreakdown?.resolved || 0, icon: <CheckCircle size={16} />, color: 'text-green-400' },
+            { label: 'Appealed', count: stats.statusBreakdown?.appealed || 0, icon: <RefreshCw size={16} />, color: 'text-orange-400' },
+            { label: 'Evidence Files', count: stats.totalEvidence || 0, icon: <BarChart3 size={16} />, color: 'text-cyan-400' },
           ].map(s => (
-            <div key={s.label} style={{
-              borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)',
-              background: 'rgba(255,255,255,0.02)', padding: 16,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: s.color, fontWeight: 600, marginBottom: 8 }}>
-                {s.icon} {s.label}
-              </div>
-              <p style={{ fontSize: 24, fontWeight: 800, color: '#fff', margin: 0 }}>{s.count}</p>
+            <div key={s.label} className="bg-gray-900 border border-gray-700 rounded-lg p-3">
+              <div className={`flex items-center gap-1.5 text-xs ${s.color} mb-1`}>{s.icon} {s.label}</div>
+              <p className="text-xl font-bold text-gray-100">{s.count}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Filters */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 4 }}>
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
           {['all', 'open', 'under_review', 'mediation', 'resolved', 'appealed', 'closed'].map(s => (
             <button key={s} onClick={() => { setFilter(s); setPage(1); }}
-              style={{
-                padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-                background: filter === s ? 'var(--gold)' : 'transparent',
-                color: filter === s ? '#0A1628' : 'rgba(255,255,255,0.5)',
-                border: 'none', cursor: 'pointer', transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { if (filter !== s) e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
-              onMouseLeave={e => { if (filter !== s) e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-            >
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${filter === s ? 'bg-gold text-black' : 'text-gray-400 hover:text-gray-200'}`}>
               {STATUS_META[s]?.label || s}
             </button>
           ))}
         </div>
-        <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
-          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+        <div className="relative flex-1 max-w-xs ml-auto">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input type="text" placeholder="Search disputes..." value={search} onChange={e => setSearch(e.target.value)}
-            style={{
-              width: '100%', paddingLeft: 36, paddingRight: 12, padding: '10px 12px 10px 36px',
-              borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              color: '#fff', fontSize: 13, outline: 'none', transition: 'all 0.2s',
-            }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(37, 99, 235,0.4)'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-          />
+            className="w-full pl-9 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gold" />
         </div>
       </div>
 
-      {/* Table */}
-      <div style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', overflow: 'hidden' }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+      <div className="bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                {['Dispute', 'Status', 'Priority', 'Opened By', 'Amount', 'Category', 'Created', 'Action'].map((th, _i) => (
-                  <th key={th} style={{
-                    textAlign: 'left', padding: '16px', fontSize: 11, fontWeight: 700,
-                    color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em', textTransform: 'uppercase',
-                  }}>{th}</th>
-                ))}
+              <tr className="border-b border-gray-700 text-xs text-gray-500 uppercase">
+                <th className="text-left px-4 py-3 font-medium">Dispute</th>
+                <th className="text-left px-4 py-3 font-medium">Status</th>
+                <th className="text-left px-4 py-3 font-medium">Priority</th>
+                <th className="text-left px-4 py-3 font-medium">Opened By</th>
+                <th className="text-left px-4 py-3 font-medium">Amount</th>
+                <th className="text-left px-4 py-3 font-medium">Category</th>
+                <th className="text-left px-4 py-3 font-medium">Created</th>
+                <th className="text-right px-4 py-3 font-medium">Action</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(d => {
                 const meta = STATUS_META[d.status] || { label: d.status, badge: 'bg-gray-500/20 text-gray-400', icon: '❓' };
-                const statusColor = d.status === 'open' ? '#F59E0B' : d.status === 'under_review' ? '#3B82F6' : d.status === 'mediation' ? '#8B5CF6' : d.status === 'resolved' ? '#22C55E' : d.status === 'appealed' ? '#F97316' : '#6B7280';
-                const priorityColor = d.priority === 'urgent' ? '#EF4444' : d.priority === 'high' ? '#F97316' : d.priority === 'medium' ? '#F59E0B' : '#6B7280';
                 return (
-                  <tr key={d._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                  >
-                    <td style={{ padding: 16 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 18 }}>{meta.icon}</span>
+                  <tr key={d._id} className="border-b border-gray-800 hover:bg-gray-800/50 transition">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <span>{meta.icon}</span>
                         <div>
-                          <p style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 600, margin: '0 0 4px 0', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.title}</p>
-                          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', margin: 0 }}>{d._id.slice(-8)}</p>
+                          <p className="text-gray-200 font-medium truncate max-w-[200px]">{d.title}</p>
+                          <p className="text-[10px] text-gray-600 font-mono">{d._id.slice(-8)}</p>
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: 16 }}>
-                      <Badge variant={
-                        d.status === 'open' ? 'orange' : d.status === 'under_review' ? 'blue' : d.status === 'mediation' ? 'muted' : d.status === 'resolved' ? 'green' : d.status === 'appealed' ? 'orange' : 'muted'
-                      }>
-                        {meta.label}
-                      </Badge>
-                    </td>
-                    <td style={{ padding: 16, fontSize: 12, fontWeight: 600, color: priorityColor }}>{d.priority || 'medium'}</td>
-                    <td style={{ padding: 16, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{d.openedBy?.name || 'Unknown'}</td>
-                    <td style={{ padding: 16, color: 'rgba(255,255,255,0.9)', fontSize: 12, fontWeight: 600 }}>KES {d.amountInDispute?.toLocaleString('en-KE')}</td>
-                    <td style={{ padding: 16, color: 'rgba(255,255,255,0.5)', fontSize: 12, textTransform: 'capitalize' }}>{d.category?.replace('_', ' ')}</td>
-                    <td style={{ padding: 16, color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>{timeAgo(d.createdAt)}</td>
-                    <td style={{ padding: 16, textAlign: 'right' }}>
-                      <Link to={`/admin/disputes/${d._id}`} style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600, textDecoration: 'none' }}>View →</Link>
+                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-[10px] font-medium border ${meta.badge}`}>{meta.label}</span></td>
+                    <td className={`px-4 py-3 text-xs font-medium ${PRIORITY_COLORS[d.priority] || 'text-gray-400'}`}>{d.priority || 'medium'}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs">{d.openedBy?.name || 'Unknown'}</td>
+                    <td className="px-4 py-3 text-gray-200 text-xs">KES {d.amountInDispute?.toLocaleString('en-KE')}</td>
+                    <td className="px-4 py-3 text-gray-400 text-xs capitalize">{d.category?.replace('_', ' ')}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">{timeAgo(d.createdAt)}</td>
+                    <td className="px-4 py-3 text-right">
+                      <Link to={`/admin/disputes/${d._id}`} className="text-xs text-gold hover:text-gold/80">View →</Link>
                     </td>
                   </tr>
                 );
@@ -224,19 +160,21 @@ export default function AdminDisputes() {
           </table>
         </div>
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(37, 99, 235,0.1)', border: '1px solid rgba(37, 99, 235,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <Shield size={24} style={{ color: 'var(--gold)' }} />
-            </div>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>No disputes match your filter</p>
+          <div className="text-center py-12 text-gray-500">
+            <Shield size={36} className="mx-auto mb-2 text-gray-600" />
+            <p className="text-sm">No disputes match your filter</p>
           </div>
         )}
       </div>
 
-      {/* Pagination */}
       {pagination && pagination.pages > 1 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 24 }}>
-          <Pagination page={page} totalPages={pagination.pages} onChange={setPage} />
+        <div className="flex items-center justify-center gap-2 mt-4">
+          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(p => (
+            <button key={p} onClick={() => setPage(p)}
+              className={`w-8 h-8 rounded-lg text-xs font-medium ${page === p ? 'bg-gold text-black' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
+              {p}
+            </button>
+          ))}
         </div>
       )}
     </div>

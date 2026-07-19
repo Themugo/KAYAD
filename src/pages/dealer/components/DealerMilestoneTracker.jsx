@@ -56,8 +56,8 @@ export default function DealerMilestoneTracker() {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(37, 99, 235,0.06), rgba(0,0,0,0.2))',
-      border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 16, padding: 24, marginBottom: 24,
+      background: 'linear-gradient(135deg, rgba(212,196,168,0.06), rgba(0,0,0,0.2))',
+      border: '1px solid rgba(212,196,168,0.15)', borderRadius: 16, padding: 24, marginBottom: 24,
     }}>
       {/* Top row: score + key stats */}
       <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 20, flexWrap: 'wrap' }}>

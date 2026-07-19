@@ -1,9 +1,9 @@
+// src/pages/admin/AdminAuctions.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { CountdownDisplay } from '../../hooks/useCountdown';
-import { Button, Badge, SpinnerPage, Modal } from '../../components/ui';
+import { CountdownDisplay } from '../../components/CountdownDisplay';
 
 export default function AdminAuctions() {
   const { toast } = useToast();
@@ -95,6 +95,15 @@ export default function AdminAuctions() {
 
   const handleSetWinner = async (bidId) => {
     if (!winnerModal) return;
+    const bid = winnerModal.bids.find(b => b._id === bidId);
+    if (!bid) return;
+    
+    // Verify payment is confirmed before setting winner
+    if (!bid.mpesaPaid) {
+      toast('⚠️ Cannot set winner: Bid payment not yet confirmed via M-Pesa', 'error');
+      return;
+    }
+    
     setActionId(bidId);
     try {
       await auctionAdminAPI.setWinner(winnerModal.car._id, bidId);
@@ -115,8 +124,8 @@ export default function AdminAuctions() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
 
         <div style={{ marginBottom: 28 }}>
-          <div className="section-eyebrow">Admin</div>
-          <h2>Auction Control</h2>
+          <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>Admin</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#fff', margin: '0 0 6px' }}>Auction Control</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 6 }}>
             Start, end, extend auctions and declare winners.
           </p>
@@ -125,17 +134,18 @@ export default function AdminAuctions() {
         {/* Stats bar */}
         <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
-            { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: '🔴' },
-            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold-light)', icon: '⏸' },
-            { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: '🏁' },
+            { label: 'Live Auctions', val: liveCars.length,  color: '#22c55e', icon: '🔴' },
+            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--gold)', icon: '⏸' },
+            { label: 'Completed', val: endedCars.length,     color: 'rgba(255,255,255,0.5)', icon: '🏁' },
           ].map(s => (
-            <div key={s.label} className="stat-box">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div key={s.label} className="stat-box" style={{ position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', right: -16, top: -16, width: 64, height: 64, borderRadius: '50%', background: s.color, opacity: 0.06 }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: `${s.color}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10, fontSize: 16 }}>{s.icon}</div>
                   <div className="stat-label">{s.label}</div>
-                  <div className="stat-value" style={{ color: s.color }}>{s.val}</div>
+                  <div className="stat-value" style={{ color: s.color, fontSize: '1.8rem' }}>{s.val}</div>
                 </div>
-                <span style={{ fontSize: 28 }}>{s.icon}</span>
               </div>
             </div>
           ))}
@@ -155,7 +165,7 @@ export default function AdminAuctions() {
         </div>
 
         {loading ? (
-          <SpinnerPage label="Loading auctions..." />
+          <div className="loading-center"><div className="spinner" /></div>
         ) : displayed.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">⚡</div>
@@ -173,10 +183,10 @@ export default function AdminAuctions() {
 
                   {/* Thumbnail */}
                   <div style={{ width: 80, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
-                    {car.images?.[0]?.url
-                      ? <img src={car.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    {(() => { const src = car.images?.[0]?.url || car.images?.[0]; return src
+                      ? <img src={src} alt={car.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚗</div>
-                    }
+                    })()}
                   </div>
 
                   {/* Info */}
@@ -254,12 +264,19 @@ export default function AdminAuctions() {
         )}
       </div>
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="Start Auction">
-        {selected && (
-          <>
-            <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{selected.title}</div>
+      {/* ─── Start Auction Modal ─── */}
+      {selected && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+          <div className="modal-box">
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Start Auction</div>
+                <h3 style={{ marginTop: 4 }}>{selected.title}</h3>
+              </div>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+            </div>
 
-            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
+            <div style={{ background: 'var(--gold-glow)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Starting Price</div>
               <div className="price-tag" style={{ fontSize: '1.6rem' }}>{formatKES(selected.price)}</div>
             </div>
@@ -268,13 +285,12 @@ export default function AdminAuctions() {
               <label className="input-label">Auction Duration</label>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {[6, 12, 24, 48, 72].map(h => (
-                  <Button key={h}
-                    variant={startForm.hours === h ? 'primary' : 'outline'}
-                    size="sm"
+                  <button key={h}
+                    className={`btn btn-sm ${startForm.hours === h ? 'btn-gold' : 'btn-outline'}`}
                     onClick={() => setStartForm({ hours: h })}
                   >
                     {h}h
-                  </Button>
+                  </button>
                 ))}
               </div>
               <div style={{ marginTop: 8 }}>
@@ -287,17 +303,25 @@ export default function AdminAuctions() {
               </div>
             </div>
 
-            <Button variant="primary" full size="lg" onClick={handleStart} loading={actionId === selected._id}>
-              Go Live Now
-            </Button>
-          </>
-        )}
-      </Modal>
+            <button className="btn btn-gold btn-full btn-lg" onClick={handleStart} disabled={actionId === selected._id}>
+              {actionId === selected._id ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Starting...</> : '🔴 Go Live Now'}
+            </button>
+          </div>
+        </div>
+      )}
 
-      <Modal open={!!winnerModal} onClose={() => setWinnerModal(null)} title="Declare Winner" size="md">
-        {winnerModal && (
-          <>
-            <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>{winnerModal.car.title}</div>
+      {/* ─── Set Winner Modal ─── */}
+      {winnerModal && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setWinnerModal(null)}>
+          <div className="modal-box" style={{ maxWidth: 540 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Declare Winner</div>
+                <h3 style={{ marginTop: 4 }}>{winnerModal.car.title}</h3>
+              </div>
+              <button onClick={() => setWinnerModal(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+            </div>
+
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
               Select the winning bid. The winner will be notified and an escrow will be initiated automatically.
             </p>
@@ -312,7 +336,7 @@ export default function AdminAuctions() {
                 {winnerModal.bids.sort((a, b) => b.amount - a.amount).map((bid, i) => (
                   <div key={bid._id} style={{
                     background: i === 0 ? 'var(--gold-glow)' : 'var(--surface)',
-                    border: `1px solid ${i === 0 ? 'rgba(37, 99, 235,0.3)' : 'var(--border)'}`,
+                    border: `1px solid ${i === 0 ? 'rgba(212,196,168,0.3)' : 'var(--border)'}`,
                     borderRadius: 'var(--radius)', padding: '14px 16px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   }}>
@@ -320,7 +344,7 @@ export default function AdminAuctions() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         {i === 0 && <span>👑</span>}
                         <span style={{ fontWeight: 600, fontSize: 14 }}>{bid.user?.name || 'Bidder'}</span>
-                        {bid.mpesaPaid && <Badge variant="green" size="sm">✓ M-Pesa Paid</Badge>}
+                        {bid.mpesaPaid && <span className="badge badge-green" style={{ fontSize: 9 }}>✓ M-Pesa Paid</span>}
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                         {bid.phone} · {new Date(bid.createdAt).toLocaleString('en-KE')}
@@ -328,22 +352,21 @@ export default function AdminAuctions() {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <div className="price-tag">{formatKES(bid.amount)}</div>
-                      <Button
-                        variant={i === 0 ? 'primary' : 'outline'}
-                        size="sm"
+                      <button
+                        className={`btn btn-sm ${i === 0 ? 'btn-gold' : 'btn-outline'}`}
                         onClick={() => handleSetWinner(bid._id)}
-                        loading={actionId === bid._id}
+                        disabled={actionId === bid._id}
                       >
-                        Select
-                      </Button>
+                        {actionId === bid._id ? '...' : '🏆 Select'}
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </>
-        )}
-      </Modal>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

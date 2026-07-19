@@ -1,3 +1,4 @@
+// src/pages/dealer/components/DealerKPIWidgets.jsx
 // KPI Widgets for Dealer Dashboard - Inventory, Revenue, Auctions, Escrow
 
 import { Car, DollarSign, Gavel, Shield, TrendingUp, TrendingDown } from 'lucide-react';

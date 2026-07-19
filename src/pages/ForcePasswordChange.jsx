@@ -1,21 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
 export default function ForcePasswordChange() {
-  const { user, loading: authLoading, setUser, login } = useAuth();
+  const { user, loading: authLoading, setUser, login, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
 
+  // Redirect after render if there's nothing to do. Doing this in an effect
+  // (rather than calling navigate() during render) prevents an infinite
+  // render → router-state → render loop that can crash with OOM.
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user || !user.mustChangePassword) {
+      navigate(isAdmin ? '/admin/settings' : '/profile', { replace: true });
+    }
+  }, [authLoading, user, isAdmin, navigate]);
+
   if (authLoading) return <div className="loading-center"><div className="spinner" /></div>;
-  if (!user?.mustChangePassword) {
-    navigate('/admin/settings', { replace: true });
-    return null;
-  }
+  if (!user?.mustChangePassword) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,10 +38,9 @@ export default function ForcePasswordChange() {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });
-      localStorage.setItem('gari_token', data.token);
       setUser(data.user);
       toast('🔐 System ownership verified. Password updated.', 'success');
-      navigate('/admin/settings', { replace: true });
+      navigate(isAdmin ? '/admin/settings' : '/profile', { replace: true });
     } catch (err) {
       toast(err.response?.data?.message || 'Failed to change password', 'error');
     } finally {
@@ -76,7 +82,7 @@ export default function ForcePasswordChange() {
                 required />
             </div>
 
-            <div style={{ background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
+            <div style={{ background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
               👑 As system owner, you have full access to all sections. Set a strong password you'll remember.
             </div>
 

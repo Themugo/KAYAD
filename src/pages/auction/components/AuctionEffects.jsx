@@ -1,3 +1,4 @@
+// src/pages/auction/components/AuctionEffects.jsx
 // Visual effects and utility components for the live auction page
 
 import { useState, useEffect } from 'react';

@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { adminPaymentsAPI, formatKES } from '../../api/api';
 import { timeAgo } from '../../utils/helpers';
-import { Button, Badge, SpinnerInline, Pagination, Modal } from '../../components/ui';
 
 export default function AdminTransactions() {
   const [payments, setPayments] = useState([]);
@@ -13,7 +12,7 @@ export default function AdminTransactions() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [selected, setSelected] = useState(null);
 
-  const load = useCallback(async (p) => {
+  const load = async (p = page) => {
     setLoading(true);
     try {
       const params = { page: p, limit: 20 };
@@ -25,10 +24,10 @@ export default function AdminTransactions() {
       setTotal(d.pagination?.total || 0);
     } catch { /* ignore */ }
     finally { setLoading(false); }
-  }, [filter, typeFilter]);
+  };
 
-  useEffect(() => { load(1); setPage(1); }, [filter, typeFilter, load]);
-  useEffect(() => { load(page); }, [page, load]);
+  useEffect(() => { load(1); setPage(1); }, [filter, typeFilter]);
+  useEffect(() => { load(); }, [page]);
 
   const totalPages = Math.ceil(total / 20);
 
@@ -91,7 +90,7 @@ export default function AdminTransactions() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40 }}><SpinnerInline /> Loading...</td></tr>
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40 }}>Loading...</td></tr>
                 ) : payments.length === 0 ? (
                   <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>No transactions found</td></tr>
                 ) : payments.map(p => (
@@ -121,30 +120,38 @@ export default function AdminTransactions() {
 
         {totalPages > 1 && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)', padding: '6px 12px' }}>Page {page} of {totalPages}</span>
+            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         )}
 
-        <Modal open={!!selected} onClose={() => setSelected(null)} title="Transaction Details">
-          {selected && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                { label: 'User', val: `${selected.user?.name} (${selected.user?.email})` },
-                { label: 'Car', val: selected.car?.title || '—' },
-                { label: 'Amount', val: formatKES(selected.amount) },
-                { label: 'Type', val: selected.type },
-                { label: 'Status', val: selected.status },
-                { label: 'M-Pesa Code', val: selected.mpesaCode || '—' },
-                { label: 'Date', val: selected.createdAt ? new Date(selected.createdAt).toLocaleString('en-KE') : '—' },
-              ].map(f => (
-                <div key={f.label}>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{f.label}</div>
-                  <div style={{ fontWeight: 500, fontSize: 14 }}>{f.val}</div>
-                </div>
-              ))}
+        {selected && (
+          <div className="modal-overlay" onClick={() => setSelected(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+              <div className="modal-header">
+                <h3>Transaction Details</h3>
+                <button className="modal-close" onClick={() => setSelected(null)}>✕</button>
+              </div>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { label: 'User', val: `${selected.user?.name} (${selected.user?.email})` },
+                  { label: 'Car', val: selected.car?.title || '—' },
+                  { label: 'Amount', val: formatKES(selected.amount) },
+                  { label: 'Type', val: selected.type },
+                  { label: 'Status', val: selected.status },
+                  { label: 'M-Pesa Code', val: selected.mpesaCode || '—' },
+                  { label: 'Date', val: selected.createdAt ? new Date(selected.createdAt).toLocaleString('en-KE') : '—' },
+                ].map(f => (
+                  <div key={f.label}>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{f.label}</div>
+                    <div style={{ fontWeight: 500, fontSize: 14 }}>{f.val}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          )}
-        </Modal>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
 import { Button, SpinnerPage, Pagination } from '../../components/ui';
 
 const SEVERITY_COLORS = {
   critical: { bg: 'rgba(239,68,68,0.1)', color: 'var(--red)' },
-  warning: { bg: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)' },
+  warning: { bg: 'rgba(212,196,168,0.1)', color: 'var(--gold)' },
   info: { bg: 'rgba(59,130,246,0.08)', color: '#3B82F6' },
 };
 
@@ -43,7 +43,7 @@ export default function AdminSecurityLog() {
   const [showStatistics, setShowStatistics] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  const fetchLogs = useCallback(() => {
+  const fetchLogs = () => {
     setLoading(true);
     const params = { page, limit: 30 };
     if (filter) params.action = filter;
@@ -56,9 +56,7 @@ export default function AdminSecurityLog() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-    // filter is applied manually (Enter key / Apply button), not auto-triggered on change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, severityFilter, targetModelFilter]);
+  };
 
   const fetchStatistics = () => {
     adminAPI.getAuditLogStatistics({ days: 30 })
@@ -102,7 +100,7 @@ export default function AdminSecurityLog() {
     }
   };
 
-  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+  useEffect(() => { fetchLogs(); }, [page, severityFilter, targetModelFilter]);
   useEffect(() => { if (showStatistics) fetchStatistics(); }, [showStatistics]);
 
   return (

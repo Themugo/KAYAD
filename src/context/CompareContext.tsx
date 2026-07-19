@@ -24,7 +24,7 @@ function loadPersisted(): string[] {
       if (Array.isArray(parsed)) return parsed.filter(id => typeof id === 'string');
     }
   } catch (error) {
-    if (import.meta.env.DEV) console.warn('Unable to load compare list', error);
+    console.warn('Unable to load compare list', error);
   }
   return [];
 }
@@ -40,7 +40,7 @@ export function CompareProvider({ children }: CompareProviderProps) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(compareIds));
     } catch (error) {
-      if (import.meta.env.DEV) console.warn('Unable to persist compare list', error);
+      console.warn('Unable to persist compare list', error);
     }
   }, [compareIds]);
 

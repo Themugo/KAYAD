@@ -52,8 +52,6 @@ export default function AddCarStepPricing({ form, set, user }) {
             { key: 'allowBid', icon: '⚡', title: 'Allow Bidding', desc: 'Buyers can place bids. You choose the winner.' },
           ].map(opt => (
             <div key={opt.key} onClick={() => set(opt.key, !form[opt.key])}
-              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(opt.key, !form[opt.key]); } }}
-              role="checkbox" aria-checked={!!form[opt.key]} tabIndex={0} aria-label={opt.title}
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 background: form[opt.key] ? 'var(--gold-glow)' : 'var(--surface)',
@@ -81,23 +79,8 @@ export default function AddCarStepPricing({ form, set, user }) {
         </div>
       </div>
 
-      {user?.role === 'individual_seller' && form.allowBuy && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(37, 99, 235,0.2)', borderRadius: 10 }}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>🛡️ Escrow Protection</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Payment held in escrow until buyer confirms receipt</div>
-          </div>
-          <div style={{ width: 44, height: 24, borderRadius: 12, background: 'var(--gold)', position: 'relative', flexShrink: 0 }}>
-            <span style={{ position: 'absolute', top: 3, left: 23, width: 18, height: 18, borderRadius: '50%', background: '#000' }} />
-          </div>
-        </div>
-      )}
-
-      {user?.role === 'dealer' && form.allowBuy && (user.escrowApproved || user.escrowForced) && (
-        <div onClick={() => set('escrowEnabled', !form.escrowEnabled)}
-          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set('escrowEnabled', !form.escrowEnabled); } }}
-          role="switch" aria-checked={!!form.escrowEnabled} tabIndex={0} aria-label="Escrow Protection"
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${form.escrowEnabled ? 'rgba(37, 99, 235,0.2)' : 'var(--border)'}`, borderRadius: 10, cursor: 'pointer' }}>
+      {user?.role === 'dealer' && form.allowBuy && (
+        <div onClick={() => set('escrowEnabled', !form.escrowEnabled)} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'var(--surface)', border: `1px solid ${form.escrowEnabled ? 'rgba(212,196,168,0.2)' : 'var(--border)'}`, borderRadius: 10, cursor: 'pointer' }}>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>🛡️ Escrow Protection</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{form.escrowEnabled ? 'Payment held in escrow until buyer confirms receipt' : 'Buyer pays directly — no escrow holding'}</div>

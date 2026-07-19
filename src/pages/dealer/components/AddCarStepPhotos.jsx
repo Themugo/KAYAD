@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { revokeObjectURL } from '../../../services/uploadService';
 
 export default function AddCarStepPhotos({ images, previews, coverImage, setCoverImage, setImages, setPreviews, handleImages }) {
   const [dragIdx, setDragIdx] = useState(null);
@@ -36,10 +35,7 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
     e.stopPropagation();
     const next = images.filter((_, j) => j !== i);
     setImages(next);
-    const removedPreview = previews[i];
-    const newPreviews = next.map(f => URL.createObjectURL(f));
-    setPreviews(newPreviews);
-    revokeObjectURL(removedPreview);
+    setPreviews(next.map(f => URL.createObjectURL(f)));
     setCoverImage(prev => prev >= next.length ? Math.max(0, next.length - 1) : prev);
   };
 
@@ -53,15 +49,12 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
           transition: 'border-color 0.2s',
         }}
         onClick={() => fileInputRef.current?.click()}
-        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
-        role="button" tabIndex={0} aria-label="Upload photos"
         onDragOver={e => e.preventDefault()}
         onDrop={e => {
           e.preventDefault();
           const dropped = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
           if (dropped.length === 0) return;
           const combined = [...images, ...dropped].slice(0, 8);
-          previews.forEach(p => revokeObjectURL(p));
           setImages(combined); setPreviews(combined.map(f => URL.createObjectURL(f)));
           if (images.length === 0) setCoverImage(0);
         }}
@@ -88,11 +81,9 @@ export default function AddCarStepPhotos({ images, previews, coverImage, setCove
                 onDrop={(e) => handleDrop(e, i)}
                 onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
                 onClick={() => setCoverImage(i)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCoverImage(i); } }}
-                role="button" tabIndex={0} aria-label={`Set photo ${i + 1} as cover image`}
                 style={{
                   aspectRatio: '4/3', borderRadius: 10, overflow: 'hidden', position: 'relative',
-                  border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(37, 99, 235,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
+                  border: `2px solid ${i === coverImage ? 'var(--gold)' : overIdx === i ? 'rgba(212,196,168,0.5)' : dragIdx === i ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'}`,
                   transition: 'all 0.15s', cursor: 'grab', opacity: dragIdx === i ? 0.5 : 1,
                   transform: overIdx === i ? 'scale(1.03)' : 'none',
                 }}>
