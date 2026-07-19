@@ -1,17 +1,13 @@
+import { useState, useEffect } from 'react';
 import {
   Gavel, Heart, Shield, ClipboardCheck, TrendingUp, Clock,
   ChevronRight, User, Bell, Settings, ArrowDown, Check,
-  AlertCircle, Search, Wrench, MessageCircle, Car,
+  AlertCircle, Search, Wrench, MessageCircle, Car, Loader, RefreshCw,
 } from 'lucide-react';
 import CarCard, { type Car as CarType } from '../components/CarCard';
-import { CARS } from '../data/cars';
-
-interface AuthUser {
-  name: string;
-  email: string;
-  role: 'private-seller' | 'dealer' | 'admin';
-  dealership?: string;
-}
+import { carsAPI, bidsAPI, escrowAPI } from '../api/api';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 interface DashboardProps {
   setPage: (page: string) => void;
@@ -20,22 +16,19 @@ interface DashboardProps {
   onSignOut: () => void;
 }
 
-const ACTIVE_BIDS = [
-  { car: CARS[0], myBid: 17800000, currentBid: 18200000, endsIn: '2h 45m', status: 'outbid'  as const },
-  { car: CARS[4], myBid: 12500000, currentBid: 12500000, endsIn: '1h 12m', status: 'winning' as const },
-  { car: CARS[6], myBid: 5200000,  currentBid: 5450000,  endsIn: '48m',    status: 'outbid'  as const },
-];
-
-const ESCROW_TXN = [
-  { id: 'ESC-001', car: 'Toyota Hilux Double Cabin 2021', amount: 4200000,  status: 'completed' as const, date: 'May 12' },
-  { id: 'ESC-002', car: 'BMW X5 xDrive40i 2019',          amount: 9500000,  status: 'active'    as const, date: 'Jun 3'  },
-  { id: 'ESC-003', car: 'Ford Ranger Raptor 2022',         amount: 5600000,  status: 'pending'   as const, date: 'Jul 1'  },
-];
+interface AuthUser {
+  name: string;
+  email: string;
+  role: 'private-seller' | 'dealer' | 'admin';
+  dealership?: string;
+}
 
 const STATUS_MAP = {
   completed: { label: 'Completed', Icon: Check,        bg: 'bg-emerald-50',      text: 'text-emerald-600' },
   active:    { label: 'Active',    Icon: TrendingUp,   bg: 'bg-gold-500/10',     text: 'text-gold-600'    },
   pending:   { label: 'Pending',   Icon: AlertCircle,  bg: 'bg-amber-50',        text: 'text-amber-600'   },
+  outbid:    { label: 'Outbid',   Icon: AlertCircle,  bg: 'bg-red-50',          text: 'text-red-600'     },
+  winning:   { label: 'Winning',   Icon: TrendingUp,   bg: 'bg-emerald-50',       text: 'text-emerald-600'},
 };
 
 const QUICK_ACTIONS = [
@@ -52,9 +45,100 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: DashboardProps) {
-  const saved = CARS.slice(1, 5);
-  const fmt   = (n: number) => n.toLocaleString('en-KE');
-  const firstName = authUser.name.split(' ')[0];
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [savedCars, setSavedCars] = useState<any[]>([]);
+  const [activeBids, setActiveBids] = useState<any[]>([]);
+  const [escrows, setEscrows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fmt = (n: number) => n.toLocaleString('en-KE');
+  const firstName = authUser?.name?.split(' ')[0] || 'User';
+
+  // Convert API car to CarCard format
+  const toCardCar = (car: any): CarType => ({
+    id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : (car.id || 1),
+    make: car.brand || car.make || '',
+    model: car.model || car.title || '',
+    price: car.price || car.currentBid || 0,
+    year: car.year || 2024,
+    mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || '0 km'),
+    fuel: car.fuel || 'Petrol',
+    city: car.location?.city || car.city || 'Nairobi',
+    type: (car.type || car.bodyType || 'SUV') as CarType['type'],
+    badges: [],
+    image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+  });
+
+  // Fetch dashboard data from API
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch cars for saved section
+        const carsData = await carsAPI.list({ page: 1, limit: 10, status: 'active' });
+        const carList = carsData?.cars || carsData?.data || [];
+        setSavedCars(carList.slice(1, 5).map(toCardCar));
+
+        // Fetch user bids
+        try {
+          const bidsData = await bidsAPI.myBids();
+          const bidsList = bidsData?.bids || bidsData?.data || [];
+          setActiveBids(bidsList.slice(0, 5).map((bid: any) => ({
+            car: toCardCar(bid.car || bid),
+            myBid: bid.amount || 0,
+            currentBid: bid.car?.currentBid || bid.currentBid || bid.amount,
+            endsIn: bid.auctionEnd ? formatTimeRemaining(bid.auctionEnd) : 'N/A',
+            status: bid.isWinning ? 'winning' : 'outbid',
+          })));
+        } catch {
+          // No bids yet
+          setActiveBids([]);
+        }
+
+        // Fetch user escrows
+        try {
+          const escrowData = await escrowAPI.mine();
+          const escrowList = escrowData?.escrows || escrowData?.data || [];
+          setEscrows(escrowList.slice(0, 5).map((escrow: any) => ({
+            id: escrow._id || escrow.id,
+            car: escrow.car?.title || escrow.carName || 'Vehicle',
+            amount: escrow.amount || escrow.car?.price || 0,
+            status: escrow.status || 'pending',
+            date: formatDate(escrow.createdAt || new Date()),
+          })));
+        } catch {
+          // No escrows yet
+          setEscrows([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+        setError('Failed to load dashboard');
+        toast('Failed to load dashboard data', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const formatTimeRemaining = (endDate: string): string => {
+    const end = new Date(endDate).getTime();
+    const now = Date.now();
+    const diff = end - now;
+    if (diff <= 0) return 'Ended';
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${mins}m`;
+  };
+
+  const formatDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
+  };
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">

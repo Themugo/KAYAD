@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets } from 'lucide-react';
-import { CARS } from '../data/cars';
+import { useState, useEffect } from 'react';
+import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets, Loader, RefreshCw } from 'lucide-react';
+import { carsAPI, inspectionAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 import CarCard, { type Car } from '../components/CarCard';
 
 const INSPECTION_CATEGORIES = [
@@ -48,7 +49,57 @@ interface PreInspectionProps {
 
 export default function PreInspection({ viewCar }: PreInspectionProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const inspectedCars = CARS.slice(0, 4);
+  const [inspectedCars, setInspectedCars] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Convert API car to CarCard format
+  const toCardCar = (car: any): Car => ({
+    id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : (car.id || 1),
+    make: car.brand || car.make || '',
+    model: car.model || car.title || '',
+    price: car.price || car.currentBid || 0,
+    year: car.year || 2024,
+    mileage: typeof car.mileage === 'number' ? `${car.mileage} km` : (car.mileage || '0 km'),
+    fuel: car.fuel || 'Petrol',
+    city: car.location?.city || car.city || 'Nairobi',
+    type: (car.type || car.bodyType || 'SUV') as Car['type'],
+    badges: car.badges || [],
+    image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+  });
+
+  // Fetch inspected cars from API
+  useEffect(() => {
+    const fetchInspectedCars = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Try to fetch from inspection API first, fallback to cars API
+        let data;
+        try {
+          data = await inspectionAPI.list();
+        } catch {
+          data = await carsAPI.list({ page: 1, limit: 20, status: 'active' });
+        }
+        
+        const carList = data?.cars || data?.data || data || [];
+        // Filter for inspected vehicles
+        const inspected = carList
+          .filter((car: any) => car.inspection?.hasReport || car.ntsaVerified)
+          .slice(0, 4);
+        
+        setInspectedCars(inspected.length > 0 ? inspected : carList.slice(0, 4));
+      } catch (err) {
+        console.error('Failed to fetch inspected cars:', err);
+        setError('Failed to load inspected vehicles');
+        toast('Failed to load vehicles', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInspectedCars();
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -173,9 +224,35 @@ export default function PreInspection({ viewCar }: PreInspectionProps) {
             <h2 className="section-heading">Inspected &amp; Certified Vehicles</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {inspectedCars.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
-            ))}
+            {loading ? (
+              <>
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
+                    <div className="aspect-[4/3] bg-cream-200" />
+                    <div className="p-5">
+                      <div className="h-4 bg-cream-200 rounded w-1/2 mb-3" />
+                      <div className="h-6 bg-cream-200 rounded w-3/4 mb-3" />
+                      <div className="h-4 bg-cream-200 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </>
+            ) : error ? (
+              <div className="col-span-full text-center py-8">
+                <p className="text-red-500 mb-4">{error}</p>
+                <button onClick={() => window.location.reload()} className="btn-outline">
+                  <RefreshCw size={16} className="inline mr-2" /> Try Again
+                </button>
+              </div>
+            ) : inspectedCars.length > 0 ? (
+              inspectedCars.map((car, idx) => (
+                <CarCard key={car._id || car.id || idx} car={toCardCar(car)} onClick={() => viewCar(toCardCar(car))} />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8 text-warm-400">
+                No inspected vehicles available
+              </div>
+            )}
           </div>
         </div>
       </section>

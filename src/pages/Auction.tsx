@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Gavel, Clock, TrendingUp, Users, Shield, ChevronRight, Zap } from 'lucide-react';
-import { CARS } from '../data/cars';
+import { Gavel, Clock, TrendingUp, Users, Shield, ChevronRight, Zap, RefreshCw, Loader } from 'lucide-react';
+import { carsAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 
 interface AuctionItem {
-  id: number;
+  _id: string;
+  id?: number;
   make: string;
   model: string;
   year: number;
@@ -13,20 +15,16 @@ interface AuctionItem {
   bids: number;
   endsIn: number; // seconds
   featured: boolean;
+  auctionEnd?: string;
+  auctionStartTime?: string;
 }
 
-const AUCTIONS: AuctionItem[] = CARS.filter(c => c.badges.includes('auction')).map((c, i) => ({
-  id: c.id,
-  make: c.make,
-  model: c.model,
-  year: c.year,
-  image: c.image,
-  startingBid: Math.round(c.price * 0.8),
-  currentBid: Math.round(c.price * 0.91 + i * 200000),
-  bids: 7 + i * 3,
-  endsIn: 3600 * (i + 1) + 1200 * i,
-  featured: i === 0,
-}));
+// Demo auction data fallback
+const DEMO_AUCTIONS: AuctionItem[] = [
+  { _id: 'demo-1', make: 'Toyota', model: 'Land Cruiser GX-R', year: 2024, image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=600&h=400&fit=crop', startingBid: 15000000, currentBid: 16500000, bids: 12, endsIn: 7200, featured: true, auctionEnd: new Date(Date.now() + 7200000).toISOString() },
+  { _id: 'demo-2', make: 'Mercedes-Benz', model: 'GLE 450 AMG', year: 2023, image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=400&fit=crop', startingBid: 12000000, currentBid: 12800000, bids: 8, endsIn: 14400, featured: false, auctionEnd: new Date(Date.now() + 14400000).toISOString() },
+  { _id: 'demo-3', make: 'Range Rover', model: 'Sport HSE', year: 2023, image: 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=600&h=400&fit=crop', startingBid: 14000000, currentBid: 15200000, bids: 6, endsIn: 10800, featured: false, auctionEnd: new Date(Date.now() + 10800000).toISOString() },
+];
 
 function Countdown({ seconds }: { seconds: number }) {
   const [remaining, setRemaining] = useState(seconds);
@@ -57,6 +55,58 @@ function Countdown({ seconds }: { seconds: number }) {
 
 export default function Auction() {
   const [bidding, setBidding] = useState<number | null>(null);
+  const [auctions, setAuctions] = useState<AuctionItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  // Fetch auctions from API
+  useEffect(() => {
+    const fetchAuctions = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Fetch cars from API
+        const data = await carsAPI.list({ page: 1, limit: 50, status: 'active' });
+        const carList = data?.cars || data?.data || [];
+        
+        // Filter for auction items and transform
+        const auctionItems: AuctionItem[] = carList
+          .filter((car: any) => car.auctionStatus === 'live' || car.auctionEnd || car.auctionStartTime)
+          .map((car: any, idx: number) => {
+            const now = Date.now();
+            const endTime = car.auctionEnd ? new Date(car.auctionEnd).getTime() : now + 7200000;
+            const startTime = car.auctionStartTime ? new Date(car.auctionStartTime).getTime() : now;
+            const endsIn = Math.max(0, Math.floor((endTime - now) / 1000));
+            
+            return {
+              _id: car._id,
+              id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : idx + 1,
+              make: car.brand || car.make || '',
+              model: car.model || car.title || '',
+              year: car.year || 2024,
+              image: typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || car.image || '',
+              startingBid: car.startingBid || Math.round((car.price || car.currentBid || 10000000) * 0.8),
+              currentBid: car.currentBid || car.price || 0,
+              bids: car.bidsCount || 0,
+              endsIn,
+              featured: idx === 0,
+              auctionEnd: car.auctionEnd,
+              auctionStartTime: car.auctionStartTime,
+            };
+          });
+        
+        setAuctions(auctionItems.length > 0 ? auctionItems : DEMO_AUCTIONS);
+      } catch (err) {
+        console.error('Failed to fetch auctions:', err);
+        setError('Failed to load auctions');
+        setAuctions(DEMO_AUCTIONS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAuctions();
+  }, []);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -70,7 +120,7 @@ export default function Auction() {
           </p>
           <div className="flex flex-wrap gap-6 mt-8">
             {[
-              { icon: Zap, label: 'Live Right Now', value: `${AUCTIONS.length} Active Lots` },
+              { icon: Zap, label: 'Live Right Now', value: `${loading ? '...' : auctions.length} Active Lots` },
               { icon: Users, label: 'Registered Bidders', value: '340+' },
               { icon: Shield, label: 'Escrow Protected', value: '100% of Lots' },
             ].map(({ icon: Icon, label, value }) => (
@@ -89,8 +139,31 @@ export default function Auction() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {AUCTIONS.map(item => (
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
+            <span className="text-red-700">{error}</span>
+            <button onClick={() => window.location.reload()} className="text-red-600 hover:text-red-800">
+              <RefreshCw size={18} />
+            </button>
+          </div>
+        )}
+        
+        {loading ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
+                <div className="aspect-[4/3] bg-cream-200" />
+                <div className="p-5">
+                  <div className="h-4 bg-cream-200 rounded w-1/2 mb-3" />
+                  <div className="h-6 bg-cream-200 rounded w-3/4 mb-3" />
+                  <div className="h-4 bg-cream-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {auctions.map(item => (
             <div
               key={item.id}
               className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
@@ -176,7 +249,8 @@ export default function Auction() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Auction rules */}
         <div className="mt-12 bg-charcoal-900 rounded-2xl p-8">
