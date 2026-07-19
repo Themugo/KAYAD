@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
   CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
-  MessageCircle, Star, ChevronRight, Lock, Clock, Loader2,
+  MessageCircle, Star, ChevronRight, Lock, Clock,
 } from 'lucide-react';
-import type { Car } from '../types';
-import { carsAPI } from '../api/client';
+import CarCard, { type Car } from '../components/CarCard';
+import { CARS } from '../data/cars';
 
 type AnyPage = string;
 
@@ -34,34 +34,10 @@ type Tab = 'overview' | 'inspection' | 'financing';
 export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
   const [saved, setSaved] = useState(false);
   const [tab, setTab]     = useState<Tab>('overview');
-  const [similar, setSimilar] = useState<Car[]>([]);
-  const [loadingSimilar, setLoadingSimilar] = useState(true);
   const fmt = (n: number) => n.toLocaleString('en-KE');
 
-  const carType = car.bodyType || car.type || 'SUV';
-  const features = FEATURES[carType] ?? FEATURES.SUV;
-  const badges = car.badges || [];
-
-  // Fetch similar cars
-  useEffect(() => {
-    const fetchSimilar = async () => {
-      try {
-        setLoadingSimilar(true);
-        const response = await carsAPI.list({ page: 1, limit: 10 });
-        const cars = response?.cars || response?.data || response || [];
-        const similarCars = (Array.isArray(cars) ? cars : [])
-          .filter((c: Car) => (c.bodyType || c.type) === carType && c._id !== car._id && c.id !== car.id)
-          .slice(0, 3);
-        setSimilar(similarCars);
-      } catch (err) {
-        console.error('Failed to fetch similar cars:', err);
-        setSimilar([]);
-      } finally {
-        setLoadingSimilar(false);
-      }
-    };
-    fetchSimilar();
-  }, [carType, car._id, car.id]);
+  const features = FEATURES[car.type] ?? FEATURES.SUV;
+  const similar  = CARS.filter(c => c.type === car.type && c.id !== car.id).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -107,12 +83,12 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             {car.model}
           </h1>
           <div className="flex flex-wrap items-center gap-3">
-            {badges.includes('escrow') && (
+            {car.badges.includes('escrow') && (
               <span className="card-badge bg-charcoal-900/80 text-white backdrop-blur-sm">
                 <Shield size={10} /> ESCROW
               </span>
             )}
-            {badges.includes('auction') && (
+            {car.badges.includes('auction') && (
               <span className="card-badge bg-gold-600 text-white">
                 <Gavel size={10} /> AUCTION
               </span>
@@ -130,7 +106,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
           <div className="flex items-center gap-8 py-4 overflow-x-auto scrollbar-hide">
             {[
               { icon: Calendar, label: 'Year',         value: String(car.year) },
-              { icon: Gauge,    label: 'Mileage',      value: car.mileage || 'N/A' },
+              { icon: Gauge,    label: 'Mileage',      value: car.mileage },
               { icon: Fuel,     label: 'Fuel',         value: car.fuel },
               { icon: MapPin,   label: 'Location',     value: car.city },
               { icon: Wrench,   label: 'Transmission', value: car.transmission ?? 'Automatic' },
@@ -177,8 +153,8 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                 <div className="bg-white rounded-2xl p-6 border border-cream-200">
                   <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-3">About This Vehicle</h2>
                   <p className="font-sans text-sm text-warm-500 leading-relaxed">
-                    This {car.year} {car.make} {car.model} is a meticulously maintained {carType.toLowerCase()} offered by a
-                    KAYAD-verified dealer in {car.city}. With only {car.mileage || 'N/A'} on the odometer, it represents
+                    This {car.year} {car.make} {car.model} is a meticulously maintained {car.type.toLowerCase()} offered by a
+                    KAYAD-verified dealer in {car.city}. With only {car.mileage} on the odometer, it represents
                     outstanding value in the Kenyan premium vehicle market. Full service history available on request.
                     All documentation verified — including log book, NTSA status, and current insurance.
                   </p>
@@ -320,7 +296,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                     >
                       <Lock size={14} /> Start Escrow
                     </button>
-                    {badges.includes('auction') && (
+                    {car.badges.includes('auction') && (
                       <button
                         onClick={() => setPage('auction')}
                         className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-sans font-semibold py-3 rounded-full transition-colors text-sm"
@@ -372,37 +348,29 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
       </div>
 
       {/* ── SIMILAR VEHICLES ───────────────────────────────────────── */}
-      <section className="bg-cream-100 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <p className="section-label mb-1">You May Also Like</p>
-              <h2 className="font-serif text-2xl text-charcoal-900 font-bold">Similar Vehicles</h2>
+      {similar.length > 0 && (
+        <section className="bg-cream-100 py-14">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p className="section-label mb-1">You May Also Like</p>
+                <h2 className="font-serif text-2xl text-charcoal-900 font-bold">Similar Vehicles</h2>
+              </div>
+              <button
+                onClick={() => setPage('gallery')}
+                className="font-sans text-sm font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
+              >
+                View All <ChevronRight size={14} />
+              </button>
             </div>
-            <button
-              onClick={() => setPage('gallery')}
-              className="font-sans text-sm font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
-            >
-              View All <ChevronRight size={14} />
-            </button>
-          </div>
-          {loadingSimilar ? (
-            <div className="flex justify-center py-12">
-              <Loader2 size={40} className="animate-spin text-gold-600" />
-            </div>
-          ) : similar.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {similar.map(c => (
-                <div key={c._id || c.id} onClick={() => viewCar(c)} className="cursor-pointer">
-                  <CarCard car={c} />
-                </div>
+                <CarCard key={c.id} car={c} onClick={() => viewCar(c)} />
               ))}
             </div>
-          ) : (
-            <p className="text-center text-warm-400 py-8">No similar vehicles found.</p>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,47 +1,28 @@
 import { Calendar, Gauge, Fuel, MapPin, Shield, Gavel, ChevronRight } from 'lucide-react';
-import type { Car } from '../types';
+
+export interface Car {
+  id: number;
+  make: string;
+  model: string;
+  price: number;
+  year: number;
+  mileage: string;
+  fuel: string;
+  city: string;
+  type: 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
+  badges: ('escrow' | 'auction')[];
+  image: string;
+  transmission?: string;
+}
 
 interface CarCardProps {
   car: Car;
   onClick?: () => void;
 }
 
-// Helper to get display image
-const getCarImage = (car: Car): string => {
-  if (car.images && car.images.length > 0) {
-    return car.images[0];
-  }
-  if (car.image) {
-    return car.image;
-  }
-  // Fallback placeholder
-  return 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&auto=format';
-};
-
-// Helper to format mileage
-const formatMileage = (car: Car): string => {
-  if (car.mileage) return car.mileage;
-  if (car.mileageValue) return `${(car.mileageValue / 1000).toFixed(0)}k km`;
-  return 'N/A';
-};
-
-// Helper to get car type
-const getCarType = (car: Car): string => {
-  return car.bodyType || car.type || 'Sedan';
-};
-
 export default function CarCard({ car, onClick }: CarCardProps) {
   const formatPrice = (n: number) =>
     n.toLocaleString('en-KE');
-  
-  const carImage = getCarImage(car);
-  const carType = getCarType(car);
-  const mileageDisplay = formatMileage(car);
-  
-  // Determine badges to display
-  const badges = car.badges || [];
-  const hasEscrow = car.escrow?.isInEscrow || badges.includes('escrow');
-  const hasAuction = car.auction?.isActive || badges.includes('auction');
 
   return (
     <div
@@ -51,7 +32,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
-          src={carImage}
+          src={car.image}
           alt={`${car.make} ${car.model}`}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
@@ -59,14 +40,14 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         {/* Badges */}
         <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
           <div className="flex flex-col gap-1.5">
-            {hasEscrow && (
+            {car.badges.includes('escrow') && (
               <span className="card-badge bg-charcoal-900/90 text-white backdrop-blur-sm">
                 <Shield size={10} />
                 ESCROW
               </span>
             )}
           </div>
-          {hasAuction && (
+          {car.badges.includes('auction') && (
             <span className="card-badge bg-gold-600 text-white">
               <Gavel size={10} />
               AUCTION
@@ -76,7 +57,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
         {/* Type pill */}
         <div className="absolute bottom-3 right-3">
           <span className="bg-white/90 backdrop-blur-sm text-warm-600 text-xs font-sans font-semibold px-3 py-1 rounded-full">
-            {carType}
+            {car.type}
           </span>
         </div>
       </div>
@@ -108,7 +89,7 @@ export default function CarCard({ car, onClick }: CarCardProps) {
             <p className="text-[9px] font-sans font-semibold tracking-widest text-warm-400 uppercase mb-0.5 flex items-center gap-1">
               <Gauge size={9} /> Mileage
             </p>
-            <p className="font-sans text-sm font-semibold text-charcoal-800">{mileageDisplay}</p>
+            <p className="font-sans text-sm font-semibold text-charcoal-800">{car.mileage}</p>
           </div>
           <div>
             <p className="text-[9px] font-sans font-semibold tracking-widest text-warm-400 uppercase mb-0.5 flex items-center gap-1">

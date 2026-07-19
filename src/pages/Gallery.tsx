@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Search, SlidersHorizontal, X, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
-import CarCard from '../components/CarCard';
-import type { Car } from '../types';
-import { carsAPI } from '../api/client';
+import { useState } from 'react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import CarCard, { type Car } from '../components/CarCard';
+import { CARS } from '../data/cars';
 
 type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
 
@@ -15,47 +14,19 @@ export default function Gallery({ viewCar }: GalleryProps) {
   const [typeFilter, setTypeFilter] = useState<VehicleType>('All');
   const [maxPrice, setMaxPrice] = useState(20000000);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   const types: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan', 'Wagon'];
 
-  const fetchCars = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const params: Record<string, string | number> = {
-        page: 1,
-        limit: 50,
-      };
-      
-      if (query) params.search = query;
-      if (typeFilter !== 'All') params.type = typeFilter;
-      if (maxPrice) params.maxPrice = maxPrice;
-      
-      const response = await carsAPI.list(params);
-      // Handle different response formats
-      const carsList = response?.cars || response?.data || response || [];
-      setCars(Array.isArray(carsList) ? carsList : []);
-      setHasLoaded(true);
-    } catch (err) {
-      console.error('Failed to fetch cars:', err);
-      const errorMessage = err && typeof err === 'object' && 'response' in err
-        ? 'Server unavailable. Please check if the backend is running.'
-        : 'Failed to load vehicles. Please try again.';
-      setError(errorMessage);
-      setCars([]);
-      setHasLoaded(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [query, typeFilter, maxPrice]);
-
-  useEffect(() => {
-    fetchCars();
-  }, [fetchCars]);
+  const results = CARS.filter(car => {
+    const matchQuery =
+      !query ||
+      car.make.toLowerCase().includes(query.toLowerCase()) ||
+      car.model.toLowerCase().includes(query.toLowerCase()) ||
+      car.city.toLowerCase().includes(query.toLowerCase());
+    const matchType = typeFilter === 'All' || car.type === typeFilter;
+    const matchPrice = car.price <= maxPrice;
+    return matchQuery && matchType && matchPrice;
+  });
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -65,9 +36,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
           <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">
-            {loading ? 'Loading...' : `${cars.length} vehicles available`}
-          </p>
+          <p className="font-sans text-white/50 text-sm">{results.length} vehicles available</p>
         </div>
       </div>
 
@@ -150,62 +119,18 @@ export default function Gallery({ viewCar }: GalleryProps) {
           ))}
         </div>
 
-        {/* Loading state */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center py-24">
-            <Loader2 size={40} className="animate-spin text-gold-600 mb-4" />
-            <p className="font-sans text-warm-400">Loading vehicles...</p>
-          </div>
-        )}
-
-        {/* Error state - Backend unavailable */}
-        {error && !loading && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertCircle size={32} className="text-red-500" />
-            </div>
-            <p className="font-serif text-2xl text-charcoal-900 mb-2">Unable to Load Vehicles</p>
-            <p className="font-sans text-sm text-warm-500 mb-6 max-w-md mx-auto">{error}</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button onClick={fetchCars} className="btn-gold mx-auto">
-                <RefreshCw size={16} className="mr-2" />
-                Retry Connection
-              </button>
-              <button 
-                onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); }} 
-                className="btn-outline-dark mx-auto"
-              >
-                Clear Filters
-              </button>
-            </div>
-            <p className="font-sans text-xs text-warm-400 mt-6">
-              Make sure the backend server is running on port 3001
-            </p>
-          </div>
-        )}
-
-        {/* Results */}
-        {!loading && !error && cars.length > 0 && (
+        {/* Grid */}
+        {results.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {cars.map(car => (
-              <CarCard key={car._id || car.id} car={car} onClick={() => viewCar(car)} />
+            {results.map(car => (
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
             ))}
           </div>
-        )}
-
-        {/* Empty state - No cars found */}
-        {!loading && !error && cars.length === 0 && hasLoaded && (
-          <div className="text-center py-16">
-            <p className="font-serif text-2xl text-charcoal-900 mb-2">No vehicles found</p>
-            <p className="font-sans text-sm text-warm-500 mb-6">
-              {query || typeFilter !== 'All' || maxPrice < 20000000
-                ? 'Try adjusting your search or filters'
-                : 'No vehicles are currently available'}
-            </p>
-            <button 
-              onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); }} 
-              className="btn-outline-dark"
-            >
+        ) : (
+          <div className="text-center py-24">
+            <p className="font-serif text-2xl text-warm-400 mb-2">No vehicles found</p>
+            <p className="font-sans text-sm text-warm-400">Try adjusting your search or filters</p>
+            <button onClick={() => { setQuery(''); setTypeFilter('All'); setMaxPrice(20000000); }} className="mt-4 text-gold-700 font-sans text-sm font-medium hover:underline">
               Clear all filters
             </button>
           </div>

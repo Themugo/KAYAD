@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets, Loader2 } from 'lucide-react';
-import type { Car } from '../types';
-import { carsAPI } from '../api/client';
+import { useState } from 'react';
+import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets } from 'lucide-react';
+import { CARS } from '../data/cars';
+import CarCard, { type Car } from '../components/CarCard';
 
 const INSPECTION_CATEGORIES = [
   {
@@ -48,25 +48,7 @@ interface PreInspectionProps {
 
 export default function PreInspection({ viewCar }: PreInspectionProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [inspectedCars, setInspectedCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
-        const response = await carsAPI.list({ page: 1, limit: 4 });
-        const cars = response?.cars || response?.data || response || [];
-        setInspectedCars(Array.isArray(cars) ? cars.slice(0, 4) : []);
-      } catch (err) {
-        console.error('Failed to fetch cars:', err);
-        setInspectedCars([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCars();
-  }, []);
+  const inspectedCars = CARS.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -190,19 +172,11 @@ export default function PreInspection({ viewCar }: PreInspectionProps) {
             <p className="section-label mb-2">Ready to Buy</p>
             <h2 className="section-heading">Inspected &amp; Certified Vehicles</h2>
           </div>
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 size={40} className="animate-spin text-gold-600" />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {inspectedCars.map(car => (
-                <div key={car._id || car.id} onClick={() => viewCar(car)} className="cursor-pointer">
-                  <CarCard car={car} />
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {inspectedCars.map(car => (
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+            ))}
+          </div>
         </div>
       </section>
 

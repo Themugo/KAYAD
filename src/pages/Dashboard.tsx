@@ -1,37 +1,36 @@
-import { useState, useEffect } from 'react';
 import {
   Gavel, Heart, Shield, ClipboardCheck, TrendingUp, Clock,
   ChevronRight, User, Bell, Settings, ArrowDown, Check,
-  AlertCircle, Search, Wrench, MessageCircle, Car as CarIcon, Loader2,
+  AlertCircle, Search, Wrench, MessageCircle, Car,
 } from 'lucide-react';
-import CarCard from '../components/CarCard';
-import type { Car, User } from '../types';
-import { carsAPI, bidsAPI, escrowAPI } from '../api/client';
+import CarCard, { type Car as CarType } from '../components/CarCard';
+import { CARS } from '../data/cars';
+
+interface AuthUser {
+  name: string;
+  email: string;
+  role: 'private-seller' | 'dealer' | 'admin';
+  dealership?: string;
+}
 
 interface DashboardProps {
   setPage: (page: string) => void;
-  viewCar: (car: Car) => void;
-  authUser: User;
+  viewCar: (car: CarType) => void;
+  authUser: AuthUser;
   onSignOut: () => void;
 }
 
-// Active bids interface
-interface ActiveBid {
-  car: Car;
-  myBid: number;
-  currentBid: number;
-  endsIn: string;
-  status: 'outbid' | 'winning';
-}
+const ACTIVE_BIDS = [
+  { car: CARS[0], myBid: 17800000, currentBid: 18200000, endsIn: '2h 45m', status: 'outbid'  as const },
+  { car: CARS[4], myBid: 12500000, currentBid: 12500000, endsIn: '1h 12m', status: 'winning' as const },
+  { car: CARS[6], myBid: 5200000,  currentBid: 5450000,  endsIn: '48m',    status: 'outbid'  as const },
+];
 
-// Escrow transaction interface
-interface EscrowTxn {
-  id: string;
-  carName: string;
-  amount: number;
-  status: 'completed' | 'active' | 'pending';
-  date: string;
-}
+const ESCROW_TXN = [
+  { id: 'ESC-001', car: 'Toyota Hilux Double Cabin 2021', amount: 4200000,  status: 'completed' as const, date: 'May 12' },
+  { id: 'ESC-002', car: 'BMW X5 xDrive40i 2019',          amount: 9500000,  status: 'active'    as const, date: 'Jun 3'  },
+  { id: 'ESC-003', car: 'Ford Ranger Raptor 2022',         amount: 5600000,  status: 'pending'   as const, date: 'Jul 1'  },
+];
 
 const STATUS_MAP = {
   completed: { label: 'Completed', Icon: Check,        bg: 'bg-emerald-50',      text: 'text-emerald-600' },
@@ -40,80 +39,22 @@ const STATUS_MAP = {
 };
 
 const QUICK_ACTIONS = [
-  { label: 'Browse Cars',     page: 'gallery',         Icon: CarIcon          },
-  { label: 'Live Auctions',   page: 'auction',         Icon: Gavel            },
-  { label: 'Book Inspection', page: 'pre-inspection',  Icon: Wrench           },
-  { label: 'Get Support',     page: 'support',         Icon: MessageCircle    },
+  { label: 'Browse Cars',     page: 'gallery',         Icon: Car            },
+  { label: 'Live Auctions',   page: 'auction',         Icon: Gavel          },
+  { label: 'Book Inspection', page: 'pre-inspection',  Icon: Wrench         },
+  { label: 'Get Support',     page: 'support',         Icon: MessageCircle  },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
-  user:        'Buyer',
   'private-seller': 'Private Seller',
-  dealer:      'Verified Dealer',
-  broker:      'Broker',
-  admin:       'Platform Admin',
-  owner:       'Owner',
+  dealer:           'Verified Dealer',
+  admin:            'Platform Admin',
 };
 
 export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: DashboardProps) {
-  const [savedCars, setSavedCars] = useState<Car[]>([]);
-  const [activeBids, setActiveBids] = useState<ActiveBid[]>([]);
-  const [escrowTxns, setEscrowTxns] = useState<EscrowTxn[]>([]);
-  const [loading, setLoading] = useState(true);
-  
+  const saved = CARS.slice(1, 5);
   const fmt   = (n: number) => n.toLocaleString('en-KE');
-  const firstName = authUser.name?.split(' ')[0] || 'User';
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const [carsRes, bidsRes, escrowRes] = await Promise.allSettled([
-          carsAPI.list({ page: 1, limit: 8 }),
-          bidsAPI.myBids(),
-          escrowAPI.mine(),
-        ]);
-
-        // Handle cars
-        if (carsRes.status === 'fulfilled') {
-          const cars = carsRes.value?.cars || carsRes.value?.data || carsRes.value || [];
-          setSavedCars(Array.isArray(cars) ? cars.slice(0, 4) : []);
-        }
-
-        // Handle bids
-        if (bidsRes.status === 'fulfilled') {
-          const bids = bidsRes.value?.data || bidsRes.value || [];
-          const formattedBids: ActiveBid[] = (Array.isArray(bids) ? bids : []).slice(0, 3).map((bid: { car?: Car; amount?: number; currentBid?: number; status?: string }) => ({
-            car: bid.car || { _id: '', make: '', model: '', price: 0, year: 0, fuel: '', city: '' },
-            myBid: bid.amount || 0,
-            currentBid: bid.currentBid || bid.amount || 0,
-            endsIn: '2h 00m',
-            status: (bid.status === 'winning' ? 'winning' : 'outbid') as 'outbid' | 'winning',
-          }));
-          setActiveBids(formattedBids);
-        }
-
-        // Handle escrow
-        if (escrowRes.status === 'fulfilled') {
-          const escrows = escrowRes.value?.escrows || escrowRes.value?.data || escrowRes.value || [];
-          const formattedTxns: EscrowTxn[] = (Array.isArray(escrows) ? escrows : []).slice(0, 3).map((escrow: { _id?: string; id?: string; amount?: number; status?: string; car?: { make?: string; model?: string; year?: number }; createdAt?: string }) => ({
-            id: escrow._id || escrow.id || `ESC-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-            carName: escrow.car ? `${escrow.car.make} ${escrow.car.model} ${escrow.car.year || ''}` : 'Vehicle',
-            amount: escrow.amount || 0,
-            status: (escrow.status as 'completed' | 'active' | 'pending') || 'pending',
-            date: escrow.createdAt ? new Date(escrow.createdAt).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' }) : 'N/A',
-          }));
-          setEscrowTxns(formattedTxns);
-        }
-      } catch (err) {
-        console.error('Failed to fetch dashboard data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, []);
+  const firstName = authUser.name.split(' ')[0];
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -162,14 +103,14 @@ export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: Das
           {/* Stat cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             {[
-              { Icon: Gavel,          label: 'Active Bids',   value: activeBids.length.toString(), sub: 'tracking'         },
-              { Icon: Heart,          label: 'Saved Cars',    value: savedCars.length.toString(), sub: 'in gallery'        },
-              { Icon: Shield,         label: 'Escrow',        value: escrowTxns.length.toString(), sub: 'transactions'     },
-              { Icon: ClipboardCheck, label: 'Inspections',   value: '0', sub: 'Book now'          },
+              { Icon: Gavel,          label: 'Active Bids',   value: '3', sub: '2 outbid'         },
+              { Icon: Heart,          label: 'Saved Cars',    value: '8', sub: '+2 this week'      },
+              { Icon: Shield,         label: 'Escrow Active', value: '2', sub: 'KES 15M held'      },
+              { Icon: ClipboardCheck, label: 'Inspections',   value: '1', sub: 'Report in 24h'     },
             ].map(({ Icon, label, value, sub }) => (
               <div key={label} className="bg-white/6 hover:bg-white/10 transition-colors rounded-xl p-5 border border-white/10">
                 <Icon size={18} className="text-gold-400 mb-3" />
-                <p className="font-serif text-3xl sm:text-4xl font-bold text-gold-400 leading-none">{loading ? '...' : value}</p>
+                <p className="font-serif text-3xl sm:text-4xl font-bold text-gold-400 leading-none">{value}</p>
                 <p className="font-sans text-sm font-semibold text-white mt-1.5">{label}</p>
                 <p className="font-sans text-xs text-white/30 mt-0.5">{sub}</p>
               </div>
@@ -192,69 +133,61 @@ export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: Das
               Auction House <ChevronRight size={14} />
             </button>
           </div>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 size={32} className="animate-spin text-gold-600" />
-            </div>
-          ) : activeBids.length > 0 ? (
-            <div className="space-y-3">
-              {activeBids.map(({ car, myBid, currentBid, endsIn, status }, index) => (
-                <div
-                  key={car._id || car.id || index}
-                  className="bg-white rounded-2xl px-5 py-4 border border-cream-200 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-gold-500/30 transition-all"
-                >
-                  <img
-                    src={car.images?.[0] || car.image || 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400'}
-                    alt={car.model}
-                    className="w-24 h-16 rounded-xl object-cover flex-shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-[10px] font-semibold text-warm-400 uppercase tracking-widest">{car.make}</p>
-                    <p className="font-serif text-lg text-charcoal-900 font-bold leading-tight">{car.model} {car.year}</p>
-                    <div className="flex items-center gap-5 mt-1">
-                      <span className="font-sans text-xs text-warm-400">
-                        My bid: <span className="font-semibold text-charcoal-800">KES {fmt(myBid)}</span>
-                      </span>
-                      <span className="font-sans text-xs text-warm-400">
-                        Current: <span className={`font-semibold ${status === 'winning' ? 'text-gold-600' : 'text-red-500'}`}>KES {fmt(currentBid)}</span>
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
-                    <div className="text-right">
-                      <div className="flex items-center gap-1 justify-end mb-1">
-                        <Clock size={10} className="text-warm-400" />
-                        <span className="font-sans text-xs font-bold text-warm-500">{endsIn}</span>
-                      </div>
-                      <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
-                        status === 'winning'
-                          ? 'bg-gold-500/15 text-gold-700'
-                          : 'bg-red-50 text-red-500'
-                      }`}>
-                        {status === 'winning'
-                          ? <><TrendingUp size={10} /> Winning</>
-                          : <><ArrowDown size={10} /> Outbid</>}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setPage('auction')}
-                      className="bg-charcoal-900 hover:bg-gold-600 text-white font-sans text-xs font-semibold px-4 py-2 rounded-full transition-colors"
-                    >
-                      Bid Again
-                    </button>
+          <div className="space-y-3">
+            {ACTIVE_BIDS.map(({ car, myBid, currentBid, endsIn, status }) => (
+              <div
+                key={car.id}
+                className="bg-white rounded-2xl px-5 py-4 border border-cream-200 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-md hover:border-gold-500/30 transition-all"
+              >
+                <img
+                  src={car.image}
+                  alt={car.model}
+                  className="w-24 h-16 rounded-xl object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-sans text-[10px] font-semibold text-warm-400 uppercase tracking-widest">{car.make}</p>
+                  <p className="font-serif text-lg text-charcoal-900 font-bold leading-tight">{car.model} {car.year}</p>
+                  <div className="flex items-center gap-5 mt-1">
+                    <span className="font-sans text-xs text-warm-400">
+                      My bid: <span className="font-semibold text-charcoal-800">KES {fmt(myBid)}</span>
+                    </span>
+                    <span className="font-sans text-xs text-warm-400">
+                      Current: <span className={`font-semibold ${status === 'winning' ? 'text-gold-600' : 'text-red-500'}`}>KES {fmt(currentBid)}</span>
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-warm-400 py-8">No active bids. <button onClick={() => setPage('auction')} className="text-gold-700 underline">Browse auctions</button></p>
-          )}
+                <div className="flex items-center gap-3 flex-shrink-0 ml-auto">
+                  <div className="text-right">
+                    <div className="flex items-center gap-1 justify-end mb-1">
+                      <Clock size={10} className="text-warm-400" />
+                      <span className="font-sans text-xs font-bold text-warm-500">{endsIn}</span>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${
+                      status === 'winning'
+                        ? 'bg-gold-500/15 text-gold-700'
+                        : 'bg-red-50 text-red-500'
+                    }`}>
+                      {status === 'winning'
+                        ? <><TrendingUp size={10} /> Winning</>
+                        : <><ArrowDown size={10} /> Outbid</>}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setPage('auction')}
+                    className="bg-charcoal-900 hover:bg-gold-600 text-white font-sans text-xs font-semibold px-4 py-2 rounded-full transition-colors"
+                  >
+                    Bid Again
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Saved Vehicles */}
         <section>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="font-serif text-2xl text-charcoal-900 font-bold">Vehicles</h2>
+            <h2 className="font-serif text-2xl text-charcoal-900 font-bold">Saved Vehicles</h2>
             <button
               onClick={() => setPage('gallery')}
               className="font-sans text-sm font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
@@ -262,19 +195,11 @@ export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: Das
               Browse All <ChevronRight size={14} />
             </button>
           </div>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 size={32} className="animate-spin text-gold-600" />
-            </div>
-          ) : savedCars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {savedCars.map(car => (
-                <CarCard key={car._id || car.id} car={car} onClick={() => viewCar(car)} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-warm-400 py-8">No vehicles found. <button onClick={() => setPage('gallery')} className="text-gold-700 underline">Browse gallery</button></p>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {saved.map(car => (
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+            ))}
+          </div>
         </section>
 
         {/* Escrow Transactions */}
@@ -289,44 +214,34 @@ export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: Das
             </button>
           </div>
           <div className="bg-white rounded-2xl border border-cream-200 overflow-hidden">
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 size={32} className="animate-spin text-gold-600" />
-              </div>
-            ) : escrowTxns.length > 0 ? (
-              <>
-                <div className="divide-y divide-cream-100">
-                  {escrowTxns.map(({ id, carName, amount, status, date }) => {
-                    const cfg = STATUS_MAP[status] || STATUS_MAP.pending;
-                    return (
-                      <div key={id} className="flex items-center gap-4 px-6 py-4 hover:bg-cream-50 transition-colors">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
-                          <cfg.Icon size={15} className={cfg.text} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-sans text-sm font-semibold text-charcoal-900 truncate">{carName}</p>
-                          <p className="font-sans text-xs text-warm-400">{id} · {date}</p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="font-sans text-sm font-bold text-charcoal-900">KES {fmt(amount)}</p>
-                          <p className={`font-sans text-xs font-semibold ${cfg.text}`}>{cfg.label}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="px-6 py-3 bg-cream-50 border-t border-cream-100">
-                  <button
-                    onClick={() => setPage('escrow')}
-                    className="font-sans text-xs font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
-                  >
-                    View all transactions <ChevronRight size={12} />
-                  </button>
-                </div>
-              </>
-            ) : (
-              <p className="text-center text-warm-400 py-8">No escrow transactions yet.</p>
-            )}
+            <div className="divide-y divide-cream-100">
+              {ESCROW_TXN.map(({ id, car, amount, status, date }) => {
+                const cfg = STATUS_MAP[status];
+                return (
+                  <div key={id} className="flex items-center gap-4 px-6 py-4 hover:bg-cream-50 transition-colors">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${cfg.bg}`}>
+                      <cfg.Icon size={15} className={cfg.text} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-sans text-sm font-semibold text-charcoal-900 truncate">{car}</p>
+                      <p className="font-sans text-xs text-warm-400">{id} · {date}</p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-sans text-sm font-bold text-charcoal-900">KES {fmt(amount)}</p>
+                      <p className={`font-sans text-xs font-semibold ${cfg.text}`}>{cfg.label}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="px-6 py-3 bg-cream-50 border-t border-cream-100">
+              <button
+                onClick={() => setPage('escrow')}
+                className="font-sans text-xs font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
+              >
+                View all transactions <ChevronRight size={12} />
+              </button>
+            </div>
           </div>
         </section>
 

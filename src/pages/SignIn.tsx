@@ -1,51 +1,50 @@
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { authAPI } from '../api/client';
-import type { User as UserType } from '../types';
+import { Mail, Lock, Eye, EyeOff, User, Building2, Shield, ArrowRight } from 'lucide-react';
+
+type Role = 'private-seller' | 'dealer' | 'admin';
+
+interface AuthUser {
+  name: string;
+  email: string;
+  role: Role;
+  dealership?: string;
+}
 
 interface SignInProps {
   setPage: (page: string) => void;
-  onLogin: (user: UserType) => void;
+  onLogin: (user: AuthUser) => void;
 }
 
+const ROLES: { key: Role; label: string; icon: typeof User; desc: string }[] = [
+  { key: 'private-seller', label: 'Private Seller', icon: User,     desc: 'Individual selling a vehicle' },
+  { key: 'dealer',         label: 'Dealer',         icon: Building2, desc: 'Licensed dealership account' },
+  { key: 'admin',          label: 'Admin',          icon: Shield,    desc: 'KAYAD platform management' },
+];
+
+const MOCK_USERS: Record<Role, Omit<AuthUser, 'email'>> = {
+  'private-seller': { name: 'John Kamau',   role: 'private-seller' },
+  dealer:           { name: 'Sarah Mwangi', role: 'dealer', dealership: 'Prestige Motors Kenya' },
+  admin:            { name: 'Admin User',   role: 'admin' },
+};
+
 export default function SignIn({ setPage, onLogin }: SignInProps) {
+  const [role,     setRole]     = useState<Role>('private-seller');
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) { 
-      setError('Please enter your email and password.'); 
-      return; 
-    }
-    if (password.length < 8) { 
-      setError('Password must be at least 8 characters.'); 
-      return; 
-    }
+    if (!email || !password) { setError('Please enter your email and password.'); return; }
+    if (password.length < 4)  { setError('Password must be at least 4 characters.'); return; }
     setError('');
     setLoading(true);
-    
-    try {
-      const response = await authAPI.login(email, password);
-      const user = response?.user || response;
-      if (user) {
-        onLogin(user);
-        setPage('dashboard');
-      } else {
-        setError('Invalid response from server. Please try again.');
-      }
-    } catch (err: unknown) {
-      console.error('Login failed:', err);
-      const errorMessage = err && typeof err === 'object' && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
-        : null;
-      setError(errorMessage || 'Login failed. Please check your credentials and try again.');
-    } finally {
-      setLoading(false);
-    }
+    setTimeout(() => {
+      onLogin({ ...MOCK_USERS[role], email });
+      setPage('dashboard');
+    }, 900);
   };
 
   return (
@@ -68,6 +67,28 @@ export default function SignIn({ setPage, onLogin }: SignInProps) {
       {/* ── SIGN-IN CARD ─────────────────────────────────────────── */}
       <div className="flex-1 flex items-start justify-center px-4 sm:px-6 py-12">
         <div className="w-full max-w-md">
+
+          {/* Role tabs */}
+          <div className="bg-charcoal-900 rounded-2xl p-1.5 flex gap-1 mb-6">
+            {ROLES.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => { setRole(key); setError(''); }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-sans text-xs font-semibold transition-all duration-200 ${
+                  role === key
+                    ? 'bg-gold-600 text-white shadow-sm'
+                    : 'text-white/40 hover:text-white/70'
+                }`}
+              >
+                <Icon size={12} /> {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Role description */}
+          <p className="font-sans text-xs text-warm-400 text-center mb-6">
+            {ROLES.find(r => r.key === role)?.desc}
+          </p>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-cream-200 p-8 shadow-sm space-y-5">
@@ -138,16 +159,18 @@ export default function SignIn({ setPage, onLogin }: SignInProps) {
               )}
             </button>
 
-            <p className="font-sans text-xs text-warm-400 text-center pt-1">
-              New to KAYAD?{' '}
-              <button
-                type="button"
-                onClick={() => setPage('create-account')}
-                className="text-gold-700 font-semibold hover:text-gold-600 transition-colors"
-              >
-                Create an account
-              </button>
-            </p>
+            {role !== 'admin' && (
+              <p className="font-sans text-xs text-warm-400 text-center pt-1">
+                New to KAYAD?{' '}
+                <button
+                  type="button"
+                  onClick={() => setPage('create-account')}
+                  className="text-gold-700 font-semibold hover:text-gold-600 transition-colors"
+                >
+                  Create an account
+                </button>
+              </p>
+            )}
           </form>
 
           {/* Security note */}

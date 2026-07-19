@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench, Loader2 } from 'lucide-react';
-import CarCard from '../components/CarCard';
-import type { Car } from '../types';
-import { carsAPI } from '../api/client';
+import { useState } from 'react';
+import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
+import CarCard, { type Car } from '../components/CarCard';
+import { CARS } from '../data/cars';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
 
@@ -43,36 +42,16 @@ const FEATURES = [
 
 export default function Home({ setPage, viewCar }: HomeProps) {
   const [filter, setFilter] = useState<Filter>('All');
-  const [cars, setCars] = useState<Car[]>([]);
-  const [loading, setLoading] = useState(true);
 
   const nav = (page: string) => {
     setPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        setLoading(true);
-        const response = await carsAPI.list({ page: 1, limit: 8 });
-        const carsList = response?.cars || response?.data || response || [];
-        setCars(Array.isArray(carsList) ? carsList : []);
-      } catch (err) {
-        console.error('Failed to fetch cars:', err);
-        setCars([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCars();
-  }, []);
-
-  // Filter cars based on selected filter
-  const filteredCars = cars.filter(car => {
+  const featured = CARS.filter(car => {
     if (filter === 'All') return true;
-    if (filter === 'Auctions') return car.auction?.isActive || car.badges?.includes('auction');
-    return car.bodyType === filter || car.type === filter;
+    if (filter === 'Auctions') return car.badges.includes('auction');
+    return car.type === filter;
   }).slice(0, 4);
 
   const filters: Filter[] = ['All', 'SUV', 'Pickup', 'Auctions'];
@@ -151,19 +130,11 @@ export default function Home({ setPage, viewCar }: HomeProps) {
             ))}
           </div>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 size={40} className="animate-spin text-gold-600" />
-            </div>
-          ) : filteredCars.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredCars.map(car => (
-                <CarCard key={car._id || car.id} car={car} onClick={() => viewCar(car)} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-warm-400 py-8">No vehicles available at the moment.</p>
-          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map(car => (
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+            ))}
+          </div>
 
           <div className="flex flex-wrap justify-center gap-4 mt-10">
             <button
