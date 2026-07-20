@@ -17,7 +17,7 @@
     "date-fns": "4.4.0",
     "framer-motion": "12.42.2",
     "lucide-react": "^0.344.0",
-    "posthog-js": "1.404.1",
+    "posthog-js": "1.405.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "3.0.0",
