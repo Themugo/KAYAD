@@ -194,7 +194,7 @@ export default function CarCard({
   return (
     <div
       onClick={onClick}
-      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border border-cream-200 hover:border-gold-500/50 hover:-translate-y-1"
+      className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-brand-lg transition-all duration-300 cursor-pointer border border-cream-200 hover:border-brand-500/50 hover:-translate-y-1 animate-fade-in-up"
     >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
@@ -323,7 +323,7 @@ export default function CarCard({
         )}
 
         {/* Divider */}
-        <div className="h-px bg-gold-500/20 my-3" />
+        <div className="h-px bg-brand-500/20 my-3" />
 
         {/* Price */}
         <div className="flex items-end justify-between">
@@ -339,7 +339,7 @@ export default function CarCard({
             )}
           </div>
 
-          <span className="text-gold-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
+          <span className="text-brand-600 text-sm font-medium group-hover:translate-x-1 transition-transform">
             View →
           </span>
         </div>

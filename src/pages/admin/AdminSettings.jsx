@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
+import AdminSettingsBranding from './AdminSettingsBranding';
 
 const DEFAULTS = {
   platformName: 'Giclan Motors',
@@ -13,6 +14,30 @@ const DEFAULTS = {
   maxListingImages: 8,
   allowGuestBrowsing: true,
   requireDealerApproval: true,
+};
+
+// Default branding with green theme
+const DEFAULT_BRANDING = {
+  logoType: 'icon',
+  logoText: 'KAYAD',
+  logoUrl: '',
+  brandTagline: 'Premium Automotive Marketplace',
+  primaryColor: '#16C4A4',
+  primaryLight: '#2DD9BE',
+  primaryDark: '#0C7B68',
+  primaryGlow: 'rgba(22, 196, 164, 0.25)',
+  accentColor: '#3B82F6',
+  backgroundColor: '#FDFAF5',
+  surfaceColor: '#F7F2E8',
+  cardColor: '#FFFFFF',
+  textColor: '#2E2B28',
+  textMutedColor: '#9A9088',
+  textDimColor: '#C8BFB0',
+  borderColor: '#E0D8C8',
+  successColor: '#10B981',
+  dangerColor: '#EF4444',
+  warningColor: '#F59E0B',
+  infoColor: '#3B82F6',
 };
 
 export default function AdminSettings() {
@@ -27,6 +52,9 @@ export default function AdminSettings() {
   const [daraja, setDaraja] = useState({ environment: 'sandbox', consumerKey: '', consumerSecret: '', passkey: '', shortCode: '' });
   const [bank, setBank] = useState({ bankName: '', accountName: '', accountNumber: '', branch: '', swiftCode: '', reconciliationEmail: '' });
   const [reconcile, setReconcile] = useState({ autoReconcile: true, matchThresholdMins: 1440, schedule: 'every 6 hours', notifyOnMismatch: true, defaultNarration: '' });
+
+  // Branding state
+  const [branding, setBranding] = useState(DEFAULT_BRANDING);
 
   // Test payment state
   const [testPhone, setTestPhone] = useState('254708374149');
@@ -55,6 +83,10 @@ export default function AdminSettings() {
         if (c.daraja) setDaraja(c.daraja);
         if (c.bank) setBank(c.bank);
         if (c.reconciliation) setReconcile(c.reconciliation);
+        // Load branding config
+        if (c.branding) {
+          setBranding({ ...DEFAULT_BRANDING, ...c.branding });
+        }
       }
     } catch { /* demo fallback — keep defaults */ }
 
@@ -91,6 +123,9 @@ export default function AdminSettings() {
       }
       if (!section || section === 'reconciliation') {
         body.reconciliation = reconcile;
+      }
+      if (!section || section === 'branding') {
+        body.branding = branding;
       }
       await adminAPI.updateConfig(body);
       toast('Settings saved', 'success');
@@ -133,6 +168,7 @@ export default function AdminSettings() {
   const tabs = useMemo(() => {
     const all = [
       { id: 'general', label: '⚙ General' },
+      { id: 'branding', label: '🎨 Branding' },
       { id: 'payments', label: '💳 Payments' },
       { id: 'reconciliation', label: '🔄 Reconciliation' },
       { id: 'audit', label: '📋 Audit Log' },
@@ -167,6 +203,18 @@ export default function AdminSettings() {
             </button>
           ))}
         </div>
+
+        {/* ═══ BRANDING ═══ */}
+        {tab === 'branding' && (
+          <AdminSettingsBranding
+            branding={branding}
+            setBranding={setBranding}
+            config={config}
+            setConfig={setConfig}
+            saveConfig={saveConfig}
+            saving={saving}
+          />
+        )}
 
         {/* ═══ GENERAL ═══ */}
         {tab === 'general' && (
