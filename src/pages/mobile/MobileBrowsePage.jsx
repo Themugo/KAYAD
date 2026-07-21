@@ -14,7 +14,7 @@ import {
   CarouselItem,
   Section,
   StatsBar,
-  MobileCarCard,
+  VehicleCard,
   MobileCardSkeleton,
   MobileEmptyState,
   MobileFilterDrawer,
@@ -425,7 +425,7 @@ export default function MobileBrowsePage() {
                   className="mobile-list-item"
                   style={{ animationDelay: `${Math.min(i, 8) * 0.05}s` }}
                 >
-                  <MobileCarCard car={car} onFavorite={handleFavorite} />
+                  <VehicleCard car={car} variant="horizontal" onSave={handleFavorite} />
                 </div>
               ))}
             </div>

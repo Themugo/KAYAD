@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets } from 'lucide-react';
 import { CARS } from '../data/cars';
-import CarCard, { type Car } from '../components/CarCard';
+import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
 
 const INSPECTION_CATEGORIES = [
   {
@@ -174,7 +174,7 @@ export default function PreInspection({ viewCar }: PreInspectionProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {inspectedCars.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+              <VehicleCard key={car.id} car={car} onClick={() => viewCar(car)} />
             ))}
           </div>
         </div>

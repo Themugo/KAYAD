@@ -3,7 +3,7 @@ import {
   Search, SlidersHorizontal, X, Grid3X3, List, 
   ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart
 } from 'lucide-react';
-import CarCard, { type Car } from '../components/CarCard';
+import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
 import { SkeletonGrid } from '../components/SkeletonCard';
 import { CARS } from '../data/cars';
 import { useCompare } from '../context/CompareContext';
@@ -456,16 +456,16 @@ export default function Gallery({ viewCar }: GalleryProps) {
                 : 'flex flex-col gap-4'
             }>
               {results.map(car => (
-                <CarCard
+                <VehicleCard
                   key={car.id}
                   car={car}
+                  variant={viewMode === 'list' ? 'horizontal' : 'default'}
+                  saved={favorites.has(car.id)}
+                  showCompare={true}
+                  compareSelected={isComparing(String(car.id))}
                   onClick={() => viewCar(car)}
-                  onToggleCompare={() => handleToggleCompare(car.id)}
-                  isComparing={isComparing(String(car.id))}
-                  compareCount={compareCount}
-                  onFavorite={toggleFavorite}
-                  isFavorited={favorites.has(car.id)}
-                  listView={viewMode === 'list'}
+                  onCompare={() => handleToggleCompare(car.id)}
+                  onSave={(car, saved) => toggleFavorite(car.id)}
                 />
               ))}
             </div>

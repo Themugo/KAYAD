@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MapPin, Phone, Mail, Star, Clock, Shield, CheckCircle, Calendar, MessageCircle, ChevronRight } from 'lucide-react';
 import { formatKES } from '../utils/helpers';
-import CarCard from '../components/CarCard';
+import VehicleCard from '../components/VehicleCard/VehicleCard';
 
 interface DealerProfileProps {
   setPage: (page: string) => void;
@@ -182,7 +182,7 @@ export default function DealerProfile({ setPage, viewCar }: DealerProfileProps) 
                   <span className="text-warm-400 text-sm">{DEMO_LISTINGS.length} vehicles</span>
                 </div>
                 {DEMO_LISTINGS.map(car => (
-                  <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+                  <VehicleCard key={car.id} car={car} showDealer={false} onClick={() => viewCar(car)} />
                 ))}
               </div>
             )}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { carsAPI, BRANDS } from '../api/api';
-import CarCard from '../components/CarCard';
+import VehicleCard from '../components/VehicleCard/VehicleCard';
 import { Button, Badge, FilterChip, RangeSlider, EmptyState, Skeleton, Segmented, Drawer } from '../components/ui';
 import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
 import { dedupedFetch, clearCache } from '../utils/requestCache';
@@ -354,7 +354,7 @@ export default function BrowsePage() {
         ) : (
           <>
             <div className="car-grid">
-              {cars.map(car => <CarCard key={car._id || car.id} car={car} />)}
+              {cars.map(car => <VehicleCard key={car._id || car.id} car={car} />)}
             </div>
             {loadingMore && (
               <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>

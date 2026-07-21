@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button, Badge, Card, Avatar, Breadcrumb, MapPlaceholder, StatCard, EmptyState, Skeleton } from '../components/ui';
-import CarCard from '../components/CarCard';
+import VehicleCard from '../components/VehicleCard/VehicleCard';
 import { carsAPI } from '../api/api';
 
 export default function DealerProfilePage() {
@@ -159,7 +159,7 @@ export default function DealerProfilePage() {
                   </select>
                 </div>
                 <div className="car-grid">
-                  {sortedInventory.map(car => <CarCard key={car.id || car._id} car={car} />)}
+                  {sortedInventory.map(car => <VehicleCard key={car.id || car._id} car={car} verified />)}
                 </div>
               </>
             )}

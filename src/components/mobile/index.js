@@ -13,6 +13,8 @@ export { default as MobileForm, Input, Textarea, Select, Checkbox, RadioGroup, T
 
 // Display components
 export { default as MobileCarCard, MobileCarCardSkeleton } from './MobileCarCard';
+export { default as VehicleCard } from '../VehicleCard/VehicleCard';
+export { VehicleCardSkeleton } from '../VehicleCard/VehicleCard';
 export { default as MobileEmptyState } from './MobileEmptyState';
 export { default as MobileSkeleton, Card, List, Detail, Page as PageSkeleton, Text, Stat, StaggeredList, Block, MobileCardSkeleton } from './MobileSkeleton';
 

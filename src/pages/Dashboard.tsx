@@ -3,7 +3,7 @@ import {
   ChevronRight, User, Bell, Settings, ArrowDown, Check,
   AlertCircle, Search, Wrench, MessageCircle, Car,
 } from 'lucide-react';
-import CarCard, { type Car as CarType } from '../components/CarCard';
+import VehicleCard, { type Car as CarType } from '../components/VehicleCard/VehicleCard';
 import { CARS } from '../data/cars';
 
 interface AuthUser {
@@ -197,7 +197,7 @@ export default function Dashboard({ setPage, viewCar, authUser, onSignOut }: Das
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {saved.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+              <VehicleCard key={car.id} car={car} saved onClick={() => viewCar(car)} />
             ))}
           </div>
         </section>

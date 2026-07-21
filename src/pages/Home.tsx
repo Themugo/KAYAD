@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
-import CarCard, { type Car } from '../components/CarCard';
+import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
 import HeroCarousel from '../components/HeroCarousel';
 import { CARS } from '../data/cars';
 
@@ -130,7 +130,7 @@ export default function Home({ setPage, viewCar }: HomeProps) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {featured.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
+              <VehicleCard key={car.id} car={car} featured onClick={() => viewCar(car)} />
             ))}
           </div>
 

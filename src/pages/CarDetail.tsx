@@ -5,7 +5,7 @@ import {
   MessageCircle, Star, ChevronRight, Lock, Clock,
   ChevronLeft, X, ZoomIn,
 } from 'lucide-react';
-import CarCard, { type Car } from '../components/CarCard';
+import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
 import { CARS } from '../data/cars';
 import { formatKES } from '../utils/helpers';
 
@@ -464,7 +464,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {similar.map(c => (
-                <CarCard key={c.id} car={c} onClick={() => viewCar(c)} />
+                <VehicleCard key={c.id} car={c} onClick={() => viewCar(c)} />
               ))}
             </div>
           </div>

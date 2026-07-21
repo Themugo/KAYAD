@@ -15,7 +15,7 @@ import {
   MobilePage,
   Section,
   StatsBar,
-  MobileCarCard,
+  VehicleCard,
   MobileCardSkeleton,
   MobileEmptyState,
   MobileFilterDrawer,
@@ -290,9 +290,11 @@ export default function MobileHomePage() {
               FEATURED_CARS.map((car, i) => (
                 <CarouselItem key={car._id}>
                   <div className="mobile-list-item" style={{ animationDelay: `${i * 0.05}s` }}>
-                    <MobileCarCard 
+                    <VehicleCard 
                       car={car} 
-                      onFavorite={handleFavorite}
+                      variant="horizontal"
+                      featured
+                      onSave={handleFavorite}
                     />
                   </div>
                 </CarouselItem>
@@ -349,7 +351,7 @@ export default function MobileHomePage() {
                     className="mobile-list-item"
                     style={{ animationDelay: `${i * 0.05}s` }}
                   >
-                    <MobileCarCard car={car} onFavorite={handleFavorite} />
+                    <VehicleCard car={car} variant="horizontal" onSave={handleFavorite} />
                   </div>
                 ))}
               </div>

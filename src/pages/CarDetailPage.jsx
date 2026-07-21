@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { carsAPI } from '../api/api';
 import { Button, Badge, PriceTag, Breadcrumb, Card, MapPlaceholder, Avatar, Progress, EmptyState } from '../components/ui';
-import CarCard from '../components/CarCard';
+import VehicleCard from '../components/VehicleCard/VehicleCard';
 import OptimizedImg from '../components/OptimizedImg';
 import { formatKES } from '../api/api';
 import { useAbortController } from '../hooks/useAbortController';
@@ -48,7 +48,7 @@ function RecentlyViewed() {
     <div style={{ marginTop: 32 }}>
       <h3 style={{ marginBottom: 16, fontSize: '1.1rem' }}>🕐 Recently Viewed</h3>
       <div className="car-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
-        {recent.slice(0, 4).map(c => <CarCard key={c.id} car={c} />)}
+        {recent.slice(0, 4).map(c => <VehicleCard key={c.id} car={c} variant="compact" />)}
       </div>
     </div>
   );
@@ -438,7 +438,7 @@ export default function CarDetailPage() {
               <div>
                 <h3 style={{ marginBottom: 16, fontSize: '1.1rem' }}>Similar Vehicles</h3>
                 <div className="car-grid">
-                  {relatedCars.map(c => <CarCard key={c.id} car={c} />)}
+                  {relatedCars.map(c => <VehicleCard key={c.id} car={c} />)}
                 </div>
               </div>
             )}

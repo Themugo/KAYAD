@@ -36,7 +36,7 @@ import SignIn from './pages/SignIn';
 import Showroom from './pages/Showroom';
 import { CARS } from './data/cars';
 import type { User } from './types';
-import type { Car } from './components/CarCard';
+import type { Car } from './components/VehicleCard/VehicleCard';
 
 // Lazy-loaded pages for code splitting
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));

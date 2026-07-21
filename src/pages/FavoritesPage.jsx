@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { favoritesAPI, formatKES } from '../api/api';
-import CarCard from '../components/CarCard';
+import VehicleCard from '../components/VehicleCard/VehicleCard';
 import { useToast } from '../context/ToastContext';
 
 export default function FavoritesPage() {
@@ -126,36 +126,14 @@ export default function FavoritesPage() {
         ) : (
           <div className="car-grid">
             {sorted.map(car => (
-              <div key={car._id} style={{ position: 'relative' }}>
-                <CarCard car={car} />
-                {/* Action overlay */}
-                <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6, zIndex: 10 }}>
-                  <button
-                    onClick={() => toggleCompare(car._id)}
-                    title="Add to compare"
-                    style={{
-                      background: compare.includes(car._id) ? 'var(--gold)' : 'rgba(10,22,40,0.85)',
-                      border: `1px solid ${compare.includes(car._id) ? 'var(--gold)' : 'var(--border)'}`,
-                      borderRadius: 6, padding: '4px 8px', fontSize: 11,
-                      color: compare.includes(car._id) ? '#0A1628' : 'var(--text)',
-                      cursor: 'pointer', fontWeight: 600, backdropFilter: 'blur(4px)',
-                    }}
-                  >
-                    {compare.includes(car._id) ? '✓ Compare' : '⇄ Compare'}
-                  </button>
-                  <button
-                    onClick={() => handleRemove(car._id)}
-                    title="Remove from favourites"
-                    style={{
-                      background: 'rgba(10,22,40,0.85)', border: '1px solid var(--border)',
-                      borderRadius: 6, padding: '4px 8px', fontSize: 13,
-                      color: 'var(--red)', cursor: 'pointer', backdropFilter: 'blur(4px)',
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
+              <VehicleCard 
+                key={car._id} 
+                car={car} 
+                saved 
+                showCompare 
+                compareSelected={compare.includes(car._id)}
+                onCompare={() => toggleCompare(car._id)}
+              />
             ))}
           </div>
         )}
