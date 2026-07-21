@@ -23,13 +23,37 @@ export default {
           300: '#E0D8C8',
           400: '#CEC4B0',
         },
-        // Vivid mint-teal — matches image accent ("VEHICLE PROTECTION", stats)
-        gold: {
-          300: '#80EDD8',
+        // Vivid mint-teal / emerald — main brand color (green)
+        brand: {
+          50:  '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
           400: '#2DD9BE',
-          500: '#16C4A4',
+          500: '#16C4A4',   // Primary brand green
           600: '#109E85',
           700: '#0C7B68',
+          800: '#065F46',
+          900: '#064E3B',
+        },
+        // Legacy "gold" references mapped to brand (green)
+        gold: {
+          50:  '#ECFDF5',
+          100: '#D1FAE5',
+          200: '#A7F3D0',
+          300: '#6EE7B7',
+          400: '#2DD9BE',
+          500: '#16C4A4',   // Primary brand green
+          600: '#109E85',
+          700: '#0C7B68',
+          800: '#065F46',
+          900: '#064E3B',
+        },
+        // Accent colors
+        accent: {
+          400: '#60A5FA',
+          500: '#3B82F6',
+          600: '#2563EB',
         },
         warm: {
           100: '#F5EFE6',
@@ -40,14 +64,51 @@ export default {
           600: '#4A4540',
           700: '#2E2B28',
         },
+        // Semantic colors
+        success: '#10B981',
+        danger: '#EF4444',
+        warning: '#F59E0B',
+        info: '#3B82F6',
       },
       backgroundImage: {
         // Updated to use navy rgba (0A1626 = rgb 10,22,38)
         'hero-gradient': 'linear-gradient(to right, rgba(10,22,38,0.95) 45%, rgba(10,22,38,0.5) 100%)',
         'dark-gradient': 'linear-gradient(180deg, rgba(10,22,38,0) 0%, rgba(10,22,38,0.85) 100%)',
+        // Brand gradient
+        'brand-gradient': 'linear-gradient(135deg, #16C4A4, #0C7B68)',
+        'brand-gradient-light': 'linear-gradient(135deg, #2DD9BE, #16C4A4)',
+      },
+      boxShadow: {
+        'brand': '0 4px 14px 0 rgba(22, 196, 164, 0.25)',
+        'brand-lg': '0 8px 30px 0 rgba(22, 196, 164, 0.35)',
+        'brand-glow': '0 0 20px rgba(22, 196, 164, 0.3)',
+      },
+      borderRadius: {
+        DEFAULT: '12px',
+        sm: '8px',
+        lg: '16px',
+        xl: '24px',
+      },
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
+        'glow': 'glow 2s ease-in-out infinite alternate',
+      },
+      keyframes: {
+        'bounce-subtle': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-4px)' },
+        },
+        'glow': {
+          '0%': { boxShadow: '0 0 5px rgba(22, 196, 164, 0.2)' },
+          '100%': { boxShadow: '0 0 20px rgba(22, 196, 164, 0.5)' },
+        },
       },
       letterSpacing: {
         widest2: '0.22em',
+      },
+      transitionTimingFunction: {
+        'spring': 'cubic-bezier(0.34, 1.56, 0.64, 1)',
       },
     },
   },
