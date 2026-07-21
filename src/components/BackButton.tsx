@@ -5,9 +5,15 @@ interface BackButtonProps {
   fallback?: string;
   label?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export default function BackButton({ fallback = '/', label = 'Back', className = 'flex items-center gap-2 px-4 py-2 bg-white border border-cream-200 text-charcoal-800 font-sans text-xs font-semibold rounded-full hover:border-gold-500 hover:text-gold-600 transition-all cursor-pointer' }: BackButtonProps) {
+// Goes to the ACTUAL previous page the user came from (browser history),
+// so "back" returns them to wherever they were — the gallery, the homepage,
+// a dashboard, search results — instead of a fixed destination. If there's no
+// history to go back to (e.g. they opened a shared link directly or refreshed),
+// it falls back to `fallback` (default: home).
+export default function BackButton({ fallback = '/', label = 'Back', className = 'back-btn', style }: BackButtonProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,7 +28,7 @@ export default function BackButton({ fallback = '/', label = 'Back', className =
   };
 
   return (
-    <button type="button" onClick={handleBack} className={className} aria-label={label}>
+    <button type="button" onClick={handleBack} className={className} style={style} aria-label={label}>
       <ArrowLeft size={14} /> {label}
     </button>
   );

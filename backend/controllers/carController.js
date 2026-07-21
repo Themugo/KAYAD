@@ -55,16 +55,19 @@ export const getCars = async (req, res) => {
     } = req.query;
 
     const pageNum = Math.max(toNumber(page, 1), 1);
+    // Hard cap: clamp limit to 1..100 so a request like ?limit=999999 can
+    // never trigger an unbounded query (pagination cap — Issue: security test).
     const limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    // Build query - only filter by available status, not isDemo (which may not exist on all vehicles)
-    const query = { status: "available" };
+    const query = { status: "available", isDemo: { $ne: true } };
 
     if (keyword) {
       const trimmed = keyword.trim();
       if (trimmed.length >= 3) {
+        // Use MongoDB text index (fast, index-backed) for 3+ char queries
         query.$text = { $search: trimmed };
       } else {
+        // Short queries: fall back to regex (text index needs full tokens)
         const safe = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         query.$or = [{ title: { $regex: safe, $options: "i" } }, { brand: { $regex: safe, $options: "i" } }];
       }
@@ -147,7 +150,10 @@ export const getCars = async (req, res) => {
     }
 
     let sortOption = {};
-    if (sort === "price_asc") sortOption = { price: 1 };
+    if (query.$text && !sort) {
+      // When using text search without explicit sort, rank by relevance
+      sortOption = { score: { $meta: "textScore" }, createdAt: -1 };
+    } else if (sort === "price_asc") sortOption = { price: 1 };
     else if (sort === "price_desc" || sort === "-price") sortOption = { price: -1 };
     else if (sort === "year_desc" || sort === "-year") sortOption = { year: -1 };
     else if (sort === "year_asc") sortOption = { year: 1 };
@@ -160,21 +166,62 @@ export const getCars = async (req, res) => {
 
     const skip = (pageNum - 1) * limitNum;
 
-    let findQuery = Car.find(query).select(
-      "title price images coverImage brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
-    );
+    // Build the query chain — add text score projection if using $text
+    let findQuery = Car.find(query);
+    if (query.$text) {
+      findQuery = findQuery.select({
+        score: { $meta: "textScore" },
+        title: 1,
+        price: 1,
+        images: 1,
+        coverImage: 1,
+        brand: 1,
+        year: 1,
+        model: 1,
+        location: 1,
+        fuel: 1,
+        transmission: 1,
+        mileage: 1,
+        bodyType: 1,
+        color: 1,
+        condition: 1,
+        description: 1,
+        allowBid: 1,
+        allowBuy: 1,
+        auctionStatus: 1,
+        currentBid: 1,
+        bidsCount: 1,
+        views: 1,
+        trustScore: 1,
+        dealRating: 1,
+        createdAt: 1,
+        dealer: 1,
+        isVerifiedDealer: 1,
+        ntsaVerified: 1,
+        dutyStatus: 1,
+        isPromoted: 1,
+        isDemo: 1,
+        demoEditedAt: 1,
+        demoEditedBy: 1,
+      });
+    } else {
+      findQuery = findQuery.select(
+        "title price images coverImage brand year model location fuel transmission mileage bodyType color condition description allowBid allowBuy auctionStatus currentBid bidsCount views trustScore dealRating createdAt dealer isVerifiedDealer ntsaVerified dutyStatus isPromoted isDemo demoEditedAt demoEditedBy",
+      );
+    }
 
     findQuery = findQuery.populate("dealer", "name businessName phone role logo verified");
 
     const [cars, total] = await Promise.all([
       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
+
       Car.countDocuments(query),
     ]);
 
     res.json({
       success: true,
       data: cars || [],
-      cars: cars || [],
+      cars: cars || [], // Include both for frontend compatibility
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -187,9 +234,12 @@ export const getCars = async (req, res) => {
       message: err.message,
       name: err.name,
       code: err.code,
-      stack: err.stack,
+      query: JSON.stringify(query),
+      sort: JSON.stringify(sortOption),
+      page: pageNum,
+      limit: limitNum,
     });
-    res.status(500).json({ success: false, message: "Failed to fetch cars", data: [], cars: [] });
+    res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
   }
 };
 
@@ -824,10 +874,10 @@ export const getCar = async (req, res) => {
       Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed (fallback)", { error: e.message }));
     }
 
-    res.json({ success: true, data: car, car });
+    res.json({ success: true, data: car });
   } catch (err) {
     logError("GET ONE ERROR", { error: err.message });
-    res.status(500).json({ success: false, message: "Failed to fetch car", data: null, car: null });
+    res.status(500).json({ success: false, message: "Failed to fetch car" });
   }
 };
 

@@ -1,8 +1,7 @@
-// src/pages/dealer/components/DashboardWidgets.jsx
 // Shared widgets and constants for the dealer dashboard
 
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 export const TABS_CONFIG = [
   { id: 'overview', label: 'Overview' },
@@ -52,7 +51,7 @@ export function StatCard({ icon, label, value, sub, color = 'var(--gold)', to, t
   const isUp = trend > 0;
   const showTrend = trend !== undefined && trend !== null;
   const inner = (
-    <div style={{
+    <div role="presentation" style={{
       background: 'var(--card)', border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)', padding: '20px', position: 'relative', overflow: 'hidden',
       transition: 'border-color 0.2s, transform 0.2s',
@@ -95,7 +94,7 @@ export function DemoBadge({ edited }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '2px 8px', borderRadius: 9999, fontSize: 9, fontWeight: 700,
-      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(212,196,168,0.1)',
+      background: edited ? 'rgba(34,197,94,0.12)' : 'rgba(37, 99, 235,0.1)',
       color: edited ? '#22c55e' : 'var(--gold)',
       textTransform: 'uppercase', letterSpacing: '0.06em',
     }}>

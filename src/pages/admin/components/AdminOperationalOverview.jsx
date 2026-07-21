@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Eye, AlertTriangle, Shield, Clock, FileText, CheckCircle, Users, Car } from 'lucide-react';
 
 const OP_CARDS = [
@@ -17,7 +16,7 @@ const OP_CARDS = [
     label: 'Pending Listings',
     key: 'pendingCars',
     color: '#8b5cf6',
-    to: '/admin/moderation',
+    to: '/admin/cars',
     desc: 'Listings awaiting moderation',
   },
   {
@@ -26,7 +25,7 @@ const OP_CARDS = [
     label: 'Pending Reports',
     key: 'pendingReports',
     color: '#eab308',
-    to: '/admin/contact-submissions',
+    to: '/admin/support',
     desc: 'Unread contact submissions',
   },
   {
@@ -53,7 +52,7 @@ const OP_CARDS = [
     label: 'Fraud Alerts',
     key: 'fraudAlerts',
     color: '#ef4444',
-    to: '/admin/fraud-alerts',
+    to: '/admin/security',
     desc: 'Critical/high severity alerts',
   },
   {
@@ -81,7 +80,7 @@ export default function AdminOperationalOverview({ stats, sysHealth }) {
           const isUrgent = card.key === 'fraudAlerts' && Number(val || 0) > 0;
           return (
             <div key={card.id} style={{ textDecoration: 'none' }}>
-              <div style={{
+              <div role="presentation" style={{
                 background: 'var(--card)', border: `1px solid ${isUrgent ? 'rgba(239,68,68,0.3)' : 'var(--border)'}`,
                 borderRadius: 'var(--radius-lg)', padding: '16px 18px',
                 transition: 'border-color 0.2s, transform 0.2s',

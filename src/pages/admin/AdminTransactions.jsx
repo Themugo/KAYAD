@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminPaymentsAPI, formatKES } from '../../api/api';
 import { timeAgo } from '../../utils/helpers';
 
@@ -12,7 +12,7 @@ export default function AdminTransactions() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [selected, setSelected] = useState(null);
 
-  const load = async (p = page) => {
+  const load = useCallback(async (p) => {
     setLoading(true);
     try {
       const params = { page: p, limit: 20 };
@@ -24,10 +24,10 @@ export default function AdminTransactions() {
       setTotal(d.pagination?.total || 0);
     } catch { /* ignore */ }
     finally { setLoading(false); }
-  };
+  }, [filter, typeFilter]);
 
-  useEffect(() => { load(1); setPage(1); }, [filter, typeFilter]);
-  useEffect(() => { load(); }, [page]);
+  useEffect(() => { load(1); setPage(1); }, [filter, typeFilter, load]);
+  useEffect(() => { load(page); }, [page, load]);
 
   const totalPages = Math.ceil(total / 20);
 
@@ -127,8 +127,8 @@ export default function AdminTransactions() {
         )}
 
         {selected && (
-          <div className="modal-overlay" onClick={() => setSelected(null)}>
-            <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
+          <div className="modal-overlay" role="presentation" onClick={() => setSelected(null)}>
+            <div className="modal" onClick={e => e.stopPropagation()} role="presentation" style={{ maxWidth: 480 }}>
               <div className="modal-header">
                 <h3>Transaction Details</h3>
                 <button className="modal-close" onClick={() => setSelected(null)}>✕</button>

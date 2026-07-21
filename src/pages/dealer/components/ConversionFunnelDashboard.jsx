@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Filter, TrendingUp, Users, DollarSign, Shield } from 'lucide-react';
 import api from '../../../api/api';
-import { Card, SpinnerInline } from '../../../components/ui';
 
 const widgetStyle = {
   background: 'var(--card)',
@@ -87,25 +86,25 @@ export default function ConversionFunnelDashboard({ dealerId }) {
 
   if (loading) {
     return (
-      <Card>
+      <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}><SpinnerInline label="Loading analytics..." /></div>
-      </Card>
+        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Loading analytics...</div>
+      </div>
     );
   }
 
   if (!analytics) {
     return (
-      <Card>
+      <div style={widgetStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Filter size={16} style={{ color: 'var(--gold)' }} />
           <span style={widgetHeader}>Conversion Funnel</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No analytics data available</div>
-      </Card>
+      </div>
     );
   }
 
@@ -116,7 +115,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
   };
 
   return (
-    <Card>
+    <div style={widgetStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
         <Filter size={16} style={{ color: 'var(--gold)' }} />
         <span style={widgetHeader}>Conversion Funnel</span>
@@ -159,7 +158,7 @@ export default function ConversionFunnelDashboard({ dealerId }) {
         })}
       </div>
 
-      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(212,196,168,0.06)', borderRadius: 8, border: '1px solid rgba(212,196,168,0.15)' }}>
+      <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(37, 99, 235,0.06)', borderRadius: 8, border: '1px solid rgba(37, 99, 235,0.15)' }}>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 4 }}>Business Insights</div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
           {total.views > 0 && total.chatted === 0 && (
@@ -176,6 +175,6 @@ export default function ConversionFunnelDashboard({ dealerId }) {
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

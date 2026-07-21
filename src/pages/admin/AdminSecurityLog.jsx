@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
-import { Button, SpinnerPage, Pagination } from '../../components/ui';
 
 const SEVERITY_COLORS = {
   critical: { bg: 'rgba(239,68,68,0.1)', color: 'var(--red)' },
-  warning: { bg: 'rgba(212,196,168,0.1)', color: 'var(--gold)' },
+  warning: { bg: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)' },
   info: { bg: 'rgba(59,130,246,0.08)', color: '#3B82F6' },
 };
 
@@ -43,7 +42,7 @@ export default function AdminSecurityLog() {
   const [showStatistics, setShowStatistics] = useState(false);
   const [exporting, setExporting] = useState(false);
 
-  const fetchLogs = () => {
+  const fetchLogs = useCallback(() => {
     setLoading(true);
     const params = { page, limit: 30 };
     if (filter) params.action = filter;
@@ -56,7 +55,9 @@ export default function AdminSecurityLog() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  };
+    // filter is applied manually (Enter key / Apply button), not auto-triggered on change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, severityFilter, targetModelFilter]);
 
   const fetchStatistics = () => {
     adminAPI.getAuditLogStatistics({ days: 30 })
@@ -100,7 +101,7 @@ export default function AdminSecurityLog() {
     }
   };
 
-  useEffect(() => { fetchLogs(); }, [page, severityFilter, targetModelFilter]);
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
   useEffect(() => { if (showStatistics) fetchStatistics(); }, [showStatistics]);
 
   return (
@@ -114,23 +115,26 @@ export default function AdminSecurityLog() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <Button variant="outline" size="sm"
+            <button 
+              className="btn btn-sm btn-outline"
               onClick={() => setShowStatistics(!showStatistics)}
             >
               {showStatistics ? 'Hide Statistics' : 'Show Statistics'}
-            </Button>
-            <Button variant="primary" size="sm"
+            </button>
+            <button 
+              className="btn btn-sm btn-gold"
               onClick={() => handleExport('json')}
-              loading={exporting}
+              disabled={exporting}
             >
-              Export JSON
-            </Button>
-            <Button variant="outline" size="sm"
+              {exporting ? 'Exporting...' : 'Export JSON'}
+            </button>
+            <button 
+              className="btn btn-sm btn-outline"
               onClick={() => handleExport('csv')}
-              loading={exporting}
+              disabled={exporting}
             >
-              Export CSV
-            </Button>
+              {exporting ? 'Exporting...' : 'Export CSV'}
+            </button>
           </div>
         </div>
 
@@ -214,14 +218,14 @@ export default function AdminSecurityLog() {
               onChange={e => setFilter(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { setPage(1); fetchLogs(); } }}
             />
-            <Button variant="primary" size="sm" onClick={() => { setPage(1); fetchLogs(); }}>
+            <button className="btn btn-sm btn-gold" onClick={() => { setPage(1); fetchLogs(); }}>
               Search
-            </Button>
+            </button>
           </div>
         </div>
 
         {loading ? (
-          <SpinnerPage label="Loading audit logs..." />
+          <div className="loading-center"><div className="spinner" /></div>
         ) : (
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -294,7 +298,23 @@ export default function AdminSecurityLog() {
 
             {pagination && pagination.pages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-                <Pagination page={page} totalPages={pagination.pages} onChange={setPage} />
+                <button
+                  className="btn btn-sm btn-outline"
+                  disabled={page <= 1}
+                  onClick={() => setPage(p => p - 1)}
+                >
+                  ← Prev
+                </button>
+                <span style={{ padding: '6px 12px', fontSize: 13, color: 'var(--text-muted)' }}>
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+                <button
+                  className="btn btn-sm btn-outline"
+                  disabled={page >= pagination.pages}
+                  onClick={() => setPage(p => p + 1)}
+                >
+                  Next →
+                </button>
               </div>
             )}
           </>

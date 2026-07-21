@@ -161,7 +161,7 @@ export default function AdManager() {
                     }}>
                       {ad.isActive ? 'ACTIVE' : 'PAUSED'}
                     </span>
-                    <span style={{ background: 'rgba(212,196,168,0.1)', color: 'var(--gold)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
+                    <span style={{ background: 'rgba(37, 99, 235,0.1)', color: 'var(--gold)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
                       {PLACEMENTS.find(p => p.value === ad.placement)?.label || ad.placement}
                     </span>
                   </div>

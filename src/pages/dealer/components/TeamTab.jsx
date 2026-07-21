@@ -1,4 +1,3 @@
-// src/pages/dealer/components/TeamTab.jsx
 // Extracted from DealerDashboard.jsx for maintainability
 
 import { useState, useEffect } from 'react';
@@ -96,7 +95,7 @@ export default function TeamTab({ toast }) {
             You are the <strong style={{ color: 'var(--gold)' }}>Business Owner</strong>. Invite staff and assign role-based access.
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 9999, padding: '6px 14px', fontSize: 11, color: 'var(--gold)', fontWeight: 700 }}>
           <Shield size={12} /> Business Owner
         </div>
       </div>
@@ -171,7 +170,7 @@ export default function TeamTab({ toast }) {
                     {m.status}
                   </span>
                   <button onClick={() => setExpanded(isExp ? null : m._id)}
-                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(212,196,168,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(212,196,168,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                    style={{ padding: '7px 12px', borderRadius: 8, background: isExp ? 'rgba(37, 99, 235,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${isExp ? 'rgba(37, 99, 235,0.25)' : 'rgba(255,255,255,0.08)'}`, color: isExp ? 'var(--gold)' : 'rgba(255,255,255,0.45)', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
                     Permissions
                   </button>
                   <button onClick={() => remove(m._id)}

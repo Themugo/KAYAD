@@ -23,5 +23,3 @@ export function LoadingList() {
     </div>
   );
 }
-
-export default LoadingPage;

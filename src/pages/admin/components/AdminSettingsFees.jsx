@@ -7,7 +7,7 @@ export default function AdminSettingsFees({ config, setConfig, saveConfig, savin
           {[
             { key: 'listingFee', label: 'Standard Listing (KES)', def: 1000 },
             { key: 'auctionRegistrationFee', label: 'Auction Entry (KES)', def: 2000 },
-            { key: 'ghostCheckFee', label: 'Ghost Check (KES)', def: 2500 },
+            { key: 'inspectionFee', label: 'Pre-Inspection (KES)', def: 2500 },
             { key: 'commissionPercentage', label: 'Hammer Commission (%)', def: 2 },
             { key: 'platformVat', label: 'VAT (%)', def: 16 },
             { key: 'buyerPremiumPct', label: 'Buyer Premium (%)', def: 0 },

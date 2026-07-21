@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -11,7 +11,7 @@ export default function AdminInspectorApplications() {
   const [reviewNotes, setReviewNotes] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
 
-  const fetchApps = () => {
+  const fetchApps = useCallback(() => {
     setLoading(true);
     const params = {};
     if (statusFilter) params.status = statusFilter;
@@ -19,9 +19,9 @@ export default function AdminInspectorApplications() {
       .then(d => setApps(d.applications || []))
       .catch(() => toast('Failed to load', 'error'))
       .finally(() => setLoading(false));
-  };
+  }, [statusFilter, toast]);
 
-  useEffect(() => { fetchApps(); }, [statusFilter]);
+  useEffect(() => { fetchApps(); }, [fetchApps]);
 
   const handleAction = async (id, action) => {
     setActionLoading(id);
@@ -69,7 +69,7 @@ export default function AdminInspectorApplications() {
                       <span style={{ fontWeight: 600 }}>{app.fullName}</span>
                       <span style={{
                         padding: '2px 8px', borderRadius: 4, fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
-                        background: app.status === 'approved' ? 'rgba(34,197,94,0.1)' : app.status === 'rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(212,196,168,0.1)',
+                        background: app.status === 'approved' ? 'rgba(34,197,94,0.1)' : app.status === 'rejected' ? 'rgba(239,68,68,0.1)' : 'rgba(37, 99, 235,0.1)',
                         color: app.status === 'approved' ? 'var(--green)' : app.status === 'rejected' ? 'var(--red)' : 'var(--gold)',
                       }}>
                         {app.status}
@@ -94,7 +94,7 @@ export default function AdminInspectorApplications() {
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Specialties:</span>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                         {app.specialties?.map(s => (
-                          <span key={s} style={{ padding: '2px 8px', background: 'rgba(212,196,168,0.1)', borderRadius: 4, fontSize: 11, color: 'var(--gold)' }}>{s}</span>
+                          <span key={s} style={{ padding: '2px 8px', background: 'rgba(37, 99, 235,0.1)', borderRadius: 4, fontSize: 11, color: 'var(--gold)' }}>{s}</span>
                         ))}
                       </div>
                     </div>

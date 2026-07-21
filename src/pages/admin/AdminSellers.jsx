@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { Button, Badge } from '../../components/ui';
 
 export default function AdminSellers() {
   const { toast } = useToast();
@@ -15,11 +14,8 @@ export default function AdminSellers() {
   const fetchSellers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await adminAPI.users({
-        seller: true,
-        ...(filter === 'pending' ? { pendingApproval: true } : {}),
-        search: search || undefined,
-      });
+      const roleParam = filter !== 'all' ? 'dealer' : undefined;
+      const data = await adminAPI.users({ role: roleParam, search: search || undefined });
       const users = data.users || data.data || [];
       const mapped = users.map(u => ({
         id: u._id,
@@ -27,7 +23,7 @@ export default function AdminSellers() {
         name: u.name,
         email: u.email,
         phone: u.phone || '—',
-        status: u.isBanned ? 'suspended' : u.status === 'approved' ? 'approved' : 'pending',
+        status: u.isBanned ? 'suspended' : u.approved ? 'approved' : 'pending',
         commission: u.commission ?? 5,
         waiver: u.waiver ?? 0,
         discount: u.discount ?? 0,
@@ -35,8 +31,6 @@ export default function AdminSellers() {
         listingCount: u.listingCount || 0,
         rating: u.dealerRating || 0,
         createdAt: u.createdAt,
-        dealerPackage: u.dealerPackage || 'none',
-        isDemo: !!u.isDemo,
       }));
       const filtered = filter === 'pending' ? mapped.filter(s => s.status === 'pending')
         : filter === 'suspended' ? mapped.filter(s => s.status === 'suspended')
@@ -216,40 +210,6 @@ export default function AdminSellers() {
                   <div style={{ fontWeight: 600, marginTop: 4 }}>{r.val}</div>
                 </div>
               ))}
-            </div>
-
-            {/* Package assignment */}
-            <div style={{ marginTop: 20, paddingTop: 20, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>
-                Listing Package
-              </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-                {['none','starter','growth','elite','enterprise'].map(pkg => {
-                  const isCurrent = selected.dealerPackage === pkg;
-                  return (
-                    <button key={pkg} onClick={async () => {
-                      try {
-                        const days = pkg !== 'none' ? 30 : undefined;
-                        await adminAPI.assignPackage(selected.id, { dealerPackage: pkg, durationDays: days });
-                        setSellers(prev => prev.map(s => s.id === selected.id ? { ...s, dealerPackage: pkg } : s));
-                        setSelected(p => ({ ...p, dealerPackage: pkg }));
-                        toast(`Package set to ${pkg}`, 'success');
-                      } catch { toast('Failed to set package', 'error'); }
-                    }} style={{
-                      padding: '7px 16px', borderRadius: 8, border: `1px solid ${isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.1)'}`,
-                      background: isCurrent ? 'rgba(212,196,168,0.12)' : 'rgba(255,255,255,0.04)',
-                      color: isCurrent ? 'var(--gold)' : 'rgba(255,255,255,0.6)',
-                      fontSize: 12, fontWeight: 700, cursor: 'pointer', textTransform: 'capitalize',
-                      transition: 'all 0.15s',
-                    }}>
-                      {pkg === 'none' ? 'No Package' : pkg}
-                    </button>
-                  );
-                })}
-              </div>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 8 }}>
-                Setting a package activates it for 30 days. Dealers do not pay per listing.
-              </div>
             </div>
           </div>
         )}

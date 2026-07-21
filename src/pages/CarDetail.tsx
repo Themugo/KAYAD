@@ -1,24 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
   CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
   MessageCircle, Star, ChevronRight, Lock, Clock,
-  ChevronLeft, X, ZoomIn, BarChart3,
+  ChevronLeft, X, ZoomIn,
 } from 'lucide-react';
 import CarCard, { type Car } from '../components/CarCard';
 import { CARS } from '../data/cars';
 import { formatKES } from '../utils/helpers';
-import {
-  GalleryImage,
-  GalleryThumbnails,
-  SpecItem,
-  CompareToggle,
-  GalleryModal,
-  NtsaStatusCard,
-  InlineBidding,
-  AuctionAnnouncement,
-  CarDetailReviews,
-} from './car/components';
 
 type AnyPage = string;
 
@@ -27,24 +16,6 @@ interface CarDetailProps {
   setPage: (page: AnyPage) => void;
   viewCar: (car: Car) => void;
 }
-
-// Convert Car to format expected by components
-const toApiCar = (car: Car) => ({
-  ...car,
-  _id: String(car.id),
-  title: `${car.make} ${car.model}`,
-  brand: car.make,
-  mileage: car.mileage,
-  location: { city: car.city },
-  images: [car.image, car.image, car.image],
-  auctionStatus: car.badges.includes('auction') ? 'live' : undefined,
-  auctionEnd: car.badges.includes('auction') ? new Date(Date.now() + 3600000).toISOString() : undefined,
-  currentBid: car.badges.includes('auction') ? Math.floor(car.price * 0.9) : undefined,
-  bidsCount: car.badges.includes('auction') ? 3 : 0,
-  ntsaVerified: car.badges.includes('verified'),
-  isPromoted: false,
-  isDemo: false,
-});
 
 const FEATURES: Record<string, string[]> = {
   SUV:    ['Leather Seats', 'Panoramic Sunroof', 'Apple CarPlay', 'Rear Camera', 'Adaptive Cruise', 'Blind Spot Monitor'],
@@ -67,9 +38,6 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
   const [tab, setTab]     = useState<Tab>('overview');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [reviews, setReviews] = useState<any[]>([]);
-
-  const apiCar = toApiCar(car);
 
   // Generate multiple images for gallery
   const carImages = [
@@ -86,33 +54,6 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
 
   const features = FEATURES[car.type] ?? FEATURES.SUV;
   const similar  = CARS.filter(c => c.type === car.type && c.id !== car.id).slice(0, 3);
-
-  const specs = [
-    { icon: Calendar, label: 'Year', value: car.year },
-    { icon: Gauge, label: 'Mileage', value: car.mileage },
-    { icon: Fuel, label: 'Fuel', value: car.fuel },
-    { icon: MapPin, label: 'Location', value: car.city },
-  ];
-
-  // Demo reviews
-  useEffect(() => {
-    setReviews([
-      {
-        _id: '1',
-        user: { name: 'James M.' },
-        rating: 5,
-        comment: 'Excellent service! The dealer was very professional and the car was exactly as described.',
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      },
-      {
-        _id: '2',
-        user: { name: 'Sarah K.' },
-        rating: 4,
-        comment: 'Good experience overall. The escrow process gave me peace of mind.',
-        createdAt: new Date(Date.now() - 86400000 * 12).toISOString(),
-      },
-    ]);
-  }, []);
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -162,7 +103,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             onClick={nextImage}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
           >
-            <ChevronRightAlt size={20} />
+            <ChevronRight size={20} />
           </button>
 
           {/* Zoom Button */}
@@ -216,7 +157,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
               </span>
             )}
             <span className="font-serif text-2xl md:text-3xl text-gold-400 font-bold ml-auto">
-              KES {fmt(car.price)}
+              {formatKES(car.price)}
             </span>
           </div>
         </div>
@@ -244,7 +185,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             onClick={(e) => { e.stopPropagation(); nextImage(); }}
             className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
           >
-            <ChevronRightAlt size={24} />
+            <ChevronRight size={24} />
           </button>
           <img
             src={carImages[currentImageIndex]}
@@ -426,7 +367,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                       <p className="font-sans text-xs text-warm-400">{rate} · {term}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-sans text-sm font-bold text-gold-700">KES {fmt(monthly)}/mo</p>
+                      <p className="font-sans text-sm font-bold text-gold-700">{formatKES(monthly)}/mo</p>
                       <button className="font-sans text-xs text-gold-600 hover:underline group-hover:text-gold-500">Apply →</button>
                     </div>
                   </div>
@@ -445,7 +386,7 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/8 blur-2xl rounded-full pointer-events-none" />
                 <div className="relative">
                   <p className="font-sans text-[10px] text-white/35 uppercase tracking-widest mb-1">Asking Price</p>
-                  <p className="font-serif text-2xl sm:text-3xl text-gold-400 font-bold mb-5">KES {fmt(car.price)}</p>
+                  <p className="font-serif text-2xl sm:text-3xl text-gold-400 font-bold mb-5">{formatKES(car.price)}</p>
 
                   <div className="space-y-2.5">
                     <button

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { adminAPI, formatKES } from '../../api/api';
+import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 export default function AdminReviews() {
@@ -31,7 +31,7 @@ export default function AdminReviews() {
       setTotal(data.pagination?.total || list.length);
     } catch { toast('Failed to load reviews', 'error'); }
     finally { setLoading(false); }
-  }, [page, search]);
+  }, [page, search, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -51,11 +51,11 @@ export default function AdminReviews() {
   const pages = Math.ceil(total / 20);
 
   return (
-    <div style={{ padding: '32px', background: '#050505', minHeight: '100vh' }}>
+    <div style={{ padding: '32px', background: '#F8FAFC', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}>⭐ Review Moderation</h2>
-          <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 13, marginTop: 6 }}>Manage and moderate dealer reviews across the platform</p>
+          <p style={{ color: 'rgba(15, 23, 42, 0.35)', fontSize: 13, marginTop: 6 }}>Manage and moderate dealer reviews across the platform</p>
         </div>
 
         <input
@@ -63,8 +63,8 @@ export default function AdminReviews() {
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
           style={{
-            width: '100%', maxWidth: 400, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 8, padding: '10px 14px', color: '#fff', fontSize: 13, outline: 'none', marginBottom: 24,
+            width: '100%', maxWidth: 400, background: 'rgba(15, 23, 42, 0.04)', border: '1px solid rgba(15, 23, 42, 0.1)',
+            borderRadius: 8, padding: '10px 14px', color: '#0F172A', fontSize: 13, outline: 'none', marginBottom: 24,
           }}
         />
 
@@ -80,15 +80,15 @@ export default function AdminReviews() {
           <>
             <div style={{ display: 'grid', gap: 12 }}>
               {reviews.map(r => (
-                <div key={r._id} style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '18px 22px' }}>
+                <div key={r._id} style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 14, padding: '18px 22px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
                         <span style={{ fontSize: 16 }}>{'⭐'.repeat(Math.min(r.rating || 0, 5))}</span>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{r.rating}/5</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{r.rating}/5</span>
                       </div>
-                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.6)' }}>{r.user?.name || 'Anonymous'}</span>
+                      <div style={{ fontSize: 12, color: 'rgba(15, 23, 42, 0.4)' }}>
+                        <span style={{ color: 'rgba(15, 23, 42, 0.6)' }}>{r.user?.name || 'Anonymous'}</span>
                         {' · '}
                         <span style={{ color: 'var(--gold)' }}>{r.dealer?.name || 'Unknown Dealer'}</span>
                         {' · '}
@@ -101,12 +101,12 @@ export default function AdminReviews() {
                     </button>
                   </div>
                   {r.comment && (
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5, marginBottom: 8, maxWidth: 600 }}>
+                    <div style={{ fontSize: 13, color: 'rgba(15, 23, 42, 0.65)', lineHeight: 1.5, marginBottom: 8, maxWidth: 600 }}>
                       "{r.comment}"
                     </div>
                   )}
                   {r._id === selected?._id && (
-                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 11, color: 'rgba(255,255,255,0.35)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(15, 23, 42, 0.06)', fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       <div>Review ID: {r._id}</div>
                       <div>User ID: {r.user?._id || '—'}</div>
                       <div>Dealer ID: {r.dealer?._id || '—'}</div>

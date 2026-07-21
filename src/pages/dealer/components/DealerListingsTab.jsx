@@ -149,7 +149,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
         transition: 'max-height 0.3s ease, opacity 0.3s ease',
         marginBottom: selectedIds.length > 0 ? 12 : 0,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(212,196,168,0.06)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 10 }}>
           <span style={{ fontSize: 12, color: 'var(--gold)', fontWeight: 600 }}>{selectedIds.length} selected</span>
           <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'active' }).then(() => { toast('Marked active', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22c55e', fontSize: 11, cursor: 'pointer' }}>Mark Active</button>
           <button onClick={() => { dealerAPI.bulkStatus({ ids: selectedIds, status: 'sold' }).then(() => { toast('Marked sold', 'success'); setSelectedIds([]); fetchListings(page, pageSize, search, statusFilter); }).catch(() => toast('Failed', 'error')); }} style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#3b82f6', fontSize: 11, cursor: 'pointer' }}>Mark Sold</button>
@@ -169,7 +169,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
             const isLiveAuction = car.auctionStatus === 'live';
             const displayStatus = isLiveAuction ? 'live' : (car.status || 'draft');
             return (
-              <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(212,196,168,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'grid', gridTemplateColumns: '20px 64px 1fr 120px 90px auto', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
+              <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(37, 99, 235,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'grid', gridTemplateColumns: '20px 64px 1fr 120px 90px auto', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
                 <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--gold)', width: 16, height: 16, flexShrink: 0 }} />
                 {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 10, aspectRatio: '4/3', flexShrink: 0 }} />
                   : <div style={{ width: 64, height: 48, borderRadius: 10, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
@@ -189,7 +189,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
                 <StatusBadge status={displayStatus} />
                 <div style={{ display: 'flex', gap: 6 }}>
                   <Link to={`/cars/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Preview</Link>
-                  <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
+                  <Link to={`/dealer/edit/${car._id}`} style={{ padding: '6px 12px', borderRadius: 8, background: 'rgba(37, 99, 235,0.1)', border: '1px solid rgba(37, 99, 235,0.2)', color: 'var(--gold)', fontSize: 11, fontWeight: 600, textDecoration: 'none' }}>Edit</Link>
                   <div style={{ position: 'relative', display: 'flex', gap: 2 }}>
                     <button
                       onClick={async () => {

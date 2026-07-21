@@ -22,39 +22,25 @@ export const authAPI = {
 };
 
 // ── CARS ──────────────────────────────────────────────
-// UNIFIED VEHICLE SERVICE - Single source of truth for all vehicle data
 export const carsAPI = {
-  // List all vehicles with optional filters
   list: (params: any) => api.get('/cars', { params }).then(unwrap),
-  
-  // Paginated list - normalizes backend response to frontend format
+  // BrowsePage and MobileBrowsePage both call this, but it never
+  // existed — every call threw immediately and silently fell back to
+  // hardcoded mock data. Wraps the real /cars endpoint with the
+  // page/limit params it actually expects, and normalizes its
+  // { data, cars, pagination: { total, pages } } response into the
+  // flat { cars, total, hasMore } shape both pages consume.
   listPaginated: async (params: any, pageNum: number, pageSize: number) => {
-    try {
-      const res: any = await api.get('/cars', { params: { ...params, page: pageNum, limit: pageSize } }).then(unwrap);
-      // Handle different response formats from backend
-      const cars = Array.isArray(res?.cars) ? res.cars : 
-                   Array.isArray(res?.data) ? res.data : [];
-      const total = res?.pagination?.total ?? cars.length;
-      const pages = res?.pagination?.pages ?? Math.ceil(total / pageSize);
-      return { cars, total, hasMore: pageNum < pages };
-    } catch (error) {
-      console.error('carsAPI.listPaginated error:', error);
-      return { cars: [], total: 0, hasMore: false };
-    }
+    const res: any = await api.get('/cars', { params: { ...params, page: pageNum, limit: pageSize } }).then(unwrap);
+    const cars = res.cars || res.data || [];
+    const total = res.pagination?.total ?? cars.length;
+    const pages = res.pagination?.pages ?? Math.ceil(total / pageSize);
+    return { cars, total, hasMore: pageNum < pages };
   },
-  
-  // Get single vehicle by ID
-  get: (id: string) => api.get(`/cars/${id}`).then(unwrap),
-  
-  // Vehicle insights and analytics
+  get:  (id: string)     => api.get(`/cars/${id}`).then(unwrap),
   insights: (id: string) => api.get(`/cars/${id}/insights`).then(unwrap),
   priceHistory: (id: string) => api.get(`/cars/${id}/price-history`).then(unwrap),
-  
-  // Tracking
   trackClick: (id: string) => api.post(`/cars/${id}/click`).then(unwrap),
-  toggleFav: (id: string) => api.post(`/cars/${id}/favorite`).then(unwrap),
-  
-  // CRUD operations
   create: (formData: FormData) =>
     api.post('/cars', formData, { headers: { 'Content-Type': 'multipart/form-data' } }).then(unwrap),
   addImages: (id: string, formData: FormData) =>
@@ -69,24 +55,17 @@ export const carsAPI = {
     }
     return results;
   },
-  update: (id: string, body: any) => api.put(`/cars/${id}`, body).then(unwrap),
+  update:  (id: string, body: any) => api.put(`/cars/${id}`, body).then(unwrap),
   promote: (id: string, body: any) => api.patch(`/cars/${id}/promote`, body).then(unwrap),
-  remove: (id: string) => api.delete(`/cars/${id}`).then(unwrap),
-  
-  // Dealer endpoints
-  myCars: () => api.get('/cars/dealer/my-cars').then(unwrap),
-  analytics: () => api.get('/cars/dealer/analytics').then(unwrap),
-  
-  // Auctions
-  bid: (id: string, body: any) => api.post(`/cars/${id}/bid`, body).then(unwrap),
-  
-  // Batch operations
-  batch: (body: any) => api.post('/cars/batch', body).then(unwrap),
-  
-  // Admin operations
+  remove: (id: string)       => api.delete(`/cars/${id}`).then(unwrap),
+  myCars:    ()      => api.get('/cars/dealer/my-cars').then(unwrap),
+  analytics: ()      => api.get('/cars/dealer/analytics').then(unwrap),
+  bid: (id: string, body: any)        => api.post(`/cars/${id}/bid`, body).then(unwrap),
+  toggleFav: (id: string)        => api.post(`/cars/${id}/favorite`).then(unwrap),
+  batch: (body: any)         => api.post('/cars/batch', body).then(unwrap),
   fraudCheck: (id: string) => api.get(`/cars/admin/${id}/fraud`).then(unwrap),
   adminStart: (id: string) => api.post(`/cars/admin/${id}/start`).then(unwrap),
-  adminEnd: (id: string) => api.post(`/cars/admin/${id}/end`).then(unwrap),
+  adminEnd:   (id: string) => api.post(`/cars/admin/${id}/end`).then(unwrap),
 };
 
 // ── BIDS ──────────────────────────────────────────────
@@ -112,12 +91,9 @@ export const paymentsAPI = {
 
 // ── ESCROW ────────────────────────────────────────────
 export const escrowAPI = {
-  // Public endpoint - no auth required
-  stats: () => api.get('/escrow/stats').then(unwrap),
-  // Protected endpoints
   mine:    ()              => api.get('/escrow/my').then(unwrap),
-  all:     (params: any)  => api.get('/escrow', { params }).then(unwrap),
-  get:     (id: string)   => api.get(`/escrow/${id}`).then(unwrap),
+  all:     (params: any)        => api.get('/escrow', { params }).then(unwrap),
+  get:     (id: string)            => api.get(`/escrow/${id}`).then(unwrap),
   release:        (id: string)          => api.post(`/escrow/${id}/release`).then(unwrap),
   refund:         (id: string)          => api.post(`/escrow/${id}/refund`).then(unwrap),
   dispute:        (id: string, reason: string) => api.post(`/escrow/${id}/dispute`, { reason }).then(unwrap),

@@ -1,7 +1,7 @@
 import { adminAPI } from '../../../api/api';
 import { useToast } from '../../../context/ToastContext';
 
-export default function AdminSettingsAuditLog({ auditLog, loading, setLoading }) {
+export default function AdminSettingsAuditLog({ auditLog, setLoading }) {
   const { toast } = useToast();
   return (
     <div>

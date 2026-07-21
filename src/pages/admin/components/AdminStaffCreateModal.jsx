@@ -16,7 +16,7 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
   return (
     <div style={{ position: 'relative' }}>
       <input type={type === 'password' && v ? 'text' : type} value={value} onChange={onChange} placeholder={placeholder}
-        style={{ width: '100%', padding: type === 'password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius: 9, border: `1px solid ${f ? 'rgba(212,196,168,0.4)' : 'rgba(255,255,255,0.09)'}`, background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
+        style={{ width: '100%', padding: type === 'password' ? '10px 40px 10px 12px' : '10px 12px', borderRadius: 9, border: `1px solid ${f ? 'rgba(37, 99, 235,0.4)' : 'rgba(255,255,255,0.09)'}`, background: 'rgba(255,255,255,0.04)', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s' }}
         onFocus={() => setF(true)} onBlur={() => setF(false)} />
       {type === 'password' && (
         <button type="button" onClick={() => setV(x => !x)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)', display: 'flex' }}>
@@ -33,8 +33,8 @@ const creatableRoles = ORG.filter(r => r.canCreate !== false && r.role !== 'supe
 
 export default function AdminStaffCreateModal({ form, set, saving, onSubmit, onClose }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose} role="presentation">
+      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()} role="presentation">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.3rem', color: '#fff', margin: 0 }}>Add Staff Member</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }}>✕</button>

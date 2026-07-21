@@ -1,340 +1,286 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { authAPI, dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { formatPhone, displayPhone } from '../../utils/helpers';
-import { User, Building2, CreditCard, Shield, Eye, EyeOff, Save, Camera } from 'lucide-react';
-
-const TABS = [
-  { id: 'profile',   label: 'Profile',    icon: User },
-  { id: 'business',  label: 'Business',   icon: Building2 },
-  { id: 'payments',  label: 'Payments',   icon: CreditCard },
-  { id: 'privacy',   label: 'Privacy',    icon: Eye },
-  { id: 'security',  label: 'Security',   icon: Shield },
-];
-
-function Field({ label, hint, children }) {
-  return (
-    <div style={{ marginBottom: 22 }}>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.45)', marginBottom: 8 }}>{label}</label>
-      {children}
-      {hint && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 6 }}>{hint}</div>}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder, type = 'text', rows }) {
-  const [focused, setFocused] = useState(false);
-  const style = {
-    width: '100%', padding: '11px 14px', borderRadius: 10, boxSizing: 'border-box',
-    border: `1px solid ${focused ? 'rgba(212,196,168,0.4)' : 'rgba(255,255,255,0.08)'}`,
-    background: focused ? 'rgba(212,196,168,0.03)' : 'rgba(255,255,255,0.04)',
-    color: '#fff', fontSize: 13, outline: 'none', transition: 'all 0.2s',
-    resize: rows ? 'vertical' : undefined,
-  };
-  if (rows) return <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} style={style} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />;
-  return <input type={type} value={value} onChange={onChange} placeholder={placeholder} style={style} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />;
-}
-
-function Toggle({ checked, onChange, label, desc }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>{label}</div>
-        {desc && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{desc}</div>}
-      </div>
-      <button onClick={() => onChange(!checked)} style={{
-        width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
-        background: checked ? 'var(--gold)' : 'rgba(255,255,255,0.1)',
-        position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-      }}>
-        <span style={{
-          position: 'absolute', top: 3, left: checked ? 23 : 3,
-          width: 18, height: 18, borderRadius: '50%',
-          background: checked ? '#000' : 'rgba(255,255,255,0.5)',
-          transition: 'left 0.2s',
-        }} />
-      </button>
-    </div>
-  );
-}
+import { authAPI } from '../../api/api';
 
 export default function DealerSettings() {
-  const { user, setUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const fileRef = useRef(null);
-  const [tab, setTab] = useState('profile');
+  const [tab, setTab] = useState('business');
   const [saving, setSaving] = useState(false);
-  const [showPw, setShowPw] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const [profile, setProfile] = useState({ name: '', phone: '', location: '', bio: '', avatar: '' });
-  const [business, setBusiness] = useState({ businessName: '', mpesaBusiness: '', mpesaBusinessName: '', bankName: '', bankAccount: '', bankBranch: '' });
-  const [privacy, setPrivacy] = useState({ showPhone: true, showEmail: true, showLocation: true, chatEnabled: true, autoApproveReviews: false });
-  const [passwords, setPasswords] = useState({ current: '', next: '', confirm: '' });
+  const [business, setBusiness] = useState({
+    businessName: '',
+    location: '',
+    phone: '',
+    bio: '',
+  });
+
+  const [payments, setPayments] = useState({
+    mpesaBusiness: '',
+    mpesaBusinessName: '',
+    bankName: '',
+    bankAccount: '',
+    bankBranch: '',
+  });
+
+  const [notifications, setNotifications] = useState({
+    emailBids: true,
+    emailPayments: true,
+    emailEscrow: true,
+    emailMarketing: false,
+    smsAlerts: true,
+  });
+
+  const [visibility, setVisibility] = useState({
+    showPhone: true,
+    showEmail: true,
+    showLocation: true,
+    chatEnabled: true,
+    autoApproveReviews: false,
+  });
 
   useEffect(() => {
-    if (!user) return;
-    setProfile({ name: user.name||'', phone: user.phone||'', location: user.location||'', bio: user.bio||'', avatar: user.avatar||'' });
-    setBusiness({ businessName: user.businessName||'', mpesaBusiness: user.mpesaBusiness||'', mpesaBusinessName: user.mpesaBusinessName||'', bankName: user.bankName||'', bankAccount: user.bankAccount||'', bankBranch: user.bankBranch||'' });
-    setPrivacy(user.visibility || { showPhone:true, showEmail:true, showLocation:true, chatEnabled:true, autoApproveReviews:false });
+    if (user) {
+      setBusiness({
+        businessName: user.businessName || '',
+        location: user.location || '',
+        phone: user.phone || '',
+        bio: user.bio || '',
+      });
+      setPayments({
+        mpesaBusiness: user.mpesaBusiness || '',
+        mpesaBusinessName: user.mpesaBusinessName || '',
+        bankName: user.bankName || '',
+        bankAccount: user.bankAccount || '',
+        bankBranch: user.bankBranch || '',
+      });
+      if (user.visibility) {
+        setVisibility(prev => ({ ...prev, ...user.visibility }));
+      }
+      setLoadingProfile(false);
+    }
   }, [user]);
 
-  const validate = () => {
-    const errs = {};
-    if (!profile.name.trim()) errs.name = 'Full name is required';
-    if (profile.phone) {
-      const formatted = formatPhone(profile.phone);
-      if (formatted.length !== 12) errs.phone = 'Enter a valid Kenyan phone number (e.g. 0712 345 678)';
-    }
-    if (tab === 'business' && !business.businessName.trim()) errs.businessName = 'Business name is required';
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleAvatarChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Please select an image file', 'error'); return; }
-    if (file.size > 2 * 1024 * 1024) { toast('Image must be under 2MB', 'error'); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => setProfile(p => ({ ...p, avatar: ev.target.result }));
-    reader.readAsDataURL(file);
-  };
-
-  const save = async () => {
-    if (!validate()) return;
+  const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
-        ...profile,
-        phone: profile.phone ? formatPhone(profile.phone) : '',
-        ...business,
-        visibility: privacy,
-      };
-      const { user: updated } = await authAPI.updateProfile(payload);
-      if (setUser && updated) {
-        setUser(updated);
-        setPrivacy(updated.visibility || { showPhone:true, showEmail:true, showLocation:true, chatEnabled:true, autoApproveReviews:false });
+      const body = {};
+      if (tab === 'business') {
+        Object.assign(body, {
+          businessName: business.businessName,
+          location: business.location,
+          phone: business.phone,
+          bio: business.bio,
+        });
+      } else if (tab === 'payments') {
+        Object.assign(body, {
+          mpesaBusiness: payments.mpesaBusiness,
+          mpesaBusinessName: payments.mpesaBusinessName,
+          bankName: payments.bankName,
+          bankAccount: payments.bankAccount,
+          bankBranch: payments.bankBranch,
+        });
+      } else if (tab === 'exposure') {
+        body.visibility = visibility;
       }
-      toast('Settings saved ✓', 'success');
-    } catch (e) {
-      toast(e?.response?.data?.message || 'Save failed', 'error');
-    } finally { setSaving(false); }
+
+      if (Object.keys(body).length > 0) {
+        await authAPI.updateProfile(body);
+      }
+      toast('Settings saved successfully', 'success');
+    } catch {
+      toast('Failed to save settings', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const changePassword = async () => {
-    if (passwords.next !== passwords.confirm) { toast('Passwords do not match', 'error'); return; }
-    if (passwords.next.length < 8) { toast('Min 8 characters required', 'error'); return; }
-    setSaving(true);
-    try {
-      await authAPI.changePassword({ currentPassword: passwords.current, newPassword: passwords.next });
-      setPasswords({ current: '', next: '', confirm: '' });
-      toast('Password updated ✓', 'success');
-    } catch (e) {
-      toast(e?.response?.data?.message || 'Password change failed', 'error');
-    } finally { setSaving(false); }
-  };
+  const Field = ({ label, children }) => (
+    <div className="input-group">{label && <label className="input-label">{label}</label>}{children}</div>
+  );
 
   return (
-    <div style={{ background: '#050505', minHeight: '100vh' }}>
-      {/* HEADER */}
-      <div style={{ background: 'linear-gradient(180deg, rgba(212,196,168,0.04) 0%, transparent 100%)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '36px 0 0' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 32px' }}>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 6 }}>Dealer Hub</div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.6rem,3vw,2.2rem)', color: '#fff', margin: 0 }}>
-              Account <span style={{ color: 'var(--gold)' }}>Settings</span>
-            </h1>
-          </div>
-          <div style={{ display: 'flex', gap: 2 }}>
-            {TABS.map(({ id, label, icon: Icon }) => (
-              <button key={id} onClick={() => setTab(id)} style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '11px 16px',
-                background: 'none', border: 'none', cursor: 'pointer', fontSize: 13,
-                fontWeight: tab === id ? 700 : 500,
-                color: tab === id ? '#fff' : 'rgba(255,255,255,0.4)',
-                borderBottom: `2px solid ${tab === id ? 'var(--gold)' : 'transparent'}`,
-                transition: 'all 0.2s',
-              }}>
-                <Icon size={14} /> {label}
-              </button>
-            ))}
-          </div>
+    <div className="page">
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 800 }}>
+        <div style={{ marginBottom: 24 }}>
+          <div className="section-eyebrow">Dealer Hub</div>
+          <h2>Settings</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage your business profile, payments, and preferences</p>
         </div>
-      </div>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '36px 32px' }}>
-        <div style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '32px', marginBottom: 20 }}>
+        <div className="tabs" style={{ marginBottom: 24 }}>
+          {[
+            { key: 'business', label: '🏪 Business' },
+            { key: 'payments', label: '💳 Payments' },
+            { key: 'notifications', label: '🔔 Notifications' },
+            { key: 'exposure', label: '👁 Exposure' },
+          ].map(t => (
+            <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
 
-          {/* ── PROFILE ── */}
-          {tab === 'profile' && (
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32, paddingBottom: 28, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ position: 'relative' }}>
-                  {profile.avatar ? (
-                    <img src={profile.avatar} alt="avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }} />
-                  ) : (
-                    <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--gold), var(--gold-muted))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 900, color: '#000', fontFamily: 'var(--font-display)' }}>
-                      {(profile.name||'D')[0].toUpperCase()}
-                    </div>
-                  )}
-                  <input ref={fileRef} type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
-                  <button onClick={() => fileRef.current?.click()} style={{ position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%', background: '#111', border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Camera size={12} style={{ color: 'rgba(255,255,255,0.5)' }} />
-                  </button>
-                </div>
-                <div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{profile.name || user?.email}</div>
-                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 4 }}>{user?.email}</div>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 8, background: 'rgba(212,196,168,0.1)', border: '1px solid rgba(212,196,168,0.2)', borderRadius: 9999, padding: '3px 10px', fontSize: 10, color: 'var(--gold)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                    {user?.role} · {user?.status === 'approved' ? '✓ Approved' : '⏳ Pending'}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
-                <div style={{ paddingRight: 24 }}>
-                  <Field label="Full Name">{errors.name && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.name}</div>}<Input value={profile.name} onChange={e => { setErrors(p=>({...p,name:''})); setProfile(p => ({...p, name: e.target.value})); }} placeholder="Your full name" /></Field>
-                  <Field label="Phone Number" hint={`Used for M-Pesa and buyer contact${profile.phone && formatPhone(profile.phone).length === 12 ? ' — formatted: ' + displayPhone(profile.phone) : ''}`}>
-                    {errors.phone && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.phone}</div>}
-                    <Input value={profile.phone} onChange={e => { setErrors(p=>({...p,phone:''})); setProfile(p => ({...p, phone: e.target.value})); }} placeholder="+254 7XX XXX XXX" />
-                  </Field>
-                </div>
-                <div style={{ paddingLeft: 24, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-                  <Field label="Location"><Input value={profile.location} onChange={e => setProfile(p => ({...p, location: e.target.value}))} placeholder="City, Kenya" /></Field>
-                  <Field label="Bio / About" hint="Shown on your dealer profile"><Input value={profile.bio} onChange={e => setProfile(p => ({...p, bio: e.target.value}))} placeholder="Tell buyers about your dealership…" rows={3} /></Field>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── BUSINESS ── */}
+        <div className="card" style={{ padding: 28 }}>
           {tab === 'business' && (
-            <div>
-              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Business Details</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Your dealership identity and registration info</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ marginBottom: 4 }}>Business Profile</h3>
+              <Field label="Business Name">
+                <input className="input" value={business.businessName}
+                  onChange={e => setBusiness(p => ({ ...p, businessName: e.target.value }))} />
+              </Field>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                <Field label="Location / City">
+                  <input className="input" value={business.location}
+                    onChange={e => setBusiness(p => ({ ...p, location: e.target.value }))} />
+                </Field>
+                <Field label="Phone Number">
+                  <input className="input" value={business.phone}
+                    onChange={e => setBusiness(p => ({ ...p, phone: e.target.value }))} />
+                </Field>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0 }}>
-                <div style={{ paddingRight: 24 }}>
-                  <Field label="Business Name">{errors.businessName && <div style={{ color: '#ef4444', fontSize: 11, marginBottom: 4 }}>{errors.businessName}</div>}<Input value={business.businessName} onChange={e => { setErrors(p=>({...p,businessName:''})); setBusiness(p => ({...p, businessName: e.target.value})); }} placeholder="Dealer Name Ltd." /></Field>
-                  <Field label="M-Pesa Paybill / Till"><Input value={business.mpesaBusiness} onChange={e => setBusiness(p => ({...p, mpesaBusiness: e.target.value}))} placeholder="Paybill or Till No." /></Field>
-                  <Field label="M-Pesa Business Name"><Input value={business.mpesaBusinessName} onChange={e => setBusiness(p => ({...p, mpesaBusinessName: e.target.value}))} placeholder="Name as on M-Pesa" /></Field>
-                </div>
-                <div style={{ paddingLeft: 24, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
-                  <Field label="Bank Name"><Input value={business.bankName} onChange={e => setBusiness(p => ({...p, bankName: e.target.value}))} placeholder="e.g. Equity Bank" /></Field>
-                  <Field label="Bank Account Number"><Input value={business.bankAccount} onChange={e => setBusiness(p => ({...p, bankAccount: e.target.value}))} placeholder="Account number" /></Field>
-                  <Field label="Branch"><Input value={business.bankBranch} onChange={e => setBusiness(p => ({...p, bankBranch: e.target.value}))} placeholder="Branch name" /></Field>
+              <Field label="About / Bio">
+                <textarea className="input" rows={3} value={business.bio}
+                  onChange={e => setBusiness(p => ({ ...p, bio: e.target.value }))} />
+              </Field>
+
+              <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 16, marginTop: 8, border: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 8 }}>Your Dealer Stats</div>
+                <div className="grid-3">
+                  {[
+                    { label: 'Rating', val: user?.dealerRating ? `⭐ ${user.dealerRating}/5` : '—' },
+                    { label: 'Status', val: user?.approved ? '✅ Approved' : '⏳ Pending' },
+                  ].map(s => (
+                    <div key={s.label}>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: 2 }}>{s.val}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           )}
 
-          {/* ── PAYMENTS ── */}
           {tab === 'payments' && (
-            <div>
-              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Payment & Commission</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Your platform commission rate and payment methods</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h3 style={{ marginBottom: 4 }}>M-Pesa Business Settings</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
+                Buyers pay into this account for purchases and bid commitments.
+              </p>
+              <div className="grid-2">
+                <Field label="M-Pesa Business Number">
+                  <input className="input" value={payments.mpesaBusiness}
+                    onChange={e => setPayments(p => ({ ...p, mpesaBusiness: e.target.value }))} />
+                </Field>
+                <Field label="Business Name (on M-Pesa)">
+                  <input className="input" value={payments.mpesaBusinessName}
+                    onChange={e => setPayments(p => ({ ...p, mpesaBusinessName: e.target.value }))} />
+                </Field>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 190px), 1fr))', gap: 16, marginBottom: 28 }}>
+
+              <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
+
+              <h3 style={{ marginBottom: 4 }}>Bank Account (Escrow Payouts)</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 8 }}>
+                Escrow funds are released to this account after buyer confirms receipt.
+              </p>
+              <div className="grid-2">
+                <Field label="Bank Name">
+                  <input className="input" value={payments.bankName}
+                    onChange={e => setPayments(p => ({ ...p, bankName: e.target.value }))} />
+                </Field>
+                <Field label="Branch">
+                  <input className="input" value={payments.bankBranch}
+                    onChange={e => setPayments(p => ({ ...p, bankBranch: e.target.value }))} />
+                </Field>
+              </div>
+              <Field label="Account Number">
+                <input className="input" value={payments.bankAccount}
+                  onChange={e => setPayments(p => ({ ...p, bankAccount: e.target.value }))} />
+              </Field>
+
+              <div style={{ background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
+                Your payment details are encrypted and only used for escrow payouts.
+              </div>
+            </div>
+          )}
+
+          {tab === 'notifications' && (
+            <div>
+              <h3 style={{ marginBottom: 16 }}>Notification Preferences</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 {[
-                  { label: 'Commission Rate',    value: `${user?.commission ?? 5}%`,     color: '#ef4444' },
-                  { label: 'Waiver',             value: `${user?.waiver || 0}%`,          color: '#22c55e' },
-                  { label: 'Balance',            value: `KES ${Number(user?.commissionBalance||0).toLocaleString()}`, color: 'var(--gold)' },
-                ].map(item => (
-                  <div key={item.label} style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '18px 20px' }}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>{item.label}</div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 900, fontSize: '1.5rem', color: item.color }}>{item.value}</div>
-                  </div>
+                  { key: 'emailBids', label: 'New bids on your listings', desc: 'Get notified when someone places a bid' },
+                  { key: 'emailPayments', label: 'Payment confirmations', desc: 'M-Pesa payment received or verified' },
+                  { key: 'emailEscrow', label: 'Escrow updates', desc: 'Escrow funded, released, or refunded' },
+                  { key: 'emailMarketing', label: 'Marketing & promotions', desc: 'Tips, featured listing opportunities' },
+                  { key: 'smsAlerts', label: 'SMS alerts', desc: 'Critical updates via text message' },
+                ].map(n => (
+                  <label key={n.key} style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '14px 0', borderBottom: '1px solid var(--border)',
+                    cursor: 'pointer',
+                  }}>
+                    <input type="checkbox" checked={notifications[n.key]}
+                      onChange={e => setNotifications(p => ({ ...p, [n.key]: e.target.checked }))}
+                      style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{n.label}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.desc}</div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{notifications[n.key] ? '✅ On' : 'Off'}</span>
+                  </label>
                 ))}
               </div>
-              <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12, padding: '20px', fontSize: 13, color: 'rgba(255,255,255,0.35)', lineHeight: 1.7 }}>
-                🏪 <strong style={{ color: 'rgba(255,255,255,0.5)' }}>Dealers do not pay per listing.</strong> Your listing allowance is set by your active package plan. Contact <a href="mailto:plans@kayad.space" style={{ color: 'var(--gold)', textDecoration: 'none' }}>plans@kayad.space</a> to upgrade your plan or request a custom enterprise arrangement.
-              </div>
             </div>
           )}
 
-          {/* ── PRIVACY ── */}
-          {tab === 'privacy' && (
+          {tab === 'exposure' && (
             <div>
-              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Visibility & Privacy</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Control what buyers can see on your profile</div>
+              <h3 style={{ marginBottom: 4 }}>Buyer Visibility</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
+                Control what buyers see when they view your listings and dealer profile.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {[
+                  { key: 'showPhone', label: 'Show Phone Number', desc: 'Display your phone number on car listings' },
+                  { key: 'showEmail', label: 'Show Email Address', desc: 'Display your email on dealer profile' },
+                  { key: 'showLocation', label: 'Show Location', desc: 'Display your business location on listings' },
+                  { key: 'chatEnabled', label: 'Enable Chat', desc: 'Allow buyers to message you directly' },
+                  { key: 'autoApproveReviews', label: 'Auto-approve Reviews', desc: 'Reviews appear immediately without moderation' },
+                ].map(n => (
+                  <label key={n.key} style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '14px 0', borderBottom: '1px solid var(--border)',
+                    cursor: 'pointer',
+                  }}>
+                    <input type="checkbox" checked={visibility[n.key]}
+                      onChange={e => setVisibility(p => ({ ...p, [n.key]: e.target.checked }))}
+                      style={{ width: 18, height: 18, accentColor: 'var(--gold)' }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{n.label}</div>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{n.desc}</div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>{visibility[n.key] ? '✅ Visible' : 'Hidden'}</span>
+                  </label>
+                ))}
               </div>
-              <Toggle checked={privacy.showPhone}           onChange={v => setPrivacy(p=>({...p,showPhone:v}))}           label="Show Phone Number"       desc="Buyers can see your contact number" />
-              <Toggle checked={privacy.showEmail}           onChange={v => setPrivacy(p=>({...p,showEmail:v}))}           label="Show Email Address"      desc="Buyers can see your email" />
-              <Toggle checked={privacy.showLocation}        onChange={v => setPrivacy(p=>({...p,showLocation:v}))}        label="Show Location"           desc="Display your city on your profile" />
-              <Toggle checked={privacy.chatEnabled}         onChange={v => setPrivacy(p=>({...p,chatEnabled:v}))}         label="Enable Chat"             desc="Allow buyers to send you messages" />
-              <Toggle checked={privacy.autoApproveReviews}  onChange={v => setPrivacy(p=>({...p,autoApproveReviews:v}))}  label="Auto-approve Reviews"    desc="Reviews publish immediately without your approval" />
-            </div>
-          )}
-
-          {/* ── SECURITY ── */}
-          {tab === 'security' && (
-            <div>
-              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Security</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Update your password and manage account security</div>
-              </div>
-              <div style={{ maxWidth: 420 }}>
-                <Field label="Current Password">
-                  <div style={{ position: 'relative' }}>
-                    <Input type={showPw ? 'text' : 'password'} value={passwords.current} onChange={e => setPasswords(p=>({...p,current:e.target.value}))} placeholder="Enter current password" />
-                    <button onClick={() => setShowPw(v=>!v)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.3)' }}>
-                      {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
-                    </button>
-                  </div>
-                </Field>
-                <Field label="New Password" hint="At least 8 characters"><Input type="password" value={passwords.next} onChange={e => setPasswords(p=>({...p,next:e.target.value}))} placeholder="New password" /></Field>
-                <Field label="Confirm New Password"><Input type="password" value={passwords.confirm} onChange={e => setPasswords(p=>({...p,confirm:e.target.value}))} placeholder="Confirm password" /></Field>
-                <button onClick={changePassword} disabled={saving || !passwords.current || !passwords.next} style={{
-                  padding: '12px 28px', background: passwords.current && passwords.next ? 'var(--gold)' : 'rgba(255,255,255,0.05)',
-                  border: 'none', borderRadius: 10, color: passwords.current && passwords.next ? '#000' : 'rgba(255,255,255,0.25)',
-                  fontSize: 13, fontWeight: 900, cursor: passwords.current && passwords.next ? 'pointer' : 'default',
-                  textTransform: 'uppercase', letterSpacing: '0.06em',
-                }}>
-                  {saving ? 'Updating…' : 'Update Password'}
-                </button>
+              <div style={{ background: 'rgba(37, 99, 235,0.06)', border: '1px solid rgba(37, 99, 235,0.12)', borderRadius: 8, padding: 14, fontSize: 12, color: 'var(--text-muted)', marginTop: 16 }}>
+                Changes take effect immediately on all your active listings.
               </div>
             </div>
           )}
 
-          {/* ── API ACCESS ── */}
-          {tab === 'security' && (
-            <div style={{ marginTop: 32, paddingTop: 28, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 4 }}>🔌 API Access</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)' }}>Webhook & REST API for integrating with your systems</div>
-              </div>
-              <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 10, padding: '18px 20px', maxWidth: 480 }}>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, marginBottom: 14 }}>
-                  The KAYAD API lets you programmatically manage listings, sync inventory, and receive real-time webhook events 
-                  (new bids, sales, status changes). <strong style={{ color: '#fff' }}>Coming soon</strong> — we'll notify you when it's ready.
-                </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <span style={{ padding: '8px 18px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', fontSize: 12, fontWeight: 700, cursor: 'default' }}>
-                    Generate API Key
-                  </span>
-                </div>
-              </div>
+          {tab !== 'notifications' && (
+            <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+              <button className="btn btn-gold btn-lg" onClick={handleSave} disabled={saving}>
+                {saving ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Saving...</> : '💾 Save Settings'}
+              </button>
             </div>
           )}
         </div>
-
-        {tab !== 'security' && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-            <button onClick={save} disabled={saving} style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '13px 28px', background: 'var(--gold)', border: 'none', borderRadius: 10,
-              color: '#000', fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer',
-              textTransform: 'uppercase', letterSpacing: '0.06em',
-              boxShadow: '0 4px 20px rgba(212,196,168,0.2)',
-            }}>
-              <Save size={14} /> {saving ? 'Saving…' : 'Save Changes'}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

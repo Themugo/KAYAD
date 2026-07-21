@@ -125,6 +125,7 @@ export const copyToClipboard = async (text) => {
 // ─── Cloudinary Image Helpers ───────────────────────────
 export const getCloudinarySrcSet = (src) => {
   if (!src) return null;
-  // Return object with src and srcSet for responsive images
-  return { src, srcSet: src };
+  // Return the same URL for srcSet - actual Cloudinary transformations
+  // would be handled server-side or via URL parameters
+  return src;
 };

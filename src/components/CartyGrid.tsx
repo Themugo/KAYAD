@@ -1,9 +1,8 @@
 import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Gauge, MapPin, ArrowRight, BarChart3 } from 'lucide-react';
+import { Gauge, MapPin, ArrowRight } from 'lucide-react';
 import LazyImage from './LazyImage';
-import { useCompare } from '../context/CompareContext';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
 
@@ -52,7 +51,6 @@ interface CarGridItemProps {
 
 const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile = false }: CarGridItemProps) {
   const [hovered, setHovered] = useState(false);
-  const { isComparing, toggleCar } = useCompare();
 
   if (!car) return null;
 
@@ -65,7 +63,6 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
   const isOnAuction = isLiveNow || isUpcomingAuction;
   const isSold = car.status === 'sold' || car.paymentStatus === 'released';
   const isNewListing = car.createdAt && (now - new Date(car.createdAt).getTime()) < SEVEN_DAYS;
-  const isCompared = isComparing(car._id);
 
   const detailTo = `/cars/${car._id}`;
   const img = firstImage(car) || undefined;
@@ -131,23 +128,6 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
                 </div>
               </div>
             </div>
-            {/* Compare button for list view */}
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-              title={isCompared ? 'Remove from compare' : 'Add to compare'}
-              style={{
-                marginTop: 'auto', paddingTop: 12,
-                padding: '8px 16px', borderRadius: 8,
-                background: isCompared ? 'var(--gold)' : 'rgba(255,255,255,0.05)',
-                color: isCompared ? '#000' : 'rgba(255,255,255,0.6)',
-                border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                display: 'flex', alignItems: 'center', gap: 6,
-                width: 'fit-content', marginLeft: 'auto',
-                transition: 'all 0.2s',
-              }}
-            >
-              <BarChart3 size={14} /> {isCompared ? 'Compared' : 'Compare'}
-            </button>
           </div>
         </motion.div>
       </Link>
@@ -198,24 +178,6 @@ const CarGridItem = memo(function CarGridItem({ car, listView = false, isMobile 
                 Featured
               </div>
             )}
-            {/* Compare button */}
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCar(car._id); }}
-              title={isCompared ? 'Remove from compare' : 'Add to compare'}
-              style={{
-                position: 'absolute', top: 10, right: 10,
-                padding: '8px', borderRadius: '50%',
-                background: isCompared ? 'var(--gold)' : 'rgba(0,0,0,0.6)',
-                color: isCompared ? '#000' : '#fff',
-                border: 'none', cursor: 'pointer',
-                opacity: hovered || isCompared ? 1 : 0,
-                transition: 'all 0.2s',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 10,
-              }}
-            >
-              <BarChart3 size={16} />
-            </button>
           </div>
 
           <div style={{ padding: '14px 16px 16px' }}>

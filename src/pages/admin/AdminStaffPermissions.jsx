@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
@@ -21,20 +21,20 @@ export default function AdminStaffPermissions() {
   const [draftPerms, setDraftPerms] = useState(new Set()); // desired effective perms
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { load(); }, []);
-
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const [s, c] = await Promise.all([adminAPI.getStaff(), adminAPI.getPermCatalog()]);
       setStaff(s.staff || []);
       setCatalog(c.catalog || []);
-    } catch (e) {
+    } catch (_e) {
       toast('Failed to load staff & permissions', 'error');
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => { load(); }, [load]);
 
   const groups = useMemo(() => {
     const g = {};
@@ -88,7 +88,7 @@ export default function AdminStaffPermissions() {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
         <Lock size={48} style={{ color: 'var(--gold)', marginBottom: 16 }} />
-        <h2 style={{ color: '#fff' }}>Superadmin Only</h2>
+        <h2 style={{ color: '#0F172A' }}>Superadmin Only</h2>
         <p style={{ color: '#888' }}>Only the platform superadmin can assign staff duties.</p>
       </div>
     );
@@ -98,14 +98,14 @@ export default function AdminStaffPermissions() {
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 4px' }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>Superadmin</div>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#fff', margin: '0 0 6px' }}>Staff Duties & Permissions</h2>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#0F172A', margin: '0 0 6px' }}>Staff Duties & Permissions</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Assign exactly which duties each admin can access. Changes take effect on their next request.</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 12px', marginBottom: 16, maxWidth: 320 }}>
         <Search size={15} style={{ color: 'var(--text-muted)' }} />
         <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search staff…"
-          style={{ border: 'none', background: 'none', outline: 'none', color: '#fff', fontSize: 13, width: '100%' }} />
+          style={{ border: 'none', background: 'none', outline: 'none', color: '#0F172A', fontSize: 13, width: '100%' }} />
       </div>
 
       {loading ? (
@@ -121,7 +121,7 @@ export default function AdminStaffPermissions() {
                   {isSuper ? <Crown size={18} /> : (member.name || '?').split(' ').map(x => x[0]).join('').slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: '#fff', fontSize: 14 }}>{member.name}</div>
+                  <div style={{ fontWeight: 700, color: '#0F172A', fontSize: 14 }}>{member.name}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{member.email}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -146,11 +146,11 @@ export default function AdminStaffPermissions() {
 
       {/* ── Editor Modal ── */}
       {editing && (
-        <div onClick={() => !saving && setEditing(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: 'var(--card)', border: '1px solid var(--border-soft)', borderRadius: 18, width: '100%', maxWidth: 620, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <div onClick={() => !saving && setEditing(null)} role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
+          <div onClick={e => e.stopPropagation()} role="presentation" style={{ background: 'var(--card)', border: '1px solid var(--border-soft)', borderRadius: 18, width: '100%', maxWidth: 620, maxHeight: '85vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: '#fff' }}>Duties — {editing.name}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontWeight: 700, fontSize: 20, color: '#0F172A' }}>Duties — {editing.name}</div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'capitalize' }}>Base role: {editing.role.replace('_', ' ')}</div>
               </div>
               <button onClick={() => !saving && setEditing(null)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
@@ -166,12 +166,14 @@ export default function AdminStaffPermissions() {
                       const fromRole = (editing.rolePermissions || []).includes(p.key);
                       return (
                         <div key={p.key} onClick={() => toggle(p.key)}
-                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 11, border: `1px solid ${on ? 'rgba(212,196,168,.3)' : 'var(--border)'}`, background: on ? 'var(--gold-glow)' : 'var(--surface)', cursor: 'pointer', transition: 'all .15s' }}>
+                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p.key); } }}
+                          role="switch" aria-checked={on} tabIndex={0} aria-label={p.label}
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 11, border: `1px solid ${on ? 'rgba(37, 99, 235,.3)' : 'var(--border)'}`, background: on ? 'var(--gold-glow)' : 'var(--surface)', cursor: 'pointer', transition: 'all .15s' }}>
                           <div style={{ width: 36, height: 20, borderRadius: 999, background: on ? 'var(--gold)' : 'var(--border-soft)', position: 'relative', flexShrink: 0, transition: 'background .15s' }}>
                             <div style={{ position: 'absolute', top: 2, left: on ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: on ? '#0A0A0A' : '#fff', transition: 'left .15s' }} />
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{p.label}
+                            <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{p.label}
                               {fromRole && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-dim)', marginLeft: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>role default</span>}
                             </div>
                             <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{p.desc}</div>

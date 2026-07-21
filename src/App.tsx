@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from 'react';
-import { Routes, Route, useNavigate, useLocation, BrowserRouter } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation, BrowserRouter, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CompareDrawer from './components/CompareDrawer';
@@ -9,7 +9,7 @@ import DemoModeBanner from './components/DemoModeBanner';
 import LoadingPage from './components/LoadingPage';
 import SWUpdateBanner from './components/SWUpdateBanner';
 import { ToastProvider } from './context/ToastContext';
-import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer, RequireSeller, RequireEmailVerified } from './context/AuthContext';
+import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { BrandingProvider } from './context/BrandingContext';
@@ -33,14 +33,13 @@ import Dashboard from './pages/Dashboard';
 import CreateAccount from './pages/CreateAccount';
 import SignIn from './pages/SignIn';
 import Showroom from './pages/Showroom';
-import type { Car, User } from './types';
+import { CARS } from './data/cars';
+import type { User } from './types';
+import type { Car } from './components/CarCard';
 
 // Lazy-loaded pages for code splitting
-const HomePage = lazy(() => import('./pages/Home'));
-const CarDetailPage = lazy(() => import('./pages/CarDetail'));
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
 const AuctionLivePage = lazy(() => import('./pages/AuctionLivePage'));
-const EscrowVaultPortal = lazy(() => import('./pages/EscrowVault'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
@@ -55,10 +54,6 @@ const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const ForcePasswordChange = lazy(() => import('./pages/ForcePasswordChange'));
 const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
-const ProfilePage = lazy(() => import('./pages/Profile'));
-const ChatPage = lazy(() => import('./pages/Chat'));
-const NotificationsPage = lazy(() => import('./pages/Notifications'));
-const FavoritesPage = lazy(() => import('./pages/Favorites'));
 const DisputesPage = lazy(() => import('./pages/DisputesPage'));
 const DisputeDetailPage = lazy(() => import('./pages/DisputeDetailPage'));
 const InspectorApply = lazy(() => import('./pages/InspectorApply'));
@@ -140,10 +135,6 @@ function Dealer({ children }: { children: React.ReactNode }) {
   return <RequireDealer>{children}</RequireDealer>;
 }
 
-function Public({ children }: { children: React.ReactNode }) {
-  const { isAuth } = require('./context/AuthContext').useAuth?.() || { isAuth: false };
-  return children;
-}
 
 function AppContent() {
   const [page, setPage] = useState('home');
@@ -248,7 +239,16 @@ function AppContent() {
         return <Home setPage={handleSetPage} viewCar={viewCar} />;
     }
   };
+  const CarDetailRoute = () => {
+    const { id } = useParams();
+    const car = CARS.find((item) => String(item.id) === String(id));
 
+    if (!car) {
+      return <NotFoundPage />;
+    }
+
+    return <CarDetail car={car} setPage={handleSetPage} viewCar={viewCar} />;
+  };
   return (
     <>
       <Suspense fallback={<LoadingPage />}>
@@ -256,16 +256,15 @@ function AppContent() {
           {/* Legacy routes for backward compatibility */}
           <Route path="/" element={renderPage()} />
           <Route path="/:page" element={renderPage()} />
-          <Route path="/car/:id" element={renderPage()} />
 
           {/* Public pages */}
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/home" element={<Home setPage={handleSetPage} viewCar={viewCar} />} />
           <Route path="/showroom" element={<Showroom />} />
-          <Route path="/car/:id" element={<CarDetailPage />} />
-          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/car/:id" element={<CarDetailRoute />} />
+          <Route path="/compare" element={<Compare setPage={handleSetPage} viewCar={viewCar} />} />
           <Route path="/auction-calendar" element={<AuctionCalendar />} />
           <Route path="/auction/:id" element={<AuctionLivePage />} />
-          <Route path="/escrow-vault" element={<EscrowVaultPortal />} />
+          <Route path="/escrow-vault" element={<EscrowVault />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -283,12 +282,12 @@ function AppContent() {
 
           {/* Authenticated user pages */}
           <Route path="/buyer" element={<User><BuyerDashboard /></User>} />
-          <Route path="/profile" element={<User><ProfilePage /></User>} />
-          <Route path="/payments" element={<User><PaymentsPage /></User>} />
-          <Route path="/chat" element={<User><ChatPage /></User>} />
-          <Route path="/chat/:threadId" element={<User><ChatPage /></User>} />
-          <Route path="/notifications" element={<User><NotificationsPage /></User>} />
-          <Route path="/favorites" element={<User><FavoritesPage /></User>} />
+          <Route path="/profile" element={<User><Profile setPage={handleSetPage} authUser={authUser} /></User>} />
+          <Route path="/payments" element={<User><Payments /></User>} />
+          <Route path="/chat" element={<User><Chat /></User>} />
+          <Route path="/chat/:threadId" element={<User><Chat /></User>} />
+          <Route path="/notifications" element={<User><Notifications /></User>} />
+          <Route path="/favorites" element={<User><Favorites setPage={handleSetPage} viewCar={viewCar} /></User>} />
           <Route path="/escrow/:id" element={<User><EscrowPage /></User>} />
           <Route path="/disputes" element={<User><DisputesPage /></User>} />
           <Route path="/disputes/:id" element={<User><DisputeDetailPage /></User>} />

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { reportAPI } from '../../api/api';
 import { timeAgo } from '../../utils/helpers';
 import { useToast } from '../../context/ToastContext';
-import { Button, SpinnerPage } from '../../components/ui';
 
 const STATUS_BADGE = {
   pending: 'badge-muted',
@@ -38,7 +37,7 @@ export default function AdminReports() {
       <div className="container" style={{ paddingTop: 40, paddingBottom: 80 }}>
         <h1 style={{ marginBottom: 24 }}>Reports</h1>
         {loading ? (
-          <SpinnerPage label="Loading reports..." />
+          <div className="loading-center"><div className="spinner" /></div>
         ) : reports.length === 0 ? (
           <div className="empty-state"><p>No reports yet.</p></div>
         ) : (
@@ -65,8 +64,8 @@ export default function AdminReports() {
                     <td>
                       {r.status === 'pending' && (
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <Button variant="success" size="sm" onClick={() => handleUpdate(r._id, 'reviewed')}>Mark Reviewed</Button>
-                          <Button variant="danger" size="sm" onClick={() => handleUpdate(r._id, 'dismissed')}>Dismiss</Button>
+                          <button className="btn btn-sm" style={{ background: '#22c55e', color: '#000', fontWeight: 700, fontSize: 11, border: 'none', borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleUpdate(r._id, 'reviewed')}>Mark Reviewed</button>
+                          <button className="btn btn-sm" style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 12px', cursor: 'pointer' }} onClick={() => handleUpdate(r._id, 'dismissed')}>Dismiss</button>
                         </div>
                       )}
                     </td>

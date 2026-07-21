@@ -128,12 +128,25 @@ function wrapDoc(doc, tableName, sb) {
         const client = sb();
         const payload = {};
         for (const [k, v] of Object.entries(this)) {
-          if (["save", "toObject", "_id"].includes(k)) continue;
+          if (["save", "toObject", "addTimelineEntry", "_id"].includes(k)) continue;
           payload[mapKeyOut(tableName, k)] = v;
         }
         const { data, error } = await client.from(tableName).update(payload).eq("id", this.id).select().single();
         if (error) throw error;
         if (data) Object.assign(this, mapRowIn(tableName, data));
+        return this;
+      },
+      writable: true, configurable: true,
+    },
+    // Generic Mongoose-style instance method used by disputeController.js
+    // (and available to any other model) — appends a timestamped entry
+    // to an in-memory `timeline` array. It does NOT save on its own;
+    // every real call site mutates the document then calls .save()
+    // once afterward, exactly like Mongoose's typical pattern.
+    addTimelineEntry: {
+      value: function (entry) {
+        if (!Array.isArray(this.timeline)) this.timeline = [];
+        this.timeline.push({ ...entry, at: new Date().toISOString() });
         return this;
       },
       writable: true, configurable: true,

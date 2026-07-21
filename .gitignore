@@ -27,8 +27,6 @@ node_modules
 !.vscode/launch.json
 !.vscode/extensions.json
 
-GEMINI.md.txt
-
 # misc
 /.sass-cache
 /connect.lock

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { dealerAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import usePageMeta from '../../hooks/usePageMeta';
-import { Button, SpinnerPage } from '../../components/ui';
 
 export default function DealerSettlement() {
   const { toast } = useToast();
@@ -23,7 +22,7 @@ export default function DealerSettlement() {
       .then(d => { if (d.settlement) setSettlement(d.settlement); })
       .catch(() => toast('Failed to load settlement config', 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [toast]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -38,7 +37,7 @@ export default function DealerSettlement() {
     }
   };
 
-  if (loading) return <div className="page"><SpinnerPage /></div>;
+  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   return (
     <div className="page" style={{ background: 'var(--bg)' }}>
@@ -126,7 +125,7 @@ export default function DealerSettlement() {
         </div>
 
         {/* Guardrail Info */}
-        <div className="card" style={{ padding: 16, marginBottom: 20, background: 'rgba(212,196,168,0.06)' }}>
+        <div className="card" style={{ padding: 16, marginBottom: 20, background: 'rgba(37, 99, 235,0.06)' }}>
           <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
             <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 4 }}>🛡️ Guardrail</strong>
             The independent seller P2P flow (bank transfer escrow) is used automatically when the seller is not a certified dealer.
@@ -134,15 +133,13 @@ export default function DealerSettlement() {
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          full
-          size="lg"
+        <button
+          className="btn btn-gold btn-full btn-lg"
           onClick={handleSave}
-          loading={saving}
+          disabled={saving}
         >
-          💾 Save Settlement Configuration
-        </Button>
+          {saving ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Saving...</> : '💾 Save Settlement Configuration'}
+        </button>
       </div>
     </div>
   );

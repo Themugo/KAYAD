@@ -35,15 +35,14 @@ export default function WebhoistOverview() {
     { icon: '🔨', label: 'Active Auctions', value: s.activeAuctions, color: '#f97316', to: '/admin/auctions' },
     { icon: '🔒', label: 'Open Escrows',    value: s.openEscrows ?? s.totalEscrows, color: '#ef4444', to: '/admin/escrows' },
     { icon: '🏷️', label: 'Total Bids',      value: s.totalBids,      color: '#06b6d4', to: '/admin/bids' },
-    { icon: '💰', label: 'Total Revenue',   value: s.totalRevenue,   color: 'var(--gold)', to: '/admin/transactions', kes: true },
+    { icon: '💰', label: 'Total Revenue',   value: s.totalRevenue,   color: 'var(--gold)', to: '/admin/reports', kes: true },
   ];
 
   // Real platform composition from the stats payload
   const composition = [
     { name: 'Dealers',            count: s.totalDealers ?? 0,      color: 'var(--gold)' },
     { name: 'Individual Sellers', count: s.individualSellers ?? 0, color: '#3b82f6' },
-    { name: 'Brokers',            count: s.brokers ?? 0,           color: '#a855f7' },
-    { name: 'Buyers & Others',    count: Math.max((s.totalUsers ?? 0) - ((s.totalDealers ?? 0) + (s.individualSellers ?? 0) + (s.brokers ?? 0)), 0), color: '#22c55e' },
+    { name: 'Buyers & Others',    count: Math.max((s.totalUsers ?? 0) - ((s.totalDealers ?? 0) + (s.individualSellers ?? 0)), 0), color: '#22c55e' },
   ];
 
   const glance = [
@@ -60,7 +59,7 @@ export default function WebhoistOverview() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 26 }}>
         <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,196,168,0.08)', border: '1px solid rgba(212,196,168,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(37, 99, 235,0.08)', border: '1px solid rgba(37, 99, 235,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
             <Crown size={13} style={{ color: 'var(--gold)' }} />
             <span style={{ fontSize: 10, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Webhoist · Owner</span>
           </div>
@@ -116,7 +115,7 @@ export default function WebhoistOverview() {
             <div style={{ padding: 28, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No recent activity</div>
           ) : logs.slice(0, 12).map((e, i) => (
             <div key={e._id || i} style={{ padding: '11px 22px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', borderBottom: i < Math.min(logs.length, 12) - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-              <code style={{ fontSize: 11, color: 'var(--gold)', fontFamily: 'monospace', background: 'rgba(212,196,168,0.08)', padding: '2px 8px', borderRadius: 6 }}>{e.action}</code>
+              <code style={{ fontSize: 11, color: 'var(--gold)', fontFamily: 'monospace', background: 'rgba(37, 99, 235,0.08)', padding: '2px 8px', borderRadius: 6 }}>{e.action}</code>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>{e.admin || e.adminId?.name || 'System'}</span>
               <span style={{ fontSize: 10, color: 'var(--text-dim)', marginLeft: 'auto' }}>
                 {e.createdAt ? new Date(e.createdAt).toLocaleString('en-KE') : ''}
@@ -127,7 +126,7 @@ export default function WebhoistOverview() {
       </div>
 
       {/* Access note */}
-      <div style={{ padding: '16px 20px', background: 'rgba(212,196,168,0.05)', borderRadius: 12, border: '1px solid rgba(212,196,168,0.15)' }}>
+      <div style={{ padding: '16px 20px', background: 'rgba(37, 99, 235,0.05)', borderRadius: 12, border: '1px solid rgba(37, 99, 235,0.15)' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--gold)', fontWeight: 600, marginBottom: 8 }}>
           <ShieldCheck size={15} /> Webhoist Access
         </div>

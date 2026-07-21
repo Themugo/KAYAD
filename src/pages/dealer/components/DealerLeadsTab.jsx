@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dealerAPI } from '../../../api/api';
-import { MessageSquare, Mail, Phone, ChevronRight, Filter, Search, X, Archive } from 'lucide-react';
+import { MessageSquare, Mail, Phone, Search, X, Archive } from 'lucide-react';
 import { timeAgo } from './DashboardWidgets';
-import { Button, SpinnerInline } from '../../../components/ui';
 
 const STAGE_CONFIG = {
   new:             { label: 'New',           color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
@@ -24,7 +23,7 @@ export default function DealerLeadsTab({ toast }) {
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
 
-  const fetchLeads = () => {
+  const fetchLeads = useCallback(() => {
     setLoading(true);
     const params = {};
     if (filter) params.stage = filter;
@@ -33,9 +32,11 @@ export default function DealerLeadsTab({ toast }) {
       .then(res => { setLeads(res.leads || []); })
       .catch(() => toast('Failed to load leads', 'error'))
       .finally(() => setLoading(false));
-  };
+    // search also drives client-side filtering below; it doesn't need to re-trigger a fetch
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, toast]);
 
-  useEffect(() => { fetchLeads(); }, [filter]);
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
   const handleStageChange = async (leadId, stage) => {
     try {
@@ -85,22 +86,26 @@ export default function DealerLeadsTab({ toast }) {
       </div>
 
       <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
-        <Button onClick={() => setFilter('')}
-          variant={!filter ? 'primary' : 'ghost'}
-          size="xs">
+        <button onClick={() => setFilter('')}
+          style={{ padding: '5px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+            background: !filter ? 'var(--gold)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${!filter ? 'var(--gold)' : 'rgba(255,255,255,0.08)'}`,
+            color: !filter ? '#000' : 'rgba(255,255,255,0.5)' }}>
           All
-        </Button>
+        </button>
         {Object.entries(STAGE_CONFIG).map(([key, cfg]) => (
-          <Button key={key} onClick={() => setFilter(key === filter ? '' : key)}
-            variant={filter === key ? 'primary' : 'ghost'}
-            size="xs">
+          <button key={key} onClick={() => setFilter(key === filter ? '' : key)}
+            style={{ padding: '5px 12px', borderRadius: 6, fontSize: 10, fontWeight: 600, cursor: 'pointer',
+              background: filter === key ? cfg.bg : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${filter === key ? cfg.color + '40' : 'rgba(255,255,255,0.08)'}`,
+              color: filter === key ? cfg.color : 'rgba(255,255,255,0.5)' }}>
             {cfg.label}
-          </Button>
+          </button>
         ))}
       </div>
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><SpinnerInline /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.35)' }}>
           <MessageSquare size={36} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
@@ -173,9 +178,10 @@ export default function DealerLeadsTab({ toast }) {
                       <option key={s} value={s}>{STAGE_CONFIG[s]?.label || s}</option>
                     ))}
                   </select>
-                  <Button variant="ghost" size="icon" onClick={() => handleArchive(lead._id)} title="Archive">
+                  <button onClick={() => handleArchive(lead._id)} title="Archive"
+                    style={{ padding: '5px 8px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)', fontSize: 10, cursor: 'pointer' }}>
                     <Archive size={12} />
-                  </Button>
+                  </button>
                 </div>
               </div>
             );

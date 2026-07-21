@@ -1,4 +1,3 @@
-// src/components/AdminWidgets.tsx
 // Shared, dependency-free dashboard widgets for the admin & webhoist
 // overviews. Pure presentation — matches the dark theme + mockup language.
 

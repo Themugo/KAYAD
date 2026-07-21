@@ -89,7 +89,7 @@ export default function Gallery({ viewCar }: GalleryProps) {
 
   // Filter all results
   const allResults = useMemo(() => {
-    let filtered = CARS.filter(car => {
+    const filtered = CARS.filter(car => {
       const q = debouncedQuery.toLowerCase();
       const matchQuery =
         !q ||

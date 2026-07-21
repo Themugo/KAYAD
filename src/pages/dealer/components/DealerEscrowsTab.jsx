@@ -1,15 +1,14 @@
 import { RefreshCw } from 'lucide-react';
 import { StatusBadge, EscrowProgress, ESCROW_STEPS, timeAgo } from './DashboardWidgets';
-import { Button } from '../../../components/ui';
 
 export default function DealerEscrowsTab({ escrows, escrowLoading, onRefresh }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <h2 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.4rem', color: '#fff', margin: 0 }}>Escrow Transactions</h2>
-        <Button onClick={onRefresh} loading={escrowLoading} variant="secondary" size="sm">
+        <button onClick={onRefresh} disabled={escrowLoading} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
           <RefreshCw size={12} /> {escrowLoading ? 'Loading...' : 'Refresh'}
-        </Button>
+        </button>
       </div>
       {escrows.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px', background: 'var(--card)', borderRadius: 'var(--radius-lg)' }}>

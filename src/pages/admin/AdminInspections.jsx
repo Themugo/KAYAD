@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { inspectionAPI, formatKES } from '../../api/api';
-import { Eye, UserCheck, ClipboardCheck, Search } from 'lucide-react';
+import { UserCheck, ClipboardCheck } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending_payment: { bg: 'rgba(251,191,36,0.1)', color: '#f59e0b' },
@@ -18,7 +18,7 @@ export default function AdminInspections() {
   const [statusFilter, setStatusFilter] = useState('');
   const [assigning, setAssigning] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = statusFilter ? { status: statusFilter } : {};
@@ -30,11 +30,11 @@ export default function AdminInspections() {
       setInspectors(ins.inspectors || []);
     } catch { setOrders([]); }
     finally { setLoading(false); }
-  };
+  }, [statusFilter]);
 
-  useEffect(() => { load(); }, [statusFilter]);
+  useEffect(() => { load(); }, [load]);
 
-  const handleAssign = async (orderId) => {
+  const _handleAssign = async (orderId) => {
     const inspectorId = prompt('Enter Inspector ID to assign:');
     if (!inspectorId) return;
     try {
@@ -42,7 +42,7 @@ export default function AdminInspections() {
       setAssigning(null);
       load();
     } catch (error) {
-      console.warn('Unable to assign inspector', error);
+      if (import.meta.env.DEV) console.warn('Unable to assign inspector', error);
     }
   };
 
@@ -52,7 +52,7 @@ export default function AdminInspections() {
       setAssigning(null);
       load();
     } catch (error) {
-      console.warn('Unable to assign inspector', error);
+      if (import.meta.env.DEV) console.warn('Unable to assign inspector', error);
     }
   };
 
@@ -66,7 +66,7 @@ export default function AdminInspections() {
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-              style={{ background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '6px 10px', color: '#fff', fontSize: 12 }}>
+              style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0F172A', fontSize: 12 }}>
               <option value="">All Status</option>
               <option value="pending_payment">Pending Payment</option>
               <option value="paid">Paid</option>
@@ -92,14 +92,14 @@ export default function AdminInspections() {
               const car = o.car || {};
               return (
                 <div key={o._id} style={{
-                  background: '#0C0C0C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px 18px',
+                  background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 12, padding: '14px 18px',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                       <ClipboardCheck size={18} style={{ color: sc.color }} />
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{car.title || car._id}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{car.title || car._id}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', marginTop: 2 }}>
                           Fee: {formatKES(o.fee)} · {o.location || 'No location'}
                         </div>
                       </div>
@@ -112,7 +112,7 @@ export default function AdminInspections() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', flexWrap: 'wrap' }}>
                     <span>Buyer: {o.buyer?.name || o.buyer?.email || '—'}</span>
                     {o.inspector && <span>Inspector: {o.inspector.name || o.inspector.email}</span>}
                     {o.overallScore && <span>Score: {o.overallScore}/100</span>}
@@ -133,7 +133,7 @@ export default function AdminInspections() {
                             </button>
                           ))}
                           <button onClick={() => setAssigning(null)} style={{
-                            background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.3)',
+                            background: 'transparent', border: 'none', color: 'rgba(15, 23, 42, 0.3)',
                             fontSize: 11, cursor: 'pointer',
                           }}>Cancel</button>
                         </div>
@@ -160,8 +160,8 @@ export default function AdminInspections() {
                         color: o.overallScore >= 80 ? '#22c55e' : o.overallScore >= 60 ? '#f59e0b' : '#ef4444',
                       }}>{o.overallScore}</div>
                       <div>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', textTransform: 'capitalize' }}>{o.conditionRating} condition</div>
-                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{o.checklist?.length || 0} items checked</div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', textTransform: 'capitalize' }}>{o.conditionRating} condition</div>
+                        <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.3)' }}>{o.checklist?.length || 0} items checked</div>
                       </div>
                     </div>
                   )}

@@ -1,18 +1,14 @@
-// src/pages/admin/AdminUsers.jsx
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, formatDate, initials } from '../../utils/helpers';
-import { useAuth } from '../../context/AuthContext';
+import { AdminUserRow } from '../../components/AdminTableRow';
 
 const ROLE_BADGE  = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red' };
 const ROLE_ICON   = { user: '👤', dealer: '🏪', admin: '🔑' };
-const SELLER_ROLES = ['dealer', 'broker', 'individual_seller'];
 
 export default function AdminUsers() {
   const { toast } = useToast();
-  const { user: me } = useAuth();
-  const isSuper = me?.role === 'superadmin';
   const [users, setUsers]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -31,7 +27,6 @@ export default function AdminUsers() {
       if (roleFilter !== 'all') params.role = roleFilter;
       if (statusFilter === 'banned') params.banned = true;
       if (statusFilter === 'pending') params.pendingApproval = true;
-      if (statusFilter === 'demo') params.isDemo = true;
       const data = await adminAPI.users(params);
       setUsers(data.users || data.data || []);
       setTotal(data.pagination?.total || data.total || 0);
@@ -41,7 +36,7 @@ export default function AdminUsers() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleBan = async (u) => {
+  const handleBan = useCallback(async (u) => {
     const action = u.isBanned ? 'Unban' : 'Ban';
     if (!window.confirm(`${action} ${u.name}?`)) return;
     setActionId(u._id + '-ban');
@@ -52,253 +47,110 @@ export default function AdminUsers() {
       toast(u.isBanned ? '✅ User unbanned' : '🚫 User banned', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
-  };
+  }, [selected, toast]);
 
-  const handleApprove = async (u) => {
-    setActionId(u._id + '-approve');
+  const handleApprove = useCallback(async (u) => {
+    setActionId(u._id + '-app');
     try {
       await adminAPI.approveDealer(u._id);
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, status: 'approved' } : x));
-      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, status: 'approved' } : prev);
-      toast('✅ Dealer approved!', 'success');
+      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true } : x));
+      toast('✅ Dealer approved', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
-  };
+  }, [toast]);
 
-  const handleDelete = async (u) => {
-    const scope = u.isDemo ? 'demo account' : 'real user account';
-    if (!window.confirm(`Permanently delete ${scope} ${u.name} (${u.email})? This removes associated cars, bids, payments, and escrows.`)) return;
-    const confirmation = window.prompt('Type DELETE to confirm permanent deletion.');
-    if (confirmation !== 'DELETE') return;
-    setActionId(u._id + '-del');
-    try {
-      await adminAPI.deleteUser(u._id);
-      setUsers(prev => prev.filter(x => x._id !== u._id));
-      if (selected?._id === u._id) setSelected(null);
-      toast('🗑 User permanently deleted', 'success');
-    } catch { toast('Delete failed', 'error'); }
-    finally { setActionId(null); }
-  };
+  const filteredStats = useMemo(() => {
+    const total = users.length;
+    const admins = users.filter(u => u.role === 'admin' || u.role === 'superadmin').length;
+    const dealers = users.filter(u => u.role === 'dealer').length;
+    const banned = users.filter(u => u.is_banned).length;
+    const pending = users.filter(u => u.role === 'dealer' && !u.approved).length;
+    return { total, admins, dealers, banned, pending };
+  }, [users]);
 
-  const handleDeactivate = async (u) => {
-    const action = u.deactivatedAt ? 'Reactivate' : 'Deactivate';
-    if (!window.confirm(`${action} ${u.name}?`)) return;
-    setActionId(u._id + '-deact');
-    try {
-      const result = await adminAPI.deactivateUser(u._id);
-      const deactivatedAt = result.deactivatedAt || null;
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, deactivatedAt } : x));
-      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, deactivatedAt } : prev);
-      toast(u.deactivatedAt ? '✅ User reactivated' : '⛔ User deactivated', 'success');
-    } catch { toast('Failed', 'error'); }
-    finally { setActionId(null); }
-  };
-
-  const totalPages = Math.ceil(total / 20);
-  const pendingCount = users.filter(u => SELLER_ROLES.includes(u.role) && u.status !== 'approved').length;
+  if (loading) return <div className="page loading-center"><div className="spinner" /></div>;
 
   return (
     <div className="page">
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
+        <h2 style={{ marginBottom: 24 }}>👥 User Management</h2>
 
-        <div style={{ marginBottom: 24 }}>
-          <div className="section-eyebrow">Admin</div>
-          <h2>Users <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-body)', fontSize: '1rem', fontWeight: 400 }}>({total.toLocaleString()} total)</span></h2>
+        <div className="stat-grid" style={{ marginBottom: 24 }}>
+          {[
+            { label: 'Total Users', value: filteredStats.total, color: 'var(--gold)' },
+            { label: 'Admins', value: filteredStats.admins, color: 'var(--red-400)' },
+            { label: 'Dealers', value: filteredStats.dealers, color: 'var(--gold)' },
+            { label: 'Banned', value: filteredStats.banned, color: 'var(--red-500)' },
+            { label: 'Pending Approval', value: filteredStats.pending, color: 'var(--orange-400)' },
+          ].map(s => (
+            <div key={s.label} className="stat-box" style={{ textAlign: 'center', padding: 16 }}>
+              <div className="stat-value" style={{ color: s.color }}>{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Pending dealers alert */}
-        {pendingCount > 0 && (
-          <div style={{ background: 'rgba(249,115,22,0.07)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ color: 'var(--orange)', fontWeight: 600 }}>⏳ {pendingCount} seller{pendingCount !== 1 ? 's' : ''} awaiting approval</span>
-            <button className="btn btn-outline btn-sm" onClick={() => { setRoleFilter('all'); setStatusFilter('pending'); }}>Show Pending</button>
-          </div>
-        )}
-
-        {/* Filters */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <input className="input" placeholder="Search name or email..." value={search}
+        <div className="data-table-controls" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+          <input className="input" placeholder="🔍 Search users..." value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            style={{ maxWidth: 280 }} />
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['all', 'user', 'dealer', 'admin'].map(r => (
-              <button key={r} className={`btn btn-sm ${roleFilter === r ? 'btn-gold' : 'btn-outline'}`}
-                onClick={() => { setRoleFilter(r); setPage(1); }}>
-                {ROLE_ICON[r] || '📋'} {r.charAt(0).toUpperCase() + r.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['all', 'banned', 'pending', 'demo'].map(s => (
-              <button key={s} className={`btn btn-sm ${statusFilter === s ? 'btn-outline' : 'btn-ghost'}`}
-                style={{ color: statusFilter === s ? 'var(--gold)' : undefined }}
-                onClick={() => { setStatusFilter(s); setPage(1); }}>
-                {s === 'banned' ? '🚫' : s === 'pending' ? '⏳' : s === 'demo' ? '🧪' : '✓'} {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
+            style={{ flex: '1 1 260px', maxWidth: 360 }} aria-label="Search users" />
+          <select className="input" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }}
+            style={{ width: 'auto' }} aria-label="Filter by role">
+            <option value="all">All Roles</option>
+            <option value="user">Users</option>
+            <option value="dealer">Dealers</option>
+            <option value="admin">Admins</option>
+          </select>
+          <select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
+            style={{ width: 'auto' }} aria-label="Filter by status">
+            <option value="all">All Status</option>
+            <option value="pending">Pending Approval</option>
+            <option value="banned">Banned</option>
+          </select>
         </div>
 
-        <div className="card">
-          <div className="table-wrap">
-            {loading ? (
-              <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
-            ) : users.length === 0 ? (
-              <div className="empty-state" style={{ padding: 48 }}>
-                <div className="empty-icon">👥</div>
-                <h3>No users found</h3>
-              </div>
-            ) : (
-              <table className="data-table">
-                <thead>
-                  <tr><th>User</th><th>Role</th><th>Phone</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u._id} style={{ cursor: 'pointer', background: u.isBanned ? 'rgba(239,68,68,0.02)' : '' }}
-                      onClick={() => setSelected(u)}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{
-                            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                            background: u.isBanned ? 'var(--red)' : 'var(--gold)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 14, color: '#0A1628', fontWeight: 700,
-                          }}>{initials(u.name)}</div>
-                          <div>
-                            <div style={{ fontWeight: 600, fontSize: 13 }}>{u.name}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{u.email}</div>
-                            {u.businessName && <div style={{ fontSize: 11, color: 'var(--gold)' }}>{u.businessName}</div>}
-                          </div>
-                        </div>
-                      </td>
-                      <td><span className={`badge ${ROLE_BADGE[u.role] || 'badge-muted'}`}>{ROLE_ICON[u.role]} {u.role}</span></td>
-                      <td style={{ fontSize: 13, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.phone || '—'}</td>
-                      <td>
-                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                          {u.isBanned && <span className="badge badge-red">🚫 Banned</span>}
-                          {u.isDemo && <span className="badge badge-blue">🧪 Demo</span>}
-                          {u.deactivatedAt && <span className="badge badge-orange">⛔ Deactivated</span>}
-                          {SELLER_ROLES.includes(u.role) && u.status !== 'approved' && <span className="badge badge-orange">⏳ Pending</span>}
-                          {SELLER_ROLES.includes(u.role) && u.status === 'approved' && <span className="badge badge-green">✓ Approved</span>}
-                          {!u.isBanned && !u.deactivatedAt && (!SELLER_ROLES.includes(u.role) || u.status === 'approved') && <span className="badge badge-green">Active</span>}
-                        </div>
-                      </td>
-                      <td style={{ fontSize: 12, color: 'var(--text-dim)' }}>{u.createdAt ? timeAgo(u.createdAt) : '—'}</td>
-                      <td onClick={e => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: 6, flexDirection: 'column', minWidth: 120 }}>
-                          {SELLER_ROLES.includes(u.role) && u.status !== 'approved' && (
-                            <button className="btn btn-gold btn-sm" disabled={actionId === u._id + '-approve'}
-                              onClick={() => handleApprove(u)}>
-                              {actionId === u._id + '-approve' ? '...' : '✅ Approve'}
-                            </button>
-                          )}
-                          <div style={{ display: 'flex', gap: 4 }}>
-                            {u.role !== 'admin' && u.role !== 'superadmin' && (
-                              <button className={`btn btn-sm ${u.isBanned ? 'btn-outline' : 'btn-danger'}`} style={{ flex: 1, fontSize: 11 }}
-                                disabled={actionId === u._id + '-ban'}
-                                onClick={() => handleBan(u)}>
-                                {actionId === u._id + '-ban' ? '...' : u.isBanned ? '✓ Unban' : '🚫 Ban'}
-                              </button>
-                            )}
-                            {isSuper && u.role !== 'superadmin' && u._id !== me?._id && (
-                              <button className="btn btn-sm btn-outline" style={{ flex: 1, fontSize: 11 }}
-                                disabled={actionId === u._id + '-deact'}
-                                onClick={() => handleDeactivate(u)}>
-                                {actionId === u._id + '-deact' ? '...' : u.deactivatedAt ? '✓ Reactivate' : '⛔ Deactivate'}
-                              </button>
-                            )}
-                          </div>
-                          {isSuper && u.isDemo && u.role !== 'superadmin' && (
-                            <button className="btn btn-sm btn-danger" style={{ fontSize: 10, opacity: 0.7 }}
-                              disabled={actionId === u._id + '-del'}
-                              onClick={() => handleDelete(u)}>
-                              {actionId === u._id + '-del' ? '...' : '🗑 Delete'}
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
-            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
-            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
-          </div>
-        )}
-      </div>
-
-      {/* User detail modal */}
-      {selected && (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
-          <div className="modal-box" style={{ maxWidth: 500 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', background: selected.isBanned ? 'var(--red)' : 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, color: '#0A1628', fontWeight: 700 }}>
-                  {initials(selected.name)}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 16 }}>{selected.name}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{selected.email}</div>
-                </div>
-              </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-              {[
-                { label: 'Role',          val: `${ROLE_ICON[selected.role]} ${selected.role}` },
-                { label: 'Status',        val: selected.isBanned ? '🚫 Banned' : selected.deactivatedAt ? '⛔ Deactivated' : '✅ Active' },
-                { label: 'Phone',         val: selected.phone || '—', mono: true },
-                { label: 'Location',      val: selected.location || '—' },
-                { label: 'Business',      val: selected.businessName || '—' },
-                { label: 'Joined',        val: selected.createdAt ? formatDate(selected.createdAt) : '—' },
-                { label: 'User ID',       val: `#${selected._id?.slice(-10)}`, mono: true },
-                { label: 'Seller Status', val: SELLER_ROLES.includes(selected.role) ? (selected.status === 'approved' ? '✅ Approved' : '⏳ Pending') : 'N/A' },
-                { label: 'Account Type', val: selected.isDemo ? '🧪 Demo Account' : '👤 Real User' },
-              ].map(r => (
-                <div key={r.label}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.label}</div>
-                  <div style={{ fontWeight: 600, marginTop: 4, fontSize: 13, fontFamily: r.mono ? 'monospace' : undefined }}>{r.val}</div>
-                </div>
+        <div className="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }}></th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th style={{ width: 160 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <AdminUserRow
+                  key={u._id}
+                  user={u}
+                  onBan={handleBan}
+                  onApprove={handleApprove}
+                  onSelect={setSelected}
+                  actionId={actionId}
+                  selected={selected}
+                />
               ))}
-            </div>
+              {users.length === 0 && (
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)' }}>No users found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {SELLER_ROLES.includes(selected.role) && selected.status !== 'approved' && (
-                <button className="btn btn-gold" style={{ flex: 1 }}
-                  onClick={() => handleApprove(selected)} disabled={actionId === selected._id + '-approve'}>
-                  {actionId === selected._id + '-approve' ? '...' : '✅ Approve Dealer'}
-                </button>
-              )}
-              {selected.role !== 'admin' && selected.role !== 'superadmin' && (
-                <button className={`btn ${selected.isBanned ? 'btn-outline' : 'btn-danger'}`} style={{ flex: 1 }}
-                  onClick={() => handleBan(selected)} disabled={actionId === selected._id + '-ban'}>
-                  {actionId === selected._id + '-ban' ? '...' : selected.isBanned ? '✓ Unban User' : '🚫 Ban User'}
-                </button>
-              )}
-              {isSuper && selected.role !== 'superadmin' && selected._id !== me?._id && (
-                <button className={`btn btn-outline`} style={{ flex: 1 }}
-                  onClick={() => handleDeactivate(selected)} disabled={actionId === selected._id + '-deact'}>
-                  {actionId === selected._id + '-deact' ? '...' : selected.deactivatedAt ? '✓ Reactivate' : '⛔ Deactivate Account'}
-                </button>
-              )}
-              {isSuper && selected.isDemo && selected.role !== 'superadmin' && (
-                <button className="btn btn-danger" style={{ flex: 1 }}
-                  onClick={() => handleDelete(selected)} disabled={actionId === selected._id + '-del'}>
-                  {actionId === selected._id + '-del' ? '...' : '🗑 Permanently Delete'}
-                </button>
-              )}
-            </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, fontSize: 13, color: 'var(--text-muted)' }}>
+          <span>{total} total users</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn btn-sm btn-outline" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ padding: '4px 12px' }}>Page {page}</span>
+            <button className="btn btn-sm btn-outline" disabled={page * 20 >= total} onClick={() => setPage(p => p + 1)}>Next →</button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
