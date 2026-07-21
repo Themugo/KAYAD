@@ -3,31 +3,31 @@
    Premium command bar, filter bands, sidebar + grid
    ============================================================ */
 
-.showroom-page { min-height: 100vh; background: var(--bg, var(--bg-base)); }
+.showroom-page { min-height: 100vh; background: var(--color-bg-base); }
 
 /* ---- Editorial hero ---- */
 .showroom-hero {
   position: relative;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(37, 99, 235,0.10), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(37, 99, 235,0.04), transparent),
-    var(--bg, var(--bg-base));
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--color-brand-subtle), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 80%, var(--color-brand-subtle), transparent),
+    var(--color-bg-base);
   overflow: hidden;
 }
 .showroom-hero-desktop { padding: 56px 0 40px; }
 .showroom-hero-mobile  { padding: 32px 0 24px; }
 .showroom-hero-hairline {
   position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(37, 99, 235,0.25), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-brand-glow), transparent);
 }
 .showroom-hero-inner { text-align: center; max-width: 720px; margin: 0 auto; }
 .showroom-hero-overline {
-  font-size: 10px; color: var(--gold, #D4C4A8);
+  font-size: 10px; color: var(--color-brand-light);
   font-weight: 700; letter-spacing: 0.22em;
   text-transform: uppercase; margin-bottom: 10px;
 }
 .showroom-hero-title {
-  font-family: var(--font-display, "Cormorant Garamond", Georgia, serif);
+  font-family: var(--font-display);
   font-weight: 900; font-style: italic;
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   line-height: 1; color: #fff; margin: 0 0 14px;
@@ -81,9 +81,9 @@
 .pill-btn-desktop { padding: 7px 16px; font-size: 12px; }
 .pill-btn-mobile  { padding: 10px 16px; font-size: 13px; min-height: 44px; }
 .pill-btn-active {
-  background: rgba(37, 99, 235,0.10);
-  border-color: var(--gold, #D4C4A8);
-  color: var(--gold, #D4C4A8);
+  background: var(--color-brand-subtle);
+  border-color: var(--color-brand-light);
+  color: var(--color-brand-light);
 }
 .pill-btn-inactive {
   background: rgba(255,255,255,0.02);
@@ -110,7 +110,7 @@
 }
 .sort-select-desktop { padding: 8px 28px 8px 12px; font-size: 12px; }
 .sort-select-mobile  { padding: 12px 28px 12px 12px; font-size: 13px; min-height: 44px; }
-.sort-select option { background: var(--bg-elevated); }
+.sort-select option { background: var(--color-bg-elevated); }
 .sort-chevron {
   position: absolute; right: 9px; pointer-events: none;
   color: rgba(255,255,255,0.45);
@@ -131,8 +131,8 @@
 .view-btn-desktop { padding: 6px 9px; }
 .view-btn-mobile  { padding: 10px 12px; min-height: 44px; }
 .view-btn-active {
-  background: rgba(37, 99, 235,0.12);
-  color: var(--gold, #D4C4A8);
+  background: var(--color-brand-subtle);
+  color: var(--color-brand-light);
 }
 .view-btn-inactive {
   background: transparent;
@@ -146,9 +146,9 @@
   font-size: 12px; font-weight: 700; cursor: pointer;
 }
 .filter-btn-mobile-active {
-  background: rgba(37, 99, 235,0.12);
+  background: var(--color-brand-subtle);
   border: 1px solid rgba(37, 99, 235,0.3);
-  color: var(--gold, #D4C4A8);
+  color: var(--color-brand-light);
 }
 .filter-btn-mobile-inactive {
   background: rgba(255,255,255,0.02);
@@ -165,15 +165,15 @@
 .filter-band-desktop { padding: 14px 0; }
 .filter-band-mobile  { padding: 12px 16px; }
 .filter-band-result-count {
-  font-family: var(--font-display, serif);
+  font-family: var(--font-display);
   font-style: italic; font-weight: 700; font-size: 15px;
   color: #fff; margin-right: 8px;
 }
 .filter-chip {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 10px; border-radius: 9999px;
-  background: rgba(37, 99, 235,0.08);
-  border: 1px solid rgba(37, 99, 235,0.18);
+  background: var(--color-brand-subtle);
+  border: 1px solid var(--color-brand-glow);
   font-size: 11px; font-weight: 600;
   color: rgba(255,255,255,0.85);
 }
@@ -197,9 +197,9 @@
   font-size: 11px; font-weight: 700; cursor: pointer;
 }
 .btn-save {
-  background: rgba(37, 99, 235,0.06);
-  border: 1px solid rgba(37, 99, 235,0.18);
-  color: var(--gold, #D4C4A8);
+  background: var(--color-brand-subtle);
+  border: 1px solid var(--color-brand-glow);
+  color: var(--color-brand-light);
 }
 .btn-saved {
   display: inline-flex; align-items: center; gap: 5px;
@@ -212,9 +212,9 @@
   color: rgba(255,255,255,0.7);
 }
 .btn-saved-active {
-  background: rgba(37, 99, 235,0.08);
+  background: var(--color-brand-subtle);
   border: 1px solid rgba(37, 99, 235,0.2);
-  color: var(--gold, #D4C4A8);
+  color: var(--color-brand-light);
 }
 .btn-clear {
   background: transparent;
@@ -228,7 +228,7 @@
 .saved-menu {
   position: absolute; top: calc(100% + 6px); right: 0;
   min-width: 260px; max-width: 360px;
-  background: var(--bg-elevated);
+  background: var(--color-bg-elevated);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.6);
@@ -243,13 +243,13 @@
   flex: 1; background: transparent; border: none;
   color: rgba(255,255,255,0.85); font-size: 12px;
   font-weight: 600; text-align: left; cursor: pointer;
-  padding: 0; font-family: var(--font-body, sans-serif);
+  padding: 0; font-family: var(--font-sans);
 }
 .saved-menu-action {
   background: transparent; border: none;
   cursor: pointer; display: flex; padding: 2px;
 }
-.saved-menu-alert-on { color: var(--gold, #D4C4A8); }
+.saved-menu-alert-on { color: var(--color-brand-light); }
 .saved-menu-alert-off { color: rgba(255,255,255,0.3); }
 .saved-menu-delete { color: rgba(255,255,255,0.3); }
 
@@ -257,13 +257,13 @@
 .save-prompt-wrap { padding: 12px 0 0; }
 .save-prompt-wrap-mobile { padding: 12px 16px 0; }
 .save-prompt-card {
-  background: var(--bg-elevated);
-  border: 1px solid rgba(37, 99, 235,0.18);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-brand-glow);
   border-radius: 10px; padding: 12px 14px;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .save-prompt-icon {
-  color: var(--gold, #D4C4A8); flex-shrink: 0;
+  color: var(--color-brand-light); flex-shrink: 0;
 }
 .save-prompt-input {
   flex: 1; min-width: 160px;
@@ -271,7 +271,7 @@
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 6px; padding: 7px 10px;
   color: #fff; font-size: 12px; outline: none;
-  font-family: var(--font-body, sans-serif);
+  font-family: var(--font-sans);
 }
 .save-prompt-cancel {
   background: transparent; border: none;
@@ -333,7 +333,7 @@
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 20px;
 }
-.empty-state-icon-svg { color: var(--gold); }
+.empty-state-icon-svg { color: var(--color-brand-light); }
 
 /* Infinite scroll sentinel */
 .showroom-sentinel { padding: 32px; }
