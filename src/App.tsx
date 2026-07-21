@@ -14,6 +14,7 @@ import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { BrandingProvider } from './context/BrandingContext';
 import { CompareProvider } from './context/CompareContext';
+import { ThemeProvider } from './components/ui/ThemeContext';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Compare from './pages/Compare';
@@ -372,19 +373,21 @@ export default function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <ToastProvider>
-          <BrandingProvider>
-            <AuthProvider>
-              <SocketProvider>
-                <NotificationProvider>
-                  <CompareProvider>
-                    <AppContent />
-                  </CompareProvider>
-                </NotificationProvider>
-              </SocketProvider>
-            </AuthProvider>
-          </BrandingProvider>
-        </ToastProvider>
+        <ThemeProvider>
+          <ToastProvider>
+            <BrandingProvider>
+              <AuthProvider>
+                <SocketProvider>
+                  <NotificationProvider>
+                    <CompareProvider>
+                      <AppContent />
+                    </CompareProvider>
+                  </NotificationProvider>
+                </SocketProvider>
+              </AuthProvider>
+            </BrandingProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );
