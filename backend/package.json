@@ -41,7 +41,7 @@
     "@supabase/supabase-js": "^2.110.2",
     "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
-    "bullmq": "^5.80.1",
+    "bullmq": "^5.80.2",
     "cloudinary": "^2.10.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
