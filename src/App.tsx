@@ -4,7 +4,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CompareDrawer from './components/CompareDrawer';
 import MobileBottomNav from './components/MobileBottomNav';
-import ErrorBoundary from './components/ErrorBoundary';
 import DemoModeBanner from './components/DemoModeBanner';
 import { LoadingPage } from './components/LoadingPage';
 import SWUpdateBanner from './components/SWUpdateBanner';
@@ -378,24 +377,22 @@ export default function App() {
   console.log('[App] Providers order: ThemeProvider -> ToastProvider -> BrandingProvider -> AuthProvider -> SocketProvider -> NotificationProvider -> CompareProvider');
   
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <ThemeProvider>
-          <ToastProvider>
-            <BrandingProvider>
-              <AuthProvider>
-                <SocketProvider>
-                  <NotificationProvider>
-                    <CompareProvider>
-                      <AppContent />
-                    </CompareProvider>
-                  </NotificationProvider>
-                </SocketProvider>
-              </AuthProvider>
-            </BrandingProvider>
-          </ToastProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <ThemeProvider>
+        <ToastProvider>
+          <BrandingProvider>
+            <AuthProvider>
+              <SocketProvider>
+                <NotificationProvider>
+                  <CompareProvider>
+                    <AppContent />
+                  </CompareProvider>
+                </NotificationProvider>
+              </SocketProvider>
+            </AuthProvider>
+          </BrandingProvider>
+        </ToastProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
