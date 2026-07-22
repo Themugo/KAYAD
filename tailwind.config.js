@@ -6,6 +6,9 @@ export default {
       fontFamily: {
         serif: ['Playfair Display', 'Georgia', 'serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Playfair Display', 'Georgia', 'serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+        technical: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {
         // Midnight navy — replaces brownish charcoal throughout
@@ -22,6 +25,17 @@ export default {
           200: '#EDE7D9',
           300: '#E0D8C8',
           400: '#CEC4B0',
+        },
+        // Surface containers (Stitch Design System)
+        surface: {
+          base:   '#fcf9f4',
+          dim:    '#dcdad5',
+          bright: '#fcf9f4',
+          lowest: '#ffffff',
+          low:    '#f6f3ee',
+          DEFAULT:'#f0ede9',
+          high:   '#ebe8e3',
+          highest:'#e5e2dd',
         },
         // Vivid mint-teal / emerald — main brand color (green)
         brand: {
