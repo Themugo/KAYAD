@@ -546,5 +546,102 @@ export const platformStatsAPI = {
 // ── formatKES (re-exported from helpers) ──────────────
 export { formatKES } from "../utils/helpers";
 
+// ── BIDDING SECURITY ─────────────────────────────────────
+export const biddingSecurityAPI = {
+  // User endpoints
+  getStatus: () => api.get('/bidding-security/status').then(unwrap),
+  createDeposit: (body: any) => api.post('/bidding-security/deposit', body).then(unwrap),
+  verifyDeposit: (depositId: string, body: any) => api.post(`/bidding-security/deposit/${depositId}/verify`, body).then(unwrap),
+  getDeposits: (params?: any) => api.get('/bidding-security/deposits', { params }).then(unwrap),
+  verifyBiometric: (body: any) => api.post('/bidding-security/biometric/verify', body).then(unwrap),
+  checkAuthorization: (carId: string, amount: number) => api.get(`/bidding-security/authorize/${carId}/${amount}`).then(unwrap),
+  
+  // Admin endpoints
+  manageDeposit: (depositId: string, body: any) => api.patch(`/bidding-security/deposit/${depositId}`, body).then(unwrap),
+  getAllDeposits: (params?: any) => api.get('/bidding-security/admin/deposits', { params }).then(unwrap),
+};
+
+// ── BID LOGS ────────────────────────────────────────────
+export const bidLogsAPI = {
+  // User endpoints
+  getMyHistory: (params?: any) => api.get('/bid-logs/my', { params }).then(unwrap),
+  getDetail: (logId: string) => api.get(`/bid-logs/${logId}`).then(unwrap),
+  
+  // Public endpoints
+  getActive: (carId: string, params?: any) => api.get(`/bid-logs/car/${carId}`, { params }).then(unwrap),
+  getWinning: (carId: string) => api.get(`/bid-logs/car/${carId}/winning`).then(unwrap),
+  getStats: (carId: string, params?: any) => api.get(`/bid-logs/car/${carId}/stats`, { params }).then(unwrap),
+  
+  // Admin endpoints
+  getAll: (params?: any) => api.get('/bid-logs/admin/all', { params }).then(unwrap),
+  getAdminStats: (params?: any) => api.get('/bid-logs/admin/stats', { params }).then(unwrap),
+};
+
+// ── TRANSACTION LEDGER ──────────────────────────────────
+export const ledgerAPI = {
+  // User endpoints
+  getMyTransactions: (params?: any) => api.get('/ledger/my', { params }).then(unwrap),
+  getByHash: (hash: string) => api.get(`/ledger/hash/${hash}`).then(unwrap),
+  getSummary: () => api.get('/ledger/summary').then(unwrap),
+  createDeposit: (body: any) => api.post('/ledger/deposit', body).then(unwrap),
+  createWithdrawal: (body: any) => api.post('/ledger/withdraw', body).then(unwrap),
+  createEscrowHold: (body: any) => api.post('/ledger/escrow/hold', body).then(unwrap),
+  createEscrowRelease: (body: any) => api.post('/ledger/escrow/release', body).then(unwrap),
+  getEscrowTransactions: (escrowId: string, params?: any) => api.get(`/ledger/escrow/${escrowId}`, { params }).then(unwrap),
+  getChain: (ledgerId: string) => api.get(`/ledger/chain/${ledgerId}`).then(unwrap),
+  
+  // Admin endpoints
+  getAll: (params?: any) => api.get('/ledger/admin/all', { params }).then(unwrap),
+  verifyChain: (params?: any) => api.get('/ledger/admin/verify', { params }).then(unwrap),
+  verifyTransaction: (ledgerId: string) => api.patch(`/ledger/${ledgerId}/verify`).then(unwrap),
+};
+
+// ── LOCALIZATION / i18n ─────────────────────────────────
+export const localizationAPI = {
+  getTranslations: (locale?: string, namespace?: string) => 
+    api.get('/localization', { params: { locale, namespace } }).then(unwrap),
+  getNamespaces: (locale?: string) => api.get('/localization/namespaces', { params: { locale } }).then(unwrap),
+  getAllTranslations: (locale?: string) => api.get('/localization/all', { params: { locale } }).then(unwrap),
+  search: (params: any) => api.get('/localization/search', { params }).then(unwrap),
+  create: (body: any) => api.post('/localization', body).then(unwrap),
+  update: (id: string, body: any) => api.patch(`/localization/${id}`, body).then(unwrap),
+  delete: (id: string) => api.delete(`/localization/${id}`).then(unwrap),
+  import: (body: any) => api.post('/localization/import', body).then(unwrap),
+  export: (params?: any) => api.get('/localization/export', { params }).then(unwrap),
+  getKeyInAllLocales: (key: string, namespace?: string) => 
+    api.get(`/localization/key/${key}`, { params: { namespace } }).then(unwrap),
+  getStats: () => api.get('/localization/stats').then(unwrap),
+};
+
+// ── USER PREFERENCES ────────────────────────────────────
+export const preferencesAPI = {
+  get: () => api.get('/preferences').then(unwrap),
+  update: (body: any) => api.patch('/preferences', body).then(unwrap),
+  setTheme: (theme: 'light' | 'dark' | 'system') => api.post('/preferences/theme', { theme }).then(unwrap),
+  toggleDarkMode: () => api.post('/preferences/theme/toggle').then(unwrap),
+  setLanguage: (language: string) => api.post('/preferences/language', { language }).then(unwrap),
+  updateNotifications: (channel: string, settings: any) => 
+    api.post('/preferences/notifications', { channel, settings }).then(unwrap),
+  addRecentSearch: (query: string) => api.post('/preferences/search/recent', { query }).then(unwrap),
+  clearRecentSearches: () => api.delete('/preferences/search/recent').then(unwrap),
+  updateAccessibility: (settings: any) => api.post('/preferences/accessibility', settings).then(unwrap),
+  updateLastSeen: (platform?: string) => api.post('/preferences/last-seen', { platform }).then(unwrap),
+  getStats: () => api.get('/preferences/stats').then(unwrap),
+};
+
+// ── SEO METADATA ────────────────────────────────────────
+export const seoAPI = {
+  getMetadata: (params: any) => api.get('/seo/metadata', { params }).then(unwrap),
+  getPageSEO: (slug: string) => api.get(`/seo/page/${slug}`).then(unwrap),
+  getCarSEO: (carId: string) => api.get(`/seo/car/${carId}`).then(unwrap),
+  getBreadcrumbJsonLd: (path: string) => api.get('/seo/breadcrumb', { params: { path } }).then(unwrap),
+  create: (body: any) => api.post('/seo/metadata', body).then(unwrap),
+  update: (id: string, body: any) => api.patch(`/seo/metadata/${id}`, body).then(unwrap),
+  delete: (id: string) => api.delete(`/seo/metadata/${id}`).then(unwrap),
+  list: (params?: any) => api.get('/seo/metadata/list', { params }).then(unwrap),
+  generateCarSEO: (carId: string) => api.post(`/seo/car/${carId}/generate`).then(unwrap),
+  getStats: () => api.get('/seo/stats').then(unwrap),
+};
+
 // ── RE-EXPORTS from data layer ──────────────────────────
 export { BRANDS, TESTIMONIALS, MOCK_CARS } from '../data/mockCars';

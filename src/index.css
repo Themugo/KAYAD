@@ -2809,3 +2809,176 @@ label, .text-label {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   DARK MODE (Obsidian Theme)
+   ============================================================ */
+
+:root[data-theme="dark"],
+.dark {
+  /* Surface Colors */
+  --bg-base: #0A1626;
+  --bg-primary: #0D1E33;
+  --bg-secondary: #112440;
+  --bg-tertiary: #15294A;
+  --bg-card: #0D1E33;
+  --bg-elevated: #112440;
+  --surface: #112440;
+  
+  /* Text Colors */
+  --text-primary: #FDFAF5;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  
+  /* Borders */
+  --border: #1E293B;
+  --border-soft: #15294A;
+  
+  /* Charcoal Scale (Dark Mode) */
+  --charcoal-700: #1E293B;
+  --charcoal-800: #0F172A;
+  --charcoal-900: #020617;
+}
+
+/* Dark Mode Backgrounds */
+html.dark,
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html.dark body,
+html[data-theme="dark"] body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+}
+
+/* Dark Mode Components */
+html.dark .bg-white,
+html[data-theme="dark"] .bg-white {
+  background-color: var(--bg-card) !important;
+}
+
+html.dark .bg-cream-50,
+html.dark .bg-cream-100,
+html.dark .bg-cream-200,
+html[data-theme="dark"] .bg-cream-50,
+html[data-theme="dark"] .bg-cream-100,
+html[data-theme="dark"] .bg-cream-200 {
+  background-color: var(--bg-secondary) !important;
+}
+
+html.dark .text-charcoal-800,
+html.dark .text-charcoal-700,
+html.dark .text-charcoal-600,
+html.dark .text-charcoal-500,
+html[data-theme="dark"] .text-charcoal-800,
+html[data-theme="dark"] .text-charcoal-700,
+html[data-theme="dark"] .text-charcoal-600,
+html[data-theme="dark"] .text-charcoal-500 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-charcoal-400,
+html.dark .text-charcoal-300,
+html[data-theme="dark"] .text-charcoal-400,
+html[data-theme="dark"] .text-charcoal-300 {
+  color: var(--text-secondary) !important;
+}
+
+html.dark .text-cream-100,
+html.dark .text-cream-200,
+html[data-theme="dark"] .text-cream-100,
+html[data-theme="dark"] .text-cream-200 {
+  color: var(--text-primary) !important;
+}
+
+html.dark .text-cream-300,
+html.dark .text-cream-400,
+html[data-theme="dark"] .text-cream-300,
+html[data-theme="dark"] .text-cream-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Dark Mode Borders */
+html.dark .border-cream-200,
+html.dark .border-cream-300,
+html[data-theme="dark"] .border-cream-200,
+html[data-theme="dark"] .border-cream-300 {
+  border-color: var(--border) !important;
+}
+
+/* Dark Mode Shadows */
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html[data-theme="dark"] .shadow-sm,
+html[data-theme="dark"] .shadow-md,
+html[data-theme="dark"] .shadow-lg {
+  --tw-shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode Nav */
+html.dark nav,
+html[data-theme="dark"] nav {
+  background-color: var(--obsidian, #0A1626);
+}
+
+/* Dark Mode Cards */
+html.dark .bg-card,
+html.dark [class*="card"],
+html[data-theme="dark"] .bg-card,
+html[data-theme="dark"] [class*="card"] {
+  background-color: var(--bg-card);
+  border-color: var(--border);
+}
+
+/* Dark Mode Inputs */
+html.dark input,
+html.dark textarea,
+html.dark select,
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background-color: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+/* Dark Mode Scrollbar */
+html.dark ::-webkit-scrollbar,
+html[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track,
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+html.dark ::-webkit-scrollbar-thumb,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--charcoal-700);
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--charcoal-600);
+}
+
+/* Dark Mode Focus States */
+html.dark *:focus-visible,
+html[data-theme="dark"] *:focus-visible {
+  outline-color: var(--brand);
+}
+
+/* Animation for theme transition */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
