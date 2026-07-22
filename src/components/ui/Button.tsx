@@ -66,23 +66,24 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles: Record<string, React.CSSProperties> = {
       primary: {
-        background: 'var(--color-brand)',
-        color: 'var(--color-text-inverse)',
-        borderColor: 'var(--color-brand)',
+        background: 'linear-gradient(135deg, #16C4A4, #0C7B68)',
+        color: '#ffffff',
+        borderColor: 'transparent',
+        boxShadow: '0 4px 14px 0 rgba(22, 196, 164, 0.25)',
       },
       secondary: {
         background: 'transparent',
-        color: 'var(--color-brand)',
-        borderColor: 'var(--color-brand)',
+        color: 'var(--brand)',
+        borderColor: 'var(--brand)',
       },
       ghost: {
         background: 'transparent',
-        color: 'var(--color-text-secondary)',
+        color: 'var(--text-secondary)',
         borderColor: 'transparent',
       },
       danger: {
         background: 'var(--color-danger)',
-        color: 'var(--color-text-inverse)',
+        color: '#ffffff',
         borderColor: 'var(--color-danger)',
       },
     };

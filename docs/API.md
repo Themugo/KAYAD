@@ -438,6 +438,59 @@ Test M-Pesa payments with:
 - **Status Page**: https://status.kayad.space
 - **GitHub Issues**: https://github.com/kayad/kayad-api/issues
 
+## Frontend Screen-to-Backend Integration
+
+This section provides UI-to-API mapping for the KAYAD high-fidelity frontend screens.
+
+### 1. Live Bidding Room
+
+**Objective:** Synchronize real-time auction state and user bidding actions.
+
+#### Data Fetching (GET)
+*   **Endpoint:** `/api/auctions/{auction_id}/status`
+*   **UI Mapping:**
+    *   `Current High Bid`: Map to `.text-display-lg` (e.g., "$285,500").
+    *   `Market Pulse`: Map to progress bar percentage and color logic (Bullish/Bearish).
+    *   `Collectors/Watchers`: Map to the counter.
+    *   `Bidding History`: Map to the list items. Each entry needs: `timestamp`, `paddle_id`, `location`, and `amount`.
+
+#### User Actions (POST)
+*   **Endpoint:** `/api/auctions/{auction_id}/bid`
+*   **Payload:** `{ "amount": number, "bidder_id": string }`
+*   **Trigger:** `PLACE BID` button.
+*   **Logic:** 
+    *   Frontend validates that `amount` >= `Next Min Bid`.
+    *   On 200 OK: Trigger UI pulse on bid amount and append to history list.
+
+#### Real-time Integration (WebSockets)
+*   **Socket Event:** `auction_update`
+*   **Handler:** Update bid amount, pulse "LIVE" indicator, add new bids to ticker.
+
+### 2. Secure Escrow Hub
+
+**Objective:** Manage the immutable transaction ledger and admin-controlled payouts.
+
+#### Escrow State (GET)
+*   **Endpoint:** `/api/escrow/transactions/{transaction_id}`
+*   **UI Mapping:**
+    *   `Total Funds Held`: Map to primary balance display.
+    *   `Commission %`: Fetch `admin_commission_rate` (default 2.5%).
+    *   `Timeline`: Map statuses (Deposit Received, Inspection Passed, Funds Released) to stepper.
+
+#### Admin Monetization Controls (PATCH)
+*   **Endpoint:** `/api/admin/settings/monetization`
+*   **Payload:** `{ "commission_rate": float, "waiver_active": boolean }`
+
+#### Immutable Logs (GET)
+*   **Endpoint:** `/api/escrow/audit-logs`
+*   **UI Mapping:** Render transaction table with `transaction_hash`, `status`, `timestamp`.
+
+### 3. Shared Identity & Security
+*   **Headers:** All requests include `Authorization: Bearer <JWT_TOKEN>`.
+*   **Biometrics:** `/api/auth/verify-biometric` before deposit submission.
+
+**Target Architecture:** RESTful API with WebSocket (Socket.io/ws) support.
+
 ## Changelog
 
 See [CHANGES.md](../CHANGES.md) for API version history.

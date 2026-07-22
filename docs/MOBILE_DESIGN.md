@@ -318,6 +318,112 @@ The app shows an install banner when:
 
 ---
 
+## Stitch Design System Integration
+
+The **Obsidian & Linen** design system from Stitch is fully integrated into the KAYAD codebase.
+
+### Brand & Style
+- **Digital Concierge** persona: sophisticated, precise, and authoritative
+- Modern Corporate foundation with Minimalism and subtle Glassmorphism
+- Exclusivity through Whitespace with 64px page-level sections
+- High-Trust Atmosphere with warm, organic surfaces
+
+### Color Palette
+
+```css
+:root {
+  /* Primary Shell: Midnight Obsidian */
+  --obsidian:      #0A1626;
+  --obsidian-800:  #0D1E33;
+  --obsidian-700:  #112440;
+  --obsidian-600:  #15294A;
+
+  /* Canvas: Warm Champagne */
+  --surface-base:  #fcf9f4;
+  --surface-dim:   #dcdad5;
+
+  /* Gallery Surfaces */
+  --surface-container-lowest: #ffffff;
+  --surface-container-low:    #f6f3ee;
+  --surface-container:        #f0ede9;
+  --surface-container-high:   #ebe8e3;
+  --surface-container-highest:#e5e2dd;
+
+  /* Interactive Precision: Vivid Mint-Teal */
+  --brand:         #16C4A4;
+  --brand-dark:    #0C7B68;
+  --brand-light:   #2DD9BE;
+  --brand-gradient: linear-gradient(135deg, #16C4A4, #0C7B68);
+
+  /* Semantic Trust */
+  --accent-emerald: #10B981;  /* Verification, escrow success */
+  --live-crimson:  #EF4444;   /* Bidding urgency */
+}
+```
+
+### Typography
+
+**The Editorial Layer:** Playfair Display for vehicle titles, prices, and headings
+**The Functional Layer:** Inter for body content and descriptions  
+**The Technical Layer:** Outfit for interactive labels, buttons, and caps labels
+
+```css
+:root {
+  /* Display */
+  --font-display: 'Playfair Display', Georgia, serif;
+  /* Body */
+  --font-body: 'Inter', system-ui, sans-serif;
+  /* Technical */
+  --font-technical: 'Outfit', system-ui, sans-serif;
+}
+```
+
+### Component Specifications
+
+#### Buttons
+- **Primary:** Linear gradient (135deg, #16C4A4, #0C7B68) with teal glow on hover
+- **Secondary/Ghost:** Hairline border with hover transition to 10% Mint-Teal
+- **Urgent (Live Auction):** Pulsing crimson gradient for "Place Bid" states
+
+#### Cards & Gallery
+- **Vehicle Card:** 16:10 aspect ratio, 1.03x image zoom on hover
+- **Spec Chips:** Sandstone capsules with 11px uppercase labels
+- **Elevation:** Cards use hairline border (1px) in Sandstone
+
+#### Bidding Panel
+- High-contrast dark surface (#0A1626) when sticky
+- Real-time numbers use "ticker" animation when updating
+
+### Layout & Spacing
+- **Baseline Grid:** 4px/8px for internal component spacing
+- **Page Sections:** 64px vertical padding (--space-16)
+- **Desktop Grid:** 12-column with 280px fixed filter sidebar
+- **Dashboards:** 32px margins for increased information density
+
+### Shape Language
+- **Standard Elements:** 8px radius (--radius-md)
+- **Containers:** 16px radius (--radius-lg)
+- **Technical Indicators:** Full pill-shape (9999px)
+
+### Elevation & Depth
+- **Level 0:** Warm Champagne background
+- **Level 1:** Pure White cards with hairline border
+- **Level 2:** Hover uses `0 12px 32px rgba(10, 22, 38, 0.12)` + 6px vertical lift
+- **Level 3:** Modals use glassmorphic backdrop filter (8-12px blur)
+
+### Verified Dealer Badge
+```jsx
+// Composite component: emerald pill badge with checkmark
+<Badge variant="success" outline icon={<CheckIcon />}>
+  Verified Dealer
+</Badge>
+```
+
+### Market Pulse Component
+Horizontal delta bar indicating current price vs Fair Market Value using tri-color scale (Green-Yellow-Red).
+
+---
+
 ## Animation Guidelines
 
 ### Durations
@@ -393,3 +499,59 @@ src/
 - [ ] Touch targets are visible
 - [ ] Focus order is logical
 - [ ] Animations respect reduced-motion
+
+---
+
+## Design System: Obsidian & Linen
+
+The premium automotive marketplace uses a "Digital Concierge" persona: sophisticated, precise, and authoritative. The aesthetic follows **Modern Corporate** foundation with **Minimalism** and subtle **Glassmorphism**.
+
+### Color Palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `surface` | `#fcf9f4` | Warm Champagne background |
+| `surface-container-lowest` | `#ffffff` | Elevated cards |
+| `primary` | `#000000` | Structural chrome |
+| `primary-container` | `#101c2c` | Midnight Obsidian |
+| `secondary` | `#006b58` | Trust Emerald |
+| `accent` | `#16C4A4` | Mint-Teal CTAs |
+| `error` | `#ba1a1a` | Live Crimson (bidding urgency) |
+
+### Typography
+
+| Style | Font | Size | Weight |
+|-------|------|------|--------|
+| Display | Playfair Display | 48px | 700 |
+| Headline | Playfair Display | 32px | 700 |
+| Body | Inter | 16px | 400 |
+| Label | Outfit | 14px | 600 |
+| Stat | Outfit | 32px | 800 |
+
+### Spacing Scale
+
+```
+xs: 4px | sm: 8px | md: 16px | lg: 24px | xl: 32px | xxl: 64px
+```
+
+### Component Styles
+
+#### Buttons
+- **Primary:** Linear gradient (135deg, #16C4A4, #0C7B68) with teal glow on hover
+- **Secondary:** Hairline Sandstone border, 10% Mint-Teal on hover
+- **Urgent (Live Auction):** Pulsing crimson gradient for "Place Bid"
+
+#### Cards & Gallery
+- Vehicle Card: 16:10 aspect ratio, 1.03x zoom on hover
+- Spec Chips: Sandstone capsules with 11px uppercase labels
+
+#### Elevation
+- Level 0: Warm Champagne base
+- Level 1: Pure White cards with 1px Sandstone border
+- Level 2: Soft shadow `0 12px 32px rgba(10, 22, 38, 0.12)` + 6px lift
+- Level 3: Glassmorphic backdrop (8-12px blur)
+
+### Marketplace Elements
+- **Bidding Panel:** Dark surface (#0A1626) when sticky
+- **Market Pulse:** Tri-color scale (Green-Yellow-Red) for FMV comparison
+- **Verified Dealer Badge:** Emerald pill with checkmark

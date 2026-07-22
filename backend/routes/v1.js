@@ -27,6 +27,11 @@ import inspectorApplicationRoutes from "./inspectorApplicationRoutes.js";
 import referralRoutes from "./referralRoutes.js";
 import contactRoutes from "./contactRoutes.js";
 import marketRoutes from "./marketRoutes.js";
+import biddingSecurityRoutes from "./biddingSecurityRoutes.js";
+import bidLogRoutes from "./bidLogRoutes.js";
+import transactionLedgerRoutes from "./transactionLedgerRoutes.js";
+import localizationRoutes from "./localizationRoutes.js";
+import userPreferenceRoutes from "./userPreferenceRoutes.js";
 
 const router = Router();
 
@@ -56,5 +61,20 @@ router.use("/inspector-applications", inspectorApplicationRoutes);
 router.use("/referral", referralRoutes);
 router.use("/contact", contactRoutes);
 router.use("/market", marketRoutes);
+
+// Bidding Security & Deposits
+router.use("/bidding-security", biddingSecurityRoutes);
+
+// Bid Logs
+router.use("/bid-logs", bidLogRoutes);
+
+// Transaction Ledger (Immutable)
+router.use("/ledger", transactionLedgerRoutes);
+
+// Localization / i18n
+router.use("/localization", localizationRoutes);
+
+// User Preferences (Dark Mode, etc.)
+router.use("/preferences", userPreferenceRoutes);
 
 export default router;
