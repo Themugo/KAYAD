@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 import { Activity, AlertTriangle, Wifi, WifiOff, Settings, Users, Car, Shield, DollarSign, Megaphone } from 'lucide-react';
-import { ErrorBoundary } from '../../components/ErrorBoundary';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const SECTIONS = [
   { key: 'users', label: 'Users', desc: 'Manage all accounts', icon: Users, path: '/admin/users' },

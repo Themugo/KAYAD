@@ -6,7 +6,7 @@ import CompareDrawer from './components/CompareDrawer';
 import MobileBottomNav from './components/MobileBottomNav';
 import ErrorBoundary from './components/ErrorBoundary';
 import DemoModeBanner from './components/DemoModeBanner';
-import LoadingPage from './components/LoadingPage';
+import { LoadingPage } from './components/LoadingPage';
 import SWUpdateBanner from './components/SWUpdateBanner';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
@@ -120,20 +120,34 @@ interface AuthUser {
 }
 
 // Page wrapper components for backward compatibility
-function User({ children }: { children: React.ReactNode }) {
+function AuthGuard({ children }: { children: React.ReactNode }) {
   return <RequireAuth>{children}</RequireAuth>;
 }
 
-function Admin({ children }: { children: React.ReactNode }) {
+function AdminGuard({ children }: { children: React.ReactNode }) {
   return <RequireAdmin>{children}</RequireAdmin>;
 }
 
-function SecureAdmin({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
+function SecureAdminGuard({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
   return <RequireAdminPage roles={roles}>{children}</RequireAdminPage>;
 }
 
-function Dealer({ children }: { children: React.ReactNode }) {
+function DealerGuard({ children }: { children: React.ReactNode }) {
   return <RequireDealer>{children}</RequireDealer>;
+}
+
+// CarDetailRoute must be defined outside App to avoid recreation on each render
+function CarDetailRoute() {
+  const { id } = useParams();
+  const car = CARS.find((item) => String(item.id) === String(id));
+  const navigate = useNavigate();
+  const handleSetPage = (page: string) => navigate('/' + page);
+
+  if (!car) {
+    return <NotFoundPage />;
+  }
+
+  return <CarDetail car={car} setPage={handleSetPage} />;
 }
 
 
@@ -240,16 +254,6 @@ function AppContent() {
         return <Home setPage={handleSetPage} viewCar={viewCar} />;
     }
   };
-  const CarDetailRoute = () => {
-    const { id } = useParams();
-    const car = CARS.find((item) => String(item.id) === String(id));
-
-    if (!car) {
-      return <NotFoundPage />;
-    }
-
-    return <CarDetail car={car} setPage={handleSetPage} viewCar={viewCar} />;
-  };
   return (
     <>
       <Suspense fallback={<LoadingPage />}>
@@ -282,73 +286,73 @@ function AppContent() {
           <Route path="/force-password-change" element={<ForcePasswordChange />} />
 
           {/* Authenticated user pages */}
-          <Route path="/buyer" element={<User><BuyerDashboard /></User>} />
-          <Route path="/profile" element={<User><Profile setPage={handleSetPage} authUser={authUser} /></User>} />
-          <Route path="/payments" element={<User><Payments /></User>} />
-          <Route path="/chat" element={<User><Chat /></User>} />
-          <Route path="/chat/:threadId" element={<User><Chat /></User>} />
-          <Route path="/notifications" element={<User><Notifications /></User>} />
-          <Route path="/favorites" element={<User><Favorites setPage={handleSetPage} viewCar={viewCar} /></User>} />
-          <Route path="/escrow/:id" element={<User><EscrowPage /></User>} />
-          <Route path="/disputes" element={<User><DisputesPage /></User>} />
-          <Route path="/disputes/:id" element={<User><DisputeDetailPage /></User>} />
+          <Route path="/buyer" element={<AuthGuard><BuyerDashboard /></AuthGuard>} />
+          <Route path="/profile" element={<AuthGuard><Profile setPage={handleSetPage} authUser={authUser} /></AuthGuard>} />
+          <Route path="/payments" element={<AuthGuard><Payments /></AuthGuard>} />
+          <Route path="/chat" element={<AuthGuard><Chat /></AuthGuard>} />
+          <Route path="/chat/:threadId" element={<AuthGuard><Chat /></AuthGuard>} />
+          <Route path="/notifications" element={<AuthGuard><Notifications /></AuthGuard>} />
+          <Route path="/favorites" element={<AuthGuard><Favorites setPage={handleSetPage} viewCar={viewCar} /></AuthGuard>} />
+          <Route path="/escrow/:id" element={<AuthGuard><EscrowPage /></AuthGuard>} />
+          <Route path="/disputes" element={<AuthGuard><DisputesPage /></AuthGuard>} />
+          <Route path="/disputes/:id" element={<AuthGuard><DisputeDetailPage /></AuthGuard>} />
 
           {/* Inspector pages */}
-          <Route path="/inspector/apply" element={<User><InspectorApply /></User>} />
-          <Route path="/inspector" element={<User><InspectorDashboard /></User>} />
-          <Route path="/inspector/dashboard" element={<User><InspectorDashboard /></User>} />
+          <Route path="/inspector/apply" element={<AuthGuard><InspectorApply /></AuthGuard>} />
+          <Route path="/inspector" element={<AuthGuard><InspectorDashboard /></AuthGuard>} />
+          <Route path="/inspector/dashboard" element={<AuthGuard><InspectorDashboard /></AuthGuard>} />
 
           {/* Dealer/Seller pages */}
-          <Route path="/dealer" element={<Dealer><DealerDashboardPage /></Dealer>} />
+          <Route path="/dealer" element={<DealerGuard><DealerDashboardPage /></DealerGuard>} />
           <Route path="/dealer/onboarding" element={<RequireAuth><DealerOnboarding /></RequireAuth>} />
-          <Route path="/dealer/setup" element={<Dealer><DealerSetup /></Dealer>} />
-          <Route path="/dealer/add-car" element={<Dealer><AddCarPage /></Dealer>} />
-          <Route path="/dealer/edit-car/:id" element={<Dealer><EditCarPage /></Dealer>} />
-          <Route path="/dealer/edit/:id" element={<Dealer><EditCarPage /></Dealer>} />
-          <Route path="/dealer/auction-setup" element={<Dealer><DealerAuctionSetup /></Dealer>} />
-          <Route path="/dealer/auctions" element={<Dealer><DealerAuctionSetup /></Dealer>} />
-          <Route path="/dealer/analytics" element={<Dealer><DealerAnalytics /></Dealer>} />
-          <Route path="/dealer/settlement" element={<Dealer><DealerSettlement /></Dealer>} />
-          <Route path="/dealer/team" element={<Dealer><DealerTeam /></Dealer>} />
-          <Route path="/dealer/activity-log" element={<Dealer><DealerAuditLog /></Dealer>} />
-          <Route path="/dealer/settings" element={<Dealer><DealerSettings /></Dealer>} />
-          <Route path="/dealer/choose-plan" element={<Dealer><PostRegPackageSelect /></Dealer>} />
+          <Route path="/dealer/setup" element={<DealerGuard><DealerSetup /></DealerGuard>} />
+          <Route path="/dealer/add-car" element={<DealerGuard><AddCarPage /></DealerGuard>} />
+          <Route path="/dealer/edit-car/:id" element={<DealerGuard><EditCarPage /></DealerGuard>} />
+          <Route path="/dealer/edit/:id" element={<DealerGuard><EditCarPage /></DealerGuard>} />
+          <Route path="/dealer/auction-setup" element={<DealerGuard><DealerAuctionSetup /></DealerGuard>} />
+          <Route path="/dealer/auctions" element={<DealerGuard><DealerAuctionSetup /></DealerGuard>} />
+          <Route path="/dealer/analytics" element={<DealerGuard><DealerAnalytics /></DealerGuard>} />
+          <Route path="/dealer/settlement" element={<DealerGuard><DealerSettlement /></DealerGuard>} />
+          <Route path="/dealer/team" element={<DealerGuard><DealerTeam /></DealerGuard>} />
+          <Route path="/dealer/activity-log" element={<DealerGuard><DealerAuditLog /></DealerGuard>} />
+          <Route path="/dealer/settings" element={<DealerGuard><DealerSettings /></DealerGuard>} />
+          <Route path="/dealer/choose-plan" element={<DealerGuard><PostRegPackageSelect /></DealerGuard>} />
 
           {/* Admin pages */}
-          <Route path="/admin" element={<Admin><AdminDashboard /></Admin>} />
-          <Route path="/admin/users" element={<SecureAdmin roles={["superadmin","admin","technical_support","hr","moderator"]}><AdminUsers /></SecureAdmin>} />
-          <Route path="/admin/sellers" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminSellers /></SecureAdmin>} />
-          <Route path="/admin/cars" element={<SecureAdmin roles={["superadmin","admin","moderator","technical_support"]}><AdminCars /></SecureAdmin>} />
-          <Route path="/admin/moderation" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminCarModeration /></SecureAdmin>} />
-          <Route path="/admin/auctions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminAuctions /></SecureAdmin>} />
-          <Route path="/admin/bids" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBids /></SecureAdmin>} />
-          <Route path="/admin/escrows" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrows /></SecureAdmin>} />
-          <Route path="/admin/escrow-vault" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrowVault /></SecureAdmin>} />
-          <Route path="/admin/reviews" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReviews /></SecureAdmin>} />
-          <Route path="/admin/referrals" element={<SecureAdmin roles={["superadmin","admin"]}><AdminReferrals /></SecureAdmin>} />
-          <Route path="/admin/chats" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminChatModeration /></SecureAdmin>} />
-          <Route path="/admin/market-data" element={<SecureAdmin roles={["superadmin","admin"]}><AdminMarketData /></SecureAdmin>} />
-          <Route path="/admin/transactions" element={<SecureAdmin roles={["superadmin","admin","accounts","escrow_officer"]}><AdminTransactions /></SecureAdmin>} />
-          <Route path="/admin/ntsa-queue" element={<SecureAdmin roles={["superadmin","admin"]}><AdminNtsaQueue /></SecureAdmin>} />
-          <Route path="/admin/inspections" element={<SecureAdmin roles={["superadmin","admin","ghost_checker"]}><AdminInspections /></SecureAdmin>} />
-          <Route path="/admin/inspector-applications" element={<SecureAdmin><AdminInspectorApplications /></SecureAdmin>} />
-          <Route path="/admin/security-log" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSecurityLog /></SecureAdmin>} />
-          <Route path="/admin/ads" element={<SecureAdmin roles={["superadmin","admin","marketing","ad_manager"]}><AdManager /></SecureAdmin>} />
-          <Route path="/admin/settings" element={<SecureAdmin roles={["superadmin","admin"]}><AdminSettings /></SecureAdmin>} />
-          <Route path="/admin/staff" element={<SecureAdmin roles={["superadmin","admin","hr"]}><AdminStaff /></SecureAdmin>} />
-          <Route path="/admin/staff-permissions" element={<SecureAdmin roles={["superadmin","admin"]}><AdminStaffPermissions /></SecureAdmin>} />
-          <Route path="/admin/control-room" element={<SecureAdmin roles={["superadmin","admin"]}><ControlRoom /></SecureAdmin>} />
-          <Route path="/admin/panic-room" element={<SecureAdmin roles={["superadmin"]}><PanicRoom /></SecureAdmin>} />
-          <Route path="/admin/webhoist" element={<SecureAdmin roles={["superadmin"]}><WebhoistOverview /></SecureAdmin>} />
-          <Route path="/admin/operations-dashboard" element={<SecureAdmin><OperationsDashboard /></SecureAdmin>} />
-          <Route path="/admin/disputes" element={<SecureAdmin><AdminDisputes /></SecureAdmin>} />
-          <Route path="/admin/disputes/:id" element={<SecureAdmin><DisputeDetailPage /></SecureAdmin>} />
-          <Route path="/admin/auction-integrity" element={<SecureAdmin><AuctionIntegrityPage /></SecureAdmin>} />
-          <Route path="/admin/dealer-verifications" element={<SecureAdmin><AdminDealerVerifications /></SecureAdmin>} />
-          <Route path="/admin/reports" element={<SecureAdmin roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdmin>} />
-          <Route path="/admin/support-tickets" element={<SecureAdmin roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdmin>} />
-          <Route path="/admin/broadcast" element={<SecureAdmin roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdmin>} />
-          <Route path="/admin/feedback" element={<SecureAdmin roles={["superadmin","admin"]}><AdminFeedback /></SecureAdmin>} />
+          <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
+          <Route path="/admin/users" element={<SecureAdminGuard roles={["superadmin","admin","technical_support","hr","moderator"]}><AdminUsers /></SecureAdminGuard>} />
+          <Route path="/admin/sellers" element={<SecureAdminGuard roles={["superadmin","admin","hr"]}><AdminSellers /></SecureAdminGuard>} />
+          <Route path="/admin/cars" element={<SecureAdminGuard roles={["superadmin","admin","moderator","technical_support"]}><AdminCars /></SecureAdminGuard>} />
+          <Route path="/admin/moderation" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminCarModeration /></SecureAdminGuard>} />
+          <Route path="/admin/auctions" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminAuctions /></SecureAdminGuard>} />
+          <Route path="/admin/bids" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminBids /></SecureAdminGuard>} />
+          <Route path="/admin/escrows" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrows /></SecureAdminGuard>} />
+          <Route path="/admin/escrow-vault" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrowVault /></SecureAdminGuard>} />
+          <Route path="/admin/reviews" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminReviews /></SecureAdminGuard>} />
+          <Route path="/admin/referrals" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminReferrals /></SecureAdminGuard>} />
+          <Route path="/admin/chats" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminChatModeration /></SecureAdminGuard>} />
+          <Route path="/admin/market-data" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminMarketData /></SecureAdminGuard>} />
+          <Route path="/admin/transactions" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminTransactions /></SecureAdminGuard>} />
+          <Route path="/admin/ntsa-queue" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminNtsaQueue /></SecureAdminGuard>} />
+          <Route path="/admin/inspections" element={<SecureAdminGuard roles={["superadmin","admin","ghost_checker"]}><AdminInspections /></SecureAdminGuard>} />
+          <Route path="/admin/inspector-applications" element={<SecureAdminGuard><AdminInspectorApplications /></SecureAdminGuard>} />
+          <Route path="/admin/security-log" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminSecurityLog /></SecureAdminGuard>} />
+          <Route path="/admin/ads" element={<SecureAdminGuard roles={["superadmin","admin","marketing","ad_manager"]}><AdManager /></SecureAdminGuard>} />
+          <Route path="/admin/settings" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminSettings /></SecureAdminGuard>} />
+          <Route path="/admin/staff" element={<SecureAdminGuard roles={["superadmin","admin","hr"]}><AdminStaff /></SecureAdminGuard>} />
+          <Route path="/admin/staff-permissions" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminStaffPermissions /></SecureAdminGuard>} />
+          <Route path="/admin/control-room" element={<SecureAdminGuard roles={["superadmin","admin"]}><ControlRoom /></SecureAdminGuard>} />
+          <Route path="/admin/panic-room" element={<SecureAdminGuard roles={["superadmin"]}><PanicRoom /></SecureAdminGuard>} />
+          <Route path="/admin/webhoist" element={<SecureAdminGuard roles={["superadmin"]}><WebhoistOverview /></SecureAdminGuard>} />
+          <Route path="/admin/operations-dashboard" element={<SecureAdminGuard><OperationsDashboard /></SecureAdminGuard>} />
+          <Route path="/admin/disputes" element={<SecureAdminGuard><AdminDisputes /></SecureAdminGuard>} />
+          <Route path="/admin/disputes/:id" element={<SecureAdminGuard><DisputeDetailPage /></SecureAdminGuard>} />
+          <Route path="/admin/auction-integrity" element={<SecureAdminGuard><AuctionIntegrityPage /></SecureAdminGuard>} />
+          <Route path="/admin/dealer-verifications" element={<SecureAdminGuard><AdminDealerVerifications /></SecureAdminGuard>} />
+          <Route path="/admin/reports" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdminGuard>} />
+          <Route path="/admin/support-tickets" element={<SecureAdminGuard roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdminGuard>} />
+          <Route path="/admin/broadcast" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdminGuard>} />
+          <Route path="/admin/feedback" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminFeedback /></SecureAdminGuard>} />
 
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />

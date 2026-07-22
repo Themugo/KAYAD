@@ -74,6 +74,7 @@ const Badge = memo(({ variant = 'default', children, icon, className = '' }) => 
     {children}
   </span>
 ));
+Badge.displayName = 'Badge';
 
 /** Compact spec chip */
 const SpecChip = memo(({ icon: Icon, label, value }) => (
@@ -82,6 +83,7 @@ const SpecChip = memo(({ icon: Icon, label, value }) => (
     {value || label}
   </span>
 ));
+SpecChip.displayName = 'SpecChip';
 
 /** Trust signal indicator */
 const TrustSignal = memo(({ icon: Icon, label, variant = 'default' }) => (
@@ -90,6 +92,7 @@ const TrustSignal = memo(({ icon: Icon, label, variant = 'default' }) => (
     {label}
   </span>
 ));
+TrustSignal.displayName = 'TrustSignal';
 
 /** Image overlay slot positions */
 const OverlayPosition = {
@@ -105,6 +108,7 @@ const ImageOverlay = memo(({ children, position = OverlayPosition.TOP_LEFT }) =>
     {children}
   </div>
 ));
+ImageOverlay.displayName = 'ImageOverlay';
 
 // ============================================================================
 // SKELETON COMPONENT
@@ -128,6 +132,7 @@ export const VehicleCardSkeleton = memo(({ variant = 'default' }) => (
     </div>
   </div>
 ));
+VehicleCardSkeleton.displayName = 'VehicleCardSkeleton';
 
 // ============================================================================
 // MAIN COMPONENT
