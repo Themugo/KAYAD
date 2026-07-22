@@ -50,6 +50,8 @@ interface MessageHandlers {
 
 interface SocketContextValue {
   connected: boolean;
+  on: (event: string, handler: (data: any) => void) => () => void;
+  off: (event: string, handler: (data: any) => void) => void;
   joinAuction: (carId: string, handlers?: AuctionHandlers) => RealtimeChannel | undefined;
   joinNotifications: (handlers?: NotificationHandlers) => RealtimeChannel | null;
   joinMessages: (conversationId: string, handlers?: MessageHandlers) => RealtimeChannel | undefined;
@@ -66,6 +68,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const { user } = useAuth();
   const [connected, setConnected] = useState(false);
   const channelsRef = useRef<RealtimeChannel[]>([]);
+  const eventHandlersRef = useRef<Map<string, Set<(data: any) => void>>>(new Map());
 
   useEffect(() => {
     if (user) {
@@ -79,6 +82,34 @@ export function SocketProvider({ children }: SocketProviderProps) {
       channelsRef.current = [];
     };
   }, [user]);
+
+  // Event emitter interface for components that expect 'on' method
+  const on = useCallback((event: string, handler: (data: any) => void): (() => void) => {
+    if (!eventHandlersRef.current.has(event)) {
+      eventHandlersRef.current.set(event, new Set());
+    }
+    eventHandlersRef.current.get(event)!.add(handler);
+    
+    // Return unsubscribe function
+    return () => {
+      eventHandlersRef.current.get(event)?.delete(handler);
+    };
+  }, []);
+
+  const off = useCallback((event: string, handler: (data: any) => void): void => {
+    eventHandlersRef.current.get(event)?.delete(handler);
+  }, []);
+
+  // Internal method to emit events (called by Supabase subscriptions)
+  const emit = useCallback((event: string, data: any): void => {
+    eventHandlersRef.current.get(event)?.forEach(handler => {
+      try {
+        handler(data);
+      } catch (e) {
+        console.error(`Error in socket event handler for ${event}:`, e);
+      }
+    });
+  }, []);
 
   const joinAuction = useCallback((carId: string, handlers: AuctionHandlers = {}): RealtimeChannel | undefined => {
     const channel = supabase
@@ -151,6 +182,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
   return (
     <SocketCtx.Provider value={{
       connected,
+      on,
+      off,
       joinAuction,
       joinNotifications,
       joinMessages,

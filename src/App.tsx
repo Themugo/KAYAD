@@ -374,6 +374,9 @@ function AppContent() {
 }
 
 export default function App() {
+  console.log('[App] Initializing application...');
+  console.log('[App] Providers order: ThemeProvider -> ToastProvider -> BrandingProvider -> AuthProvider -> SocketProvider -> NotificationProvider -> CompareProvider');
+  
   return (
     <ErrorBoundary>
       <BrowserRouter>

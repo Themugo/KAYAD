@@ -22,7 +22,17 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Enhanced logging for debugging runtime errors
+    console.group('🚨 ErrorBoundary caught an error');
+    console.error('Error:', error);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    console.error('Component Stack:', errorInfo.componentStack);
+    console.error('Error Info:', errorInfo);
+    console.log('Location:', window.location.href);
+    console.log('User Agent:', navigator.userAgent);
+    console.groupEnd();
+    
     this.props.onError?.(error, errorInfo);
   }
 
