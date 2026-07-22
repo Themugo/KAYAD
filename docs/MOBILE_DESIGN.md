@@ -393,3 +393,59 @@ src/
 - [ ] Touch targets are visible
 - [ ] Focus order is logical
 - [ ] Animations respect reduced-motion
+
+---
+
+## Design System: Obsidian & Linen
+
+The premium automotive marketplace uses a "Digital Concierge" persona: sophisticated, precise, and authoritative. The aesthetic follows **Modern Corporate** foundation with **Minimalism** and subtle **Glassmorphism**.
+
+### Color Palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `surface` | `#fcf9f4` | Warm Champagne background |
+| `surface-container-lowest` | `#ffffff` | Elevated cards |
+| `primary` | `#000000` | Structural chrome |
+| `primary-container` | `#101c2c` | Midnight Obsidian |
+| `secondary` | `#006b58` | Trust Emerald |
+| `accent` | `#16C4A4` | Mint-Teal CTAs |
+| `error` | `#ba1a1a` | Live Crimson (bidding urgency) |
+
+### Typography
+
+| Style | Font | Size | Weight |
+|-------|------|------|--------|
+| Display | Playfair Display | 48px | 700 |
+| Headline | Playfair Display | 32px | 700 |
+| Body | Inter | 16px | 400 |
+| Label | Outfit | 14px | 600 |
+| Stat | Outfit | 32px | 800 |
+
+### Spacing Scale
+
+```
+xs: 4px | sm: 8px | md: 16px | lg: 24px | xl: 32px | xxl: 64px
+```
+
+### Component Styles
+
+#### Buttons
+- **Primary:** Linear gradient (135deg, #16C4A4, #0C7B68) with teal glow on hover
+- **Secondary:** Hairline Sandstone border, 10% Mint-Teal on hover
+- **Urgent (Live Auction):** Pulsing crimson gradient for "Place Bid"
+
+#### Cards & Gallery
+- Vehicle Card: 16:10 aspect ratio, 1.03x zoom on hover
+- Spec Chips: Sandstone capsules with 11px uppercase labels
+
+#### Elevation
+- Level 0: Warm Champagne base
+- Level 1: Pure White cards with 1px Sandstone border
+- Level 2: Soft shadow `0 12px 32px rgba(10, 22, 38, 0.12)` + 6px lift
+- Level 3: Glassmorphic backdrop (8-12px blur)
+
+### Marketplace Elements
+- **Bidding Panel:** Dark surface (#0A1626) when sticky
+- **Market Pulse:** Tri-color scale (Green-Yellow-Red) for FMV comparison
+- **Verified Dealer Badge:** Emerald pill with checkmark
