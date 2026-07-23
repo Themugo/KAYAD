@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { X } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -28,6 +29,10 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   className = '',
 }) => {
+  const focusTrapRef = useFocusTrap(isOpen);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
   // Handle escape key
   const handleEscape = useCallback(
     (e: KeyboardEvent) => {
@@ -40,12 +45,24 @@ export const Modal: React.FC<ModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // Store current focus
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+      
+      // Focus the close button after a brief delay
+      setTimeout(() => {
+        closeButtonRef.current?.focus();
+      }, 50);
     }
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = '';
+      // Restore focus
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+      }
     };
   }, [isOpen, handleEscape]);
 
@@ -139,8 +156,17 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div style={backdropStyle} onClick={closeOnBackdrop ? onClose : undefined}>
+    <div 
+      style={backdropStyle} 
+      onClick={closeOnBackdrop ? onClose : undefined}
+      role="presentation"
+    >
       <div
+        ref={focusTrapRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? 'modal-title' : undefined}
+        aria-describedby={description ? 'modal-description' : undefined}
         style={modalStyle}
         className={className}
         onClick={(e) => e.stopPropagation()}
@@ -148,14 +174,16 @@ export const Modal: React.FC<ModalProps> = ({
         {(title || showCloseButton) && (
           <div style={headerStyle}>
             <div>
-              {title && <h2 style={titleStyle}>{title}</h2>}
-              {description && <p style={descriptionStyle}>{description}</p>}
+              {title && <h2 id="modal-title" style={titleStyle}>{title}</h2>}
+              {description && <p id="modal-description" style={descriptionStyle}>{description}</p>}
             </div>
             {showCloseButton && (
               <button
+                ref={closeButtonRef}
                 style={closeButtonStyle}
                 onClick={onClose}
                 aria-label="Close modal"
+                className="hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gold-500/30"
               >
                 <X size={16} />
               </button>

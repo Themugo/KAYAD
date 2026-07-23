@@ -10,3 +10,20 @@ export { useLocalization } from './useLocalization';
 export { useMediaQuery } from './useMediaQuery';
 export { usePageMeta } from './usePageMeta';
 export { useSwipeBack } from './useSwipeBack';
+
+// Accessibility hooks
+export {
+  useFocusTrap,
+  useKeyboardNavigation,
+  useAnnounce,
+  useSkipLink,
+  useReducedMotion,
+  getAnimationClass,
+  useEscapeKey,
+  useScrollLock,
+  generateId,
+  mergeAriaProps,
+} from './useAccessibility';
+
+// Form validation
+export { useFormValidation, validators } from './useFormValidation';
