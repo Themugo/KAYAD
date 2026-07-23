@@ -2,7 +2,7 @@
 // Uses windowing technique to only render visible items + buffer
 
 import { useState, useEffect, useRef, useCallback, useMemo, memo, CSSProperties } from 'react';
-import useIntersectionObserver from '../hooks/useIntersectionObserver';
+import useIntersectionObserver from '../../../hooks/useIntersectionObserver';
 
 interface VirtualListProps<T> {
   items: T[];

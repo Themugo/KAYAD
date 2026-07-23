@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import useIntersectionObserver from '../hooks/useIntersectionObserver';
-import { getCloudinarySrcSet } from '../utils/helpers';
+import useIntersectionObserver from '../../../hooks/useIntersectionObserver';
+import { getCloudinarySrcSet } from '../../../utils/helpers';
 
 const FALLBACK_CHAIN = [
   'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop',

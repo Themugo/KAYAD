@@ -1,4 +1,4 @@
-import { SkeletonCard, SkeletonRow, SkeletonStat } from './Skeleton';
+import { SkeletonCard, SkeletonRow, SkeletonStat } from '../../Skeleton';
 
 export function LoadingPage() {
   return (

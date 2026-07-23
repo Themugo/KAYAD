@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, renderHook, act, cleanup } from '@testing-library/react';
 import { useCountdown } from '../../hooks/useCountdown';
-import { CountdownDisplay } from '../../components/CountdownDisplay';
+import { CountdownDisplay } from '../../components/features/auction/CountdownDisplay';
 
 describe('useCountdown', () => {
   beforeEach(() => { vi.useFakeTimers(); });

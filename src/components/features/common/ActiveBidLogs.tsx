@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { bidLogsAPI, formatKES } from '../api/api.exports';
+import { bidLogsAPI, formatKES } from '../../../api/api.exports';
 
 interface ActiveBidLogsProps {
   carId: string;

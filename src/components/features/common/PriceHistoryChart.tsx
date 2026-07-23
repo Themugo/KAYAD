@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatKES } from '../utils/helpers';
+import { formatKES } from '../../../utils/helpers';
 
 interface PricePoint {
   date: string;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar, Gauge, Fuel, MapPin, Shield, Gavel, ChevronRight, Heart, BarChart3 } from 'lucide-react';
-import LazyImage from './LazyImage';
-import { formatKES } from '../utils/helpers';
+import LazyImage from '../common/LazyImage';
+import { formatKES } from '../../../utils/helpers';
 
 export interface Car {
   id: number;

@@ -1,4 +1,4 @@
-import type { Car } from '../components/CarCard';
+import type { Car } from '../components/features/car/CarCard';
 
 export const CARS: Car[] = [
   {

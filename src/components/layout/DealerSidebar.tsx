@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, PlusCircle, Gavel, TrendingUp,
   DollarSign, Users, Settings, ChevronLeft, PanelRight, Award, ClipboardList, X,

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import CarGridItem from '../../components/CartyGrid';
+import CarGridItem from '../../components/features/car/CartyGrid';
 
 const mockCar = {
   _id: 'c1', title: 'Test Car', brand: 'Toyota', model: 'Hilux',

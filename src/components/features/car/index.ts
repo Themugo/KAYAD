@@ -1,8 +1,8 @@
 // Car Feature Components
 export { default as CarCard } from './CarCard';
 export { default as CartyGrid } from './CartyGrid';
-export { default as GalleryModal } from './GalleryModal';
 export { default as CompareDrawer } from './CompareDrawer';
+export { default as GalleryModal } from './GalleryModal';
 export { default as SimilarCars } from './SimilarCars';
 
 // Car Detail Components

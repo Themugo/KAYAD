@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Check, X, Clock, MessageCircle, Shield, DollarSign, Gavel } from 'lucide-react';
-import { timeAgo } from '../utils/helpers';
+import { timeAgo } from '../../../utils/helpers';
 
 interface Notification {
   id: string;

@@ -1,5 +1,5 @@
 import { TrendingUp, TrendingDown, Minus, Info } from 'lucide-react';
-import { formatKES } from '../utils/helpers';
+import { formatKES } from '../../../utils/helpers';
 
 interface ValuationData {
   make: string;

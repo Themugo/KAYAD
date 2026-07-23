@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import SearchSidebar from '../../components/SearchSidebar';
+import SearchSidebar from '../../components/features/common/SearchSidebar';
 
 const defaultFilters = {
   filter: 'all', keyword: '', brand: '', location: '', priceMin: '', priceMax: '',

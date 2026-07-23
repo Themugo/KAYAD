@@ -4,7 +4,7 @@ import {
   ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart
 } from 'lucide-react';
 import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
-import { SkeletonGrid } from '../components/SkeletonCard';
+import { SkeletonGrid } from '../components/features/common/SkeletonCard';
 import { CARS } from '../data/cars';
 import { useCompare } from '../context/CompareContext';
 

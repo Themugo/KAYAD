@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { timeAgo } from '../utils/helpers';
 import { Shield, AlertTriangle, Plus, Search, Filter } from 'lucide-react';
-import { LoadingPage } from '../components/LoadingPage';
+import { LoadingPage } from '../components/features/common/LoadingPage';
 
 const STATUS_META = {
   open:          { label: 'Open',           badge: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', icon: '🆕' },

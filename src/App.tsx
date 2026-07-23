@@ -13,7 +13,7 @@ import { SocketProvider } from './context/SocketContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { BrandingProvider } from './context/BrandingContext';
 import { CompareProvider } from './context/CompareContext';
-import { ThemeProvider } from './components/ui/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Compare from './pages/Compare';

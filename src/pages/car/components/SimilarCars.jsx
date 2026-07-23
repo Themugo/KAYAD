@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI } from '../../../api/api';
-import CartyGrid from '../../../components/CartyGrid';
+import CartyGrid from '../../../components/features/car/CartyGrid';
 import useMediaQuery from '../../../hooks/useMediaQuery';
 
 export default function SimilarCars({ carId, brand }) {

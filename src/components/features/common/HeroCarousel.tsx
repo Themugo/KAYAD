@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Shield, Star, Eye, Clock } from 'lucide-react';
-import { formatKES, timeAgo } from '../utils/helpers';
-import { carsAPI } from '../api/api';
+import { formatKES, timeAgo } from '../../../utils/helpers';
+import { carsAPI } from '../../../api/api';
 
 interface FeaturedCar {
   _id: string;

@@ -1,6 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, cleanup } from '@testing-library/react';
-import { LoadingPage, LoadingList } from '../../components/LoadingPage';
+import { LoadingPage, LoadingList } from '../../components/features/common/LoadingPage';
 
 vi.mock('../../components/Skeleton', () => ({
   SkeletonCard: () => <div data-testid="skeleton-card">Card</div>,

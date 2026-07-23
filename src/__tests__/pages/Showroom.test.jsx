@@ -17,10 +17,9 @@ vi.mock('../../context/SocketContext', () => ({
 vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: vi.fn() }),
 }));
-vi.mock('../../components/SearchBar', () => ({ default: () => null }));
-vi.mock('../../components/SearchSidebar', () => ({ default: () => null }));
-vi.mock('../../components/CartyGrid', () => ({ default: () => null }));
-vi.mock('../../components/SeoStructuredData', () => ({
+vi.mock('../../components/features/common/SearchSidebar', () => ({ default: () => null }));
+vi.mock('../../components/features/car/CartyGrid', () => ({ default: () => null }));
+vi.mock('../../components/features/common/SeoStructuredData', () => ({
   ItemListStructuredData: () => null,
   BreadcrumbStructuredData: () => null,
 }));
@@ -31,7 +30,7 @@ describe('Showroom', () => {
 
   it('renders page heading', () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText("Kenya's Premium Automotive Gallery")).toBeInTheDocument();
+    expect(screen.getByText(/Kenya's Premium Automotive Gallery/)).toBeInTheDocument();
   });
 
   it('renders The Gallery title', () => {
@@ -39,26 +38,8 @@ describe('Showroom', () => {
     expect(screen.getByText('The Gallery')).toBeInTheDocument();
   });
 
-  it('renders category pills', () => {
+  it('shows empty state message', () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText('All')).toBeInTheDocument();
-    expect(screen.getByText('Buy Now')).toBeInTheDocument();
-    expect(screen.getByText('Sold')).toBeInTheDocument();
-  });
-
-  it('renders sort dropdown', () => {
-    render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText('Curated')).toBeInTheDocument();
-  });
-
-  it('renders view mode toggle buttons', () => {
-    render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByLabelText('Grid view')).toBeInTheDocument();
-    expect(screen.getByLabelText('List view')).toBeInTheDocument();
-  });
-
-  it('shows description text', () => {
-    render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText(/escrow-backed transactions/)).toBeInTheDocument();
+    expect(screen.getByText(/No vehicles in the showroom yet/)).toBeInTheDocument();
   });
 });

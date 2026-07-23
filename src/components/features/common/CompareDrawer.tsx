@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, X, Eye } from 'lucide-react';
-import { useCompare } from '../context/CompareContext';
+import { useCompare } from '../../../context/CompareContext';
 import { CARS } from '../data/cars';
 
 function getImageSrc(img: any): string {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus, BarChart3, Clock, Target } from 'lucide-react';
-import { marketAPI } from '../api/api';
+import { marketAPI } from '../../../api/api';
 
 const fmtKES = (n) => 'KES ' + Number(n || 0).toLocaleString('en-KE');
 

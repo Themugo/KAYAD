@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Calculator, ChevronDown, ChevronUp, Info } from 'lucide-react';
-import { formatKES } from '../utils/helpers';
+import { formatKES } from '../../../utils/helpers';
 
 const BANK_RATES = [
   { name: 'KCB', rate: 0.135, years: [1, 2, 3, 4, 5] },

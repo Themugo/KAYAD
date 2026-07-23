@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react';
 import AdminSidebar from './AdminSidebar';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
 import { ChevronRight, Menu } from 'lucide-react';
 

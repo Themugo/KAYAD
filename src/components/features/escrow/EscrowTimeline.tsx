@@ -1,4 +1,4 @@
-import { timeAgo } from '../utils/helpers';
+import { timeAgo } from '../../../utils/helpers';
 import { Shield, DollarSign, Truck, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const STEP_CONFIG = [

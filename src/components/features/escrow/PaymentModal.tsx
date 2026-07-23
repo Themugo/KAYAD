@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { paymentsAPI, formatKES } from '../api/api';
-import { useSocket } from '../context/SocketContext';
-import { useToast } from '../context/ToastContext';
-import { formatPhone } from '../utils/helpers';
+import { paymentsAPI, formatKES } from '../../../api/api';
+import { useSocket } from '../../../context/SocketContext';
+import { useToast } from '../../../context/ToastContext';
+import { formatPhone } from '../../../utils/helpers';
 
 const TYPE_META: Record<string, { label: string; desc: string; sub: string }> = {
   escrow: {

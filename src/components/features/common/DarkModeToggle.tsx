@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface DarkModeToggleProps {
   size?: 'sm' | 'md' | 'lg';

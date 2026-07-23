@@ -3,6 +3,27 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 
+vi.mock('lucide-react', () => ({
+  Search: 'Search',
+  X: 'X',
+  Menu: 'Menu',
+  LogIn: 'LogIn',
+  LogOut: 'LogOut',
+  LayoutDashboard: 'LayoutDashboard',
+  ChevronDown: 'ChevronDown',
+  Home: 'Home',
+  Images: 'Images',
+  Gavel: 'Gavel',
+  Shield: 'Shield',
+  ClipboardCheck: 'ClipboardCheck',
+  MessageCircle: 'MessageCircle',
+  Tag: 'Tag',
+  Heart: 'Heart',
+  BarChart3: 'BarChart3',
+  Bell: 'Bell',
+  User: 'User',
+}));
+
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
     user: { _id: 'u1', name: 'TestUser', role: 'dealer' },
@@ -30,7 +51,7 @@ vi.mock('../../api/api', () => ({
 }));
 vi.mock('../../utils/helpers', () => ({ initials: () => 'TU' }));
 vi.mock('../../utils/authRoutes', () => ({ isSellerRole: () => false }));
-vi.mock('../../components/NotificationCenter', () => ({ default: () => null }));
+vi.mock('../../components/features/common/NotificationCenter', () => ({ default: () => null }));
 vi.mock('framer-motion', () => ({
   motion: { div: ({ children, ...p }) => <div {...p}>{children}</div> },
   AnimatePresence: ({ children }) => children,

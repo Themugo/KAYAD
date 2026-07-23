@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
-import LazyImage from './LazyImage';
+import LazyImage from '../common/LazyImage';
 
 interface CarImage {
   url?: string;

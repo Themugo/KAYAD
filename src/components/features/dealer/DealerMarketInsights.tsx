@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Camera, DollarSign, BarChart3, Lightbulb } from 'lucide-react';
-import { marketAPI } from '../api/api';
+import { marketAPI } from '../../../api/api';
 
 interface Recommendation {
   carId: string;

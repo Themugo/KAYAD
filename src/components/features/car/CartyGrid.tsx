@@ -2,7 +2,7 @@ import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Gauge, MapPin, ArrowRight } from 'lucide-react';
-import LazyImage from './LazyImage';
+import LazyImage from '../common/LazyImage';
 
 const FALLBACK = 'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1200&auto=format&fit=crop';
 
