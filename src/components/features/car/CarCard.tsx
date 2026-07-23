@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { Calendar, Gauge, Fuel, MapPin, Shield, Gavel, ChevronRight, Heart, BarChart3 } from 'lucide-react';
 import LazyImage from '../common/LazyImage';
 import { formatKES } from '../../../utils/helpers';
@@ -41,7 +41,7 @@ interface CarCardProps {
   listView?: boolean;
 }
 
-export default function CarCard({
+function CarCardComponent({
   car,
   onClick,
   onToggleCompare,
@@ -347,3 +347,22 @@ export default function CarCard({
     </div>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+const CarCard = memo(CarCardComponent, (prevProps, nextProps) => {
+  // Custom comparison - only re-render if car data or interactive states change
+  return (
+    prevProps.car.id === nextProps.car.id &&
+    prevProps.car.price === nextProps.car.price &&
+    prevProps.car.image === nextProps.car.image &&
+    prevProps.isComparing === nextProps.isComparing &&
+    prevProps.isFavorited === nextProps.isFavorited &&
+    prevProps.compareCount === nextProps.compareCount &&
+    prevProps.showCompare === nextProps.showCompare &&
+    prevProps.listView === nextProps.listView
+  );
+});
+
+CarCard.displayName = 'CarCard';
+
+export default CarCard;

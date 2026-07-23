@@ -27,3 +27,18 @@ export {
 
 // Form validation
 export { useFormValidation, validators } from './useFormValidation';
+
+// Performance optimization
+export {
+  useStableCallback,
+  useMemoized,
+  useStableRef,
+  useBatchedUpdates,
+  useThrottledCallback,
+  useDebouncedCallback,
+  useVirtualList,
+  useWindowedList,
+  useStableComparator,
+  useRenderCount,
+  usePerformanceMark,
+} from './useOptimizedCallback';
