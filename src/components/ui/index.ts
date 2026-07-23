@@ -13,5 +13,9 @@ export { Tabs, TabList, Tab, TabPanel, type TabsProps, type TabListProps, type T
 export { ThemeProvider, useTheme, type Theme, type ThemeContextValue } from './ThemeContext';
 export { ThemeToggle, type ThemeToggleProps } from './ThemeToggle';
 
+// Error & Loading Components
+export { ErrorBoundary, SectionErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+export { Skeleton, CardSkeleton, ListItemSkeleton, TableSkeleton, ProfileSkeleton, PageSkeleton, ChatSkeleton, EmptyState } from './Skeleton';
+
 // Re-export design system utilities
 export { tokens } from './tokens';

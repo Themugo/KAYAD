@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState, ComponentType } from 'react';
 import { Routes, Route, useNavigate, useLocation, BrowserRouter, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/layout/Footer';
@@ -7,6 +7,7 @@ import MobileBottomNav from './components/layout/MobileBottomNav';
 import DemoModeBanner from './components/features/common/DemoModeBanner';
 import { LoadingPage } from './components/features/common/LoadingPage';
 import SWUpdateBanner from './components/features/common/SWUpdateBanner';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -36,6 +37,9 @@ import Showroom from './pages/Showroom';
 import { CARS } from './data/cars';
 import type { User } from './types';
 import type { Car } from './components/features/car/CarCard';
+
+// Error page for catching errors
+import ServerError from './pages/ServerError';
 
 // Lazy-loaded pages for code splitting
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
@@ -384,7 +388,9 @@ export default function App() {
               <SocketProvider>
                 <NotificationProvider>
                   <CompareProvider>
-                    <AppContent />
+                    <ErrorBoundary>
+                      <AppContent />
+                    </ErrorBoundary>
                   </CompareProvider>
                 </NotificationProvider>
               </SocketProvider>
