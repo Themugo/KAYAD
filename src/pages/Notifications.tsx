@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, Check, Trash2, DollarSign, MessageCircle, Gavel, Shield, AlertCircle, Clock } from 'lucide-react';
+import { Bell, Check, Trash2, DollarSign, MessageCircle, Gavel, Shield, AlertCircle, Clock, Loader2 } from 'lucide-react';
 import { timeAgo } from '../utils/helpers';
+import { useNotifications } from '../context/NotificationContext';
 
-interface Notification {
-  id: string;
-  type: 'bid' | 'payment' | 'escrow' | 'chat' | 'auction' | 'system';
+interface NotificationItem {
+  _id: string;
+  type?: string;
   title: string;
   message: string;
   read: boolean;
@@ -13,7 +13,7 @@ interface Notification {
   link?: string;
 }
 
-const TYPE_CONFIG = {
+const TYPE_CONFIG: Record<string, { icon: any; color: string; bg: string }> = {
   bid: { icon: DollarSign, color: 'text-gold-400', bg: 'bg-gold-500/10' },
   payment: { icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   escrow: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10' },
@@ -22,89 +22,21 @@ const TYPE_CONFIG = {
   system: { icon: AlertCircle, color: 'text-warm-400', bg: 'bg-warm-500/10' },
 };
 
-const DEMO_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    type: 'auction',
-    title: 'New bid on Toyota Land Cruiser',
-    message: 'Someone placed a bid of KES 15,500,000 on this vehicle.',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-    link: '/auction/1',
-  },
-  {
-    id: '2',
-    type: 'escrow',
-    title: 'Payment received',
-    message: 'Your escrow payment of KES 12,000,000 has been confirmed.',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    link: '/escrow/1',
-  },
-  {
-    id: '3',
-    type: 'chat',
-    title: 'New message from Premium Motors',
-    message: 'Is this vehicle still available for viewing?',
-    read: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
-    link: '/chat/1',
-  },
-  {
-    id: '4',
-    type: 'bid',
-    title: 'You were outbid',
-    message: 'Someone placed a higher bid of KES 16,200,000 on Range Rover Sport.',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(),
-    link: '/auction/2',
-  },
-  {
-    id: '5',
-    type: 'payment',
-    title: 'Escrow released',
-    message: 'Funds have been successfully released to the seller.',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    link: '/escrow/2',
-  },
-  {
-    id: '6',
-    type: 'system',
-    title: 'Welcome to KAYAD',
-    message: 'Thank you for joining Kenya\'s premier vehicle marketplace.',
-    read: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-  },
-];
-
 export default function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>(DEMO_NOTIFICATIONS);
+  const { notifications, unreadCount, loading, markAsRead, markAllRead, deleteNotif } = useNotifications();
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
-    );
-  };
-
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
-
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  const clearAll = () => {
-    setNotifications([]);
-  };
-
-  const getIcon = (type: Notification['type']) => {
-    const config = TYPE_CONFIG[type] || TYPE_CONFIG.system;
+  const getIcon = (type?: string) => {
+    const config = TYPE_CONFIG[type || 'system'] || TYPE_CONFIG.system;
     return { Icon: config.icon, color: config.color, bg: config.bg };
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream-50 pt-16 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-gold-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -147,14 +79,14 @@ export default function Notifications() {
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-cream-200 overflow-hidden">
-            {notifications.map((n, idx) => {
+            {notifications.map((n) => {
               const { Icon, color, bg } = getIcon(n.type);
               const content = (
                 <div
                   className={`px-5 py-4 flex gap-4 hover:bg-cream-50 transition-colors cursor-pointer border-b border-cream-100 last:border-0 ${
                     !n.read ? 'bg-gold-500/3' : ''
                   }`}
-                  onClick={() => markAsRead(n.id)}
+                  onClick={() => markAsRead(n._id)}
                 >
                   {/* Icon */}
                   <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center flex-shrink-0`}>
@@ -172,14 +104,14 @@ export default function Notifications() {
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <button
-                          onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}
+                          onClick={(e) => { e.stopPropagation(); markAsRead(n._id); }}
                           className="p-1.5 text-warm-300 hover:text-gold-500 transition-colors"
                           title="Mark as read"
                         >
                           <Check size={14} />
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                          onClick={(e) => { e.stopPropagation(); deleteNotif(n._id); }}
                           className="p-1.5 text-warm-300 hover:text-red-500 transition-colors"
                           title="Delete"
                         >
@@ -202,24 +134,24 @@ export default function Notifications() {
 
               if (n.link) {
                 return (
-                  <Link key={n.id} to={n.link} className="block no-underline">
+                  <Link key={n._id} to={n.link} className="block no-underline">
                     {content}
                   </Link>
                 );
               }
 
-              return <div key={n.id}>{content}</div>;
+              return <div key={n._id}>{content}</div>;
             })}
           </div>
         )}
 
-        {notifications.length > 0 && (
+        {notifications.length > 0 && unreadCount > 0 && (
           <div className="mt-6 text-center">
             <button
-              onClick={clearAll}
+              onClick={markAllRead}
               className="text-sm text-warm-400 hover:text-warm-600 font-medium transition-colors"
             >
-              Clear all notifications
+              Mark all as read
             </button>
           </div>
         )}

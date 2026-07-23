@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { MessageCircle, Phone, Mail, Clock, Send, HeadphonesIcon } from 'lucide-react';
+import { MessageCircle, Phone, Mail, Clock, Send, HeadphonesIcon, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { supportAPI } from '../api/api';
 import SEOHead from '../components/features/common/SEOHead';
 
 export default function Support() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [message, setMessage] = useState('');
   const [subject, setSubject] = useState('');
   const [category, setCategory] = useState('general');
@@ -17,13 +20,19 @@ export default function Support() {
 
     setLoading(true);
     try {
-      // TODO: Implement support ticket submission
-      console.log('Submitting support ticket:', { subject, message, category });
+      await supportAPI.create({
+        subject: subject.trim(),
+        message: message.trim(),
+        category,
+        email: user?.email,
+        userId: user?._id || user?.id,
+      });
+      toast.success('Support ticket submitted successfully');
       setSubmitted(true);
       setMessage('');
       setSubject('');
     } catch (error) {
-      console.error('Failed to submit support ticket:', error);
+      toast.error('Failed to submit support ticket. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -176,7 +185,7 @@ export default function Support() {
                   disabled={loading || !message.trim() || !subject.trim()}
                   className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  <Send className="h-4 w-4" />
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   {loading ? 'Submitting...' : 'Submit Request'}
                 </button>
               </form>

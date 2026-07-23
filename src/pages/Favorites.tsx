@@ -1,99 +1,65 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowLeft, Trash2, Bell, ArrowRight } from 'lucide-react';
+import { Heart, ArrowLeft, Trash2, Bell, ArrowRight, Loader2 } from 'lucide-react';
+import { favoritesAPI } from '../api/api';
+import { useToast } from '../context/ToastContext';
 
 interface FavoritesProps {
   setPage: (page: string) => void;
   viewCar: (car: any) => void;
 }
 
-// Demo favorites for when API is not available
-const DEMO_FAVORITES = [
-  {
-    id: 1,
-    make: 'Toyota',
-    model: 'Land Cruiser GX-R 2024',
-    price: 18500000,
-    year: 2024,
-    mileage: '12,500 km',
-    fuel: 'Petrol',
-    city: 'Nairobi',
-    type: 'SUV' as const,
-    badges: ['escrow', 'verified'] as const,
-    image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-    priceAlert: true,
-  },
-  {
-    id: 2,
-    make: 'Mercedes-Benz',
-    model: 'GLE 450 2023',
-    price: 14200000,
-    year: 2023,
-    mileage: '8,200 km',
-    fuel: 'Petrol',
-    city: 'Mombasa',
-    type: 'SUV' as const,
-    badges: ['escrow'] as const,
-    image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-    priceAlert: false,
-  },
-  {
-    id: 5,
-    make: 'Range Rover',
-    model: 'Sport HSE 2023',
-    price: 16800000,
-    year: 2023,
-    mileage: '15,800 km',
-    fuel: 'Diesel',
-    city: 'Nairobi',
-    type: 'SUV' as const,
-    badges: ['auction', 'escrow'] as const,
-    image: 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?w=600&h=400&fit=crop',
-    savedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    priceAlert: true,
-  },
-];
-
 export default function Favorites({ setPage, viewCar }: FavoritesProps) {
-  const [favorites, setFavorites] = useState(DEMO_FAVORITES);
-  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+  const [favorites, setFavorites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Try to fetch from API
   useEffect(() => {
     const fetchFavorites = async () => {
+      setLoading(true);
       try {
-        const response = await fetch('/api/favorites', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.favorites?.length > 0) {
-            setFavorites(data.favorites.map((f: any) => ({
-              ...f.car,
-              id: f.car?._id || f.car?.id,
-              savedAt: f.createdAt,
-              priceAlert: f.notifyOnPriceDrop,
-            })));
-          }
-        }
-      } catch {
-        // API not available, use demo data
+        const data = await favoritesAPI.list();
+        const favs = (data.favorites || data || []).map((f: any) => ({
+          ...f.car,
+          id: f.car?._id || f.car?.id || f.favoriteId,
+          savedAt: f.createdAt,
+          priceAlert: f.notifyOnPriceDrop || false,
+        }));
+        setFavorites(favs);
+      } catch (err) {
+        console.error('Failed to load favorites:', err);
+        toast.error('Failed to load favorites');
+      } finally {
+        setLoading(false);
       }
     };
     fetchFavorites();
   }, []);
 
-  const removeFavorite = (id: number) => {
-    setFavorites(prev => prev.filter(f => f.id !== id));
+  const removeFavorite = async (id: string | number) => {
+    try {
+      await favoritesAPI.remove(String(id));
+      setFavorites(prev => prev.filter(f => f.id !== id));
+      toast.success('Removed from favorites');
+    } catch (err) {
+      toast.error('Failed to remove favorite');
+    }
   };
 
-  const togglePriceAlert = (id: number) => {
-    setFavorites(prev => prev.map(f => 
-      f.id === id ? { ...f, priceAlert: !f.priceAlert } : f
-    ));
+  const togglePriceAlert = async (id: string | number, currentState: boolean) => {
+    try {
+      await favoritesAPI.setPriceAlert(String(id), !currentState);
+      setFavorites(prev => prev.map(f => 
+        f.id === id ? { ...f, priceAlert: !currentState } : f
+      ));
+      toast.success(!currentState ? 'Price alert enabled' : 'Price alert disabled');
+    } catch (err) {
+      toast.error('Failed to update price alert');
+    }
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Recently';
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -104,6 +70,14 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString('en-KE', { month: 'short', day: 'numeric' });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream-50 pt-16 flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-gold-500 animate-spin" />
+      </div>
+    );
+  }
 
   if (favorites.length === 0) {
     return (
@@ -224,7 +198,7 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
                   <div className="mt-auto pt-4 border-t border-cream-200 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <button
-                        onClick={() => togglePriceAlert(favorite.id)}
+                        onClick={() => togglePriceAlert(favorite.id, favorite.priceAlert)}
                         className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
                           favorite.priceAlert 
                             ? 'text-emerald-600' 
