@@ -1,7 +1,7 @@
 import { TimerReset, XCircle } from 'lucide-react';
 import { formatKES } from '../../../api/api';
 import { useCountdown } from '../../../hooks/useCountdown';
-import { CountdownDisplay } from '../../../components/CountdownDisplay';
+import { CountdownDisplay } from '../../../components/features/auction/CountdownDisplay';
 import DealerAuctionStatusPill from './DealerAuctionStatusPill';
 import DealerAuctionCarIdentity from './DealerAuctionCarIdentity';
 

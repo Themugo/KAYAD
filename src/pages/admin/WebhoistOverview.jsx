@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI } from '../../api/api';
 import { Crown, Activity, ShieldCheck, RefreshCw } from 'lucide-react';
-import { StatTile, MiniBarChart, BreakdownBars } from '../../components/AdminWidgets';
+import { StatTile, MiniBarChart, BreakdownBars } from '../../components/features/admin/AdminWidgets';
 
 export default function WebhoistOverview() {
   const [stats, setStats] = useState(null);

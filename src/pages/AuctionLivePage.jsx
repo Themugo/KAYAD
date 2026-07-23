@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
 import { CountdownDisplay } from '../hooks/useCountdown';
-import PaymentModal from '../components/PaymentModal';
+import PaymentModal from '../components/features/escrow/PaymentModal';
 
 export default function AuctionLivePage() {
   const { id } = useParams();

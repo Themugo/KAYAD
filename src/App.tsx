@@ -1,12 +1,12 @@
 import { lazy, Suspense, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, BrowserRouter, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import CompareDrawer from './components/CompareDrawer';
-import MobileBottomNav from './components/MobileBottomNav';
-import DemoModeBanner from './components/DemoModeBanner';
-import { LoadingPage } from './components/LoadingPage';
-import SWUpdateBanner from './components/SWUpdateBanner';
+import Footer from './components/layout/Footer';
+import CompareDrawer from './components/features/car/CompareDrawer';
+import MobileBottomNav from './components/layout/MobileBottomNav';
+import DemoModeBanner from './components/features/common/DemoModeBanner';
+import { LoadingPage } from './components/features/common/LoadingPage';
+import SWUpdateBanner from './components/features/common/SWUpdateBanner';
 import { ToastProvider } from './context/ToastContext';
 import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -35,7 +35,7 @@ import SignIn from './pages/SignIn';
 import Showroom from './pages/Showroom';
 import { CARS } from './data/cars';
 import type { User } from './types';
-import type { Car } from './components/VehicleCard/VehicleCard';
+import type { Car } from './components/features/car/CarCard';
 
 // Lazy-loaded pages for code splitting
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));

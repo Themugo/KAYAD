@@ -1,7 +1,7 @@
 import '../../../styles/dashboard.css';
 import { Link } from 'react-router-dom';
 import { StatCard, QuickLink, BidStatusBadge, TimeRemaining } from './BuyerWidgets';
-import { MiniBarChart, BreakdownBars } from '../../../components/AdminWidgets';
+import { MiniBarChart, BreakdownBars } from '../../../components/features/admin/AdminWidgets';
 
 export default function BuyerOverviewTab({
   favorites, escrows, payments, myBids, chats, watchlist, trending, trendingLoading, onSetTab,

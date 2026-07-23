@@ -24,6 +24,7 @@ vi.mock('../../context/ToastContext', () => ({
 vi.mock('../../utils/helpers', () => ({
   timeAgo: () => '2mo ago',
   formatDate: () => 'Jan 15, 2024',
+  formatKES: (v) => `KES ${(v / 1000).toFixed(0)}K`,
 }));
 
 describe('EscrowPage', () => {

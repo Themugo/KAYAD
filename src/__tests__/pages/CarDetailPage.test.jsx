@@ -66,7 +66,7 @@ vi.mock('../../components/TcoCalculator', () => ({ default: () => null }));
 vi.mock('../../components/MarketValuationMatrix', () => ({ default: () => null }));
 vi.mock('../../components/MarketPulse', () => ({ default: () => null }));
 vi.mock('../../components/PriceHistoryChart', () => ({ default: () => null }));
-vi.mock('../../components/GalleryModal', () => ({ default: () => null }));
+vi.mock('../../components/features/car/GalleryModal', () => ({ default: () => null }));
 vi.mock('../../components/SeoStructuredData', () => ({
   VehicleStructuredData: () => null,
   BreadcrumbStructuredData: () => null,

@@ -1,4 +1,4 @@
-import { MiniBarChart, BreakdownBars } from '../../../components/AdminWidgets';
+import { MiniBarChart, BreakdownBars } from '../../../components/features/admin/AdminWidgets';
 
 export default function AdminChartsRow({ stats }) {
   const s = stats || {};

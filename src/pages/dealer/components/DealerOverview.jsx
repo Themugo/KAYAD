@@ -10,7 +10,7 @@ import {
   TrendingUp, ChevronRight, Activity, Package, ArrowUpRight,
 } from 'lucide-react';
 import { StatCard, StatusBadge, DemoBadge, MiniBarChart, timeAgo } from './DashboardWidgets';
-import DealerMarketInsights from '../../../components/DealerMarketInsights';
+import DealerMarketInsights from '../../../components/features/dealer/DealerMarketInsights';
 import { DealerKPIRow } from './DealerKPIWidgets';
 import ConversionFunnelDashboard from './ConversionFunnelDashboard';
 

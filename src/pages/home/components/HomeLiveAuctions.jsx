@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import CartyGrid from '../../../components/CartyGrid';
+import CartyGrid from '../../../components/features/car/CartyGrid';
 
 function LiveCountdown({ endTime }) {
   const [timeStr, setTimeStr] = useState('');

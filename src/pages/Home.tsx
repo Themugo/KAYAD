@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
-import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
-import HeroCarousel from '../components/HeroCarousel';
+import VehicleCard, { type Car } from '../components/features/car/CarCard';
+import HeroCarousel from '../components/features/common/HeroCarousel';
 import { CARS } from '../data/cars';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';

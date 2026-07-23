@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import CarCard from '../../components/CarCard';
+import CarCard from '../../components/features/car/CarCard';
 
 vi.mock('../../api/api', () => ({
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),

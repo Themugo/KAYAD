@@ -7,7 +7,7 @@ import {
   Plus, Eye, MessageSquare, DollarSign, TrendingUp, TrendingDown,
   Car, Users, Star, Settings, BarChart3, Bell, Zap, ArrowUp, ChevronRight
 } from 'lucide-react';
-import { DealerHub, DealerMetric, DealerAction, DealerFunnel, DealerLeadsTable, DealerInventoryCard } from '../../components/dealer';
+import { DealerHub, DealerMetric, DealerAction, DealerFunnel, DealerLeadsTable, DealerInventoryCard } from '../../components/features/dealer';
 import '../../styles/dealer.css';
 
 export default function DealerDashboard() {

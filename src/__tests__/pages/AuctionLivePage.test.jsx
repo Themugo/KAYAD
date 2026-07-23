@@ -24,7 +24,7 @@ vi.mock('../../components/CountdownDisplay', () => ({ CountdownDisplay: () => nu
 vi.mock('../../components/BackButton', () => ({ default: () => null }));
 vi.mock('../../components/WinnerModal', () => ({ default: () => null }));
 vi.mock('../../components/MarketValuationMatrix', () => ({ default: () => null }));
-vi.mock('../../components/GalleryModal', () => ({ default: () => null }));
+vi.mock('../../components/features/car/GalleryModal', () => ({ default: () => null }));
 vi.mock('../../pages/auction/components/AuctionEffects', () => ({
   AVATAR_COLORS: [],
   hashColor: () => '#000',
