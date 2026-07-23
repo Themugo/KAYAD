@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Gavel, Clock, TrendingUp, Users, Shield, ChevronRight, Zap } from 'lucide-react';
-import { CARS } from '../data/cars';
+import { useNavigate } from 'react-router-dom';
+import { Gavel, Clock, TrendingUp, Users, Shield, ChevronRight, Zap, Loader2 } from 'lucide-react';
+import { auctionAPI } from '../api/api';
 
 interface AuctionItem {
-  id: number;
+  id: string;
   make: string;
   model: string;
   year: number;
@@ -13,20 +14,8 @@ interface AuctionItem {
   bids: number;
   endsIn: number; // seconds
   featured: boolean;
+  _id?: string;
 }
-
-const AUCTIONS: AuctionItem[] = CARS.filter(c => c.badges.includes('auction')).map((c, i) => ({
-  id: c.id,
-  make: c.make,
-  model: c.model,
-  year: c.year,
-  image: c.image,
-  startingBid: Math.round(c.price * 0.8),
-  currentBid: Math.round(c.price * 0.91 + i * 200000),
-  bids: 7 + i * 3,
-  endsIn: 3600 * (i + 1) + 1200 * i,
-  featured: i === 0,
-}));
 
 function Countdown({ seconds }: { seconds: number }) {
   const [remaining, setRemaining] = useState(seconds);
@@ -56,7 +45,46 @@ function Countdown({ seconds }: { seconds: number }) {
 }
 
 export default function Auction() {
-  const [bidding, setBidding] = useState<number | null>(null);
+  const [auctions, setAuctions] = useState<AuctionItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bidding, setBidding] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadAuctions = async () => {
+      setLoading(true);
+      try {
+        const data = await auctionAPI.active({ limit: 20 });
+        // Transform API response to AuctionItem format
+        const auctionList: AuctionItem[] = (data.auctions || data || []).map((a: any, i: number) => ({
+          id: a._id || a.id || String(i),
+          _id: a._id,
+          make: a.car?.brand || a.brand || 'Unknown',
+          model: a.car?.model || a.title || 'Vehicle',
+          year: a.car?.year || a.year || 2024,
+          image: a.car?.images?.[0] || a.images?.[0] || a.car?.image || '',
+          startingBid: a.startingBid || Math.round((a.currentBid || a.price) * 0.8),
+          currentBid: a.currentBid || a.price || 0,
+          bids: a.bidsCount || a.bids || 0,
+          endsIn: a.endsIn || calculateSecondsRemaining(a.auctionEnd || a.endTime),
+          featured: i === 0,
+        }));
+        setAuctions(auctionList);
+      } catch (err) {
+        console.error('Failed to load auctions:', err);
+        setAuctions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadAuctions();
+  }, []);
+
+  const calculateSecondsRemaining = (endTime: string): number => {
+    if (!endTime) return 3600 * 24; // Default 24 hours
+    const diff = new Date(endTime).getTime() - Date.now();
+    return Math.max(0, Math.floor(diff / 1000));
+  };
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -70,7 +98,7 @@ export default function Auction() {
           </p>
           <div className="flex flex-wrap gap-6 mt-8">
             {[
-              { icon: Zap, label: 'Live Right Now', value: `${AUCTIONS.length} Active Lots` },
+              { icon: Zap, label: 'Live Right Now', value: `${auctions.length} Active Lots` },
               { icon: Users, label: 'Registered Bidders', value: '340+' },
               { icon: Shield, label: 'Escrow Protected', value: '100% of Lots' },
             ].map(({ icon: Icon, label, value }) => (
@@ -89,94 +117,109 @@ export default function Auction() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {AUCTIONS.map(item => (
-            <div
-              key={item.id}
-              className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-                item.featured ? 'border-gold-500/50 ring-1 ring-gold-500/20' : 'border-cream-200'
-              }`}
-            >
-              {/* Image */}
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img src={item.image} alt={`${item.make} ${item.model}`} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-dark-gradient" />
-                {item.featured && (
-                  <div className="absolute top-3 left-3 bg-gold-600 text-white font-sans text-xs font-bold px-2.5 py-1 rounded flex items-center gap-1">
-                    <Zap size={10} /> FEATURED LOT
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-12 h-12 text-gold-500 animate-spin" />
+          </div>
+        ) : auctions.length === 0 ? (
+          <div className="text-center py-20">
+            <Gavel className="w-16 h-16 text-cream-300 mx-auto mb-4" />
+            <h3 className="font-serif text-2xl text-charcoal-900 font-bold mb-2">No active auctions</h3>
+            <p className="font-sans text-warm-400 mb-6">Check back soon for new listings</p>
+            <button onClick={() => navigate('/gallery')} className="btn-gold">
+              Browse All Vehicles
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {auctions.map(item => (
+              <div
+                key={item.id}
+                className={`bg-white rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                  item.featured ? 'border-gold-500/50 ring-1 ring-gold-500/20' : 'border-cream-200'
+                }`}
+              >
+                {/* Image */}
+                <div className="relative aspect-[16/9] overflow-hidden cursor-pointer" onClick={() => navigate(`/auction/${item._id || item.id}`)}>
+                  <img src={item.image} alt={`${item.make} ${item.model}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-dark-gradient" />
+                  {item.featured && (
+                    <div className="absolute top-3 left-3 bg-gold-600 text-white font-sans text-xs font-bold px-2.5 py-1 rounded flex items-center gap-1">
+                      <Zap size={10} /> FEATURED LOT
+                    </div>
+                  )}
+                  <div className="absolute top-3 right-3 bg-charcoal-900/90 text-white font-sans text-xs font-bold px-2.5 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
+                    <Gavel size={10} /> AUCTION
                   </div>
-                )}
-                <div className="absolute top-3 right-3 bg-charcoal-900/90 text-white font-sans text-xs font-bold px-2.5 py-1 rounded flex items-center gap-1 backdrop-blur-sm">
-                  <Gavel size={10} /> AUCTION
+                  {/* Countdown */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 bg-charcoal-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      <Clock size={12} className="text-gold-400" />
+                      <span className="font-sans text-xs text-white/70">Ends in</span>
+                    </div>
+                    <Countdown seconds={item.endsIn} />
+                  </div>
                 </div>
-                {/* Countdown */}
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 bg-charcoal-900/80 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                    <Clock size={12} className="text-gold-400" />
-                    <span className="font-sans text-xs text-white/70">Ends in</span>
+
+                {/* Details */}
+                <div className="p-5">
+                  <p className="section-label mb-1">{item.make}</p>
+                  <h3 className="font-serif text-xl text-charcoal-900 font-semibold mb-4">{item.model} {item.year}</h3>
+
+                  <div className="grid grid-cols-2 gap-4 mb-5">
+                    <div className="bg-cream-100 rounded-xl p-3">
+                      <p className="font-sans text-[10px] text-warm-400 tracking-wider uppercase mb-1">Starting Bid</p>
+                      <p className="font-sans text-sm font-semibold text-charcoal-800">
+                        KES {item.startingBid.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-gold-500/10 rounded-xl p-3">
+                      <p className="font-sans text-[10px] text-gold-600 tracking-wider uppercase mb-1 flex items-center gap-1">
+                        <TrendingUp size={9} /> Current Bid
+                      </p>
+                      <p className="font-sans text-sm font-bold text-gold-600">
+                        KES {item.currentBid.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <Countdown seconds={item.endsIn} />
+
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="font-sans text-xs text-warm-400">{item.bids} bids placed</span>
+                    <span className="font-sans text-xs text-green-600 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      Live
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => setBidding(bidding === item.id ? null : item.id)}
+                    className={`w-full font-sans text-sm font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
+                      bidding === item.id
+                        ? 'bg-charcoal-800 text-white'
+                        : 'bg-gold-600 text-white hover:bg-gold-700'
+                    }`}
+                  >
+                    <Gavel size={15} />
+                    {bidding === item.id ? 'Cancel Bid' : 'Place Bid'}
+                  </button>
+
+                  {bidding === item.id && (
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        type="number"
+                        placeholder={`Min: ${(item.currentBid + 50000).toLocaleString()}`}
+                        className="flex-1 px-3 py-2 bg-cream-100 border border-cream-300 rounded-lg font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500"
+                      />
+                      <button className="btn-gold px-4 py-2 text-sm rounded-lg">
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Details */}
-              <div className="p-5">
-                <p className="section-label mb-1">{item.make}</p>
-                <h3 className="font-serif text-xl text-charcoal-900 font-semibold mb-4">{item.model} {item.year}</h3>
-
-                <div className="grid grid-cols-2 gap-4 mb-5">
-                  <div className="bg-cream-100 rounded-xl p-3">
-                    <p className="font-sans text-[10px] text-warm-400 tracking-wider uppercase mb-1">Starting Bid</p>
-                    <p className="font-sans text-sm font-semibold text-charcoal-800">
-                      KES {item.startingBid.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="bg-gold-500/10 rounded-xl p-3">
-                    <p className="font-sans text-[10px] text-gold-600 tracking-wider uppercase mb-1 flex items-center gap-1">
-                      <TrendingUp size={9} /> Current Bid
-                    </p>
-                    <p className="font-sans text-sm font-bold text-gold-600">
-                      KES {item.currentBid.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-sans text-xs text-warm-400">{item.bids} bids placed</span>
-                  <span className="font-sans text-xs text-green-600 font-semibold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    Live
-                  </span>
-                </div>
-
-                <button
-                  onClick={() => setBidding(bidding === item.id ? null : item.id)}
-                  className={`w-full font-sans text-sm font-semibold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
-                    bidding === item.id
-                      ? 'bg-charcoal-800 text-white'
-                      : 'bg-gold-600 text-white hover:bg-gold-700'
-                  }`}
-                >
-                  <Gavel size={15} />
-                  {bidding === item.id ? 'Cancel Bid' : 'Place Bid'}
-                </button>
-
-                {bidding === item.id && (
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      type="number"
-                      placeholder={`Min: ${(item.currentBid + 50000).toLocaleString()}`}
-                      className="flex-1 px-3 py-2 bg-cream-100 border border-cream-300 rounded-lg font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500"
-                    />
-                    <button className="btn-gold px-4 py-2 text-sm rounded-lg">
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Auction rules */}
         <div className="mt-12 bg-charcoal-900 rounded-2xl p-8">

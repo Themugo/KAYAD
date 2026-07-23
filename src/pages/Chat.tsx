@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { Send, Paperclip, Phone, MoreVertical, Search, ArrowLeft, Image } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Send, Paperclip, Phone, MoreVertical, Search, ArrowLeft, Image, Loader2 } from 'lucide-react';
 import { formatKES } from '../utils/helpers';
+import { chatAPI } from '../api/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Message {
   id: string;
@@ -25,72 +27,131 @@ interface Conversation {
   };
 }
 
-// Demo conversations
-const DEMO_CONVERSATIONS: Conversation[] = [
-  {
-    id: '1',
-    name: 'Premium Motors KE',
-    lastMessage: 'The vehicle is still available for viewing',
-    time: '2 min ago',
-    unread: 2,
-    online: true,
-    car: {
-      title: 'Toyota Land Cruiser GX-R 2024',
-      price: 18500000,
-      image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=100&h=100&fit=crop',
-    },
-  },
-  {
-    id: '2',
-    name: 'Auto Gallery Nairobi',
-    lastMessage: 'Thank you for your interest!',
-    time: '1 hour ago',
-    unread: 0,
-    online: false,
-  },
-  {
-    id: '3',
-    name: 'James Kimani',
-    lastMessage: 'Can I see the service history?',
-    time: '3 hours ago',
-    unread: 1,
-    online: true,
-    car: {
-      title: 'Mercedes GLE 450 2023',
-      price: 14200000,
-      image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=100&h=100&fit=crop',
-    },
-  },
-];
-
-const DEMO_MESSAGES: Record<string, Message[]> = {
-  '1': [
-    { id: '1', sender: 'them', text: 'Hello! Thank you for your interest in our Toyota Land Cruiser.', time: '10:30 AM', read: true },
-    { id: '2', sender: 'me', text: 'Hi, is the vehicle still available?', time: '10:32 AM', read: true },
-    { id: '3', sender: 'them', text: 'Yes, it is still available. Would you like to schedule a viewing?', time: '10:33 AM', read: true },
-    { id: '4', sender: 'me', text: 'Definitely! When would be a good time?', time: '10:35 AM', read: true },
-    { id: '5', sender: 'them', text: 'The vehicle is still available for viewing. We are open Mon-Sat 9am-6pm.', time: '10:36 AM', read: false },
-  ],
-};
-
 export default function Chat() {
-  const [conversations, setConversations] = useState(DEMO_CONVERSATIONS);
-  const [selectedId, setSelectedId] = useState<string | null>('1');
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedConversation = conversations.find(c => c.id === selectedId);
-  const messages = DEMO_MESSAGES[selectedId || '1'] || [];
 
-  const sendMessage = () => {
-    if (!message.trim()) return;
-    // In real app, this would send to API
-    setMessage('');
+  // Load conversations on mount
+  useEffect(() => {
+    const loadConversations = async () => {
+      setLoading(true);
+      try {
+        const data = await chatAPI.inbox();
+        // Transform API response to Conversation format
+        const convs: Conversation[] = (data.chats || data || []).map((chat: any) => ({
+          id: chat._id || chat.id,
+          name: chat.otherUser?.name || chat.name || 'Unknown',
+          avatar: chat.otherUser?.avatar,
+          lastMessage: chat.lastMessage?.text || chat.lastMessage || '',
+          time: chat.lastMessage?.createdAt ? timeAgo(chat.lastMessage.createdAt) : '',
+          unread: chat.unreadCount || 0,
+          online: chat.otherUser?.online || false,
+          car: chat.car ? {
+            title: chat.car.title || chat.car.name,
+            price: chat.car.price,
+            image: chat.car.images?.[0] || chat.car.image,
+          } : undefined,
+        }));
+        setConversations(convs);
+        if (convs.length > 0 && !selectedId) {
+          setSelectedId(convs[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load conversations:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadConversations();
+  }, []);
+
+  // Load messages when conversation selected
+  useEffect(() => {
+    if (!selectedId) return;
+    
+    const loadMessages = async () => {
+      setLoadingMessages(true);
+      try {
+        const data = await chatAPI.messages(selectedId, { limit: 50 });
+        const msgs: Message[] = (data.messages || data || []).map((msg: any) => ({
+          id: msg._id || msg.id,
+          sender: msg.senderId === user?.id ? 'me' : 'them',
+          text: msg.text || msg.content,
+          time: formatMessageTime(msg.createdAt),
+          read: msg.read || false,
+        }));
+        setMessages(msgs);
+        // Mark as seen
+        chatAPI.seen(selectedId).catch(console.error);
+      } catch (err) {
+        console.error('Failed to load messages:', err);
+      } finally {
+        setLoadingMessages(false);
+      }
+    };
+    loadMessages();
+  }, [selectedId, user?.id]);
+
+  // Scroll to bottom on new messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async () => {
+    if (!message.trim() || !selectedId) return;
+    setSending(true);
+    try {
+      await chatAPI.send(selectedId, { text: message });
+      // Optimistically add message
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        sender: 'me',
+        text: message,
+        time: formatMessageTime(new Date().toISOString()),
+        read: false,
+      }]);
+      setMessage('');
+      // Update conversation last message
+      setConversations(prev => prev.map(c => 
+        c.id === selectedId 
+          ? { ...c, lastMessage: message, unread: 0 }
+          : c
+      ));
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    } finally {
+      setSending(false);
+    }
   };
 
   const filteredConversations = conversations.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const timeAgo = (date: string) => {
+    const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    return `${Math.floor(seconds / 86400)} days ago`;
+  };
+
+  const formatMessageTime = (date: string) => {
+    return new Date(date).toLocaleTimeString('en-KE', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16 flex">
@@ -113,7 +174,16 @@ export default function Chat() {
 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
-          {filteredConversations.map(conv => (
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
+            </div>
+          ) : filteredConversations.length === 0 ? (
+            <div className="p-8 text-center">
+              <p className="text-warm-400 text-sm">No conversations yet</p>
+            </div>
+          ) : (
+            filteredConversations.map(conv => (
             <button
               key={conv.id}
               onClick={() => setSelectedId(conv.id)}
@@ -151,7 +221,8 @@ export default function Chat() {
                 )}
               </div>
             </button>
-          ))}
+          ))
+          )}
         </div>
       </div>
 
@@ -197,27 +268,40 @@ export default function Chat() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map(msg => (
-                <div
-                  key={msg.id}
-                  className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
-                      msg.sender === 'me'
-                        ? 'bg-charcoal-900 text-white rounded-br-md'
-                        : 'bg-cream-100 text-charcoal-800 rounded-bl-md'
-                    }`}
-                  >
-                    <p className="font-sans text-sm">{msg.text}</p>
-                    <p className={`font-sans text-[10px] mt-1 ${
-                      msg.sender === 'me' ? 'text-white/40' : 'text-warm-400'
-                    }`}>
-                      {msg.time} {msg.sender === 'me' && msg.read && '· Read'}
-                    </p>
-                  </div>
+              {loadingMessages ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
                 </div>
-              ))}
+              ) : messages.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-warm-400 text-sm">No messages yet</p>
+                </div>
+              ) : (
+                <>
+                  {messages.map(msg => (
+                    <div
+                      key={msg.id}
+                      className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[75%] px-4 py-2.5 rounded-2xl ${
+                          msg.sender === 'me'
+                            ? 'bg-charcoal-900 text-white rounded-br-md'
+                            : 'bg-cream-100 text-charcoal-800 rounded-bl-md'
+                        }`}
+                      >
+                        <p className="font-sans text-sm">{msg.text}</p>
+                        <p className={`font-sans text-[10px] mt-1 ${
+                          msg.sender === 'me' ? 'text-white/40' : 'text-warm-400'
+                        }`}>
+                          {msg.time} {msg.sender === 'me' && msg.read && '· Read'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
             </div>
 
             {/* Input */}

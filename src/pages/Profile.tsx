@@ -1,5 +1,9 @@
-import { useState } from 'react';
-import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, ChevronRight, Camera } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, ChevronRight, Camera, Loader2 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
+import { formatKES } from '../utils/helpers';
 
 interface ProfileProps {
   setPage: (page: string) => void;
@@ -7,22 +11,29 @@ interface ProfileProps {
 }
 
 export default function Profile({ setPage, authUser }: ProfileProps) {
+  const { user: authUser2, logout, updateProfile } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('info');
+  const [loading, setLoading] = useState(false);
 
-  // Demo user data
-  const user = authUser || {
-    name: 'James Mwangi',
-    email: 'james.mwangi@email.com',
-    phone: '+254 712 345 678',
-    location: 'Nairobi, Kenya',
-    memberSince: '2023',
+  // Use auth context user or prop
+  const user = authUser2 || authUser || {
+    name: 'Guest User',
+    email: '',
+    phone: '',
+    location: '',
+    createdAt: new Date().toISOString(),
     avatar: null,
   };
 
+  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
+
   const stats = [
-    { label: 'Listings', value: '3' },
-    { label: 'Purchases', value: '1' },
-    { label: 'Escrows', value: '2' },
+    { label: 'Listings', value: user.listingsCount || '0' },
+    { label: 'Purchases', value: user.purchasesCount || '0' },
+    { label: 'Escrows', value: user.escrowsCount || '0' },
   ];
 
   const menuItems = [
@@ -30,6 +41,34 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     { key: 'notifications', label: 'Notifications', icon: Bell },
     { key: 'security', label: 'Security', icon: Lock },
   ];
+
+  const handleLogout = async () => {
+    if (confirm('Are you sure you want to sign out?')) {
+      await logout();
+      navigate('/');
+    }
+  };
+
+  const handleEdit = (field: string, currentValue: string) => {
+    setEditingField(field);
+    setEditValue(currentValue || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingField) return;
+    setLoading(true);
+    try {
+      await updateProfile({ [editingField]: editValue });
+      toast.success('Profile updated successfully');
+      setEditingField(null);
+    } catch (err) {
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
   return (
     <div className="min-h-screen bg-cream-50 pt-16">
@@ -40,9 +79,13 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
             {/* Avatar */}
             <div className="relative">
               <div className="w-24 h-24 bg-gold-500/20 rounded-full flex items-center justify-center">
-                <span className="text-4xl font-bold text-gold-400">
-                  {user.name?.charAt(0) || 'U'}
-                </span>
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                ) : (
+                  <span className="text-4xl font-bold text-gold-400">
+                    {user.name?.charAt(0) || 'U'}
+                  </span>
+                )}
               </div>
               <button className="absolute bottom-0 right-0 w-8 h-8 bg-gold-500 rounded-full flex items-center justify-center text-charcoal-900 hover:bg-gold-600 transition-colors">
                 <Camera size={14} />
@@ -54,14 +97,16 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
               <h1 className="font-serif text-2xl text-white font-bold">{user.name}</h1>
               <p className="text-white/50 text-sm flex items-center gap-2 mt-1">
                 <Clock size={12} />
-                Member since {user.memberSince}
+                Member since {memberYear}
               </p>
-              <div className="flex items-center gap-1 mt-2">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star key={i} size={14} className="text-gold-400 fill-current" />
-                ))}
-                <span className="text-white/50 text-xs ml-1">(24 reviews)</span>
-              </div>
+              {user.rating && (
+                <div className="flex items-center gap-1 mt-2">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} size={14} className={i <= (user.rating || 0) ? 'text-gold-400 fill-current' : 'text-white/30'} />
+                  ))}
+                  <span className="text-white/50 text-xs ml-1">({user.reviewsCount || 0} reviews)</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -97,6 +142,15 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                   <span className="font-sans text-sm font-semibold">{label}</span>
                 </button>
               ))}
+              <div className="mt-4 pt-4 border-t border-cream-200">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <LogOut size={18} />
+                  <span className="font-sans text-sm font-semibold">Sign Out</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -115,9 +169,25 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Full Name
                       </label>
-                      <p className="font-sans text-sm text-charcoal-900">{user.name}</p>
+                      {editingField === 'name' ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                          />
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="font-sans text-sm text-charcoal-900">{user.name}</p>
+                      )}
                     </div>
-                    <button className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    {!editingField && (
+                      <button onClick={() => handleEdit('name', user.name || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
@@ -130,7 +200,6 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       </label>
                       <p className="font-sans text-sm text-charcoal-900">{user.email}</p>
                     </div>
-                    <button className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
@@ -141,9 +210,25 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Phone Number
                       </label>
-                      <p className="font-sans text-sm text-charcoal-900">{user.phone}</p>
+                      {editingField === 'phone' ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="tel"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                          />
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="font-sans text-sm text-charcoal-900">{user.phone || 'Not set'}</p>
+                      )}
                     </div>
-                    <button className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    {!editingField && (
+                      <button onClick={() => handleEdit('phone', user.phone || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 p-4 bg-cream-50 rounded-xl">
@@ -154,9 +239,25 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Location
                       </label>
-                      <p className="font-sans text-sm text-charcoal-900">{user.location}</p>
+                      {editingField === 'location' ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={editValue}
+                            onChange={(e) => setEditValue(e.target.value)}
+                            className="font-sans text-sm text-charcoal-900 border border-cream-300 rounded px-2 py-1"
+                          />
+                          <button onClick={handleSaveEdit} disabled={loading} className="text-gold-600 text-sm font-semibold">
+                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="font-sans text-sm text-charcoal-900">{user.location || 'Not set'}</p>
+                      )}
                     </div>
-                    <button className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    {!editingField && (
+                      <button onClick={() => handleEdit('location', user.location || '')} className="text-gold-600 text-sm font-semibold hover:text-gold-700">Edit</button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -168,13 +269,13 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                 
                 <div className="space-y-4">
                   {[
-                    { label: 'New bids on my listings', desc: 'Get notified when someone places a bid', enabled: true },
-                    { label: 'Escrow updates', desc: 'Payment and delivery notifications', enabled: true },
-                    { label: 'Messages', desc: 'New messages from buyers or sellers', enabled: true },
-                    { label: 'Price alerts', desc: 'Vehicles you saved dropped in price', enabled: false },
-                    { label: 'Newsletter', desc: 'Weekly market updates and new listings', enabled: false },
-                  ].map(({ label, desc, enabled }) => (
-                    <div key={label} className="flex items-center justify-between p-4 bg-cream-50 rounded-xl">
+                    { label: 'New bids on my listings', desc: 'Get notified when someone places a bid', key: 'new_bids', enabled: user.notifications?.newBids ?? true },
+                    { label: 'Escrow updates', desc: 'Payment and delivery notifications', key: 'escrow', enabled: user.notifications?.escrow ?? true },
+                    { label: 'Messages', desc: 'New messages from buyers or sellers', key: 'messages', enabled: user.notifications?.messages ?? true },
+                    { label: 'Price alerts', desc: 'Vehicles you saved dropped in price', key: 'price_alerts', enabled: user.notifications?.priceAlerts ?? false },
+                    { label: 'Newsletter', desc: 'Weekly market updates and new listings', key: 'newsletter', enabled: user.notifications?.newsletter ?? false },
+                  ].map(({ label, desc, key, enabled }) => (
+                    <div key={key} className="flex items-center justify-between p-4 bg-cream-50 rounded-xl">
                       <div>
                         <p className="font-sans text-sm font-semibold text-charcoal-900">{label}</p>
                         <p className="font-sans text-xs text-warm-400 mt-0.5">{desc}</p>
@@ -207,15 +308,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <Shield size={18} className="text-gold-600" />
                       <span className="font-sans text-sm font-semibold text-charcoal-900">Two-Factor Authentication</span>
                     </div>
-                    <span className="text-xs text-warm-400">Disabled</span>
-                  </button>
-
-                  <button className="w-full flex items-center justify-between p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <LogOut size={18} className="text-red-500" />
-                      <span className="font-sans text-sm font-semibold text-red-600">Sign Out</span>
-                    </div>
-                    <ChevronRight size={16} className="text-red-400" />
+                    <span className="text-xs text-warm-400">{user.twoFactorEnabled ? 'Enabled' : 'Disabled'}</span>
                   </button>
                 </div>
               </div>

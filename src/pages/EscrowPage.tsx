@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, CheckCircle, Clock, AlertTriangle, ChevronRight, Truck, DollarSign, FileText } from 'lucide-react';
+import { Shield, CheckCircle, Clock, AlertTriangle, ChevronRight, Truck, DollarSign, FileText, Loader2 } from 'lucide-react';
 import { formatKES, timeAgo } from '../utils/helpers';
+import { escrowAPI } from '../api/api';
 
 interface EscrowTransaction {
   id: string;
-  status: 'pending' | 'funded' | 'released' | 'disputed';
+  status: 'pending' | 'funded' | 'released' | 'disputed' | 'active';
   amount: number;
   car: {
     title: string;
@@ -17,58 +18,47 @@ interface EscrowTransaction {
   updatedAt: string;
 }
 
-const DEMO_ESCROWS: EscrowTransaction[] = [
-  {
-    id: '1',
-    status: 'funded',
-    amount: 18500000,
-    car: {
-      title: 'Toyota Land Cruiser GX-R 2024',
-      image: 'https://images.unsplash.com/photo-1594502184342-2e12f877aa73?w=200&h=150&fit=crop',
-    },
-    seller: 'Premium Motors KE',
-    buyer: 'James M.',
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-  },
-  {
-    id: '2',
-    status: 'released',
-    amount: 14200000,
-    car: {
-      title: 'Mercedes GLE 450 2023',
-      image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=200&h=150&fit=crop',
-    },
-    seller: 'Auto Gallery',
-    buyer: 'Sarah K.',
-    createdAt: new Date(Date.now() - 86400000 * 14).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-  },
-  {
-    id: '3',
-    status: 'pending',
-    amount: 8800000,
-    car: {
-      title: 'BMW X5 xDrive40i',
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=200&h=150&fit=crop',
-    },
-    seller: 'Euro Motors',
-    buyer: 'Peter W.',
-    createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-    updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-  },
-];
-
 const STATUS_CONFIG = {
   pending: { label: 'Pending', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100', border: 'border-amber-200' },
   funded: { label: 'Funded', icon: DollarSign, color: 'text-blue-600', bg: 'bg-blue-100', border: 'border-blue-200' },
+  active: { label: 'Active', icon: Truck, color: 'text-blue-600', bg: 'bg-blue-100', border: 'border-blue-200' },
   released: { label: 'Released', icon: CheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-100', border: 'border-emerald-200' },
   disputed: { label: 'Disputed', icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-100', border: 'border-red-200' },
 };
 
 export default function EscrowPage() {
-  const [escrows, setEscrows] = useState<EscrowTransaction[]>(DEMO_ESCROWS);
+  const [escrows, setEscrows] = useState<EscrowTransaction[]>([]);
   const [filter, setFilter] = useState<'all' | keyof typeof STATUS_CONFIG>('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEscrows = async () => {
+      setLoading(true);
+      try {
+        const data = await escrowAPI.mine();
+        // Transform API response to EscrowTransaction format
+        const escrowList: EscrowTransaction[] = (data.escrows || data || []).map((e: any) => ({
+          id: e._id || e.id,
+          status: e.status || 'pending',
+          amount: e.amount || e.totalAmount || 0,
+          car: {
+            title: e.car?.title || e.car?.name || 'Vehicle',
+            image: e.car?.images?.[0] || e.car?.image || '',
+          },
+          seller: e.seller?.name || e.sellerName || 'Unknown',
+          buyer: e.buyer?.name || e.buyerName || 'Unknown',
+          createdAt: e.createdAt || e.created_at,
+          updatedAt: e.updatedAt || e.updated_at,
+        }));
+        setEscrows(escrowList);
+      } catch (err) {
+        console.error('Failed to load escrows:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEscrows();
+  }, []);
 
   const filteredEscrows = escrows.filter(e => {
     if (filter === 'all') return true;
@@ -98,34 +88,52 @@ export default function EscrowPage() {
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
-          {Object.entries(STATUS_CONFIG).map(([key, config]) => {
-            const count = escrows.filter(e => e.status === key).length;
-            const Icon = config.icon;
-            return (
-              <button
-                key={key}
-                onClick={() => setFilter(filter === key ? 'all' : key as any)}
-                className={`p-4 rounded-xl border transition-all ${
-                  filter === key
-                    ? `${config.bg} ${config.border}`
-                    : 'bg-white border-cream-200 hover:border-cream-300'
-                }`}
-              >
-                <div className={`flex items-center gap-2 mb-1 ${config.color}`}>
-                  <Icon size={16} />
-                  <span className="font-sans text-xs font-semibold capitalize">{config.label}</span>
-                </div>
-                <p className="font-serif text-2xl text-charcoal-900 font-bold">{count}</p>
-              </button>
-            );
-          })}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          {loading ? (
+            <div className="col-span-full flex items-center justify-center p-8">
+              <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
+            </div>
+          ) : (
+            Object.entries(STATUS_CONFIG).map(([key, config]) => {
+              const count = escrows.filter(e => e.status === key).length;
+              const Icon = config.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setFilter(filter === key ? 'all' : key as any)}
+                  className={`p-4 rounded-xl border transition-all ${
+                    filter === key
+                      ? `${config.bg} ${config.border}`
+                      : 'bg-white border-cream-200 hover:border-cream-300'
+                  }`}
+                >
+                  <div className={`flex items-center gap-2 mb-1 ${config.color}`}>
+                    <Icon size={16} />
+                    <span className="font-sans text-xs font-semibold capitalize">{config.label}</span>
+                  </div>
+                  <p className="font-serif text-2xl text-charcoal-900 font-bold">{count}</p>
+                </button>
+              );
+            })
+          )}
         </div>
 
         {/* Escrow list */}
         <div className="space-y-4">
-          {filteredEscrows.map(escrow => {
-            const config = STATUS_CONFIG[escrow.status];
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <Loader2 className="w-8 h-8 text-gold-500 animate-spin" />
+            </div>
+          ) : filteredEscrows.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-cream-200 p-12 text-center">
+              <Shield size={48} className="text-cream-300 mx-auto mb-4" />
+              <h3 className="font-serif text-xl text-charcoal-900 font-bold mb-2">No escrow transactions</h3>
+              <p className="font-sans text-sm text-warm-400">
+                Start a transaction by purchasing a vehicle with escrow protection
+              </p>
+            </div>
+          ) : filteredEscrows.map(escrow => {
+            const config = STATUS_CONFIG[escrow.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.pending;
             const Icon = config.icon;
 
             return (
@@ -195,16 +203,6 @@ export default function EscrowPage() {
               </div>
             );
           })}
-
-          {filteredEscrows.length === 0 && (
-            <div className="bg-white rounded-2xl border border-cream-200 p-12 text-center">
-              <Shield size={48} className="text-cream-300 mx-auto mb-4" />
-              <h3 className="font-serif text-xl text-charcoal-900 font-bold mb-2">No escrow transactions</h3>
-              <p className="font-sans text-sm text-warm-400">
-                Start a transaction by purchasing a vehicle with escrow protection
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </div>
