@@ -1,6 +1,9 @@
-export { default as Button } from './Button.jsx';
-export { default as Badge } from './Badge.jsx';
-export { default as Card } from './Card.jsx';
+// Legacy JS components re-exported as TS for backward compatibility
+// Prefer importing from index.ts for TypeScript components
+
+export { default as Button } from './Button.tsx';
+export { default as Badge } from './Badge.tsx';
+export { default as Card } from './Card.tsx';
 export { default as Drawer } from './Drawer.jsx';
 export { default as Progress } from './Progress.jsx';
 export { default as EmptyState } from './EmptyState.jsx';
