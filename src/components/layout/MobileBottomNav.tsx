@@ -29,7 +29,7 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
     { key: 'search', href: '/gallery', icon: Search, label: 'Search' },
     { key: 'favorites', href: '/favorites', icon: Heart, label: 'Saved' },
     { key: 'compare', href: '/compare', icon: BarChart3, label: 'Compare' },
-    { key: 'account', href: authUser ? '/dashboard' : '/sign-in', icon: User, label: authUser ? 'Account' : 'Sign In' },
+    { key: 'account', href: authUser ? '/dealer' : '/login', icon: User, label: authUser ? 'Account' : 'Sign In' },
   ];
 
   return (

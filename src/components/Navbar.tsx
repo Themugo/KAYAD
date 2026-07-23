@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Search, X, Menu, LogIn, LogOut, LayoutDashboard,
   ChevronDown, Home, Images, Gavel, Shield, ClipboardCheck,
@@ -20,12 +21,12 @@ interface NavbarProps {
 }
 
 const navLinks = [
-  { label: 'Home',           page: 'home',           href: '/',          icon: Home           },
-  { label: 'Gallery',        page: 'gallery',        href: '/gallery',   icon: Images         },
-  { label: 'Auction',        page: 'auction',        href: '/auction',   icon: Gavel          },
-  { label: 'Escrow Vault',   page: 'escrow',         href: '/escrow',    icon: Shield         },
-  { label: 'Pre-Inspection', page: 'pre-inspection', href: '/pre-inspection', icon: ClipboardCheck },
-  { label: 'Support',        page: 'support',        href: '/support',   icon: MessageCircle  },
+  { label: 'Home',           path: '/',              icon: Home           },
+  { label: 'Gallery',        path: '/gallery',       icon: Images         },
+  { label: 'Auction',        path: '/auction',        icon: Gavel          },
+  { label: 'Escrow Vault',   path: '/escrow',         icon: Shield         },
+  { label: 'Pre-Inspection', path: '/pre-inspection', icon: ClipboardCheck },
+  { label: 'Support',        path: '/support',        icon: MessageCircle  },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -41,6 +42,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
   const [searchQuery,  setSearchQuery]  = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -64,6 +66,12 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+    setUserMenuOpen(false);
+  }, [location.pathname]);
+
   const handleNav = (page: string) => {
     setPage(page);
     setMobileOpen(false);
@@ -76,6 +84,8 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
   const initials = authUser
     ? authUser.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     : '';
+
+  const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
@@ -90,8 +100,9 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
           <div className="flex items-center justify-between h-16">
 
             {/* Logo */}
-            <button
-              onClick={() => handleNav('home')}
+            <Link
+              to="/"
+              onClick={() => setPage('home')}
               className="flex items-center gap-2.5 group flex-shrink-0"
             >
               <div className="w-9 h-9 bg-gold-600 rounded-lg flex items-center justify-center group-hover:bg-gold-500 transition-colors duration-200">
@@ -105,21 +116,22 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 </svg>
               </div>
               <span className="text-white font-sans font-bold text-lg tracking-[0.15em] uppercase">KAYAD</span>
-            </button>
+            </Link>
 
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-6">
-              {navLinks.map(({ label, page }) => (
-                <button
-                  key={page}
-                  onClick={() => handleNav(page)}
-                  className={`nav-link ${currentPage === page ? 'active' : ''}`}
+              {navLinks.map(({ label, path }) => (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={() => setPage(path === '/' ? 'home' : path.slice(1))}
+                  className={`nav-link ${isActive(path) ? 'active' : ''}`}
                 >
                   {label}
-                  {currentPage === page && (
+                  {isActive(path) && (
                     <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold-400 rounded-full" />
                   )}
-                </button>
+                </Link>
               ))}
             </div>
 
@@ -220,16 +232,17 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   )}
                 </div>
               ) : (
-                <button
-                  onClick={() => handleNav('sign-in')}
+                <Link
+                  to="/login"
+                  onClick={() => setPage('sign-in')}
                   className={`flex items-center gap-2 font-sans text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200 ${
-                    currentPage === 'sign-in'
+                    isActive('/login')
                       ? 'bg-gold-600 text-white'
                       : 'bg-white text-charcoal-900 hover:bg-cream-100'
                   }`}
                 >
                   <LogIn size={14} /> Sign In
-                </button>
+                </Link>
               )}
             </div>
 
@@ -299,33 +312,35 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
         {/* Nav links */}
         <div className="flex-1 overflow-y-auto px-3 py-4">
           <div className="flex flex-col gap-1">
-            {navLinks.map(({ label, page, icon: Icon }) => (
-              <button
-                key={page}
-                onClick={() => handleNav(page)}
+            {navLinks.map(({ label, path, icon: Icon }) => (
+              <Link
+                key={path}
+                to={path}
+                onClick={() => { setPage(path === '/' ? 'home' : path.slice(1)); setMobileOpen(false); }}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-sans text-sm font-semibold transition-all text-left ${
-                  currentPage === page
+                  isActive(path)
                     ? 'bg-gold-600 text-white'
                     : 'text-white/70 hover:text-white hover:bg-white/8'
                 }`}
               >
-                <Icon size={17} className={currentPage === page ? 'text-white' : 'text-white/40'} />
+                <Icon size={17} className={isActive(path) ? 'text-white' : 'text-white/40'} />
                 {label}
-              </button>
+              </Link>
             ))}
 
             {authUser && (
-              <button
-                onClick={() => handleNav('dashboard')}
+              <Link
+                to="/dealer"
+                onClick={() => { setPage('dashboard'); setMobileOpen(false); }}
                 className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-sans text-sm font-semibold transition-all text-left ${
-                  currentPage === 'dashboard'
+                  isActive('/dealer')
                     ? 'bg-gold-600 text-white'
                     : 'text-white/70 hover:text-white hover:bg-white/8'
                 }`}
               >
-                <LayoutDashboard size={17} className={currentPage === 'dashboard' ? 'text-white' : 'text-white/40'} />
+                <LayoutDashboard size={17} className={isActive('/dealer') ? 'text-white' : 'text-white/40'} />
                 Dashboard
-              </button>
+              </Link>
             )}
           </div>
         </div>
@@ -346,12 +361,13 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
               <LogOut size={14} /> Sign Out
             </button>
           ) : (
-            <button
-              onClick={() => handleNav('sign-in')}
+            <Link
+              to="/login"
+              onClick={() => { setPage('sign-in'); setMobileOpen(false); }}
               className="w-full flex items-center justify-center gap-2 bg-white text-charcoal-900 font-sans text-sm font-semibold py-3 rounded-full hover:bg-cream-100 transition-colors"
             >
               <LogIn size={14} /> Sign In
-            </button>
+            </Link>
           )}
         </div>
       </div>

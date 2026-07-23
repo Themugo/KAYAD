@@ -263,12 +263,17 @@ function AppContent() {
 
           {/* Public pages */}
           <Route path="/home" element={<Home setPage={handleSetPage} viewCar={viewCar} />} />
+          <Route path="/gallery" element={<Gallery viewCar={viewCar} />} />
           <Route path="/showroom" element={<Showroom />} />
           <Route path="/car/:id" element={<CarDetailRoute />} />
           <Route path="/compare" element={<Compare setPage={handleSetPage} viewCar={viewCar} />} />
+          <Route path="/auction" element={<Auction />} />
           <Route path="/auction-calendar" element={<AuctionCalendar />} />
           <Route path="/auction/:id" element={<AuctionLivePage />} />
+          <Route path="/escrow" element={<EscrowVault />} />
           <Route path="/escrow-vault" element={<EscrowVault />} />
+          <Route path="/pre-inspection" element={<PreInspection viewCar={viewCar} />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -297,19 +302,16 @@ function AppContent() {
           <Route path="/disputes/:id" element={<AuthGuard><DisputeDetailPage /></AuthGuard>} />
 
           {/* Inspector pages */}
-          <Route path="/inspector/apply" element={<AuthGuard><InspectorApply /></AuthGuard>} />
           <Route path="/inspector" element={<AuthGuard><InspectorDashboard /></AuthGuard>} />
-          <Route path="/inspector/dashboard" element={<AuthGuard><InspectorDashboard /></AuthGuard>} />
+          <Route path="/inspector/apply" element={<AuthGuard><InspectorApply /></AuthGuard>} />
 
           {/* Dealer/Seller pages */}
           <Route path="/dealer" element={<DealerGuard><DealerDashboardPage /></DealerGuard>} />
-          <Route path="/dealer/onboarding" element={<RequireAuth><DealerOnboarding /></RequireAuth>} />
+          <Route path="/dealer/onboarding" element={<DealerGuard><DealerOnboarding /></DealerGuard>} />
           <Route path="/dealer/setup" element={<DealerGuard><DealerSetup /></DealerGuard>} />
           <Route path="/dealer/add-car" element={<DealerGuard><AddCarPage /></DealerGuard>} />
           <Route path="/dealer/edit-car/:id" element={<DealerGuard><EditCarPage /></DealerGuard>} />
-          <Route path="/dealer/edit/:id" element={<DealerGuard><EditCarPage /></DealerGuard>} />
           <Route path="/dealer/auction-setup" element={<DealerGuard><DealerAuctionSetup /></DealerGuard>} />
-          <Route path="/dealer/auctions" element={<DealerGuard><DealerAuctionSetup /></DealerGuard>} />
           <Route path="/dealer/analytics" element={<DealerGuard><DealerAnalytics /></DealerGuard>} />
           <Route path="/dealer/settlement" element={<DealerGuard><DealerSettlement /></DealerGuard>} />
           <Route path="/dealer/team" element={<DealerGuard><DealerTeam /></DealerGuard>} />
