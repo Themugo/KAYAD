@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import CarDetailPage from '../../pages/CarDetailPage';
+import CarDetailPage from '../../pages/CarDetail';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 

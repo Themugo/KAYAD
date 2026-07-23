@@ -1,16 +1,3 @@
-export default function Badge({
-  children,
-  variant = 'muted',
-  icon,
-  size = 'md',
-  className = '',
-  ...rest
-}) {
-  const classes = ['ui-badge', `ui-badge--${variant}`, className].filter(Boolean).join(' ');
-  return (
-    <span className={classes} {...rest}>
-      {icon && <span aria-hidden="true">{icon}</span>}
-      {children}
-    </span>
-  );
-}
+// Re-export from TypeScript version for consistency
+export { Badge, StatusBadge, type BadgeProps, type BadgeVariant, type BadgeSize, type StatusBadgeProps } from './Badge.tsx';
+export { default } from './Badge.tsx';

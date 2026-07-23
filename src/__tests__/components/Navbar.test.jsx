@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Navbar from '../../components/NavbarNew';
+import Navbar from '../../components/Navbar';
 
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
@@ -40,12 +40,12 @@ describe('Navbar', () => {
   afterEach(() => { cleanup(); });
 
   it('renders KAYAD branding', () => {
-    render(<MemoryRouter><Navbar /></MemoryRouter>);
+    render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
-  it('renders Gallery link', () => {
-    render(<MemoryRouter><Navbar /></MemoryRouter>);
+  it('renders nav links', () => {
+    render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
     expect(screen.getAllByText('Gallery').length).toBeGreaterThan(0);
   });
 });
