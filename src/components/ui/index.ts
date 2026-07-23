@@ -69,6 +69,9 @@ export { Tooltip, type TooltipProps } from './Tooltip';
 // Dropdown - Dropdown menus
 export { Dropdown, type DropdownProps } from './Dropdown';
 
+// GlassPanel - Stitch design glass effect
+export { GlassPanel, type GlassPanelProps } from './GlassPanel';
+
 // ============================================================
 // NAVIGATION COMPONENTS
 // ============================================================

@@ -1,5 +1,8 @@
 import React from 'react';
 
+// Stitch Design System Card
+// Aligns with Heritage Tech design language
+
 export interface CardProps {
   children: React.ReactNode;
   padding?: 'sm' | 'md' | 'lg' | 'flush';
@@ -10,6 +13,7 @@ export interface CardProps {
   onClick?: () => void;
 }
 
+// Stitch: 12px radius for cards, white background with subtle border
 export const Card: React.FC<CardProps> = ({
   children,
   padding = 'md',
@@ -21,40 +25,30 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const paddingMap: Record<string, string> = {
     sm: 'var(--space-4)',
-    md: 'var(--space-card-padding)',
-    lg: 'var(--space-8)',
+    md: 'var(--space-4)',
+    lg: 'var(--space-6)',
     flush: '0',
   };
 
+  // Stitch Design: Card with subtle shadow and border
   const baseStyle: React.CSSProperties = {
     display: 'block',
     padding: paddingMap[padding],
-    background: 'var(--color-bg-elevated)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-xl)',
-    boxShadow: 'var(--shadow-sm)',
-    transition: hoverEffect || interactive 
-      ? 'box-shadow var(--transition-normal), border-color var(--transition-normal), transform var(--transition-normal)'
-      : undefined,
+    background: 'var(--surface-container-lowest, #ffffff)',
+    border: '1px solid var(--surface-dim)',
+    borderRadius: 'var(--radius-lg)', // Stitch: 12px for cards
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+    // Stitch: Hover animation - translate -2px
+    transition: 'transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease',
     cursor: interactive || onClick ? 'pointer' : 'default',
   };
-
-  const hoverStyle: React.CSSProperties = interactive || hoverEffect
-    ? {
-        ':hover': {
-          boxShadow: 'var(--shadow-md)',
-          borderColor: 'var(--color-border-strong)',
-          transform: 'translateY(-2px)',
-        },
-      }
-    : {};
 
   const Component = onClick ? 'button' : 'div';
   
   return (
     <Component
       className={className}
-      style={{ ...baseStyle, ...hoverStyle, ...style }}
+      style={baseStyle}
       onClick={onClick}
     >
       {children}
@@ -80,6 +74,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   className = '',
   style,
 }) => {
+  // Stitch Design: Clean header with bottom border
   const headerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -87,19 +82,21 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     gap: 'var(--space-4)',
     paddingBottom: 'var(--space-4)',
     marginBottom: 'var(--space-4)',
-    borderBottom: '1px solid var(--color-border-soft)',
+    borderBottom: '1px solid var(--outline-variant)',
   };
 
+  // Stitch: Playfair Display for card titles
   const titleStyle: React.CSSProperties = {
-    fontSize: 'var(--text-h3)',
+    fontFamily: 'var(--font-display)',
+    fontSize: 'var(--text-xl)',
     fontWeight: 600,
-    color: 'var(--color-text-primary)',
+    color: 'var(--on-surface)',
     margin: 0,
   };
 
   const subtitleStyle: React.CSSProperties = {
-    fontSize: 'var(--text-body-sm)',
-    color: 'var(--color-text-muted)',
+    fontSize: 'var(--text-sm)',
+    color: 'var(--on-surface-variant)',
     margin: 'var(--space-1) 0 0 0',
   };
 
@@ -135,7 +132,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
     gap: 'var(--space-3)',
     paddingTop: 'var(--space-4)',
     marginTop: 'var(--space-4)',
-    borderTop: '1px solid var(--color-border-soft)',
+    borderTop: '1px solid var(--outline-variant)',
   };
 
   return (

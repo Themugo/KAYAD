@@ -2982,3 +2982,88 @@ html {
 html * {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
+
+
+/* ============================================================
+   STITCH DESIGN SYSTEM UTILITIES
+   Heritage Tech - High-Trust Automotive Prestige
+   ============================================================ */
+
+/* Stitch: Label Caps (Outfit font, 12px, uppercase) */
+.label-caps {
+  font-family: "Outfit", var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Stitch: Primary CTA Button Effect */
+.primary-cta {
+  background: linear-gradient(135deg, #16C4A4, #0C7B68);
+  box-shadow: 0 4px 15px rgba(22, 196, 164, 0.25);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.primary-cta:active {
+  transform: scale(0.95);
+}
+
+/* Stitch: Glass Panel Effect */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(10, 22, 38, 0.08);
+}
+
+/* Stitch: Organic Blob Animation */
+.organic-blob {
+  filter: blur(80px);
+  z-index: -1;
+  animation: float 20s infinite alternate ease-in-out;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(10%, 20%) scale(1.1); }
+  100% { transform: translate(-5%, 10%) scale(0.9); }
+}
+
+/* Stitch: Card Hover Effect */
+.card-stitch:hover {
+  transform: translateY(-2px);
+  border-color: var(--outline);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+/* Stitch: Focus Ring (Teal) */
+.focus-stitch:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(22, 196, 164, 0.15);
+}
+
+/* Stitch: Input Focus State */
+.input-stitch:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(22, 196, 164, 0.15);
+}
+
+/* Stitch: Navigation Glass Effect */
+.nav-glass {
+  background: rgba(10, 22, 38, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Stitch: Mobile Bottom Nav */
+.bottom-nav-glass {
+  background: rgba(10, 22, 38, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
