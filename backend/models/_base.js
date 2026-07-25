@@ -25,8 +25,7 @@ const TABLE_MAP = {
   SearchAnalytics: "search_analytics", ListingQuality: "listing_quality",
   MarketplaceHealth: "marketplace_health", FraudDetection: "fraud_detection",
   ConversionFunnel: "conversion_funnels", Organization: "organizations",
-  Department: "departments", Branch: "branches", Team: "teams",
-  Role: "roles", LedgerAccount: "ledger_accounts",
+  LedgerAccount: "ledger_accounts",
   LedgerEntry: "ledger_entries",
   ReconciliationRecord: "reconciliation_records",
   ReconciliationReport: "reconciliation_reports",
@@ -35,8 +34,8 @@ const TABLE_MAP = {
   AuctionIntegrityFlag: "auction_integrity_flags",
   AuctionRiskProfile: "auction_risk_profiles",
   MpesaTransaction: "mpesa_transactions", SmsBidder: "sms_bidders",
-  Contact: "contacts", ContactShield: "contact_shields",
-  NotificationAudit: "notification_audits",
+  Contact: "contacts",
+  NotificationAudit: "notification_audit",
   NtsaVerificationRequest: "ntsa_verification_requests",
   InspectionOrder: "inspection_orders",
   InspectorApplication: "inspector_applications",
@@ -46,7 +45,6 @@ const TABLE_MAP = {
   Event: "events", DuplicateVehicleLog: "duplicate_vehicle_logs",
   Referral: "referrals", Feedback: "feedback",
   DemandSignals: "demand_signals", GlobalSettings: "global_settings",
-  Ticket: "support_tickets",
 };
 
 // ────────────────────────────────────────────────────────────────

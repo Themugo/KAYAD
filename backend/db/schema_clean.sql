@@ -1152,3 +1152,388 @@ ALTER TABLE disputes ADD CONSTRAINT disputes_status_check
 -- auction. Never existed as a column at all.
 -- =============================
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS winner JSONB;
+
+-- =====================================================
+-- DATABASE AUDIT FIXES — 2026-07-25
+-- Comprehensive schema improvements from full audit
+-- =====================================================
+
+-- ─────────────────────────────────────────────────────
+-- C1: Email verification columns
+-- authController.js (lines 52,635,637,644,663,673)
+-- writes/reads emailVerifyToken and emailVerifyExpire
+-- ─────────────────────────────────────────────────────
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_token TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verify_expire TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_users_email_verify_token ON users(email_verify_token);
+
+-- ─────────────────────────────────────────────────────
+-- C3: ON DELETE rules for all foreign keys
+-- Without these, deleting any parent row crashes with
+-- a foreign key violation error.
+-- ─────────────────────────────────────────────────────
+
+-- users
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_referred_by_fkey;
+ALTER TABLE users ADD CONSTRAINT users_referred_by_fkey FOREIGN KEY (referred_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- cars
+ALTER TABLE cars DROP CONSTRAINT IF EXISTS cars_dealer_id_fkey;
+ALTER TABLE cars ADD CONSTRAINT cars_dealer_id_fkey FOREIGN KEY (dealer_id) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE cars DROP CONSTRAINT IF EXISTS cars_demo_edited_by_fkey;
+ALTER TABLE cars ADD CONSTRAINT cars_demo_edited_by_fkey FOREIGN KEY (demo_edited_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- auctions
+ALTER TABLE auctions DROP CONSTRAINT IF EXISTS auctions_car_id_fkey;
+ALTER TABLE auctions ADD CONSTRAINT auctions_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE;
+ALTER TABLE auctions DROP CONSTRAINT IF EXISTS auctions_seller_id_fkey;
+ALTER TABLE auctions ADD CONSTRAINT auctions_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE auctions DROP CONSTRAINT IF EXISTS auctions_highest_bidder_id_fkey;
+ALTER TABLE auctions ADD CONSTRAINT auctions_highest_bidder_id_fkey FOREIGN KEY (highest_bidder_id) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE auctions DROP CONSTRAINT IF EXISTS auctions_winner_id_fkey;
+ALTER TABLE auctions ADD CONSTRAINT auctions_winner_id_fkey FOREIGN KEY (winner_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- bids
+ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_auction_id_fkey;
+ALTER TABLE bids ADD CONSTRAINT bids_auction_id_fkey FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE CASCADE;
+ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_user_id_fkey;
+ALTER TABLE bids ADD CONSTRAINT bids_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE bids DROP CONSTRAINT IF EXISTS bids_car_id_fkey;
+ALTER TABLE bids ADD CONSTRAINT bids_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+
+-- escrows
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_car_id_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_buyer_id_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_seller_id_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_payment_id_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_payment_id_fkey FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_released_by_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_released_by_fkey FOREIGN KEY (released_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_refunded_by_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_refunded_by_fkey FOREIGN KEY (refunded_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE escrows DROP CONSTRAINT IF EXISTS escrows_disputed_by_fkey;
+ALTER TABLE escrows ADD CONSTRAINT escrows_disputed_by_fkey FOREIGN KEY (disputed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- payments
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_user_id_fkey;
+ALTER TABLE payments ADD CONSTRAINT payments_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_escrow_id_fkey;
+ALTER TABLE payments ADD CONSTRAINT payments_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE SET NULL;
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_car_id_fkey;
+ALTER TABLE payments ADD CONSTRAINT payments_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_bid_id_fkey;
+ALTER TABLE payments ADD CONSTRAINT payments_bid_id_fkey FOREIGN KEY (bid_id) REFERENCES bids(id) ON DELETE SET NULL;
+
+-- chats
+ALTER TABLE chats DROP CONSTRAINT IF EXISTS chats_car_id_fkey;
+ALTER TABLE chats ADD CONSTRAINT chats_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+
+-- messages
+ALTER TABLE messages DROP CONSTRAINT IF EXISTS messages_chat_id_fkey;
+ALTER TABLE messages ADD CONSTRAINT messages_chat_id_fkey FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE;
+ALTER TABLE messages DROP CONSTRAINT IF EXISTS messages_sender_id_fkey;
+ALTER TABLE messages ADD CONSTRAINT messages_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- notifications
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_user_id_fkey;
+ALTER TABLE notifications ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- favorites
+ALTER TABLE favorites DROP CONSTRAINT IF EXISTS favorites_user_id_fkey;
+ALTER TABLE favorites ADD CONSTRAINT favorites_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE favorites DROP CONSTRAINT IF EXISTS favorites_car_id_fkey;
+ALTER TABLE favorites ADD CONSTRAINT favorites_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE;
+
+-- reviews
+ALTER TABLE reviews DROP CONSTRAINT IF EXISTS reviews_user_id_fkey;
+ALTER TABLE reviews ADD CONSTRAINT reviews_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE reviews DROP CONSTRAINT IF EXISTS reviews_dealer_id_fkey;
+ALTER TABLE reviews ADD CONSTRAINT reviews_dealer_id_fkey FOREIGN KEY (dealer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE reviews DROP CONSTRAINT IF EXISTS reviews_car_id_fkey;
+ALTER TABLE reviews ADD CONSTRAINT reviews_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+
+-- refresh_tokens
+ALTER TABLE refresh_tokens DROP CONSTRAINT IF EXISTS refresh_tokens_user_id_fkey;
+ALTER TABLE refresh_tokens ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- audit_logs
+ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS audit_logs_user_id_fkey;
+ALTER TABLE audit_logs ADD CONSTRAINT audit_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- security_logs
+ALTER TABLE security_logs DROP CONSTRAINT IF EXISTS security_logs_user_id_fkey;
+ALTER TABLE security_logs ADD CONSTRAINT security_logs_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- dealers
+ALTER TABLE dealers DROP CONSTRAINT IF EXISTS dealers_user_id_fkey;
+ALTER TABLE dealers ADD CONSTRAINT dealers_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- dealer_health_scores
+ALTER TABLE dealer_health_scores DROP CONSTRAINT IF EXISTS dealer_health_scores_dealer_id_fkey;
+ALTER TABLE dealer_health_scores ADD CONSTRAINT dealer_health_scores_dealer_id_fkey FOREIGN KEY (dealer_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- disputes
+ALTER TABLE disputes DROP CONSTRAINT IF EXISTS disputes_escrow_id_fkey;
+ALTER TABLE disputes ADD CONSTRAINT disputes_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE CASCADE;
+ALTER TABLE disputes DROP CONSTRAINT IF EXISTS disputes_opened_by_fkey;
+ALTER TABLE disputes ADD CONSTRAINT disputes_opened_by_fkey FOREIGN KEY (opened_by) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE disputes DROP CONSTRAINT IF EXISTS disputes_opened_against_fkey;
+ALTER TABLE disputes ADD CONSTRAINT disputes_opened_against_fkey FOREIGN KEY (opened_against) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE disputes DROP CONSTRAINT IF EXISTS disputes_assigned_to_fkey;
+ALTER TABLE disputes ADD CONSTRAINT disputes_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL;
+
+-- leads
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_buyer_id_fkey;
+ALTER TABLE leads ADD CONSTRAINT leads_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_dealer_id_fkey;
+ALTER TABLE leads ADD CONSTRAINT leads_dealer_id_fkey FOREIGN KEY (dealer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_car_id_fkey;
+ALTER TABLE leads ADD CONSTRAINT leads_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+
+-- support_tickets
+ALTER TABLE support_tickets DROP CONSTRAINT IF EXISTS support_tickets_user_id_fkey;
+ALTER TABLE support_tickets ADD CONSTRAINT support_tickets_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE support_tickets DROP CONSTRAINT IF EXISTS support_tickets_assigned_to_fkey;
+ALTER TABLE support_tickets ADD CONSTRAINT support_tickets_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL;
+
+-- search_analytics
+ALTER TABLE search_analytics DROP CONSTRAINT IF EXISTS search_analytics_user_id_fkey;
+ALTER TABLE search_analytics ADD CONSTRAINT search_analytics_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- vehicle_valuations
+ALTER TABLE vehicle_valuations DROP CONSTRAINT IF EXISTS vehicle_valuations_car_id_fkey;
+ALTER TABLE vehicle_valuations ADD CONSTRAINT vehicle_valuations_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE;
+
+-- saved_searches
+ALTER TABLE saved_searches DROP CONSTRAINT IF EXISTS saved_searches_user_id_fkey;
+ALTER TABLE saved_searches ADD CONSTRAINT saved_searches_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- escrow_vaults
+ALTER TABLE escrow_vaults DROP CONSTRAINT IF EXISTS escrow_vaults_buyer_id_fkey;
+ALTER TABLE escrow_vaults ADD CONSTRAINT escrow_vaults_buyer_id_fkey FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE escrow_vaults DROP CONSTRAINT IF EXISTS escrow_vaults_seller_id_fkey;
+ALTER TABLE escrow_vaults ADD CONSTRAINT escrow_vaults_seller_id_fkey FOREIGN KEY (seller_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE escrow_vaults DROP CONSTRAINT IF EXISTS escrow_vaults_escrow_id_fkey;
+ALTER TABLE escrow_vaults ADD CONSTRAINT escrow_vaults_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE CASCADE;
+
+-- fraud_detection
+ALTER TABLE fraud_detection DROP CONSTRAINT IF EXISTS fraud_detection_user_id_fkey;
+ALTER TABLE fraud_detection ADD CONSTRAINT fraud_detection_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- transactions
+ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_from_user_fkey;
+ALTER TABLE transactions ADD CONSTRAINT transactions_from_user_fkey FOREIGN KEY (from_user) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_to_user_fkey;
+ALTER TABLE transactions ADD CONSTRAINT transactions_to_user_fkey FOREIGN KEY (to_user) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE transactions DROP CONSTRAINT IF EXISTS transactions_escrow_id_fkey;
+ALTER TABLE transactions ADD CONSTRAINT transactions_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE SET NULL;
+
+-- ntsa_verification_requests
+ALTER TABLE ntsa_verification_requests DROP CONSTRAINT IF EXISTS ntsa_verification_requests_car_id_fkey;
+ALTER TABLE ntsa_verification_requests ADD CONSTRAINT ntsa_verification_requests_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE;
+ALTER TABLE ntsa_verification_requests DROP CONSTRAINT IF EXISTS ntsa_verification_requests_requested_by_fkey;
+ALTER TABLE ntsa_verification_requests ADD CONSTRAINT ntsa_verification_requests_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE CASCADE;
+
+-- inspection_orders
+ALTER TABLE inspection_orders DROP CONSTRAINT IF EXISTS inspection_orders_car_id_fkey;
+ALTER TABLE inspection_orders ADD CONSTRAINT inspection_orders_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE;
+ALTER TABLE inspection_orders DROP CONSTRAINT IF EXISTS inspection_orders_inspector_id_fkey;
+ALTER TABLE inspection_orders ADD CONSTRAINT inspection_orders_inspector_id_fkey FOREIGN KEY (inspector_id) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE inspection_orders DROP CONSTRAINT IF EXISTS inspection_orders_requested_by_fkey;
+ALTER TABLE inspection_orders ADD CONSTRAINT inspection_orders_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE inspection_orders DROP CONSTRAINT IF EXISTS inspection_orders_payment_id_fkey;
+ALTER TABLE inspection_orders ADD CONSTRAINT inspection_orders_payment_id_fkey FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE SET NULL;
+
+-- escrow_anomalies
+ALTER TABLE escrow_anomalies DROP CONSTRAINT IF EXISTS escrow_anomalies_escrow_id_fkey;
+ALTER TABLE escrow_anomalies ADD CONSTRAINT escrow_anomalies_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE CASCADE;
+ALTER TABLE escrow_anomalies DROP CONSTRAINT IF EXISTS escrow_anomalies_flagged_by_fkey;
+ALTER TABLE escrow_anomalies ADD CONSTRAINT escrow_anomalies_flagged_by_fkey FOREIGN KEY (flagged_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE escrow_anomalies DROP CONSTRAINT IF EXISTS escrow_anomalies_reviewed_by_fkey;
+ALTER TABLE escrow_anomalies ADD CONSTRAINT escrow_anomalies_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- escrow_risk_scores
+ALTER TABLE escrow_risk_scores DROP CONSTRAINT IF EXISTS escrow_risk_scores_user_id_fkey;
+ALTER TABLE escrow_risk_scores ADD CONSTRAINT escrow_risk_scores_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- escrow_audits
+ALTER TABLE escrow_audits DROP CONSTRAINT IF EXISTS escrow_audits_escrow_id_fkey;
+ALTER TABLE escrow_audits ADD CONSTRAINT escrow_audits_escrow_id_fkey FOREIGN KEY (escrow_id) REFERENCES escrows(id) ON DELETE CASCADE;
+ALTER TABLE escrow_audits DROP CONSTRAINT IF EXISTS escrow_audits_performed_by_fkey;
+ALTER TABLE escrow_audits ADD CONSTRAINT escrow_audits_performed_by_fkey FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- auction_integrity_flags
+ALTER TABLE auction_integrity_flags DROP CONSTRAINT IF EXISTS auction_integrity_flags_auction_id_fkey;
+ALTER TABLE auction_integrity_flags ADD CONSTRAINT auction_integrity_flags_auction_id_fkey FOREIGN KEY (auction_id) REFERENCES auctions(id) ON DELETE CASCADE;
+ALTER TABLE auction_integrity_flags DROP CONSTRAINT IF EXISTS auction_integrity_flags_flagged_by_fkey;
+ALTER TABLE auction_integrity_flags ADD CONSTRAINT auction_integrity_flags_flagged_by_fkey FOREIGN KEY (flagged_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE auction_integrity_flags DROP CONSTRAINT IF EXISTS auction_integrity_flags_reviewed_by_fkey;
+ALTER TABLE auction_integrity_flags ADD CONSTRAINT auction_integrity_flags_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- auction_risk_profiles
+ALTER TABLE auction_risk_profiles DROP CONSTRAINT IF EXISTS auction_risk_profiles_user_id_fkey;
+ALTER TABLE auction_risk_profiles ADD CONSTRAINT auction_risk_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- evidence
+ALTER TABLE evidence DROP CONSTRAINT IF EXISTS evidence_dispute_id_fkey;
+ALTER TABLE evidence ADD CONSTRAINT evidence_dispute_id_fkey FOREIGN KEY (dispute_id) REFERENCES disputes(id) ON DELETE CASCADE;
+ALTER TABLE evidence DROP CONSTRAINT IF EXISTS evidence_uploaded_by_fkey;
+ALTER TABLE evidence ADD CONSTRAINT evidence_uploaded_by_fkey FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE evidence DROP CONSTRAINT IF EXISTS evidence_reviewed_by_fkey;
+ALTER TABLE evidence ADD CONSTRAINT evidence_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- admin_alerts
+ALTER TABLE admin_alerts DROP CONSTRAINT IF EXISTS admin_alerts_acknowledged_by_fkey;
+ALTER TABLE admin_alerts ADD CONSTRAINT admin_alerts_acknowledged_by_fkey FOREIGN KEY (acknowledged_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- reports
+ALTER TABLE reports DROP CONSTRAINT IF EXISTS reports_generated_by_fkey;
+ALTER TABLE reports ADD CONSTRAINT reports_generated_by_fkey FOREIGN KEY (generated_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- notification_audit
+ALTER TABLE notification_audit DROP CONSTRAINT IF EXISTS notification_audit_notification_id_fkey;
+ALTER TABLE notification_audit ADD CONSTRAINT notification_audit_notification_id_fkey FOREIGN KEY (notification_id) REFERENCES notifications(id) ON DELETE CASCADE;
+
+-- mpesa_transactions
+ALTER TABLE mpesa_transactions DROP CONSTRAINT IF EXISTS mpesa_transactions_car_id_fkey;
+ALTER TABLE mpesa_transactions ADD CONSTRAINT mpesa_transactions_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
+
+-- user_profiles
+ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_user_id_fkey;
+ALTER TABLE user_profiles ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- inspector_applications
+ALTER TABLE inspector_applications DROP CONSTRAINT IF EXISTS inspector_applications_user_id_fkey;
+ALTER TABLE inspector_applications ADD CONSTRAINT inspector_applications_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE inspector_applications DROP CONSTRAINT IF EXISTS inspector_applications_reviewed_by_fkey;
+ALTER TABLE inspector_applications ADD CONSTRAINT inspector_applications_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- dealer_verifications
+ALTER TABLE dealer_verifications DROP CONSTRAINT IF EXISTS dealer_verifications_user_id_fkey;
+ALTER TABLE dealer_verifications ADD CONSTRAINT dealer_verifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE dealer_verifications DROP CONSTRAINT IF EXISTS dealer_verifications_dealer_id_fkey;
+ALTER TABLE dealer_verifications ADD CONSTRAINT dealer_verifications_dealer_id_fkey FOREIGN KEY (dealer_id) REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE dealer_verifications DROP CONSTRAINT IF EXISTS dealer_verifications_reviewed_by_fkey;
+ALTER TABLE dealer_verifications ADD CONSTRAINT dealer_verifications_reviewed_by_fkey FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL;
+
+-- ─────────────────────────────────────────────────────
+-- C4/L4: updated_at triggers for all tables with
+-- updated_at columns. The function was defined but
+-- never attached to any table.
+-- ─────────────────────────────────────────────────────
+DROP TRIGGER IF EXISTS set_updated_at ON users;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON cars;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON cars FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON auctions;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON auctions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON escrows;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON escrows FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON payments;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON payments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON reviews;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON reviews FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON dealers;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON dealers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON disputes;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON disputes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON leads;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON leads FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON support_tickets;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON support_tickets FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON feature_flags;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON feature_flags FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON organizations;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON organizations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON escrow_vaults;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON escrow_vaults FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON platform_config;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON platform_config FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON announcements;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON announcements FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON subscriptions;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON subscriptions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON user_profiles;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON user_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON inspector_applications;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON inspector_applications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON dealer_verifications;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON dealer_verifications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON contacts;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON contacts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ─────────────────────────────────────────────────────
+-- H3, H4, H5, H8: Missing indexes for performance
+-- ─────────────────────────────────────────────────────
+-- H3: GIN index for UUID[] participant lookup in chats
+CREATE INDEX IF NOT EXISTS idx_chats_participants ON chats USING GIN (participants);
+-- H4: Composite index for message loading (every chat load)
+CREATE INDEX IF NOT EXISTS idx_messages_chat_created ON messages(chat_id, created_at);
+-- H5: Composite index for dealer dashboard (active listings)
+CREATE INDEX IF NOT EXISTS idx_cars_dealer_status ON cars(dealer_id, status);
+-- H8: Partial indexes for filtered queries
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id) WHERE read = false;
+CREATE INDEX IF NOT EXISTS idx_cars_featured_true ON cars(featured) WHERE featured = true;
+
+-- ─────────────────────────────────────────────────────
+-- M2: JSONB indexes for queryable JSON columns
+-- ─────────────────────────────────────────────────────
+CREATE INDEX IF NOT EXISTS idx_cars_price_history ON cars USING GIN (price_history);
+CREATE INDEX IF NOT EXISTS idx_escrows_history ON escrows USING GIN (history);
+CREATE INDEX IF NOT EXISTS idx_escrows_timeline ON escrows USING GIN (timeline);
+CREATE INDEX IF NOT EXISTS idx_disputes_evidence ON disputes USING GIN (evidence);
+CREATE INDEX IF NOT EXISTS idx_disputes_timeline ON disputes USING GIN (timeline);
+
+-- ─────────────────────────────────────────────────────
+-- M5: UNIQUE constraint on payment reference
+-- ─────────────────────────────────────────────────────
+-- NOTE: Run DELETE duplicate rows first if this fails:
+-- DELETE FROM mpesa_transactions WHERE id NOT IN
+--   (SELECT MIN(id) FROM mpesa_transactions GROUP BY checkout_request_id);
+ALTER TABLE mpesa_transactions ADD CONSTRAINT uq_mpesa_checkout UNIQUE (checkout_request_id);
+
+-- ─────────────────────────────────────────────────────
+-- L1: Row Level Security policies
+-- service_role (backend) bypasses RLS entirely.
+-- anon key (frontend) is subject to these policies.
+-- ─────────────────────────────────────────────────────
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE cars ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chats ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE escrows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
+ALTER TABLE refresh_tokens ENABLE ROW LEVEL SECURITY;
+
+-- Public read for marketplace data
+CREATE POLICY "cars_public_read" ON cars FOR SELECT USING (status NOT IN ('hidden', 'draft'));
+CREATE POLICY "reviews_public_read" ON reviews FOR SELECT USING (status = 'approved');
+
+-- Users own their data
+CREATE POLICY "users_own_select" ON users FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "users_own_update" ON users FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "notifications_own_all" ON notifications FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "favorites_own_all" ON favorites FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "messages_own_select" ON messages FOR SELECT USING (
+  EXISTS (SELECT 1 FROM chats WHERE chats.id = messages.chat_id AND auth.uid() = ANY(chats.participants))
+);
+CREATE POLICY "chats_own_select" ON chats FOR SELECT USING (auth.uid() = ANY(participants));
+
+-- ─────────────────────────────────────────────────────
+-- L3: CHECK constraints for data integrity
+-- ─────────────────────────────────────────────────────
+ALTER TABLE cars ADD CONSTRAINT cars_year_check CHECK (year >= 1900 AND year <= 2030);
+ALTER TABLE users ADD CONSTRAINT users_commission_check CHECK (commission >= 0 AND commission <= 100);
+ALTER TABLE users ADD CONSTRAINT users_dealer_rating_check CHECK (dealer_rating >= 0 AND dealer_rating <= 5);
+ALTER TABLE cars ADD CONSTRAINT cars_mileage_check CHECK (mileage >= 0);
+
+-- =====================================================
+-- END OF AUDIT FIXES
+-- =====================================================

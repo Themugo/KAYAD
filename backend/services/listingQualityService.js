@@ -127,7 +127,7 @@ export const getPlatformQualityStats = async () => {
   try {
     const distribution = await ListingQuality.getQualityDistribution();
 
-    const stats = await aggregate("listing_qualities", [{
+    const stats = await aggregate("listing_quality", [{
         $group: {
           _id: null,
           totalListings: { $sum: 1 },
@@ -164,7 +164,7 @@ export const getQualityTrends = async (period = 30) => {
   try {
     const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
 
-    const trends = await aggregate("listing_qualities", [{
+    const trends = await aggregate("listing_quality", [{
         $match: {
           lastCalculatedAt: { $gte: startDate },
         },

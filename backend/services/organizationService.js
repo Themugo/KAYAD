@@ -181,7 +181,7 @@ export const createBranch = async (organizationId, branchData) => {
 
 export const getOrganizationBranches = async (organizationId) => {
   try {
-    const branches = await Branch.getByOrganization(organizationId);
+    const branches = await findAll("branches", { filters: { organization_id: organizationId } });
     return branches;
   } catch (err) {
     logError("Failed to get organization branches", err);
@@ -198,10 +198,10 @@ export const getOrganizationStats = async (organizationId) => {
     const organization = await findById("organizations", organizationId);
     if (!organization) return null;
 
-    const branches = await Branch.getByOrganization(organizationId);
-    const teams = await Team.getByOrganization(organizationId);
-    const departments = await Department.getByOrganization(organizationId);
-    const roles = await Role.getByOrganization(organizationId);
+    const branches = await findAll("branches", { filters: { organization_id: organizationId } });
+    const teams = await findAll("teams", { filters: { organization_id: organizationId } });
+    const departments = await findAll("departments", { filters: { organization_id: organizationId } });
+    const roles = await findAll("roles", { filters: { organization_id: organizationId } });
 
     return {
       organization: {

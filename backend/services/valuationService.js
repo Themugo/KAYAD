@@ -76,9 +76,9 @@ export const calculateVehicleValue = async (carId) => {
     if (!car) { logWarn("Car not found for valuation", { carId }); return null; }
 
     const [marketPricingArr, brandDepreciationArr, mileageImpactArr, demandSignalsArr] = await Promise.all([
-      findAll("market_pricings", { filters: { county: car.location?.city, "vehicle.brand": car.brand }, orderBy: "createdAt", ascending: false, limit: 1 }),
-      findAll("brand_depreciations", { filters: { brand: car.brand }, limit: 1 }),
-      findAll("mileage_impacts", { filters: { "vehicle.brand": car.brand, "vehicle.bodyType": car.bodyType }, limit: 1 }),
+      findAll("market_pricing", { filters: { county: car.location?.city, "vehicle.brand": car.brand }, orderBy: "createdAt", ascending: false, limit: 1 }),
+      findAll("brand_depreciation", { filters: { brand: car.brand }, limit: 1 }),
+      findAll("mileage_impact", { filters: { "vehicle.brand": car.brand, "vehicle.bodyType": car.bodyType }, limit: 1 }),
       findAll("demand_signals", { filters: { "search.filters.brand": car.brand, "search.county": car.location?.city }, orderBy: "createdAt", ascending: false, limit: 1 }),
     ]);
 
@@ -115,7 +115,7 @@ export const getMarketPosition = async (carId) => {
   try {
     const car = await findById("cars", carId);
     if (!car) return null;
-    const mpArr = await findAll("market_pricings", { filters: { county: car.location?.city, "vehicle.brand": car.brand }, orderBy: "createdAt", ascending: false, limit: 1 });
+    const mpArr = await findAll("market_pricing", { filters: { county: car.location?.city, "vehicle.brand": car.brand }, orderBy: "createdAt", ascending: false, limit: 1 });
     const marketPricing = mpArr[0] || null;
     if (!marketPricing || !marketPricing.pricing?.averagePrice) return null;
     const pctDiff = ((car.price - marketPricing.pricing.averagePrice) / marketPricing.pricing.averagePrice) * 100;
@@ -152,19 +152,19 @@ export const updateValuation = async (carId) => {
 };
 
 export const getCountyPricing = async (county, filters = {}) => {
-  const mpArr = await findAll("market_pricings", { filters: { county, ...filters }, orderBy: "createdAt", ascending: false, limit: 1 });
+  const mpArr = await findAll("market_pricing", { filters: { county, ...filters }, orderBy: "createdAt", ascending: false, limit: 1 });
   const mp = mpArr[0] || null;
   return mp ? { county, pricing: mp.pricing, metrics: mp.metrics, trend: mp.trend } : null;
 };
 
 export const getBrandDepreciation = async (brand) => {
-  const bdArr = await findAll("brand_depreciations", { filters: { brand }, limit: 1 });
+  const bdArr = await findAll("brand_depreciation", { filters: { brand }, limit: 1 });
   const bd = bdArr[0] || null;
   return bd ? { brand, depreciation: bd.depreciation, market: bd.market } : null;
 };
 
 export const getMileageImpact = async (filters = {}) => {
-  const miArr = await findAll("mileage_impacts", { filters, limit: 1 });
+  const miArr = await findAll("mileage_impact", { filters, limit: 1 });
   const mi = miArr[0] || null;
   return mi ? { vehicle: filters.vehicle || {}, mileageRanges: mi.mileageRanges, impact: mi.impact } : null;
 };
