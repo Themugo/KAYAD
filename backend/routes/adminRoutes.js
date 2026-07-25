@@ -1092,7 +1092,7 @@ router.post(
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password: await bcrypt.hash(password, 12), role });
     res.json({
       success: true,
       message: `Staff account created: ${email}`,
@@ -1156,37 +1156,37 @@ router.post(
       {
         name: "Marketing",
         email: "marketing@kayad.space",
-        password: process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"),
+        password: await bcrypt.hash(process.env.SEED_MARKET_PW || devFallback("SEED_MARKET_PW"), 12),
         role: "marketing",
       },
       {
         name: "Tech Support",
         email: "support@kayad.space",
-        password: process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"),
+        password: await bcrypt.hash(process.env.SEED_SUPPORT_PW || devFallback("SEED_SUPPORT_PW"), 12),
         role: "technical_support",
       },
       {
         name: "HR",
         email: "hr@kayad.space",
-        password: process.env.SEED_HR_PW || devFallback("SEED_HR_PW"),
+        password: await bcrypt.hash(process.env.SEED_HR_PW || devFallback("SEED_HR_PW"), 12),
         role: "hr",
       },
       {
         name: "Accounts",
         email: "accounts@kayad.space",
-        password: process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"),
+        password: await bcrypt.hash(process.env.SEED_ACCOUNTS_PW || devFallback("SEED_ACCOUNTS_PW"), 12),
         role: "accounts",
       },
       {
         name: "Escrow",
         email: "escrow@kayad.space",
-        password: process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"),
+        password: await bcrypt.hash(process.env.SEED_ESCROW_PW || devFallback("SEED_ESCROW_PW"), 12),
         role: "escrow_officer",
       },
       {
         name: "Ad Manager",
         email: "ads@kayad.space",
-        password: process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"),
+        password: await bcrypt.hash(process.env.SEED_ADS_PW || devFallback("SEED_ADS_PW"), 12),
         role: "ad_manager",
       },
     ];

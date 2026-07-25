@@ -1,5 +1,8 @@
 import { getSupabase } from "../utils/supabase.js";
 import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, FIELD_ALIASES, camelToSnake, normalizeSelect } from "../utils/fieldMap.js";
+import bcrypt from "bcryptjs";
+
+const BCRYPT_ROUNDS = 12;
 
 const TABLE_MAP = {
   User: "users", Car: "cars", Auction: "auctions", Bid: "bids",
@@ -156,6 +159,26 @@ function wrapDoc(doc, tableName, sb) {
       writable: true, configurable: true,
     },
   });
+
+  if (tableName === "users") {
+    Object.defineProperties(doc, {
+      matchPassword: {
+        value: async function (candidatePassword) {
+          if (!this.password || !candidatePassword) return false;
+          return bcrypt.compare(candidatePassword, this.password);
+        },
+        writable: true, configurable: true,
+      },
+      hashPassword: {
+        value: async function () {
+          if (this.password && !this.password.startsWith("$2")) {
+            this.password = await bcrypt.hash(this.password, BCRYPT_ROUNDS);
+          }
+        },
+        writable: true, configurable: true,
+      },
+    });
+  }
 }
 
 function createQuery(tableName) {

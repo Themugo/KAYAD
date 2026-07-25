@@ -196,7 +196,7 @@ export const register = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password,
+      password: await bcrypt.hash(password, 12),
       role,
       phone: validPhone,
       status,
@@ -609,7 +609,7 @@ export const changePassword = async (req, res) => {
     const match = await bcrypt.compare(currentPassword, user.password);
     if (!match) return R.error(res, "Current password is incorrect", 400);
 
-    user.password = newPassword; // pre-save hook will hash this
+    user.password = await bcrypt.hash(newPassword, 12);
     user.mustChangePassword = false;
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
@@ -732,7 +732,7 @@ export const resetPassword = async (req, res) => {
 
     if (!user) return R.error(res, "Reset link is invalid or has expired.", 400);
 
-    user.password = password;
+    user.password = await bcrypt.hash(password, 12);
     user.resetToken = undefined;
     user.resetTokenExpire = undefined;
     user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all existing sessions

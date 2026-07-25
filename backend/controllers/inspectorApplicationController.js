@@ -1,5 +1,6 @@
 import InspectorApplication from "../models/InspectorApplication.js";
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 import { sendNotification } from "../services/notification.service.js";
 import { logError } from "../utils/logger.js";
 
@@ -122,8 +123,10 @@ export const approveApplication = async (req, res) => {
         name: application.fullName,
         email: application.email,
         phone: application.phone,
-        password:
+        password: await bcrypt.hash(
           process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
+          12
+        ),
         role: "ghost_checker",
       });
     } else {
