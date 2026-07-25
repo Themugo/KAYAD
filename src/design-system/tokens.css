@@ -1,0 +1,421 @@
+/* ============================================================
+   KAYAD Design System 2.0 - Design Tokens
+   Premium Automotive Marketplace Design Language
+   
+   These tokens form the foundation of the entire design system.
+   All UI elements must use these tokens exclusively.
+   ============================================================ */
+
+/* ============================================
+   1. TYPOGRAPHY TOKENS
+   ============================================ */
+
+/* Font Families */
+:root {
+  /* Display/Headings - Premium serif */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  
+  /* Body/UI - Clean sans-serif */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  
+  /* Monospace */
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+
+/* Type Scale - 8 sizes only */
+:root {
+  /* Display XL - Hero headlines */
+  --text-display-xl: clamp(3rem, 6vw, 4.5rem);
+  --text-display-xl--line-height: 1.05;
+  --text-display-xl--letter-spacing: -0.03em;
+  --text-display-xl--font-weight: 700;
+  
+  /* Display L - Section headlines */
+  --text-display-l: clamp(2.25rem, 4vw, 3rem);
+  --text-display-l--line-height: 1.1;
+  --text-display-l--letter-spacing: -0.02em;
+  --text-display-l--font-weight: 700;
+  
+  /* Heading 1 - Page titles */
+  --text-h1: clamp(1.75rem, 3vw, 2.25rem);
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h1--font-weight: 700;
+  
+  /* Heading 2 - Section headers */
+  --text-h2: clamp(1.375rem, 2vw, 1.75rem);
+  --text-h2--line-height: 1.2;
+  --text-h2--letter-spacing: 0;
+  --text-h2--font-weight: 600;
+  
+  /* Heading 3 - Card titles */
+  --text-h3: clamp(1.125rem, 1.5vw, 1.375rem);
+  --text-h3--line-height: 1.25;
+  --text-h3--letter-spacing: 0;
+  --text-h3--font-weight: 600;
+  
+  /* Heading 4 - Labels */
+  --text-h4: 1rem;
+  --text-h4--line-height: 1.35;
+  --text-h4--letter-spacing: 0;
+  --text-h4--font-weight: 600;
+  
+  /* Body Large - Lead text */
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.6;
+  --text-body-lg--letter-spacing: 0;
+  --text-body-lg--font-weight: 400;
+  
+  /* Body - Default text */
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+  --text-body--letter-spacing: 0;
+  --text-body--font-weight: 400;
+  
+  /* Body Small - Secondary text */
+  --text-body-sm: 0.875rem;
+  --text-body-sm--line-height: 1.5;
+  --text-body-sm--letter-spacing: 0;
+  --text-body-sm--font-weight: 400;
+  
+  /* Caption - Labels, hints */
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.02em;
+  --text-caption--font-weight: 500;
+  
+  /* Button - Button text */
+  --text-button: 0.875rem;
+  --text-button--line-height: 1;
+  --text-button--letter-spacing: 0.02em;
+  --text-button--font-weight: 600;
+  
+  /* Overline - Eyebrow text */
+  --text-overline: 0.6875rem;
+  --text-overline--line-height: 1.2;
+  --text-overline--letter-spacing: 0.1em;
+  --text-overline--font-weight: 700;
+  --text-overline--text-transform: uppercase;
+}
+
+/* ============================================
+   2. SPACING TOKENS
+   ============================================ */
+
+:root {
+  /* Base unit: 4px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  
+  /* Component-specific spacing */
+  --space-input-y: var(--space-3);
+  --space-input-x: var(--space-4);
+  --space-button-y: var(--space-3);
+  --space-button-x: var(--space-6);
+  --space-card-padding: var(--space-6);
+  --space-section-gap: var(--space-16);
+  --space-page-padding-x: var(--space-6);
+  --space-page-padding-y: var(--space-8);
+}
+
+/* ============================================
+   3. COLOR TOKENS - Semantic System
+   ============================================ */
+
+/* Primary Brand Colors - Green */
+:root {
+  /* Brand Green - Main accent */
+  --color-brand: #16C4A4;
+  --color-brand-light: #2DD9BE;
+  --color-brand-dark: #0C7B68;
+  --color-brand-glow: rgba(22, 196, 164, 0.25);
+  --color-brand-subtle: rgba(22, 196, 164, 0.1);
+  --color-brand-muted: rgba(22, 196, 164, 0.15);
+  
+  /* Legacy gold alias - mapped to brand */
+  --gold: var(--color-brand);
+  --gold-light: var(--color-brand-light);
+  --gold-dark: var(--color-brand-dark);
+  --gold-glow: var(--color-brand-glow);
+}
+
+/* Surface Colors - Dark (nav, sidebar) */
+:root {
+  --color-surface-900: #0A1626;
+  --color-surface-850: rgba(10, 22, 38, 0.98);
+  --color-surface-800: #0D1E33;
+  --color-surface-700: #112440;
+  
+  /* Legacy */
+  --nav-bg: var(--color-surface-900);
+  --nav-bg-scrolled: var(--color-surface-850);
+}
+
+/* Background Colors - Light (content areas) */
+:root {
+  --color-bg-base: #FDFAF5;
+  --color-bg-primary: #FDFAF5;
+  --color-bg-secondary: #F7F2E8;
+  --color-bg-tertiary: #EDE7D9;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-muted: #EDE7D9;
+  --color-bg-surface: #F7F2E8;
+  
+  /* Legacy */
+  --bg-base: var(--color-bg-base);
+  --bg-primary: var(--color-bg-primary);
+  --bg-secondary: var(--color-bg-secondary);
+  --bg-card: var(--color-bg-elevated);
+  --bg-elevated: var(--color-bg-elevated);
+  --bg-muted: var(--color-bg-muted);
+  --surface: var(--color-bg-surface);
+}
+
+/* Text Colors */
+:root {
+  --color-text-primary: #2E2B28;
+  --color-text-secondary: #4A4540;
+  --color-text-muted: #9A9088;
+  --color-text-dim: #C8BFB0;
+  --color-text-inverse: #FFFFFF;
+  
+  /* Legacy */
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
+  --text-dim: var(--color-text-dim);
+  --text: var(--color-text-primary);
+}
+
+/* Border Colors */
+:root {
+  --color-border: #E0D8C8;
+  --color-border-soft: #EDE7D9;
+  --color-border-strong: #C8BFB0;
+  --color-border-focus: var(--color-brand);
+  --color-border-inverse: rgba(255, 255, 255, 0.1);
+  
+  /* Legacy */
+  --border: var(--color-border);
+  --border-soft: var(--color-border-soft);
+  --border-light: var(--color-border-strong);
+  --border-focus: var(--color-border-focus);
+}
+
+/* Accent Colors */
+:root {
+  --color-accent: #3B82F6;
+  --color-accent-light: #60A5FA;
+  --color-accent-dark: #2563EB;
+  --color-accent-subtle: rgba(59, 130, 246, 0.1);
+  
+  /* Legacy */
+  --blue-400: var(--color-accent-light);
+  --blue-500: var(--color-accent);
+  --blue-600: var(--color-accent-dark);
+}
+
+/* Status Colors */
+:root {
+  /* Success */
+  --color-success: #10B981;
+  --color-success-light: #34D399;
+  --color-success-dark: #059669;
+  --color-success-subtle: rgba(16, 185, 129, 0.1);
+  
+  /* Danger/Error */
+  --color-danger: #EF4444;
+  --color-danger-light: #F87171;
+  --color-danger-dark: #DC2626;
+  --color-danger-subtle: rgba(239, 68, 68, 0.1);
+  
+  /* Warning */
+  --color-warning: #F59E0B;
+  --color-warning-light: #FBBF24;
+  --color-warning-dark: #D97706;
+  --color-warning-subtle: rgba(245, 158, 11, 0.1);
+  
+  /* Info */
+  --color-info: #3B82F6;
+  --color-info-light: #60A5FA;
+  --color-info-dark: #2563EB;
+  --color-info-subtle: rgba(59, 130, 246, 0.1);
+  
+  /* Legacy */
+  --success: var(--color-success);
+  --danger: var(--color-danger);
+  --warning: var(--color-warning);
+  --info: var(--color-info);
+  
+  /* Badge colors */
+  --badge-verified: var(--color-success);
+  --badge-featured: var(--color-warning);
+  --badge-auction: var(--color-danger);
+  --badge-certified: #8B5CF6;
+  --badge-new: #06B6D4;
+}
+
+/* ============================================
+   4. BORDER RADIUS TOKENS
+   ============================================ */
+
+:root {
+  /* Core radius scale */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+  --radius-full: 9999px;
+  
+  /* Legacy aliases */
+  --radius: var(--radius-md);
+  --radius-lg-legacy: var(--radius-lg);
+}
+
+/* ============================================
+   5. ELEVATION / SHADOW TOKENS
+   ============================================ */
+
+:root {
+  /* Elevation 0 - None */
+  --shadow-none: none;
+  
+  /* Elevation 1 - Small (subtle depth) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+  
+  /* Elevation 2 - Medium (cards, inputs) */
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  
+  /* Elevation 3 - Large (dropdowns, modals) */
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  
+  /* Elevation 4 - Floating (popovers, tooltips) */
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+  
+  /* Elevation 5 - Modal (dialogs) */
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  
+  /* Brand shadow - For brand-colored elements */
+  --shadow-brand: 0 4px 14px rgba(22, 196, 164, 0.25);
+  --shadow-brand-lg: 0 8px 30px rgba(22, 196, 164, 0.35);
+  --shadow-brand-glow: 0 0 20px rgba(22, 196, 164, 0.3);
+  
+  /* Legacy */
+  --shadow-sm-legacy: var(--shadow-sm);
+  --shadow-md-legacy: var(--shadow-md);
+  --shadow-lg-legacy: var(--shadow-lg);
+  --shadow-xl-legacy: var(--shadow-xl);
+  --shadow-2xl-legacy: var(--shadow-2xl);
+}
+
+/* ============================================
+   6. MOTION / ANIMATION TOKENS
+   ============================================ */
+
+:root {
+  /* Duration scale */
+  --duration-instant: 50ms;
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 200ms;
+  --duration-slower: 250ms;
+  --duration-slowest: 350ms;
+  
+  /* Easing - Premium feel */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Standard easing for most animations */
+  --transition-fast: var(--duration-fast) var(--ease-out);
+  --transition-normal: var(--duration-normal) var(--ease-out);
+  --transition-slow: var(--duration-slow) var(--ease-out);
+  --transition-spring: var(--duration-slow) var(--ease-spring);
+}
+
+/* ============================================
+   7. Z-INDEX SCALE
+   ============================================ */
+
+:root {
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+}
+
+/* ============================================
+   8. ICON SIZE TOKENS
+   ============================================ */
+
+:root {
+  --icon-xs: 12px;
+  --icon-sm: 14px;
+  --icon-md: 16px;
+  --icon-lg: 18px;
+  --icon-xl: 20px;
+  --icon-2xl: 24px;
+  --icon-3xl: 28px;
+  
+  /* Stroke width */
+  --icon-stroke: 1.5px;
+  --icon-stroke-bold: 2px;
+}
+
+/* ============================================
+   9. BREAKPOINT TOKENS
+   ============================================ */
+
+:root {
+  /* Mobile first breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* Container widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1440px;
+  --container-content: 720px;
+  --container-wide: 1320px;
+}
+
+/* ============================================
+   10. TOUCH TARGET TOKENS
+   ============================================ */
+
+:root {
+  /* Minimum touch target for accessibility */
+  --touch-target-min: 44px;
+  
+  /* Button heights */
+  --button-height-sm: 32px;
+  --button-height-md: 40px;
+  --button-height-lg: 48px;
+  
+  /* Input heights */
+  --input-height-sm: 32px;
+  --input-height-md: 40px;
+  --input-height-lg: 48px;
+}

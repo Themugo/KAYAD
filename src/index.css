@@ -1,14 +1,13 @@
 /* ============================================================
-   KAYAD — Premium Automotive Marketplace Design System
+   KAYAD Design System 2.0
+   Premium Automotive Marketplace
    ============================================================ */
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+/* Google Fonts - Inter for body, Playfair Display for headings */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* Mobile design system */
+/* Legacy imports - consolidated into design system */
 @import './styles/mobile.css';
-
-/* Dealer platform design system */
 @import './styles/dealer.css';
 
 /* ---- Premium Design Tokens ---- */
