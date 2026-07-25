@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useDesignTheme } from '../theme/DesignThemeProvider';
 import CarCard, { type Car } from '../components/features/car/CarCard';
 import { CARS } from '../data/cars';
-import { Search, SlidersHorizontal, Grid, List } from 'lucide-react';
+import { Search, SlidersHorizontal, Grid, List, ArrowUpDown } from 'lucide-react';
 
 type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan';
 type ViewMode = 'grid' | 'list';
+type SortOption = 'default' | 'price-asc' | 'price-desc' | 'year-desc' | 'year-asc' | 'mileage-asc';
 
 interface GalleryProps {
   setPage: (page: string) => void;
@@ -14,6 +15,14 @@ interface GalleryProps {
 }
 
 const TYPES: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan'];
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'default', label: 'Featured' },
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+  { value: 'year-desc', label: 'Newest First' },
+  { value: 'year-asc', label: 'Oldest First' },
+  { value: 'mileage-asc', label: 'Lowest Mileage' },
+];
 const ITEMS_PER_PAGE = 10;
 
 export default function Gallery({ setPage, viewCar }: GalleryProps) {
@@ -27,6 +36,9 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('default');
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
 
   const nav = useCallback(
     (page: string) => {
@@ -39,16 +51,34 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
-    return CARS.filter((car) => {
+    const pMin = priceMin ? parseInt(priceMin.replace(/,/g, ''), 10) : 0;
+    const pMax = priceMax ? parseInt(priceMax.replace(/,/g, ''), 10) : Infinity;
+    let results = CARS.filter((car) => {
       const matchType = typeFilter === 'All' || car.type === typeFilter;
       const matchQuery =
         !q ||
         car.make.toLowerCase().includes(q) ||
         car.model.toLowerCase().includes(q) ||
         car.city.toLowerCase().includes(q);
-      return matchType && matchQuery;
+      const matchPrice = car.price >= pMin && car.price <= pMax;
+      return matchType && matchQuery && matchPrice;
     });
-  }, [query, typeFilter]);
+
+    if (sortBy !== 'default') {
+      results = [...results].sort((a, b) => {
+        switch (sortBy) {
+          case 'price-asc': return a.price - b.price;
+          case 'price-desc': return b.price - a.price;
+          case 'year-desc': return b.year - a.year;
+          case 'year-asc': return a.year - b.year;
+          case 'mileage-asc': return parseInt(a.mileage.replace(/[^\d]/g, '')) - parseInt(b.mileage.replace(/[^\d]/g, ''));
+          default: return 0;
+        }
+      });
+    }
+
+    return results;
+  }, [query, typeFilter, sortBy, priceMin, priceMax]);
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
   const paginated = filtered.slice(0, currentPage * ITEMS_PER_PAGE);
@@ -303,7 +333,7 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
               ))}
             </div>
 
-            {/* Price Range Display */}
+            {/* Price Range Inputs */}
             <div style={{ marginTop: 20 }}>
               <p
                 style={{
@@ -317,53 +347,78 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
                   margin: '0 0 8px',
                 }}
               >
-                Price Range
+                Price Range (KES)
               </p>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: fonts.body,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    color: c.cardHeading,
-                  }}
-                >
-                  KES {prices.min.toLocaleString('en-KE')}
-                </span>
-                <div
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <input
+                  type="text"
+                  value={priceMin}
+                  onChange={(e) => { setPriceMin(e.target.value); setCurrentPage(1); }}
+                  placeholder="Min"
                   style={{
                     flex: 1,
-                    height: 4,
-                    borderRadius: 2,
-                    background: c.cardBorder,
-                    position: 'relative',
-                  }}
-                >
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: 2,
-                      background: `linear-gradient(to right, ${c.cardAccent}, ${c.heroAccent})`,
-                    }}
-                  />
-                </div>
-                <span
-                  style={{
+                    padding: '10px 12px',
+                    borderRadius: Math.round(sizes.radius * 0.6),
+                    border: `1.5px solid ${c.cardBorder}`,
+                    background: c.pageBg,
+                    color: c.cardHeading,
                     fontFamily: fonts.body,
                     fontSize: 13,
-                    fontWeight: 600,
-                    color: c.cardHeading,
+                    outline: 'none',
+                    boxSizing: 'border-box',
                   }}
-                >
-                  KES {prices.max.toLocaleString('en-KE')}
-                </span>
+                />
+                <span style={{ color: c.cardBody, opacity: 0.4, fontSize: 13 }}>—</span>
+                <input
+                  type="text"
+                  value={priceMax}
+                  onChange={(e) => { setPriceMax(e.target.value); setCurrentPage(1); }}
+                  placeholder="Max"
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: Math.round(sizes.radius * 0.6),
+                    border: `1.5px solid ${c.cardBorder}`,
+                    background: c.pageBg,
+                    color: c.cardHeading,
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: c.cardBody, opacity: 0.4 }}>
+                Range: KES {prices.min.toLocaleString('en-KE')} — KES {prices.max.toLocaleString('en-KE')}
+              </p>
+            </div>
+
+            {/* Sort By */}
+            <div style={{ marginTop: 20 }}>
+              <p
+                style={{
+                  fontFamily: fonts.body,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: c.cardBody,
+                  opacity: 0.5,
+                  margin: '0 0 8px',
+                }}
+              >
+                Sort By
+              </p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setSortBy(opt.value); setCurrentPage(1); }}
+                    className={sortBy === opt.value ? 'pill-active' : 'pill-inactive'}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -391,17 +446,44 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
         )}
 
         {/* Results Count */}
-        <p
-          style={{
-            fontFamily: fonts.body,
-            fontSize: 13,
-            color: c.cardBody,
-            opacity: 0.6,
-            margin: '0 0 24px',
-          }}
-        >
-          {filtered.length} vehicle{filtered.length !== 1 ? 's' : ''} found
-        </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 13,
+              color: c.cardBody,
+              opacity: 0.6,
+              margin: 0,
+            }}
+          >
+            {filtered.length} vehicle{filtered.length !== 1 ? 's' : ''} found
+            {sortBy !== 'default' && (
+              <span style={{ marginLeft: 8, color: c.cardAccent, fontWeight: 600 }}>
+                · Sorted by {SORT_OPTIONS.find(o => o.value === sortBy)?.label}
+              </span>
+            )}
+          </p>
+          {sortBy !== 'default' && (
+            <button
+              onClick={() => setSortBy('default')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                background: 'none',
+                border: 'none',
+                color: c.cardAccent,
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              <ArrowUpDown size={12} /> Clear sort
+            </button>
+          )}
+        </div>
 
         {/* ── CAR GRID ─────────────────────────────────────────── */}
         {paginated.length > 0 ? (
@@ -598,6 +680,9 @@ export default function Gallery({ setPage, viewCar }: GalleryProps) {
               onClick={() => {
                 setQuery('');
                 setTypeFilter('All');
+                setSortBy('default');
+                setPriceMin('');
+                setPriceMax('');
                 setCurrentPage(1);
               }}
               style={{

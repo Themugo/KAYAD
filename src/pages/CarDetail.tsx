@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDesignTheme } from '../theme/DesignThemeProvider';
 import { Car } from '../components/features/car/CarCard';
+import { CARS } from '../data/cars';
 import {
   ArrowLeft,
   Heart,
@@ -17,11 +18,13 @@ import {
   XCircle,
   MessageCircle,
   ExternalLink,
+  Phone,
 } from 'lucide-react';
 
 interface CarDetailProps {
   car: Car | null;
   setPage: (page: string) => void;
+  viewCar?: (car: Car) => void;
 }
 
 type Tab = 'overview' | 'escrow' | 'inspection' | 'financing';
@@ -49,7 +52,7 @@ function useCountdown(targetDate: string | undefined) {
   return remaining;
 }
 
-export default function CarDetail({ car, setPage }: CarDetailProps) {
+export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
   const navigate = useNavigate();
   const { theme } = useDesignTheme();
   const c = theme.colors;
@@ -58,6 +61,13 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
   const [tab, setTab] = useState<Tab>('overview');
   const [activeImage, setActiveImage] = useState(0);
   const [favorited, setFavorited] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const [inspectionLocation, setInspectionLocation] = useState('Westlands');
   const [financingName, setFinancingName] = useState('');
@@ -143,6 +153,10 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
     car.image.replace('600x400', '700x500'),
     car.image.replace('600x400', '900x600'),
   ];
+
+  const similarCars = CARS.filter(
+    (c) => c.id !== car.id && (c.make === car.make || c.type === car.type),
+  ).slice(0, 4);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: 'overview', label: 'Overview' },
@@ -421,7 +435,7 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: '1fr 360px',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 360px',
             gap: 32,
             alignItems: 'start',
           }}
@@ -526,7 +540,7 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
                   >
                     Key Details
                   </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr 1fr 1fr', gap: 16 }}>
                     {keyDetails.map(d => (
                       <div
                         key={d.label}
@@ -1287,7 +1301,8 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
                   gap: 10,
                 }}
               >
-                <button
+                <a
+                  href="tel:+254700123456"
                   style={{
                     width: '100%',
                     padding: '12px 0',
@@ -1303,11 +1318,16 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
+                    textDecoration: 'none',
+                    textAlign: 'center',
                   }}
                 >
-                  <MessageCircle size={15} /> Call Dealer
-                </button>
-                <button
+                  <Phone size={15} /> Call Dealer
+                </a>
+                <a
+                  href={`https://wa.me/254700123456?text=${encodeURIComponent(`Hi, I'm interested in the ${car.year} ${car.make} ${car.model} listed on KAYAD.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{
                     width: '100%',
                     padding: '12px 0',
@@ -1323,10 +1343,12 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
+                    textDecoration: 'none',
+                    textAlign: 'center',
                   }}
                 >
                   <MessageCircle size={15} /> Send WhatsApp
-                </button>
+                </a>
               </div>
 
               {/* Dealer Info */}
@@ -1401,6 +1423,83 @@ export default function CarDetail({ car, setPage }: CarDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* ── SIMILAR VEHICLES ── */}
+      {similarCars.length > 0 && (
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 48px' }}>
+          <h2
+            style={{
+              fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+              fontSize: `calc(1.4rem * ${theme.sizes.headingScale})`,
+              fontWeight: 700,
+              color: c.headingText,
+              margin: '0 0 24px',
+            }}
+          >
+            Similar Vehicles
+          </h2>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 20,
+            }}
+          >
+            {similarCars.map((sc) => (
+              <div
+                key={sc.id}
+                onClick={() => {
+                  if (viewCar) {
+                    viewCar(sc);
+                  } else {
+                    navigate('/car/' + sc.id);
+                  }
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                style={{
+                  background: c.cardBg,
+                  border: `1px solid ${c.cardBorder}`,
+                  borderRadius: r,
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'box-shadow 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 8px 24px ${c.cardAccent}15`;
+                  e.currentTarget.style.borderColor = c.cardAccent;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = c.cardBorder;
+                }}
+              >
+                <div style={{ aspectRatio: '16/10', overflow: 'hidden', position: 'relative' }}>
+                  <img
+                    src={sc.image}
+                    alt={`${sc.make} ${sc.model}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+                <div style={{ padding: 16 }}>
+                  <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.cardAccent }}>
+                    {sc.make}
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontFamily: `var(--font-heading, ${theme.fonts.heading})`, fontWeight: 700, fontSize: '1rem', color: c.cardHeading }}>
+                    {sc.model}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, fontSize: '0.78rem', color: c.cardBody }}>
+                    <MapPin size={12} style={{ color: c.cardAccent }} />
+                    {sc.city}
+                  </div>
+                  <p style={{ margin: '10px 0 0', fontWeight: 700, fontSize: '1.05rem', color: c.cardHeading }}>
+                    KES {sc.price.toLocaleString('en-KE')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── BOTTOM NAV ── */}
       <div

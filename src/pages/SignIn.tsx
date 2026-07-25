@@ -18,7 +18,6 @@ interface SignInProps {
 const ROLES: { key: Role; label: string; icon: typeof User; desc: string }[] = [
   { key: 'private-seller', label: 'Private Seller', icon: User,     desc: 'Individual selling a vehicle' },
   { key: 'dealer',         label: 'Dealer',         icon: Building2, desc: 'Licensed dealership account' },
-  { key: 'admin',          label: 'Admin',          icon: Shield,    desc: 'KAYAD platform management' },
 ];
 
 const MOCK_USERS: Record<Role, Omit<AuthUser, 'email'>> = {

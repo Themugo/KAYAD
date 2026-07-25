@@ -41,14 +41,14 @@ interface NavbarProps {
 
 const NAV_ITEMS = [
   { key: 'home', label: 'Home', path: '/', icon: Home },
-  { key: 'listings', label: 'Browse Cars', path: '/listings', icon: Images },
-  { key: 'auctions', label: 'Auctions', path: '/auctions', icon: Gavel },
-  { key: 'sell', label: 'Sell', path: '/sell', icon: Tag },
+  { key: 'gallery', label: 'Browse Cars', path: '/gallery', icon: Images },
+  { key: 'auction', label: 'Auctions', path: '/auction', icon: Gavel },
+  { key: 'sell', label: 'Sell', path: '/dealer/add-car', icon: Tag },
 ];
 
 const AUTH_NAV_ITEMS = [
-  { key: 'messages', label: 'Messages', path: '/messages', icon: MessageCircle },
-  { key: 'watchlist', label: 'Watchlist', path: '/watchlist', icon: Heart },
+  { key: 'chat', label: 'Messages', path: '/chat', icon: MessageCircle },
+  { key: 'favorites', label: 'Watchlist', path: '/favorites', icon: Heart },
 ];
 
 export default function Navbar({ currentPage, setPage, authUser, onSignOut }: NavbarProps) {
@@ -97,8 +97,8 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
-      setPage('listings');
+      navigate(`/gallery?q=${encodeURIComponent(searchQuery.trim())}`);
+      setPage('gallery');
       setSearchOpen(false);
       setSearchQuery('');
     }
@@ -279,7 +279,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
 
                   {/* Sell button */}
                   <button
-                    onClick={() => handleNav('/sell', 'sell')}
+                    onClick={() => handleNav('/dealer/add-car', 'sell')}
                     className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
                     style={{
                       backgroundColor: 'var(--c-navbar-accent, #e94560)',
@@ -347,9 +347,10 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                         </div>
                         <div className="py-1">
                           <button
-                            onClick={() => {
-                              handleNav('/dashboard', 'dashboard');
-                            }}
+                  onClick={() => {
+                    const dashPath = authUser.role === 'admin' ? '/admin' : authUser.role === 'dealer' ? '/dealer' : '/dashboard';
+                    handleNav(dashPath, 'dashboard');
+                  }}
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
                             style={{ color: 'var(--c-navbar-text, #ffffff)' }}
                             onMouseEnter={(e) =>
@@ -451,17 +452,30 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
               )}
 
               {!authUser && (
-                <button
-                  onClick={() => handleNav('/auth', 'auth')}
-                  className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                  style={{
-                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                    color: '#ffffff',
-                  }}
-                >
-                  <LogIn size={16} />
-                  Sign In
-                </button>
+                <>
+                  <button
+                    onClick={() => handleNav('/register', 'register')}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'var(--c-navbar-text, #ffffff)',
+                      border: '1.5px solid rgba(255,255,255,0.25)',
+                    }}
+                  >
+                    Register
+                  </button>
+                  <button
+                    onClick={() => handleNav('/login', 'login')}
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
+                    style={{
+                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    <LogIn size={16} />
+                    Sign In
+                  </button>
+                </>
               )}
             </div>
 
@@ -719,9 +733,9 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
             )}
 
             {!authUser && (
-              <div className="px-4 py-3">
+              <div className="px-4 py-3 space-y-2">
                 <button
-                  onClick={() => handleNav('/auth', 'auth')}
+                  onClick={() => handleNav('/login', 'login')}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
                   style={{
                     backgroundColor: 'var(--c-navbar-accent, #e94560)',
@@ -731,6 +745,17 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   <LogIn size={16} />
                   Sign In
                 </button>
+                <button
+                  onClick={() => handleNav('/register', 'register')}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: 'var(--c-navbar-text, #ffffff)',
+                    border: '1.5px solid rgba(255,255,255,0.25)',
+                  }}
+                >
+                  Register
+                </button>
               </div>
             )}
 
@@ -738,7 +763,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
             {authUser && (
               <div className="px-4 pb-4">
                 <button
-                  onClick={() => handleNav('/sell', 'sell')}
+                  onClick={() => handleNav('/dealer/add-car', 'sell')}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
                   style={{
                     backgroundColor: 'var(--c-navbar-accent, #e94560)',

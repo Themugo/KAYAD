@@ -1,5 +1,6 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Search, PlusCircle, Trophy, User, Heart, BarChart3 } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Heart, BarChart3 } from 'lucide-react';
 
 interface MobileBottomNavProps {
   authUser?: any;
@@ -8,10 +9,16 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
   const location = useLocation();
   const path = location.pathname;
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
-  // Hide on desktop or admin/dealer routes
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   if (
-    window.innerWidth >= 1024 ||
+    !isMobile ||
     path.startsWith('/dealer') ||
     path.startsWith('/admin') ||
     path.startsWith('/dashboard')
@@ -24,12 +31,20 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
     return path.startsWith(href);
   };
 
+  const getAccountHref = () => {
+    if (!authUser) return '/login';
+    const role = authUser.role;
+    if (role === 'admin') return '/admin';
+    if (role === 'dealer') return '/dealer';
+    return '/dashboard';
+  };
+
   const tabs = [
     { key: 'home', href: '/', icon: Home, label: 'Home' },
     { key: 'search', href: '/gallery', icon: Search, label: 'Search' },
+    { key: 'sell', href: '/dealer/add-car', icon: PlusCircle, label: 'Sell' },
     { key: 'favorites', href: '/favorites', icon: Heart, label: 'Saved' },
-    { key: 'compare', href: '/compare', icon: BarChart3, label: 'Compare' },
-    { key: 'account', href: authUser ? '/dealer' : '/login', icon: User, label: authUser ? 'Account' : 'Sign In' },
+    { key: 'account', href: getAccountHref(), icon: User, label: authUser ? 'Account' : 'Sign In' },
   ];
 
   return (

@@ -146,12 +146,16 @@ function CarDetailRoute() {
   const car = CARS.find((item) => String(item.id) === String(id));
   const navigate = useNavigate();
   const handleSetPage = (page: string) => navigate('/' + page);
+  const handleViewCar = (car: Car) => {
+    navigate('/car/' + (car.id || car._id));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (!car) {
     return <NotFoundPage />;
   }
 
-  return <CarDetail car={car} setPage={handleSetPage} />;
+  return <CarDetail car={car} setPage={handleSetPage} viewCar={handleViewCar} />;
 }
 
 

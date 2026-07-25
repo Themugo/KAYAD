@@ -13,6 +13,7 @@ import {
   Wrench,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
@@ -27,6 +28,7 @@ const TRUST_BADGES = [
   { icon: Search, title: 'Pre-Inspection', desc: 'Independent check before purchase' },
   { icon: CheckCircle, title: 'Verified Dealers', desc: 'All sellers vetted and approved' },
   { icon: Tag, title: 'Live Auctions', desc: 'Transparent real-time bidding' },
+  { icon: TrendingUp, title: '2,500+ Sold', desc: 'Vehicles successfully traded' },
 ];
 
 const FEATURES = [
@@ -62,6 +64,7 @@ export default function Home({ setPage, viewCar }: HomeProps) {
   const [filter, setFilter] = useState<Filter>('All');
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [heroSearch, setHeroSearch] = useState('');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const nav = useCallback(
@@ -201,7 +204,7 @@ export default function Home({ setPage, viewCar }: HomeProps) {
                 fontSize: `${1.1 * sizes.bodyScale}rem`,
                 color: colors.heroText,
                 opacity: 0.75,
-                marginBottom: 32,
+                marginBottom: 24,
                 maxWidth: '540px',
                 marginLeft: heroTextAlign === 'center' ? 'auto' : undefined,
                 marginRight: heroTextAlign === 'center' ? 'auto' : undefined,
@@ -211,6 +214,86 @@ export default function Home({ setPage, viewCar }: HomeProps) {
               Buy, sell and auction vehicles with confidence. Escrow protection,
               verified dealers, and real-time bidding — all in one place.
             </p>
+
+            {/* Hero Search Bar */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (heroSearch.trim()) {
+                  navigate(`/gallery?q=${encodeURIComponent(heroSearch.trim())}`);
+                  setPage('gallery');
+                } else {
+                  navigate('/gallery');
+                  setPage('gallery');
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              style={{
+                display: 'flex',
+                gap: 0,
+                maxWidth: 520,
+                marginLeft: heroTextAlign === 'center' ? 'auto' : undefined,
+                marginRight: heroTextAlign === 'center' ? 'auto' : undefined,
+                marginBottom: 24,
+                background: 'rgba(255,255,255,0.12)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                borderRadius: sizes.radius,
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+                <Search
+                  size={18}
+                  style={{
+                    position: 'absolute',
+                    left: 14,
+                    color: colors.heroText,
+                    opacity: 0.5,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <input
+                  type="text"
+                  value={heroSearch}
+                  onChange={(e) => setHeroSearch(e.target.value)}
+                  placeholder="Search by make, model, or city..."
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px 14px 42px',
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    color: colors.heroText,
+                    fontFamily: fonts.body,
+                    fontSize: '0.95rem',
+                  }}
+                />
+              </div>
+              <button
+                type="submit"
+                style={{
+                  padding: '14px 24px',
+                  background: colors.heroAccent,
+                  color: '#fff',
+                  border: 'none',
+                  fontFamily: fonts.body,
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'opacity 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.88')}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+              >
+                <Search size={16} />
+                Search
+              </button>
+            </form>
 
             <div
               style={{
