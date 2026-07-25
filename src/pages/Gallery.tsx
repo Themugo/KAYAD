@@ -1,498 +1,625 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { 
-  Search, SlidersHorizontal, X, Grid3X3, List, 
-  ChevronDown, ArrowUpDown, RotateCcw, BarChart3, Heart
-} from 'lucide-react';
-import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
-import { SkeletonGrid } from '../components/features/common/SkeletonCard';
+import { useState, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
+import CarCard, { type Car } from '../components/features/car/CarCard';
 import { CARS } from '../data/cars';
-import { useCompare } from '../context/CompareContext';
+import { Search, SlidersHorizontal, Grid, List } from 'lucide-react';
 
-type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
-type SortOption = 'default' | 'price_asc' | 'price_desc' | 'newest' | 'year_desc';
+type VehicleType = 'All' | 'SUV' | 'Pickup' | 'Sedan';
 type ViewMode = 'grid' | 'list';
 
 interface GalleryProps {
+  setPage: (page: string) => void;
   viewCar: (car: Car) => void;
 }
 
-// Debounce hook
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
-}
+const TYPES: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan'];
+const ITEMS_PER_PAGE = 10;
 
-// Infinite scroll hook
-function useInfiniteScroll(callback: () => void, hasMore: boolean) {
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
-    if (observerRef.current) observerRef.current.disconnect();
-    if (node && hasMore) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          if (entries[0]?.isIntersecting) {
-            callback();
-          }
-        },
-        { rootMargin: '200px' }
-      );
-      observerRef.current.observe(node);
-    }
-  }, [callback, hasMore]);
-  return sentinelRef;
-}
+export default function Gallery({ setPage, viewCar }: GalleryProps) {
+  const navigate = useNavigate();
+  const { theme } = useDesignTheme();
+  const { colors, fonts, sizes } = theme;
+  const c = colors;
 
-export default function Gallery({ viewCar }: GalleryProps) {
-  const { compareIds, toggleCar, isComparing, compareCount } = useCompare();
   const [query, setQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<VehicleType>('All');
-  const [maxPrice, setMaxPrice] = useState(20000000);
-  const [minYear, setMinYear] = useState(2000);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('default');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const ITEMS_PER_PAGE = 12;
-  
-  // Debounced search
-  const debouncedQuery = useDebounce(query, 300);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const types: VehicleType[] = ['All', 'SUV', 'Pickup', 'Sedan', 'Wagon'];
-  
-  const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'default', label: 'Curated' },
-    { value: 'newest', label: 'Newest First' },
-    { value: 'year_desc', label: 'Year (Newest)' },
-    { value: 'price_asc', label: 'Price: Low to High' },
-    { value: 'price_desc', label: 'Price: High to Low' },
-  ];
+  const nav = useCallback(
+    (page: string) => {
+      setPage(page);
+      navigate('/' + page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [setPage, navigate],
+  );
 
-  // Get unique values for filters
-  const { makes, cities, years } = useMemo(() => {
-    const makes = [...new Set(CARS.map(c => c.make))].sort();
-    const cities = [...new Set(CARS.map(c => c.city))].sort();
-    const years = [...new Set(CARS.map(c => c.year))].sort((a, b) => b - a);
-    return { makes, cities, years };
-  }, []);
-
-  const [selectedMake, setSelectedMake] = useState('All');
-  const [selectedCity, setSelectedCity] = useState('All');
-
-  // Filter all results
-  const allResults = useMemo(() => {
-    const filtered = CARS.filter(car => {
-      const q = debouncedQuery.toLowerCase();
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return CARS.filter((car) => {
+      const matchType = typeFilter === 'All' || car.type === typeFilter;
       const matchQuery =
         !q ||
         car.make.toLowerCase().includes(q) ||
         car.model.toLowerCase().includes(q) ||
         car.city.toLowerCase().includes(q);
-      const matchType = typeFilter === 'All' || car.type === typeFilter;
-      const matchPrice = car.price <= maxPrice;
-      const matchYear = car.year >= minYear;
-      const matchMake = selectedMake === 'All' || car.make === selectedMake;
-      const matchCity = selectedCity === 'All' || car.city === selectedCity;
-      return matchQuery && matchType && matchPrice && matchYear && matchMake && matchCity;
+      return matchType && matchQuery;
     });
+  }, [query, typeFilter]);
 
-    // Sort
-    switch (sortBy) {
-      case 'price_asc':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
-      case 'newest':
-        filtered.sort((a, b) => (b.listedDate ? 1 : 0) - (a.listedDate ? 1 : 0));
-        break;
-      case 'year_desc':
-        filtered.sort((a, b) => b.year - a.year);
-        break;
-    }
-    return filtered;
-  }, [debouncedQuery, typeFilter, maxPrice, minYear, selectedMake, selectedCity, sortBy]);
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const paginated = filtered.slice(0, currentPage * ITEMS_PER_PAGE);
+  const hasMore = paginated.length < filtered.length;
 
-  // Paginated results
-  const results = useMemo(() => {
-    return allResults.slice(0, page * ITEMS_PER_PAGE);
-  }, [allResults, page]);
-
-  const hasMore = results.length < allResults.length;
-
-  // Infinite scroll callback
-  const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setLoading(true);
-      // Simulate API delay
-      setTimeout(() => {
-        setPage(p => p + 1);
-        setLoading(false);
-      }, 300);
-    }
-  }, [loading, hasMore]);
-
-  const sentinelRef = useInfiniteScroll(loadMore, hasMore);
-
-  // Reset page when filters change
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedQuery, typeFilter, maxPrice, minYear, selectedMake, selectedCity, sortBy]);
-
-  // Active filters count
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (typeFilter !== 'All') count++;
-    if (maxPrice < 20000000) count++;
-    if (minYear > 2000) count++;
-    if (selectedMake !== 'All') count++;
-    if (selectedCity !== 'All') count++;
-    return count;
-  }, [typeFilter, maxPrice, minYear, selectedMake, selectedCity]);
-
-  const clearAllFilters = useCallback(() => {
-    setQuery('');
-    setTypeFilter('All');
-    setMaxPrice(20000000);
-    setMinYear(2000);
-    setSelectedMake('All');
-    setSelectedCity('All');
-    setSortBy('default');
-    setPage(1);
+  const prices = useMemo(() => {
+    if (CARS.length === 0) return { min: 0, max: 0 };
+    const allPrices = CARS.map((c) => c.price);
+    return { min: Math.min(...allPrices), max: Math.max(...allPrices) };
   }, []);
-
-  const hasActiveFilters = activeFiltersCount > 0 || query;
-
-  const toggleFavorite = useCallback((carId: number) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      if (next.has(carId)) {
-        next.delete(carId);
-      } else {
-        next.add(carId);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleToggleCompare = useCallback((carId: number) => {
-    toggleCar(String(carId));
-  }, [toggleCar]);
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
-      {/* Header */}
-      <div className="relative bg-charcoal-900 pt-16 pb-14 overflow-hidden">
-        <div className="absolute bottom-0 right-0 w-1/2 h-full bg-gold-400/6 blur-3xl rounded-full pointer-events-none" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="section-label text-gold-400 mb-3">Browse All Listings</p>
-          <h1 className="font-serif text-3xl sm:text-5xl text-white font-bold mb-2">Vehicle Gallery</h1>
-          <p className="font-sans text-white/50 text-sm">{allResults.length} vehicles available</p>
-        </div>
-      </div>
+    <div style={{ minHeight: '100vh', background: c.pageBg, fontFamily: fonts.body }}>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Search + Filter Bar */}
-        <div className="flex flex-col lg:flex-row gap-3 mb-6">
-          {/* Search Input */}
-          <div className="relative flex-1">
-            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-warm-400" />
+      {/* ── HERO HEADER ──────────────────────────────────────────── */}
+      <section
+        style={{
+          position: 'relative',
+          background: c.heroBg,
+          paddingTop: 64,
+          paddingBottom: 56,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '40%',
+            height: '100%',
+            background: `${c.heroAccent}10`,
+            borderRadius: '0 0 0 50%',
+            filter: 'blur(80px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: 1200,
+            margin: '0 auto',
+            padding: '0 24px',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: c.heroAccent,
+              marginBottom: 8,
+            }}
+          >
+            Browse Collection
+          </p>
+          <h1
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: `clamp(1.8rem, 5vw, ${3 * sizes.headingScale}rem)`,
+              color: c.heroText,
+              fontWeight: 700,
+              lineHeight: 1.15,
+              margin: '0 0 12px',
+            }}
+          >
+            Find Your Perfect Vehicle
+          </h1>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: `${1 * sizes.bodyScale}rem`,
+              color: c.heroText,
+              opacity: 0.6,
+              margin: 0,
+            }}
+          >
+            Browse our collection of verified vehicles
+          </p>
+        </div>
+      </section>
+
+      {/* ── CONTENT ──────────────────────────────────────────────── */}
+      <div
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto',
+          padding: '32px 24px 64px',
+        }}
+      >
+        {/* Search + Controls Row */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            flexWrap: 'wrap',
+            marginBottom: 20,
+            alignItems: 'center',
+          }}
+        >
+          {/* Search */}
+          <div style={{ position: 'relative', flex: 1, minWidth: 220 }}>
+            <Search
+              size={16}
+              style={{
+                position: 'absolute',
+                left: 14,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: c.cardBody,
+                opacity: 0.45,
+                pointerEvents: 'none',
+              }}
+            />
             <input
               value={query}
-              onChange={e => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search by make, model, or city..."
-              className="w-full pl-10 pr-10 py-3 bg-white border border-cream-300 rounded-xl font-sans text-sm text-charcoal-800 placeholder-warm-400 outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all"
+              style={{
+                width: '100%',
+                padding: '12px 14px 12px 40px',
+                fontFamily: fonts.body,
+                fontSize: 14,
+                color: c.bodyText,
+                background: c.cardBg,
+                border: `1px solid ${c.cardBorder}`,
+                borderRadius: sizes.radius,
+                outline: 'none',
+                transition: 'border-color 0.2s ease',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = c.cardAccent;
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = c.cardBorder;
+              }}
             />
-            {query && (
-              <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2">
-                <X size={14} className="text-warm-400 hover:text-warm-600" />
-              </button>
-            )}
           </div>
 
-          {/* Controls Row */}
-          <div className="flex items-center gap-2">
-            {/* Compare indicator */}
-            {compareCount > 0 && (
-              <button
-                onClick={() => {/* Navigate to compare page */}}
-                className="flex items-center gap-2 bg-gold-500 text-charcoal-900 font-sans text-sm font-semibold px-4 py-3 rounded-xl hover:bg-gold-400 transition-all"
-              >
-                <BarChart3 size={14} />
-                <span>Compare ({compareCount})</span>
-              </button>
-            )}
+          {/* Filter Toggle */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 18px',
+              fontFamily: fonts.body,
+              fontSize: 14,
+              fontWeight: 600,
+              color: showFilters ? c.cardAccent : c.bodyText,
+              background: c.cardBg,
+              border: `1px solid ${showFilters ? c.cardAccent : c.cardBorder}`,
+              borderRadius: sizes.radius,
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Filters</span>
+          </button>
 
-            {/* Sort Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                className="flex items-center gap-2 bg-white border border-cream-300 text-charcoal-800 font-sans text-sm font-medium px-4 py-3 rounded-xl hover:border-gold-500 transition-all"
-              >
-                <ArrowUpDown size={14} />
-                <span className="hidden sm:inline">{sortOptions.find(o => o.value === sortBy)?.label}</span>
-                <ChevronDown size={14} className={`transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              {sortDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl border border-cream-200 shadow-lg z-50 overflow-hidden">
-                  {sortOptions.map(opt => (
-                    <button
-                      key={opt.value}
-                      onClick={() => { setSortBy(opt.value); setSortDropdownOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 font-sans text-sm hover:bg-cream-100 transition-colors ${
-                        sortBy === opt.value ? 'text-gold-700 font-semibold bg-gold-50' : 'text-charcoal-800'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* View Toggle */}
-            <div className="flex bg-white border border-cream-300 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-3 transition-colors ${viewMode === 'grid' ? 'bg-charcoal-900 text-white' : 'text-warm-400 hover:text-charcoal-800'}`}
-              >
-                <Grid3X3 size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-3 transition-colors ${viewMode === 'list' ? 'bg-charcoal-900 text-white' : 'text-warm-400 hover:text-charcoal-800'}`}
-              >
-                <List size={16} />
-              </button>
-            </div>
-
-            {/* Filter Button */}
+          {/* Grid / List Toggle */}
+          <div
+            style={{
+              display: 'flex',
+              background: c.cardBg,
+              border: `1px solid ${c.cardBorder}`,
+              borderRadius: sizes.radius,
+              overflow: 'hidden',
+            }}
+          >
             <button
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className={`flex items-center gap-2 bg-white border text-charcoal-800 font-sans text-sm font-medium px-4 py-3 rounded-xl transition-all ${
-                filtersOpen ? 'border-gold-500 text-gold-700' : 'border-cream-300 hover:border-gold-500'
-              }`}
+              onClick={() => setViewMode('grid')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px 14px',
+                border: 'none',
+                background: viewMode === 'grid' ? c.heroBg : 'transparent',
+                color: viewMode === 'grid' ? c.heroText : c.cardBody,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
             >
-              <SlidersHorizontal size={16} />
-              <span>Filters</span>
-              {activeFiltersCount > 0 && (
-                <span className="w-5 h-5 bg-gold-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                  {activeFiltersCount}
-                </span>
-              )}
+              <Grid size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '12px 14px',
+                border: 'none',
+                borderLeft: `1px solid ${c.cardBorder}`,
+                background: viewMode === 'list' ? c.heroBg : 'transparent',
+                color: viewMode === 'list' ? c.heroText : c.cardBody,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <List size={16} />
             </button>
           </div>
         </div>
 
-        {/* Active Filters Strip */}
-        {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-white rounded-xl border border-cream-200">
-            <span className="font-sans text-xs text-warm-400 mr-2">Active filters:</span>
-            {query && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-charcoal-900 text-white rounded-full text-xs font-medium">
-                "{query}"
-                <button onClick={() => setQuery('')}><X size={12} /></button>
-              </span>
-            )}
-            {typeFilter !== 'All' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gold-100 text-gold-700 rounded-full text-xs font-medium">
-                {typeFilter}
-                <button onClick={() => setTypeFilter('All')}><X size={12} /></button>
-              </span>
-            )}
-            {selectedMake !== 'All' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gold-100 text-gold-700 rounded-full text-xs font-medium">
-                {selectedMake}
-                <button onClick={() => setSelectedMake('All')}><X size={12} /></button>
-              </span>
-            )}
-            {selectedCity !== 'All' && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gold-100 text-gold-700 rounded-full text-xs font-medium">
-                {selectedCity}
-                <button onClick={() => setSelectedCity('All')}><X size={12} /></button>
-              </span>
-            )}
-            {maxPrice < 20000000 && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gold-100 text-gold-700 rounded-full text-xs font-medium">
-                Max: KES {maxPrice.toLocaleString()}
-                <button onClick={() => setMaxPrice(20000000)}><X size={12} /></button>
-              </span>
-            )}
-            {minYear > 2000 && (
-              <span className="inline-flex items-center gap-1 px-3 py-1 bg-gold-100 text-gold-700 rounded-full text-xs font-medium">
-                From: {minYear}
-                <button onClick={() => setMinYear(2000)}><X size={12} /></button>
-              </span>
-            )}
-            <button
-              onClick={clearAllFilters}
-              className="ml-auto flex items-center gap-1 text-xs text-warm-400 hover:text-gold-600 transition-colors"
+        {/* Filter Panel */}
+        {showFilters && (
+          <div
+            style={{
+              background: c.cardBg,
+              border: `1px solid ${c.cardBorder}`,
+              borderRadius: sizes.radius,
+              padding: 24,
+              marginBottom: 20,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: c.cardBody,
+                opacity: 0.5,
+                margin: '0 0 12px',
+              }}
             >
-              <RotateCcw size={12} /> Clear all
-            </button>
-          </div>
-        )}
-
-        {/* Expanded Filters */}
-        {filtersOpen && (
-          <div className="bg-white rounded-2xl border border-cream-200 p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Vehicle Type */}
-              <div>
-                <p className="font-sans text-xs font-semibold text-warm-400 tracking-widest uppercase mb-3">Vehicle Type</p>
-                <div className="flex flex-wrap gap-2">
-                  {types.map(t => (
-                    <button
-                      key={t}
-                      onClick={() => setTypeFilter(t)}
-                      className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Make */}
-              <div>
-                <p className="font-sans text-xs font-semibold text-warm-400 tracking-widest uppercase mb-3">Make</p>
-                <select
-                  value={selectedMake}
-                  onChange={e => setSelectedMake(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-cream-300 rounded-lg font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500"
+              Vehicle Type
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => {
+                    setTypeFilter(t);
+                    setCurrentPage(1);
+                  }}
+                  className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
                 >
-                  <option value="All">All Makes</option>
-                  {makes.map(m => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
+                  {t}
+                </button>
+              ))}
+            </div>
 
-              {/* City */}
-              <div>
-                <p className="font-sans text-xs font-semibold text-warm-400 tracking-widest uppercase mb-3">Location</p>
-                <select
-                  value={selectedCity}
-                  onChange={e => setSelectedCity(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-cream-300 rounded-lg font-sans text-sm text-charcoal-800 outline-none focus:border-gold-500"
+            {/* Price Range Display */}
+            <div style={{ marginTop: 20 }}>
+              <p
+                style={{
+                  fontFamily: fonts.body,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: c.cardBody,
+                  opacity: 0.5,
+                  margin: '0 0 8px',
+                }}
+              >
+                Price Range
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: c.cardHeading,
+                  }}
                 >
-                  <option value="All">All Locations</option>
-                  {cities.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-
-              {/* Max Price */}
-              <div>
-                <p className="font-sans text-xs font-semibold text-warm-400 tracking-widest uppercase mb-3">
-                  Max Price: <span className="text-gold-700">KES {maxPrice.toLocaleString()}</span>
-                </p>
-                <input
-                  type="range"
-                  min={1000000}
-                  max={20000000}
-                  step={500000}
-                  value={maxPrice}
-                  onChange={e => setMaxPrice(Number(e.target.value))}
-                  className="w-full accent-gold-500"
-                />
-                <div className="flex justify-between font-sans text-xs text-warm-400 mt-1">
-                  <span>KES 1M</span>
-                  <span>KES 20M</span>
+                  KES {prices.min.toLocaleString('en-KE')}
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: 4,
+                    borderRadius: 2,
+                    background: c.cardBorder,
+                    position: 'relative',
+                  }}
+                >
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: 2,
+                      background: `linear-gradient(to right, ${c.cardAccent}, ${c.heroAccent})`,
+                    }}
+                  />
                 </div>
-              </div>
-
-              {/* Min Year */}
-              <div>
-                <p className="font-sans text-xs font-semibold text-warm-400 tracking-widest uppercase mb-3">
-                  Min Year: <span className="text-gold-700">{minYear}</span>
-                </p>
-                <input
-                  type="range"
-                  min={2000}
-                  max={2025}
-                  step={1}
-                  value={minYear}
-                  onChange={e => setMinYear(Number(e.target.value))}
-                  className="w-full accent-gold-500"
-                />
-                <div className="flex justify-between font-sans text-xs text-warm-400 mt-1">
-                  <span>2000</span>
-                  <span>2025</span>
-                </div>
+                <span
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: c.cardHeading,
+                  }}
+                >
+                  KES {prices.max.toLocaleString('en-KE')}
+                </span>
               </div>
             </div>
           </div>
         )}
 
         {/* Type Pills (always visible) */}
-        <div className="flex items-center gap-2 flex-wrap mb-8">
-          {types.map(t => (
-            <button
-              key={t}
-              onClick={() => setTypeFilter(t)}
-              className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
-            >
-              {t}
-              <span className="ml-1.5 text-xs opacity-60">
-                ({allResults.filter(c => t === 'All' || c.type === t).length})
-              </span>
-            </button>
-          ))}
-        </div>
+        {!showFilters && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+            {TYPES.map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setTypeFilter(t);
+                  setCurrentPage(1);
+                }}
+                className={typeFilter === t ? 'pill-active' : 'pill-inactive'}
+              >
+                {t}
+                <span style={{ marginLeft: 6, fontSize: 12, opacity: 0.55 }}>
+                  ({CARS.filter((car) => t === 'All' || car.type === t).length})
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-        {/* Grid / List View */}
-        {results.length > 0 ? (
+        {/* Results Count */}
+        <p
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 13,
+            color: c.cardBody,
+            opacity: 0.6,
+            margin: '0 0 24px',
+          }}
+        >
+          {filtered.length} vehicle{filtered.length !== 1 ? 's' : ''} found
+        </p>
+
+        {/* ── CAR GRID ─────────────────────────────────────────── */}
+        {paginated.length > 0 ? (
           <>
-            <div className={
-              viewMode === 'grid'
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
-                : 'flex flex-col gap-4'
-            }>
-              {results.map(car => (
-                <VehicleCard
+            <div
+              style={{
+                display: viewMode === 'list' ? 'flex' : 'grid',
+                flexDirection: viewMode === 'list' ? 'column' : undefined,
+                gridTemplateColumns:
+                  viewMode === 'grid' ? 'repeat(auto-fill, minmax(300px, 1fr))' : undefined,
+                gap: viewMode === 'list' ? 16 : 24,
+              }}
+            >
+              {paginated.map((car) => (
+                <CarCard
                   key={car.id}
                   car={car}
-                  variant={viewMode === 'list' ? 'horizontal' : 'default'}
-                  saved={favorites.has(car.id)}
-                  showCompare={true}
-                  compareSelected={isComparing(String(car.id))}
                   onClick={() => viewCar(car)}
-                  onCompare={() => handleToggleCompare(car.id)}
-                  onSave={(car, saved) => toggleFavorite(car.id)}
                 />
               ))}
             </div>
 
-            {/* Infinite scroll sentinel */}
+            {/* Load More */}
             {hasMore && (
-              <div ref={sentinelRef} className="flex justify-center py-8">
-                {loading && <SkeletonGrid count={4} />}
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 40 }}>
+                <button
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: c.cardBg,
+                    background: c.cardAccent,
+                    border: 'none',
+                    borderRadius: sizes.radius,
+                    padding: '14px 40px',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.2s ease, transform 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.opacity = '0.88';
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.opacity = '1';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  Load More Vehicles
+                </button>
               </div>
             )}
 
-            {/* End of results */}
-            {!hasMore && results.length > 0 && (
-              <p className="text-center text-warm-400 py-8">
-                Showing all {results.length} vehicles
-              </p>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginTop: 32,
+                }}
+              >
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: currentPage === 1 ? c.cardBody : c.cardHeading,
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: sizes.radius * 0.6,
+                    padding: '8px 16px',
+                    cursor: currentPage === 1 ? 'default' : 'pointer',
+                    opacity: currentPage === 1 ? 0.4 : 1,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    style={{
+                      fontFamily: fonts.body,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: page === currentPage ? c.cardBg : c.cardHeading,
+                      background: page === currentPage ? c.cardAccent : c.cardBg,
+                      border: `1px solid ${page === currentPage ? c.cardAccent : c.cardBorder}`,
+                      borderRadius: sizes.radius * 0.6,
+                      width: 36,
+                      height: 36,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: currentPage === totalPages ? c.cardBody : c.cardHeading,
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: sizes.radius * 0.6,
+                    padding: '8px 16px',
+                    cursor: currentPage === totalPages ? 'default' : 'pointer',
+                    opacity: currentPage === totalPages ? 0.4 : 1,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  Next
+                </button>
+              </div>
             )}
+
+            {/* Page indicator */}
+            <p
+              style={{
+                textAlign: 'center',
+                fontFamily: fonts.body,
+                fontSize: 12,
+                color: c.cardBody,
+                opacity: 0.45,
+                marginTop: 16,
+              }}
+            >
+              Page {currentPage} of {totalPages} &middot; Showing {paginated.length} of {filtered.length} vehicles
+            </p>
           </>
         ) : (
-          <div className="text-center py-24">
-            <p className="font-serif text-2xl text-warm-400 mb-2">No vehicles found</p>
-            <p className="font-sans text-sm text-warm-400">Try adjusting your search or filters</p>
-            <button 
-              onClick={clearAllFilters} 
-              className="mt-4 px-6 py-2 bg-charcoal-900 text-white font-sans text-sm font-medium rounded-full hover:bg-charcoal-800 transition-colors"
+          /* ── EMPTY STATE ──────────────────────────────────── */
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '80px 24px',
+            }}
+          >
+            <div
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: '50%',
+                background: `${c.cardAccent}15`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 24px',
+              }}
             >
-              Clear all filters
+              <Search size={32} style={{ color: c.cardAccent, opacity: 0.6 }} />
+            </div>
+            <h3
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${1.6 * sizes.headingScale}rem`,
+                color: c.cardHeading,
+                fontWeight: 700,
+                margin: '0 0 8px',
+              }}
+            >
+              No results found
+            </h3>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 14,
+                color: c.cardBody,
+                opacity: 0.6,
+                margin: '0 0 24px',
+                maxWidth: 360,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+              }}
+            >
+              Try adjusting your search or filters to find what you're looking for.
+            </p>
+            <button
+              onClick={() => {
+                setQuery('');
+                setTypeFilter('All');
+                setCurrentPage(1);
+              }}
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 14,
+                fontWeight: 600,
+                color: c.cardBg,
+                background: c.cardAccent,
+                border: 'none',
+                borderRadius: sizes.radius,
+                padding: '12px 28px',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.88';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
+            >
+              Clear All Filters
             </button>
           </div>
         )}

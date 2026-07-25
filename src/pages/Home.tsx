@@ -1,8 +1,19 @@
-import { useState } from 'react';
-import { ArrowRight, Shield, Search, CheckCircle, Tag, CreditCard, Wrench } from 'lucide-react';
-import VehicleCard, { type Car } from '../components/features/car/CarCard';
-import HeroCarousel from '../components/features/common/HeroCarousel';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
+import CarCard, { type Car } from '../components/features/car/CarCard';
 import { CARS } from '../data/cars';
+import {
+  ArrowRight,
+  Shield,
+  Search,
+  CheckCircle,
+  Tag,
+  CreditCard,
+  Wrench,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 type Filter = 'All' | 'SUV' | 'Pickup' | 'Auctions';
 
@@ -41,13 +52,50 @@ const FEATURES = [
   },
 ];
 
-export default function Home({ setPage, viewCar }: HomeProps) {
-  const [filter, setFilter] = useState<Filter>('All');
+const HERO_SLIDES = CARS.slice(0, 5);
 
-  const nav = (page: string) => {
-    setPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+export default function Home({ setPage, viewCar }: HomeProps) {
+  const navigate = useNavigate();
+  const { theme } = useDesignTheme();
+  const { colors, fonts, sizes, layouts } = theme;
+
+  const [filter, setFilter] = useState<Filter>('All');
+  const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const nav = useCallback(
+    (page: string) => {
+      setPage(page);
+      navigate('/' + page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [setPage, navigate],
+  );
+
+  // Hero auto-rotate
+  useEffect(() => {
+    if (paused) return;
+    intervalRef.current = setInterval(() => {
+      setSlide(prev => (prev + 1) % HERO_SLIDES.length);
+    }, 5500);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [paused]);
+
+  const goTo = useCallback((idx: number) => {
+    setSlide(idx);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    goTo((slide - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+  }, [slide, goTo]);
+
+  const nextSlide = useCallback(() => {
+    goTo((slide + 1) % HERO_SLIDES.length);
+  }, [slide, goTo]);
 
   const featured = CARS.filter(car => {
     if (filter === 'All') return true;
@@ -57,66 +105,308 @@ export default function Home({ setPage, viewCar }: HomeProps) {
 
   const filters: Filter[] = ['All', 'SUV', 'Pickup', 'Auctions'];
 
-  // Handle carousel car click - convert to local format
-  const handleCarouselView = (car: any) => {
-    const localCar: Car = {
-      id: car._id ? parseInt(car._id.replace(/\D/g, '') || '1') : 1,
-      make: car.brand || car.make || '',
-      model: car.model || car.title || '',
-      price: car.price || car.currentBid || 0,
-      year: car.year || 2024,
-      mileage: car.mileage || '0 km',
-      fuel: car.fuel || 'Petrol',
-      city: car.location?.city || 'Nairobi',
-      type: 'SUV' as const,
-      badges: [],
-      image: car.images?.[0] || car.images?.[0]?.url || car.image || '',
-    };
-    viewCar(localCar);
-  };
+  // Layout-aware hero styles
+  const heroLayout = layouts.hero;
+  const heroTextAlign = heroLayout === 'centered' ? 'center' : 'left';
+  const heroMaxW = heroLayout === 'minimal' ? '600px' : heroLayout === 'split' ? '500px' : '800px';
+  const heroPaddingY = heroLayout === 'minimal' ? '60px' : heroLayout === 'split' ? '80px' : '100px';
 
   return (
-    <div className="min-h-screen">
+    <div style={{ minHeight: '100vh', background: colors.pageBg, fontFamily: fonts.body }}>
 
-      {/* ── HERO CAROUSEL ──────────────────────────────────────────── */}
-      <section className="relative bg-charcoal-900 pt-16 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <HeroCarousel onViewCar={handleCarouselView} />
+      {/* ── HERO SECTION ──────────────────────────────────────────── */}
+      <section
+        style={{
+          position: 'relative',
+          width: '100%',
+          background: colors.heroBg,
+          overflow: 'hidden',
+          paddingTop: '64px',
+          paddingBottom: heroPaddingY,
+        }}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        {/* Sliding car images background */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+          {HERO_SLIDES.map((car, i) => (
+            <div
+              key={car.id}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                opacity: i === slide ? 1 : 0,
+                transition: 'opacity 1s ease-in-out',
+              }}
+            >
+              <img
+                src={car.image}
+                alt={`${car.make} ${car.model}`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  filter: 'brightness(0.45)',
+                }}
+              />
+            </div>
+          ))}
+          {/* Left-to-right gradient overlay */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.1) 100%)`,
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 24px',
+            display: 'flex',
+            flexDirection: heroLayout === 'split' ? 'row' : 'column',
+            alignItems: heroLayout === 'split' ? 'center' : undefined,
+            gap: heroLayout === 'split' ? '48px' : undefined,
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              textAlign: heroTextAlign,
+              maxWidth: heroMaxW,
+              margin: heroLayout === 'centered' ? '0 auto' : undefined,
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `clamp(2rem, 5vw, ${3.5 * sizes.headingScale}rem)`,
+                color: colors.heroText,
+                fontWeight: 700,
+                lineHeight: 1.15,
+                marginBottom: 16,
+              }}
+            >
+              Drive Your Dream Today
+            </h1>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: `${1.1 * sizes.bodyScale}rem`,
+                color: colors.heroText,
+                opacity: 0.75,
+                marginBottom: 32,
+                maxWidth: '540px',
+                marginLeft: heroTextAlign === 'center' ? 'auto' : undefined,
+                marginRight: heroTextAlign === 'center' ? 'auto' : undefined,
+                lineHeight: 1.6,
+              }}
+            >
+              Buy, sell and auction vehicles with confidence. Escrow protection,
+              verified dealers, and real-time bidding — all in one place.
+            </p>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 16,
+                flexWrap: 'wrap',
+                justifyContent: heroTextAlign === 'center' ? 'center' : 'flex-start',
+              }}
+            >
+              <button className="btn-gold" onClick={() => nav('gallery')}>
+                Browse Cars
+              </button>
+              <button className="btn-outline" onClick={() => nav('sell')}>
+                Sell a Vehicle
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Arrow navigation — left */}
+        <button
+          onClick={prevSlide}
+          style={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 20,
+            background: 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '50%',
+            width: 48,
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+          }}
+          aria-label="Previous slide"
+        >
+          <ChevronLeft size={24} color={colors.heroText} />
+        </button>
+
+        {/* Arrow navigation — right */}
+        <button
+          onClick={nextSlide}
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 20,
+            background: 'rgba(255,255,255,0.12)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            borderRadius: '50%',
+            width: 48,
+            height: 48,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'background 0.2s',
+          }}
+          aria-label="Next slide"
+        >
+          <ChevronRight size={24} color={colors.heroText} />
+        </button>
+
+        {/* Slide dots */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 24,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 20,
+            display: 'flex',
+            gap: 8,
+          }}
+        >
+          {HERO_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              style={{
+                width: i === slide ? 28 : 10,
+                height: 10,
+                borderRadius: 5,
+                border: 'none',
+                background: i === slide ? colors.heroAccent : 'rgba(255,255,255,0.35)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+            />
+          ))}
         </div>
       </section>
 
-      {/* ── TRUST BADGES ──────────────────────────────────────────── */}
-      <section className="bg-charcoal-800 border-t border-white/5">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 lg:divide-x divide-gold-700/40">
-            {TRUST_BADGES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 px-6 py-6">
-                <div className="w-10 h-10 rounded-lg bg-gold-400/25 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-400/30">
-                  <Icon size={20} className="text-gold-400" />
-                </div>
-                <div>
-                  <p className="font-sans text-sm font-semibold text-white">{title}</p>
-                  <p className="font-sans text-xs text-white/40 mt-0.5 leading-relaxed">{desc}</p>
-                </div>
+      {/* ── TRUST BADGES STRIP ────────────────────────────────────── */}
+      <section
+        style={{
+          background: colors.navbarBg,
+          borderTop: `1px solid rgba(255,255,255,0.06)`,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1024,
+            margin: '0 auto',
+            padding: '0 24px',
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          }}
+        >
+          {TRUST_BADGES.map(({ icon: Icon, title, desc }) => (
+            <div
+              key={title}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '20px 24px',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 8,
+                  background: 'rgba(255,255,255,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={20} color={colors.navbarAccent} />
               </div>
-            ))}
-          </div>
+              <div>
+                <p style={{ fontFamily: fonts.body, fontSize: 14, fontWeight: 600, color: colors.navbarText, margin: 0 }}>
+                  {title}
+                </p>
+                <p style={{ fontFamily: fonts.body, fontSize: 12, color: 'rgba(255,255,255,0.45)', margin: '2px 0 0', lineHeight: 1.4 }}>
+                  {desc}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ── FEATURED VEHICLES ─────────────────────────────────────── */}
-      <section className="bg-cream-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="section-label mb-3">Premium Selection</p>
-            <h2 className="section-heading mb-3">Featured Vehicles</h2>
-            <p className="font-sans text-warm-400 text-sm">
+      <section
+        style={{
+          background: colors.cardBg,
+          padding: `${sizes.sectionPadding}px 24px`,
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: colors.cardAccent,
+                marginBottom: 8,
+              }}
+            >
+              Premium Selection
+            </p>
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${2.25 * sizes.headingScale}rem`,
+                color: colors.cardHeading,
+                fontWeight: 700,
+                marginBottom: 12,
+              }}
+            >
+              Featured Vehicles
+            </h2>
+            <p style={{ fontFamily: fonts.body, fontSize: 14, color: colors.cardBody, maxWidth: 420, margin: '0 auto' }}>
               Handpicked quality cars from verified dealers across Kenya
             </p>
           </div>
 
           {/* Filter pills */}
-          <div className="flex justify-center gap-2 flex-wrap mb-8">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
             {filters.map(f => (
               <button
                 key={f}
@@ -128,23 +418,39 @@ export default function Home({ setPage, viewCar }: HomeProps) {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Car grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))',
+              gap: 24,
+            }}
+          >
             {featured.map(car => (
-              <VehicleCard key={car.id} car={car} featured onClick={() => viewCar(car)} />
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} showCompare={false} />
             ))}
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 mt-10">
+          {/* View all link */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 16, marginTop: 40 }}>
             <button
               onClick={() => nav('gallery')}
-              className="font-sans text-sm text-gold-700 font-semibold hover:text-gold-600 transition-colors flex items-center gap-1"
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 14,
+                fontWeight: 600,
+                color: colors.cardAccent,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
             >
               View all vehicles <ArrowRight size={14} />
             </button>
-            <button
-              onClick={() => nav('gallery')}
-              className="btn-outline-dark"
-            >
+            <button onClick={() => nav('gallery')} className="btn-outline-dark">
               Browse All Cars <ArrowRight size={16} />
             </button>
           </div>
@@ -152,23 +458,79 @@ export default function Home({ setPage, viewCar }: HomeProps) {
       </section>
 
       {/* ── BUILT FOR KENYA ───────────────────────────────────────── */}
-      <section className="bg-cream-50 py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="section-heading mb-3">Built for Kenya</h2>
-            <p className="font-sans text-warm-400 text-sm max-w-md mx-auto">
+      <section
+        style={{
+          background: colors.pageBg,
+          padding: `${sizes.sectionPadding}px 24px`,
+        }}
+      >
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${2.25 * sizes.headingScale}rem`,
+                color: colors.headingText,
+                fontWeight: 700,
+                marginBottom: 12,
+              }}
+            >
+              Built for Kenya
+            </h2>
+            <p style={{ fontFamily: fonts.body, fontSize: 14, color: colors.bodyText, maxWidth: 380, margin: '0 auto' }}>
               We understand the Kenyan car market. Here's why thousands trust KAYAD.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))',
+              gap: 20,
+            }}
+          >
             {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex gap-4 bg-white p-6 rounded-2xl border border-cream-200 hover:shadow-md hover:border-gold-600/40 transition-all duration-200">
-                <div className="w-11 h-11 rounded-xl bg-gold-600/15 flex items-center justify-center flex-shrink-0 ring-1 ring-gold-600/20">
-                  <Icon size={20} className="text-gold-700" />
+              <div
+                key={title}
+                style={{
+                  display: 'flex',
+                  gap: 16,
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: sizes.radius,
+                  padding: sizes.cardPadding + 4,
+                  transition: 'box-shadow 0.2s, border-color 0.2s',
+                }}
+              >
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: `${colors.cardAccent}20`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={20} style={{ color: colors.cardAccent }} />
                 </div>
                 <div>
-                  <h3 className="font-sans font-semibold text-charcoal-900 mb-1">{title}</h3>
-                  <p className="font-sans text-sm text-warm-500 leading-relaxed">{desc}</p>
+                  <h3
+                    style={{
+                      fontFamily: fonts.body,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: colors.cardHeading,
+                      margin: '0 0 4px',
+                    }}
+                  >
+                    {title}
+                  </h3>
+                  <p style={{ fontFamily: fonts.body, fontSize: 13, color: colors.cardBody, margin: 0, lineHeight: 1.55 }}>
+                    {desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -176,27 +538,68 @@ export default function Home({ setPage, viewCar }: HomeProps) {
         </div>
       </section>
 
-      {/* ── CTA ───────────────────────────────────────────────────── */}
-      <section className="relative bg-charcoal-900 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-full bg-gold-500/6 blur-3xl rounded-full" />
-        </div>
-        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-12 sm:py-20">
-          <h2 className="font-serif text-2xl sm:text-4xl text-white font-bold mb-4">Ready to Find Your Dream Car?</h2>
-          <p className="font-sans text-white/50 text-base mb-8">
+      {/* ── CTA SECTION ───────────────────────────────────────────── */}
+      <section
+        style={{
+          position: 'relative',
+          background: colors.footerBg,
+          overflow: 'hidden',
+          padding: `${sizes.sectionPadding}px 24px`,
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '66%',
+            height: '100%',
+            background: `${colors.heroAccent}10`,
+            borderRadius: '50%',
+            filter: 'blur(80px)',
+            pointerEvents: 'none',
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: 720,
+            margin: '0 auto',
+            textAlign: 'center',
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: `clamp(1.6rem, 4vw, ${2.5 * sizes.headingScale}rem)`,
+              color: colors.footerText,
+              fontWeight: 700,
+              marginBottom: 16,
+            }}
+          >
+            Ready to Find Your Dream Car?
+          </h2>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: `${1 * sizes.bodyScale}rem`,
+              color: 'rgba(255,255,255,0.5)',
+              marginBottom: 32,
+            }}
+          >
             Join thousands of Kenyan car buyers who trust KAYAD for safe and transparent transactions.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button onClick={() => nav('gallery')} className="btn-gold">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <button className="btn-gold" onClick={() => nav('gallery')}>
               Start Browsing
             </button>
-            <button onClick={() => nav('support')} className="btn-outline">
+            <button className="btn-outline" onClick={() => nav('support')}>
               Become a Dealer
             </button>
           </div>
         </div>
       </section>
-
     </div>
   );
 }

@@ -1,227 +1,484 @@
-import { useState } from 'react';
-import { ClipboardCheck, ArrowRight, Calendar, CheckCircle2, Wrench, Eye, Zap, Droplets } from 'lucide-react';
-import { CARS } from '../data/cars';
-import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
+import { Search, Calendar, MapPin, Shield, CheckCircle, AlertCircle, ArrowRight, ChevronDown } from 'lucide-react';
 
-const INSPECTION_CATEGORIES = [
+interface PreInspectionProps {
+  setPage: (page: string) => void;
+}
+
+const LOCATIONS = [
+  'Westlands',
+  'Industrial Area',
+  'Karen',
+  'Thika Road',
+  'Mombasa Road',
+  'Kisumu',
+  'Nakuru',
+];
+
+const INSPECTION_TYPES = [
+  { value: 'standard', label: 'Standard 150-Point', desc: 'Comprehensive full-vehicle assessment' },
+  { value: 'basic', label: 'Basic 80-Point', desc: 'Essential systems check' },
+  { value: 'premium', label: 'Premium 200-Point', desc: 'Extended inspection with road test & diagnostics' },
+];
+
+const CHECK_ITEMS: { category: string; items: string[] }[] = [
   {
-    icon: Wrench,
-    title: 'Engine & Drivetrain',
-    points: 38,
-    checks: ['Engine compression test', 'Oil leaks & pressure', 'Transmission condition', 'Driveshaft & CV joints', 'Exhaust system'],
+    category: 'Engine & Mechanical',
+    items: ['Engine compression', 'Oil leaks & pressure', 'Transmission condition', 'Exhaust system'],
   },
   {
-    icon: Eye,
-    title: 'Exterior & Body',
-    points: 32,
-    checks: ['Panel gaps & alignment', 'Paint condition & overspray', 'Frame & chassis integrity', 'Glass & seals', 'Lights & indicators'],
+    category: 'Interior & Electronics',
+    items: ['Dashboard warning lights', 'Infotainment & sensors', 'Air conditioning', 'Seat controls'],
   },
   {
-    icon: Zap,
-    title: 'Electrical Systems',
-    points: 28,
-    checks: ['Battery health test', 'Alternator output', 'Airbag system check', 'Central locking', 'Infotainment & sensors'],
+    category: 'Exterior & Body',
+    items: ['Panel gaps & alignment', 'Paint condition', 'Frame integrity', 'Glass & seals'],
   },
   {
-    icon: Droplets,
-    title: 'Interior & Safety',
-    points: 22,
-    checks: ['Seat belts & airbags', 'HVAC performance', 'Interior trim & upholstery', 'Dashboard warning lights', 'Braking system'],
+    category: 'Test Drive',
+    items: ['Cold start behaviour', 'Gear shift quality', 'Steering response', 'Braking distance'],
   },
   {
-    icon: ClipboardCheck,
-    title: 'Documentation',
-    points: 18,
-    checks: ['Log book verification', 'Service history review', 'Encumbrance check', 'Insurance status', 'KRA compliance'],
+    category: 'Electrical Systems',
+    items: ['Battery health', 'Alternator output', 'Airbag system', 'Central locking'],
   },
   {
-    icon: CheckCircle2,
-    title: 'Road Test',
-    points: 12,
-    checks: ['Cold start behaviour', 'Gear shift quality', 'Steering response', 'Braking distance', 'Suspension handling'],
+    category: 'Documentation',
+    items: ['Log book verification', 'Service history', 'Encumbrance check', 'Insurance status'],
   },
 ];
 
-interface PreInspectionProps {
-  viewCar: (car: Car) => void;
-}
+export default function PreInspection({ setPage }: PreInspectionProps) {
+  const navigate = useNavigate();
+  const { theme } = useDesignTheme();
+  const { colors, fonts, sizes } = theme;
 
-export default function PreInspection({ viewCar }: PreInspectionProps) {
-  const [activeTab, setActiveTab] = useState(0);
-  const inspectedCars = CARS.slice(0, 4);
+  const [location, setLocation] = useState(LOCATIONS[0]);
+  const [inspectionType, setInspectionType] = useState('standard');
+
+  const nav = useCallback(
+    (page: string) => {
+      setPage(page);
+      navigate('/' + page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [setPage, navigate],
+  );
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
-      {/* Hero banner */}
-      <div className="relative bg-charcoal-900 pt-16 pb-20 overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src="https://images.pexels.com/photos/2533092/pexels-photo-2533092.jpeg?auto=compress&cs=tinysrgb&w=1600"
-            alt="Pre-Inspection"
-            className="w-full h-full object-cover opacity-20 object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-charcoal-900/95 to-charcoal-900/60" />
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="section-label text-gold-400 mb-4">
-            CERTIFIED MECHANICS · 150 POINTS · FULL REPORT
+    <div style={{ minHeight: '100vh', background: colors.pageBg, fontFamily: fonts.body }}>
+
+      {/* ── HERO ──────────────────────────────────────────────────── */}
+      <section
+        style={{
+          position: 'relative',
+          background: colors.heroBg,
+          paddingTop: `${sizes.sectionPadding}px`,
+          paddingBottom: `${sizes.sectionPadding}px`,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(135deg, ${colors.heroAccent}18 0%, transparent 60%)`,
+          }}
+        />
+        <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: colors.heroAccent,
+              marginBottom: 12,
+            }}
+          >
+            150-Point Vehicle Assessment
           </p>
-          <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl text-white font-bold mb-6 leading-tight">
-            Pre-Inspection
+          <h1
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: `clamp(1.75rem, 4vw, ${2.75 * sizes.headingScale}rem)`,
+              color: colors.heroText,
+              fontWeight: 700,
+              marginBottom: 12,
+            }}
+          >
+            Pre-Purchase Inspection
           </h1>
-          <p className="font-sans text-white/60 text-lg leading-relaxed max-w-xl mb-8">
-            Every vehicle is checked by certified mechanics across 150 points before you commit.
-            Know exactly what you're buying — no surprises after the sale.
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: `${1 * sizes.bodyScale}rem`,
+              color: 'rgba(255,255,255,0.6)',
+              maxWidth: 560,
+              lineHeight: 1.6,
+            }}
+          >
+            Every vehicle is checked by certified mechanics across 150 points before you commit. Know exactly what you're buying — no surprises after the sale.
           </p>
-          <div className="flex flex-wrap gap-4">
-            <button className="btn-gold">
-              View Inspected Cars <ArrowRight size={16} />
-            </button>
-            <button className="btn-outline">
-              <Calendar size={16} /> Book an Inspection
-            </button>
-          </div>
         </div>
-      </div>
+      </section>
 
-      {/* 150-point breakdown */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <p className="section-label mb-3">Comprehensive Assessment</p>
-            <h2 className="section-heading">150-Point Inspection Breakdown</h2>
-          </div>
-
-          {/* Category tabs */}
-          <div className="flex flex-wrap gap-2 justify-center mb-10">
-            {INSPECTION_CATEGORIES.map(({ title }, i) => (
-              <button
+      {/* ── HERO BANNER ──────────────────────────────────────────── */}
+      <section style={{ padding: `${sizes.sectionPadding / 2}px 24px` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {[
+              { icon: Shield, title: 'Certified Mechanics', desc: 'All inspectors are factory-trained and licensed' },
+              { icon: CheckCircle, title: '150+ Check Points', desc: 'Comprehensive bumper-to-bumper assessment' },
+              { icon: AlertCircle, title: 'Full Report', desc: 'Detailed PDF report with photos and findings' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div
                 key={title}
-                onClick={() => setActiveTab(i)}
-                className={activeTab === i ? 'pill-active' : 'pill-inactive'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 14,
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: sizes.radius,
+                  padding: sizes.cardPadding + 8,
+                }}
               >
-                {title}
-              </button>
-            ))}
-          </div>
-
-          {/* Active category detail */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
-            <div className="bg-white rounded-2xl p-8 border border-cream-200">
-              {(() => {
-                const cat = INSPECTION_CATEGORIES[activeTab];
-                const Icon = cat.icon;
-                return (
-                  <>
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-gold-600 rounded-xl flex items-center justify-center">
-                        <Icon size={22} className="text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-serif text-xl text-charcoal-900 font-semibold">{cat.title}</h3>
-                        <p className="font-sans text-sm text-gold-700 font-semibold">{cat.points} inspection points</p>
-                      </div>
-                    </div>
-                    <ul className="space-y-3">
-                      {cat.checks.map(check => (
-                        <li key={check} className="flex items-center gap-3">
-                          <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
-                          <span className="font-sans text-sm text-charcoal-800">{check}</span>
-                        </li>
-                      ))}
-                      <li className="flex items-center gap-3 opacity-50">
-                        <CheckCircle2 size={16} className="text-warm-400 flex-shrink-0" />
-                        <span className="font-sans text-sm text-warm-400">+{cat.points - cat.checks.length} more checks…</span>
-                      </li>
-                    </ul>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Category grid overview */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {INSPECTION_CATEGORIES.map(({ icon: Icon, title, points }, i) => (
-                <button
-                  key={title}
-                  onClick={() => setActiveTab(i)}
-                  className={`text-left p-5 rounded-xl border transition-all duration-200 ${
-                    activeTab === i
-                      ? 'bg-gold-600/10 border-gold-600/40'
-                      : 'bg-white border-cream-200 hover:border-gold-500/30'
-                  }`}
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: `${colors.cardAccent}20`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center mb-3 ${activeTab === i ? 'bg-gold-600' : 'bg-cream-200'}`}>
-                    <Icon size={16} className={activeTab === i ? 'text-white' : 'text-warm-500'} />
-                  </div>
-                  <p className="font-sans text-xs font-semibold text-charcoal-800 mb-0.5">{title}</p>
-                  <p className={`font-sans text-xs font-bold ${activeTab === i ? 'text-gold-700' : 'text-warm-400'}`}>
-                    {points} pts
+                  <Icon size={20} style={{ color: colors.cardAccent }} />
+                </div>
+                <div>
+                  <p style={{ fontFamily: fonts.body, fontSize: 14, fontWeight: 700, color: colors.cardHeading, marginBottom: 2 }}>
+                    {title}
                   </p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Inspected cars */}
-      <section className="bg-cream-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-10">
-            <p className="section-label mb-2">Ready to Buy</p>
-            <h2 className="section-heading">Inspected &amp; Certified Vehicles</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {inspectedCars.map(car => (
-              <VehicleCard key={car.id} car={car} onClick={() => viewCar(car)} />
+                  <p style={{ fontFamily: fonts.body, fontSize: 12, color: colors.cardBody, lineHeight: 1.5 }}>
+                    {desc}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Book inspection */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <p className="section-label mb-3">Own a Car to Sell?</p>
-            <h2 className="section-heading">Book a Pre-Inspection</h2>
-            <p className="font-sans text-warm-500 text-base mt-4">
-              Get your vehicle certified by our mechanics. Certified cars sell 3x faster on KAYAD.
+      {/* ── SCHEDULE INSPECTION FORM ─────────────────────────────── */}
+      <section style={{ padding: `0 24px ${sizes.sectionPadding}px` }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: colors.cardAccent,
+                marginBottom: 8,
+              }}
+            >
+              Schedule Now
             </p>
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${1.75 * sizes.headingScale}rem`,
+                color: colors.headingText,
+                fontWeight: 700,
+              }}
+            >
+              Schedule Inspection
+            </h2>
           </div>
-          <div className="bg-white rounded-2xl border border-cream-200 p-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="font-sans text-xs font-semibold text-warm-400 tracking-wider uppercase mb-1.5 block">Full Name</label>
-                <input className="w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl font-sans text-sm outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all" placeholder="John Mwangi" />
-              </div>
-              <div>
-                <label className="font-sans text-xs font-semibold text-warm-400 tracking-wider uppercase mb-1.5 block">Phone Number</label>
-                <input className="w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl font-sans text-sm outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all" placeholder="+254 700 000 000" />
-              </div>
-              <div>
-                <label className="font-sans text-xs font-semibold text-warm-400 tracking-wider uppercase mb-1.5 block">Vehicle Make & Model</label>
-                <input className="w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl font-sans text-sm outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all" placeholder="e.g. Toyota Land Cruiser 300" />
-              </div>
-              <div>
-                <label className="font-sans text-xs font-semibold text-warm-400 tracking-wider uppercase mb-1.5 block">Preferred Date</label>
-                <input type="date" className="w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl font-sans text-sm outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all text-charcoal-800" />
+
+          <div
+            style={{
+              background: colors.cardBg,
+              border: `1px solid ${colors.cardBorder}`,
+              borderRadius: sizes.radius,
+              padding: sizes.cardPadding + 12,
+            }}
+          >
+            {/* Location */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  fontFamily: fonts.body,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: colors.cardBody,
+                  marginBottom: 6,
+                  display: 'block',
+                }}
+              >
+                Inspection Location
+              </label>
+              <div style={{ position: 'relative' }}>
+                <MapPin
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    left: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: colors.cardAccent,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <select
+                  value={location}
+                  onChange={e => setLocation(e.target.value)}
+                  style={{
+                    width: '100%',
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    color: colors.headingText,
+                    background: colors.pageBg,
+                    border: `1px solid ${colors.cardBorder}`,
+                    borderRadius: 12,
+                    padding: '12px 40px 12px 40px',
+                    outline: 'none',
+                    appearance: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {LOCATIONS.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: colors.cardBody,
+                    pointerEvents: 'none',
+                  }}
+                />
               </div>
             </div>
-            <div className="mb-6">
-              <label className="font-sans text-xs font-semibold text-warm-400 tracking-wider uppercase mb-1.5 block">Additional Notes</label>
-              <textarea rows={3} className="w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl font-sans text-sm outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-all resize-none" placeholder="Any specific concerns or areas to check..." />
+
+            {/* Inspection type */}
+            <div style={{ marginBottom: 24 }}>
+              <label
+                style={{
+                  fontFamily: fonts.body,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: colors.cardBody,
+                  marginBottom: 6,
+                  display: 'block',
+                }}
+              >
+                Inspection Type
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Search
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    left: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: colors.cardAccent,
+                    pointerEvents: 'none',
+                  }}
+                />
+                <select
+                  value={inspectionType}
+                  onChange={e => setInspectionType(e.target.value)}
+                  style={{
+                    width: '100%',
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    color: colors.headingText,
+                    background: colors.pageBg,
+                    border: `1px solid ${colors.cardBorder}`,
+                    borderRadius: 12,
+                    padding: '12px 40px 12px 40px',
+                    outline: 'none',
+                    appearance: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {INSPECTION_TYPES.map(t => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={16}
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: colors.cardBody,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+              <p style={{ fontFamily: fonts.body, fontSize: 12, color: colors.cardBody, marginTop: 6 }}>
+                {INSPECTION_TYPES.find(t => t.value === inspectionType)?.desc}
+              </p>
             </div>
-            <button className="w-full btn-gold justify-center text-base py-4">
-              Book Inspection <ArrowRight size={18} />
+
+            <button
+              style={{
+                width: '100%',
+                fontFamily: fonts.body,
+                fontSize: 15,
+                fontWeight: 700,
+                color: colors.buttonText,
+                background: colors.cardAccent,
+                border: 'none',
+                borderRadius: 12,
+                padding: '14px 24px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                transition: 'opacity 0.2s',
+              }}
+            >
+              Book Inspection <ArrowRight size={16} />
             </button>
-            <p className="font-sans text-xs text-warm-400 text-center mt-3">
-              Inspection fee: KES 8,000 · Results within 24 hours
-            </p>
           </div>
         </div>
+      </section>
+
+      {/* ── WHAT WE CHECK ────────────────────────────────────────── */}
+      <section style={{ padding: `0 24px ${sizes.sectionPadding}px` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: colors.cardAccent,
+                marginBottom: 8,
+              }}
+            >
+              Comprehensive Assessment
+            </p>
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${2 * sizes.headingScale}rem`,
+                color: colors.headingText,
+                fontWeight: 700,
+              }}
+            >
+              What We Check
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 20,
+            }}
+          >
+            {CHECK_ITEMS.map(({ category, items }) => (
+              <div
+                key={category}
+                style={{
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: sizes.radius,
+                  padding: sizes.cardPadding + 8,
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: colors.cardHeading,
+                    marginBottom: 12,
+                  }}
+                >
+                  {category}
+                </p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {items.map(item => (
+                    <li
+                      key={item}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        padding: '6px 0',
+                        borderTop: `1px solid ${colors.cardBorder}40`,
+                      }}
+                    >
+                      <CheckCircle size={14} style={{ color: colors.cardAccent, flexShrink: 0 }} />
+                      <span style={{ fontFamily: fonts.body, fontSize: 13, color: colors.cardBody }}>
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── BACK TO MARKETPLACE ───────────────────────────────────── */}
+      <section style={{ padding: '0 24px 64px', textAlign: 'center' }}>
+        <button
+          onClick={() => nav('gallery')}
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 14,
+            fontWeight: 600,
+            color: colors.cardAccent,
+            background: 'none',
+            border: `1px solid ${colors.cardBorder}`,
+            borderRadius: sizes.radius,
+            padding: '14px 32px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+          }}
+        >
+          Back to Marketplace <ArrowRight size={16} />
+        </button>
       </section>
     </div>
   );
 }
+
+

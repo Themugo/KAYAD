@@ -2333,10 +2333,12 @@ label, .text-label {
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: var(--radius-md); font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; font-family: inherit; }
-.btn-gold { background: linear-gradient(135deg, var(--blue-500), var(--blue-600)); color: #fff; padding: 10px 24px; font-size: 14px; }
-.btn-gold:hover { background: linear-gradient(135deg, var(--blue-400), var(--blue-500)); box-shadow: var(--shadow-glow); }
+.btn-gold { background: linear-gradient(135deg, #3ddb72, #34b563); color: #1e3063; padding: 10px 24px; font-size: 14px; }
+.btn-gold:hover { background: linear-gradient(135deg, #34b563, #2a9a53); box-shadow: 0 4px 16px rgba(61,219,114,0.3); }
+.btn-outline-dark { background: transparent; color: #1e3063; border: 1px solid #1e3063; padding: 10px 24px; font-size: 14px; }
+.btn-outline-dark:hover { background: rgba(30,48,99,0.06); }
 .btn-outline { background: transparent; color: var(--text-primary); border: 1px solid var(--border); padding: 10px 24px; font-size: 14px; }
-.btn-outline:hover { border-color: var(--blue-400); color: var(--blue-400); }
+.btn-outline:hover { border-color: #3ddb72; color: #3ddb72; }
 .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); color: #fff; padding: 8px 16px; font-size: 13px; }
 .btn-danger:hover { background: linear-gradient(135deg, #ef4444, #dc2626); }
 .btn-ghost { background: transparent; color: var(--text-muted); padding: 8px 16px; font-size: 13px; }
@@ -3066,4 +3068,123 @@ html * {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================================
+   BOLT-V5 Design System Classes
+   ============================================================ */
+
+/* Typography helpers */
+.section-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold-500, #3ddb72);
+  font-family: 'Inter', sans-serif;
+}
+
+.section-heading {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary, #1e3063);
+  font-family: 'Playfair Display', serif;
+}
+
+/* Filter pills */
+.pill-active {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--c-button-bg, #3ddb72);
+  color: var(--c-button-text, #1e3063);
+  border: none;
+}
+
+.pill-inactive {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--c-heading-text, #1e3063);
+  border: 1px solid var(--c-card-border, #e8e4dc);
+}
+
+.pill-inactive:hover {
+  background: rgba(61,219,114,0.06);
+  border-color: var(--c-button-bg, #3ddb72);
+}
+
+/* Card badge */
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Nav link */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+
+.nav-link.active {
+  color: var(--c-navbar-accent, #00d1d5);
+  font-weight: 600;
+}
+
+/* Font families */
+.font-heading {
+  font-family: 'Playfair Display', serif;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Card padding */
+.card-pad {
+  padding: var(--card-pad, 20px);
+}
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
 }

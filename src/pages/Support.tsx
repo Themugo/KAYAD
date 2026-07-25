@@ -1,294 +1,417 @@
-import { useState } from 'react';
-import { MessageCircle, Phone, Mail, Clock, Send, HeadphonesIcon, Loader2, CheckCircle } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
-import { supportAPI } from '../api/api';
-import { useFormValidation, validators } from '../hooks/useFormValidation';
-import { FormField, FormTextarea, FormSelect } from '../components/ui/FormField';
-import { useFocusTrap, useEscapeKey, useScrollLock } from '../hooks/useAccessibility';
-import SEOHead from '../components/features/common/SEOHead';
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
+import { HelpCircle, MessageCircle, Phone, Mail, ArrowRight, Search, Shield, ClipboardCheck, CreditCard, Tag, Banknote, Car } from 'lucide-react';
 
-export default function Support() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [submitted, setSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+interface SupportProps {
+  setPage: (page: string) => void;
+}
 
-  const {
-    values,
-    errors,
-    touched,
-    isValid,
-    isDirty,
-    handleChange,
-    handleBlur,
-    handleSubmit: validateSubmit,
-    resetForm,
-  } = useFormValidation({
-    category: {
-      initialValue: 'general',
-      rules: [validators.required('Please select a category')],
+const TOPICS = [
+  { icon: Shield, title: 'Escrow Vault', desc: 'Secure payment protection and fund management', page: 'escrow-vault' },
+  { icon: ClipboardCheck, title: 'Pre-Inspection', desc: '150-point vehicle assessment before purchase', page: 'pre-inspection' },
+  { icon: Car, title: 'Buying a Car', desc: 'Browse, compare, and purchase with confidence', page: 'gallery' },
+  { icon: Tag, title: 'Selling a Vehicle', desc: 'List your car and reach thousands of buyers', page: 'sell' },
+  { icon: Banknote, title: 'Financing', desc: 'Affordable car loans from trusted partners', page: 'payments' },
+  { icon: CreditCard, title: 'Insurance', desc: 'Comprehensive motor insurance for your vehicle', page: 'payments' },
+];
+
+const CONTACT_OPTIONS = [
+  {
+    icon: MessageCircle,
+    title: 'Live Chat',
+    desc: 'Chat with our team',
+    detail: 'Available 24/7',
+    color: '#8b5cf6',
+    bg: 'rgba(139,92,246,0.12)',
+  },
+  {
+    icon: Mail,
+    title: 'Email',
+    desc: 'support@kayad.co.ke',
+    detail: 'Response within 24 hours',
+    color: '#3b82f6',
+    bg: 'rgba(59,130,246,0.12)',
+  },
+  {
+    icon: Phone,
+    title: 'Phone',
+    desc: '+254 700 123 456',
+    detail: 'Mon–Fri, 8am–6pm',
+    color: '#10b981',
+    bg: 'rgba(16,185,129,0.12)',
+  },
+  {
+    icon: MessageCircle,
+    title: 'WhatsApp',
+    desc: '+254 700 123 456',
+    detail: 'Instant messaging',
+    color: '#22c55e',
+    bg: 'rgba(34,197,94,0.12)',
+  },
+];
+
+export default function Support({ setPage }: SupportProps) {
+  const navigate = useNavigate();
+  const { theme } = useDesignTheme();
+  const { colors, fonts, sizes } = theme;
+
+  const [search, setSearch] = useState('');
+
+  const nav = useCallback(
+    (page: string) => {
+      setPage(page);
+      navigate('/' + page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    subject: {
-      initialValue: '',
-      rules: [
-        validators.required('Subject is required'),
-        validators.minLength(5, 'Subject must be at least 5 characters'),
-      ],
-    },
-    message: {
-      initialValue: '',
-      rules: [
-        validators.required('Message is required'),
-        validators.minLength(20, 'Please provide more details (at least 20 characters)'),
-      ],
-    },
-  });
+    [setPage, navigate],
+  );
 
-  const handleSubmit = validateSubmit(async () => {
-    setIsSubmitting(true);
-    try {
-      await supportAPI.create({
-        subject: values.subject.trim(),
-        message: values.message.trim(),
-        category: values.category,
-        email: user?.email,
-        userId: user?._id || user?.id,
-      });
-      toast.success('Support ticket submitted successfully');
-      setSubmitted(true);
-      resetForm();
-    } catch (error) {
-      toast.error('Failed to submit support ticket. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  });
-
-  const categories = [
-    { value: 'general', label: 'General Inquiry' },
-    { value: 'technical', label: 'Technical Issue' },
-    { value: 'account', label: 'Account Related' },
-    { value: 'listing', label: 'Listing Issue' },
-    { value: 'payment', label: 'Payment/Escrow' },
-    { value: 'feedback', label: 'Feedback/Suggestion' },
-  ];
+  const filteredTopics = TOPICS.filter(
+    t =>
+      t.title.toLowerCase().includes(search.toLowerCase()) ||
+      t.desc.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
-    <>
-      <SEOHead 
-        title="Support - KAYAD"
-        description="Get help and support from the KAYAD team"
-      />
-      
-      <div className="min-h-screen bg-cream-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gold-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <HeadphonesIcon className="h-8 w-8 text-gold-600" />
-            </div>
-            <h1 className="text-3xl font-serif font-bold text-charcoal-900">How can we help you?</h1>
-            <p className="mt-2 text-warm-500">We're here to help with any questions or concerns</p>
+    <div style={{ minHeight: '100vh', background: colors.pageBg, fontFamily: fonts.body }}>
+
+      {/* ── HERO ──────────────────────────────────────────────────── */}
+      <section
+        style={{
+          position: 'relative',
+          background: colors.heroBg,
+          paddingTop: `${sizes.sectionPadding}px`,
+          paddingBottom: `${sizes.sectionPadding}px`,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: `linear-gradient(135deg, ${colors.heroAccent}18 0%, transparent 60%)`,
+          }}
+        />
+        <div style={{ position: 'relative', maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+          <div
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 16,
+              background: `${colors.heroAccent}25`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 16,
+            }}
+          >
+            <HelpCircle size={28} style={{ color: colors.heroAccent }} />
           </div>
+          <h1
+            style={{
+              fontFamily: fonts.heading,
+              fontSize: `clamp(1.75rem, 4vw, ${2.75 * sizes.headingScale}rem)`,
+              color: colors.heroText,
+              fontWeight: 700,
+              marginBottom: 8,
+            }}
+          >
+            Support Center
+          </h1>
+          <p
+            style={{
+              fontFamily: fonts.body,
+              fontSize: `${1 * sizes.bodyScale}rem`,
+              color: 'rgba(255,255,255,0.6)',
+              maxWidth: 480,
+              lineHeight: 1.6,
+            }}
+          >
+            We're here to help with any questions or concerns about buying, selling, or using KAYAD.
+          </p>
+        </div>
+      </section>
 
-          {/* Contact Options */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <a 
-              href="mailto:support@kayad.co.ke"
-              className="bg-white rounded-xl p-6 border border-cream-200 hover:border-gold-500/50 hover:shadow-md transition-all group"
-            >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors">
-                  <Mail className="h-6 w-6 text-blue-600" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-charcoal-900">Email Support</h3>
-                  <p className="text-sm text-warm-500">support@kayad.co.ke</p>
-                </div>
-              </div>
-              <p className="text-sm text-warm-500">Response within 24 hours</p>
-            </a>
-
-            <a 
-              href="tel:+254700123456"
-              className="bg-white rounded-xl p-6 border border-cream-200 hover:border-gold-500/50 hover:shadow-md transition-all group"
-            >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="p-3 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors">
-                  <Phone className="h-6 w-6 text-green-600" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-charcoal-900">Phone Support</h3>
-                  <p className="text-sm text-warm-500">+254 700 123 456</p>
-                </div>
-              </div>
-              <p className="text-sm text-warm-500">Mon-Fri, 8am-6pm</p>
-            </a>
-
-            <button 
-              onClick={() => setModalOpen(true)}
-              className="bg-white rounded-xl p-6 border border-cream-200 hover:border-gold-500/50 hover:shadow-md transition-all text-left group"
-              aria-label="Open live chat"
-            >
-              <div className="flex items-center gap-4 mb-3">
-                <div className="p-3 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors">
-                  <MessageCircle className="h-6 w-6 text-purple-600" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-charcoal-900">Live Chat</h3>
-                  <p className="text-sm text-warm-500">Chat with us</p>
-                </div>
-              </div>
-              <p className="text-sm text-warm-500">Available 24/7</p>
-            </button>
-          </div>
-
-          {/* Contact Form */}
-          <div className="bg-white rounded-2xl border border-cream-200 p-6 md:p-8">
-            <h2 className="text-xl font-serif font-bold text-charcoal-900 mb-6 flex items-center gap-2">
-              <Send className="h-5 w-5 text-gold-600" aria-hidden="true" />
-              Submit a Support Request
-            </h2>
-
-            {submitted ? (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="h-8 w-8 text-emerald-600" aria-hidden="true" />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-charcoal-900 mb-2">Request Submitted!</h3>
-                <p className="text-warm-500 mb-6">
-                  Thank you for contacting us. Our team will respond within 24 hours.
-                </p>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className="text-gold-600 hover:text-gold-700 font-semibold"
-                >
-                  Submit another request
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                <FormSelect
-                  label="Category"
-                  name="category"
-                  value={values.category}
-                  onChange={(e) => handleChange('category', e.target.value)}
-                  onBlur={() => handleBlur('category')}
-                  error={touched.category ? errors.category : null}
-                  required
-                  options={categories}
-                  placeholder="Select a category"
-                />
-
-                <FormField
-                  label="Subject"
-                  name="subject"
-                  type="text"
-                  value={values.subject}
-                  onChange={(e) => handleChange('subject', e.target.value)}
-                  onBlur={() => handleBlur('subject')}
-                  error={touched.subject ? errors.subject : null}
-                  placeholder="Brief description of your issue"
-                  required
-                  hint="Be specific to help us assist you faster"
-                />
-
-                <FormTextarea
-                  label="Message"
-                  name="message"
-                  value={values.message}
-                  onChange={(e) => handleChange('message', e.target.value)}
-                  onBlur={() => handleBlur('message')}
-                  error={touched.message ? errors.message : null}
-                  placeholder="Please describe your issue in detail. Include any relevant order numbers, vehicle IDs, or screenshots if applicable..."
-                  rows={6}
-                  required
-                />
-
-                {!user && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4" role="alert">
-                    <p className="text-sm text-amber-800">
-                      <strong>Tip:</strong> For faster assistance, consider signing in to your account.
-                    </p>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !isValid}
-                  className="w-full py-3.5 bg-gold-500 text-charcoal-900 rounded-xl font-sans font-semibold 
-                    hover:bg-gold-600 disabled:opacity-50 disabled:cursor-not-allowed 
-                    flex items-center justify-center gap-2 transition-colors"
-                  aria-describedby={!isValid ? 'form-requirements' : undefined}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      <span>Submitting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-4 w-4" aria-hidden="true" />
-                      <span>Submit Request</span>
-                    </>
-                  )}
-                </button>
-                
-                <p id="form-requirements" className="text-xs text-warm-400 text-center">
-                  Fields marked with * are required
-                </p>
-              </form>
-            )}
-          </div>
-
-          {/* Response Time */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 text-warm-500">
-              <Clock className="h-4 w-4" aria-hidden="true" />
-              <span>Average response time: 4 hours</span>
-            </div>
+      {/* ── SEARCH BAR ───────────────────────────────────────────── */}
+      <section style={{ padding: `${sizes.sectionPadding / 2}px 24px 0` }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <div
+            style={{
+              position: 'relative',
+              background: colors.cardBg,
+              border: `1px solid ${colors.cardBorder}`,
+              borderRadius: sizes.radius,
+              overflow: 'hidden',
+            }}
+          >
+            <Search
+              size={18}
+              style={{
+                position: 'absolute',
+                left: 18,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: colors.cardAccent,
+                pointerEvents: 'none',
+              }}
+            />
+            <input
+              type="text"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search help topics..."
+              style={{
+                width: '100%',
+                fontFamily: fonts.body,
+                fontSize: 15,
+                color: colors.headingText,
+                background: 'transparent',
+                border: 'none',
+                padding: '16px 18px 16px 48px',
+                outline: 'none',
+              }}
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Live Chat Modal (placeholder) */}
-      {modalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="chat-modal-title"
-        >
-          <div 
-            className="absolute inset-0 bg-charcoal-900/50 backdrop-blur-sm"
-            onClick={() => setModalOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
-            <h2 id="chat-modal-title" className="text-lg font-serif font-bold text-charcoal-900 mb-4">
-              Live Chat
-            </h2>
-            <p className="text-warm-500 mb-6">
-              Live chat coming soon! For immediate assistance, please call us or submit a support ticket.
+      {/* ── POPULAR TOPICS ───────────────────────────────────────── */}
+      <section style={{ padding: `${sizes.sectionPadding}px 24px` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: colors.cardAccent,
+                marginBottom: 8,
+              }}
+            >
+              Help Library
             </p>
-            <div className="flex gap-3">
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${2 * sizes.headingScale}rem`,
+                color: colors.headingText,
+                fontWeight: 700,
+              }}
+            >
+              Popular Topics
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: 20,
+            }}
+          >
+            {filteredTopics.map(({ icon: Icon, title, desc, page }) => (
               <button
-                onClick={() => setModalOpen(false)}
-                className="flex-1 py-2 px-4 border border-cream-300 rounded-xl font-sans font-semibold hover:bg-cream-50 transition-colors"
+                key={title}
+                onClick={() => nav(page)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 14,
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: sizes.radius,
+                  padding: sizes.cardPadding + 8,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'box-shadow 0.2s, border-color 0.2s',
+                }}
               >
-                Close
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: `${colors.cardAccent}20`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={20} style={{ color: colors.cardAccent }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p
+                    style={{
+                      fontFamily: fonts.body,
+                      fontSize: 15,
+                      fontWeight: 700,
+                      color: colors.cardHeading,
+                      marginBottom: 2,
+                    }}
+                  >
+                    {title}
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: fonts.body,
+                      fontSize: 13,
+                      color: colors.cardBody,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {desc}
+                  </p>
+                </div>
+                <ArrowRight size={16} style={{ color: colors.cardAccent, marginTop: 4, flexShrink: 0 }} />
               </button>
-              <a
-                href="tel:+254700123456"
-                className="flex-1 py-2 px-4 bg-gold-500 text-charcoal-900 rounded-xl font-sans font-semibold hover:bg-gold-600 transition-colors text-center"
-              >
-                Call Us
-              </a>
+            ))}
+          </div>
+
+          {filteredTopics.length === 0 && (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '48px 24px',
+                background: colors.cardBg,
+                border: `1px solid ${colors.cardBorder}`,
+                borderRadius: sizes.radius,
+              }}
+            >
+              <Search size={32} style={{ color: colors.cardBorder, marginBottom: 12 }} />
+              <p style={{ fontFamily: fonts.body, fontSize: 14, color: colors.cardBody }}>
+                No topics match "{search}". Try a different search.
+              </p>
             </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── CONTACT US ───────────────────────────────────────────── */}
+      <section style={{ padding: `0 24px ${sizes.sectionPadding}px` }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <p
+              style={{
+                fontFamily: fonts.body,
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: colors.cardAccent,
+                marginBottom: 8,
+              }}
+            >
+              Get in Touch
+            </p>
+            <h2
+              style={{
+                fontFamily: fonts.heading,
+                fontSize: `${2 * sizes.headingScale}rem`,
+                color: colors.headingText,
+                fontWeight: 700,
+              }}
+            >
+              Contact Us
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: 16,
+            }}
+          >
+            {CONTACT_OPTIONS.map(({ icon: Icon, title, desc, detail, color, bg }) => (
+              <div
+                key={title}
+                style={{
+                  background: colors.cardBg,
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: sizes.radius,
+                  padding: sizes.cardPadding + 8,
+                  cursor: 'pointer',
+                  transition: 'box-shadow 0.2s, border-color 0.2s',
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 12,
+                    background: bg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <Icon size={22} style={{ color }} />
+                </div>
+                <p
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: colors.cardHeading,
+                    marginBottom: 4,
+                  }}
+                >
+                  {title}
+                </p>
+                <p
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 13,
+                    color: colors.cardBody,
+                    marginBottom: 8,
+                  }}
+                >
+                  {desc}
+                </p>
+                <p
+                  style={{
+                    fontFamily: fonts.body,
+                    fontSize: 11,
+                    color: colors.cardBody,
+                    opacity: 0.6,
+                  }}
+                >
+                  {detail}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      )}
-    </>
+      </section>
+
+      {/* ── BACK TO MARKETPLACE ───────────────────────────────────── */}
+      <section style={{ padding: '0 24px 64px', textAlign: 'center' }}>
+        <button
+          onClick={() => nav('gallery')}
+          style={{
+            fontFamily: fonts.body,
+            fontSize: 14,
+            fontWeight: 600,
+            color: colors.cardAccent,
+            background: 'none',
+            border: `1px solid ${colors.cardBorder}`,
+            borderRadius: sizes.radius,
+            padding: '14px 32px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+          }}
+        >
+          Back to Marketplace <ArrowRight size={16} />
+        </button>
+      </section>
+    </div>
   );
 }

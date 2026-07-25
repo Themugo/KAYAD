@@ -111,6 +111,7 @@ const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
 const AdminSupportTickets = lazy(() => import('./pages/admin/AdminSupportTickets'));
 const AdminBroadcast = lazy(() => import('./pages/admin/AdminBroadcast'));
 const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
+const ThemeStudio = lazy(() => import('./pages/admin/ThemeStudio'));
 
 export type { Car, User };
 
@@ -358,6 +359,7 @@ function AppContent() {
           <Route path="/admin/support-tickets" element={<SecureAdminGuard roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdminGuard>} />
           <Route path="/admin/broadcast" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdminGuard>} />
           <Route path="/admin/feedback" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminFeedback /></SecureAdminGuard>} />
+          <Route path="/admin/theme-studio" element={<SecureAdminGuard roles={["superadmin","admin"]}><ThemeStudio /></SecureAdminGuard>} />
 
           {/* 404 */}
           <Route path="*" element={<NotFoundPage />} />

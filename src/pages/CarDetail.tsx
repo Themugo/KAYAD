@@ -1,475 +1,1473 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
+import { Car } from '../components/features/car/CarCard';
 import {
-  ArrowLeft, Shield, Gavel, Calendar, Gauge, Fuel, MapPin,
-  CheckCircle, Heart, Share2, Wrench, Eye, Zap, Phone,
-  MessageCircle, Star, ChevronRight, Lock, Clock,
-  ChevronLeft, X, ZoomIn,
+  ArrowLeft,
+  Heart,
+  Share,
+  MapPin,
+  Calendar,
+  Fuel,
+  Gauge,
+  Tag,
+  Shield,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  MessageCircle,
+  ExternalLink,
 } from 'lucide-react';
-import VehicleCard, { type Car } from '../components/VehicleCard/VehicleCard';
-import { CARS } from '../data/cars';
-import { formatKES } from '../utils/helpers';
-
-type AnyPage = string;
 
 interface CarDetailProps {
-  car: Car;
-  setPage: (page: AnyPage) => void;
-  viewCar: (car: Car) => void;
+  car: Car | null;
+  setPage: (page: string) => void;
 }
 
-const FEATURES: Record<string, string[]> = {
-  SUV:    ['Leather Seats', 'Panoramic Sunroof', 'Apple CarPlay', 'Rear Camera', 'Adaptive Cruise', 'Blind Spot Monitor'],
-  Pickup: ['Bull Bar', 'Diff Lock', 'Tow Bar', 'Side Steps', 'Cargo Liner', 'LED Light Bar'],
-  Sedan:  ['Sport Package', 'Heated Seats', 'Wireless Charging', 'Ambient Lighting', 'Lane Assist', 'Navigation'],
-  Wagon:  ['Roof Rails', 'Third Row Seats', 'Power Liftgate', 'AWD', 'Fold-Flat Seats', 'Rear Entertainment'],
-};
+type Tab = 'overview' | 'escrow' | 'inspection' | 'financing';
 
-const INSPECTION_CATS = [
-  { label: 'Engine & Drivetrain', icon: Wrench, score: 95 },
-  { label: 'Exterior & Body',     icon: Eye,    score: 91 },
-  { label: 'Electrical Systems',  icon: Zap,    score: 88 },
-  { label: 'Interior & Safety',   icon: Shield, score: 94 },
-];
+function useCountdown(targetDate: string | undefined) {
+  const [remaining, setRemaining] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-type Tab = 'overview' | 'inspection' | 'financing' | 'reviews';
+  useEffect(() => {
+    if (!targetDate) return;
+    const target = new Date(targetDate).getTime();
+    const tick = () => {
+      const diff = Math.max(0, target - Date.now());
+      setRemaining({
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor((diff % 86400000) / 3600000),
+        minutes: Math.floor((diff % 3600000) / 60000),
+        seconds: Math.floor((diff % 60000) / 1000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [targetDate]);
 
-export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
-  const [saved, setSaved] = useState(false);
-  const [tab, setTab]     = useState<Tab>('overview');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
+  return remaining;
+}
 
-  // Generate multiple images for gallery
+export default function CarDetail({ car, setPage }: CarDetailProps) {
+  const navigate = useNavigate();
+  const { theme } = useDesignTheme();
+  const c = theme.colors;
+  const r = theme.sizes.radius;
+
+  const [tab, setTab] = useState<Tab>('overview');
+  const [activeImage, setActiveImage] = useState(0);
+  const [favorited, setFavorited] = useState(false);
+
+  const [inspectionLocation, setInspectionLocation] = useState('Westlands');
+  const [financingName, setFinancingName] = useState('');
+  const [financingPhone, setFinancingPhone] = useState('');
+  const [financingIncome, setFinancingIncome] = useState('');
+  const [financingEmployment, setFinancingEmployment] = useState('employed');
+
+  const countdown = useCountdown(car?.auctionEnd);
+
+  const goBack = useCallback(() => {
+    setPage('gallery');
+    navigate('/gallery');
+  }, [setPage, navigate]);
+
+  const nav = useCallback(
+    (page: string) => {
+      setPage(page);
+      navigate('/' + page);
+    },
+    [setPage, navigate],
+  );
+
+  if (!car) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: c.pageBg,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 24,
+          padding: 24,
+          fontFamily: `var(--font-body, ${theme.fonts.body})`,
+        }}
+      >
+        <AlertCircle size={56} style={{ color: c.cardBorder, opacity: 0.5 }} />
+        <h1
+          style={{
+            fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+            color: c.headingText,
+            fontSize: '1.8rem',
+            fontWeight: 700,
+            margin: 0,
+          }}
+        >
+          Vehicle Not Found
+        </h1>
+        <p style={{ color: c.bodyText, margin: 0, fontSize: '0.95rem' }}>
+          The vehicle you are looking for may have been removed or is unavailable.
+        </p>
+        <button
+          onClick={goBack}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '12px 28px',
+            borderRadius: r,
+            border: 'none',
+            background: c.buttonBg,
+            color: c.buttonText,
+            fontFamily: `var(--font-body, ${theme.fonts.body})`,
+            fontWeight: 600,
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+          }}
+        >
+          <ArrowLeft size={16} /> Back to Marketplace
+        </button>
+      </div>
+    );
+  }
+
+  const isOnAuction = car.badges.includes('auction') && car.auctionEnd && new Date(car.auctionEnd).getTime() > Date.now();
+  const currentPrice = isOnAuction && car.currentBid && car.currentBid > 0 ? car.currentBid : car.price;
+  const formattedPrice = `KES ${currentPrice.toLocaleString('en-KE')}`;
+
   const carImages = [
     car.image,
     car.image.replace('600x400', '800x600'),
-    car.image,
     car.image.replace('600x400', '700x500'),
-    car.image,
     car.image.replace('600x400', '900x600'),
   ];
 
-  const nextImage = () => setCurrentImageIndex(i => (i + 1) % carImages.length);
-  const prevImage = () => setCurrentImageIndex(i => (i - 1 + carImages.length) % carImages.length);
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'escrow', label: 'Escrow' },
+    { key: 'inspection', label: 'Inspection' },
+    { key: 'financing', label: 'Financing' },
+  ];
 
-  const features = FEATURES[car.type] ?? FEATURES.SUV;
-  const similar  = CARS.filter(c => c.type === car.type && c.id !== car.id).slice(0, 3);
+  const keyDetails = [
+    { icon: Calendar, label: 'Year', value: String(car.year) },
+    { icon: Gauge, label: 'Mileage', value: car.mileage },
+    { icon: Tag, label: 'Transmission', value: car.transmission ?? 'Automatic' },
+    { icon: Fuel, label: 'Fuel Type', value: car.fuel },
+    { icon: AlertCircle, label: 'VIN', value: `KND${String(car.id).padStart(10, '0')}` },
+  ];
+
+  const historyItems = [
+    { ok: true, text: 'Accident-free history — no structural damage recorded' },
+    { ok: true, text: 'First owner — single private ownership' },
+    { ok: true, text: 'Full service history with authorized dealer' },
+    { ok: false, text: car.isBankOwned ? 'Bank-owned repossessed vehicle' : 'No outstanding finance or liens' },
+  ];
+
+  const inspectionLocations = [
+    'Westlands',
+    'Industrial Area',
+    'Mombasa Road',
+    'Thika Road',
+    'Karen',
+    'Nyali (Mombasa)',
+  ];
 
   return (
-    <div className="min-h-screen bg-cream-50 pt-16">
-
-      {/* ── BREADCRUMB BAR ─────────────────────────────────────────── */}
-      <div className="bg-charcoal-900 border-b border-white/10 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
-          <button
-            onClick={() => setPage('gallery')}
-            className="flex items-center gap-2 text-white/60 hover:text-gold-400 font-sans text-sm transition-colors"
-          >
-            <ArrowLeft size={14} /> Back to Gallery
-          </button>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setSaved(v => !v)}
-              className={`flex items-center gap-1.5 font-sans text-xs font-semibold transition-colors ${saved ? 'text-gold-400' : 'text-white/40 hover:text-white/70'}`}
-            >
-              <Heart size={13} fill={saved ? 'currentColor' : 'none'} />
-              {saved ? 'Saved' : 'Save'}
-            </button>
-            <button className="flex items-center gap-1.5 font-sans text-xs font-semibold text-white/40 hover:text-white/70 transition-colors">
-              <Share2 size={13} /> Share
-            </button>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: c.pageBg,
+        fontFamily: `var(--font-body, ${theme.fonts.body})`,
+      }}
+    >
+      {/* ── BREADCRUMB ── */}
+      <div
+        style={{
+          padding: '14px 0',
+          borderBottom: `1px solid ${c.cardBorder}`,
+        }}
+      >
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button
+                onClick={goBack}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  background: 'none',
+                  border: 'none',
+                  color: c.cardAccent,
+                  cursor: 'pointer',
+                  fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                  fontSize: '0.85rem',
+                  fontWeight: 500,
+                  padding: 0,
+                }}
+              >
+                <ArrowLeft size={16} />
+              </button>
+              <nav
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: '0.85rem',
+                  color: c.bodyText,
+                  opacity: 0.6,
+                }}
+              >
+                <span
+                  style={{ cursor: 'pointer', color: c.cardAccent, opacity: 1 }}
+                  onClick={goBack}
+                >
+                  Home
+                </span>
+                <span style={{ opacity: 0.4 }}>&gt;</span>
+                <span style={{ opacity: 1, color: c.bodyText }}>{car.make}</span>
+                <span style={{ opacity: 0.4 }}>&gt;</span>
+                <span style={{ opacity: 1, color: c.headingText, fontWeight: 600 }}>{car.model}</span>
+              </nav>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <button
+                onClick={() => setFavorited(v => !v)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  background: 'none',
+                  border: 'none',
+                  color: favorited ? '#ef4444' : c.cardBody,
+                  cursor: 'pointer',
+                  fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  padding: 0,
+                }}
+              >
+                <Heart size={15} className={favorited ? 'fill-current' : ''} />
+                {favorited ? 'Saved' : 'Save'}
+              </button>
+              <button
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  background: 'none',
+                  border: 'none',
+                  color: c.cardBody,
+                  cursor: 'pointer',
+                  fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  padding: 0,
+                }}
+              >
+                <Share size={15} /> Share
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ── HERO IMAGE GALLERY ───────────────────────────────────── */}
-      <div className="relative h-[58vh] min-h-[380px] bg-charcoal-900 overflow-hidden">
-        {/* Main Image */}
-        <div className="relative h-full">
-          <img
-            src={carImages[currentImageIndex]}
-            alt={`${car.make} ${car.model} - Image ${currentImageIndex + 1}`}
-            className="w-full h-full object-cover transition-opacity duration-300"
-          />
-          
-          {/* Navigation Arrows */}
-          <button
-            onClick={prevImage}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={nextImage}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
-          >
-            <ChevronRight size={20} />
-          </button>
-
-          {/* Zoom Button */}
-          <button
-            onClick={() => setLightboxOpen(true)}
-            className="absolute top-4 right-4 w-10 h-10 bg-charcoal-900/80 backdrop-blur-sm text-white rounded-full flex items-center justify-center hover:bg-charcoal-900 transition-colors"
-          >
-            <ZoomIn size={18} />
-          </button>
-
-          {/* Image Counter */}
-          <div className="absolute bottom-4 right-4 px-3 py-1 bg-charcoal-900/80 backdrop-blur-sm text-white text-xs font-medium rounded-full">
-            {currentImageIndex + 1} / {carImages.length}
-          </div>
-        </div>
-
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-900/25 to-transparent" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-40 bg-gold-400/10 blur-3xl rounded-full pointer-events-none" />
-
-        {/* Thumbnail Strip */}
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 px-4">
-          {carImages.map((img, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentImageIndex(idx)}
-              className={`w-16 h-10 rounded-lg overflow-hidden border-2 transition-all ${
-                idx === currentImageIndex ? 'border-gold-400 scale-110' : 'border-transparent opacity-60 hover:opacity-100'
-              }`}
-            >
-              <img src={img} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-
-        {/* Car Info Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-6 lg:px-8 pb-8 max-w-7xl mx-auto">
-          <p className="section-label text-gold-400 mb-2">{car.make}</p>
-          <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-3 leading-tight">
-            {car.model}
-          </h1>
-          <div className="flex flex-wrap items-center gap-3">
-            {car.badges.includes('escrow') && (
-              <span className="card-badge bg-charcoal-900/80 text-white backdrop-blur-sm">
-                <Shield size={10} /> ESCROW
-              </span>
-            )}
-            {car.badges.includes('auction') && (
-              <span className="card-badge bg-gold-600 text-white">
-                <Gavel size={10} /> AUCTION
-              </span>
-            )}
-            <span className="font-serif text-2xl md:text-3xl text-gold-400 font-bold ml-auto">
-              {formatKES(car.price)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ── LIGHTBOX ──────────────────────────────────────────────── */}
-      {lightboxOpen && (
-        <div 
-          className="fixed inset-0 z-[100] bg-charcoal-950/95 flex items-center justify-center"
-          onClick={() => setLightboxOpen(false)}
+      {/* ── IMAGE GALLERY ── */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr',
+            gap: 12,
+          }}
         >
-          <button
-            onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
+          {/* Main image */}
+          <div
+            style={{
+              borderRadius: r,
+              overflow: 'hidden',
+              position: 'relative',
+              aspectRatio: '16/9',
+              background: c.cardBorder,
+            }}
           >
-            <X size={24} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); prevImage(); }}
-            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
-          >
-            <ChevronLeft size={24} />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); nextImage(); }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-charcoal-800 text-white rounded-full flex items-center justify-center hover:bg-charcoal-700 transition-colors"
-          >
-            <ChevronRight size={24} />
-          </button>
-          <img
-            src={carImages[currentImageIndex]}
-            alt={`${car.make} ${car.model}`}
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white text-sm font-medium">
-            {currentImageIndex + 1} / {carImages.length}
+            <img
+              src={carImages[activeImage]}
+              alt={`${car.make} ${car.model}`}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+            {/* Overlay gradient */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 40%)',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* Badges */}
+            <div style={{ position: 'absolute', top: 16, left: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {isOnAuction && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    background: 'rgba(239,68,68,0.92)',
+                    color: '#fff',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', animation: 'pulse 1.5s infinite' }} />
+                  LIVE AUCTION
+                </span>
+              )}
+              {car.badges.includes('escrow') && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    background: 'rgba(30,30,30,0.88)',
+                    color: '#fff',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <Shield size={11} /> ESCROW
+                </span>
+              )}
+              {car.isVerified && (
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '4px 12px',
+                    borderRadius: 20,
+                    background: 'rgba(16,185,129,0.92)',
+                    color: '#fff',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  ✓ VERIFIED
+                </span>
+              )}
+            </div>
+            {/* Image count */}
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 16,
+                right: 16,
+                padding: '4px 12px',
+                borderRadius: 20,
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(8px)',
+                color: '#fff',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+              }}
+            >
+              {activeImage + 1} / {carImages.length}
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* ── QUICK STATS STRIP ──────────────────────────────────────── */}
-      <div className="bg-charcoal-800 border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-8 py-4 overflow-x-auto scrollbar-hide">
-            {[
-              { icon: Calendar, label: 'Year',         value: String(car.year) },
-              { icon: Gauge,    label: 'Mileage',      value: car.mileage },
-              { icon: Fuel,     label: 'Fuel',         value: car.fuel },
-              { icon: MapPin,   label: 'Location',     value: car.city },
-              { icon: Wrench,   label: 'Transmission', value: car.transmission ?? 'Automatic' },
-            ].map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex items-center gap-2.5 flex-shrink-0">
-                <Icon size={14} className="text-gold-400" />
-                <div>
-                  <p className="text-[9px] font-sans font-semibold text-white/35 uppercase tracking-widest leading-none">{label}</p>
-                  <p className="font-sans text-sm font-semibold text-white mt-0.5">{value}</p>
-                </div>
-              </div>
+          {/* Thumbnails */}
+          <div style={{ display: 'flex', gap: 10 }}>
+            {carImages.map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImage(idx)}
+                style={{
+                  flex: idx === 0 ? '1.5 1 0%' : '1 1 0%',
+                  aspectRatio: '16/10',
+                  borderRadius: Math.round(r * 0.6),
+                  overflow: 'hidden',
+                  border: idx === activeImage ? `2.5px solid ${c.cardAccent}` : `2px solid transparent`,
+                  cursor: 'pointer',
+                  padding: 0,
+                  opacity: idx === activeImage ? 1 : 0.6,
+                  transition: 'all 0.2s ease',
+                  background: 'none',
+                }}
+              >
+                <img
+                  src={img}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ───────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      {/* ── MAIN LAYOUT: CONTENT + SIDEBAR ── */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 60px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 360px',
+            gap: 32,
+            alignItems: 'start',
+          }}
+        >
+          {/* ── LEFT COLUMN ── */}
+          <div style={{ minWidth: 0 }}>
+            {/* Car title */}
+            <div style={{ marginBottom: 24 }}>
+              <p
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  color: c.cardAccent,
+                  margin: 0,
+                  marginBottom: 4,
+                }}
+              >
+                {car.make}
+              </p>
+              <h1
+                style={{
+                  fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                  fontSize: `calc(2rem * ${theme.sizes.headingScale})`,
+                  fontWeight: 700,
+                  color: c.headingText,
+                  margin: 0,
+                  lineHeight: 1.2,
+                }}
+              >
+                {car.model}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, color: c.bodyText, fontSize: '0.85rem' }}>
+                <MapPin size={14} style={{ color: c.cardAccent }} />
+                {car.city}, Kenya
+                {car.listedDate && (
+                  <>
+                    <span style={{ opacity: 0.3 }}>·</span>
+                    <Calendar size={13} />
+                    Listed {car.listedDate}
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* LEFT — tabs + content */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* Tab switcher */}
-            <div className="flex gap-1 bg-white rounded-xl p-1 border border-cream-200 w-fit shadow-sm">
-              {(['overview', 'inspection', 'financing'] as Tab[]).map(t => (
+            {/* Tabs */}
+            <div
+              style={{
+                display: 'flex',
+                gap: 4,
+                background: c.cardBg,
+                border: `1px solid ${c.cardBorder}`,
+                borderRadius: r,
+                padding: 4,
+                marginBottom: 24,
+              }}
+            >
+              {tabs.map(t => (
                 <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`px-5 py-2 rounded-lg font-sans text-sm font-semibold capitalize transition-all duration-200 ${
-                    tab === t
-                      ? 'bg-charcoal-900 text-white shadow-sm'
-                      : 'text-warm-500 hover:text-charcoal-900'
-                  }`}
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 0',
+                    borderRadius: Math.round(r * 0.6),
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    background: tab === t.key ? c.buttonBg : 'transparent',
+                    color: tab === t.key ? c.buttonText : c.cardBody,
+                  }}
                 >
-                  {t}
+                  {t.label}
                 </button>
               ))}
             </div>
 
-            {/* ── OVERVIEW ── */}
+            {/* ── TAB: OVERVIEW ── */}
             {tab === 'overview' && (
-              <div className="space-y-5">
-                <div className="bg-white rounded-2xl p-6 border border-cream-200">
-                  <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-3">About This Vehicle</h2>
-                  <p className="font-sans text-sm text-warm-500 leading-relaxed">
-                    This {car.year} {car.make} {car.model} is a meticulously maintained {car.type.toLowerCase()} offered by a
-                    KAYAD-verified dealer in {car.city}. With only {car.mileage} on the odometer, it represents
-                    outstanding value in the Kenyan premium vehicle market. Full service history available on request.
-                    All documentation verified — including log book, NTSA status, and current insurance.
-                  </p>
-                  <p className="font-sans text-sm text-warm-500 leading-relaxed mt-3">
-                    This vehicle is fully covered under KAYAD Escrow Protection. Your payment is held securely until
-                    you confirm safe receipt and complete satisfaction. An independent 150-point pre-inspection
-                    certificate is available upon request.
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-2xl p-6 border border-cream-200">
-                  <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-4">Key Features</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    {features.map(f => (
-                      <div key={f} className="flex items-center gap-2.5">
-                        <CheckCircle size={14} className="text-gold-500 flex-shrink-0" />
-                        <span className="font-sans text-sm text-warm-600">{f}</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {/* Key Details */}
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    Key Details
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+                    {keyDetails.map(d => (
+                      <div
+                        key={d.label}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 6,
+                          padding: 14,
+                          background: c.pageBg,
+                          borderRadius: Math.round(r * 0.6),
+                          border: `1px solid ${c.cardBorder}`,
+                        }}
+                      >
+                        <d.icon size={16} style={{ color: c.cardAccent }} />
+                        <span
+                          style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            color: c.cardBody,
+                            opacity: 0.5,
+                          }}
+                        >
+                          {d.label}
+                        </span>
+                        <span
+                          style={{
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            color: c.cardHeading,
+                          }}
+                        >
+                          {d.value}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl p-6 border border-cream-200">
-                  <h2 className="font-serif text-xl text-charcoal-900 font-bold mb-4">Verified Dealer</h2>
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-charcoal-900 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="font-sans text-white font-bold text-xs">{car.make.slice(0, 2)}</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-sans font-semibold text-charcoal-900">{car.make} Premium Motors</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={11} className={i < 4 ? 'text-gold-500 fill-gold-500' : 'text-warm-300 fill-warm-300'} />
-                        ))}
-                        <span className="font-sans text-xs text-warm-400 ml-1">4.8 · 142 reviews</span>
+                {/* Vehicle History */}
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    Vehicle History
+                  </h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {historyItems.map((item, i) => (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                        {item.ok ? (
+                          <CheckCircle size={17} style={{ color: '#10b981', flexShrink: 0, marginTop: 1 }} />
+                        ) : (
+                          <XCircle size={17} style={{ color: '#f59e0b', flexShrink: 0, marginTop: 1 }} />
+                        )}
+                        <span style={{ fontSize: '0.85rem', color: c.cardBody, lineHeight: 1.5 }}>
+                          {item.text}
+                        </span>
                       </div>
-                      <p className="font-sans text-xs text-warm-400 mt-1 flex items-center gap-1">
-                        <MapPin size={10} /> {car.city}, Kenya · KAYAD Verified Since 2022
+                    ))}
+                  </div>
+                </div>
+
+                {/* Insurance */}
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    Insurance
+                  </h2>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Shield size={20} style={{ color: c.cardAccent }} />
+                    <div>
+                      <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: c.cardHeading }}>
+                        Comprehensive Cover — Active
+                      </p>
+                      <p style={{ margin: 0, fontSize: '0.78rem', color: c.cardBody, marginTop: 2 }}>
+                        Valid until December 2026. Transferable to new owner upon sale.
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-sans text-[10px] text-warm-400 uppercase tracking-wide">Response</p>
-                      <p className="font-sans text-sm font-bold text-gold-600">Under 2h</p>
+                  </div>
+                </div>
+
+                {/* Inspection Status */}
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    Inspection Status
+                  </h2>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 16,
+                      background: c.pageBg,
+                      borderRadius: Math.round(r * 0.6),
+                      border: `1px solid ${c.cardBorder}`,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <CheckCircle size={20} style={{ color: '#10b981' }} />
+                      <div>
+                        <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: c.cardHeading }}>
+                          150-Point Pre-Purchase Inspection
+                        </p>
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: c.cardBody, marginTop: 2 }}>
+                          Available upon request — not yet completed
+                        </p>
+                      </div>
                     </div>
+                    <span
+                      style={{
+                        padding: '5px 14px',
+                        borderRadius: 20,
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        background: '#fef3c7',
+                        color: '#92400e',
+                      }}
+                    >
+                      AVAILABLE
+                    </span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ── INSPECTION ── */}
-            {tab === 'inspection' && (
-              <div className="space-y-5">
-                <div className="bg-charcoal-900 rounded-2xl p-7 relative overflow-hidden">
-                  <div className="absolute bottom-0 right-0 w-48 h-48 bg-gold-500/8 blur-3xl rounded-full pointer-events-none" />
-                  <div className="relative flex items-start justify-between mb-7">
-                    <div>
-                      <p className="section-label text-gold-400 mb-1">KAYAD CERTIFIED</p>
-                      <h2 className="font-serif text-2xl text-white font-bold">150-Point Report</h2>
-                      <p className="font-sans text-xs text-white/40 mt-1">Inspected by certified mechanic · {car.city}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-serif text-4xl sm:text-5xl font-bold text-gold-400 leading-none">92</p>
-                      <p className="font-sans text-[10px] text-white/40 uppercase tracking-widest mt-1">Score</p>
-                    </div>
-                  </div>
-                  <div className="relative space-y-5">
-                    {INSPECTION_CATS.map(({ label, icon: Icon, score }) => (
-                      <div key={label}>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <Icon size={13} className="text-gold-400" />
-                            <span className="font-sans text-sm text-white/80">{label}</span>
-                          </div>
-                          <span className="font-sans text-sm font-bold text-gold-400">{score}%</span>
+            {/* ── TAB: ESCROW ── */}
+            {tab === 'escrow' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    KAYAD Escrow Protection
+                  </h2>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {[
+                      {
+                        step: '1',
+                        title: 'Buyer initiates escrow',
+                        desc: 'You send the agreed amount to KAYAD\'s secure escrow account via M-Pesa or bank transfer.',
+                      },
+                      {
+                        step: '2',
+                        title: 'Vehicle delivered & inspected',
+                        desc: 'The dealer delivers the vehicle. You or a KAYAD inspector verify condition matches the listing.',
+                      },
+                      {
+                        step: '3',
+                        title: 'Funds released to dealer',
+                        desc: 'Once you confirm satisfaction, the funds are released to the seller within 24 hours.',
+                      },
+                      {
+                        step: '4',
+                        title: 'Dispute resolution',
+                        desc: 'If issues arise within 48 hours, KAYAD mediates and can freeze funds pending resolution.',
+                      },
+                    ].map(s => (
+                      <div key={s.step} style={{ display: 'flex', gap: 14 }}>
+                        <div
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            background: c.cardAccent,
+                            color: c.buttonText,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '0.8rem',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {s.step}
                         </div>
-                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gold-400 rounded-full"
-                            style={{ width: `${score}%` }}
-                          />
+                        <div>
+                          <p style={{ margin: 0, fontWeight: 600, fontSize: '0.9rem', color: c.cardHeading }}>
+                            {s.title}
+                          </p>
+                          <p style={{ margin: 0, fontSize: '0.82rem', color: c.cardBody, marginTop: 3, lineHeight: 1.5 }}>
+                            {s.desc}
+                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl p-6 border border-cream-200">
-                  <p className="font-sans text-sm text-warm-500 leading-relaxed mb-4">
-                    The full 150-point digital inspection report — including photo evidence for every check —
-                    is available after booking a formal inspection through KAYAD.
-                  </p>
-                  <button onClick={() => setPage('pre-inspection')} className="btn-gold text-sm">
-                    Book Full Inspection <ChevronRight size={14} />
-                  </button>
+
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 12px',
+                    }}
+                  >
+                    Why Use Escrow?
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                    {[
+                      { icon: Shield, title: 'Zero Scam Risk', desc: 'Your money never reaches the seller until you approve the vehicle.' },
+                      { icon: AlertCircle, title: 'Dispute Window', desc: '48-hour window to report issues after delivery.' },
+                      { icon: CheckCircle, title: 'Verified Dealers Only', desc: 'All sellers are KYC-verified KAYAD members.' },
+                      { icon: ExternalLink, title: 'Transparent Process', desc: 'Track your escrow status in real-time from your dashboard.' },
+                    ].map(item => (
+                      <div
+                        key={item.title}
+                        style={{
+                          padding: 16,
+                          background: c.pageBg,
+                          borderRadius: Math.round(r * 0.6),
+                          border: `1px solid ${c.cardBorder}`,
+                        }}
+                      >
+                        <item.icon size={18} style={{ color: c.cardAccent, marginBottom: 8 }} />
+                        <p style={{ margin: 0, fontWeight: 600, fontSize: '0.82rem', color: c.cardHeading }}>
+                          {item.title}
+                        </p>
+                        <p style={{ margin: 0, fontSize: '0.75rem', color: c.cardBody, marginTop: 4, lineHeight: 1.4 }}>
+                          {item.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* ── FINANCING ── */}
-            {tab === 'financing' && (
-              <div className="bg-white rounded-2xl p-6 border border-cream-200 space-y-4">
-                <h2 className="font-serif text-xl text-charcoal-900 font-bold">Financing Options</h2>
-                <p className="font-sans text-sm text-warm-400">Estimated monthly repayments based on full vehicle price:</p>
-                {[
-                  { bank: 'KCB Auto Loan', rate: '13.5% p.a.', term: '60 months', monthly: Math.round(car.price / 60 * 1.135) },
-                  { bank: 'Equity Bank',   rate: '14.0% p.a.', term: '48 months', monthly: Math.round(car.price / 48 * 1.14)  },
-                  { bank: 'Stanbic Bank',  rate: '12.9% p.a.', term: '72 months', monthly: Math.round(car.price / 72 * 1.129) },
-                ].map(({ bank, rate, term, monthly }) => (
-                  <div key={bank} className="flex items-center justify-between p-4 rounded-xl border border-cream-200 hover:border-gold-500/40 transition-colors group">
+            {/* ── TAB: INSPECTION ── */}
+            {tab === 'inspection' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 8px',
+                    }}
+                  >
+                    Book Pre-Purchase Inspection
+                  </h2>
+                  <p style={{ margin: '0 0 20px', fontSize: '0.85rem', color: c.cardBody, lineHeight: 1.6 }}>
+                    Our certified KAYAD mechanics perform a thorough 150-point inspection including engine diagnostics,
+                    structural integrity, electrical systems, and undercarriage analysis. You receive a full digital report
+                    with photos within 24 hours.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     <div>
-                      <p className="font-sans font-semibold text-charcoal-900 text-sm">{bank}</p>
-                      <p className="font-sans text-xs text-warm-400">{rate} · {term}</p>
+                      <label
+                        style={{
+                          display: 'block',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          color: c.cardBody,
+                          opacity: 0.6,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Inspection Location
+                      </label>
+                      <select
+                        value={inspectionLocation}
+                        onChange={e => setInspectionLocation(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          borderRadius: Math.round(r * 0.6),
+                          border: `1.5px solid ${c.cardBorder}`,
+                          background: c.pageBg,
+                          color: c.cardHeading,
+                          fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
+                      >
+                        {inspectionLocations.map(loc => (
+                          <option key={loc} value={loc}>{loc}</option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="text-right">
-                      <p className="font-sans text-sm font-bold text-gold-700">{formatKES(monthly)}/mo</p>
-                      <button className="font-sans text-xs text-gold-600 hover:underline group-hover:text-gold-500">Apply →</button>
-                    </div>
+
+                    <button
+                      onClick={() => nav('pre-inspection')}
+                      style={{
+                        width: '100%',
+                        padding: '13px 0',
+                        borderRadius: Math.round(r * 0.6),
+                        border: 'none',
+                        background: c.buttonBg,
+                        color: c.buttonText,
+                        fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      Book Inspection — KES 3,500
+                    </button>
                   </div>
-                ))}
-                <p className="font-sans text-xs text-warm-300 pt-2">* Rates are indicative. Subject to bank approval and credit check.</p>
+                </div>
+
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 16px',
+                    }}
+                  >
+                    What Is Checked
+                  </h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {[
+                      'Engine & drivetrain',
+                      'Transmission system',
+                      'Brake pads & rotors',
+                      'Suspension & steering',
+                      'Electrical systems',
+                      'Body & frame alignment',
+                      'Interior condition',
+                      'Undercarriage & exhaust',
+                      'Oil & fluid levels',
+                      'Cooling system',
+                      'Battery health',
+                      'Tire tread depth',
+                    ].map(item => (
+                      <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <CheckCircle size={14} style={{ color: c.cardAccent, flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.82rem', color: c.cardBody }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── TAB: FINANCING ── */}
+            {tab === 'financing' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div
+                  style={{
+                    background: c.cardBg,
+                    border: `1px solid ${c.cardBorder}`,
+                    borderRadius: r,
+                    padding: theme.sizes.cardPadding,
+                  }}
+                >
+                  <h2
+                    style={{
+                      fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                      fontSize: `calc(1.15rem * ${theme.sizes.headingScale})`,
+                      fontWeight: 700,
+                      color: c.cardHeading,
+                      margin: '0 0 8px',
+                    }}
+                  >
+                    Apply for Car Financing
+                  </h2>
+                  <p style={{ margin: '0 0 20px', fontSize: '0.85rem', color: c.cardBody, lineHeight: 1.6 }}>
+                    Complete the form below and our financing partners will reach out with tailored offers within 24 hours.
+                    Rates start from 12.5% p.a. depending on credit profile.
+                  </p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                      <div>
+                        <label
+                          style={{
+                            display: 'block',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            color: c.cardBody,
+                            opacity: 0.6,
+                            marginBottom: 6,
+                          }}
+                        >
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          value={financingName}
+                          onChange={e => setFinancingName(e.target.value)}
+                          placeholder="John Kamau"
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px',
+                            borderRadius: Math.round(r * 0.6),
+                            border: `1.5px solid ${c.cardBorder}`,
+                            background: c.pageBg,
+                            color: c.cardHeading,
+                            fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                            fontSize: '0.85rem',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          style={{
+                            display: 'block',
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            letterSpacing: '0.1em',
+                            textTransform: 'uppercase',
+                            color: c.cardBody,
+                            opacity: 0.6,
+                            marginBottom: 6,
+                          }}
+                        >
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          value={financingPhone}
+                          onChange={e => setFinancingPhone(e.target.value)}
+                          placeholder="+254 7XX XXX XXX"
+                          style={{
+                            width: '100%',
+                            padding: '12px 14px',
+                            borderRadius: Math.round(r * 0.6),
+                            border: `1.5px solid ${c.cardBorder}`,
+                            background: c.pageBg,
+                            color: c.cardHeading,
+                            fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                            fontSize: '0.85rem',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: 'block',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          color: c.cardBody,
+                          opacity: 0.6,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Monthly Income (KES)
+                      </label>
+                      <input
+                        type="text"
+                        value={financingIncome}
+                        onChange={e => setFinancingIncome(e.target.value)}
+                        placeholder="e.g. 200,000"
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          borderRadius: Math.round(r * 0.6),
+                          border: `1.5px solid ${c.cardBorder}`,
+                          background: c.pageBg,
+                          color: c.cardHeading,
+                          fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                          fontSize: '0.85rem',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        style={{
+                          display: 'block',
+                          fontSize: '0.72rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.1em',
+                          textTransform: 'uppercase',
+                          color: c.cardBody,
+                          opacity: 0.6,
+                          marginBottom: 6,
+                        }}
+                      >
+                        Employment Type
+                      </label>
+                      <select
+                        value={financingEmployment}
+                        onChange={e => setFinancingEmployment(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '12px 14px',
+                          borderRadius: Math.round(r * 0.6),
+                          border: `1.5px solid ${c.cardBorder}`,
+                          background: c.pageBg,
+                          color: c.cardHeading,
+                          fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
+                      >
+                        <option value="employed">Employed (Formal)</option>
+                        <option value="self-employed">Self-Employed</option>
+                        <option value="business">Business Owner</option>
+                        <option value="contractor">Contractor / Freelancer</option>
+                        <option value="retired">Retired</option>
+                      </select>
+                    </div>
+
+                    <button
+                      style={{
+                        width: '100%',
+                        padding: '13px 0',
+                        borderRadius: Math.round(r * 0.6),
+                        border: 'none',
+                        background: c.buttonBg,
+                        color: c.buttonText,
+                        fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                        fontWeight: 700,
+                        fontSize: '0.88rem',
+                        cursor: 'pointer',
+                        marginTop: 4,
+                      }}
+                    >
+                      Submit Application
+                    </button>
+
+                    <p style={{ margin: 0, fontSize: '0.72rem', color: c.cardBody, opacity: 0.5, textAlign: 'center' }}>
+                      By submitting, you agree to KAYAD's financing partner terms. This is not a commitment to lend.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* RIGHT — sticky sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-32 space-y-4">
+          {/* ── RIGHT SIDEBAR ── */}
+          <div style={{ position: 'sticky', top: 100 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Price / Bid Card */}
+              <div
+                style={{
+                  background: c.cardBg,
+                  border: `1px solid ${c.cardBorder}`,
+                  borderRadius: r,
+                  padding: theme.sizes.cardPadding,
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: c.cardBody,
+                    opacity: 0.5,
+                  }}
+                >
+                  {isOnAuction ? (car.currentBid ? 'Current Bid' : 'Starting Bid') : 'Asking Price'}
+                </p>
+                <p
+                  style={{
+                    margin: '4px 0 0',
+                    fontFamily: `var(--font-heading, ${theme.fonts.heading})`,
+                    fontSize: '1.8rem',
+                    fontWeight: 700,
+                    color: c.cardHeading,
+                  }}
+                >
+                  {formattedPrice}
+                </p>
+                {car.isNegotiable && (
+                  <span style={{ fontSize: '0.75rem', color: c.cardBody, opacity: 0.5 }}>Negotiable</span>
+                )}
 
-              {/* Price + CTAs */}
-              <div className="bg-charcoal-900 rounded-2xl p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/8 blur-2xl rounded-full pointer-events-none" />
-                <div className="relative">
-                  <p className="font-sans text-[10px] text-white/35 uppercase tracking-widest mb-1">Asking Price</p>
-                  <p className="font-serif text-2xl sm:text-3xl text-gold-400 font-bold mb-5">{formatKES(car.price)}</p>
-
-                  <div className="space-y-2.5">
-                    <button
-                      onClick={() => setPage('escrow')}
-                      className="w-full flex items-center justify-center gap-2 bg-gold-600 hover:bg-gold-700 text-white font-sans font-semibold py-3 rounded-full transition-colors text-sm"
-                    >
-                      <Lock size={14} /> Start Escrow
-                    </button>
-                    {car.badges.includes('auction') && (
-                      <button
-                        onClick={() => setPage('auction')}
-                        className="w-full flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 text-white font-sans font-semibold py-3 rounded-full transition-colors text-sm"
-                      >
-                        <Gavel size={14} /> Place a Bid
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setPage('pre-inspection')}
-                      className="w-full flex items-center justify-center gap-2 border border-gold-400 text-gold-400 hover:bg-gold-400/10 font-sans font-semibold py-3 rounded-full transition-colors text-sm"
-                    >
-                      <Wrench size={14} /> Book Inspection
-                    </button>
+                {/* Auction countdown */}
+                {isOnAuction && (
+                  <div
+                    style={{
+                      marginTop: 16,
+                      padding: 14,
+                      background: c.pageBg,
+                      borderRadius: Math.round(r * 0.6),
+                      border: `1px solid ${c.cardBorder}`,
+                    }}
+                  >
+                    <p style={{ margin: '0 0 8px', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: c.cardBody, opacity: 0.5 }}>
+                      Auction Ends In
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, textAlign: 'center' }}>
+                      {[
+                        { val: countdown.days, label: 'D' },
+                        { val: countdown.hours, label: 'H' },
+                        { val: countdown.minutes, label: 'M' },
+                        { val: countdown.seconds, label: 'S' },
+                      ].map(({ val, label }) => (
+                        <div key={label}>
+                          <div
+                            style={{
+                              padding: '8px 0',
+                              borderRadius: Math.round(r * 0.4),
+                              background: c.cardBg,
+                              border: `1px solid ${c.cardBorder}`,
+                            }}
+                          >
+                            <span style={{ fontFamily: `var(--font-heading, ${theme.fonts.heading})`, fontWeight: 700, fontSize: '1.1rem', color: c.cardHeading }}>
+                              {String(val).padStart(2, '0')}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: c.cardBody, opacity: 0.4, marginTop: 4, display: 'block' }}>
+                            {label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="mt-4 pt-4 border-t border-white/10 flex">
-                    <button className="flex-1 flex items-center justify-center gap-1.5 text-white/50 hover:text-gold-400 font-sans text-xs font-semibold transition-colors py-2">
-                      <Phone size={13} /> Call
-                    </button>
-                    <div className="w-px bg-white/10" />
-                    <button className="flex-1 flex items-center justify-center gap-1.5 text-white/50 hover:text-gold-400 font-sans text-xs font-semibold transition-colors py-2">
-                      <MessageCircle size={13} /> WhatsApp
-                    </button>
-                  </div>
+              {/* Escrow Protection Box */}
+              <div
+                style={{
+                  background: c.cardBg,
+                  border: `1px solid ${c.cardBorder}`,
+                  borderRadius: r,
+                  padding: theme.sizes.cardPadding,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: Math.round(r * 0.5),
+                    background: `${c.cardAccent}18`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Shield size={18} style={{ color: c.cardAccent }} />
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 600, fontSize: '0.82rem', color: c.cardHeading }}>
+                    ESCROW PROTECTION
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.72rem', color: c.cardBody, marginTop: 2 }}>
+                    Your payment is 100% secure until you confirm delivery
+                  </p>
                 </div>
               </div>
 
-              {/* Trust badges */}
-              <div className="bg-white rounded-2xl p-5 border border-cream-200 space-y-3.5">
-                {[
-                  { icon: Shield,       title: 'Escrow Protected',  desc: 'Funds held until safe delivery' },
-                  { icon: CheckCircle,  title: 'Verified Dealer',   desc: 'KAYAD certified since 2022' },
-                  { icon: Clock,        title: '24h Report',        desc: 'Full inspection within one day' },
-                ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-gold-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Icon size={14} className="text-gold-600" />
-                    </div>
-                    <div>
-                      <p className="font-sans text-xs font-semibold text-charcoal-900">{title}</p>
-                      <p className="font-sans text-xs text-warm-400">{desc}</p>
-                    </div>
+              {/* Contact Buttons */}
+              <div
+                style={{
+                  background: c.cardBg,
+                  border: `1px solid ${c.cardBorder}`,
+                  borderRadius: r,
+                  padding: theme.sizes.cardPadding,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 10,
+                }}
+              >
+                <button
+                  style={{
+                    width: '100%',
+                    padding: '12px 0',
+                    borderRadius: Math.round(r * 0.6),
+                    border: 'none',
+                    background: c.buttonBg,
+                    color: c.buttonText,
+                    fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <MessageCircle size={15} /> Call Dealer
+                </button>
+                <button
+                  style={{
+                    width: '100%',
+                    padding: '12px 0',
+                    borderRadius: Math.round(r * 0.6),
+                    border: `1.5px solid ${c.cardAccent}`,
+                    background: 'transparent',
+                    color: c.cardAccent,
+                    fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <MessageCircle size={15} /> Send WhatsApp
+                </button>
+              </div>
+
+              {/* Dealer Info */}
+              <div
+                style={{
+                  background: c.cardBg,
+                  border: `1px solid ${c.cardBorder}`,
+                  borderRadius: r,
+                  padding: theme.sizes.cardPadding,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: '50%',
+                      background: c.buttonBg,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
+                        color: c.buttonText,
+                      }}
+                    >
+                      {(car.dealerName ?? car.make).slice(0, 2).toUpperCase()}
+                    </span>
                   </div>
-                ))}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <p style={{ margin: 0, fontWeight: 600, fontSize: '0.85rem', color: c.cardHeading, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {car.dealerName ?? `${car.make} Premium Motors`}
+                      </p>
+                      {car.isVerified && (
+                        <CheckCircle size={13} style={{ color: '#10b981', flexShrink: 0 }} />
+                      )}
+                    </div>
+                    <p style={{ margin: 0, fontSize: '0.72rem', color: c.cardBody, marginTop: 2 }}>
+                      KAYAD Verified Dealer
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => nav('dealer-profile')}
+                  style={{
+                    width: '100%',
+                    padding: '10px 0',
+                    borderRadius: Math.round(r * 0.5),
+                    border: `1px solid ${c.cardBorder}`,
+                    background: 'transparent',
+                    color: c.cardHeading,
+                    fontFamily: `var(--font-body, ${theme.fonts.body})`,
+                    fontWeight: 600,
+                    fontSize: '0.78rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  View All Vehicles <ExternalLink size={12} />
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── SIMILAR VEHICLES ───────────────────────────────────────── */}
-      {similar.length > 0 && (
-        <section className="bg-cream-100 py-14">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <p className="section-label mb-1">You May Also Like</p>
-                <h2 className="font-serif text-2xl text-charcoal-900 font-bold">Similar Vehicles</h2>
-              </div>
-              <button
-                onClick={() => setPage('gallery')}
-                className="font-sans text-sm font-semibold text-gold-700 hover:text-gold-600 flex items-center gap-1 transition-colors"
-              >
-                View All <ChevronRight size={14} />
-              </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {similar.map(c => (
-                <VehicleCard key={c.id} car={c} onClick={() => viewCar(c)} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* ── BOTTOM NAV ── */}
+      <div
+        style={{
+          borderTop: `1px solid ${c.cardBorder}`,
+          background: c.cardBg,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1200,
+            margin: '0 auto',
+            padding: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+          }}
+        >
+          <button
+            onClick={goBack}
+            style={{
+              padding: '12px 28px',
+              borderRadius: Math.round(r * 0.6),
+              border: `1.5px solid ${c.cardBorder}`,
+              background: 'transparent',
+              color: c.cardHeading,
+              fontFamily: `var(--font-body, ${theme.fonts.body})`,
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <ArrowLeft size={15} /> Back to Marketplace
+          </button>
+          <button
+            onClick={() => nav('gallery')}
+            style={{
+              padding: '12px 28px',
+              borderRadius: Math.round(r * 0.6),
+              border: 'none',
+              background: c.buttonBg,
+              color: c.buttonText,
+              fontFamily: `var(--font-body, ${theme.fonts.body})`,
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            View All Vehicles <ExternalLink size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Keyframe for auction pulse dot */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,376 +1,760 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Search, X, Menu, LogIn, LogOut, LayoutDashboard,
-  ChevronDown, Home, Images, Gavel, Shield, ClipboardCheck,
-  MessageCircle, Tag, Heart, BarChart3, Bell, User,
+  Search,
+  X,
+  Menu,
+  LogIn,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
+  Home,
+  Images,
+  Gavel,
+  Shield,
+  ClipboardCheck,
+  MessageCircle,
+  Tag,
+  Palette,
+  Bell,
+  Heart,
 } from 'lucide-react';
+import { useDesignTheme } from '../theme/DesignThemeProvider';
 
-interface AuthUser {
-  name: string;
-  email: string;
-  role: 'private-seller' | 'dealer' | 'admin';
-  dealership?: string;
-}
+const ROLE_LABEL: Record<string, string> = {
+  'private-seller': 'Private Seller',
+  dealer: 'Dealer',
+  admin: 'Admin',
+};
 
 interface NavbarProps {
   currentPage: string;
   setPage: (page: string) => void;
-  authUser: AuthUser | null;
+  authUser: {
+    name: string;
+    email: string;
+    role: 'private-seller' | 'dealer' | 'admin';
+    dealership?: string;
+  } | null;
   onSignOut: () => void;
 }
 
-const navLinks = [
-  { label: 'Home',           path: '/',              icon: Home           },
-  { label: 'Gallery',        path: '/gallery',       icon: Images         },
-  { label: 'Auction',        path: '/auction',        icon: Gavel          },
-  { label: 'Escrow Vault',   path: '/escrow',         icon: Shield         },
-  { label: 'Pre-Inspection', path: '/pre-inspection', icon: ClipboardCheck },
-  { label: 'Support',        path: '/support',        icon: MessageCircle  },
+const NAV_ITEMS = [
+  { key: 'home', label: 'Home', path: '/', icon: Home },
+  { key: 'listings', label: 'Browse Cars', path: '/listings', icon: Images },
+  { key: 'auctions', label: 'Auctions', path: '/auctions', icon: Gavel },
+  { key: 'sell', label: 'Sell', path: '/sell', icon: Tag },
 ];
 
-const ROLE_LABEL: Record<string, string> = {
-  'private-seller': 'Private Seller',
-  dealer:           'Dealer',
-  admin:            'Admin',
-};
+const AUTH_NAV_ITEMS = [
+  { key: 'messages', label: 'Messages', path: '/messages', icon: MessageCircle },
+  { key: 'watchlist', label: 'Watchlist', path: '/watchlist', icon: Heart },
+];
 
 export default function Navbar({ currentPage, setPage, authUser, onSignOut }: NavbarProps) {
-  const [scrolled,     setScrolled]     = useState(false);
-  const [searchOpen,   setSearchOpen]   = useState(false);
-  const [mobileOpen,   setMobileOpen]   = useState(false);
-  const [searchQuery,  setSearchQuery]  = useState('');
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { layout } = useDesignTheme();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  // Lock body scroll when mobile menu open
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
+    function handleClickOutside(e: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close mobile menu on route change
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
   useEffect(() => {
     setMobileOpen(false);
     setUserMenuOpen(false);
+    setSearchOpen(false);
   }, [location.pathname]);
 
-  const handleNav = (page: string) => {
-    setPage(page);
+  const handleNav = (path: string, key: string) => {
+    navigate(path);
+    setPage(key);
     setMobileOpen(false);
-    setUserMenuOpen(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSell = () => handleNav(authUser ? 'dashboard' : 'create-account');
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
+      setPage('listings');
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
 
-  const initials = authUser
-    ? authUser.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const layoutClass =
+    layout === 'centered'
+      ? 'justify-center'
+      : layout === 'compact'
+      ? 'justify-between'
+      : 'justify-between';
+
+  const innerClass =
+    layout === 'centered'
+      ? 'flex-row items-center justify-center gap-6'
+      : layout === 'compact'
+      ? 'flex-row items-center justify-between'
+      : 'flex-row items-center justify-between';
+
+  const userInitials = authUser
+    ? authUser.name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
     : '';
-
-  const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? 'bg-charcoal-900/98 backdrop-blur-md shadow-lg shadow-black/30'
-            : 'bg-charcoal-900/85 backdrop-blur-sm'
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 font-sans"
+        style={{
+          backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+          color: 'var(--c-navbar-text, #ffffff)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-
-            {/* Logo */}
-            <Link
-              to="/"
-              onClick={() => setPage('home')}
-              className="flex items-center gap-2.5 group flex-shrink-0"
+        <div
+          className={`mx-auto flex w-full max-w-7xl px-4 py-3 ${innerClass}`}
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => handleNav('/', 'home')}
+              className="flex items-center gap-1 text-xl font-bold font-sans tracking-tight cursor-pointer bg-transparent border-none"
+              style={{ color: 'var(--c-navbar-accent, #e94560)' }}
             >
-              <div className="w-9 h-9 bg-gold-600 rounded-lg flex items-center justify-center group-hover:bg-gold-500 transition-colors duration-200">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 13l2-6h14l2 6" />
-                  <path d="M1 17h22" />
-                  <circle cx="7" cy="17" r="2" />
-                  <circle cx="17" cy="17" r="2" />
-                  <path d="M5 13v-2" />
-                  <path d="M19 13v-2" />
-                </svg>
-              </div>
-              <span className="text-white font-sans font-bold text-lg tracking-[0.15em] uppercase">KAYAD</span>
-            </Link>
+              KAYAD
+            </button>
+          </div>
 
-            {/* Desktop nav links */}
-            <div className="hidden md:flex items-center gap-6">
-              {navLinks.map(({ label, path }) => (
-                <Link
-                  key={path}
-                  to={path}
-                  onClick={() => setPage(path === '/' ? 'home' : path.slice(1))}
-                  className={`nav-link ${isActive(path) ? 'active' : ''}`}
+          {/* Center nav links (centered layout) */}
+          {layout === 'centered' && (
+            <div className="hidden md:flex items-center gap-1">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => handleNav(item.path, item.key)}
+                  className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
+                    currentPage === item.key
+                      ? 'nav-link active'
+                      : ''
+                  }`}
+                  style={{
+                    color:
+                      currentPage === item.key
+                        ? 'var(--c-navbar-accent, #e94560)'
+                        : 'var(--c-navbar-text, #ffffff)',
+                    backgroundColor:
+                      currentPage === item.key
+                        ? 'rgba(233, 69, 96, 0.1)'
+                        : 'transparent',
+                  }}
                 >
-                  {label}
-                  {isActive(path) && (
-                    <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold-400 rounded-full" />
-                  )}
-                </Link>
+                  {item.label}
+                </button>
               ))}
+              {authUser &&
+                AUTH_NAV_ITEMS.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => handleNav(item.path, item.key)}
+                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
+                      currentPage === item.key ? 'nav-link active' : ''
+                    }`}
+                    style={{
+                      color:
+                        currentPage === item.key
+                          ? 'var(--c-navbar-accent, #e94560)'
+                          : 'var(--c-navbar-text, #ffffff)',
+                      backgroundColor:
+                        currentPage === item.key
+                          ? 'rgba(233, 69, 96, 0.1)'
+                          : 'transparent',
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
             </div>
+          )}
+
+          {/* Split / compact nav links */}
+          {layout !== 'centered' && (
+            <div className="hidden md:flex items-center gap-1">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => handleNav(item.path, item.key)}
+                  className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
+                    currentPage === item.key ? 'nav-link active' : ''
+                  }`}
+                  style={{
+                    color:
+                      currentPage === item.key
+                        ? 'var(--c-navbar-accent, #e94560)'
+                        : 'var(--c-navbar-text, #ffffff)',
+                    backgroundColor:
+                      currentPage === item.key
+                        ? 'rgba(233, 69, 96, 0.1)'
+                        : 'transparent',
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+              {authUser &&
+                AUTH_NAV_ITEMS.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => handleNav(item.path, item.key)}
+                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
+                      currentPage === item.key ? 'nav-link active' : ''
+                    }`}
+                    style={{
+                      color:
+                        currentPage === item.key
+                          ? 'var(--c-navbar-accent, #e94560)'
+                          : 'var(--c-navbar-text, #ffffff)',
+                      backgroundColor:
+                        currentPage === item.key
+                          ? 'rgba(233, 69, 96, 0.1)'
+                          : 'transparent',
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+            </div>
+          )}
+
+          {/* Right section */}
+          <div className="flex items-center gap-2">
+            {/* Search toggle */}
+            <button
+              onClick={() => setSearchOpen((v) => !v)}
+              className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
+              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+              aria-label="Toggle search"
+            >
+              {searchOpen ? <X size={20} /> : <Search size={20} />}
+            </button>
 
             {/* Desktop right actions */}
-            <div className="hidden md:flex items-center gap-3">
-              {searchOpen ? (
-                <div className="flex items-center bg-white/10 rounded-full px-4 py-1.5 gap-2 border border-white/20">
-                  <Search size={15} className="text-white/60" />
-                  <input
-                    autoFocus
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search cars..."
-                    className="bg-transparent text-white text-sm outline-none placeholder-white/40 w-36"
-                  />
-                  <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }}>
-                    <X size={14} className="text-white/60 hover:text-white" />
+            <div className="hidden md:flex items-center gap-2">
+              {authUser && (
+                <>
+                  {/* Notifications bell */}
+                  <button
+                    className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
+                    style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    aria-label="Notifications"
+                  >
+                    <Bell size={20} />
                   </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  className="text-white/60 hover:text-white transition-colors p-1.5"
-                >
-                  <Search size={17} />
-                </button>
+
+                  {/* Sell button */}
+                  <button
+                    onClick={() => handleNav('/sell', 'sell')}
+                    className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
+                    style={{
+                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    Sell a Vehicle
+                  </button>
+
+                  {/* User menu */}
+                  <div className="relative" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserMenuOpen((v) => !v)}
+                      className="flex items-center gap-2 px-2 py-1 rounded-full cursor-pointer bg-transparent border-none"
+                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                        style={{
+                          backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                          color: '#ffffff',
+                        }}
+                      >
+                        {userInitials}
+                      </div>
+                      <ChevronDown
+                        size={14}
+                        className={`transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    {userMenuOpen && (
+                      <div
+                        className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl border overflow-hidden font-sans"
+                        style={{
+                          backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+                          borderColor: 'rgba(255,255,255,0.1)',
+                        }}
+                      >
+                        <div
+                          className="px-4 py-3 border-b"
+                          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                        >
+                          <p
+                            className="text-sm font-semibold"
+                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                          >
+                            {authUser.name}
+                          </p>
+                          <p
+                            className="text-xs opacity-60"
+                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                          >
+                            {authUser.email}
+                          </p>
+                          <span
+                            className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium"
+                            style={{
+                              backgroundColor: 'rgba(233, 69, 96, 0.15)',
+                              color: 'var(--c-navbar-accent, #e94560)',
+                            }}
+                          >
+                            {ROLE_LABEL[authUser.role] || authUser.role}
+                          </span>
+                        </div>
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              handleNav('/dashboard', 'dashboard');
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                'rgba(255,255,255,0.05)')
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.backgroundColor = 'transparent')
+                            }
+                          >
+                            <LayoutDashboard size={16} />
+                            Dashboard
+                          </button>
+                          {authUser.role === 'admin' && (
+                            <button
+                              onClick={() => {
+                                handleNav('/theme-studio', 'theme-studio');
+                              }}
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.backgroundColor =
+                                  'rgba(255,255,255,0.05)')
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor = 'transparent')
+                              }
+                            >
+                              <Palette size={16} />
+                              Theme Studio
+                            </button>
+                          )}
+                          {authUser.role === 'admin' && (
+                            <button
+                              onClick={() => {
+                                handleNav('/admin', 'admin');
+                              }}
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.backgroundColor =
+                                  'rgba(255,255,255,0.05)')
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor = 'transparent')
+                              }
+                            >
+                              <Shield size={16} />
+                              Admin Panel
+                            </button>
+                          )}
+                          {(authUser.role === 'dealer' || authUser.role === 'admin') && (
+                            <button
+                              onClick={() => {
+                                handleNav('/dealer-verify', 'dealer-verify');
+                              }}
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.backgroundColor =
+                                  'rgba(255,255,255,0.05)')
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor = 'transparent')
+                              }
+                            >
+                              <ClipboardCheck size={16} />
+                              Dealer Verification
+                            </button>
+                          )}
+                        </div>
+                        <div
+                          className="border-t py-1"
+                          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                        >
+                          <button
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              onSignOut();
+                            }}
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.backgroundColor =
+                                'rgba(233, 69, 96, 0.1)')
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.backgroundColor = 'transparent')
+                            }
+                          >
+                            <LogOut size={16} />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
 
-              <button
-                onClick={handleSell}
-                className="text-gold-400 font-sans text-sm font-semibold hover:text-gold-300 transition-colors px-1"
-              >
-                Sell
-              </button>
-
-              {authUser ? (
-                <div className="relative" ref={userMenuRef}>
-                  <button
-                    onClick={() => setUserMenuOpen(v => !v)}
-                    className="flex items-center gap-2 bg-white/10 hover:bg-white/15 border border-white/15 rounded-full px-2.5 py-1.5 transition-all"
-                  >
-                    <div className="w-6 h-6 bg-gold-600 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="font-sans text-white text-[10px] font-bold">{initials}</span>
-                    </div>
-                    <span className="font-sans text-white text-xs font-semibold max-w-[5rem] truncate">
-                      {authUser.name.split(' ')[0]}
-                    </span>
-                    <ChevronDown size={12} className={`text-white/50 transition-transform flex-shrink-0 ${userMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {userMenuOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-charcoal-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden">
-                      <div className="px-4 py-3 border-b border-white/10">
-                        <p className="font-sans text-xs font-bold text-white truncate">{authUser.name}</p>
-                        <p className="font-sans text-[10px] text-white/40 truncate">{authUser.email}</p>
-                        <span className="inline-block mt-1 bg-gold-400/15 text-gold-400 font-sans text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
-                          {ROLE_LABEL[authUser.role]}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleNav('profile')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
-                      >
-                        <User size={14} /> My Profile
-                      </button>
-                      <button
-                        onClick={() => handleNav('favorites')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
-                      >
-                        <Heart size={14} /> Saved Vehicles
-                      </button>
-                      <button
-                        onClick={() => handleNav('compare')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
-                      >
-                        <BarChart3 size={14} /> Compare
-                      </button>
-                      <button
-                        onClick={() => handleNav('notifications')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
-                      >
-                        <Bell size={14} /> Notifications
-                      </button>
-                      <div className="border-t border-white/10" />
-                      <button
-                        onClick={() => handleNav('dashboard')}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-white/70 hover:text-white hover:bg-white/5 font-sans text-xs font-semibold transition-colors text-left"
-                      >
-                        <LayoutDashboard size={14} /> Dashboard
-                      </button>
-                      <button
-                        onClick={() => { onSignOut(); setUserMenuOpen(false); }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 font-sans text-xs font-semibold transition-colors text-left border-t border-white/10"
-                      >
-                        <LogOut size={14} /> Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setPage('sign-in')}
-                  className={`flex items-center gap-2 font-sans text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200 ${
-                    isActive('/login')
-                      ? 'bg-gold-600 text-white'
-                      : 'bg-white text-charcoal-900 hover:bg-cream-100'
-                  }`}
+              {!authUser && (
+                <button
+                  onClick={() => handleNav('/auth', 'auth')}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
+                  style={{
+                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                    color: '#ffffff',
+                  }}
                 >
-                  <LogIn size={14} /> Sign In
-                </Link>
+                  <LogIn size={16} />
+                  Sign In
+                </button>
               )}
             </div>
 
             {/* Mobile hamburger */}
             <button
-              onClick={() => setMobileOpen(true)}
-              className="md:hidden w-10 h-10 flex items-center justify-center text-white/80 hover:text-white rounded-lg hover:bg-white/10 transition-all"
-              aria-label="Open menu"
+              onClick={() => setMobileOpen((v) => !v)}
+              className="md:hidden p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
+              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+              aria-label="Toggle menu"
             >
-              <Menu size={22} />
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
-      </nav>
 
-      {/* ── MOBILE FULL-SCREEN OVERLAY ─────────────────────────────── */}
-      {/* Backdrop */}
-      <div
-        onClick={() => setMobileOpen(false)}
-        className={`fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm md:hidden transition-opacity duration-300 ${
-          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      />
-
-      {/* Slide-in panel */}
-      <div
-        className={`fixed top-0 right-0 bottom-0 z-[70] w-[min(320px,100vw)] bg-charcoal-900 md:hidden flex flex-col transition-transform duration-300 ease-in-out ${
-          mobileOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        {/* Panel header */}
-        <div className="flex items-center justify-between px-5 h-16 border-b border-white/10 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gold-600 rounded-md flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 13l2-6h14l2 6" /><path d="M1 17h22" />
-                <circle cx="7" cy="17" r="2" /><circle cx="17" cy="17" r="2" />
-              </svg>
-            </div>
-            <span className="text-white font-sans font-bold text-base tracking-[0.15em] uppercase">KAYAD</span>
-          </div>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all"
+        {/* Expandable search bar */}
+        {searchOpen && (
+          <div
+            className="border-t"
+            style={{
+              borderColor: 'rgba(255,255,255,0.1)',
+              backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+            }}
           >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Auth section (if signed in) */}
-        {authUser && (
-          <div className="px-5 py-4 border-b border-white/10 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gold-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="font-sans text-white font-bold text-sm">{initials}</span>
+            <form
+              onSubmit={handleSearchSubmit}
+              className="mx-auto max-w-7xl px-4 py-3"
+            >
+              <div className="relative">
+                <Search
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
+                  style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for cars, makes, models..."
+                  className="w-full pl-10 pr-10 py-2.5 rounded-full text-sm border outline-none font-sans"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    color: 'var(--c-navbar-text, #ffffff)',
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer bg-transparent border-none p-0"
+                    style={{ color: 'var(--c-navbar-text, #ffffff)', opacity: 0.5 }}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
               </div>
-              <div className="min-w-0">
-                <p className="font-sans text-sm font-bold text-white truncate">{authUser.name}</p>
-                <span className="inline-block bg-gold-400/15 text-gold-400 font-sans text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
-                  {ROLE_LABEL[authUser.role]}
-                </span>
-              </div>
-            </div>
+            </form>
           </div>
         )}
+      </nav>
 
-        {/* Nav links */}
-        <div className="flex-1 overflow-y-auto px-3 py-4">
-          <div className="flex flex-col gap-1">
-            {navLinks.map(({ label, path, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                onClick={() => { setPage(path === '/' ? 'home' : path.slice(1)); setMobileOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-sans text-sm font-semibold transition-all text-left ${
-                  isActive(path)
-                    ? 'bg-gold-600 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/8'
-                }`}
+      {/* Mobile slide-in menu */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/50 transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Slide-in panel */}
+          <div
+            ref={mobileMenuRef}
+            className="absolute right-0 top-0 bottom-0 w-72 shadow-2xl overflow-y-auto font-sans"
+            style={{
+              backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+              color: 'var(--c-navbar-text, #ffffff)',
+            }}
+          >
+            <div className="flex items-center justify-between px-4 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+              <span
+                className="text-lg font-bold tracking-tight"
+                style={{ color: 'var(--c-navbar-accent, #e94560)' }}
               >
-                <Icon size={17} className={isActive(path) ? 'text-white' : 'text-white/40'} />
-                {label}
-              </Link>
-            ))}
+                KAYAD
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-1.5 rounded-full cursor-pointer bg-transparent border-none"
+                style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+              >
+                <X size={20} />
+              </button>
+            </div>
 
+            {/* Mobile search */}
+            <form onSubmit={handleSearchSubmit} className="px-4 py-3">
+              <div className="relative">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
+                  style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search cars..."
+                  className="w-full pl-9 pr-4 py-2 rounded-full text-sm border outline-none font-sans"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    borderColor: 'rgba(255,255,255,0.15)',
+                    color: 'var(--c-navbar-text, #ffffff)',
+                  }}
+                />
+              </div>
+            </form>
+
+            {/* Mobile nav links */}
+            <div className="px-2 py-1">
+              {NAV_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.key}
+                    onClick={() => handleNav(item.path, item.key)}
+                    className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
+                      currentPage === item.key ? 'nav-link active' : ''
+                    }`}
+                    style={{
+                      color:
+                        currentPage === item.key
+                          ? 'var(--c-navbar-accent, #e94560)'
+                          : 'var(--c-navbar-text, #ffffff)',
+                      backgroundColor:
+                        currentPage === item.key
+                          ? 'rgba(233, 69, 96, 0.1)'
+                          : 'transparent',
+                    }}
+                  >
+                    <Icon size={18} />
+                    {item.label}
+                  </button>
+                );
+              })}
+              {authUser &&
+                AUTH_NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => handleNav(item.path, item.key)}
+                      className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
+                        currentPage === item.key ? 'nav-link active' : ''
+                      }`}
+                      style={{
+                        color:
+                          currentPage === item.key
+                            ? 'var(--c-navbar-accent, #e94560)'
+                            : 'var(--c-navbar-text, #ffffff)',
+                        backgroundColor:
+                          currentPage === item.key
+                            ? 'rgba(233, 69, 96, 0.1)'
+                            : 'transparent',
+                      }}
+                    >
+                      <Icon size={18} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+            </div>
+
+            <div className="border-t my-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+
+            {/* Mobile user section */}
             {authUser && (
-              <Link
-                to="/dealer"
-                onClick={() => { setPage('dashboard'); setMobileOpen(false); }}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-sans text-sm font-semibold transition-all text-left ${
-                  isActive('/dealer')
-                    ? 'bg-gold-600 text-white'
-                    : 'text-white/70 hover:text-white hover:bg-white/8'
-                }`}
-              >
-                <LayoutDashboard size={17} className={isActive('/dealer') ? 'text-white' : 'text-white/40'} />
-                Dashboard
-              </Link>
+              <div className="px-4 py-3">
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+                    style={{
+                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                      color: '#ffffff',
+                    }}
+                  >
+                    {userInitials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--c-navbar-text, #ffffff)' }}>
+                      {authUser.name}
+                    </p>
+                    <p className="text-xs opacity-60 truncate" style={{ color: 'var(--c-navbar-text, #ffffff)' }}>
+                      {authUser.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <button
+                    onClick={() => handleNav('/dashboard', 'dashboard')}
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                    style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                  >
+                    <LayoutDashboard size={16} />
+                    Dashboard
+                  </button>
+                  {authUser.role === 'admin' && (
+                    <button
+                      onClick={() => handleNav('/theme-studio', 'theme-studio')}
+                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    >
+                      <Palette size={16} />
+                      Theme Studio
+                    </button>
+                  )}
+                  {authUser.role === 'admin' && (
+                    <button
+                      onClick={() => handleNav('/admin', 'admin')}
+                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    >
+                      <Shield size={16} />
+                      Admin Panel
+                    </button>
+                  )}
+                  {(authUser.role === 'dealer' || authUser.role === 'admin') && (
+                    <button
+                      onClick={() => handleNav('/dealer-verify', 'dealer-verify')}
+                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    >
+                      <ClipboardCheck size={16} />
+                      Dealer Verification
+                    </button>
+                  )}
+                </div>
+
+                <div className="border-t mt-2 pt-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      onSignOut();
+                    }}
+                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
+                    style={{ color: 'var(--c-navbar-accent, #e94560)' }}
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!authUser && (
+              <div className="px-4 py-3">
+                <button
+                  onClick={() => handleNav('/auth', 'auth')}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
+                  style={{
+                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                    color: '#ffffff',
+                  }}
+                >
+                  <LogIn size={16} />
+                  Sign In
+                </button>
+              </div>
+            )}
+
+            {/* Mobile sell button */}
+            {authUser && (
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => handleNav('/sell', 'sell')}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
+                  style={{
+                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
+                    color: '#ffffff',
+                  }}
+                >
+                  <Tag size={16} />
+                  Sell a Vehicle
+                </button>
+              </div>
             )}
           </div>
         </div>
+      )}
 
-        {/* Bottom actions */}
-        <div className="px-5 py-5 border-t border-white/10 flex-shrink-0 space-y-3">
-          <button
-            onClick={handleSell}
-            className="w-full flex items-center justify-center gap-2 border border-gold-400/50 text-gold-400 font-sans text-sm font-semibold py-3 rounded-full hover:bg-gold-400/10 transition-colors"
-          >
-            <Tag size={14} /> Sell a Vehicle
-          </button>
-          {authUser ? (
-            <button
-              onClick={() => { onSignOut(); setMobileOpen(false); }}
-              className="w-full flex items-center justify-center gap-2 bg-white/8 text-red-400 font-sans text-sm font-semibold py-3 rounded-full hover:bg-red-500/15 transition-colors"
-            >
-              <LogOut size={14} /> Sign Out
-            </button>
-          ) : (
-            <Link
-              to="/login"
-              onClick={() => { setPage('sign-in'); setMobileOpen(false); }}
-              className="w-full flex items-center justify-center gap-2 bg-white text-charcoal-900 font-sans text-sm font-semibold py-3 rounded-full hover:bg-cream-100 transition-colors"
-            >
-              <LogIn size={14} /> Sign In
-            </Link>
-          )}
-        </div>
-      </div>
+      {/* Spacer for fixed navbar */}
+      <div className="h-16" />
     </>
   );
 }
