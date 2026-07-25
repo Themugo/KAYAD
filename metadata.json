@@ -1,0 +1,6 @@
+{
+  "name": "KAYAD Marketplace",
+  "description": "Production-grade vehicle marketplace with live auctions, escrow workflows, dealer management, real-time bidding, and BOLT UI redesign.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
