@@ -215,7 +215,7 @@ function AppContent() {
       case 'home':
         return <Home setPage={handleSetPage} viewCar={viewCar} />;
       case 'gallery':
-        return <Gallery viewCar={viewCar} />;
+        return <Gallery setPage={handleSetPage} viewCar={viewCar} />;
       case 'compare':
         return <Compare setPage={handleSetPage} viewCar={viewCar} />;
       case 'favorites':
@@ -235,17 +235,17 @@ function AppContent() {
       case 'showroom':
         return <Showroom />;
       case 'auction':
-        return <Auction />;
+        return <Auction setPage={handleSetPage} viewCar={viewCar} />;
       case 'escrow':
-        return <EscrowVault />;
+        return <EscrowVault setPage={handleSetPage} />;
       case 'pre-inspection':
-        return <PreInspection viewCar={viewCar} />;
+        return <PreInspection setPage={handleSetPage} />;
       case 'support':
-        return <Support />;
+        return <Support setPage={handleSetPage} />;
       case 'car-detail':
         return selectedCar
           ? <CarDetail car={selectedCar} setPage={handleSetPage} viewCar={viewCar} />
-          : <Gallery viewCar={viewCar} />;
+          : <Gallery setPage={handleSetPage} viewCar={viewCar} />;
       case 'dashboard':
         return authUser
           ? <Dashboard setPage={handleSetPage} viewCar={viewCar} authUser={authUser} onSignOut={handleSignOut} />
@@ -268,17 +268,17 @@ function AppContent() {
 
           {/* Public pages */}
           <Route path="/home" element={<Home setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/gallery" element={<Gallery viewCar={viewCar} />} />
+          <Route path="/gallery" element={<Gallery setPage={handleSetPage} viewCar={viewCar} />} />
           <Route path="/showroom" element={<Showroom />} />
           <Route path="/car/:id" element={<CarDetailRoute />} />
           <Route path="/compare" element={<Compare setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/auction" element={<Auction />} />
+          <Route path="/auction" element={<Auction setPage={handleSetPage} viewCar={viewCar} />} />
           <Route path="/auction-calendar" element={<AuctionCalendar />} />
           <Route path="/auction/:id" element={<AuctionLivePage />} />
-          <Route path="/escrow" element={<EscrowVault />} />
-          <Route path="/escrow-vault" element={<EscrowVault />} />
-          <Route path="/pre-inspection" element={<PreInspection viewCar={viewCar} />} />
-          <Route path="/support" element={<Support />} />
+          <Route path="/escrow" element={<EscrowVault setPage={handleSetPage} />} />
+          <Route path="/escrow-vault" element={<EscrowVault setPage={handleSetPage} />} />
+          <Route path="/pre-inspection" element={<PreInspection setPage={handleSetPage} />} />
+          <Route path="/support" element={<Support setPage={handleSetPage} />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/contact" element={<ContactPage />} />

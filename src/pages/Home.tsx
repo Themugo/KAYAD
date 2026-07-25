@@ -427,7 +427,7 @@ export default function Home({ setPage, viewCar }: HomeProps) {
             }}
           >
             {featured.map(car => (
-              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} showCompare={false} />
+              <CarCard key={car.id} car={car} onClick={() => viewCar(car)} />
             ))}
           </div>
 

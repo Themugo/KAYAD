@@ -52,7 +52,8 @@ const AUTH_NAV_ITEMS = [
 ];
 
 export default function Navbar({ currentPage, setPage, authUser, onSignOut }: NavbarProps) {
-  const { layout } = useDesignTheme();
+  const { theme } = useDesignTheme();
+  const layout = theme.layouts.navbar;
   const location = useLocation();
   const navigate = useNavigate();
 
