@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const BCRYPT_ROUNDS = 12;
 
 const TABLE_MAP = {
-  User: "users", Car: "cars", Auction: "auctions", Bid: "bids",
+  User: "users", UserAuth: "user_auth", Car: "cars", Auction: "auctions", Bid: "bids",
   Escrow: "escrows", Payment: "payments", Chat: "chats", Message: "messages",
   Notification: "notifications", Favorite: "favorites", Review: "reviews",
   Dealer: "dealers", DealerHealthScore: "dealer_health_scores",
@@ -158,7 +158,7 @@ function wrapDoc(doc, tableName, sb) {
     },
   });
 
-  if (tableName === "users") {
+  if (tableName === "users" || tableName === "user_auth") {
     Object.defineProperties(doc, {
       matchPassword: {
         value: async function (candidatePassword) {

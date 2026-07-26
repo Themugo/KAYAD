@@ -8,6 +8,7 @@ import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
 
 import User from "../models/User.js";
+import UserAuth from "../models/UserAuth.js";
 import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
 import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
@@ -1092,7 +1093,8 @@ router.post(
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    const user = await User.create({ name, email, password: await bcrypt.hash(password, 12), role });
+    const user = await User.create({ name, email, role });
+    await UserAuth.create({ user: user.id, password: await bcrypt.hash(password, 12) });
     res.json({
       success: true,
       message: `Staff account created: ${email}`,

@@ -804,19 +804,9 @@ CREATE TABLE IF NOT EXISTS distributed_locks (
   expires_at TIMESTAMPTZ NOT NULL
 );
 
--- Profiles/user preferences table
-CREATE TABLE IF NOT EXISTS user_profiles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID UNIQUE REFERENCES users(id),
-  business_name TEXT,
-  location TEXT,
-  bio TEXT,
-  avatar TEXT,
-  phone TEXT,
-  notification_preferences JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
+-- M4: user_profiles ghost table removed (zero queries anywhere).
+-- User preferences are handled by UserPreference model (MongoDB).
+-- The notification_preferences column was unused.
 
 -- =============================
 -- MIGRATION: columns referenced by controllers/carController.js
@@ -1401,9 +1391,7 @@ ALTER TABLE notification_audit ADD CONSTRAINT notification_audit_notification_id
 ALTER TABLE mpesa_transactions DROP CONSTRAINT IF EXISTS mpesa_transactions_car_id_fkey;
 ALTER TABLE mpesa_transactions ADD CONSTRAINT mpesa_transactions_car_id_fkey FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE SET NULL;
 
--- user_profiles
-ALTER TABLE user_profiles DROP CONSTRAINT IF EXISTS user_profiles_user_id_fkey;
-ALTER TABLE user_profiles ADD CONSTRAINT user_profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+-- user_profiles: dropped (M4)
 
 -- inspector_applications
 ALTER TABLE inspector_applications DROP CONSTRAINT IF EXISTS inspector_applications_user_id_fkey;
@@ -1456,8 +1444,7 @@ DROP TRIGGER IF EXISTS set_updated_at ON announcements;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON announcements FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS set_updated_at ON subscriptions;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON subscriptions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-DROP TRIGGER IF EXISTS set_updated_at ON user_profiles;
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON user_profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- user_profiles trigger: dropped (M4)
 DROP TRIGGER IF EXISTS set_updated_at ON inspector_applications;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON inspector_applications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 DROP TRIGGER IF EXISTS set_updated_at ON dealer_verifications;
@@ -1533,6 +1520,85 @@ ALTER TABLE cars ADD CONSTRAINT cars_year_check CHECK (year >= 1900 AND year <= 
 ALTER TABLE users ADD CONSTRAINT users_commission_check CHECK (commission >= 0 AND commission <= 100);
 ALTER TABLE users ADD CONSTRAINT users_dealer_rating_check CHECK (dealer_rating >= 0 AND dealer_rating <= 5);
 ALTER TABLE cars ADD CONSTRAINT cars_mileage_check CHECK (mileage >= 0);
+
+-- =====================================================
+-- ARCHITECTURAL IMPROVEMENTS — 2026-07-25
+-- H1: user_auth split, H2: auction consolidation,
+-- M1: audit log retention, M4: user_profiles dropped
+-- =====================================================
+
+-- ─────────────────────────────────────────────────────
+-- H1: USER AUTH (split from users table)
+-- Auth fields moved to dedicated table so profile queries
+-- can never accidentally expose passwords or tokens.
+-- ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS user_auth (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  password TEXT,
+  token_version INTEGER DEFAULT 0,
+  must_change_password BOOLEAN DEFAULT false,
+  login_attempts INTEGER DEFAULT 0,
+  lock_until TIMESTAMPTZ,
+  reset_token TEXT,
+  reset_token_expire TIMESTAMPTZ,
+  email_verify_token TEXT,
+  email_verify_expire TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_user_auth_user ON user_auth(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_auth_reset_token ON user_auth(reset_token);
+CREATE INDEX IF NOT EXISTS idx_user_auth_email_verify_token ON user_auth(email_verify_token);
+
+-- Migration: populate user_auth from existing users data
+INSERT INTO user_auth (user_id, password, token_version, must_change_password, login_attempts, lock_until, reset_token, reset_token_expire, email_verify_token, email_verify_expire)
+SELECT id, password, COALESCE(token_version, 0), COALESCE(must_change_password, false), COALESCE(login_attempts, 0), lock_until, reset_token, reset_token_expire, email_verify_token, email_verify_expire
+FROM users
+WHERE password IS NOT NULL
+ON CONFLICT (user_id) DO NOTHING;
+
+DROP TRIGGER IF EXISTS set_updated_at ON user_auth;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON user_auth FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+ALTER TABLE user_auth ENABLE ROW LEVEL SECURITY;
+
+-- ─────────────────────────────────────────────────────
+-- H2: AUCTION CONSOLIDATION
+-- Add missing columns to auctions so auction data lives in
+-- one place instead of split between cars and auctions.
+-- ─────────────────────────────────────────────────────
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS bids_count INTEGER DEFAULT 0;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS reserve_mode TEXT DEFAULT 'strict';
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS has_auction BOOLEAN DEFAULT false;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS allow_bid BOOLEAN DEFAULT false;
+ALTER TABLE auctions ADD COLUMN IF NOT EXISTS allow_buy BOOLEAN DEFAULT true;
+
+-- Sync auction flags from cars → auctions where auction rows exist
+UPDATE auctions a
+SET
+  has_auction = true,
+  allow_bid = COALESCE(c.allow_bid, false),
+  allow_buy = COALESCE(c.allow_buy, true),
+  reserve_mode = COALESCE(c.reserve_mode, 'strict'),
+  bids_count = COALESCE(c.bids_count, 0)
+FROM cars c
+WHERE a.car_id = c.id
+  AND c.has_auction = true;
+
+-- ─────────────────────────────────────────────────────
+-- M1: AUDIT LOG RETENTION
+-- Cleanup function for old audit/security data.
+-- Schedule via pg_cron: SELECT cron.schedule('audit-cleanup', '0 2 1 * *', 'SELECT cleanup_old_audit_logs(365)');
+-- ─────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION cleanup_old_audit_logs(retention_days INTEGER DEFAULT 365)
+RETURNS void AS $$
+BEGIN
+  DELETE FROM audit_logs WHERE created_at < now() - (retention_days || ' days')::INTERVAL;
+  DELETE FROM security_logs WHERE created_at < now() - (retention_days || ' days')::INTERVAL;
+  DELETE FROM notification_audit WHERE sent_at < now() - (retention_days || ' days')::INTERVAL;
+END;
+$$ LANGUAGE plpgsql;
 
 -- =====================================================
 -- END OF AUDIT FIXES

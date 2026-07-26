@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import UserAuth from "../models/UserAuth.js";
 import Dealer from "../models/Dealer.js";
 import RefreshToken from "../models/RefreshToken.js";
 import bcrypt from "bcryptjs";
@@ -46,12 +47,6 @@ const isOwnerEmail = (email) =>
 const serializeUser = (user) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
   const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
-  delete raw.password;
-  delete raw.resetToken;
-  delete raw.resetTokenExpire;
-  delete raw.emailVerifyToken;
-  delete raw.emailVerifyExpire;
-  delete raw.tokenVersion;
   return { ...raw, role, isOwner: isOwnerEmail(raw.email) };
 };
 
@@ -89,7 +84,7 @@ const sendAccessToken = (res, token) => {
 // =============================
 // 🧾 RESPONSE FORMAT
 // =============================
-const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null) => {
+const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, tokenVersion = 0) => {
   const accessToken = generateAccessToken(user);
   const newRefreshToken = generateRefreshToken(user);
   const safeUser = serializeUser(user);
@@ -100,7 +95,7 @@ const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null) =
   await RefreshToken.create({
     user: user._id,
     token: newRefreshToken,
-    tokenVersion: user.tokenVersion || 0,
+    tokenVersion: tokenVersion || 0,
     deviceId: req?.body?.deviceId || req?.headers["x-device-id"] || "unknown",
     userAgent: req?.headers["user-agent"] || "",
     ipAddress: req?.ip || req?.connection?.remoteAddress || "",
@@ -196,13 +191,17 @@ export const register = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password: await bcrypt.hash(password, 12),
       role,
       phone: validPhone,
       status,
       emailVerified: true,
-      tokenVersion: 0,
       referredBy,
+    });
+
+    const userAuth = await UserAuth.create({
+      user: user._id,
+      password: await bcrypt.hash(password, 12),
+      tokenVersion: 0,
     });
 
     if (referredBy) {
@@ -232,7 +231,7 @@ export const register = async (req, res) => {
       // non-blocking
     }
 
-    return sendAuthResponse(res.status(201), user);
+    return sendAuthResponse(res.status(201), user, null, null, userAuth.tokenVersion || 0);
   } catch (err) {
     console.error("REGISTER ERROR:", err);
     R.error(res, "Registration failed", 500);
@@ -252,37 +251,40 @@ export const login = async (req, res) => {
 
     email = email.toLowerCase().trim();
 
-    const user = await User.findOne({ email }).select("+password +tokenVersion");
+    const user = await User.findOne({ email });
+
+    // Auth fields live in user_auth table (H1 split)
+    const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion") : null;
 
     // ─── Check lockout BEFORE password verification ──────
-    if (user?.lockUntil && user.lockUntil > new Date()) {
-      const remaining = Math.ceil((user.lockUntil - new Date()) / 60000);
+    if (userAuth?.lockUntil && userAuth.lockUntil > new Date()) {
+      const remaining = Math.ceil((userAuth.lockUntil - new Date()) / 60000);
       return R.error(res, `Account locked. Try again in ${remaining} minute(s).`, 429);
     }
 
-    if (!user || !(await user.matchPassword(password))) {
+    if (!userAuth || !(await userAuth.matchPassword(password))) {
       // ─── Record failed attempt for IP-based lockout ──────
       recordFailedAttempt(req);
 
       // ─── Account lockout ────────────────────────────────
-      if (user && !user.isBanned) {
-        const attempts = (user.loginAttempts || 0) + 1;
+      if (userAuth && !user.isBanned) {
+        const attempts = (userAuth.loginAttempts || 0) + 1;
         if (attempts >= 5) {
-          user.loginAttempts = attempts;
-          user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
-          await user.save();
+          userAuth.loginAttempts = attempts;
+          userAuth.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+          await userAuth.save();
           return R.error(res, "Account locked due to too many attempts. Try again in 15 minutes.", 429);
         }
-        user.loginAttempts = attempts;
-        await user.save();
+        userAuth.loginAttempts = attempts;
+        await userAuth.save();
       }
       return R.unauthorized(res, "Invalid credentials");
     }
 
     // ─── Reset lockout on successful login ────────────────
-    if (user.loginAttempts || user.lockUntil) {
-      user.loginAttempts = 0;
-      user.lockUntil = null;
+    if (userAuth.loginAttempts || userAuth.lockUntil) {
+      userAuth.loginAttempts = 0;
+      userAuth.lockUntil = null;
     }
 
     // ─── Record successful attempt for IP-based lockout ──
@@ -315,8 +317,9 @@ export const login = async (req, res) => {
     user.lastLogin = new Date();
     user.lastLoginAt = new Date();
     await user.save();
+    if (userAuth) await userAuth.save();
 
-    return await sendAuthResponse(res, user, null, req);
+    return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
   } catch (err) {
     console.error("❌ LOGIN ERROR:", err);
     R.error(res, "Login failed", 500);
@@ -340,10 +343,10 @@ export const demoLogin = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid demo account" });
     }
 
-    const user = await User.findOne({ email: demo.email, isDemo: true })
-      .select("+password +tokenVersion");
+    const user = await User.findOne({ email: demo.email, isDemo: true });
+    const userAuth = user ? await UserAuth.findOne({ user: user._id }).select("+password +tokenVersion") : null;
 
-    if (!user) {
+    if (!user || !userAuth) {
       return res.status(404).json({
         success: false,
         message: "Demo account not found. Run seed first.",
@@ -354,7 +357,7 @@ export const demoLogin = async (req, res) => {
     user.lastLoginAt = new Date();
     await user.save();
 
-    return await sendAuthResponse(res, user, null, req);
+    return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
   } catch (err) {
     console.error("❌ DEMO LOGIN ERROR:", err);
     R.error(res, "Demo login failed", 500);
@@ -397,13 +400,14 @@ export const refreshToken = async (req, res) => {
       return R.error(res, "Refresh token not found or revoked", 403);
     }
 
-    const user = await User.findById(decoded.id).select("+tokenVersion");
+    const user = await User.findById(decoded.id);
+    const userAuth = user ? await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion") : null;
 
-    if (!user) {
+    if (!user || !userAuth) {
       return R.error(res, "Invalid credentials", 403);
     }
 
-    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== user.tokenVersion) {
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
       return R.error(res, "Session invalidated — please login again", 403);
     }
 
@@ -412,7 +416,7 @@ export const refreshToken = async (req, res) => {
     await storedToken.save();
 
     // Issue new tokens with rotation (old token is revoked in sendAuthResponse)
-    return await sendAuthResponse(res, user, token, req);
+    return await sendAuthResponse(res, user, token, req, userAuth?.tokenVersion || 0);
   } catch (err) {
     console.error("❌ REFRESH ERROR:", err);
     R.error(res, "Refresh failed", 500);
@@ -429,7 +433,7 @@ export const logout = async (req, res) => {
       await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
 
       // 🔥 Also increment tokenVersion to invalidate any existing tokens
-      await User.findByIdAndUpdate(req.user.id, {
+      await UserAuth.findOneAndUpdate({ user: req.user.id }, {
         $inc: { tokenVersion: 1 },
       });
 
@@ -455,7 +459,7 @@ export const logout = async (req, res) => {
 // =============================
 export const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return R.notFound(res, "User not found");
@@ -503,7 +507,7 @@ export const revokeAllSessions = async (req, res) => {
     await RefreshToken.revokeAllForUser(req.user.id, req.user.id);
 
     // Also increment tokenVersion to invalidate any existing tokens
-    await User.findByIdAndUpdate(req.user.id, {
+    await UserAuth.findOneAndUpdate({ user: req.user.id }, {
       $inc: { tokenVersion: 1 },
     });
 
@@ -556,9 +560,7 @@ export const updateProfile = async (req, res) => {
     if (onboardingComplete !== undefined) updates.onboardingComplete = Boolean(onboardingComplete);
     if (avatar !== undefined) updates.avatar = String(avatar);
 
-    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true }).select(
-      "-password",
-    );
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
 
     if (!user) return R.notFound(res, "User not found");
 
@@ -603,21 +605,22 @@ export const changePassword = async (req, res) => {
       return R.error(res, "New password must contain at least one special character (@$!%*?&)", 400);
     }
 
-    const user = await User.findById(req.user.id).select("+password +tokenVersion");
-    if (!user) return R.notFound(res, "User not found");
+    const user = await User.findById(req.user.id);
+    const userAuth = user ? await UserAuth.findOne({ user: req.user.id }).select("+password +tokenVersion") : null;
+    if (!user || !userAuth) return R.notFound(res, "User not found");
 
-    const match = await bcrypt.compare(currentPassword, user.password);
+    const match = await userAuth.matchPassword(currentPassword);
     if (!match) return R.error(res, "Current password is incorrect", 400);
 
-    user.password = await bcrypt.hash(newPassword, 12);
-    user.mustChangePassword = false;
-    user.tokenVersion = (user.tokenVersion || 0) + 1;
-    await user.save();
+    userAuth.password = await bcrypt.hash(newPassword, 12);
+    userAuth.mustChangePassword = false;
+    userAuth.tokenVersion = (userAuth.tokenVersion || 0) + 1;
+    await userAuth.save();
 
     // 🔥 Invalidate user cache to prevent stale auth state after password change
     invalidateUserCache(req.user.id);
 
-    return sendAuthResponse(res, user);
+    return sendAuthResponse(res, user, null, null, userAuth.tokenVersion || 0);
   } catch (err) {
     R.error(res, process.env.NODE_ENV === "production" ? "An error occurred" : err.message, 500);
   }
@@ -631,19 +634,24 @@ export const verifyEmail = async (req, res) => {
     const { token } = req.params;
     if (!token) return R.error(res, "Token required", 400);
 
-    const user = await User.findOne({
+    const userAuth = await UserAuth.findOne({
       emailVerifyToken: token,
       emailVerifyExpire: { $gt: Date.now() },
     }).select("+emailVerifyToken +emailVerifyExpire");
 
-    if (!user) {
+    if (!userAuth) {
       return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
     }
 
-    user.emailVerified = true;
-    user.emailVerifyToken = undefined;
-    user.emailVerifyExpire = undefined;
-    await user.save();
+    const user = await User.findById(userAuth.user);
+    if (user) {
+      user.emailVerified = true;
+      await user.save();
+    }
+
+    userAuth.emailVerifyToken = undefined;
+    userAuth.emailVerifyExpire = undefined;
+    await userAuth.save();
 
     res.json({ success: true, message: "Email verified successfully. You can now log in." });
   } catch (err) {
@@ -659,20 +667,23 @@ export const resendVerification = async (req, res) => {
     const { email } = req.body;
     if (!email) return R.error(res, "Email required", 400);
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select(
-      "+emailVerifyToken +emailVerifyExpire",
-    );
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     // Always return 200 to avoid user enumeration
     if (!user || user.emailVerified) {
       return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
     }
 
+    const userAuth = await UserAuth.findOne({ user: user._id }).select("+emailVerifyToken +emailVerifyExpire");
+    if (!userAuth) {
+      return res.json({ success: true, message: "If that email exists and is unverified, a link has been sent." });
+    }
+
     // Generate new token
     const verifyToken = crypto.randomBytes(32).toString("hex");
-    user.emailVerifyToken = verifyToken;
-    user.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    await user.save();
+    userAuth.emailVerifyToken = verifyToken;
+    userAuth.emailVerifyExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    await userAuth.save();
 
     // Send verification email
     const { sendVerificationReminderEmail } = emailService;
@@ -700,10 +711,13 @@ export const forgotPassword = async (req, res) => {
     // Always return 200 to prevent user enumeration
     if (!user) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
 
+    const userAuth = await UserAuth.findOne({ user: user._id });
+    if (!userAuth) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
+
     const token = crypto.randomBytes(32).toString("hex");
-    user.resetToken = token;
-    user.resetTokenExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    await user.save();
+    userAuth.resetToken = token;
+    userAuth.resetTokenExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await userAuth.save();
 
     const { sendPasswordResetEmail } = emailService;
     if (typeof sendPasswordResetEmail === "function") {
@@ -725,18 +739,18 @@ export const resetPassword = async (req, res) => {
     if (!token || !password) return R.error(res, "Token and password required", 400);
     if (password.length < 8) return R.error(res, "Password must be at least 8 characters", 400);
 
-    const user = await User.findOne({
+    const userAuth = await UserAuth.findOne({
       resetToken: token,
       resetTokenExpire: { $gt: Date.now() },
     });
 
-    if (!user) return R.error(res, "Reset link is invalid or has expired.", 400);
+    if (!userAuth) return R.error(res, "Reset link is invalid or has expired.", 400);
 
-    user.password = await bcrypt.hash(password, 12);
-    user.resetToken = undefined;
-    user.resetTokenExpire = undefined;
-    user.tokenVersion = (user.tokenVersion || 0) + 1; // Invalidate all existing sessions
-    await user.save();
+    userAuth.password = await bcrypt.hash(password, 12);
+    userAuth.resetToken = undefined;
+    userAuth.resetTokenExpire = undefined;
+    userAuth.tokenVersion = (userAuth.tokenVersion || 0) + 1; // Invalidate all existing sessions
+    await userAuth.save();
 
     res.json({ success: true, message: "Password reset successfully. You can now sign in." });
   } catch (err) {

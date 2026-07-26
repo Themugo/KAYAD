@@ -1,5 +1,6 @@
 import InspectorApplication from "../models/InspectorApplication.js";
 import User from "../models/User.js";
+import UserAuth from "../models/UserAuth.js";
 import bcrypt from "bcryptjs";
 import { sendNotification } from "../services/notification.service.js";
 import { logError } from "../utils/logger.js";
@@ -119,16 +120,17 @@ export const approveApplication = async (req, res) => {
     // Find or create user with ghost_checker role
     let user = await User.findOne({ email: application.email });
     if (!user) {
+      const inspectorPw = await bcrypt.hash(
+        process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
+        12
+      );
       user = await User.create({
         name: application.fullName,
         email: application.email,
         phone: application.phone,
-        password: await bcrypt.hash(
-          process.env.SEED_INSPECTOR_PW || (await import("crypto")).randomBytes(16).toString("base64url") + "!A1",
-          12
-        ),
         role: "ghost_checker",
       });
+      await UserAuth.create({ user: user.id, password: inspectorPw });
     } else {
       user.role = "ghost_checker";
     }

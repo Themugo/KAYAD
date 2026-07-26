@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 import { logInfo, logWarn, logError } from "./utils/logger.js";
 import { initSupabase, getSupabase } from "./utils/supabase.js";
 import { findOne, create, upsert } from "./db/index.js";
+import UserAuth from "./models/UserAuth.js";
 
 dotenv.config();
 
@@ -94,6 +95,21 @@ export async function reseed() {
 
   const hashPw = (pw) => bcrypt.hashSync(pw, 12);
 
+  // Helper: upsert user + auth (H1 split)
+  const upsertUser = async (userData) => {
+    const { password, must_change_password, ...profileData } = userData;
+    const rows = await upsert("users", profileData, "email");
+    const user = rows?.[0];
+    if (user && password) {
+      await upsert("user_auth", {
+        user_id: user.id,
+        password,
+        must_change_password: must_change_password || false,
+      }, "user_id");
+    }
+    return rows;
+  };
+
   // 1. WEBHOST (SUPERADMIN)
   const webhostEmail = process.env.SEED_ADMIN_EMAIL;
   const webhostPassword = hashPw(process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PASSWORD"));
@@ -114,14 +130,14 @@ export async function reseed() {
     }
     const name = isPrimary ? webhostName : "KAYAD Webhost";
     try {
-      await upsert("users", {
+      await upsertUser({
         name,
         email: ownerEmail,
         password: pw,
         role: "superadmin",
         is_demo: false,
         email_verified: true,
-      }, "email");
+      });
       created.webhost.push(ownerEmail);
     } catch (err) {
       logError("Failed to upsert webhost", { email: ownerEmail, error: err.message });
@@ -130,14 +146,14 @@ export async function reseed() {
 
   // 2. PLATFORM ADMIN
   const adminPw = hashPw(process.env.SEED_ADMIN_PW || process.env.SEED_ADMIN_PASSWORD || devFallback("SEED_ADMIN_PW"));
-  await upsert("users", {
+  await upsertUser({
     name: "Platform Admin",
     email: "admin@kayad.space",
     password: adminPw,
     role: "admin",
     email_verified: true,
     must_change_password: true,
-  }, "email");
+  });
   created.admin.push("admin@kayad.space");
 
   // 3. DEMO ACCOUNTS
@@ -148,7 +164,7 @@ export async function reseed() {
   ];
 
   for (const acc of demos) {
-    await upsert("users", { ...acc, must_change_password: true, email_verified: true }, "email");
+    await upsertUser({ ...acc, must_change_password: true, email_verified: true });
     created.demos.push(acc.email);
   }
 
@@ -159,7 +175,7 @@ export async function reseed() {
   ];
 
   for (const acc of extraDealers) {
-    await upsert("users", { ...acc, must_change_password: true, email_verified: true }, "email");
+    await upsertUser({ ...acc, must_change_password: true, email_verified: true });
     created.dealers.push(acc.email);
   }
 
@@ -176,7 +192,7 @@ export async function reseed() {
 
   const staffPw = hashPw(process.env.SEED_STAFF_PW || devFallback("SEED_STAFF_PW"));
   for (const acc of staffAccounts) {
-    await upsert("users", { ...acc, password: staffPw, must_change_password: true, email_verified: true }, "email");
+    await upsertUser({ ...acc, password: staffPw, must_change_password: true, email_verified: true });
     created.staff.push(acc.email);
   }
 
