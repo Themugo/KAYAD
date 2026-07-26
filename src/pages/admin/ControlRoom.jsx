@@ -14,10 +14,87 @@ const SECTIONS = [
   { key: 'panic', label: 'Security Log', desc: 'Security & emergency controls', icon: AlertTriangle, path: '/admin/security', danger: true },
 ];
 
+const CS = {
+  pageBg: { background: '#F8FAFC', minHeight: '100vh' },
+  pageContainer: { maxWidth: 1000, margin: '0 auto', padding: '32px 32px 60px' },
+  headerRow: { marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' },
+  h1Title: { fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, color: '#0F172A', marginBottom: 4, fontStyle: 'italic' },
+  subtitle: { color: 'rgba(15, 23, 42, 0.35)', fontSize: 14 },
+  refreshRight: { textAlign: 'right' },
+  refreshBtn: { padding: '8px 16px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.05)', border: '1px solid rgba(15, 23, 42, 0.1)', color: 'rgba(15, 23, 42, 0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 600 },
+  updateTime: { fontSize: 10, color: 'rgba(15, 23, 42, 0.25)', marginTop: 4 },
+  lastChecked: { fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', marginTop: 2 },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 },
+  statCard: { padding: '10px 12px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)' },
+  statLabel: { fontSize: 10, color: 'rgba(15, 23, 42, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 },
+  quickNavGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 },
+  noUnderline: { textDecoration: 'none' },
+  navDesc: { fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', marginTop: 2 },
+  loadingContainer: { padding: 24 },
+  demoGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10, marginBottom: 20 },
+  demoStatCard: { padding: '12px 14px', borderRadius: 10, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)' },
+  demoStatLabel: { fontSize: 10, color: 'rgba(15, 23, 42, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 },
+  btnRow: { display: 'flex', gap: 10 },
+  dangerBtn: { padding: '10px 20px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 },
+  normalBtn: { padding: '10px 20px', background: 'rgba(15, 23, 42, 0.05)', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 10, color: '#0F172A', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
+  warningBox: { marginTop: 12, padding: '10px 14px', background: 'rgba(251,191,36,0.06)', borderRadius: 8, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)' },
+  noData: { color: 'rgba(15, 23, 42, 0.4)', fontSize: 13, padding: 12 },
+  staffDesc: { fontSize: 13, lineHeight: 1.8, color: 'rgba(15, 23, 42, 0.6)' },
+  staffGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+  goldCard: { padding: 14, borderRadius: 10, background: 'rgba(251,191,36,0.04)', border: '1px solid rgba(251,191,36,0.1)' },
+  goldTitle: { fontSize: 12, fontWeight: 700, color: 'var(--gold)', marginBottom: 6 },
+  goldList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)', lineHeight: 2 },
+  blueCard: { padding: 14, borderRadius: 10, background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.1)' },
+  blueTitle: { fontSize: 12, fontWeight: 700, color: '#3b82f6', marginBottom: 6 },
+  blueList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)', lineHeight: 2 },
+  deptGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 },
+  deptLink: { textDecoration: 'none' },
+  deptCard: { padding: '10px 12px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)', fontSize: 12, textAlign: 'center' },
+};
+
+const sectionCardStyles = {
+  container: { background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 16, padding: 24, marginBottom: 20 },
+  header: { fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid rgba(15, 23, 42, 0.05)', paddingBottom: 12 },
+};
+
+const statRowStyles = {
+  row: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(15, 23, 42, 0.03)', fontSize: 13 },
+  label: { color: 'rgba(15, 23, 42, 0.45)' },
+};
+
+const getHealthBannerStyle = (status) => ({
+  display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px', borderRadius: 10,
+  background: status === 'healthy' ? 'rgba(34,197,94,0.04)' : 'rgba(239,68,68,0.04)',
+  border: `1px solid ${status === 'healthy' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}`,
+});
+
+const getNavCardStyle = (danger) => ({
+  padding: '14px 16px', borderRadius: 10,
+  border: `1px solid ${danger ? 'rgba(239,68,68,0.2)' : 'rgba(15, 23, 42, 0.06)'}`,
+  background: danger ? 'rgba(239,68,68,0.04)' : 'rgba(15, 23, 42, 0.02)',
+  transition: 'border-color 0.2s',
+});
+
+const getNavIconStyle = (danger) => ({ color: danger ? '#ef4444' : 'var(--gold)', marginBottom: 4 });
+const getNavLabelStyle = (danger) => ({ fontWeight: 700, fontSize: 13, color: danger ? '#ef4444' : '#fff' });
+const getStatValueStyle = (color) => ({ fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', color });
+const getDemoStatValueStyle = (color) => ({ fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)', color });
+const getHealthStatusColor = (status) => status === 'healthy' ? '#22c55e' : '#ef4444';
+const getDeptIconStyle = (color) => ({ color, marginBottom: 2 });
+const getDeptLabelStyle = (color) => ({ color, fontWeight: 600 });
+
+const healthStatusBar = (status) => ({ fontWeight: 700, fontSize: 14, color: getHealthStatusColor(status), textTransform: 'uppercase' });
+const healthIcon = (status) => ({ color: getHealthStatusColor(status) });
+const accentStrong = { color: '#f59e0b' };
+const staffStrong = { color: '#0F172A' };
+const goldStrong = { color: 'var(--gold)' };
+const blueStrong = { color: '#3b82f6' };
+const staffPara = { marginBottom: 12 };
+
 function SectionCard({ title, children, accent = 'var(--gold)' }) {
   return (
-    <div style={{ background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.07)', borderRadius: 16, padding: 24, marginBottom: 20 }}>
-      <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid rgba(15, 23, 42, 0.05)', paddingBottom: 12 }}>
+    <div style={sectionCardStyles.container}>
+      <div style={sectionCardStyles.header}>
         <span style={{ color: accent, marginRight: 8 }}>◆</span> {title}
       </div>
       {children}
@@ -27,8 +104,8 @@ function SectionCard({ title, children, accent = 'var(--gold)' }) {
 
 function StatRow({ label, value, color = '#fff' }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(15, 23, 42, 0.03)', fontSize: 13 }}>
-      <span style={{ color: 'rgba(15, 23, 42, 0.45)' }}>{label}</span>
+    <div style={statRowStyles.row}>
+      <span style={statRowStyles.label}>{label}</span>
       <span style={{ color, fontWeight: 600, fontFamily: 'monospace' }}>{value ?? '—'}</span>
     </div>
   );
@@ -77,36 +154,36 @@ export default function ControlRoom() {
 
   return (
     <ErrorBoundary>
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 32px 60px' }}>
-        <div style={{ marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+    <div style={CS.pageBg}>
+      <div style={CS.pageContainer}>
+        <div style={CS.headerRow}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, color: '#0F172A', marginBottom: 4, fontStyle: 'italic' }}>Control Room</h1>
-            <p style={{ color: 'rgba(15, 23, 42, 0.35)', fontSize: 14 }}>Platform status and system management</p>
+            <h1 style={CS.h1Title}>Control Room</h1>
+            <p style={CS.subtitle}>Platform status and system management</p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <button onClick={loadData} style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.05)', border: '1px solid rgba(15, 23, 42, 0.1)', color: 'rgba(15, 23, 42, 0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+          <div style={CS.refreshRight}>
+            <button onClick={loadData} style={CS.refreshBtn}>
               ↻ Refresh
             </button>
-            {lastRefresh && <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.25)', marginTop: 4 }}>Updated {lastRefresh.toLocaleTimeString()}</div>}
+            {lastRefresh && <div style={CS.updateTime}>Updated {lastRefresh.toLocaleTimeString()}</div>}
           </div>
         </div>
 
         {/* System Health */}
         {health && (
           <SectionCard title="System Health" accent={health.status === 'healthy' ? '#22c55e' : '#ef4444'}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px', borderRadius: 10, background: health.status === 'healthy' ? 'rgba(34,197,94,0.04)' : 'rgba(239,68,68,0.04)', border: `1px solid ${health.status === 'healthy' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}` }}>
-              {health.status === 'healthy' ? <Wifi size={20} style={{ color: '#22c55e' }} /> : <WifiOff size={20} style={{ color: '#ef4444' }} />}
+            <div style={getHealthBannerStyle(health.status)}>
+              {health.status === 'healthy' ? <Wifi size={20} style={healthIcon(health.status)} /> : <WifiOff size={20} style={healthIcon(health.status)} />}
               <div>
-                <div style={{ fontWeight: 700, fontSize: 14, color: health.status === 'healthy' ? '#22c55e' : '#ef4444', textTransform: 'uppercase' }}>
+                <div style={healthStatusBar(health.status)}>
                   {health.status === 'healthy' ? 'All Systems Operational' : 'System Warning'}
                 </div>
-                <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.35)', marginTop: 2 }}>
+                <div style={CS.lastChecked}>
                   Last checked: {new Date(health.timestamp).toLocaleTimeString()}
                 </div>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 }}>
+            <div style={CS.statsGrid}>
               {[
                 { label: 'Total Users', value: health.users, color: '#3b82f6' },
                 { label: 'Total Listings', value: health.listings, color: 'var(--gold)' },
@@ -115,9 +192,9 @@ export default function ControlRoom() {
                 { label: 'Pending Moderation', value: health.pendingModeration, color: '#8b5cf6' },
                 { label: 'Critical Alerts (24h)', value: health.criticalAlerts24h, color: health.criticalAlerts24h > 0 ? '#ef4444' : 'rgba(15, 23, 42, 0.3)' },
               ].map(s => (
-                <div key={s.label} style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)' }}>
-                  <div style={{ fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{s.label}</div>
+                <div key={s.label} style={CS.statCard}>
+                  <div style={getStatValueStyle(s.color)}>{s.value}</div>
+                  <div style={CS.statLabel}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -126,18 +203,13 @@ export default function ControlRoom() {
 
         {/* Quick Navigation */}
         <SectionCard title="Quick Navigation">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
+          <div style={CS.quickNavGrid}>
             {SECTIONS.map(s => (
-              <Link key={s.key} to={s.path} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  padding: '14px 16px', borderRadius: 10,
-                  border: `1px solid ${s.danger ? 'rgba(239,68,68,0.2)' : 'rgba(15, 23, 42, 0.06)'}`,
-                  background: s.danger ? 'rgba(239,68,68,0.04)' : 'rgba(15, 23, 42, 0.02)',
-                  transition: 'border-color 0.2s',
-                }}>
-                  <s.icon size={16} style={{ color: s.danger ? '#ef4444' : 'var(--gold)', marginBottom: 4 }} />
-                  <div style={{ fontWeight: 700, fontSize: 13, color: s.danger ? '#ef4444' : '#fff' }}>{s.label}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(15, 23, 42, 0.4)', marginTop: 2 }}>{s.desc}</div>
+              <Link key={s.key} to={s.path} style={CS.noUnderline}>
+                <div style={getNavCardStyle(s.danger)}>
+                  <s.icon size={16} style={getNavIconStyle(s.danger)} />
+                  <div style={getNavLabelStyle(s.danger)}>{s.label}</div>
+                  <div style={CS.navDesc}>{s.desc}</div>
                 </div>
               </Link>
             ))}
@@ -148,10 +220,10 @@ export default function ControlRoom() {
         {isSuperadmin && (
           <SectionCard title="Demo Data Management" accent="#f59e0b">
             {loading ? (
-              <div className="loading-center" style={{ padding: 24 }}><div className="spinner" /></div>
+              <div className="loading-center" style={CS.loadingContainer}><div className="spinner" /></div>
             ) : demo ? (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10, marginBottom: 20 }}>
+                <div style={CS.demoGrid}>
                   {[
                     { label: 'Active Demo Users', value: demo.status.activeDemoUsers, color: '#22c55e' },
                     { label: 'Deactivated Demo', value: demo.status.deactivatedDemoUsers, color: '#f97316' },
@@ -160,40 +232,40 @@ export default function ControlRoom() {
                     { label: 'Demo Payments', value: demo.status.demoPayments, color: '#06b6d4' },
                     { label: 'Demo Escrows', value: demo.status.demoEscrows, color: '#22c55e' },
                   ].map(s => (
-                    <div key={s.label} style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)' }}>
-                      <div style={{ fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)', color: s.color }}>{s.value}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(15, 23, 42, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 }}>{s.label}</div>
+                    <div key={s.label} style={CS.demoStatCard}>
+                      <div style={getDemoStatValueStyle(s.color)}>{s.value}</div>
+                      <div style={CS.demoStatLabel}>{s.label}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <button onClick={handleCleanup} disabled={cleaning} style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={CS.btnRow}>
+                  <button onClick={handleCleanup} disabled={cleaning} style={CS.dangerBtn}>
                     {cleaning ? 'Cleaning...' : '🧹 Delete All Demo Data'}
                   </button>
-                  <button onClick={async () => { try { await adminAPI.reseed(); toast('✅ Database re-seeded', 'success'); adminAPI.demoStatus().then(setDemo).catch(() => {}); } catch { toast('Reseed failed', 'error'); } }} style={{ padding: '10px 20px', background: 'rgba(15, 23, 42, 0.05)', border: '1px solid rgba(15, 23, 42, 0.1)', borderRadius: 10, color: '#0F172A', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                  <button onClick={async () => { try { await adminAPI.reseed(); toast('✅ Database re-seeded', 'success'); adminAPI.demoStatus().then(setDemo).catch(() => {}); } catch { toast('Reseed failed', 'error'); } }} style={CS.normalBtn}>
                     🔄 Re-seed Database
                   </button>
                 </div>
-                <div style={{ marginTop: 12, padding: '10px 14px', background: 'rgba(251,191,36,0.06)', borderRadius: 8, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)' }}>
-                  ⚠️ Deleting demo data removes all pre-seeded accounts and their associated data. This is permanent. Use <strong style={{ color: '#f59e0b' }}>Re-seed</strong> to restore demo data.
+                <div style={CS.warningBox}>
+                  ⚠️ Deleting demo data removes all pre-seeded accounts and their associated data. This is permanent. Use <strong style={accentStrong}>Re-seed</strong> to restore demo data.
                 </div>
               </>
             ) : (
-              <div style={{ color: 'rgba(15, 23, 42, 0.4)', fontSize: 13, padding: 12 }}>Unable to load demo status</div>
+              <div style={CS.noData}>Unable to load demo status</div>
             )}
           </SectionCard>
         )}
 
         {/* System Management Staff */}
         <SectionCard title="System Management Staff" accent="#3b82f6">
-          <div style={{ fontSize: 13, lineHeight: 1.8, color: 'rgba(15, 23, 42, 0.6)' }}>
-            <p style={{ marginBottom: 12 }}>
-              The <strong style={{ color: '#0F172A' }}>Control Room</strong> is the operations hub for <strong style={{ color: 'var(--gold)' }}>Webhost</strong> (superadmin) and <strong style={{ color: '#3b82f6' }}>Admin</strong> roles.
+          <div style={CS.staffDesc}>
+            <p style={staffPara}>
+              The <strong style={staffStrong}>Control Room</strong> is the operations hub for <strong style={goldStrong}>Webhost</strong> (superadmin) and <strong style={blueStrong}>Admin</strong> roles.
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div style={{ padding: 14, borderRadius: 10, background: 'rgba(251,191,36,0.04)', border: '1px solid rgba(251,191,36,0.1)' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold)', marginBottom: 6 }}>👑 Webhost / Superadmin</div>
-                <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)', lineHeight: 2 }}>
+            <div style={CS.staffGrid}>
+              <div style={CS.goldCard}>
+                <div style={CS.goldTitle}>👑 Webhost / Superadmin</div>
+                <ul style={CS.goldList}>
                   <li>Full system access &amp; configuration</li>
                   <li>Staff account management (CRUD)</li>
                   <li>Demo data lifecycle (seed / cleanup)</li>
@@ -201,9 +273,9 @@ export default function ControlRoom() {
                   <li>User hard-delete &amp; deactivation</li>
                 </ul>
               </div>
-              <div style={{ padding: 14, borderRadius: 10, background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.1)' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#3b82f6', marginBottom: 6 }}>⚙ Platform Admin</div>
-                <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(15, 23, 42, 0.5)', lineHeight: 2 }}>
+              <div style={CS.blueCard}>
+                <div style={CS.blueTitle}>⚙ Platform Admin</div>
+                <ul style={CS.blueList}>
                   <li>User &amp; seller management</li>
                   <li>Escrow &amp; transaction oversight</li>
                   <li>Content moderation &amp; listings</li>
@@ -217,7 +289,7 @@ export default function ControlRoom() {
 
         {/* Staff Quick Links */}
         <SectionCard title="Staff Departments" accent="#8b5cf6">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+          <div style={CS.deptGrid}>
             {[
               { role: 'marketing', label: 'Marketing', icon: Megaphone, color: '#8b5cf6', path: '/admin/reports' },
               { role: 'technical_support', label: 'Tech Support', icon: Users, color: '#22c55e', path: '/admin/users' },
@@ -227,10 +299,10 @@ export default function ControlRoom() {
               { role: 'ad_manager', label: 'Ad Manager', icon: Megaphone, color: '#f97316', path: '/admin/reports' },
               { role: 'moderator', label: 'Moderator', icon: Shield, color: '#3b82f6', path: '/admin/cars' },
             ].map(d => (
-              <Link key={d.role} to={d.path} style={{ textDecoration: 'none' }}>
-                <div style={{ padding: '10px 12px', borderRadius: 8, background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)', fontSize: 12, textAlign: 'center' }}>
-                  <d.icon size={14} style={{ color: d.color, marginBottom: 2 }} />
-                  <div style={{ color: d.color, fontWeight: 600 }}>{d.label}</div>
+              <Link key={d.role} to={d.path} style={CS.deptLink}>
+                <div style={CS.deptCard}>
+                  <d.icon size={14} style={getDeptIconStyle(d.color)} />
+                  <div style={getDeptLabelStyle(d.color)}>{d.label}</div>
                 </div>
               </Link>
             ))}

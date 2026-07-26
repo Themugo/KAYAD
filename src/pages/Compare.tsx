@@ -97,6 +97,8 @@ export default function Compare({ setPage, viewCar }: CompareProps) {
                   <img
                     src={car.image}
                     alt={`${car.make} ${car.model}`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>

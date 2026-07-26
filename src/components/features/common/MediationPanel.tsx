@@ -26,11 +26,7 @@ export default function MediationPanel({
     setSubmitting(true);
     try {
       // TODO: Call API to submit mediation
-      console.log('Submitting mediation:', {
-        disputeId,
-        notes: mediatorNotes,
-        proposedSolution
-      });
+
       onStatusChange?.('resolved');
     } catch (error) {
       console.error('Failed to submit mediation:', error);

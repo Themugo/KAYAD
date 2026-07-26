@@ -92,6 +92,8 @@ export const CustomerTestimonials: React.FC = () => {
                 <img
                   src={item.avatar}
                   alt={item.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-11 h-11 rounded-2xl object-cover border border-[#1E3063]/20 dark:border-white/20 shrink-0"
                 />
 

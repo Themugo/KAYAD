@@ -338,6 +338,10 @@ export default function Auction({ setPage, viewCar }: Props) {
                 <img
                   src={featuredCar.image}
                   alt={`${featuredCar.make} ${featuredCar.model}`}
+                  width={800}
+                  height={600}
+                  loading="lazy"
+                  decoding="async"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }}
                 />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)' }} />
@@ -799,6 +803,10 @@ export default function Auction({ setPage, viewCar }: Props) {
                       <img
                         src={car.image}
                         alt={`${car.make} ${car.model}`}
+                        width={400}
+                        height={300}
+                        loading="lazy"
+                        decoding="async"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 40%)' }} />

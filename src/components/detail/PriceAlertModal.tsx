@@ -146,6 +146,8 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
               <img
                 src={vehicle.images[0] || 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=300&q=80'}
                 alt={vehicle.title}
+                loading="lazy"
+                decoding="async"
                 className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/60 shadow-xs"
               />
               <div className="flex-1 min-w-0">

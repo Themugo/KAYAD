@@ -147,6 +147,8 @@ export default function EscrowPage() {
                     <img
                       src={escrow.car.image}
                       alt={escrow.car.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-24 h-18 rounded-xl object-cover flex-shrink-0"
                     />
 

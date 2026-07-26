@@ -248,7 +248,7 @@ export const AdminPage: React.FC = () => {
                         : 'border-[#E2D8C7] hover:border-[#1E3063]'
                     }`}
                   >
-                    <img src={preset.url} alt="" className="w-full h-12 object-cover rounded-lg" />
+                    <img src={preset.url} alt="" loading="lazy" decoding="async" className="w-full h-12 object-cover rounded-lg" />
                     <span className="text-[10px] font-bold text-[#1E3063] block truncate text-center mt-1">
                       {preset.label}
                     </span>
@@ -284,6 +284,8 @@ export const AdminPage: React.FC = () => {
               <img
                 src={formImage || PRESET_IMAGES[0].url}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none"
               />
               <div className="relative z-10 space-y-3">
@@ -326,7 +328,7 @@ export const AdminPage: React.FC = () => {
                     : 'bg-[#F6F1E8]/50 border-slate-200 opacity-60'
                 }`}
               >
-                <img src={ad.imageUrl} alt="" className="w-20 h-20 rounded-xl object-cover shrink-0 border border-[#E2D8C7]" />
+                <img src={ad.imageUrl} alt="" loading="lazy" decoding="async" className="w-20 h-20 rounded-xl object-cover shrink-0 border border-[#E2D8C7]" />
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-[#1E3063]/10 text-[#1E3063]">

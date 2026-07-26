@@ -89,6 +89,8 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle, viewMode = 'g
           <img
             src={vehicle.images?.[currentImgIndex] || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80'}
             alt={fullTitle}
+            width={400}
+            height={300}
             loading="lazy"
             decoding="async"
             onLoad={() => setIsImgLoading(false)}

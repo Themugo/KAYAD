@@ -78,6 +78,8 @@ function CarCardComponent({
           <LazyImage
             src={car.image}
             alt={`${car.make} ${car.model}`}
+            width={400}
+            height={533}
             className="w-full h-full"
             onLoad={handleImageLoad}
             style={{
@@ -220,6 +222,8 @@ function CarCardComponent({
           <LazyImage
             src={car.image}
             alt={`${car.make} ${car.model}`}
+            width={400}
+            height={300}
             className="w-full h-full"
             onLoad={handleImageLoad}
             style={{ opacity: imgLoaded ? 1 : 0 }}
@@ -357,6 +361,8 @@ function CarCardComponent({
         <LazyImage
           src={car.image}
           alt={`${car.make} ${car.model}`}
+          width={400}
+          height={250}
           className="w-full h-full"
           onLoad={handleImageLoad}
           style={{

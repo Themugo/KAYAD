@@ -34,11 +34,7 @@ export default function AppealPanel({
     setSubmitting(true);
     try {
       // TODO: Call API to submit appeal
-      console.log('Submitting appeal:', {
-        disputeId,
-        reason: appealReason,
-        evidence: additionalEvidence
-      });
+
       onSubmitAppeal?.(appealReason, additionalEvidence);
     } catch (error) {
       console.error('Failed to submit appeal:', error);

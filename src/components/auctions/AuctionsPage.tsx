@@ -588,6 +588,8 @@ export const AuctionsPage: React.FC = () => {
                       <img
                         src={lot.imageUrl}
                         alt={lot.title}
+                        loading="lazy"
+                        decoding="async"
                         className={`w-full h-full object-cover transition-transform duration-500 ${status === 'ended' || status === 'canceled' || status === 'suspended' ? 'grayscale brightness-90' : 'group-hover:scale-105'}`}
                       />
 

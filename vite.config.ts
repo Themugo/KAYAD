@@ -182,10 +182,6 @@ export default defineConfig({
             if (id.includes('axios')) {
               return 'http-vendor';
             }
-            // WebSocket/Real-time
-            if (id.includes('socket.io-client') || id.includes('socket.io-parser')) {
-              return 'socket-vendor';
-            }
             // Icons - large, load lazily
             if (id.includes('lucide-react')) {
               return 'icons-vendor';
@@ -193,10 +189,6 @@ export default defineConfig({
             // Supabase
             if (id.includes('@supabase')) {
               return 'supabase-vendor';
-            }
-            // Error tracking
-            if (id.includes('@sentry')) {
-              return 'sentry-vendor';
             }
             // Analytics
             if (id.includes('posthog')) {

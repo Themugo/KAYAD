@@ -155,6 +155,8 @@ export const VehicleCollectionsSection: React.FC = () => {
               <img
                 src={item.image}
                 alt={item.title}
+                loading="lazy"
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 select-none"
               />
 

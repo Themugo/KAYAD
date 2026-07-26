@@ -41,11 +41,15 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
 
   const tabs = [
     { key: 'home', href: '/', icon: Home, label: 'Home' },
-    { key: 'search', href: '/gallery', icon: Search, label: 'Search' },
+    { key: 'gallery', href: '/gallery', icon: Search, label: 'Search' },
     { key: 'sell', href: '/dealer/add-car', icon: PlusCircle, label: 'Sell' },
     { key: 'favorites', href: '/favorites', icon: Heart, label: 'Saved' },
     { key: 'account', href: getAccountHref(), icon: User, label: authUser ? 'Account' : 'Sign In' },
   ];
+
+  const PREFETCH_ROUTES: Record<string, () => Promise<any>> = {
+    gallery: () => import('../../pages/Gallery'),
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[999] bg-charcoal-950 border-t border-white/5 pb-safe flex h-16 lg:hidden">
@@ -57,6 +61,7 @@ export default function MobileBottomNav({ authUser }: MobileBottomNavProps) {
           <Link
             key={tab.key}
             to={tab.href}
+            onPointerEnter={() => PREFETCH_ROUTES[tab.key]?.()}
             className={`
               flex-1 flex flex-col items-center justify-center gap-0.5
               text-[10px] font-semibold no-underline transition-colors

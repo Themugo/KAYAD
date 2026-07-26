@@ -311,6 +311,10 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
             <img
               src={carImages[activeImage]}
               alt={`${car.make} ${car.model}`}
+              width={800}
+              height={450}
+              loading="lazy"
+              decoding="async"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
             {/* Overlay gradient */}
@@ -422,6 +426,10 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                 <img
                   src={img}
                   alt=""
+                  width={112}
+                  height={80}
+                  loading="lazy"
+                  decoding="async"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               </button>
@@ -1477,6 +1485,10 @@ export default function CarDetail({ car, setPage, viewCar }: CarDetailProps) {
                   <img
                     src={sc.image}
                     alt={`${sc.make} ${sc.model}`}
+                    width={400}
+                    height={300}
+                    loading="lazy"
+                    decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 </div>

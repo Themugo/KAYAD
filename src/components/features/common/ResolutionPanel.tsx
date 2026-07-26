@@ -42,7 +42,7 @@ export default function ResolutionPanel({
 
     try {
       // TODO: Call API to submit resolution
-      console.log('Submitting resolution:', finalResolution);
+
       onSubmitResolution?.(finalResolution);
     } catch (error) {
       console.error('Failed to submit resolution:', error);

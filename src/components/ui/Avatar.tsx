@@ -91,6 +91,8 @@ export function Avatar({
         <img
           src={src}
           alt={alt || name}
+          loading="lazy"
+          decoding="async"
           onError={() => setImageError(true)}
           className={`
             ${sizes[size]}

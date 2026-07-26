@@ -71,6 +71,8 @@ export default function CarCard({
           <LazyImage
             src={car.image}
             alt={`${car.make} ${car.model}`}
+            width={400}
+            height={300}
             className="w-full h-full"
             onLoad={() => setImgLoaded(true)}
             style={{ opacity: imgLoaded ? 1 : 0 }}
@@ -201,6 +203,8 @@ export default function CarCard({
         <LazyImage
           src={car.image}
           alt={`${car.make} ${car.model}`}
+          width={400}
+          height={300}
           className="w-full h-full"
           onLoad={() => setImgLoaded(true)}
           style={{ opacity: imgLoaded ? 1 : 0 }}

@@ -211,7 +211,7 @@ export const DealerInventoryCard = memo(function DealerInventoryCard({
   return (
     <div className={`dealer-inventory-card ${className}`}>
       <div className="dealer-inventory-card__image">
-        <img src={car.image || 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800'} alt={car.title} />
+        <img src={car.image || 'https://images.pexels.com/photos/3593922/pexels-photo-3593922.jpeg?auto=compress&cs=tinysrgb&w=800'} alt={car.title} loading="lazy" decoding="async" />
         <div className="dealer-inventory-card__badges">
           <span className={`dealer-inventory-card__badge dealer-inventory-card__badge--${statusMap[car.status] || 'active'}`}>
             {car.status || 'Active'}

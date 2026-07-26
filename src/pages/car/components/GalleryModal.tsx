@@ -86,6 +86,8 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
         <img
           src={src}
           alt={car?.title || 'Vehicle'}
+          loading="lazy"
+          decoding="async"
           className="max-w-full max-h-full object-contain transition-transform duration-200"
           style={{ transform: `scale(${zoom})` }}
           onError={(e) => {
@@ -156,7 +158,7 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
                     : 'opacity-50 hover:opacity-80'
                 }`}
               >
-                <img src={thumbSrc} alt="" className="w-full h-full object-cover" />
+                <img src={thumbSrc} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
               </button>
             );
           })}

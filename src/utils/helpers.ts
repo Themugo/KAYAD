@@ -123,9 +123,13 @@ export const copyToClipboard = async (text) => {
 };
 
 // ─── Cloudinary Image Helpers ───────────────────────────
-export const getCloudinarySrcSet = (src) => {
+export const getCloudinarySrcSet = (src: string | undefined | null): { src: string; srcSet?: string } | null => {
   if (!src) return null;
-  // Return the same URL for srcSet - actual Cloudinary transformations
-  // would be handled server-side or via URL parameters
-  return src;
+  if (src.includes('res.cloudinary.com')) {
+    return {
+      src,
+      srcSet: `${src.replace('/image/upload/', '/image/upload/w_400/')} 400w, ${src.replace('/image/upload/', '/image/upload/w_800/')} 800w, ${src.replace('/image/upload/', '/image/upload/w_1200/')} 1280w`,
+    };
+  }
+  return { src };
 };

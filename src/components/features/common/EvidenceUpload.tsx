@@ -35,7 +35,7 @@ export default function EvidenceUpload({
     // Placeholder for upload logic
     try {
       // TODO: Implement actual upload
-      console.log('Uploading files for dispute:', disputeId, files);
+
     } catch (err) {
       setError('Upload failed. Please try again.');
     } finally {

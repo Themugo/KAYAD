@@ -51,6 +51,66 @@ const AUTH_NAV_ITEMS = [
   { key: 'favorites', label: 'Watchlist', path: '/favorites', icon: Heart },
 ];
 
+const NS = {
+  navBar: {
+    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+    color: 'var(--c-navbar-text, #ffffff)',
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
+  },
+  logo: { color: 'var(--c-navbar-accent, #e94560)' },
+  iconBtn: { color: 'var(--c-navbar-text, #ffffff)' },
+  sellBtn: {
+    backgroundColor: 'var(--c-navbar-accent, #e94560)',
+    color: '#ffffff',
+  },
+  avatarCircle: {
+    backgroundColor: 'var(--c-navbar-accent, #e94560)',
+    color: '#ffffff',
+  },
+  dropdown: {
+    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  dropdownBorder: { borderColor: 'rgba(255,255,255,0.1)' },
+  menuItemText: { color: 'var(--c-navbar-text, #ffffff)' },
+  roleBadge: {
+    backgroundColor: 'rgba(233, 69, 96, 0.15)',
+    color: 'var(--c-navbar-accent, #e94560)',
+  },
+  divider: { borderColor: 'rgba(255,255,255,0.1)' },
+  searchPanel: {
+    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+  },
+  searchIcon: { color: 'var(--c-navbar-text, #ffffff)' },
+  searchInput: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(255,255,255,0.15)',
+    color: 'var(--c-navbar-text, #ffffff)',
+  },
+  searchClear: { color: 'var(--c-navbar-text, #ffffff)', opacity: 0.5 },
+  mobilePanel: {
+    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
+    color: 'var(--c-navbar-text, #ffffff)',
+  },
+  registerBtn: {
+    backgroundColor: 'transparent',
+    color: 'var(--c-navbar-text, #ffffff)',
+    border: '1.5px solid rgba(255,255,255,0.25)',
+  },
+  mobileSignOut: { color: 'var(--c-navbar-accent, #e94560)' },
+};
+
+const getNavItemStyle = (isActive: boolean): React.CSSProperties => ({
+  color: isActive
+    ? 'var(--c-navbar-accent, #e94560)'
+    : 'var(--c-navbar-text, #ffffff)',
+  backgroundColor: isActive
+    ? 'rgba(233, 69, 96, 0.1)'
+    : 'transparent',
+});
+
 export default function Navbar({ currentPage, setPage, authUser, onSignOut }: NavbarProps) {
   const { theme } = useDesignTheme();
   const layout = theme.layouts.navbar;
@@ -131,12 +191,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
     <>
       <nav
         className="fixed top-0 left-0 right-0 z-50 font-sans"
-        style={{
-          backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-          color: 'var(--c-navbar-text, #ffffff)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
+        style={NS.navBar}
       >
         <div
           className={`mx-auto flex w-full max-w-7xl px-4 py-3 ${innerClass}`}
@@ -146,7 +201,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
             <button
               onClick={() => handleNav('/', 'home')}
               className="flex items-center gap-1 text-xl font-bold font-sans tracking-tight cursor-pointer bg-transparent border-none"
-              style={{ color: 'var(--c-navbar-accent, #e94560)' }}
+              style={NS.logo}
             >
               KAYAD
             </button>
@@ -164,16 +219,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                       ? 'nav-link active'
                       : ''
                   }`}
-                  style={{
-                    color:
-                      currentPage === item.key
-                        ? 'var(--c-navbar-accent, #e94560)'
-                        : 'var(--c-navbar-text, #ffffff)',
-                    backgroundColor:
-                      currentPage === item.key
-                        ? 'rgba(233, 69, 96, 0.1)'
-                        : 'transparent',
-                  }}
+                  style={getNavItemStyle(currentPage === item.key)}
                 >
                   {item.label}
                 </button>
@@ -186,16 +232,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
                       currentPage === item.key ? 'nav-link active' : ''
                     }`}
-                    style={{
-                      color:
-                        currentPage === item.key
-                          ? 'var(--c-navbar-accent, #e94560)'
-                          : 'var(--c-navbar-text, #ffffff)',
-                      backgroundColor:
-                        currentPage === item.key
-                          ? 'rgba(233, 69, 96, 0.1)'
-                          : 'transparent',
-                    }}
+                    style={getNavItemStyle(currentPage === item.key)}
                   >
                     {item.label}
                   </button>
@@ -213,16 +250,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
                     currentPage === item.key ? 'nav-link active' : ''
                   }`}
-                  style={{
-                    color:
-                      currentPage === item.key
-                        ? 'var(--c-navbar-accent, #e94560)'
-                        : 'var(--c-navbar-text, #ffffff)',
-                    backgroundColor:
-                      currentPage === item.key
-                        ? 'rgba(233, 69, 96, 0.1)'
-                        : 'transparent',
-                  }}
+                  style={getNavItemStyle(currentPage === item.key)}
                 >
                   {item.label}
                 </button>
@@ -235,16 +263,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
                       currentPage === item.key ? 'nav-link active' : ''
                     }`}
-                    style={{
-                      color:
-                        currentPage === item.key
-                          ? 'var(--c-navbar-accent, #e94560)'
-                          : 'var(--c-navbar-text, #ffffff)',
-                      backgroundColor:
-                        currentPage === item.key
-                          ? 'rgba(233, 69, 96, 0.1)'
-                          : 'transparent',
-                    }}
+                    style={getNavItemStyle(currentPage === item.key)}
                   >
                     {item.label}
                   </button>
@@ -258,7 +277,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
             <button
               onClick={() => setSearchOpen((v) => !v)}
               className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+              style={NS.iconBtn}
               aria-label="Toggle search"
             >
               {searchOpen ? <X size={20} /> : <Search size={20} />}
@@ -271,7 +290,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   {/* Notifications bell */}
                   <button
                     className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-                    style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    style={NS.iconBtn}
                     aria-label="Notifications"
                   >
                     <Bell size={20} />
@@ -281,10 +300,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   <button
                     onClick={() => handleNav('/dealer/add-car', 'sell')}
                     className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                    style={{
-                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                      color: '#ffffff',
-                    }}
+                    style={NS.sellBtn}
                   >
                     Sell a Vehicle
                   </button>
@@ -294,14 +310,11 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     <button
                       onClick={() => setUserMenuOpen((v) => !v)}
                       className="flex items-center gap-2 px-2 py-1 rounded-full cursor-pointer bg-transparent border-none"
-                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                      style={NS.iconBtn}
                     >
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{
-                          backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                          color: '#ffffff',
-                        }}
+                        style={NS.avatarCircle}
                       >
                         {userInitials}
                       </div>
@@ -314,33 +327,27 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     {userMenuOpen && (
                       <div
                         className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl border overflow-hidden font-sans"
-                        style={{
-                          backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-                          borderColor: 'rgba(255,255,255,0.1)',
-                        }}
+                        style={NS.dropdown}
                       >
                         <div
                           className="px-4 py-3 border-b"
-                          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                          style={NS.dropdownBorder}
                         >
                           <p
                             className="text-sm font-semibold"
-                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            style={NS.menuItemText}
                           >
                             {authUser.name}
                           </p>
                           <p
                             className="text-xs opacity-60"
-                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            style={NS.menuItemText}
                           >
                             {authUser.email}
                           </p>
                           <span
                             className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={{
-                              backgroundColor: 'rgba(233, 69, 96, 0.15)',
-                              color: 'var(--c-navbar-accent, #e94560)',
-                            }}
+                            style={NS.roleBadge}
                           >
                             {ROLE_LABEL[authUser.role] || authUser.role}
                           </span>
@@ -352,7 +359,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     handleNav(dashPath, 'dashboard');
                   }}
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            style={NS.menuItemText}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.backgroundColor =
                                 'rgba(255,255,255,0.05)')
@@ -370,7 +377,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                                 handleNav('/theme-studio', 'theme-studio');
                               }}
                               className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              style={NS.menuItemText}
                               onMouseEnter={(e) =>
                                 (e.currentTarget.style.backgroundColor =
                                   'rgba(255,255,255,0.05)')
@@ -389,7 +396,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                                 handleNav('/admin', 'admin');
                               }}
                               className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              style={NS.menuItemText}
                               onMouseEnter={(e) =>
                                 (e.currentTarget.style.backgroundColor =
                                   'rgba(255,255,255,0.05)')
@@ -408,7 +415,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                                 handleNav('/dealer-verify', 'dealer-verify');
                               }}
                               className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                              style={NS.menuItemText}
                               onMouseEnter={(e) =>
                                 (e.currentTarget.style.backgroundColor =
                                   'rgba(255,255,255,0.05)')
@@ -424,7 +431,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                         </div>
                         <div
                           className="border-t py-1"
-                          style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                          style={NS.divider}
                         >
                           <button
                             onClick={() => {
@@ -432,7 +439,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                               onSignOut();
                             }}
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                            style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                            style={NS.menuItemText}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.backgroundColor =
                                 'rgba(233, 69, 96, 0.1)')
@@ -456,21 +463,14 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   <button
                     onClick={() => handleNav('/register', 'register')}
                     className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
-                    style={{
-                      backgroundColor: 'transparent',
-                      color: 'var(--c-navbar-text, #ffffff)',
-                      border: '1.5px solid rgba(255,255,255,0.25)',
-                    }}
+                    style={NS.registerBtn}
                   >
                     Register
                   </button>
                   <button
                     onClick={() => handleNav('/login', 'login')}
                     className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                    style={{
-                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                      color: '#ffffff',
-                    }}
+                    style={NS.sellBtn}
                   >
                     <LogIn size={16} />
                     Sign In
@@ -483,7 +483,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
             <button
               onClick={() => setMobileOpen((v) => !v)}
               className="md:hidden p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-              style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+              style={NS.iconBtn}
               aria-label="Toggle menu"
             >
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
@@ -495,10 +495,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
         {searchOpen && (
           <div
             className="border-t"
-            style={{
-              borderColor: 'rgba(255,255,255,0.1)',
-              backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-            }}
+            style={NS.searchPanel}
           >
             <form
               onSubmit={handleSearchSubmit}
@@ -508,7 +505,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <Search
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
-                  style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                  style={NS.searchIcon}
                 />
                 <input
                   ref={searchInputRef}
@@ -517,18 +514,14 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for cars, makes, models..."
                   className="w-full pl-10 pr-10 py-2.5 rounded-full text-sm border outline-none font-sans"
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    borderColor: 'rgba(255,255,255,0.15)',
-                    color: 'var(--c-navbar-text, #ffffff)',
-                  }}
+                  style={NS.searchInput}
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer bg-transparent border-none p-0"
-                    style={{ color: 'var(--c-navbar-text, #ffffff)', opacity: 0.5 }}
+                    style={NS.searchClear}
                   >
                     <X size={16} />
                   </button>
@@ -551,22 +544,19 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
           <div
             ref={mobileMenuRef}
             className="absolute right-0 top-0 bottom-0 w-72 shadow-2xl overflow-y-auto font-sans"
-            style={{
-              backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-              color: 'var(--c-navbar-text, #ffffff)',
-            }}
+            style={NS.mobilePanel}
           >
-            <div className="flex items-center justify-between px-4 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="flex items-center justify-between px-4 py-4 border-b" style={NS.divider}>
               <span
                 className="text-lg font-bold tracking-tight"
-                style={{ color: 'var(--c-navbar-accent, #e94560)' }}
+                style={NS.logo}
               >
                 KAYAD
               </span>
               <button
                 onClick={() => setMobileOpen(false)}
                 className="p-1.5 rounded-full cursor-pointer bg-transparent border-none"
-                style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                style={NS.iconBtn}
               >
                 <X size={20} />
               </button>
@@ -578,7 +568,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <Search
                   size={16}
                   className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
-                  style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                  style={NS.searchIcon}
                 />
                 <input
                   type="text"
@@ -586,11 +576,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search cars..."
                   className="w-full pl-9 pr-4 py-2 rounded-full text-sm border outline-none font-sans"
-                  style={{
-                    backgroundColor: 'rgba(255,255,255,0.08)',
-                    borderColor: 'rgba(255,255,255,0.15)',
-                    color: 'var(--c-navbar-text, #ffffff)',
-                  }}
+                  style={NS.searchInput}
                 />
               </div>
             </form>
@@ -606,16 +592,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
                       currentPage === item.key ? 'nav-link active' : ''
                     }`}
-                    style={{
-                      color:
-                        currentPage === item.key
-                          ? 'var(--c-navbar-accent, #e94560)'
-                          : 'var(--c-navbar-text, #ffffff)',
-                      backgroundColor:
-                        currentPage === item.key
-                          ? 'rgba(233, 69, 96, 0.1)'
-                          : 'transparent',
-                    }}
+                    style={getNavItemStyle(currentPage === item.key)}
                   >
                     <Icon size={18} />
                     {item.label}
@@ -632,16 +609,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                       className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
                         currentPage === item.key ? 'nav-link active' : ''
                       }`}
-                      style={{
-                        color:
-                          currentPage === item.key
-                            ? 'var(--c-navbar-accent, #e94560)'
-                            : 'var(--c-navbar-text, #ffffff)',
-                        backgroundColor:
-                          currentPage === item.key
-                            ? 'rgba(233, 69, 96, 0.1)'
-                            : 'transparent',
-                      }}
+                      style={getNavItemStyle(currentPage === item.key)}
                     >
                       <Icon size={18} />
                       {item.label}
@@ -650,7 +618,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 })}
             </div>
 
-            <div className="border-t my-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+            <div className="border-t my-2" style={NS.divider} />
 
             {/* Mobile user section */}
             {authUser && (
@@ -658,18 +626,15 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                    style={{
-                      backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                      color: '#ffffff',
-                    }}
+                    style={NS.sellBtn}
                   >
                     {userInitials}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: 'var(--c-navbar-text, #ffffff)' }}>
+                    <p className="text-sm font-semibold truncate" style={NS.menuItemText}>
                       {authUser.name}
                     </p>
-                    <p className="text-xs opacity-60 truncate" style={{ color: 'var(--c-navbar-text, #ffffff)' }}>
+                    <p className="text-xs opacity-60 truncate" style={NS.menuItemText}>
                       {authUser.email}
                     </p>
                   </div>
@@ -679,7 +644,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   <button
                     onClick={() => handleNav('/dashboard', 'dashboard')}
                     className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                    style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                    style={NS.menuItemText}
                   >
                     <LayoutDashboard size={16} />
                     Dashboard
@@ -688,7 +653,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     <button
                       onClick={() => handleNav('/theme-studio', 'theme-studio')}
                       className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                      style={NS.menuItemText}
                     >
                       <Palette size={16} />
                       Theme Studio
@@ -698,7 +663,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     <button
                       onClick={() => handleNav('/admin', 'admin')}
                       className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                      style={NS.menuItemText}
                     >
                       <Shield size={16} />
                       Admin Panel
@@ -708,7 +673,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                     <button
                       onClick={() => handleNav('/dealer-verify', 'dealer-verify')}
                       className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={{ color: 'var(--c-navbar-text, #ffffff)' }}
+                      style={NS.menuItemText}
                     >
                       <ClipboardCheck size={16} />
                       Dealer Verification
@@ -716,14 +681,14 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                   )}
                 </div>
 
-                <div className="border-t mt-2 pt-2" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+                <div className="border-t mt-2 pt-2" style={NS.divider}>
                   <button
                     onClick={() => {
                       setMobileOpen(false);
                       onSignOut();
                     }}
                     className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                    style={{ color: 'var(--c-navbar-accent, #e94560)' }}
+                    style={NS.mobileSignOut}
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -737,10 +702,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <button
                   onClick={() => handleNav('/login', 'login')}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                  style={{
-                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                    color: '#ffffff',
-                  }}
+                  style={NS.sellBtn}
                 >
                   <LogIn size={16} />
                   Sign In
@@ -748,11 +710,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <button
                   onClick={() => handleNav('/register', 'register')}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: 'var(--c-navbar-text, #ffffff)',
-                    border: '1.5px solid rgba(255,255,255,0.25)',
-                  }}
+                  style={NS.registerBtn}
                 >
                   Register
                 </button>
@@ -765,10 +723,7 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
                 <button
                   onClick={() => handleNav('/dealer/add-car', 'sell')}
                   className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                  style={{
-                    backgroundColor: 'var(--c-navbar-accent, #e94560)',
-                    color: '#ffffff',
-                  }}
+                  style={NS.sellBtn}
                 >
                   <Tag size={16} />
                   Sell a Vehicle

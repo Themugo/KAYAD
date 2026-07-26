@@ -124,6 +124,8 @@ export const ChatDrawer: React.FC = () => {
                 <img
                   src={targetVehicle.images[0]}
                   alt={targetVehicle.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-10 rounded-lg object-cover border border-[#00C9CE]/30"
                 />
                 <div className="min-w-0">

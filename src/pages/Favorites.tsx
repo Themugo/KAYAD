@@ -145,6 +145,8 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
                   <img
                     src={favorite.image}
                     alt={`${favorite.make} ${favorite.model}`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>

@@ -207,7 +207,7 @@ export default function Chat() {
                 <p className="font-sans text-xs text-warm-500 truncate mt-0.5">{conv.lastMessage}</p>
                 {conv.car && (
                   <div className="flex items-center gap-2 mt-2 p-2 bg-cream-50 rounded-lg">
-                    <img src={conv.car.image} alt="" className="w-8 h-8 rounded object-cover" />
+                    <img src={conv.car.image} alt="" loading="lazy" decoding="async" className="w-8 h-8 rounded object-cover" />
                     <div className="flex-1 min-w-0">
                       <p className="font-sans text-[10px] text-charcoal-800 truncate">{conv.car.title}</p>
                       <p className="font-sans text-[10px] text-gold-600 font-semibold">{formatKES(conv.car.price)}</p>
@@ -258,7 +258,7 @@ export default function Chat() {
             {/* Car info banner */}
             {selectedConversation.car && (
               <div className="px-4 py-3 bg-cream-50 border-b border-cream-200 flex items-center gap-3">
-                <img src={selectedConversation.car.image} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                <img src={selectedConversation.car.image} alt="" loading="lazy" decoding="async" className="w-12 h-12 rounded-lg object-cover" />
                 <div className="flex-1 min-w-0">
                   <p className="font-sans text-xs text-charcoal-800 font-semibold truncate">{selectedConversation.car.title}</p>
                   <p className="font-sans text-xs text-gold-600 font-bold">{formatKES(selectedConversation.car.price)}</p>

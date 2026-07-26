@@ -449,6 +449,10 @@ export const VehicleDetailPage: React.FC = () => {
                 <img
                   src={images[activeImgIndex]}
                   alt={`${formattedFullTitle} - Image ${activeImgIndex + 1}`}
+                  width={800}
+                  height={600}
+                  loading="lazy"
+                  decoding="async"
                   onLoad={() => setIsImageLoading(false)}
                   onError={() => {
                     setIsImageLoading(false);
@@ -551,7 +555,7 @@ export const VehicleDetailPage: React.FC = () => {
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img src={img} alt={`Thumb ${idx + 1}`} width={112} height={80} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-[#1E3063]/90 text-white px-1.5 py-0.2 rounded">
                     #{idx + 1}
                   </span>
@@ -1064,6 +1068,10 @@ export const VehicleDetailPage: React.FC = () => {
             <img
               src={images[activeImgIndex]}
               alt={`Fullscreen ${vehicle.title} ${activeImgIndex + 1}`}
+              width={800}
+              height={600}
+              loading="lazy"
+              decoding="async"
               className={`max-h-full max-w-full object-contain transition-transform duration-300 ${
                 isZoomed ? 'scale-150 cursor-grab' : 'scale-100'
               }`}
@@ -1098,7 +1106,7 @@ export const VehicleDetailPage: React.FC = () => {
                     : 'border-transparent opacity-50 hover:opacity-100'
                 }`}
               >
-                <img src={img} alt={`Modal thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                <img src={img} alt={`Modal thumb ${idx + 1}`} width={80} height={56} loading="lazy" decoding="async" className="w-full h-full object-cover" />
               </button>
             ))}
           </div>

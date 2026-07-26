@@ -53,6 +53,9 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
         onError={() => setErr(true)}
         onLoad={() => setLoaded(true)}
         alt={car?.title || 'Vehicle'}
+        width={800}
+        height={450}
+        loading="lazy"
         decoding="async"
         className="w-full h-full object-cover transition-opacity duration-500"
         style={{ opacity: loaded ? 1 : 0.3 }}
@@ -136,6 +139,8 @@ export function GalleryThumbnails({ car, selectedIdx, onSelect }: GalleryThumbna
             <img
               src={src || 'https://placehold.co/64x48/1a1a1a/D4C4A8?text=Car'}
               alt={`View ${idx + 1}`}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover"
             />
           </button>
