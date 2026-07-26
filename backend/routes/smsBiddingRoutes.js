@@ -17,7 +17,10 @@ const router = Router();
 const SMS_WEBHOOK_API_KEY = process.env.SMS_WEBHOOK_API_KEY;
 const requireWebhookApiKey = (req, res, next) => {
   if (!SMS_WEBHOOK_API_KEY) {
-    // No key configured — allow through (dev mode)
+    // No key configured — block in production, allow in dev
+    if (process.env.NODE_ENV === "production") {
+      return res.status(401).json({ success: false, message: "SMS webhook not configured" });
+    }
     return next();
   }
   const key = req.headers["x-api-key"] || req.query.api_key;

@@ -189,9 +189,11 @@ router.get(
 // 📈 TRACKING (ANTI-SPAM READY)
 // =============================
 
-// 👁 TRACK CLICK
+// 👁 TRACK CLICK (rate-limited, optional auth to prevent bot inflation)
 router.post(
   "/:id/click",
+  optionalAuth,
+  createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
     const car = await findById("cars", req.params.id, "clicks");
@@ -201,9 +203,11 @@ router.post(
   }),
 );
 
-// ❤️ TRACK FAVORITE (NEW 🔥)
+// ❤️ TRACK FAVORITE (rate-limited, optional auth to prevent bot inflation)
 router.post(
   "/:id/favorite",
+  optionalAuth,
+  createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
     const car = await findById("cars", req.params.id, "favoritesCount");
@@ -515,6 +519,8 @@ router.post(
 // =============================
 router.post(
   "/batch",
+  protect,
+  createLimiter,
   asyncHandler(async (req, res) => {
     const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0 || ids.length > 10) {

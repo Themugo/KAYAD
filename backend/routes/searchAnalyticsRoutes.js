@@ -36,31 +36,31 @@ router.get("/trending", validateQuery(analyticsQuerySchema), asyncHandler(getTre
 // =============================
 
 // Get no-result searches
-router.get("/no-results", adminOnly, asyncHandler(getNoResultSearchesHandler));
+router.get("/no-results", protect, adminOnly, asyncHandler(getNoResultSearchesHandler));
 
 // Get popular filters
-router.get("/filters", adminOnly, asyncHandler(getPopularFiltersHandler));
+router.get("/filters", protect, adminOnly, asyncHandler(getPopularFiltersHandler));
 
 // Get county search stats
-router.get("/counties", adminOnly, asyncHandler(getCountySearchStatsHandler));
+router.get("/counties", protect, adminOnly, asyncHandler(getCountySearchStatsHandler));
 
 // Get price range stats
-router.get("/price-ranges", adminOnly, asyncHandler(getPriceRangeStatsHandler));
+router.get("/price-ranges", protect, adminOnly, asyncHandler(getPriceRangeStatsHandler));
 
 // Get brand/model stats
-router.get("/brands", adminOnly, asyncHandler(getBrandModelStatsHandler));
+router.get("/brands", protect, adminOnly, asyncHandler(getBrandModelStatsHandler));
 
 // Get missing inventory report
-router.get("/missing-inventory", adminOnly, asyncHandler(getMissingInventoryReportHandler));
+router.get("/missing-inventory", protect, adminOnly, asyncHandler(getMissingInventoryReportHandler));
 
 // Get search demand report
-router.get("/demand-report", adminOnly, asyncHandler(getSearchDemandReportHandler));
+router.get("/demand-report", protect, adminOnly, asyncHandler(getSearchDemandReportHandler));
 
 // Get comprehensive insights
-router.get("/insights", adminOnly, asyncHandler(getSearchInsightsHandler));
+router.get("/insights", protect, adminOnly, asyncHandler(getSearchInsightsHandler));
 
 // Get search summary
-router.get("/summary", adminOnly, asyncHandler(getSearchSummaryHandler));
+router.get("/summary", protect, adminOnly, asyncHandler(getSearchSummaryHandler));
 
 // =============================
 // 🏪 DEALER ROUTES

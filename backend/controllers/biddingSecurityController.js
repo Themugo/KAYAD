@@ -1,6 +1,5 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import BidderDeposit from "../models/BidderDeposit.js";
-import BidLog from "../models/BidLog.js";
 import Escrow from "../models/Escrow.js";
 import User from "../models/User.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";

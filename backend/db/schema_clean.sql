@@ -1601,5 +1601,110 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================
+-- C3: MISSING TABLES FOR MONGOOSE MODEL REPLACEMENT
+-- These tables back features that were previously MongoDB-only.
+-- =====================================================
+
+-- Transaction ledger (richer than the base transactions table)
+CREATE TABLE IF NOT EXISTS transaction_ledger (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ledger_id TEXT UNIQUE NOT NULL,
+  escrow_id UUID REFERENCES escrows(id),
+  car_id UUID REFERENCES cars(id),
+  from_user UUID REFERENCES users(id),
+  to_user UUID REFERENCES users(id),
+  amount NUMERIC NOT NULL,
+  currency TEXT DEFAULT 'KES',
+  type TEXT NOT NULL,
+  description TEXT,
+  metadata JSONB DEFAULT '{}',
+  transaction_hash TEXT,
+  previous_hash TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  verified_at TIMESTAMPTZ,
+  verified_by UUID REFERENCES users(id),
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_escrow ON transaction_ledger(escrow_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_hash ON transaction_ledger(transaction_hash);
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_type ON transaction_ledger(type);
+
+-- Localization / translations
+CREATE TABLE IF NOT EXISTS localizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  namespace TEXT NOT NULL DEFAULT 'common',
+  key TEXT NOT NULL,
+  locale TEXT NOT NULL DEFAULT 'en',
+  value TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(namespace, key, locale)
+);
+CREATE INDEX IF NOT EXISTS idx_localizations_locale ON localizations(locale);
+CREATE INDEX IF NOT EXISTS idx_localizations_namespace ON localizations(namespace);
+
+-- User preferences
+CREATE TABLE IF NOT EXISTS user_preferences (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  theme TEXT DEFAULT 'light',
+  language TEXT DEFAULT 'en',
+  notifications JSONB DEFAULT '{}',
+  privacy JSONB DEFAULT '{}',
+  display JSONB DEFAULT '{}',
+  bidding JSONB DEFAULT '{}',
+  search JSONB DEFAULT '{}',
+  accessibility JSONB DEFAULT '{}',
+  recent_searches JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_user_preferences_user ON user_preferences(user_id);
+
+-- Bidder deposits
+CREATE TABLE IF NOT EXISTS bidder_deposits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  auction_id UUID REFERENCES auctions(id),
+  amount NUMERIC NOT NULL,
+  status TEXT DEFAULT 'held' CHECK (status IN ('held','refunded','forfeited')),
+  mpesa_receipt TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_bidder_deposits_user ON bidder_deposits(user_id);
+CREATE INDEX IF NOT EXISTS idx_bidder_deposits_auction ON bidder_deposits(auction_id);
+
+-- Bid logs (detailed audit trail for bids)
+CREATE TABLE IF NOT EXISTS bid_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  bid_id UUID REFERENCES bids(id),
+  user_id UUID REFERENCES users(id),
+  auction_id UUID REFERENCES auctions(id),
+  car_id UUID REFERENCES cars(id),
+  amount NUMERIC NOT NULL,
+  previous_amount NUMERIC,
+  increment NUMERIC,
+  source TEXT DEFAULT 'web',
+  ip_address TEXT,
+  user_agent TEXT,
+  pseudonym TEXT,
+  is_proxy BOOLEAN DEFAULT false,
+  display_order INTEGER,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_bid_logs_bid ON bid_logs(bid_id);
+CREATE INDEX IF NOT EXISTS idx_bid_logs_auction ON bid_logs(auction_id);
+CREATE INDEX IF NOT EXISTS idx_bid_logs_user ON bid_logs(user_id);
+
+DROP TRIGGER IF EXISTS set_updated_at ON localizations;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON localizations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON user_preferences;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON user_preferences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+DROP TRIGGER IF EXISTS set_updated_at ON bidder_deposits;
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON bidder_deposits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
 -- END OF AUDIT FIXES
 -- =====================================================

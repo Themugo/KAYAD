@@ -44,7 +44,7 @@ router.post(
 // =============================
 // 📊 GET BIDS FOR A CAR
 // =============================
-router.get("/:id/bids", validateObjectId, validateQuery(bidListQuerySchema), asyncHandler(getAuctionBids));
+router.get("/:id/bids", protect, validateObjectId, validateQuery(bidListQuerySchema), asyncHandler(getAuctionBids));
 
 // =============================
 // 📲 MPESA CALLBACK (SAFE ENTRY) - Idempotent to prevent duplicate callbacks

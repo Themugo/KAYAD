@@ -3,6 +3,7 @@ import InspectorApplication from "../models/InspectorApplication.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
+import { createLimiter } from "../middleware/rateLimiter.js";
 import {
   submitApplication,
   approveApplication,
@@ -15,7 +16,7 @@ import {
 const router = Router();
 
 router.get("/active", asyncHandler(listActiveInspectors));
-router.post("/apply", asyncHandler(submitApplication));
+router.post("/apply", createLimiter, asyncHandler(submitApplication));
 
 router.get(
   "/my",

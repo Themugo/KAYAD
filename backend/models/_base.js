@@ -45,6 +45,9 @@ const TABLE_MAP = {
   Event: "events", DuplicateVehicleLog: "duplicate_vehicle_logs",
   Referral: "referrals", Feedback: "feedback",
   DemandSignals: "demand_signals", GlobalSettings: "global_settings",
+  TransactionLedger: "transaction_ledger", Localization: "localizations",
+  UserPreference: "user_preferences", BidderDeposit: "bidder_deposits",
+  BidLog: "bid_logs",
 };
 
 // ────────────────────────────────────────────────────────────────

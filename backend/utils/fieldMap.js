@@ -55,6 +55,28 @@ export const FIELD_ALIASES = {
     seller: "seller_id",
     car: "car_id",
   },
+  user_auth: {
+    user: "user_id",
+  },
+  user_preferences: {
+    user: "user_id",
+  },
+  bidder_deposits: {
+    user: "user_id",
+    auction: "auction_id",
+  },
+  bid_logs: {
+    bid: "bid_id",
+    user: "user_id",
+    auction: "auction_id",
+    car: "car_id",
+  },
+  transaction_ledger: {
+    fromUser: "from_user",
+    toUser: "to_user",
+    car: "car_id",
+    escrow: "escrow_id",
+  },
 };
 
 export const REVERSE_FIELD_ALIASES = Object.fromEntries(
@@ -110,7 +132,7 @@ export function normalizeSelect(table, fields) {
   } else {
     return "*";
   }
-  names = names.filter(Boolean).filter((n) => n !== "score"); // "score" is a $text virtual, not a real column
+  names = names.map((n) => n.replace(/^\+/, "")).filter(Boolean).filter((n) => n !== "score"); // strip Mongoose +prefix; "score" is a $text virtual
   if (names.length === 0) return "*";
   return names.map((n) => mapKeyOut(table, n)).join(",");
 }

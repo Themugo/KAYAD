@@ -507,14 +507,20 @@ const io = new Server(server, {
 app.set("io", io);
 setIO(io);
 
-// Socket JWT auth
+// Socket JWT auth — reject unauthenticated users for sensitive rooms
 io.use((socket, next) => {
   try {
     const token = socket.handshake.auth?.token;
-    if (token) socket.user = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    if (token) {
+      socket.user = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+      return next();
+    }
+    // Allow unauthenticated viewers for public auction watching only
+    socket.user = null;
     next();
   } catch {
-    next(); // allow unauthenticated viewers
+    socket.user = null;
+    next();
   }
 });
 
@@ -552,7 +558,7 @@ io.on("connection", (socket) => {
       socket.join(`car_${carId}`);
       const { getSupabase } = await import("./utils/supabase.js");
       const sb = getSupabase();
-      const { data: car } = await sb.from("cars").select("current_bid, auction_end, auction_status, highest_bidder_id").eq("id", carId).single();
+      const { data: car } = await sb.from("cars").select("current_bid, auction_end, auction_status").eq("id", carId).single();
       if (car) {
         socket.emit("auctionResync", {
           carId,
@@ -565,12 +571,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinChat", (chatId) => {
+    if (!socket.user) return; // reject unauthenticated chat access
     if (!isRateLimited("joinChat") && isValidId(chatId)) socket.join(`chat_${chatId}`);
   });
   socket.on("leaveChat", (chatId) => {
     if (!isRateLimited("leaveChat") && isValidId(chatId)) socket.leave(`chat_${chatId}`);
   });
   socket.on("typing", ({ chatId, userId, name }) => {
+    if (!socket.user) return; // reject unauthenticated typing
     if (!isRateLimited("typing") && chatId) socket.to(`chat_${chatId}`).emit("typing", { chatId, userId, name });
   });
   socket.on("joinAdmin", () => {

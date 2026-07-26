@@ -345,9 +345,9 @@ export const paginate = async (table, options = {}) => {
 
 // ── RAW QUERY ──────────────────────────────────────────────────
 
-export const rawQuery = async (queryString, params = []) => {
-  const sb = getSupabase();
-  const { data, error } = await sb.rpc('exec_sql', { query_text: queryString, query_params: params });
-  if (error) throw error;
-  return data;
+// SAFETY: rawQuery is intentionally disabled. The previous implementation
+// accepted arbitrary SQL via an exec_sql RPC — a critical SQL injection / RCE risk.
+// Use parameterized queries through the typed helpers above instead.
+export const rawQuery = async () => {
+  throw new Error("rawQuery is disabled for security. Use findAll/findOne/create/update instead.");
 };
