@@ -50,7 +50,10 @@ export const sendNotification = async ({ userId, title, message, type = "info", 
     }
 
     if (email) {
-      sendRawEmail({ to: email, subject: title, html: `<p>${message}</p>` }).catch((e) =>
+      // M-9 FIX: Escape user-controlled content in HTML email to prevent injection.
+      const safeTitle = String(title).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const safeMessage = String(message).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      sendRawEmail({ to: email, subject: safeTitle, html: `<p>${safeMessage}</p>` }).catch((e) =>
         console.warn("⚠️ Notification email failed:", e.message),
       );
     }

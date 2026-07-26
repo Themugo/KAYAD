@@ -652,8 +652,11 @@ router.post("/sessions/revoke-all", protect, asyncHandler(revokeAllSessions));
 // =============================
 // 📞 PHONE VERIFICATION
 // =============================
-router.post("/send-otp", protect, asyncHandler(sendPhoneOTP));
-router.post("/verify-phone", protect, asyncHandler(verifyPhoneOTP));
+// M-11 FIX: Add rate limiting to OTP endpoints to prevent SMS flooding.
+import { otpLimiter } from "../middleware/rateLimiter.js";
+
+router.post("/send-otp", protect, otpLimiter, asyncHandler(sendPhoneOTP));
+router.post("/verify-phone", protect, otpLimiter, asyncHandler(verifyPhoneOTP));
 router.get("/phone-status", protect, asyncHandler(checkPhoneVerification));
 
 export default router;

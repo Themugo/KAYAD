@@ -128,7 +128,9 @@ export const getAllReports = async (req, res) => {
     if (targetType) filter.targetType = targetType;
     if (category) filter.category = category;
     if (search) {
-      filter.description = { $regex: search, $options: "i" };
+      // H-9 FIX: Escape user input to prevent ReDoS.
+      const { escapeRegex } = await import("../utils/escapeRegex.js");
+      filter.description = { $regex: escapeRegex(search), $options: "i" };
     }
 
     const skip = (page - 1) * limit;

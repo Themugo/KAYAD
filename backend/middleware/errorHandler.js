@@ -37,7 +37,9 @@ const errorHandler = (err, req, res, next) => {
     message: err.message || "Server Error",
     ...(requestId && { requestId }),
     ...(err.details && { details: err.details }),
-    ...(process.env.NODE_ENV !== "production" && {
+    // M-8 FIX: Default to production behavior (no stack traces) when NODE_ENV is unset.
+    // Previously the default was "development", which would leak stack traces in production.
+    ...(process.env.NODE_ENV === "production" ? {} : {
       stack: err.stack,
       path: req.originalUrl,
       method: req.method,

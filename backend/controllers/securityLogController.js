@@ -1,11 +1,13 @@
 import SecurityLog from "../models/SecurityLog.js";
 import { logError } from '../infrastructure/logging/index.js';
+import { escapeRegex } from '../utils/escapeRegex.js';
 
 export const getSecurityLogs = async (req, res) => {
   try {
     const { action, severity, actor, page = 1, limit = 50 } = req.query;
     const filter = {};
-    if (action) filter.action = { $regex: action, $options: "i" };
+    // H-9 FIX: Escape user input to prevent ReDoS.
+    if (action) filter.action = { $regex: escapeRegex(action), $options: "i" };
     if (severity) filter.severity = severity;
     if (actor) filter.actor = actor;
 
@@ -41,7 +43,8 @@ export const getMySecurityLogs = async (req, res) => {
   try {
     const { action, page = 1, limit = 30 } = req.query;
     const filter = { actor: req.user.id };
-    if (action) filter.action = { $regex: action, $options: "i" };
+    // H-9 FIX: Escape user input to prevent ReDoS.
+    if (action) filter.action = { $regex: escapeRegex(action), $options: "i" };
 
     const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 200);
 

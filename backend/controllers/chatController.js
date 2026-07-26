@@ -22,7 +22,9 @@ export const startChat = async (req, res) => {
     const participants = [req.user.id, participantId].sort();
 
     const sb = getSupabase();
-    let query = sb.from("chats").select("*").contains("participants", participants);
+    // H-2 FIX: Select specific fields instead of "*" to avoid leaking internal chat data.
+    const CHAT_FIELDS = "id, participants, car, lastMessage, lastMessageAt, isBlocked, createdAt, updatedAt";
+    let query = sb.from("chats").select(CHAT_FIELDS).contains("participants", participants);
     if (carId) query = query.eq("car", carId);
 
     const { data: existing } = await query;
@@ -66,7 +68,7 @@ export const getUserChats = async (req, res) => {
 
     const { data: chats, count: total } = await sb
       .from("chats")
-      .select("*", { count: "exact" })
+      .select(CHAT_FIELDS, { count: "exact" })
       .contains("participants", [req.user.id])
       .order("updatedAt", { ascending: false })
       .range(skip, skip + limit - 1);

@@ -314,10 +314,12 @@ export const searchDuplicates = async (req, res) => {
     const { vin, chassisNumber, registrationNumber, dealerId } = req.query;
 
     const criteria = {};
-    if (vin) criteria["detectionCriteria.vin"] = { $regex: vin, $options: "i" };
-    if (chassisNumber) criteria["detectionCriteria.chassisNumber"] = { $regex: chassisNumber, $options: "i" };
+    // H-9 FIX: Escape user input to prevent ReDoS.
+    const { escapeRegex } = await import("../utils/escapeRegex.js");
+    if (vin) criteria["detectionCriteria.vin"] = { $regex: escapeRegex(vin), $options: "i" };
+    if (chassisNumber) criteria["detectionCriteria.chassisNumber"] = { $regex: escapeRegex(chassisNumber), $options: "i" };
     if (registrationNumber)
-      criteria["detectionCriteria.registrationNumber"] = { $regex: registrationNumber, $options: "i" };
+      criteria["detectionCriteria.registrationNumber"] = { $regex: escapeRegex(registrationNumber), $options: "i" };
     if (dealerId) criteria.dealer = dealerId;
 
     const logs = await DuplicateVehicleLog.find(criteria)

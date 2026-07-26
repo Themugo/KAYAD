@@ -96,12 +96,31 @@ router.get(
   }),
 );
 
+// H-4 FIX: Verify ownership before allowing deletion.
+// Previously any authenticated user could delete any file by publicId.
+// Now we check that the publicId starts with the user's ID or folder prefix,
+// and admins can delete anything.
 router.delete(
   "/:publicId",
   protect,
   asyncHandler(async (req, res) => {
     const { publicId } = req.params;
     if (!publicId) return res.status(400).json({ success: false, message: "No public_id provided" });
+
+    const isAdmin = ["admin", "superadmin"].includes(req.user.role);
+    const userId = String(req.user._id || req.user.id);
+
+    // Ownership check: publicId should start with "kayad/<folder>/" and the folder
+    // should be user-scoped (profiles, temp) or the user must be admin.
+    const isUserScoped = publicId.startsWith(`kayad/profiles/${userId}/`) ||
+      publicId.startsWith(`kayad/temp/${userId}/`) ||
+      publicId.startsWith(`kayad/documents/${userId}/`) ||
+      publicId.startsWith(`kayad/receipts/${userId}/`);
+
+    if (!isAdmin && !isUserScoped) {
+      return res.status(403).json({ success: false, message: "You can only delete your own files" });
+    }
+
     await deleteImage(publicId);
     res.json({ success: true, message: "File deleted" });
   }),

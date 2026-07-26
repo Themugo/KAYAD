@@ -28,6 +28,17 @@ api.interceptors.request.use(
         url: config.url,
       });
     }
+
+    // H-5 FIX: Read XSRF-TOKEN cookie and send it as a header for CSRF protection.
+    // Without this, the backend csrfProtection middleware rejects all state-changing requests.
+    const method = String(config.method || "get").toLowerCase();
+    if (!["get", "head", "options"].includes(method)) {
+      const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+      if (xsrfMatch) {
+        config.headers["X-XSRF-Token"] = decodeURIComponent(xsrfMatch[1]);
+      }
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -71,7 +82,10 @@ api.interceptors.response.use(
       orig._retry = true;
       _refreshing = true;
       try {
-        await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true });
+        // H-5 FIX: Include CSRF token in refresh request too.
+        const xsrfRefresh = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        const xsrfHeader = xsrfRefresh ? { "X-XSRF-Token": decodeURIComponent(xsrfRefresh[1]) } : {};
+        await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true, headers: xsrfHeader });
         _queue.forEach((p) => p.res());
         _queue = [];
         return api(orig);

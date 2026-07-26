@@ -13,11 +13,9 @@ const keyGenerator = (req) => {
   return req.user?.id || ipKeyGenerator(req);
 };
 
-// =============================
-// 🚫 SKIP TRUSTED USERS
-// =============================
+// M-10 FIX: Admin should NOT bypass all rate limits. A compromised admin account
+// could abuse unlimited API calls. Only health checks are exempt.
 const skipTrusted = (req) => {
-  if (["admin"].includes(req.user?.role)) return true;
   if (req.path?.startsWith("/health") || req.path?.startsWith("/api/health")) return true;
   return false;
 };

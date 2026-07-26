@@ -313,8 +313,13 @@ const vercelPattern = /^https:\/\/kayad-motors(-themugos-projects)?\.vercel\.app
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return cb(null, true);
+      // M-6 FIX: Requests with no Origin header should NOT be blindly trusted.
+      // In production, only allow non-origin requests (curl, server-to-server) when
+      // they don't have credentials. Browser requests always have an Origin header.
+      if (!origin) {
+        if (NODE_ENV === "production") return cb(null, false);
+        return cb(null, true);
+      }
       
       // Allow all origins in development
       if (NODE_ENV === "development") return cb(null, true);
@@ -469,8 +474,11 @@ app.use("/api/v1/analytics/sales", salesDashboardRoutes);
 const io = new Server(server, {
   cors: {
     origin: (origin, cb) => {
-      // Allow requests with no origin (mobile apps, curl, etc.)
-      if (!origin) return cb(null, true);
+      // M-6 FIX: Same null-origin fix for Socket.IO.
+      if (!origin) {
+        if (NODE_ENV === "production") return cb(null, false);
+        return cb(null, true);
+      }
       
       // Allow all origins in development
       if (NODE_ENV === "development") return cb(null, true);
@@ -617,14 +625,14 @@ app.use("/api/payments", externalTimeout, paymentRoutes);
 
 app.use("/api/escrow", idempotencyCheck, csrfProtection, escrowRoutes); // Idempotency + CSRF for escrow operations
 app.use("/api/chat", chatRoutes);
-app.use("/api/favorites", favoriteRoutes);
+app.use("/api/favorites", csrfProtection, favoriteRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/reviews", reviewRoutes);
+app.use("/api/reviews", csrfProtection, reviewRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/auction-admin", auctionAdminRoutes);
 app.use("/api/ads", adRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/saved-searches", savedSearchRoutes);
+app.use("/api/users", csrfProtection, userRoutes);
+app.use("/api/saved-searches", csrfProtection, savedSearchRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/ntsa-verification", ntsaVerificationRoutes);
 app.use("/api/inspections", inspectionRoutes);
@@ -634,8 +642,8 @@ app.use("/api/sms-bidding", smsBiddingRoutes);
 app.use("/api/inspector-applications", inspectorApplicationRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/funnel", conversionFunnelRoutes);
-app.use("/api/disputes", idempotencyCheck, disputeRoutes);
-app.use("/api/upload", uploadRoutes);
+app.use("/api/disputes", idempotencyCheck, csrfProtection, disputeRoutes);
+app.use("/api/upload", csrfProtection, uploadRoutes);
 app.use("/api/fraud", fraudRoutes);
 app.use("/api/operations", operationsRoutes);
 app.use("/api/support", supportRoutes);

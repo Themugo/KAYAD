@@ -2,6 +2,16 @@ import Contact from "../models/Contact.js";
 import { sendRawEmail } from "../services/email.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 
+// M-9 FIX: Escape user input before interpolating into HTML email templates.
+// Without this, an attacker could inject arbitrary HTML/JS into notification emails.
+const escapeHTML = (str) =>
+  String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+
 export const submitContact = async (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
@@ -13,14 +23,14 @@ export const submitContact = async (req, res) => {
     // Send email asynchronously without awaiting
     sendRawEmail({
       to: process.env.ADMIN_EMAIL || process.env.EMAIL_FROM,
-      subject: `Contact form: ${subject}`,
+      subject: `Contact form: ${escapeHTML(subject)}`,
       html: `<div style="font-family:sans-serif;background:#F8FAFC;color:#0F172A;padding:24px;max-width:500px;border:1px solid #E2E8F0;">
         <h2 style="color:#2563EB;">New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
+        <p><strong>Name:</strong> ${escapeHTML(name)}</p>
+        <p><strong>Email:</strong> ${escapeHTML(email)}</p>
+        <p><strong>Subject:</strong> ${escapeHTML(subject)}</p>
         <hr style="border-color:#252E3D;" />
-        <p>${message}</p>
+        <p>${escapeHTML(message)}</p>
       </div>`,
     }).catch(err => {
       logError("Failed to send contact email", err);

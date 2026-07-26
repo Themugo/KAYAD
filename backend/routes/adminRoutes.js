@@ -6,6 +6,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
 import bcrypt from "bcryptjs";
+import { escapeRegex } from "../utils/escapeRegex.js";
 
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
@@ -250,13 +251,18 @@ router.get(
     if (req.query.isDemo === "false") filter.isDemo = { $ne: true };
 
     // 🔎 SEARCH (name/email)
+    // H-9 FIX: Escape user input to prevent ReDoS via $regex patterns.
     if (req.query.search) {
-      const search = req.query.search.trim();
+      const search = escapeRegex(req.query.search.trim());
       filter.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }];
     }
 
+    // H-2 FIX: Use field whitelist instead of select("-password") which leaks
+    // internal fields like bankAccount, mpesaBusiness, paymentDetails, etc.
+    const ADMIN_USER_FIELDS = "_id name email role phone avatar status isBanned approved location dealerRating bio businessName businessType createdAt lastLogin lastLoginAt verificationStatus emailVerified phoneVerified dealerPackage subscriptionStatus";
+
     const [users, total] = await Promise.all([
-      User.find(filter).select("-password").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      User.find(filter).select(ADMIN_USER_FIELDS).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
 
       User.countDocuments(filter),
     ]);
@@ -421,8 +427,9 @@ router.get(
     if (req.query.auctionStatus) filter.auctionStatus = req.query.auctionStatus;
 
     // 🔎 SEARCH (title)
+    // H-9 FIX: Escape user input to prevent ReDoS.
     if (req.query.search) {
-      filter.title = { $regex: req.query.search.trim(), $options: "i" };
+      filter.title = { $regex: escapeRegex(req.query.search.trim()), $options: "i" };
     }
 
     const [cars, total] = await Promise.all([
@@ -1219,12 +1226,26 @@ router.get(
   }),
 );
 
+// H-3 FIX: Whitelist allowed fields to prevent mass assignment attacks.
+// Without this, an attacker could inject arbitrary fields like `createdBy`,
+// `impressions`, `clicks`, or `internalFlags` via the request body.
+const AD_ALLOWED_FIELDS = [
+  "title", "description", "imageUrl", "targetUrl", "position",
+  "status", "budget", "spent", "startDate", "endDate",
+  "priority", "audience", "placement", "impressions", "clicks",
+];
+
 // CREATE AD
 router.post(
   "/ads",
   adminOrSuper,
   asyncHandler(async (req, res) => {
-    const ad = await Ad.create(req.body);
+    const payload = {};
+    for (const key of AD_ALLOWED_FIELDS) {
+      if (req.body[key] !== undefined) payload[key] = req.body[key];
+    }
+    payload.createdBy = req.user.id;
+    const ad = await Ad.create(payload);
     res.json({ success: true, ad });
   }),
 );
@@ -1327,7 +1348,7 @@ router.patch(
         subscriptionStatus: dealerPackage === "none" ? "none" : "active",
       },
       { new: true },
-    ).select("-password");
+    ).select(ADMIN_USER_FIELDS);
 
     if (!user) return res.status(404).json({ success: false, message: "Dealer not found" });
     res.json({ success: true, user });
@@ -1620,8 +1641,9 @@ router.get(
       .lean();
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       const users = await User.find({
-        $or: [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }],
+        $or: [{ name: { $regex: safeSearch, $options: "i" } }, { email: { $regex: safeSearch, $options: "i" } }],
       })
         .select("_id")
         .lean();

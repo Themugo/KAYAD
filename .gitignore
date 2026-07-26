@@ -51,6 +51,7 @@ Thumbs.db
 # Environment secrets
 backend/.env
 .env
+bolt-v5/project/.env
 
 # Vercel
 .vercel/

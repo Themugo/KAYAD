@@ -203,9 +203,12 @@ export const getUserPayments = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const sb = getSupabase();
+    // H-2 FIX: Whitelist safe fields instead of using select("*") which
+    // may expose internal M-Pesa callback data and status flags.
+    const SAFE_PAYMENT_FIELDS = "id, user, amount, currency, status, type, method, reference, description, createdAt, updatedAt";
     const { data: payments, count: total } = await sb
       .from("payments")
-      .select("*", { count: "exact" })
+      .select(SAFE_PAYMENT_FIELDS, { count: "exact" })
       .eq("user", req.user.id)
       .order("createdAt", { ascending: false })
       .range(skip, skip + limit - 1);
@@ -235,7 +238,8 @@ export const getAllPayments = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const sb = getSupabase();
-    let query = sb.from("payments").select("*", { count: "exact" });
+    const SAFE_PAYMENT_FIELDS = "id, user, amount, currency, status, type, method, reference, description, createdAt, updatedAt";
+    let query = sb.from("payments").select(SAFE_PAYMENT_FIELDS, { count: "exact" });
 
     const VALID_STATUSES = ["pending", "success", "failed", "cancelled"];
     const VALID_TYPES = ["bid", "auction_win", "buy", "listing", "subscription", "escrow"];

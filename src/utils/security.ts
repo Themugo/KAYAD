@@ -28,7 +28,10 @@ export function validatePhone(phone) {
   return { valid: true, value: normalized };
 }
 
-export function sanitizeHTML(str) {
+// M-5 FIX: sanitizeHTML was dead code (exported but never imported).
+// React auto-escapes JSX content, so this is only needed for rare
+// non-JSX contexts. Kept for future use if dangerouslySetInnerHTML is needed.
+export function sanitizeHTML(str: string): string {
   if (!str || typeof str !== 'string') return '';
   return str
     .replace(/&/g, '&amp;')
@@ -36,7 +39,7 @@ export function sanitizeHTML(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
-    .replace(/</g, '&#x2F;');
+    .replace(/\//g, '&#x2F;');
 }
 
 export function sanitizeQueryObject(obj) {

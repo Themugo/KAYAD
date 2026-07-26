@@ -45,10 +45,29 @@ const isOwnerEmail = (email) =>
       .trim(),
   );
 
+// H-1 FIX: Strip sensitive fields before sending user data in any response.
+// Without this, bankAccount, mpesaBusiness, paymentDetails, phoneOTP, emailVerifyToken,
+// password reset tokens, and internal flags leak to the client.
+const SAFE_USER_FIELDS = [
+  "_id", "id", "name", "email", "role", "phone", "avatar", "status",
+  "isBanned", "approved", "location", "dealerRating", "bio",
+  "businessName", "businessType", "isDemo", "createdAt", "updatedAt",
+  "lastLogin", "lastLoginAt", "referralCode", "credits",
+  "emailVerified", "phoneVerified", "verificationStatus",
+  "dealerPackage", "packageListingMax", "packageFeatures", "packageExpiresAt",
+  "packageAutoRenew", "subscriptionStatus", "wholesale", "deactivatedAt",
+];
+
 const serializeUser = (user) => {
   const raw = typeof user.toObject === "function" ? user.toObject() : user;
   const role = isOwnerEmail(raw.email) ? "superadmin" : raw.role;
-  return { ...raw, role, isOwner: isOwnerEmail(raw.email) };
+  const safe = {};
+  for (const field of SAFE_USER_FIELDS) {
+    if (raw[field] !== undefined) safe[field] = raw[field];
+  }
+  safe.role = role;
+  safe.isOwner = isOwnerEmail(raw.email);
+  return safe;
 };
 
 // =============================
@@ -111,9 +130,11 @@ const sendAuthResponse = async (res, user, oldRefreshToken = null, req = null, t
   sendRefreshToken(res, newRefreshToken);
   sendAccessToken(res, accessToken);
 
+  // M-1 FIX: Do NOT include the access token in the JSON response body.
+  // The httpOnly cookie is already set above. Returning the token in the body
+  // makes it readable by any JavaScript on the page, defeating httpOnly protection.
   return res.json({
     success: true,
-    token: accessToken,
     user: safeUser,
   });
 };

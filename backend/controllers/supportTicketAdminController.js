@@ -1,6 +1,7 @@
 import SupportTicket from "../models/SupportTicket.js";
 import { logInfo, logError } from "../utils/logger.js";
 import AuditLog from "../models/AuditLog.js";
+import { escapeRegex } from "../utils/escapeRegex.js";
 
 export const getAllTickets = async (req, res) => {
   try {
@@ -12,9 +13,11 @@ export const getAllTickets = async (req, res) => {
     if (priority) filter.priority = priority;
 
     if (search) {
+      // H-9 FIX: Escape user input to prevent ReDoS.
+      const safe = escapeRegex(search);
       filter.$or = [
-        { subject: { $regex: search, $options: "i" } },
-        { ticketNumber: { $regex: search, $options: "i" } },
+        { subject: { $regex: safe, $options: "i" } },
+        { ticketNumber: { $regex: safe, $options: "i" } },
       ];
     }
 

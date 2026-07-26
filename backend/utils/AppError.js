@@ -35,12 +35,13 @@ export class AppError extends Error {
     return new AppError(msg, 500, details);
   }
 
+  // M-8 FIX: Same as errorHandler — default to production (no stack trace).
   toJSON() {
     return {
       success: false,
       message: this.message,
       ...(this.details && { details: this.details }),
-      ...(process.env.NODE_ENV !== "production" && { stack: this.stack }),
+      ...(process.env.NODE_ENV === "production" ? {} : { stack: this.stack }),
     };
   }
 }

@@ -13,6 +13,10 @@ import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, normalizeSelect } from '../util
 
 // ── FILTER HELPERS ──────────────────────────────────────────────
 
+// M-4 FIX: Escape LIKE wildcards (% and _) in ilike terms to prevent
+// users from matching broader patterns than intended.
+const escapeLike = (s) => String(s).replace(/[%_]/g, (ch) => `\\${ch}`);
+
 const applyFilters = (query, filters, table) => {
   if (!filters) return query;
   for (const [key, value] of Object.entries(filters)) {
@@ -22,7 +26,8 @@ const applyFilters = (query, filters, table) => {
       const term = value?.$search;
       const fields = SEARCHABLE_FIELDS[table];
       if (term && fields?.length) {
-        const orExpr = fields.map((f) => `${f}.ilike.*${String(term).replace(/[,%]/g, '')}*`).join(',');
+        const safeTerm = escapeLike(term).replace(/,/g, '');
+        const orExpr = fields.map((f) => `${f}.ilike.*${safeTerm}*`).join(',');
         query = query.or(orExpr);
       }
       continue;
@@ -34,7 +39,7 @@ const applyFilters = (query, filters, table) => {
           const col = mapKeyOut(table, fk);
           if (fv && typeof fv === 'object' && fv.$regex) {
             const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
-            return `${col}.ilike.*${term}*`;
+            return `${col}.ilike.*${escapeLike(term)}*`;
           }
           return `${col}.eq.${fv}`;
         }).join(',')
@@ -71,8 +76,9 @@ const applyFilters = (query, filters, table) => {
           case '$like': case 'like': query = query.like(col, val); break;
           case '$ilike': case 'ilike': query = query.ilike(col, val); break;
           case '$regex': case 'regex': {
-            const term = (val.source || val).toString().replace(/[\^$]/g, '');
-            query = query.ilike(col, `%${term}%`);
+            const rawTerm = (val.source || val).toString().replace(/[\^$]/g, '');
+            // M-4 FIX: Escape LIKE wildcards in regex-derived ilike terms.
+            query = query.ilike(col, `%${escapeLike(rawTerm)}%`);
             break;
           }
           case '$is': case 'is': query = query.is(col, val); break;
