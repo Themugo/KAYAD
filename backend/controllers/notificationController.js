@@ -55,7 +55,7 @@ export const markAsRead = async (req, res) => {
     await Notification.findOneAndUpdate({ _id: req.params.id, user: req.user.id }, { read: true, readAt: new Date() });
     res.json({ success: true, message: "Marked as read" });
   } catch (err) {
-    console.error("❌ markAsRead error:", err.message);
+    logError("❌ markAsRead error:", err.message);
     res.status(500).json({ success: false, message: "Failed to mark as read" });
   }
 };
@@ -66,7 +66,7 @@ export const markAllAsRead = async (req, res) => {
     await Notification.updateMany({ user: req.user.id, read: false }, { read: true, readAt: new Date() });
     res.json({ success: true, message: "All notifications marked as read" });
   } catch (err) {
-    console.error("❌ markAllAsRead error:", err.message);
+    logError("❌ markAllAsRead error:", err.message);
     res.status(500).json({ success: false, message: "Failed to mark all as read" });
   }
 };
@@ -77,7 +77,7 @@ export const deleteNotification = async (req, res) => {
     await Notification.findOneAndDelete({ _id: req.params.id, user: req.user.id });
     res.json({ success: true, message: "Notification deleted" });
   } catch (err) {
-    console.error("❌ deleteNotification error:", err.message);
+    logError("❌ deleteNotification error:", err.message);
     res.status(500).json({ success: false, message: "Failed to delete notification" });
   }
 };
@@ -95,6 +95,6 @@ export const createNotification = async ({ user, title, message, type = "info", 
 
     return notif;
   } catch (err) {
-    console.error("Failed to create notification:", err.message);
+    logError("Failed to create notification:", err.message);
   }
 };

@@ -1,4 +1,5 @@
 import { getPersonalizedRecommendations } from "../services/recommendationService.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // =============================
 // 🎯 GET PERSONALIZED RECOMMENDATIONS
@@ -16,7 +17,7 @@ export const getRecommendations = async (req, res) => {
 
     res.json({ success: true, recommendations });
   } catch (error) {
-    console.error("Error getting recommendations:", error);
+    logError("Error getting recommendations:", error);
     res.status(500).json({ success: false, message: "Failed to get recommendations" });
   }
 };

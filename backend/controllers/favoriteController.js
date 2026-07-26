@@ -3,6 +3,7 @@
 import { startSession } from "../utils/supabaseSession.js";
 import Favorite from "../models/Favorite.js";
 import Car from "../models/Car.js";
+import { logError } from "../infrastructure/logging/index.js";
 
 // GET /api/favorites
 export const getFavorites = async (req, res) => {
@@ -39,7 +40,7 @@ export const getFavorites = async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    console.error("❌ getFavorites error:", err.message);
+    logError("❌ getFavorites error:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch favourites" });
   }
 };
@@ -83,7 +84,7 @@ export const addFavorite = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     if (err.code === 11000) return res.json({ success: true, favorited: true, message: "Already in favourites" });
-    console.error("❌ addFavorite error:", err.message);
+    logError("❌ addFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to add favourite" });
   }
 };
@@ -102,7 +103,7 @@ export const updateFavoritePriceAlert = async (req, res) => {
 
     res.json({ success: true, notifyOnPriceDrop: existing.notifyOnPriceDrop });
   } catch (err) {
-    console.error("❌ updateFavoritePriceAlert error:", err.message);
+    logError("❌ updateFavoritePriceAlert error:", err.message);
     res.status(500).json({ success: false, message: "Failed to update price alert" });
   }
 };
@@ -124,7 +125,7 @@ export const removeFavorite = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ removeFavorite error:", err.message);
+    logError("❌ removeFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to remove favourite" });
   }
 };
@@ -172,7 +173,7 @@ export const toggleFavorite = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ toggleFavorite error:", err.message);
+    logError("❌ toggleFavorite error:", err.message);
     res.status(500).json({ success: false, message: "Failed to toggle favourite" });
   }
 };

@@ -1,5 +1,6 @@
 import SupportTicket from "../models/SupportTicket.js";
 import User from "../models/User.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // =============================
 // 🎫 CREATE SUPPORT TICKET
@@ -29,7 +30,7 @@ export const createTicket = async (req, res) => {
 
     res.json({ success: true, ticket: populatedTicket });
   } catch (error) {
-    console.error("Error creating ticket:", error);
+    logError("Error creating ticket:", error);
     res.status(500).json({ success: false, message: "Failed to create ticket" });
   }
 };
@@ -60,7 +61,7 @@ export const getAllTickets = async (req, res) => {
 
     res.json({ success: true, tickets });
   } catch (error) {
-    console.error("Error getting tickets:", error);
+    logError("Error getting tickets:", error);
     res.status(500).json({ success: false, message: "Failed to get tickets" });
   }
 };
@@ -82,7 +83,7 @@ export const getUserTickets = async (req, res) => {
 
     res.json({ success: true, tickets });
   } catch (error) {
-    console.error("Error getting user tickets:", error);
+    logError("Error getting user tickets:", error);
     res.status(500).json({ success: false, message: "Failed to get user tickets" });
   }
 };
@@ -111,7 +112,7 @@ export const getTicket = async (req, res) => {
 
     res.json({ success: true, ticket });
   } catch (error) {
-    console.error("Error getting ticket:", error);
+    logError("Error getting ticket:", error);
     res.status(500).json({ success: false, message: "Failed to get ticket" });
   }
 };
@@ -195,7 +196,7 @@ export const addMessage = async (req, res) => {
 
     res.json({ success: true, ticket: updatedTicket[0] || ticket });
   } catch (error) {
-    console.error("Error adding message:", error);
+    logError("Error adding message:", error);
     res.status(500).json({ success: false, message: "Failed to add message" });
   }
 };
@@ -308,7 +309,7 @@ export const updateTicketStatus = async (req, res) => {
 
     res.json({ success: true, ticket: updatedTicket[0] || ticket });
   } catch (error) {
-    console.error("Error updating ticket status:", error);
+    logError("Error updating ticket status:", error);
     res.status(500).json({ success: false, message: "Failed to update ticket status" });
   }
 };
@@ -339,7 +340,7 @@ export const rateTicket = async (req, res) => {
 
     res.json({ success: true, ticket });
   } catch (error) {
-    console.error("Error rating ticket:", error);
+    logError("Error rating ticket:", error);
     res.status(500).json({ success: false, message: "Failed to rate ticket" });
   }
 };
@@ -397,7 +398,7 @@ export const getSupportAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting support analytics:", error);
+    logError("Error getting support analytics:", error);
     res.status(500).json({ success: false, message: "Failed to get support analytics" });
   }
 };

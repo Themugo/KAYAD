@@ -1,4 +1,3 @@
-import React from 'react';
 import { Building2, ShieldCheck, Landmark, Shield, Lock, CreditCard } from 'lucide-react';
 
 export const PartnerEcosystem: React.FC = () => {

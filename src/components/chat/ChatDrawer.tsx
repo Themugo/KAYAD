@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageSquareText, X, Send, ShieldCheck, DollarSign, Car, ExternalLink } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';

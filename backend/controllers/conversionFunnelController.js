@@ -1,5 +1,6 @@
 import ConversionFunnel from "../models/ConversionFunnel.js";
 import Car from "../models/Car.js";
+import { logError } from "../infrastructure/logging/index.js";
 
 // =============================
 // 📊 TRACK FUNNEL EVENTS
@@ -39,7 +40,7 @@ export const trackView = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking view:", error);
+    logError("Error tracking view:", error);
     res.status(500).json({ success: false, message: "Failed to track view" });
   }
 };
@@ -83,7 +84,7 @@ export const trackFavorite = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking favorite:", error);
+    logError("Error tracking favorite:", error);
     res.status(500).json({ success: false, message: "Failed to track favorite" });
   }
 };
@@ -129,7 +130,7 @@ export const trackChat = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking chat:", error);
+    logError("Error tracking chat:", error);
     res.status(500).json({ success: false, message: "Failed to track chat" });
   }
 };
@@ -176,7 +177,7 @@ export const trackOffer = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking offer:", error);
+    logError("Error tracking offer:", error);
     res.status(500).json({ success: false, message: "Failed to track offer" });
   }
 };
@@ -220,7 +221,7 @@ export const trackEscrow = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking escrow:", error);
+    logError("Error tracking escrow:", error);
     res.status(500).json({ success: false, message: "Failed to track escrow" });
   }
 };
@@ -267,7 +268,7 @@ export const trackSale = async (req, res) => {
     await funnel.save();
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking sale:", error);
+    logError("Error tracking sale:", error);
     res.status(500).json({ success: false, message: "Failed to track sale" });
   }
 };
@@ -344,7 +345,7 @@ export const getFunnelAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting funnel analytics:", error);
+    logError("Error getting funnel analytics:", error);
     res.status(500).json({ success: false, message: "Failed to get funnel analytics" });
   }
 };
@@ -405,7 +406,7 @@ export const getDealerFunnelAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting dealer funnel analytics:", error);
+    logError("Error getting dealer funnel analytics:", error);
     res.status(500).json({ success: false, message: "Failed to get dealer funnel analytics" });
   }
 };

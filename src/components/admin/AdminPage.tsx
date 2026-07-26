@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Users, Gavel, DollarSign, FileText, Megaphone, Plus, Trash2, Eye, ExternalLink, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { Badge } from '../ui/Badge';

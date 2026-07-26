@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, Check, ExternalLink, ShieldCheck, Gavel, MessageSquare, X, TrendingDown, Tag, BellRing } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';

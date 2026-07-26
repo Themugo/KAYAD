@@ -1,4 +1,3 @@
-import React from 'react';
 
 export type BadgeVariant = 'brand' | 'success' | 'danger' | 'warning' | 'info' | 'neutral';
 export type BadgeSize = 'sm' | 'md';

@@ -1,4 +1,3 @@
-import React from 'react';
 
 // Stitch Design System Button
 // Aligns with Heritage Tech design language

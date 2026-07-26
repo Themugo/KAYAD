@@ -1,4 +1,5 @@
 import SecurityLog from "../models/SecurityLog.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 export const getSecurityLogs = async (req, res) => {
   try {
@@ -31,7 +32,7 @@ export const getSecurityLogs = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ GET SECURITY LOGS ERROR:", err);
+    logError("❌ GET SECURITY LOGS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to fetch logs" });
   }
 };
@@ -65,7 +66,7 @@ export const getMySecurityLogs = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ GET MY SECURITY LOGS ERROR:", err);
+    logError("❌ GET MY SECURITY LOGS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to fetch logs" });
   }
 };
@@ -83,7 +84,7 @@ export const getSecurityLogSummary = async (req, res) => {
     ]);
     res.json({ success: true, summary: { total, criticalCount, recentActions } });
   } catch (err) {
-    console.error("❌ SECURITY LOG SUMMARY ERROR:", err);
+    logError("❌ SECURITY LOG SUMMARY ERROR:", err);
     res.status(500).json({ success: false, message: "Failed" });
   }
 };

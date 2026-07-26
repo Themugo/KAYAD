@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, X, Shield, Award, ArrowRight } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 // Design System Table Component
 export interface TableColumn<T> {

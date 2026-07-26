@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Gavel, Clock, Flame, ShieldCheck, MapPin, ArrowRight } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { LiveAuctionsSkeleton } from '../ui/Skeleton';

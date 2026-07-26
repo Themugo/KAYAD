@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Gavel, Clock, ShieldCheck, Flame, User, ArrowUpRight, Check, Lock, AlertCircle, X, Sparkles, Building2, Phone, CreditCard, ChevronRight, CheckCircle2, Eye, TrendingUp, Zap, Award, BarChart2 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';

@@ -2,6 +2,7 @@
 import { startSession } from "../utils/supabaseSession.js";
 import Review from "../models/Review.js";
 import User from "../models/User.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // POST /api/reviews (Phase 2 Transaction Support)
 export const createReview = async (req, res) => {
@@ -46,7 +47,7 @@ export const createReview = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.error("❌ createReview error:", err.message);
+    logError("❌ createReview error:", err.message);
     res.status(500).json({ success: false, message: "Failed to create review" });
   }
 };
@@ -60,7 +61,7 @@ export const getDealerReviews = async (req, res) => {
 
     res.json({ success: true, reviews, averageRating: Math.round(avg * 10) / 10, total: reviews.length });
   } catch (err) {
-    console.error("❌ getDealerReviews error:", err.message);
+    logError("❌ getDealerReviews error:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch reviews" });
   }
 };
@@ -73,7 +74,7 @@ export const getMyReviews = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, reviews });
   } catch (err) {
-    console.error("❌ getMyReviews error:", err.message);
+    logError("❌ getMyReviews error:", err.message);
     res.status(500).json({ success: false, message: "Failed to fetch reviews" });
   }
 };
@@ -108,7 +109,7 @@ export const deleteReview = async (req, res) => {
 
     res.json({ success: true, message: "Review deleted" });
   } catch (err) {
-    console.error("❌ deleteReview error:", err.message);
+    logError("❌ deleteReview error:", err.message);
     res.status(500).json({ success: false, message: "Failed to delete review" });
   }
 };

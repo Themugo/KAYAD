@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeft, ArrowRight, Home, Car, ChevronRight, Sparkles } from 'lucide-react';
 import { useMarketplace, PageView } from '../../context/MarketplaceContext';
 

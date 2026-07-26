@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star, MapPin } from 'lucide-react';
 
 export const CustomerStories: React.FC = () => {

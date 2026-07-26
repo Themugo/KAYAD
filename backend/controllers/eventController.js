@@ -1,4 +1,5 @@
 import Event from "../models/Event.js";
+import { logError } from "../infrastructure/logging/index.js";
 import {
   trackEvent,
   trackSearch,
@@ -41,7 +42,7 @@ export const track = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking event:", error);
+    logError("Error tracking event:", error);
     res.status(500).json({ success: false, message: "Failed to track event" });
   }
 };
@@ -60,7 +61,7 @@ export const trackSearchEvent = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking search:", error);
+    logError("Error tracking search:", error);
     res.status(500).json({ success: false, message: "Failed to track search" });
   }
 };
@@ -79,7 +80,7 @@ export const trackVehicleViewEvent = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking vehicle view:", error);
+    logError("Error tracking vehicle view:", error);
     res.status(500).json({ success: false, message: "Failed to track vehicle view" });
   }
 };
@@ -98,7 +99,7 @@ export const trackOfferEvent = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking offer:", error);
+    logError("Error tracking offer:", error);
     res.status(500).json({ success: false, message: "Failed to track offer" });
   }
 };
@@ -117,7 +118,7 @@ export const trackBidEvent = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking bid:", error);
+    logError("Error tracking bid:", error);
     res.status(500).json({ success: false, message: "Failed to track bid" });
   }
 };
@@ -142,7 +143,7 @@ export const trackEscrowEvent = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Error tracking escrow:", error);
+    logError("Error tracking escrow:", error);
     res.status(500).json({ success: false, message: "Failed to track escrow" });
   }
 };
@@ -162,7 +163,7 @@ export const getAnalytics = async (req, res) => {
 
     res.json({ success: true, analytics });
   } catch (error) {
-    console.error("Error getting event analytics:", error);
+    logError("Error getting event analytics:", error);
     res.status(500).json({ success: false, message: "Failed to get event analytics" });
   }
 };
@@ -183,7 +184,7 @@ export const getUserEvents = async (req, res) => {
 
     res.json({ success: true, events });
   } catch (error) {
-    console.error("Error getting user events:", error);
+    logError("Error getting user events:", error);
     res.status(500).json({ success: false, message: "Failed to get user events" });
   }
 };

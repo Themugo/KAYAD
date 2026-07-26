@@ -183,6 +183,55 @@ export const releaseEscrow = async (escrowId, adminId, { idempotencyKey, req } =
   }
 };
 
+export const autoReleaseEscrow = async (escrowId) => {
+  try {
+    const escrow = await findById("escrows", escrowId);
+    if (!escrow) throw new Error("Escrow not found");
+
+    const validation = validateTransition(escrow.status, STATES.RELEASED, "system", escrow);
+    if (!validation.allowed) throw new Error(validation.reason);
+
+    const { commission, sellerAmount } = await calculateCommission(escrow.amount);
+    const now = new Date();
+
+    await update("escrows", escrow.id, {
+      commission,
+      sellerAmount,
+      status: STATES.RELEASED,
+      releasedAt: now,
+      releasedBy: null,
+      timeline: { ...escrow.timeline, fundsReleased: true, fundsReleasedAt: now },
+      history: [...(escrow.history || []), { action: `Auto-released after timeout — KES ${sellerAmount.toLocaleString("en-KE")}`, by: "system", at: now }],
+    });
+
+    if (escrow.car) {
+      const { findById: fi } = await import("../db/index.js");
+      const car = await fi("cars", escrow.car);
+      if (car) {
+        await update("cars", car.id, { sold: true, status: "sold", isPaid: true });
+      }
+    }
+
+    if (escrow.payment) {
+      const { findById: fi } = await import("../db/index.js");
+      const payment = await fi("payments", escrow.payment);
+      if (payment) {
+        await update("payments", payment.id, {
+          status: "released",
+          platformFee: commission,
+          dealerAmount: sellerAmount,
+        });
+      }
+    }
+
+    logInfo("Escrow auto-released", { escrowId, sellerAmount, commission });
+    return { ...escrow, commission, sellerAmount, status: STATES.RELEASED, releasedAt: now };
+  } catch (err) {
+    logError("Escrow auto-release failed", err);
+    throw err;
+  }
+};
+
 export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey, req } = {}) => {
   try {
     const escrow = await findById("escrows", escrowId);

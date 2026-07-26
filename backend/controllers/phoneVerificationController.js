@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import { sendOTP } from "../services/otpService.js";
 import * as R from "../utils/response.js";
 import { logInfo, logWarn } from "../utils/logger.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
@@ -27,7 +28,7 @@ export const sendPhoneOTP = async (req, res) => {
     logInfo("Phone OTP sent", { userId: user._id });
     R.success(res, null, "Verification code sent");
   } catch (err) {
-    console.error("Send OTP error:", err);
+    logError("Send OTP error:", err);
     R.error(res, "Failed to send code", 500);
   }
 };
@@ -60,7 +61,7 @@ export const verifyPhoneOTP = async (req, res) => {
     logInfo("Phone verified", { userId: user._id });
     R.success(res, null, "Phone verified");
   } catch (err) {
-    console.error("Verify OTP error:", err);
+    logError("Verify OTP error:", err);
     R.error(res, "Verification failed", 500);
   }
 };

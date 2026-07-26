@@ -4,6 +4,7 @@ import InspectionOrder from "../models/InspectionOrder.js";
 import User from "../models/User.js";
 import Dispute from "../models/Dispute.js";
 import Payment from "../models/Payment.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // =============================
 // 📊 OPERATIONS COMMAND CENTER (Phase 3 Query Optimization)
@@ -152,7 +153,7 @@ export const getOperationsDashboard = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting operations dashboard:", error);
+    logError("Error getting operations dashboard:", error);
     res.status(500).json({ success: false, message: "Failed to get operations dashboard" });
   }
 };
@@ -191,7 +192,7 @@ export const getEscrowQueue = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting escrow queue:", error);
+    logError("Error getting escrow queue:", error);
     res.status(500).json({ success: false, message: "Failed to get escrow queue" });
   }
 };
@@ -230,7 +231,7 @@ export const getInspectionQueue = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting inspection queue:", error);
+    logError("Error getting inspection queue:", error);
     res.status(500).json({ success: false, message: "Failed to get inspection queue" });
   }
 };
@@ -274,7 +275,7 @@ export const getDealerQueue = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting dealer queue:", error);
+    logError("Error getting dealer queue:", error);
     res.status(500).json({ success: false, message: "Failed to get dealer queue" });
   }
 };
@@ -316,7 +317,7 @@ export const getSupportQueue = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting support queue:", error);
+    logError("Error getting support queue:", error);
     res.status(500).json({ success: false, message: "Failed to get support queue" });
   }
 };
@@ -354,7 +355,7 @@ export const getPaymentQueue = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting payment queue:", error);
+    logError("Error getting payment queue:", error);
     res.status(500).json({ success: false, message: "Failed to get payment queue" });
   }
 };

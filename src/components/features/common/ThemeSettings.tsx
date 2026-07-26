@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { preferencesAPI } from '../../../api/api.exports';
 

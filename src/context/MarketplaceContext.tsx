@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import { createContext, useContext, useState, useMemo } from 'react';
 import { Vehicle, FilterState, EscrowContract, Bid, NotificationItem, Advert, PriceAlert } from '../types';
 import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
 

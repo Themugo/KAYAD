@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Lock, ShieldCheck, Check, Gavel, Award, AlertCircle, FileText, CheckCircle2, ChevronRight, Scale } from 'lucide-react';
 import { Button } from '../ui/Button';
 

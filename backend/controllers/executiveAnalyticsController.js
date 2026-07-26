@@ -5,6 +5,7 @@ import Bid from "../models/Bid.js";
 import Payment from "../models/Payment.js";
 import Dispute from "../models/Dispute.js";
 import Event from "../models/Event.js";
+import { logError } from "../infrastructure/logging/index.js";
 
 // =============================
 // 📊 EXECUTIVE ANALYTICS DASHBOARD
@@ -217,7 +218,7 @@ export const getExecutiveDashboard = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting executive dashboard:", error);
+    logError("Error getting executive dashboard:", error);
     res.status(500).json({ success: false, message: "Failed to get executive dashboard" });
   }
 };
@@ -260,7 +261,7 @@ export const getRevenueBreakdown = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting revenue breakdown:", error);
+    logError("Error getting revenue breakdown:", error);
     res.status(500).json({ success: false, message: "Failed to get revenue breakdown" });
   }
 };
@@ -297,7 +298,7 @@ export const getUserGrowth = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting user growth:", error);
+    logError("Error getting user growth:", error);
     res.status(500).json({ success: false, message: "Failed to get user growth" });
   }
 };

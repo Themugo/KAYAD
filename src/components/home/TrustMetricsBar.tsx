@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ShieldCheck, Users, Car, CheckCircle2, Award } from 'lucide-react';
 
 export const TrustMetricsBar: React.FC = () => {

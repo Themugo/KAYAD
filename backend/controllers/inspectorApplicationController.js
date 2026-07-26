@@ -70,7 +70,7 @@ export const submitApplication = async (req, res) => {
 
     res.json({ success: true, application });
   } catch (err) {
-    console.error("❌ INSPECTOR APPLY ERROR:", err);
+    logError("❌ INSPECTOR APPLY ERROR:", err);
     res.status(500).json({ success: false, message: "Application failed" });
   }
 };
@@ -151,7 +151,7 @@ export const approveApplication = async (req, res) => {
 
     res.json({ success: true, application, user: { id: user._id, email: user.email, role: user.role } });
   } catch (err) {
-    console.error("❌ APPROVE INSPECTOR ERROR:", err);
+    logError("❌ APPROVE INSPECTOR ERROR:", err);
     res.status(500).json({ success: false, message: "Approval failed" });
   }
 };
@@ -183,7 +183,7 @@ export const rejectApplication = async (req, res) => {
 
     res.json({ success: true, application });
   } catch (err) {
-    console.error("❌ REJECT INSPECTOR ERROR:", err);
+    logError("❌ REJECT INSPECTOR ERROR:", err);
     res.status(500).json({ success: false, message: "Rejection failed" });
   }
 };
@@ -219,7 +219,7 @@ export const listApplications = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ LIST INSPECTOR APPS ERROR:", err);
+    logError("❌ LIST INSPECTOR APPS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed" });
   }
 };
@@ -233,7 +233,7 @@ export const getApplication = async (req, res) => {
     if (!application) return res.status(404).json({ success: false, message: "Not found" });
     res.json({ success: true, application });
   } catch (err) {
-    console.error("❌ GET APP ERROR:", err);
+    logError("❌ GET APP ERROR:", err);
     res.status(500).json({ success: false, message: "Failed" });
   }
 };

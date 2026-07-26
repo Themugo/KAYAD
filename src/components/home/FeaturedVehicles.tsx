@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Sparkles, ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { VehicleCard } from '../gallery/VehicleCard';

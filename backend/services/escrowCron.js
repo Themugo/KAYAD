@@ -15,7 +15,8 @@ import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { STATES } from "./escrowStateMachine.js";
-import { findAll, findOne, create, update } from "../db/index.js";
+import { findAll, findOne, create } from "../db/index.js";
+import { autoReleaseEscrow } from "./escrow.service.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 
 const RELEASE_DAYS = parseInt(process.env.ESCROW_AUTO_RELEASE_DAYS || "7");
@@ -62,7 +63,7 @@ const runAutoRelease = async () => {
       const seller = escrow.seller ? await findOne("users", { id: escrow.seller }) : null;
       const buyer = escrow.buyer ? await findOne("users", { id: escrow.buyer }) : null;
 
-      await update("escrows", escrow.id, { status: STATES.RELEASED, releasedAt: new Date().toISOString() });
+      await autoReleaseEscrow(escrow.id);
 
       if (seller) {
         await notify(seller.id, "💰 Escrow Released",

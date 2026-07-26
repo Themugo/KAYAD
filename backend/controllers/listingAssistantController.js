@@ -3,6 +3,7 @@ import {
   batchAnalyzeListings,
   getListingQualityStats,
 } from "../services/listingAssistantService.js";
+import { logError } from "../infrastructure/logging/index.js";
 
 // =============================
 // 🤖 ANALYZE LISTING QUALITY
@@ -20,7 +21,7 @@ export const analyzeListing = async (req, res) => {
 
     res.json({ success: true, analysis });
   } catch (error) {
-    console.error("Error analyzing listing:", error);
+    logError("Error analyzing listing:", error);
     res.status(500).json({ success: false, message: "Failed to analyze listing" });
   }
 };
@@ -41,7 +42,7 @@ export const batchAnalyze = async (req, res) => {
 
     res.json({ success: true, analyses });
   } catch (error) {
-    console.error("Error batch analyzing listings:", error);
+    logError("Error batch analyzing listings:", error);
     res.status(500).json({ success: false, message: "Failed to batch analyze listings" });
   }
 };
@@ -62,7 +63,7 @@ export const getDealerQualityStats = async (req, res) => {
 
     res.json({ success: true, stats });
   } catch (error) {
-    console.error("Error getting dealer quality stats:", error);
+    logError("Error getting dealer quality stats:", error);
     res.status(500).json({ success: false, message: "Failed to get dealer quality stats" });
   }
 };

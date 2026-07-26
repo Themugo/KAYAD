@@ -1,6 +1,7 @@
 import Subscription from "../models/Subscription.js";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // =============================
 // 📦 PLAN DEFINITIONS
@@ -68,7 +69,7 @@ export const getPlans = async (req, res) => {
       plans: PLANS,
     });
   } catch (error) {
-    console.error("Error getting plans:", error);
+    logError("Error getting plans:", error);
     res.status(500).json({ success: false, message: "Failed to get plans" });
   }
 };
@@ -107,7 +108,7 @@ export const getSubscription = async (req, res) => {
 
     res.json({ success: true, subscription });
   } catch (error) {
-    console.error("Error getting subscription:", error);
+    logError("Error getting subscription:", error);
     res.status(500).json({ success: false, message: "Failed to get subscription" });
   }
 };
@@ -150,7 +151,7 @@ export const upgradeSubscription = async (req, res) => {
 
     res.json({ success: true, subscription });
   } catch (error) {
-    console.error("Error upgrading subscription:", error);
+    logError("Error upgrading subscription:", error);
     res.status(500).json({ success: false, message: "Failed to upgrade subscription" });
   }
 };
@@ -177,7 +178,7 @@ export const cancelSubscription = async (req, res) => {
 
     res.json({ success: true, subscription });
   } catch (error) {
-    console.error("Error cancelling subscription:", error);
+    logError("Error cancelling subscription:", error);
     res.status(500).json({ success: false, message: "Failed to cancel subscription" });
   }
 };
@@ -208,7 +209,7 @@ export const reactivateSubscription = async (req, res) => {
 
     res.json({ success: true, subscription });
   } catch (error) {
-    console.error("Error reactivating subscription:", error);
+    logError("Error reactivating subscription:", error);
     res.status(500).json({ success: false, message: "Failed to reactivate subscription" });
   }
 };
@@ -254,7 +255,7 @@ export const checkUsageLimits = async (req, res) => {
 
     res.json({ success: true, limits, subscription });
   } catch (error) {
-    console.error("Error checking usage limits:", error);
+    logError("Error checking usage limits:", error);
     res.status(500).json({ success: false, message: "Failed to check usage limits" });
   }
 };
@@ -293,7 +294,7 @@ export const getAllSubscriptions = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting all subscriptions:", error);
+    logError("Error getting all subscriptions:", error);
     res.status(500).json({ success: false, message: "Failed to get subscriptions" });
   }
 };
@@ -334,7 +335,7 @@ export const getSubscriptionAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting subscription analytics:", error);
+    logError("Error getting subscription analytics:", error);
     res.status(500).json({ success: false, message: "Failed to get subscription analytics" });
   }
 };

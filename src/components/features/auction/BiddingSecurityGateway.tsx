@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { biddingSecurityAPI, formatKES } from '../../../api/api.exports';
 
 interface BiddingSecurityGatewayProps {

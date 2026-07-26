@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, SlidersHorizontal, ArrowRight, ShieldCheck, MapPin, DollarSign, Calendar, Fuel, Gauge, Car } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { BodyStyle, FuelType, TransmissionType } from '../../types';

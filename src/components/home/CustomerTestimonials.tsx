@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star, ShieldCheck, Quote, MapPin, CheckCircle2 } from 'lucide-react';
 
 export const CustomerTestimonials: React.FC = () => {

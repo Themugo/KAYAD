@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Building2, Star, MapPin, Phone, Mail, ShieldCheck, CheckCircle2, Calendar } from 'lucide-react';
 import { mockDealers } from '../../data/mockData';
 import { useMarketplace } from '../../context/MarketplaceContext';

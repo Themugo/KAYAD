@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search, X, Sparkles, SlidersHorizontal, ArrowUpDown, LayoutGrid, List, CheckCircle2 } from 'lucide-react';
 
 export interface FilterOption {
