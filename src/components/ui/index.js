@@ -20,5 +20,4 @@ export { default as FilterChip } from './FilterChip.jsx';
 export { default as RangeSlider } from './RangeSlider.jsx';
 export { default as ChartPlaceholder } from './ChartPlaceholder.jsx';
 export { default as MapPlaceholder } from './MapPlaceholder.jsx';
-export { default as BottomNav } from './BottomNav.jsx';
 export { default as Skeleton, SkeletonCard, SkeletonGrid, SkeletonRow, SkeletonText, SkeletonStat } from '../Skeleton.jsx';

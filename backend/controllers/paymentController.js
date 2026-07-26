@@ -6,6 +6,7 @@ import { isValidId } from "../utils/validateId.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
+import { logError } from "../infrastructure/logging/index.js";
 
 // =============================
 // 📲 INITIATE PAYMENT (Phase 2 Transaction Support)
@@ -86,7 +87,7 @@ export const initiatePayment = async (req, res) => {
       ...result,
     });
   } catch (err) {
-    console.error("INITIATE ERROR:", err);
+    logError("INITIATE ERROR", err);
 
     res.status(500).json({
       success: false,
@@ -118,7 +119,7 @@ export const mpesaCallback = async (req, res) => {
 
     return res.json({ success: true });
   } catch (err) {
-    console.error("CALLBACK ERROR:", err);
+    logError("CALLBACK ERROR", err);
     return res.status(500).json({ success: false, message: err.message || "Callback processing failed" });
   }
 };
@@ -140,7 +141,7 @@ export const b2cCallback = async (req, res) => {
     }
     return res.json({ ResultCode: 0, ResultDesc: "Success" });
   } catch (err) {
-    console.error("B2C CALLBACK ERROR:", err);
+    logError("B2C CALLBACK ERROR", err);
     return res.json({ ResultCode: 1, ResultDesc: "Processing failed" });
   }
 };
@@ -183,7 +184,7 @@ export const checkPaymentStatus = async (req, res) => {
       payment,
     });
   } catch (err) {
-    console.error("STATUS ERROR:", err);
+    logError("STATUS ERROR", err);
 
     res.status(500).json({
       success: false,
@@ -215,7 +216,7 @@ export const getUserPayments = async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    console.error("USER PAYMENTS ERROR:", err);
+    logError("USER PAYMENTS ERROR", err);
 
     res.status(500).json({
       success: false,
@@ -251,7 +252,7 @@ export const getAllPayments = async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    console.error("ALL PAYMENTS ERROR:", err);
+    logError("ALL PAYMENTS ERROR", err);
 
     res.status(500).json({
       success: false,
@@ -292,7 +293,7 @@ export const getPaymentById = async (req, res) => {
       payment,
     });
   } catch (err) {
-    console.error("GET PAYMENT ERROR:", err);
+    logError("GET PAYMENT ERROR", err);
 
     res.status(500).json({
       success: false,

@@ -1,4 +1,5 @@
 import FraudDetection from "../models/FraudDetection.js";
+import { logError } from '../infrastructure/logging/index.js';
 import {
   detectDuplicateAccounts,
   detectDuplicatePhone,
@@ -92,7 +93,7 @@ export const getFraudAnalytics = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error getting fraud analytics:", error);
+    logError("Error getting fraud analytics", error);
     res.status(500).json({ success: false, message: "Failed to get fraud analytics" });
   }
 };
@@ -113,7 +114,7 @@ export const runFraudCheckOnTarget = async (req, res) => {
 
     res.json({ success: true, results });
   } catch (error) {
-    console.error("Error running fraud check:", error);
+    logError("Error running fraud check", error);
     res.status(500).json({ success: false, message: "Failed to run fraud check" });
   }
 };
@@ -140,7 +141,7 @@ export const checkUserFraud = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking user fraud:", error);
+    logError("Error checking user fraud", error);
     res.status(500).json({ success: false, message: "Failed to check user fraud" });
   }
 };
@@ -169,7 +170,7 @@ export const checkAuctionFraud = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking auction fraud:", error);
+    logError("Error checking auction fraud", error);
     res.status(500).json({ success: false, message: "Failed to check auction fraud" });
   }
 };
@@ -192,7 +193,7 @@ export const checkEscrowFraud = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking escrow fraud:", error);
+    logError("Error checking escrow fraud", error);
     res.status(500).json({ success: false, message: "Failed to check escrow fraud" });
   }
 };
@@ -219,7 +220,7 @@ export const checkDealerFraud = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking dealer fraud:", error);
+    logError("Error checking dealer fraud", error);
     res.status(500).json({ success: false, message: "Failed to check dealer fraud" });
   }
 };
@@ -242,7 +243,7 @@ export const checkPriceManipulation = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking price manipulation:", error);
+    logError("Error checking price manipulation", error);
     res.status(500).json({ success: false, message: "Failed to check price manipulation" });
   }
 };
@@ -265,7 +266,7 @@ export const checkAccountFarms = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking account farms:", error);
+    logError("Error checking account farms", error);
     res.status(500).json({ success: false, message: "Failed to check account farms" });
   }
 };
@@ -288,7 +289,7 @@ export const checkDuplicatePhotos = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error checking duplicate photos:", error);
+    logError("Error checking duplicate photos", error);
     res.status(500).json({ success: false, message: "Failed to check duplicate photos" });
   }
 };
@@ -324,7 +325,7 @@ export const updateFraudStatus = async (req, res) => {
 
     res.json({ success: true, fraud });
   } catch (error) {
-    console.error("Error updating fraud status:", error);
+    logError("Error updating fraud status", error);
     res.status(500).json({ success: false, message: "Failed to update fraud status" });
   }
 };
@@ -351,7 +352,7 @@ export const getAllFraudDetections = async (req, res) => {
 
     res.json({ success: true, frauds });
   } catch (error) {
-    console.error("Error getting fraud detections:", error);
+    logError("Error getting fraud detections", error);
     res.status(500).json({ success: false, message: "Failed to get fraud detections" });
   }
 };

@@ -1,4 +1,5 @@
 import SmsBidder from "../models/SmsBidder.js";
+import { logError } from '../infrastructure/logging/index.js';
 import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import User from "../models/User.js";
@@ -141,7 +142,7 @@ export const handleInboundSms = async (req, res) => {
 
     res.json({ success: true, message: "Bid placed via SMS" });
   } catch (err) {
-    console.error("❌ SMS BID WEBHOOK ERROR:", err);
+    logError("❌ SMS BID WEBHOOK ERROR", err);
     res.status(500).json({ success: false, message: "SMS bid processing failed" });
   }
 };
@@ -172,7 +173,7 @@ export const registerSmsBidder = async (req, res) => {
 
     res.json({ success: true, smsBidder });
   } catch (err) {
-    console.error("❌ REGISTER SMS BIDDER ERROR:", err);
+    logError("❌ REGISTER SMS BIDDER ERROR", err);
     res.status(500).json({ success: false, message: "Registration failed" });
   }
 };
@@ -207,7 +208,7 @@ export const subscribeToCar = async (req, res) => {
     await smsBidder.save();
     res.json({ success: true, subscriptions: smsBidder.subscriptions });
   } catch (err) {
-    console.error("❌ SUBSCRIBE ERROR:", err);
+    logError("❌ SUBSCRIBE ERROR", err);
     res.status(500).json({ success: false, message: "Subscription failed" });
   }
 };
@@ -227,7 +228,7 @@ export const unsubscribeFromCar = async (req, res) => {
     await smsBidder.save();
     res.json({ success: true, subscriptions: smsBidder.subscriptions });
   } catch (err) {
-    console.error("❌ UNSUBSCRIBE ERROR:", err);
+    logError("❌ UNSUBSCRIBE ERROR", err);
     res.status(500).json({ success: false, message: "Unsubscribe failed" });
   }
 };
@@ -244,7 +245,7 @@ export const getMySmsProfile = async (req, res) => {
     );
     res.json({ success: true, smsBidder: smsBidder || { phone: "", active: false, subscriptions: [] } });
   } catch (err) {
-    console.error("❌ GET SMS PROFILE ERROR:", err);
+    logError("❌ GET SMS PROFILE ERROR", err);
     res.status(500).json({ success: false, message: "Failed" });
   }
 };

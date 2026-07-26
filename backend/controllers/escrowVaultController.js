@@ -6,6 +6,7 @@ import { sendOTP, verifyOTP } from "../services/otpService.js";
 import { sendNotification } from "../services/notification.service.js";
 import { emitListingUpdate } from "../socket/socket.js";
 import { logInfo } from "../utils/logger.js";
+import { logError } from "../infrastructure/logging/index.js";
 import { logSecurityAction, logActionFromReq } from "../utils/securityLogger.js";
 
 const addHistory = (vault, action, userId) => {
@@ -50,7 +51,7 @@ export const initEscrowVault = async (req, res) => {
     const ref = `KYD-${carId.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
 
     if (!process.env.ESCROW_ACCOUNT_NUMBER) {
-      console.error("ESCROW_ACCOUNT_NUMBER not set — escrow vault cannot be created");
+      logError("ESCROW_ACCOUNT_NUMBER not set — escrow vault cannot be created");
       return res.status(500).json({ success: false, message: "Escrow not configured. Contact support." });
     }
     const vault = await EscrowVault.create({
@@ -75,7 +76,7 @@ export const initEscrowVault = async (req, res) => {
 
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ INIT VAULT ERROR:", err);
+    logError("❌ INIT VAULT ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to initiate escrow" });
   }
 };
@@ -155,7 +156,7 @@ export const webhookFundsReceived = async (req, res) => {
 
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ WEBHOOK FUNDS ERROR:", err);
+    logError("❌ WEBHOOK FUNDS ERROR:", err);
     res.status(500).json({ success: false, message: "Webhook processing failed" });
   }
 };
@@ -200,7 +201,7 @@ export const adminConfirmFunding = async (req, res) => {
     res.json({ success: true, vault });
   } catch (err) {
     if (err.message === "Vault not found") return res.status(404).json({ success: false, message: "Vault not found" });
-    console.error("❌ ADMIN CONFIRM FUNDS ERROR:", err);
+    logError("❌ ADMIN CONFIRM FUNDS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to confirm funding" });
   }
 };
@@ -233,7 +234,7 @@ export const markInspectionComplete = async (req, res) => {
 
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ INSPECTION COMPLETE ERROR:", err);
+    logError("❌ INSPECTION COMPLETE ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to mark inspection complete" });
   }
 };
@@ -289,7 +290,7 @@ export const requestReleaseOtp = async (req, res) => {
 
     res.json({ success: true, message: "OTP sent to your registered phone" });
   } catch (err) {
-    console.error("❌ REQUEST OTP ERROR:", err);
+    logError("❌ REQUEST OTP ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to send OTP" });
   }
 };
@@ -392,7 +393,7 @@ export const releaseWithOtp = async (req, res) => {
 
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ RELEASE OTP ERROR:", err);
+    logError("❌ RELEASE OTP ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to release funds" });
   }
 };
@@ -447,7 +448,7 @@ export const adminRefund = async (req, res) => {
 
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ REFUND ERROR:", err);
+    logError("❌ REFUND ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to refund" });
   }
 };
@@ -467,7 +468,7 @@ export const getUserVaults = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, vaults });
   } catch (err) {
-    console.error("❌ GET VAULTS ERROR:", err);
+    logError("❌ GET VAULTS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to fetch vaults" });
   }
 };
@@ -489,7 +490,7 @@ export const getVaultById = async (req, res) => {
     }
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ GET VAULT ERROR:", err);
+    logError("❌ GET VAULT ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to fetch vault" });
   }
 };
@@ -506,7 +507,7 @@ export const getAllVaults = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, vaults });
   } catch (err) {
-    console.error("❌ ALL VAULTS ERROR:", err);
+    logError("❌ ALL VAULTS ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to fetch vaults" });
   }
 };
@@ -530,7 +531,7 @@ export const getVaultForCar = async (req, res) => {
     }
     res.json({ success: true, vault });
   } catch (err) {
-    console.error("❌ CAR VAULT ERROR:", err);
+    logError("❌ CAR VAULT ERROR:", err);
     res.status(500).json({ success: false, message: "Failed to check vault" });
   }
 };

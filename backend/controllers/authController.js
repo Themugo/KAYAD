@@ -12,6 +12,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { invalidateUserCache } from "../middleware/auth.js";
 import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/accountLockout.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // Email service — imported once at module level. Functions are no-ops
 // if the email transport isn't configured (EMAIL_HOST not set).
@@ -233,7 +234,7 @@ export const register = async (req, res) => {
 
     return sendAuthResponse(res.status(201), user, null, null, userAuth.tokenVersion || 0);
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    logError("REGISTER ERROR", err);
     R.error(res, "Registration failed", 500);
   }
 };
@@ -321,7 +322,7 @@ export const login = async (req, res) => {
 
     return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
   } catch (err) {
-    console.error("❌ LOGIN ERROR:", err);
+    logError("❌ LOGIN ERROR", err);
     R.error(res, "Login failed", 500);
   }
 };
@@ -359,7 +360,7 @@ export const demoLogin = async (req, res) => {
 
     return await sendAuthResponse(res, user, null, req, userAuth?.tokenVersion || 0);
   } catch (err) {
-    console.error("❌ DEMO LOGIN ERROR:", err);
+    logError("❌ DEMO LOGIN ERROR", err);
     R.error(res, "Demo login failed", 500);
   }
 };
@@ -418,7 +419,7 @@ export const refreshToken = async (req, res) => {
     // Issue new tokens with rotation (old token is revoked in sendAuthResponse)
     return await sendAuthResponse(res, user, token, req, userAuth?.tokenVersion || 0);
   } catch (err) {
-    console.error("❌ REFRESH ERROR:", err);
+    logError("❌ REFRESH ERROR", err);
     R.error(res, "Refresh failed", 500);
   }
 };
@@ -449,7 +450,7 @@ export const logout = async (req, res) => {
       message: "Logged out from all devices",
     });
   } catch (err) {
-    console.error("❌ LOGOUT ERROR:", err);
+    logError("❌ LOGOUT ERROR", err);
     R.error(res, "Logout failed", 500);
   }
 };
@@ -467,7 +468,7 @@ export const getProfile = async (req, res) => {
 
     res.json({ success: true, user: serializeUser(user) });
   } catch (err) {
-    console.error("❌ PROFILE ERROR:", err);
+    logError("❌ PROFILE ERROR", err);
     R.error(res, "Failed to fetch profile", 500);
   }
 };
@@ -480,7 +481,7 @@ export const getSessions = async (req, res) => {
     const sessions = await RefreshToken.getActiveSessions(req.user.id);
     res.json({ success: true, sessions, data: sessions });
   } catch (err) {
-    console.error("❌ SESSIONS ERROR:", err);
+    logError("❌ SESSIONS ERROR", err);
     R.error(res, "Failed to fetch sessions", 500);
   }
 };
@@ -497,7 +498,7 @@ export const revokeSession = async (req, res) => {
     await RefreshToken.revokeToken(session.token, req.user.id);
     res.json({ success: true, message: "Session revoked" });
   } catch (err) {
-    console.error("❌ REVOKE SESSION ERROR:", err);
+    logError("❌ REVOKE SESSION ERROR", err);
     R.error(res, "Failed to revoke session", 500);
   }
 };
@@ -516,7 +517,7 @@ export const revokeAllSessions = async (req, res) => {
 
     res.json({ success: true, message: "All sessions revoked" });
   } catch (err) {
-    console.error("❌ REVOKE ALL SESSIONS ERROR:", err);
+    logError("❌ REVOKE ALL SESSIONS ERROR", err);
     R.error(res, "Failed to revoke all sessions", 500);
   }
 };

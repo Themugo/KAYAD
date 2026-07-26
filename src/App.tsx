@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, ComponentType } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, BrowserRouter, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/layout/Footer';
@@ -15,6 +15,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { BrandingProvider } from './context/BrandingContext';
 import { CompareProvider } from './context/CompareContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { MarketplaceProvider } from './context/MarketplaceContext';
 import Home from './pages/Home';
 import Gallery from './pages/Gallery';
 import Compare from './pages/Compare';
@@ -37,9 +38,6 @@ import Showroom from './pages/Showroom';
 import { CARS } from './data/cars';
 import type { User } from './types';
 import type { Car } from './components/features/car/CarCard';
-
-// Error page for catching errors
-import ServerError from './pages/ServerError';
 
 // Lazy-loaded pages for code splitting
 const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
@@ -393,11 +391,13 @@ export default function App() {
             <AuthProvider>
               <SocketProvider>
                 <NotificationProvider>
-                  <CompareProvider>
-                    <ErrorBoundary>
-                      <AppContent />
-                    </ErrorBoundary>
-                  </CompareProvider>
+                  <MarketplaceProvider>
+                    <CompareProvider>
+                      <ErrorBoundary>
+                        <AppContent />
+                      </ErrorBoundary>
+                    </CompareProvider>
+                  </MarketplaceProvider>
                 </NotificationProvider>
               </SocketProvider>
             </AuthProvider>

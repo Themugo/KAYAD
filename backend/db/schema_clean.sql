@@ -1706,5 +1706,178 @@ DROP TRIGGER IF EXISTS set_updated_at ON bidder_deposits;
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON bidder_deposits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
+-- M6: MISSING FK INDEXES (71 unindexed foreign keys)
+-- =====================================================
+
+-- disputes: 0 indexes on 4 FK columns (core business logic)
+CREATE INDEX IF NOT EXISTS idx_disputes_escrow_id ON disputes(escrow_id);
+CREATE INDEX IF NOT EXISTS idx_disputes_opened_by ON disputes(opened_by);
+CREATE INDEX IF NOT EXISTS idx_disputes_opened_against ON disputes(opened_against);
+CREATE INDEX IF NOT EXISTS idx_disputes_assigned_to ON disputes(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status);
+
+-- leads: 0 indexes on 3 FK columns
+CREATE INDEX IF NOT EXISTS idx_leads_buyer_id ON leads(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_leads_dealer_id ON leads(dealer_id);
+CREATE INDEX IF NOT EXISTS idx_leads_car_id ON leads(car_id);
+
+-- transactions: 0 indexes on 3 FK columns
+CREATE INDEX IF NOT EXISTS idx_transactions_from_user ON transactions(from_user);
+CREATE INDEX IF NOT EXISTS idx_transactions_to_user ON transactions(to_user);
+CREATE INDEX IF NOT EXISTS idx_transactions_escrow_id ON transactions(escrow_id);
+
+-- escrow_vaults: 0 indexes on 3 FK columns
+CREATE INDEX IF NOT EXISTS idx_escrow_vaults_buyer_id ON escrow_vaults(buyer_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_vaults_seller_id ON escrow_vaults(seller_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_vaults_escrow_id ON escrow_vaults(escrow_id);
+
+-- payments: missing escrow_id, car_id, bid_id
+CREATE INDEX IF NOT EXISTS idx_payments_escrow_id ON payments(escrow_id);
+CREATE INDEX IF NOT EXISTS idx_payments_car_id ON payments(car_id);
+CREATE INDEX IF NOT EXISTS idx_payments_bid_id ON payments(bid_id);
+
+-- escrows: missing car_id, payment_id
+CREATE INDEX IF NOT EXISTS idx_escrows_car_id ON escrows(car_id);
+CREATE INDEX IF NOT EXISTS idx_escrows_payment_id ON escrows(payment_id);
+
+-- support_tickets: 0 indexes on 2 FK columns
+CREATE INDEX IF NOT EXISTS idx_support_tickets_user_id ON support_tickets(user_id);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_assigned_to ON support_tickets(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status);
+
+-- escrow_anomalies: 0 indexes
+CREATE INDEX IF NOT EXISTS idx_escrow_anomalies_escrow_id ON escrow_anomalies(escrow_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_anomalies_flagged_by ON escrow_anomalies(flagged_by);
+
+-- escrow_audits: 0 indexes
+CREATE INDEX IF NOT EXISTS idx_escrow_audits_escrow_id ON escrow_audits(escrow_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_audits_performed_by ON escrow_audits(performed_by);
+
+-- auction_integrity_flags: 0 indexes
+CREATE INDEX IF NOT EXISTS idx_auction_integrity_flags_auction_id ON auction_integrity_flags(auction_id);
+CREATE INDEX IF NOT EXISTS idx_auction_integrity_flags_flagged_by ON auction_integrity_flags(flagged_by);
+
+-- evidence: 0 indexes
+CREATE INDEX IF NOT EXISTS idx_evidence_dispute_id ON evidence(dispute_id);
+CREATE INDEX IF NOT EXISTS idx_evidence_uploaded_by ON evidence(uploaded_by);
+
+-- notification_audit
+CREATE INDEX IF NOT EXISTS idx_notification_audit_notification_id ON notification_audit(notification_id);
+
+-- risk/fraud tables
+CREATE INDEX IF NOT EXISTS idx_auction_risk_profiles_user_id ON auction_risk_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_escrow_risk_scores_user_id ON escrow_risk_scores(user_id);
+CREATE INDEX IF NOT EXISTS idx_fraud_detection_user_id ON fraud_detection(user_id);
+
+-- auctions: bidder/winner FK columns
+CREATE INDEX IF NOT EXISTS idx_auctions_highest_bidder_id ON auctions(highest_bidder_id);
+CREATE INDEX IF NOT EXISTS idx_auctions_winner_id ON auctions(winner_id);
+
+-- reviews
+CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_car_id ON reviews(car_id);
+
+-- messages
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages(sender_id);
+
+-- chats
+CREATE INDEX IF NOT EXISTS idx_chats_car_id ON chats(car_id);
+
+-- favorites: car_id-only lookups (UNIQUE(user_id,car_id) can't serve these)
+CREATE INDEX IF NOT EXISTS idx_favorites_car_id ON favorites(car_id);
+
+-- users: referral lookups
+CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by);
+
+-- inspector_applications
+CREATE INDEX IF NOT EXISTS idx_inspector_applications_user_id ON inspector_applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_inspector_applications_reviewed_by ON inspector_applications(reviewed_by);
+
+-- dealer_verifications
+CREATE INDEX IF NOT EXISTS idx_dealer_verifications_dealer_id ON dealer_verifications(dealer_id);
+CREATE INDEX IF NOT EXISTS idx_dealer_verifications_reviewed_by ON dealer_verifications(reviewed_by);
+
+-- subscriptions, saved_searches, search_analytics
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_saved_searches_user_id ON saved_searches(user_id);
+CREATE INDEX IF NOT EXISTS idx_search_analytics_user_id ON search_analytics(user_id);
+
+-- admin_alerts, reports
+CREATE INDEX IF NOT EXISTS idx_admin_alerts_acknowledged_by ON admin_alerts(acknowledged_by);
+CREATE INDEX IF NOT EXISTS idx_reports_generated_by ON reports(generated_by);
+
+-- vehicle_valuations, listing_quality
+CREATE INDEX IF NOT EXISTS idx_vehicle_valuations_car_id ON vehicle_valuations(car_id);
+CREATE INDEX IF NOT EXISTS idx_listing_quality_car_id ON listing_quality(car_id);
+
+-- inspection_orders
+CREATE INDEX IF NOT EXISTS idx_inspection_orders_car_id ON inspection_orders(car_id);
+CREATE INDEX IF NOT EXISTS idx_inspection_orders_inspector_id ON inspection_orders(inspector_id);
+
+-- ntsa_verification_requests
+CREATE INDEX IF NOT EXISTS idx_ntsa_verification_requests_car_id ON ntsa_verification_requests(car_id);
+CREATE INDEX IF NOT EXISTS idx_ntsa_verification_requests_requested_by ON ntsa_verification_requests(requested_by);
+
+-- mpesa_transactions
+CREATE INDEX IF NOT EXISTS idx_mpesa_transactions_car_id ON mpesa_transactions(car_id);
+
+-- dealer_health_scores
+CREATE INDEX IF NOT EXISTS idx_dealer_health_scores_dealer_id ON dealer_health_scores(dealer_id);
+
+-- bid_logs (car_id)
+CREATE INDEX IF NOT EXISTS idx_bid_logs_car_id ON bid_logs(car_id);
+
+-- transaction_ledger
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_car_id ON transaction_ledger(car_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_from_user ON transaction_ledger(from_user);
+CREATE INDEX IF NOT EXISTS idx_transaction_ledger_to_user ON transaction_ledger(to_user);
+
+-- cars: demo_edited_by
+CREATE INDEX IF NOT EXISTS idx_cars_demo_edited_by ON cars(demo_edited_by);
+
+-- =====================================================
+-- COMPOSITE INDEXES (high-value multi-column queries)
+-- =====================================================
+
+-- Bids: highest bid per auction
+CREATE INDEX IF NOT EXISTS idx_bids_auction_amount_desc ON bids(auction_id, amount DESC);
+CREATE INDEX IF NOT EXISTS idx_bids_auction_status ON bids(auction_id, status);
+
+-- Escrows: dashboard filters
+CREATE INDEX IF NOT EXISTS idx_escrows_buyer_status ON escrows(buyer_id, status);
+CREATE INDEX IF NOT EXISTS idx_escrows_seller_status ON escrows(seller_id, status);
+CREATE INDEX IF NOT EXISTS idx_escrows_car_status ON escrows(car_id, status);
+
+-- Payments: user history
+CREATE INDEX IF NOT EXISTS idx_payments_user_created ON payments(user_id, created_at DESC);
+
+-- Reviews: filtered listings
+CREATE INDEX IF NOT EXISTS idx_reviews_dealer_status ON reviews(dealer_id, status);
+CREATE INDEX IF NOT EXISTS idx_reviews_car_status ON reviews(car_id, status);
+
+-- Notifications: feed
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
+
+-- Disputes: filtered lookups
+CREATE INDEX IF NOT EXISTS idx_disputes_escrow_status ON disputes(escrow_id, status);
+CREATE INDEX IF NOT EXISTS idx_disputes_assigned_status ON disputes(assigned_to, status);
+
+-- Support tickets: filtered views
+CREATE INDEX IF NOT EXISTS idx_support_tickets_user_status ON support_tickets(user_id, status);
+CREATE INDEX IF NOT EXISTS idx_support_tickets_assigned_status ON support_tickets(assigned_to, status);
+
+-- Leads: pipeline view
+CREATE INDEX IF NOT EXISTS idx_leads_dealer_status ON leads(dealer_id, status);
+
+-- Inspector schedule
+CREATE INDEX IF NOT EXISTS idx_inspection_orders_inspector_status ON inspection_orders(inspector_id, status);
+
+-- Cars: dealer promoted listings
+CREATE INDEX IF NOT EXISTS idx_cars_dealer_featured ON cars(dealer_id, featured, created_at DESC);
+
+-- Admin alerts: unacknowledged by severity
+CREATE INDEX IF NOT EXISTS idx_admin_alerts_severity_ack ON admin_alerts(severity, acknowledged);
+
+-- =====================================================
 -- END OF AUDIT FIXES
 -- =====================================================

@@ -6,6 +6,7 @@ import { getSupabase } from "../utils/supabase.js";
 import { sendSMS } from "../utils/sms.js";
 import { getIO } from "../utils/io.js";
 import { findOrCreateLeadFromChat, addLeadActivity, updateLeadStage } from "../services/leadService.js";
+import { logError } from '../infrastructure/logging/index.js';
 
 // =============================
 // 💬 START / CREATE CHAT
@@ -47,7 +48,7 @@ export const startChat = async (req, res) => {
 
     res.status(201).json({ success: true, chat });
   } catch (error) {
-    console.error("❌ START CHAT ERROR:", error);
+    logError("❌ START CHAT ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to start chat" });
   }
 };
@@ -83,7 +84,7 @@ export const getUserChats = async (req, res) => {
 
     res.json({ success: true, chats, total, page, pages: Math.ceil(total / limit) });
   } catch (error) {
-    console.error("❌ GET USER CHATS ERROR:", error);
+    logError("❌ GET USER CHATS ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to fetch chats" });
   }
 };
@@ -110,7 +111,7 @@ export const getUnreadCount = async (req, res) => {
 
     res.json({ success: true, unread });
   } catch (error) {
-    console.error("❌ GET UNREAD COUNT ERROR:", error);
+    logError("❌ GET UNREAD COUNT ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to get unread count" });
   }
 };
@@ -219,7 +220,7 @@ export const sendMessage = async (req, res) => {
       seenBy: [],
     });
   } catch (error) {
-    console.error("❌ SEND MESSAGE ERROR:", error);
+    logError("❌ SEND MESSAGE ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to send message" });
   }
 };
@@ -254,7 +255,7 @@ export const getMessages = async (req, res) => {
     }));
     res.json({ success: true, messages: enriched });
   } catch (error) {
-    console.error("❌ GET MESSAGES ERROR:", error);
+    logError("❌ GET MESSAGES ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to fetch messages" });
   }
 };
@@ -286,7 +287,7 @@ export const markAsSeen = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error("❌ MARK AS SEEN ERROR:", error);
+    logError("❌ MARK AS SEEN ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to mark as seen" });
   }
 };
@@ -312,7 +313,7 @@ export const deleteChat = async (req, res) => {
 
     res.json({ success: true, message: "Left chat" });
   } catch (error) {
-    console.error("❌ DELETE CHAT ERROR:", error);
+    logError("❌ DELETE CHAT ERROR:", error);
     res.status(500).json({ success: false, message: "Failed to leave chat" });
   }
 };
