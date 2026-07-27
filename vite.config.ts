@@ -163,68 +163,13 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        manualChunks: (id: string) => {
-          // Only hand-split third-party vendor code. Application code (components,
-          // context, pages, hooks, api, utils) is intentionally left to Rollup's
-          // automatic, dependency-graph-aware chunking below.
-          //
-          // NOTE: previously this function also force-split app code by folder
-          // (src/components -> 'components', src/context -> 'context', etc).
-          // Because several app modules have circular imports across those folder
-          // boundaries (e.g. a component importing a context hook, and that context
-          // importing a component), forcing them into separate physical chunk files
-          // broke module initialization order and caused a production-only
-          // "Uncaught ReferenceError: Cannot access 'X' before initialization" crash
-          // (a blank white page, since it happened before React ever mounted).
-          // Do not reintroduce folder-based app-code splitting here.
-          if (!id.includes('node_modules')) {
-            return undefined;
-          }
-
-          // React core - should load first
-          if (id.includes('react-dom') || id.includes('react/')) {
-            return 'react-vendor';
-          }
-          // React Router - navigation
-          if (id.includes('react-router') || id.includes('react-router-dom')) {
-            return 'router-vendor';
-          }
-          // Animations - can load lazily
-          if (id.includes('framer-motion')) {
-            return 'animation-vendor';
-          }
-          // HTTP client
-          if (id.includes('axios')) {
-            return 'http-vendor';
-          }
-          // Icons - large, load lazily
-          if (id.includes('lucide-react')) {
-            return 'icons-vendor';
-          }
-          // Supabase
-          if (id.includes('@supabase')) {
-            return 'supabase-vendor';
-          }
-          // Analytics
-          if (id.includes('posthog')) {
-            return 'analytics-vendor';
-          }
-          // Date formatting
-          if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
-            return 'date-vendor';
-          }
-          // JSON parsing
-          if (id.includes('lodash') || id.includes('clonedeep')) {
-            return 'utils-vendor';
-          }
-          // Everything else in node_modules
-          return 'vendor';
-        },
+        // No manual chunks — Vite/Rollup's automatic chunking avoids circular
+        // dependency crashes (e.g. "Cannot access 'X' before initialization")
+        // that manual splitting causes when vendor packages have inter-dependencies
+        // (react-dom -> react, supabase -> react, etc.).
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-        // Optimize for HTTP/2
-        hoistTransitiveImports: false,
       }
     },
     chunkSizeWarningLimit: 800, // Lower limit to catch potential issues
