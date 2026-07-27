@@ -164,92 +164,61 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
-          // Vendor chunking - group related packages together
-          if (id.includes('node_modules')) {
-            // React core - should load first
-            if (id.includes('react-dom') || id.includes('react/')) {
-              return 'react-vendor';
-            }
-            // React Router - navigation
-            if (id.includes('react-router') || id.includes('react-router-dom')) {
-              return 'router-vendor';
-            }
-            // Animations - can load lazily
-            if (id.includes('framer-motion')) {
-              return 'animation-vendor';
-            }
-            // HTTP client
-            if (id.includes('axios')) {
-              return 'http-vendor';
-            }
-            // Icons - large, load lazily
-            if (id.includes('lucide-react')) {
-              return 'icons-vendor';
-            }
-            // Supabase
-            if (id.includes('@supabase')) {
-              return 'supabase-vendor';
-            }
-            // Analytics
-            if (id.includes('posthog')) {
-              return 'analytics-vendor';
-            }
-            // Date formatting
-            if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
-              return 'date-vendor';
-            }
-            // JSON parsing
-            if (id.includes('lodash') || id.includes('clonedeep')) {
-              return 'utils-vendor';
-            }
-            // Default vendor chunk
-            return 'vendor';
+          // Only hand-split third-party vendor code. Application code (components,
+          // context, pages, hooks, api, utils) is intentionally left to Rollup's
+          // automatic, dependency-graph-aware chunking below.
+          //
+          // NOTE: previously this function also force-split app code by folder
+          // (src/components -> 'components', src/context -> 'context', etc).
+          // Because several app modules have circular imports across those folder
+          // boundaries (e.g. a component importing a context hook, and that context
+          // importing a component), forcing them into separate physical chunk files
+          // broke module initialization order and caused a production-only
+          // "Uncaught ReferenceError: Cannot access 'X' before initialization" crash
+          // (a blank white page, since it happened before React ever mounted).
+          // Do not reintroduce folder-based app-code splitting here.
+          if (!id.includes('node_modules')) {
+            return undefined;
           }
-          
-          // Application code splitting
-          // Admin pages - typically not accessed, load lazily
-          if (id.includes('src/pages/admin')) {
-            return 'pages-admin';
+
+          // React core - should load first
+          if (id.includes('react-dom') || id.includes('react/')) {
+            return 'react-vendor';
           }
-          // Dealer pages
-          if (id.includes('src/pages/dealer')) {
-            return 'pages-dealer';
+          // React Router - navigation
+          if (id.includes('react-router') || id.includes('react-router-dom')) {
+            return 'router-vendor';
           }
-          // Role-based pages
-          if (id.includes('src/pages/buyer') || 
-              id.includes('src/pages/seller') || 
-              id.includes('src/pages/inspector') || 
-              id.includes('src/pages/showroom')) {
-            return 'pages-role';
+          // Animations - can load lazily
+          if (id.includes('framer-motion')) {
+            return 'animation-vendor';
           }
-          // Auction and car detail pages - popular, moderate priority
-          if (id.includes('src/pages/auction') || id.includes('src/pages/car')) {
-            return 'pages-auction';
+          // HTTP client
+          if (id.includes('axios')) {
+            return 'http-vendor';
           }
-          // Other pages
-          if (id.includes('src/pages')) {
-            return 'pages-misc';
+          // Icons - large, load lazily
+          if (id.includes('lucide-react')) {
+            return 'icons-vendor';
           }
-          // Components - heavy UI components
-          if (id.includes('src/components')) {
-            return 'components';
+          // Supabase
+          if (id.includes('@supabase')) {
+            return 'supabase-vendor';
           }
-          // Context providers
-          if (id.includes('src/context')) {
-            return 'context';
+          // Analytics
+          if (id.includes('posthog')) {
+            return 'analytics-vendor';
           }
-          // API layer
-          if (id.includes('src/api')) {
-            return 'api';
+          // Date formatting
+          if (id.includes('date-fns') || id.includes('dayjs') || id.includes('moment')) {
+            return 'date-vendor';
           }
-          // Hooks
-          if (id.includes('src/hooks')) {
-            return 'hooks';
+          // JSON parsing
+          if (id.includes('lodash') || id.includes('clonedeep')) {
+            return 'utils-vendor';
           }
-          // Utils
-          if (id.includes('src/utils')) {
-            return 'utils';
-          }
+          // Everything else in node_modules
+          return 'vendor';
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',

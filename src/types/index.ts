@@ -189,6 +189,7 @@ export interface ToastContextValue {
   error: (message: string, duration?: number) => void;
   warning: (message: string, duration?: number) => void;
   info: (message: string, duration?: number) => void;
+  toast: (message: string, type?: ToastType) => void;
 }
 
 // ============================================================
