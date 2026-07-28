@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: |
@@ -61,51 +61,36 @@ jobs:
 
       - name: Check for non-compliant licenses
         run: |
-          # Define allowed licenses
-          ALLOWED_LICENSES=(
-            "MIT"
-            "Apache-2.0"
-            "BSD-2-Clause"
-            "BSD-3-Clause"
-            "ISC"
-            "0BSD"
-            "CC0-1.0"
-            "Unlicense"
-            "WTFPL"
-          )
-          
-          # Check for disallowed licenses
-          DISALLOWED_LICENSES=(
-            "GPL"
-            "AGPL"
-            "LGPL"
-            "MPL"
-            "CPL"
-            "EPL"
-            "SSPL"
-            "CPAL"
-          )
-          
-          # Parse license report
+          # Parse license report - license-checker outputs object with package@version as keys
           node -e "
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
             const disallowed = [];
-            const allowed = ['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', '0BSD', 'CC0-1.0', 'Unlicense', 'WTFPL'];
             const disallowedPatterns = ['GPL', 'AGPL', 'LGPL', 'MPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
             
-            report.forEach(pkg => {
-              const licenses = pkg.licenses || [];
+            // license-checker outputs an object, not an array
+            Object.entries(report).forEach(([pkgKey, pkgInfo]) => {
+              // Extract package name from 'name@version' format
+              const pkgName = pkgKey.split('@')[0];
+              let licenses = pkgInfo.licenses;
+              
+              // Handle different license formats (string or array)
+              if (typeof licenses === 'string') {
+                licenses = [licenses];
+              } else if (!Array.isArray(licenses)) {
+                licenses = [];
+              }
+              
               licenses.forEach(license => {
                 if (disallowedPatterns.some(pattern => license.includes(pattern))) {
-                  disallowed.push({ package: pkg.name, license: license });
+                  disallowed.push({ package: pkgName, license: license });
                 }
               });
             });
             
             if (disallowed.length > 0) {
               console.log('Disallowed licenses found:');
-              disallowed.forEach(d => console.log(\`  - \${d.package}: \${d.license}\`));
+              disallowed.forEach(d => console.log('  - ' + d.package + ': ' + d.license));
               process.exit(1);
             } else {
               console.log('All licenses are compliant.');
@@ -120,8 +105,15 @@ jobs:
             const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
             
             const licenseSummary = {};
-            report.forEach(pkg => {
-              const licenses = pkg.licenses || ['Unknown'];
+            // license-checker outputs an object, not an array
+            Object.entries(report).forEach(([pkgKey, pkgInfo]) => {
+              let licenses = pkgInfo.licenses;
+              if (typeof licenses === 'string') {
+                licenses = [licenses];
+              } else if (!Array.isArray(licenses)) {
+                licenses = ['Unknown'];
+              }
+              
               licenses.forEach(license => {
                 licenseSummary[license] = (licenseSummary[license] || 0) + 1;
               });
@@ -129,7 +121,7 @@ jobs:
             
             console.log('License Summary for ${{ matrix.component }}:');
             Object.entries(licenseSummary).forEach(([license, count]) => {
-              console.log(\`  \${license}: \${count}\`);
+              console.log('  ' + license + ': ' + count);
             });
           "
 
@@ -143,18 +135,25 @@ jobs:
               const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
               
               const licenseSummary = {};
-              report.forEach(pkg => {
-                const licenses = pkg.licenses || ['Unknown'];
+              // license-checker outputs an object, not an array
+              Object.entries(report).forEach(([pkgKey, pkgInfo]) => {
+                let licenses = pkgInfo.licenses;
+                if (typeof licenses === 'string') {
+                  licenses = [licenses];
+                } else if (!Array.isArray(licenses)) {
+                  licenses = ['Unknown'];
+                }
+                
                 licenses.forEach(license => {
                   licenseSummary[license] = (licenseSummary[license] || 0) + 1;
                 });
               });
               
               const summary = Object.entries(licenseSummary)
-                .map(([license, count]) => `${license}: ${count}`)
+                .map(([license, count]) => license + ': ' + count)
                 .join('\n');
               
-              const comment = `## 📜 License Compliance - ${{ matrix.component }}\n\n\`\`\`\n${summary}\n\`\`\`\n\nAll licenses are compliant with the allowed license policy.`;
+              const comment = '## 📜 License Compliance - ${{ matrix.component }}\n\n```\n' + summary + '\n```\n\nAll licenses are compliant with the allowed license policy.';
               github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
