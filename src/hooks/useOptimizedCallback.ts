@@ -1,8 +1,5 @@
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/preserve-manual-memoization */
-
 // Stable callback that only changes when dependencies change
 export function useStableCallback<T extends (...args: any[]) => any>(
   callback: T,
@@ -15,14 +12,17 @@ export function useStableCallback<T extends (...args: any[]) => any>(
     callbackRef.current = callback;
   });
   
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   return useCallback(
     (...args: any[]) => callbackRef.current(...args),
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     deps
   ) as T;
 }
 
 // Memoize expensive computations
 export function useMemoized<T>(factory: () => T, deps: React.DependencyList): T {
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   return useMemo(factory, deps);
 }
 
