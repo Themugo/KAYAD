@@ -29,7 +29,6 @@ export default function AddCarStepBasic({ form, set }) {
     }
     // `set` is a non-memoized prop recreated every parent render; only year/brand/model
     // changes should re-trigger the auto-title logic (guarded by titledRef besides).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.year, form.brand, form.model]);
 
   return (

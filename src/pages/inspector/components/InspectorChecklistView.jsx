@@ -51,7 +51,6 @@ export default function InspectorChecklistView({ activeTask, setActiveTask, chec
     // checklist.length is intentionally excluded: this effect should only restore a
     // draft when switching tasks (activeTask._id), not whenever checklist mutates,
     // to avoid clobbering in-progress edits with a stale localStorage snapshot.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTask._id, setChecklist, setNotes, setCondition]);
 
   const toggleCheck = (idx) => {

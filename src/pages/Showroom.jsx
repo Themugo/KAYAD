@@ -178,14 +178,12 @@ export default function Showroom() {
     if (debouncedKeyword) next.set('keyword', debouncedKeyword);
     else next.delete('keyword');
     setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedKeyword]);
 
   // Keep the input mirror in sync when the URL changes externally (back/forward, saved-search restore).
   useEffect(() => {
     const k = searchParams.get('keyword') || '';
     if (k !== keywordInput) setKeywordInput(k);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // ─── Filter mutations ─────────────────────────────────────────────────

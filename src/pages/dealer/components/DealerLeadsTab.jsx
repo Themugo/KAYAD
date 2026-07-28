@@ -33,7 +33,6 @@ export default function DealerLeadsTab({ toast }) {
       .catch(() => toast('Failed to load leads', 'error'))
       .finally(() => setLoading(false));
     // search also drives client-side filtering below; it doesn't need to re-trigger a fetch
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, toast]);
 
   useEffect(() => { fetchLeads(); }, [fetchLeads]);

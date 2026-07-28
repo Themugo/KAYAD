@@ -56,7 +56,6 @@ export default function AdminSecurityLog() {
       .catch(() => {})
       .finally(() => setLoading(false));
     // filter is applied manually (Enter key / Apply button), not auto-triggered on change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, severityFilter, targetModelFilter]);
 
   const fetchStatistics = () => {

@@ -1,6 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/preserve-manual-memoization */
-
 import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 
 // Stable callback that only changes when dependencies change
@@ -73,7 +70,6 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
 ): T {
   const lastCall = useRef(0);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback((...args: any[]) => {
     const now = Date.now();
     if (now - lastCall.current >= delay) {
@@ -90,7 +86,6 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 ): T {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useCallback((...args: any[]) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
