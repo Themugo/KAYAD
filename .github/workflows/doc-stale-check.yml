@@ -1,0 +1,54 @@
+name: Documentation Staleness Check
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+jobs:
+  check-stale-docs:
+    name: Check Stale Documentation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install gray-matter date-fns
+
+      - name: Check document staleness
+        run: |
+          node scripts/doc-stale-check.js
+
+      - name: Create issue for stale docs
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let staleDocs = [];
+            try {
+              staleDocs = JSON.parse(fs.readFileSync('stale-docs.json', 'utf8'));
+            } catch (e) {
+              console.log('No stale docs found');
+            }
+            
+            if (staleDocs.length > 0) {
+              const body = staleDocs.map(doc => 
+                `- **${doc.file}**: Last reviewed ${doc.lastReviewed}, overdue by ${doc.overdue} days`
+              ).join('\n');
+              
+              github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Stale Documentation Detected (${staleDocs.length} files)`,
+                body: `The following documentation files are overdue for review:\n\n${body}\n\nPlease review and update the \`last-reviewed\` date in the frontmatter.`,
+                labels: ['documentation', 'stale-doc']
+              });
+            }

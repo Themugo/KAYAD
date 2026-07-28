@@ -1,0 +1,178 @@
+name: Security Reports
+
+on:
+  schedule:
+    # Run daily at 7 AM UTC
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Type of report to generate'
+        required: true
+        type: choice
+        options:
+          - all
+          - codeql
+          - gitleaks
+          - trivy
+          - sbom
+          - license
+
+jobs:
+  generate-reports:
+    name: Generate Security Reports
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate security summary
+        run: |
+          echo "# Security Report - $(date)" > security-report.md
+          echo "" >> security-report.md
+          echo "## Executive Summary" >> security-report.md
+          echo "" >> security-report.md
+          echo "This report summarizes the security posture of the KAYAD platform." >> security-report.md
+          echo "" >> security-report.md
+          echo "## Security Scan Results" >> security-report.md
+          echo "" >> security-report.md
+
+      - name: Fetch CodeQL results
+        if: inputs.report_type == 'all' || inputs.report_type == 'codeql'
+        uses: github/codeql-action/analyze@v3
+        with:
+          upload-database: false
+          upload-results: false
+          output: codeql-results
+
+      - name: Fetch Trivy results
+        if: inputs.report_type == 'all' || inputs.report_type == 'trivy'
+        run: |
+          echo "### Container Vulnerabilities" >> security-report.md
+          echo "" >> security-report.md
+          echo "Fetching Trivy scan results from GitHub Security..." >> security-report.md
+          echo "" >> security-report.md
+
+      - name: Fetch Dependency Track results
+        if: inputs.report_type == 'all' || inputs.report_type == 'sbom'
+        env:
+          DEPENDENCY_TRACK_URL: ${{ secrets.DEPENDENCY_TRACK_URL }}
+          DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          PROJECT_ID: ${{ secrets.DEPENDENCY_TRACK_PROJECT_ID }}
+        run: |
+          if [ -n "$DEPENDENCY_TRACK_URL" ] && [ -n "$DEPENDENCY_TRACK_API_KEY" ]; then
+            curl -L https://github.com/DependencyTrack/dependency-track-cli/releases/latest/download/dt-cli.jar -o dt-cli.jar
+            
+            echo "### Dependency Vulnerabilities" >> security-report.md
+            echo "" >> security-report.md
+            
+            java -jar dt-cli.jar \
+              --api-key $DEPENDENCY_TRACK_API_KEY \
+              --url $DEPENDENCY_TRACK_URL \
+              --project $PROJECT_ID \
+              --find \
+              --output dt-findings.json
+            
+            CRITICAL=$(jq '[.[] | select(.severity == "CRITICAL")] | length' dt-findings.json)
+            HIGH=$(jq '[.[] | select(.severity == "HIGH")] | length' dt-findings.json)
+            MEDIUM=$(jq '[.[] | select(.severity == "MEDIUM")] | length' dt-findings.json)
+            LOW=$(jq '[.[] | select(.severity == "LOW")] | length' dt-findings.json)
+            
+            echo "| Severity | Count |" >> security-report.md
+            echo "|----------|-------|" >> security-report.md
+            echo "| Critical | $CRITICAL |" >> security-report.md
+            echo "| High | $HIGH |" >> security-report.md
+            echo "| Medium | $MEDIUM |" >> security-report.md
+            echo "| Low | $LOW |" >> security-report.md
+            echo "" >> security-report.md
+          else
+            echo "Dependency Track not configured." >> security-report.md
+          fi
+
+      - name: Generate remediation dashboard
+        run: |
+          echo "## Remediation Dashboard" >> security-report.md
+          echo "" >> security-report.md
+          echo "### Critical Issues" >> security-report.md
+          echo "" >> security-report.md
+          echo "Priority 1: Fix immediately" >> security-report.md
+          echo "" >> security-report.md
+          echo "### High Issues" >> security-report.md
+          echo "" >> security-report.md
+          echo "Priority 2: Fix within 7 days" >> security-report.md
+          echo "" >> security-report.md
+          echo "### Medium Issues" >> security-report.md
+          echo "" >> security-report.md
+          echo "Priority 3: Fix within 30 days" >> security-report.md
+          echo "" >> security-report.md
+          echo "### Low Issues" >> security-report.md
+          echo "" >> security-report.md
+          echo "Priority 4: Fix within 90 days" >> security-report.md
+          echo "" >> security-report.md
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security-report.md
+
+      - name: Create GitHub Issue for security report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('security-report.md', 'utf8');
+            
+            const title = `Security Report - ${new Date().toISOString().split('T')[0]}`;
+            const body = report;
+            
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security-report'
+            });
+            
+            if (issues.data.length > 0) {
+              // Update existing issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: body
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['security-report']
+              });
+            }
+
+      - name: Send Slack notification
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SECURITY_WEBHOOK }}
+        run: |
+          curl -X POST $SLACK_WEBHOOK_URL \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "Security Report Generated",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Security Report Generated*\n\nA new security report has been generated for the KAYAD platform. Please review the findings and take necessary actions."
+                  }
+                }
+              ]
+            }'

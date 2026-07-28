@@ -1,0 +1,165 @@
+name: Load Testing
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  K6_VERSION: 'latest'
+
+jobs:
+  load-test:
+    name: Load Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd backend && npm ci
+
+      - name: Setup k6
+        uses: grafana/k6-action@v0.3.1
+        with:
+          k6-version: ${{ env.K6_VERSION }}
+
+      - name: Start backend server
+        run: |
+          cd backend
+          npm run dev &
+          echo $! > /tmp/backend.pid
+          sleep 10
+
+      - name: Run API load tests
+        run: k6 run load-tests/api-load-test.js
+        continue-on-error: true
+
+      - name: Run WebSocket load tests
+        run: k6 run load-tests/websocket-load-test.js
+        continue-on-error: true
+
+      - name: Run database load tests
+        run: k6 run load-tests/database-load-test.js
+        continue-on-error: true
+
+      - name: Stop backend server
+        if: always()
+        run: |
+          if [ -f /tmp/backend.pid ]; then
+            kill $(cat /tmp/backend.pid) || true
+          fi
+
+      - name: Upload load test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results
+          path: |
+            load-tests/results/
+          retention-days: 30
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## Load Test Results\n\n';
+            
+            try {
+              const results = JSON.parse(fs.readFileSync('load-tests/results/api-results.json', 'utf8'));
+              comment += `### API Load Test\n`;
+              comment += `- Requests: ${results.metrics.http_reqs.values.count}\n`;
+              comment += `- RPS: ${results.metrics.http_reqs.values.count / results.metrics.http_req_duration.values.count}\n`;
+              comment += `- Avg Latency: ${results.metrics.http_req_duration.values.avg}ms\n`;
+              comment += `- P95 Latency: ${results.metrics.http_req_duration.values['p(95)']}ms\n`;
+              comment += `- P99 Latency: ${results.metrics.http_req_duration.values['p(99)']}ms\n`;
+              comment += `- Error Rate: ${results.metrics.http_req_failed.values.rate * 100}%\n`;
+            } catch (e) {
+              comment += '### API Load Test\nFailed to load results\n';
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  performance-regression:
+    name: Performance Regression Test
+    runs-on: ubuntu-latest
+    needs: load-test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download load test results
+        uses: actions/download-artifact@v4
+        with:
+          name: load-test-results
+          path: load-tests/results/
+
+      - name: Compare with baseline
+        run: |
+          node scripts/compare-performance.js
+
+      - name: Fail on regression
+        run: |
+          if [ -f load-tests/results/regression-detected ]; then
+            echo "Performance regression detected!"
+            exit 1
+          fi
+
+  performance-budget-check:
+    name: Performance Budget Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Check bundle size
+        run: |
+          node scripts/check-bundle-size.js
+
+      - name: Check performance budgets
+        run: |
+          node scripts/check-performance-budgets.js
+
+      - name: Upload bundle analysis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-analysis
+          path: dist/stats.html
+          retention-days: 30

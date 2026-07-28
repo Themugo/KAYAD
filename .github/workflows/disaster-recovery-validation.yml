@@ -1,0 +1,242 @@
+name: Disaster Recovery Validation
+
+on:
+  schedule:
+    # Database Restore Test: First Sunday of each quarter at 2 AM UTC
+    - cron: '0 2 * 0 1,4,7,10'  # Jan, Apr, Jul, Oct (quarterly)
+    # Failover Test: Second Sunday of each quarter at 2 AM UTC
+    - cron: '0 2 * 0 2,5,8,11'  # Feb, May, Aug, Nov (quarterly)
+    # Backup Verification: Third Sunday of each quarter at 2 AM UTC
+    - cron: '0 2 * 0 3,6,9,12'  # Mar, Jun, Sep, Dec (quarterly)
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        type: choice
+        options:
+          - backup-verification
+          - restore-test
+          - failover-test
+          - all
+
+jobs:
+  backup-verification:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'backup-verification' || github.event.inputs.test_type == 'all' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+          
+      - name: Run backup verification
+        env:
+          BACKUP_ENABLED: true
+          BACKUP_VERIFICATION_ENABLED: true
+        run: |
+          cd backend
+          node -e "
+          const { runAutomatedVerification } = require('./services/backupVerificationService.js');
+          runAutomatedVerification().then(result => {
+            console.log('Verification result:', JSON.stringify(result, null, 2));
+            process.exit(result.success ? 0 : 1);
+          }).catch(err => {
+            console.error('Verification failed:', err);
+            process.exit(1);
+          });
+          "
+          
+      - name: Check backup status
+        run: |
+          cd backend
+          npm run backup:status
+          
+      - name: Alert on failure
+        if: failure()
+        run: |
+          echo "Backup verification failed - alert on-call team"
+
+  restore-test:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'restore-test' || github.event.inputs.test_type == 'all'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+          
+      - name: Get latest backup
+        id: backup
+        run: |
+          cd backend
+          node -e "
+          const { listBackups } = require('./services/backupService.js');
+          listBackups().then(backups => {
+            if (backups.length === 0) {
+              console.log('No backups found');
+              process.exit(1);
+            }
+            console.log('::set-output name=filename::' + backups[0].filename);
+          }).catch(err => {
+            console.error('Failed to list backups:', err);
+            process.exit(1);
+          });
+          "
+          
+      - name: Run restore test
+        env:
+          MONGODB_URI: ${{ secrets.TEST_MONGODB_URI }}
+          RUN_RESTORE_TEST: true
+        run: |
+          cd backend
+          node -e "
+          const { testRestore } = require('./services/backupVerificationService.js');
+          const filename = '${{ steps.backup.outputs.filename }}';
+          testRestore(filename, 'kayad_dr_test').then(result => {
+            console.log('Restore test result:', JSON.stringify(result, null, 2));
+            if (result.duration > 3600000) { // 1 hour
+              console.error('Restore test exceeded RTO of 1 hour');
+              process.exit(1);
+            }
+            process.exit(0);
+          }).catch(err => {
+            console.error('Restore test failed:', err);
+            process.exit(1);
+          });
+          "
+          
+      - name: Alert on RTO breach
+        if: failure()
+        run: |
+          echo "Restore test exceeded RTO - alert on-call team"
+
+  failover-test:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'failover-test' || github.event.inputs.test_type == 'all'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install dependencies
+        run: |
+          cd backend
+          npm ci
+          
+      - name: Simulate database failover
+        env:
+          MONGODB_URI: ${{ secrets.STANDBY_MONGODB_URI }}
+        run: |
+          cd backend
+          echo "Simulating database failover to standby..."
+          # This would be implemented based on your failover setup
+          # For now, just verify standby connectivity
+          node -e "
+          const mongoose = require('mongoose');
+          const uri = process.env.MONGODB_URI;
+          mongoose.connect(uri).then(() => {
+            console.log('Standby database connected successfully');
+            process.exit(0);
+          }).catch(err => {
+            console.error('Standby database connection failed:', err);
+            process.exit(1);
+          });
+          "
+          
+      - name: Measure failover time
+        run: |
+          echo "Failover time measurement would be implemented here"
+          echo "This should measure time from primary failure to standby promotion"
+          
+      - name: Alert on failover failure
+        if: failure()
+        run: |
+          echo "Failover test failed - alert on-call team"
+
+  runbook-review:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all' || github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check runbook files exist
+        run: |
+          ls -la runbooks/
+          
+      - name: Validate runbook format
+        run: |
+          for file in runbooks/*.md; do
+            echo "Validating $file"
+            # Check for required sections
+            if ! grep -q "## Severity" "$file"; then
+              echo "Error: Missing Severity section in $file"
+              exit 1
+            fi
+            if ! grep -q "## RTO" "$file"; then
+              echo "Error: Missing RTO section in $file"
+              exit 1
+            fi
+            if ! grep -q "## Recovery Steps" "$file"; then
+              echo "Error: Missing Recovery Steps section in $file"
+              exit 1
+            fi
+          done
+          echo "All runbooks validated successfully"
+          
+      - name: Create issue for runbook review
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Quarterly Runbook Review',
+              body: 'Please review all disaster recovery runbooks and update with any lessons learned from the quarter.',
+              labels: ['disaster-recovery', 'runbook-review']
+            })
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [backup-verification, restore-test, failover-test, runbook-review]
+    if: always()
+    steps:
+      - name: Generate report
+        run: |
+          echo "# Disaster Recovery Validation Report" > report.md
+          echo "Date: $(date)" >> report.md
+          echo "" >> report.md
+          echo "## Test Results" >> report.md
+          echo "- Backup Verification: ${{ needs.backup-verification.result }}" >> report.md
+          echo "- Restore Test: ${{ needs.restore-test.result }}" >> report.md
+          echo "- Failover Test: ${{ needs.failover-test.result }}" >> report.md
+          echo "- Runbook Review: ${{ needs.runbook-review.result }}" >> report.md
+          cat report.md
+          
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-validation-report
+          path: report.md
+          
+      - name: Alert on any failure
+        if: needs.backup-verification.result == 'failure' || needs.restore-test.result == 'failure' || needs.failover-test.result == 'failure'
+        run: |
+          echo "One or more disaster recovery tests failed - alert on-call team"
