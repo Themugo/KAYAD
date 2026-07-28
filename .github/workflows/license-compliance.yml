@@ -66,9 +66,27 @@ jobs:
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
             const disallowed = [];
-            // Allow LGPL and other permissive licenses - only block strong copyleft (GPL, AGPL)
-            // LGPL is commonly allowed as it permits dynamic linking
+            // Only block strong copyleft licenses (GPL, AGPL)
+            // Note: We use exact matching to avoid false positives (LGPL shouldn't match GPL)
             const disallowedPatterns = ['GPL', 'AGPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
+            
+            // Helper to extract license identifiers from a license string
+            function extractLicenses(licenseStr) {
+              // Split by common delimiters and clean up
+              return licenseStr
+                .replace(/[()]/g, ' ')
+                .split(/[\s,]+|OR|I|AND/)
+                .map(l => l.trim())
+                .filter(l => l.length > 0);
+            }
+            
+            // Check if a license identifier matches a disallowed pattern exactly
+            function isDisallowed(licenseId) {
+              // Check for exact match (case-insensitive)
+              return disallowedPatterns.some(pattern => 
+                licenseId.toUpperCase() === pattern.toUpperCase()
+              );
+            }
             
             // license-checker outputs an object, not an array
             Object.entries(report).forEach(([pkgKey, pkgInfo]) => {
@@ -84,7 +102,10 @@ jobs:
               }
               
               licenses.forEach(license => {
-                if (disallowedPatterns.some(pattern => license.includes(pattern))) {
+                const licenseIds = extractLicenses(license);
+                const disallowedLicenses = licenseIds.filter(isDisallowed);
+                
+                if (disallowedLicenses.length > 0) {
                   disallowed.push({ package: pkgName, license: license });
                 }
               });
