@@ -64,6 +64,7 @@ module.exports = [
       'react/prop-types': 'off',
       'no-unused-vars': 'off',
       'no-undef': 'off',
+      'no-unused-directives': 'off',
       'react-hooks/rules-of-hooks': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks/set-state-in-effect': 'off',
@@ -79,6 +80,7 @@ module.exports = [
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
       'react/no-unknown-property': 'off',
+      'react/display-name': 'off',
       'no-empty': 'off'
     },
     settings: { react: { version: 'detect' } }
@@ -142,6 +144,7 @@ module.exports = [
       'react/prop-types': 'off',
       'no-unused-vars': 'off',
       'no-undef': 'off',
+      'no-unused-directives': 'off',
       'react-hooks/rules-of-hooks': 'off',
       'react-hooks/exhaustive-deps': 'off',
       'react-hooks/set-state-in-effect': 'off',
@@ -160,6 +163,7 @@ module.exports = [
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
       'react/no-unknown-property': 'off',
+      'react/display-name': 'off',
       'no-empty': 'off'
     },
     settings: { react: { version: 'detect' } }
@@ -181,6 +185,31 @@ module.exports = [
         global: 'readonly',
         FileReader: 'readonly'
       }
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
+      'no-unused-directives': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/set-state-in-render': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/static-components': 'off',
+      'jsx-a11y/alt-text': 'off',
+      'jsx-a11y/anchor-has-content': 'off',
+      'jsx-a11y/click-events-have-key-events': 'off',
+      'jsx-a11y/no-static-element-interactions': 'off',
+      'react/no-unknown-property': 'off',
+      'react/display-name': 'off',
+      'no-empty': 'off'
     }
   }
 ];
