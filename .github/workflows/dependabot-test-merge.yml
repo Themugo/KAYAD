@@ -1,66 +1,52 @@
 name: Dependabot Test Auto-Merge
 
 on:
-  workflow_run:
-    types: [completed]
-    workflows: ["CI"]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  auto-merge-on-test-pass:
-    name: Auto-Merge Dependabot PRs on Test Pass
+  test-and-auto-merge:
+    name: Run Tests and Auto-Merge Dependabot PRs
     runs-on: ubuntu-latest
-    if: |
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.name == 'CI'
     
     steps:
-      - name: Download workflow run artifacts
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Tests
+        id: test
+        run: npm test
+
+      - name: Enable auto-merge on Dependabot PR
+        if: success()
         uses: actions/github-script@v7
         with:
           script: |
-            const runId = context.payload.workflow_run.id;
-            const run = await github.rest.actions.getWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: runId
-            });
-            
-            // Get the PR number from the head branch
-            const headBranch = context.payload.workflow_run.head_branch;
-            console.log(`Head branch: ${headBranch}`);
-            
-            // Find PRs with this head branch
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head: `${context.repo.owner}:${headBranch}`,
-              state: 'open'
-            });
-            
-            if (prs.length === 0) {
-              console.log('No PR found for this head branch');
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log('No PR found in payload');
               process.exit(0);
             }
             
-            const pr = prs[0];
-            console.log(`Found PR #${pr.number}: ${pr.title}`);
-            console.log(`User: ${pr.user?.login}`);
-            
-            // Only process Dependabot PRs
             if (!pr.user?.login?.includes('dependabot')) {
               console.log('Not a Dependabot PR, skipping');
               process.exit(0);
             }
             
-            // Check if PR is mergeable
-            if (pr.mergeable !== true) {
-              console.log('PR has merge conflicts or is not mergeable');
-              process.exit(0);
-            }
+            console.log(`Processing Dependabot PR #${pr.number}: ${pr.title}`);
             
             // Check if auto-merge is already enabled
             if (pr.auto_merge) {
@@ -68,9 +54,8 @@ jobs:
               process.exit(0);
             }
             
-            console.log('CI passed, enabling auto-merge on Dependabot PR...');
+            console.log('Tests passed, enabling auto-merge on Dependabot PR...');
             
-            // Enable auto-merge using GraphQL
             try {
               await github.graphql(`
                 mutation enableAutoMerge($prId: ID!) {
@@ -94,5 +79,5 @@ jobs:
               console.log('PR will be merged when all status checks pass.');
             } catch (error) {
               console.log('Failed to enable auto-merge:', error.message);
-              process.exit(1);
+              core.warning('Could not enable auto-merge');
             }
