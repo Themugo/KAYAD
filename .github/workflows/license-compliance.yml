@@ -66,8 +66,9 @@ jobs:
             const fs = require('fs');
             const report = JSON.parse(fs.readFileSync('license-report-${{ matrix.component }}.json', 'utf8'));
             const disallowed = [];
-            // Allow MPL and other permissive licenses - only block strong copyleft
-            const disallowedPatterns = ['GPL', 'AGPL', 'LGPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
+            // Allow LGPL and other permissive licenses - only block strong copyleft (GPL, AGPL)
+            // LGPL is commonly allowed as it permits dynamic linking
+            const disallowedPatterns = ['GPL', 'AGPL', 'CPL', 'EPL', 'SSPL', 'CPAL'];
             
             // license-checker outputs an object, not an array
             Object.entries(report).forEach(([pkgKey, pkgInfo]) => {
