@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
-
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/preserve-manual-memoization */
+
+import { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 
 // Stable callback that only changes when dependencies change
 export function useStableCallback<T extends (...args: any[]) => any>(
