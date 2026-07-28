@@ -13,13 +13,21 @@ export function useStableCallback<T extends (...args: any[]) => any>(
   });
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useCallback((...args: any[]) => callbackRef.current(...args), deps) as T;
+  return useCallback(
+    (...args: any[]) => callbackRef.current(...args),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    deps
+  ) as T;
 }
 
 // Memoize expensive computations
 export function useMemoized<T>(factory: () => T, deps: React.DependencyList): T {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(factory, deps);
+  return useMemo(
+    factory,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    deps
+  );
 }
 
 // Create a stable reference that only updates when value changes
