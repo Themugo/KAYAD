@@ -34,7 +34,7 @@ describe('ChatPage', () => {
 
   it('renders messages heading', async () => {
     render(<MemoryRouter><ChatPage /></MemoryRouter>);
-    expect(await screen.findByText('💬 Messages')).toBeInTheDocument();
+    expect(await screen.findByText('Messages')).toBeInTheDocument();
   });
 
   it('shows empty state when no chat selected', async () => {
@@ -44,7 +44,7 @@ describe('ChatPage', () => {
 
   it('shows empty state prompt', async () => {
     render(<MemoryRouter><ChatPage /></MemoryRouter>);
-    expect(await screen.findByText(/Choose from your existing chats or start a new one from a car listing/)).toBeInTheDocument();
+    expect(await screen.findByText(/Choose a conversation to start messaging/)).toBeInTheDocument();
   });
 
   describe('Chat API integration', () => {

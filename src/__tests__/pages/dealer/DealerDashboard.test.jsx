@@ -9,11 +9,22 @@ vi.mock('lucide-react', () => ({
   Car: () => null,
   Users: () => null,
   Plus: () => null,
+  PlusCircle: () => null,
   BarChart3: () => null,
   MessageSquare: () => null,
   DollarSign: () => null,
   Settings: () => null,
   ChevronRight: () => null,
+  Gavel: () => null,
+  TrendingUp: () => null,
+  ClipboardList: () => null,
+  Eye: () => null,
+  Star: () => null,
+  Bell: () => null,
+  Zap: () => null,
+  ArrowUp: () => null,
+  TrendingDown: () => null,
+  Award: () => null,
 }));
 
 vi.mock('../../../context/AuthContext', () => ({

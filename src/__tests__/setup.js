@@ -4,8 +4,8 @@ import { vi } from 'vitest';
 
 globalThis.React = React;
 
-// Mock DesignThemeProvider and useDesignTheme
-const mockDesignThemeValue = {
+// Define mock values that can be used in vi.mock factories
+const createMockDesignTheme = () => ({
   mode: 'light',
   setMode: vi.fn(),
   primaryColor: '#d4af37',
@@ -14,48 +14,113 @@ const mockDesignThemeValue = {
   setSecondaryColor: vi.fn(),
   fontFamily: 'sans-serif',
   setFontFamily: vi.fn(),
-};
+  layouts: { card: 'standard' },
+  colors: {
+    primary: '#d4af37',
+    secondary: '#1a1a1a',
+    background: '#ffffff',
+    text: '#000000',
+  },
+});
 
-vi.mock('../theme/DesignThemeProvider', () => ({
-  DesignThemeProvider: ({ children }) => children,
-  useDesignTheme: () => mockDesignThemeValue,
-  default: ({ children }) => children,
-}));
+// Mock DesignThemeProvider and useDesignTheme - must be hoisted
+vi.mock('../theme/DesignThemeProvider', () => {
+  // The context value has { theme, loading, saveTheme, resetTheme }
+  // ThemeConfig includes colors, fonts, sizes, layouts, and time
+  const mockTheme = {
+    colors: {
+      navbarBg: '#1e3063',
+      navbarText: '#ffffff',
+      navbarAccent: '#00d1d5',
+      heroBg: '#1e3063',
+      heroText: '#ffffff',
+      heroAccent: '#00d1d5',
+      footerBg: '#141f42',
+      footerText: '#ffffff',
+      footerAccent: '#00d1d5',
+      cardBg: '#fcf9f4',
+      cardBorder: '#e8e4dc',
+      cardHeading: '#1e3063',
+      cardBody: '#4a5568',
+      cardAccent: '#00d1d5',
+      dashboardBg: '#fcf9f4',
+      dashboardCardBg: '#ffffff',
+      dashboardHeading: '#1e3063',
+      dashboardAccent: '#3ddb72',
+      pageBg: '#fcf9f4',
+      bodyText: '#4a5568',
+      headingText: '#1e3063',
+      buttonBg: '#3ddb72',
+      buttonText: '#1e3063',
+    },
+    fonts: {
+      heading: 'Playfair Display',
+      body: 'Inter',
+    },
+    sizes: {
+      headingScale: 1,
+      bodyScale: 1,
+      sectionPadding: 80,
+      cardPadding: 20,
+      radius: 16,
+    },
+    layouts: {
+      navbar: 'split',
+      hero: 'centered',
+      footer: 'four-col',
+      card: 'standard',
+      dashboard: 'grid',
+    },
+    time: {
+      enabled: false,
+      dayStartHour: 6,
+      nightStartHour: 18,
+      dayColors: {},
+      nightColors: {},
+    },
+  };
+  return {
+    DesignThemeProvider: ({ children }) => children,
+    useDesignTheme: () => ({
+      theme: mockTheme,
+      loading: false,
+      saveTheme: vi.fn(),
+      resetTheme: vi.fn(),
+    }),
+    default: ({ children }) => children,
+  };
+});
 
 // Mock SocketContext
-const mockSocketValue = {
-  socket: null,
-  isConnected: false,
-  connect: vi.fn(),
-  disconnect: vi.fn(),
-  emit: vi.fn(),
-  on: vi.fn(),
-  off: vi.fn(),
-};
-
 vi.mock('../context/SocketContext', () => ({
   SocketProvider: ({ children }) => children,
-  useSocket: () => mockSocketValue,
+  useSocket: () => ({
+    socket: null,
+    isConnected: false,
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    emit: vi.fn(),
+    on: vi.fn(),
+    off: vi.fn(),
+  }),
   default: ({ children }) => children,
 }));
 
 // Mock AuthContext
-const mockAuthValue = {
-  user: { id: 'test-user-id', email: 'test@example.com' },
-  session: { access_token: 'test-token' },
-  loading: false,
-  error: null,
-  signIn: vi.fn(),
-  signUp: vi.fn(),
-  signOut: vi.fn(),
-  resetPassword: vi.fn(),
-  updateUser: vi.fn(),
-  refreshSession: vi.fn(),
-};
-
 vi.mock('../context/AuthContext', () => ({
   AuthProvider: ({ children }) => children,
-  useAuth: () => mockAuthValue,
+  useAuth: () => ({
+    user: { id: 'test-user-id', email: 'test@example.com' },
+    session: { access_token: 'test-token' },
+    loading: false,
+    error: null,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+    resetPassword: vi.fn(),
+    updateUser: vi.fn(),
+    refreshSession: vi.fn(),
+  }),
   default: ({ children }) => children,
 }));
 
@@ -95,26 +160,8 @@ vi.mock('../lib/supabaseClient', () => ({
   },
 }));
 
-// Mock api module for isDemoMode/enableDemoMode
-vi.mock('../api/api', () => ({
-  isDemoMode: vi.fn(() => false),
-  enableDemoMode: vi.fn(),
-  disableDemoMode: vi.fn(),
-  api: {
-    isDemoMode: vi.fn(() => false),
-    enableDemoMode: vi.fn(),
-    disableDemoMode: vi.fn(),
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
-  },
-  default: {
-    isDemoMode: vi.fn(() => false),
-    enableDemoMode: vi.fn(),
-    disableDemoMode: vi.fn(),
-  },
-}));
+// Note: We don't mock the api module here because tests like api.test.js
+// need to test the real functions. Components that need mocks should do it themselves.
 
 // Mock @sentry/react for tests - this must be before any imports of sentry.ts
 vi.mock('@sentry/react', () => ({
@@ -255,7 +302,7 @@ vi.mock('lucide-react', () => {
     'Pest', 'Locust', 'Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Lime',
     'Orange', 'Peach', 'Pear', 'Pepper', 'Watermelon', 'Carrot', 'Eggplant',
     'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn',
-    'Loader', 'Loader2', 'Gavel', 'ArrowLeft'];
+    'Loader', 'Loader2', 'Gavel', 'ArrowLeft', 'Wrench', 'FilterX'];
   // Create a mock that handles any icon name
   const mockIcon = (name) => () => React.createElement('span', { 'data-testid': `icon-${name.toLowerCase()}` }, name);
   const result = {};

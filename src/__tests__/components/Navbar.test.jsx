@@ -67,6 +67,6 @@ describe('Navbar', () => {
 
   it('renders nav links', () => {
     render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
-    expect(screen.getAllByText('Gallery').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Browse Cars').length).toBeGreaterThan(0);
   });
 });

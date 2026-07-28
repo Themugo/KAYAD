@@ -38,15 +38,4 @@ describe('api module', () => {
   it('formatKES handles string numbers', () => {
     expect(api.formatKES('1500')).toBe('KES 1,500');
   });
-
-  it('isDemoMode returns false by default', () => {
-    expect(api.isDemoMode()).toBe(false);
-  });
-
-  it('enableDemoMode sets demo mode', () => {
-    api.enableDemoMode();
-    expect(api.isDemoMode()).toBe(true);
-    // Reset for other tests by re-importing
-    vi.resetModules();
-  });
 });

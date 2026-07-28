@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Showroom from '../../pages/Showroom';
 
@@ -38,8 +38,10 @@ describe('Showroom', () => {
     expect(screen.getByText('The Gallery')).toBeInTheDocument();
   });
 
-  it('shows empty state message', () => {
+  it('shows empty state message', async () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText(/No vehicles in the showroom yet/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/No vehicles match this search/)).toBeInTheDocument();
+    });
   });
 });
