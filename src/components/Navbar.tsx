@@ -40,10 +40,9 @@ interface NavbarProps {
 }
 
 const NAV_ITEMS = [
-  { key: 'home', label: 'Home', path: '/', icon: Home },
-  { key: 'gallery', label: 'Browse Cars', path: '/gallery', icon: Images },
+  { key: 'gallery', label: 'Browse', path: '/gallery', icon: Images },
   { key: 'auction', label: 'Auctions', path: '/auction', icon: Gavel },
-  { key: 'sell', label: 'Sell', path: '/dealer/add-car', icon: Tag },
+  { key: 'escrow', label: 'Escrow', path: '/escrow', icon: Shield },
 ];
 
 const AUTH_NAV_ITEMS = [
@@ -197,14 +196,15 @@ export default function Navbar({ currentPage, setPage, authUser, onSignOut }: Na
           className={`mx-auto flex w-full max-w-7xl px-4 py-3 ${innerClass}`}
         >
           {/* Logo */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => handleNav('/', 'home')}
-              className="flex items-center gap-1 text-xl font-bold font-sans tracking-tight cursor-pointer bg-transparent border-none"
+              className="flex items-center gap-2 text-lg font-bold tracking-tight cursor-pointer bg-transparent border-none"
               style={NS.logo}
             >
-              KAYAD
+              <span className="text-[#16C4A4]">KAYAD</span>
             </button>
+            <span className="hidden md:block text-[10px] text-white/40 uppercase tracking-widest">Motors</span>
           </div>
 
           {/* Center nav links (centered layout) */}

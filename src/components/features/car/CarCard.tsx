@@ -391,33 +391,18 @@ function CarCardComponent({
           }}
         />
 
-        {/* Badges - Top Left */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+        {/* Badges - Top Left (simplified) */}
+        <div className="absolute top-3 left-3 flex gap-1.5">
           {isOnAuction && (
             <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(239,68,68,0.92)', color: '#fff' }}>
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#fff' }} />
               LIVE
             </span>
           )}
-          {car.badges.includes('escrow') && (
-            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(30,30,30,0.88)', color: '#fff' }}>
+          {(car.badges.includes('escrow') || car.isVerified) && (
+            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(16,185,129,0.88)', color: '#fff' }}>
               <Shield size={10} />
-              ESCROW
-            </span>
-          )}
-          {car.isVerified && (
-            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(16,185,129,0.92)', color: '#fff' }}>
-              ✓
-            </span>
-          )}
-          {car.isDemo && (
-            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(245,158,11,0.92)', color: '#1a1200' }}>
-              DEMO
-            </span>
-          )}
-          {car.isBankOwned && (
-            <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(59,130,246,0.92)', color: '#fff' }}>
-              BANK
+              {car.isVerified ? 'VERIFIED' : 'ESCROW'}
             </span>
           )}
         </div>

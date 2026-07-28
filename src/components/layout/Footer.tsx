@@ -36,25 +36,14 @@ export default function Footer({ setPage }: FooterProps) {
         { label: 'Browse Cars', page: 'gallery' },
         { label: 'Live Auctions', page: 'auction' },
         { label: 'Sell Your Vehicle', page: 'register' },
-        { label: 'Escrow Vault', page: 'escrow' },
       ],
     },
     {
-      title: 'Services',
+      title: 'Support',
       links: [
-        { label: 'Pre-Inspection', page: 'pre-inspection' },
-        { label: 'Car Financing', page: 'support' },
-        { label: 'Insurance', page: 'support' },
+        { label: 'Help Center', page: 'support' },
+        { label: 'Contact Us', page: 'support' },
         { label: 'Become a Dealer', page: 'support' },
-      ],
-    },
-    {
-      title: 'Company',
-      links: [
-        { label: 'About KAYAD', page: 'about' },
-        { label: 'How It Works', page: 'home' },
-        { label: 'Support', page: 'support' },
-        { label: 'Contact', page: 'support' },
       ],
     },
   ];
@@ -249,7 +238,7 @@ export default function Footer({ setPage }: FooterProps) {
                   </span>
                 </button>
                 <p style={{ fontSize: 13, opacity: 0.4, lineHeight: 1.6 }}>
-                  Kenya's premium car marketplace. Buy, sell, and auction vehicles with M-Pesa escrow protection.
+                  Kenya's trusted car marketplace. Secure escrow, verified dealers.
                 </p>
               </div>
             )}
