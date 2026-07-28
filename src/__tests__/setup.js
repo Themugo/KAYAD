@@ -4,6 +4,118 @@ import { vi } from 'vitest';
 
 globalThis.React = React;
 
+// Mock DesignThemeProvider and useDesignTheme
+const mockDesignThemeValue = {
+  mode: 'light',
+  setMode: vi.fn(),
+  primaryColor: '#d4af37',
+  setPrimaryColor: vi.fn(),
+  secondaryColor: '#1a1a1a',
+  setSecondaryColor: vi.fn(),
+  fontFamily: 'sans-serif',
+  setFontFamily: vi.fn(),
+};
+
+vi.mock('../theme/DesignThemeProvider', () => ({
+  DesignThemeProvider: ({ children }) => children,
+  useDesignTheme: () => mockDesignThemeValue,
+  default: ({ children }) => children,
+}));
+
+// Mock SocketContext
+const mockSocketValue = {
+  socket: null,
+  isConnected: false,
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+  emit: vi.fn(),
+  on: vi.fn(),
+  off: vi.fn(),
+};
+
+vi.mock('../context/SocketContext', () => ({
+  SocketProvider: ({ children }) => children,
+  useSocket: () => mockSocketValue,
+  default: ({ children }) => children,
+}));
+
+// Mock AuthContext
+const mockAuthValue = {
+  user: { id: 'test-user-id', email: 'test@example.com' },
+  session: { access_token: 'test-token' },
+  loading: false,
+  error: null,
+  signIn: vi.fn(),
+  signUp: vi.fn(),
+  signOut: vi.fn(),
+  resetPassword: vi.fn(),
+  updateUser: vi.fn(),
+  refreshSession: vi.fn(),
+};
+
+vi.mock('../context/AuthContext', () => ({
+  AuthProvider: ({ children }) => children,
+  useAuth: () => mockAuthValue,
+  default: ({ children }) => children,
+}));
+
+// Mock SupabaseClient
+vi.mock('../lib/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { access_token: 'test-token', user: { id: 'test-user-id' } } },
+      }),
+      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      signInWithPassword: vi.fn().mockResolvedValue({
+        data: { user: { id: 'test-user-id' }, session: { access_token: 'test-token' } },
+      }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+    },
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+    })),
+  },
+  default: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: { session: { access_token: 'test-token', user: { id: 'test-user-id' } } },
+      }),
+      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+    },
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })),
+  },
+}));
+
+// Mock api module for isDemoMode/enableDemoMode
+vi.mock('../api/api', () => ({
+  isDemoMode: vi.fn(() => false),
+  enableDemoMode: vi.fn(),
+  disableDemoMode: vi.fn(),
+  api: {
+    isDemoMode: vi.fn(() => false),
+    enableDemoMode: vi.fn(),
+    disableDemoMode: vi.fn(),
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
+  default: {
+    isDemoMode: vi.fn(() => false),
+    enableDemoMode: vi.fn(),
+    disableDemoMode: vi.fn(),
+  },
+}));
+
 // Mock @sentry/react for tests - this must be before any imports of sentry.ts
 vi.mock('@sentry/react', () => ({
   default: {
@@ -49,7 +161,7 @@ vi.mock('framer-motion', () => ({
   useTransform: () => 0,
 }));
 
-// Mock lucide-react icons
+// Mock lucide-react icons - comprehensive mock that allows any icon
 vi.mock('lucide-react', () => {
   const icons = ['Gauge', 'MapPin', 'ArrowRight', 'Search', 'X', 'ChevronLeft', 'ChevronRight', 
     'Star', 'Heart', 'Filter', 'User', 'Settings', 'Menu', 'Close', 'Phone', 'Mail',
@@ -142,11 +254,19 @@ vi.mock('lucide-react', () => {
     'Signal2', 'Signal3', 'Signal4', 'Signal5', 'Bug', 'BugOff', 'Ant', 'Worm',
     'Pest', 'Locust', 'Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Lime',
     'Orange', 'Peach', 'Pear', 'Pepper', 'Watermelon', 'Carrot', 'Eggplant',
-    'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn'];
-  return icons.reduce((acc, icon) => {
-    acc[icon] = () => React.createElement('span', { 'data-testid': `icon-${icon.toLowerCase()}` }, icon);
-    return acc;
-  }, {});
+    'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn',
+    'Loader', 'Loader2', 'Gavel', 'ArrowLeft'];
+  // Create a mock that handles any icon name
+  const mockIcon = (name) => () => React.createElement('span', { 'data-testid': `icon-${name.toLowerCase()}` }, name);
+  const result = {};
+  icons.forEach(icon => {
+    result[icon] = mockIcon(icon);
+  });
+  // Add a default handler for any icon not in the list
+  result.default = new Proxy({}, {
+    get: (_, name) => mockIcon(name)
+  });
+  return result;
 });
 
 const createStorageMock = () => {
