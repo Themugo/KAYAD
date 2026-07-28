@@ -3,11 +3,6 @@ name: Dependabot Auto-Merge
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
-  check_suite:
-    types: [completed]
-  workflow_run:
-    types: [completed]
-    workflows: ["CI"]
 
 permissions:
   contents: write
@@ -17,51 +12,26 @@ jobs:
   auto-merge:
     name: Auto-Merge Dependabot PRs
     runs-on: ubuntu-latest
-    if: |
-      github.actor == 'dependabot[bot]' ||
-      (github.event.pull_request.user.login == 'dependabot[bot]')
+    # Only run for Dependabot PRs
+    if: github.actor == 'dependabot[bot]'
     
     steps:
       - name: Enable auto-merge on Dependabot PR
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = context.payload.pull_request?.number || context.payload.workflow_run?.pull_requests?.[0]?.number;
+            const pr = context.payload.pull_request;
             
-            if (!prNumber) {
-              console.log('No PR number found in payload');
+            if (!pr) {
+              console.log('No PR found in payload');
               process.exit(0);
             }
             
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
-            // Get PR details
-            const { data: pr } = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: prNumber,
-            });
-            
-            // Only process Dependabot PRs
-            if (!pr.user?.login?.includes('dependabot')) {
-              console.log('Not a Dependabot PR, skipping');
-              process.exit(0);
-            }
-            
-            console.log(`Processing PR #${prNumber}: ${pr.title}`);
-            console.log(`Mergeable: ${pr.mergeable}, State: ${pr.mergeable_state}`);
-            
-            // Check if PR can be merged
-            if (pr.mergeable !== true || pr.mergeable_state !== 'clean') {
-              console.log('PR is not ready to merge (conflicts or pending checks)');
-              console.log(`Current state: ${pr.mergeable_state}`);
-              process.exit(0);
-            }
+            console.log(`Processing Dependabot PR #${pr.number}: ${pr.title}`);
             
             // Check if auto-merge is already enabled
             if (pr.auto_merge) {
-              console.log('Auto-merge already enabled');
+              console.log('Auto-merge already enabled on this PR');
               process.exit(0);
             }
             
@@ -72,7 +42,6 @@ jobs:
                   enablePullRequestAutoMerge(input: {
                     pullRequestId: $prId
                     mergeMethod: SQUASH
-                    autoMergeMethod: SQUASH
                   }) {
                     pullRequest {
                       autoMergeRequest {
@@ -85,28 +54,9 @@ jobs:
               `, {
                 prId: pr.node_id
               });
-              console.log('✅ Auto-merge enabled successfully via GraphQL!');
-              console.log('PR will be merged when all checks pass.');
+              console.log('✅ Auto-merge enabled successfully!');
+              console.log('PR will be automatically merged by GitHub when all status checks pass.');
             } catch (error) {
-              console.log('GraphQL mutation failed:', error.message);
-              
-              // Fallback: try direct merge via REST API
-              if (pr.mergeable === true) {
-                try {
-                  await github.rest.pulls.merge({
-                    owner,
-                    repo,
-                    pull_number: prNumber,
-                    merge_method: 'squash',
-                    commit_title: `${pr.title} (auto-merged by Dependabot)`
-                  });
-                  console.log('✅ PR merged directly via REST API!');
-                } catch (mergeError) {
-                  console.log('Direct merge failed:', mergeError.message);
-                  process.exit(1);
-                }
-              } else {
-                console.log('PR cannot be merged yet, will retry on next check_suite event');
-                process.exit(0);
-              }
+              console.log('Failed to enable auto-merge:', error.message);
+              process.exit(1);
             }
