@@ -1,4 +1,5 @@
-import { SkeletonCard, SkeletonRow, SkeletonStat } from '../../Skeleton';
+import { SkeletonStat, SkeletonRow, CardSkeleton } from '../../ui/Skeleton';
+import { SkeletonCard, SkeletonGrid } from './SkeletonCard';
 
 export function LoadingPage() {
   return (
@@ -10,7 +11,7 @@ export function LoadingPage() {
         <SkeletonStat />
       </div>
       <div className="car-grid">
-        {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        <SkeletonGrid count={6} />
       </div>
     </div>
   );

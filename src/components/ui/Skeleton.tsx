@@ -44,6 +44,30 @@ export function Skeleton({
   );
 }
 
+// Stat skeleton
+export function SkeletonStat() {
+  return (
+    <div className="bg-white rounded-2xl border border-cream-200 p-6 text-center">
+      <Skeleton variant="text" width="60%" height={14} className="mb-2 mx-auto" />
+      <Skeleton variant="text" width="80%" height={32} className="mx-auto" />
+    </div>
+  );
+}
+
+// Row skeleton for lists
+export function SkeletonRow() {
+  return (
+    <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-cream-200 mb-3">
+      <Skeleton variant="rectangular" width={80} height={60} className="rounded-lg" />
+      <div className="flex-1 space-y-2">
+        <Skeleton variant="text" width="60%" height={16} />
+        <Skeleton variant="text" width="40%" height={12} />
+      </div>
+      <Skeleton variant="text" width={80} height={24} />
+    </div>
+  );
+}
+
 // Card skeleton for car listings
 export function CardSkeleton({ count = 1 }: { count?: number }) {
   return (

@@ -10,6 +10,5 @@ export * from './layout';
 
 // Individual component re-exports for convenience
 export { default as Navbar } from './Navbar';
-export { default as Skeleton } from './Skeleton';
 export { default as ThemeToggle } from './ui/ThemeToggle';
 export { default as Tabs } from './ui/Tabs';
