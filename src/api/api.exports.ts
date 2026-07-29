@@ -644,4 +644,3 @@ export const seoAPI = {
 };
 
 // ── RE-EXPORTS from data layer ──────────────────────────
-export { BRANDS, TESTIMONIALS, MOCK_CARS } from '../data/mockCars';

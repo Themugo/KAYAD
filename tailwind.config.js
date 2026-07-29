@@ -5,8 +5,8 @@ export default {
     extend: {
       fontFamily: {
         serif: ['Playfair Display', 'Georgia', 'serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        display: ['Outfit', 'Playfair Display', 'Georgia', 'sans-serif'],
         body: ['Inter', 'system-ui', 'sans-serif'],
         technical: ['Outfit', 'system-ui', 'sans-serif'],
       },
@@ -83,6 +83,33 @@ export default {
         danger: '#EF4444',
         warning: '#F59E0B',
         info: '#3B82F6',
+        // NEW: KAYAD Navy palette (from new frontend)
+        navy: {
+          50: '#F0F4F9',
+          100: '#E1E9F3',
+          200: '#C3D3E7',
+          300: '#A5BDDC',
+          400: '#6A92C5',
+          500: '#3067AF',
+          600: '#255190',
+          700: '#1E3063', // KAYAD Brand Light Navy
+          800: '#17244B',
+          900: '#0F1833',
+        },
+        beige: {
+          50: '#FAF7F2',
+          100: '#F6F1E8', // KAYAD Page Background
+          200: '#ECE3D4',
+          300: '#E2D5C0',
+          400: '#CDBA98',
+          500: '#B89F70',
+        },
+        amber: {
+          300: '#FCD34D',
+          400: '#FBBF24',
+          500: '#F59E0B',
+          600: '#D97706',
+        },
       },
       backgroundImage: {
         // Updated to use navy rgba (0A1626 = rgb 10,22,38)
@@ -96,6 +123,8 @@ export default {
         'brand': '0 4px 14px 0 rgba(22, 196, 164, 0.25)',
         'brand-lg': '0 8px 30px 0 rgba(22, 196, 164, 0.35)',
         'brand-glow': '0 0 20px rgba(22, 196, 164, 0.3)',
+        'card': '0 2px 8px -1px rgba(30, 48, 99, 0.06), 0 1px 4px -1px rgba(30, 48, 99, 0.04)',
+        'card-hover': '0 12px 24px -4px rgba(30, 48, 99, 0.12), 0 4px 8px -2px rgba(30, 48, 99, 0.06)',
       },
       borderRadius: {
         DEFAULT: '12px',
@@ -107,6 +136,7 @@ export default {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'bounce-short': 'bounce-short 1s ease-in-out infinite',
       },
       keyframes: {
         'bounce-subtle': {
@@ -116,6 +146,10 @@ export default {
         'glow': {
           '0%': { boxShadow: '0 0 5px rgba(22, 196, 164, 0.2)' },
           '100%': { boxShadow: '0 0 20px rgba(22, 196, 164, 0.5)' },
+        },
+        'bounce-short': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-2px)' },
         },
       },
       letterSpacing: {

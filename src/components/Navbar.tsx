@@ -1,741 +1,328 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import {
-  Search,
-  X,
-  Menu,
-  LogIn,
-  LogOut,
-  LayoutDashboard,
+import React, { useState } from 'react';
+import { 
+  Car, 
+  Search, 
+  Heart, 
+  PlusCircle, 
+  Menu, 
+  X, 
+  MapPin, 
+  ShieldCheck, 
+  User, 
   ChevronDown,
-  Home,
-  Images,
   Gavel,
   Shield,
-  ClipboardCheck,
-  MessageCircle,
-  Tag,
-  Palette,
+  CreditCard,
+  Building2,
+  LayoutDashboard,
+  MessageSquare,
   Bell,
-  Heart,
+  HelpCircle,
+  Lock,
+  Sparkles
 } from 'lucide-react';
-import { useDesignTheme } from '../theme/DesignThemeProvider';
-
-const ROLE_LABEL: Record<string, string> = {
-  'private-seller': 'Private Seller',
-  dealer: 'Dealer',
-  admin: 'Admin',
-};
 
 interface NavbarProps {
-  currentPage: string;
-  setPage: (page: string) => void;
-  authUser: {
-    name: string;
-    email: string;
-    role: 'private-seller' | 'dealer' | 'admin';
-    dealership?: string;
-  } | null;
-  onSignOut: () => void;
+  onSearch?: (query: string) => void;
+  initialQuery?: string;
+  savedCount?: number;
+  activeNav: string;
+  onNavClick: (nav: string) => void;
+  selectedCounty: string;
+  onCountyChange: (county: string) => void;
+  onOpenAuth: () => void;
+  onOpenAlerts: () => void;
 }
 
-const NAV_ITEMS = [
-  { key: 'gallery', label: 'Browse', path: '/gallery', icon: Images },
-  { key: 'auction', label: 'Auctions', path: '/auction', icon: Gavel },
-  { key: 'escrow', label: 'Escrow', path: '/escrow', icon: Shield },
-];
+export const Navbar: React.FC<NavbarProps> = ({
+  onSearch,
+  initialQuery = '',
+  savedCount = 0,
+  activeNav,
+  onNavClick,
+  selectedCounty,
+  onCountyChange,
+  onOpenAuth,
+  onOpenAlerts
+}) => {
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showCountyDropdown, setShowCountyDropdown] = useState(false);
 
-const AUTH_NAV_ITEMS = [
-  { key: 'chat', label: 'Messages', path: '/chat', icon: MessageCircle },
-  { key: 'favorites', label: 'Watchlist', path: '/favorites', icon: Heart },
-];
+  const counties = ['All East Africa', 'Nairobi', 'Mombasa', 'Nakuru', 'Kiambu', 'Eldoret', 'Kisumu'];
 
-const NS = {
-  navBar: {
-    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-    color: 'var(--c-navbar-text, #ffffff)',
-    backdropFilter: 'blur(12px)',
-    WebkitBackdropFilter: 'blur(12px)',
-  },
-  logo: { color: 'var(--c-navbar-accent, #e94560)' },
-  iconBtn: { color: 'var(--c-navbar-text, #ffffff)' },
-  sellBtn: {
-    backgroundColor: 'var(--c-navbar-accent, #e94560)',
-    color: '#ffffff',
-  },
-  avatarCircle: {
-    backgroundColor: 'var(--c-navbar-accent, #e94560)',
-    color: '#ffffff',
-  },
-  dropdown: {
-    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  dropdownBorder: { borderColor: 'rgba(255,255,255,0.1)' },
-  menuItemText: { color: 'var(--c-navbar-text, #ffffff)' },
-  roleBadge: {
-    backgroundColor: 'rgba(233, 69, 96, 0.15)',
-    color: 'var(--c-navbar-accent, #e94560)',
-  },
-  divider: { borderColor: 'rgba(255,255,255,0.1)' },
-  searchPanel: {
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-  },
-  searchIcon: { color: 'var(--c-navbar-text, #ffffff)' },
-  searchInput: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(255,255,255,0.15)',
-    color: 'var(--c-navbar-text, #ffffff)',
-  },
-  searchClear: { color: 'var(--c-navbar-text, #ffffff)', opacity: 0.5 },
-  mobilePanel: {
-    backgroundColor: 'var(--c-navbar-bg, #1a1a2e)',
-    color: 'var(--c-navbar-text, #ffffff)',
-  },
-  registerBtn: {
-    backgroundColor: 'transparent',
-    color: 'var(--c-navbar-text, #ffffff)',
-    border: '1.5px solid rgba(255,255,255,0.25)',
-  },
-  mobileSignOut: { color: 'var(--c-navbar-accent, #e94560)' },
-};
-
-const getNavItemStyle = (isActive: boolean): React.CSSProperties => ({
-  color: isActive
-    ? 'var(--c-navbar-accent, #e94560)'
-    : 'var(--c-navbar-text, #ffffff)',
-  backgroundColor: isActive
-    ? 'rgba(233, 69, 96, 0.1)'
-    : 'transparent',
-});
-
-export default function Navbar({ currentPage, setPage, authUser, onSignOut }: NavbarProps) {
-  const { theme } = useDesignTheme();
-  const layout = theme.layouts.navbar;
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const userMenuRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    if (onSearch) {
+      onSearch(val);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-    setUserMenuOpen(false);
-    setSearchOpen(false);
-  }, [location.pathname]);
-
-  const handleNav = (path: string, key: string) => {
-    navigate(path);
-    setPage(key);
-    setMobileOpen(false);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/gallery?q=${encodeURIComponent(searchQuery.trim())}`);
-      setPage('gallery');
-      setSearchOpen(false);
-      setSearchQuery('');
+    if (onSearch) {
+      onSearch(searchQuery);
     }
   };
 
-  const layoutClass =
-    layout === 'centered'
-      ? 'justify-center'
-      : layout === 'compact'
-      ? 'justify-between'
-      : 'justify-between';
-
-  const innerClass =
-    layout === 'centered'
-      ? 'flex-row items-center justify-center gap-6'
-      : layout === 'compact'
-      ? 'flex-row items-center justify-between'
-      : 'flex-row items-center justify-between';
-
-  const userInitials = authUser
-    ? authUser.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : '';
+  const navItems = [
+    { id: 'marketplace', label: 'Marketplace', icon: Car },
+    { id: 'auctions', label: 'Auctions', icon: Gavel, badge: 'LIVE' },
+    { id: 'escrow', label: 'Escrow Vault', icon: Shield },
+    { id: 'financing', label: 'Financing', icon: CreditCard },
+    { id: 'dealers', label: 'Verified Dealers', icon: Building2 },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'chat', label: 'Messages', icon: MessageSquare },
+    { id: 'admin', label: 'Admin Panel', icon: Lock },
+    { id: 'support', label: 'Support & Disputes', icon: HelpCircle },
+  ];
 
   return (
-    <>
-      <nav
-        className="fixed top-0 left-0 right-0 z-50 font-sans"
-        style={NS.navBar}
-      >
-        <div
-          className={`mx-auto flex w-full max-w-7xl px-4 py-3 ${innerClass}`}
-        >
-          {/* Logo */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => handleNav('/', 'home')}
-              className="flex items-center gap-2 text-lg font-bold tracking-tight cursor-pointer bg-transparent border-none"
-              style={NS.logo}
-            >
-              <span className="text-[#16C4A4]">KAYAD</span>
-            </button>
-            <span className="hidden md:block text-[10px] text-white/40 uppercase tracking-widest">Motors</span>
+    <header className="sticky top-0 z-50 bg-[#1E3063] text-white shadow-md">
+      {/* Top Utility Bar */}
+      <div className="bg-[#17244B] border-b border-navy-600/40 text-xs py-1.5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-slate-300">
+          <div className="flex items-center space-x-4">
+            <span className="flex items-center gap-1.5 font-medium text-emerald-400">
+              <ShieldCheck className="w-3.5 h-3.5" /> 100% Escrow & NTSA Verification Guaranteed
+            </span>
+            <span className="hidden sm:inline text-slate-500">|</span>
+            <div className="relative hidden sm:block">
+              <button 
+                onClick={() => setShowCountyDropdown(!showCountyDropdown)}
+                className="flex items-center gap-1 hover:text-white transition-colors"
+                id="county-selector-top"
+              >
+                <MapPin className="w-3.5 h-3.5 text-amber-400" />
+                <span>Region: <strong className="text-white">{selectedCounty}</strong></span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
+              </button>
+
+              {showCountyDropdown && (
+                <div className="absolute left-0 mt-1 w-44 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 py-1 z-50 text-xs">
+                  {counties.map((county) => (
+                    <button
+                      key={county}
+                      onClick={() => {
+                        onCountyChange(county);
+                        setShowCountyDropdown(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-100 flex items-center justify-between ${
+                        selectedCounty === county ? 'font-bold text-[#1E3063] bg-amber-50' : ''
+                      }`}
+                    >
+                      {county}
+                      {selectedCounty === county && <span className="w-1.5 h-1.5 rounded-full bg-[#1E3063]"></span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Center nav links (centered layout) */}
-          {layout === 'centered' && (
-            <div className="hidden md:flex items-center gap-1">
-              {NAV_ITEMS.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => handleNav(item.path, item.key)}
-                  className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
-                    currentPage === item.key
-                      ? 'nav-link active'
-                      : ''
-                  }`}
-                  style={getNavItemStyle(currentPage === item.key)}
-                >
-                  {item.label}
-                </button>
-              ))}
-              {authUser &&
-                AUTH_NAV_ITEMS.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => handleNav(item.path, item.key)}
-                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
-                      currentPage === item.key ? 'nav-link active' : ''
-                    }`}
-                    style={getNavItemStyle(currentPage === item.key)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-            </div>
-          )}
-
-          {/* Split / compact nav links */}
-          {layout !== 'centered' && (
-            <div className="hidden md:flex items-center gap-1">
-              {NAV_ITEMS.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => handleNav(item.path, item.key)}
-                  className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
-                    currentPage === item.key ? 'nav-link active' : ''
-                  }`}
-                  style={getNavItemStyle(currentPage === item.key)}
-                >
-                  {item.label}
-                </button>
-              ))}
-              {authUser &&
-                AUTH_NAV_ITEMS.map((item) => (
-                  <button
-                    key={item.key}
-                    onClick={() => handleNav(item.path, item.key)}
-                    className={`nav-link px-3 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer bg-transparent border-none ${
-                      currentPage === item.key ? 'nav-link active' : ''
-                    }`}
-                    style={getNavItemStyle(currentPage === item.key)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-            </div>
-          )}
-
-          {/* Right section */}
-          <div className="flex items-center gap-2">
-            {/* Search toggle */}
+          <div className="flex items-center space-x-4">
             <button
-              onClick={() => setSearchOpen((v) => !v)}
-              className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-              style={NS.iconBtn}
-              aria-label="Toggle search"
+              onClick={onOpenAlerts}
+              className="flex items-center gap-1 text-amber-300 hover:text-amber-200 transition-colors font-medium"
             >
-              {searchOpen ? <X size={20} /> : <Search size={20} />}
+              <Bell className="w-3.5 h-3.5" />
+              <span>Price Drop Alerts</span>
             </button>
-
-            {/* Desktop right actions */}
-            <div className="hidden md:flex items-center gap-2">
-              {authUser && (
-                <>
-                  {/* Notifications bell */}
-                  <button
-                    className="relative p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-                    style={NS.iconBtn}
-                    aria-label="Notifications"
-                  >
-                    <Bell size={20} />
-                  </button>
-
-                  {/* Sell button */}
-                  <button
-                    onClick={() => handleNav('/dealer/add-car', 'sell')}
-                    className="px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                    style={NS.sellBtn}
-                  >
-                    Sell a Vehicle
-                  </button>
-
-                  {/* User menu */}
-                  <div className="relative" ref={userMenuRef}>
-                    <button
-                      onClick={() => setUserMenuOpen((v) => !v)}
-                      className="flex items-center gap-2 px-2 py-1 rounded-full cursor-pointer bg-transparent border-none"
-                      style={NS.iconBtn}
-                    >
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={NS.avatarCircle}
-                      >
-                        {userInitials}
-                      </div>
-                      <ChevronDown
-                        size={14}
-                        className={`transition-transform ${userMenuOpen ? 'rotate-180' : ''}`}
-                      />
-                    </button>
-
-                    {userMenuOpen && (
-                      <div
-                        className="absolute right-0 mt-2 w-56 rounded-xl shadow-2xl border overflow-hidden font-sans"
-                        style={NS.dropdown}
-                      >
-                        <div
-                          className="px-4 py-3 border-b"
-                          style={NS.dropdownBorder}
-                        >
-                          <p
-                            className="text-sm font-semibold"
-                            style={NS.menuItemText}
-                          >
-                            {authUser.name}
-                          </p>
-                          <p
-                            className="text-xs opacity-60"
-                            style={NS.menuItemText}
-                          >
-                            {authUser.email}
-                          </p>
-                          <span
-                            className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                            style={NS.roleBadge}
-                          >
-                            {ROLE_LABEL[authUser.role] || authUser.role}
-                          </span>
-                        </div>
-                        <div className="py-1">
-                          <button
-                  onClick={() => {
-                    const dashPath = authUser.role === 'admin' ? '/admin' : authUser.role === 'dealer' ? '/dealer' : '/dashboard';
-                    handleNav(dashPath, 'dashboard');
-                  }}
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                            style={NS.menuItemText}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.backgroundColor =
-                                'rgba(255,255,255,0.05)')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.backgroundColor = 'transparent')
-                            }
-                          >
-                            <LayoutDashboard size={16} />
-                            Dashboard
-                          </button>
-                          {authUser.role === 'admin' && (
-                            <button
-                              onClick={() => {
-                                handleNav('/theme-studio', 'theme-studio');
-                              }}
-                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={NS.menuItemText}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'rgba(255,255,255,0.05)')
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = 'transparent')
-                              }
-                            >
-                              <Palette size={16} />
-                              Theme Studio
-                            </button>
-                          )}
-                          {authUser.role === 'admin' && (
-                            <button
-                              onClick={() => {
-                                handleNav('/admin', 'admin');
-                              }}
-                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={NS.menuItemText}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'rgba(255,255,255,0.05)')
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = 'transparent')
-                              }
-                            >
-                              <Shield size={16} />
-                              Admin Panel
-                            </button>
-                          )}
-                          {(authUser.role === 'dealer' || authUser.role === 'admin') && (
-                            <button
-                              onClick={() => {
-                                handleNav('/dealer-verify', 'dealer-verify');
-                              }}
-                              className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                              style={NS.menuItemText}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'rgba(255,255,255,0.05)')
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor = 'transparent')
-                              }
-                            >
-                              <ClipboardCheck size={16} />
-                              Dealer Verification
-                            </button>
-                          )}
-                        </div>
-                        <div
-                          className="border-t py-1"
-                          style={NS.divider}
-                        >
-                          <button
-                            onClick={() => {
-                              setUserMenuOpen(false);
-                              onSignOut();
-                            }}
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                            style={NS.menuItemText}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.backgroundColor =
-                                'rgba(233, 69, 96, 0.1)')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.backgroundColor = 'transparent')
-                            }
-                          >
-                            <LogOut size={16} />
-                            Sign Out
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {!authUser && (
-                <>
-                  <button
-                    onClick={() => handleNav('/register', 'register')}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
-                    style={NS.registerBtn}
-                  >
-                    Register
-                  </button>
-                  <button
-                    onClick={() => handleNav('/login', 'login')}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                    style={NS.sellBtn}
-                  >
-                    <LogIn size={16} />
-                    Sign In
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Mobile hamburger */}
+            <span className="text-slate-500">|</span>
             <button
-              onClick={() => setMobileOpen((v) => !v)}
-              className="md:hidden p-2 rounded-full transition-colors cursor-pointer bg-transparent border-none"
-              style={NS.iconBtn}
-              aria-label="Toggle menu"
+              onClick={onOpenAuth}
+              className="flex items-center gap-1 hover:text-white transition-colors font-medium text-slate-200"
             >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              <User className="w-3.5 h-3.5" />
+              <span>Sign In / Register</span>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Expandable search bar */}
-        {searchOpen && (
-          <div
-            className="border-t"
-            style={NS.searchPanel}
+      {/* Main Header Container */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-18 gap-4">
+          
+          {/* Brand Logo */}
+          <button 
+            onClick={() => onNavClick('marketplace')}
+            className="flex items-center gap-2.5 group focus:outline-none shrink-0"
+            id="brand-logo"
           >
-            <form
-              onSubmit={handleSearchSubmit}
-              className="mx-auto max-w-7xl px-4 py-3"
-            >
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
-                  style={NS.searchIcon}
-                />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-[#1E3063] flex items-center justify-center font-black shadow-inner group-hover:scale-105 transition-transform">
+              <Car className="w-6 h-6 stroke-[2.5]" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="font-extrabold text-2xl tracking-tight text-white font-display leading-none flex items-center gap-1">
+                KAYAD
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 font-sans font-semibold border border-amber-400/30">
+                  EA
+                </span>
+              </span>
+              <span className="text-[10px] text-slate-300 font-medium tracking-wide uppercase">Automotive Marketplace</span>
+            </div>
+          </button>
+
+          {/* Integrated Search Input (Marketplace First Priority) */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-4">
+            <form onSubmit={handleSearchSubmit} className="w-full relative">
+              <div className="relative flex items-center">
+                <Search className="absolute left-3.5 w-4 h-4 text-slate-300" />
                 <input
-                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for cars, makes, models..."
-                  className="w-full pl-10 pr-10 py-2.5 rounded-full text-sm border outline-none font-sans"
-                  style={NS.searchInput}
+                  onChange={handleSearchChange}
+                  placeholder="Search Toyota Prado, Subaru, Diesel, Nairobi..."
+                  className="w-full pl-10 pr-10 py-2 bg-white/10 text-white placeholder-slate-300 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white focus:text-slate-900 focus:placeholder-slate-400 transition-all text-xs"
                 />
                 {searchQuery && (
                   <button
                     type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer bg-transparent border-none p-0"
-                    style={NS.searchClear}
+                    onClick={() => { setSearchQuery(''); onSearch && onSearch(''); }}
+                    className="absolute right-3 text-slate-300 hover:text-white"
                   >
-                    <X size={16} />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </form>
           </div>
-        )}
-      </nav>
 
-      {/* Mobile slide-in menu */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 transition-opacity"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Slide-in panel */}
-          <div
-            ref={mobileMenuRef}
-            className="absolute right-0 top-0 bottom-0 w-72 shadow-2xl overflow-y-auto font-sans"
-            style={NS.mobilePanel}
-          >
-            <div className="flex items-center justify-between px-4 py-4 border-b" style={NS.divider}>
-              <span
-                className="text-lg font-bold tracking-tight"
-                style={NS.logo}
-              >
-                KAYAD
-              </span>
+          {/* Quick Action & Saved Counters */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavClick('saved')}
+              className={`p-2 rounded-xl text-slate-200 hover:text-white hover:bg-white/10 transition-colors relative ${
+                activeNav === 'saved' ? 'bg-white/20 text-white' : ''
+              }`}
+              title="Saved Vehicles"
+            >
+              <Heart className="w-5 h-5 text-rose-400" />
+              {savedCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-rose-500 text-white shadow">
+                  {savedCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => onNavClick('sell')}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-amber-400 hover:bg-amber-500 text-[#17244B] transition-all shadow-md active:scale-95 shrink-0"
+              id="cta-sell-car"
+            >
+              <PlusCircle className="w-4 h-4 stroke-[2.5]" />
+              <span>List Vehicle</span>
+            </button>
+
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2.5 text-slate-200 hover:text-white hover:bg-white/10 rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6 text-amber-400" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+        </div>
+
+        {/* Primary Marketplace Navigation Tabs Bar (Desktop) */}
+        <nav className="hidden lg:flex items-center space-x-1 border-t border-navy-600/40 py-2 text-xs font-semibold overflow-x-auto scrollbar-none">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeNav === item.id;
+            return (
               <button
-                onClick={() => setMobileOpen(false)}
-                className="p-1.5 rounded-full cursor-pointer bg-transparent border-none"
-                style={NS.iconBtn}
+                key={item.id}
+                onClick={() => onNavClick(item.id)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg whitespace-nowrap transition-all min-h-[40px] ${
+                  isActive
+                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-sm'
+                    : 'text-slate-200 hover:text-white hover:bg-white/10'
+                }`}
               >
-                <X size={20} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#17244B]' : 'text-slate-300'}`} />
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className={`text-[9px] px-1 py-0.2 rounded font-extrabold ${
+                    isActive ? 'bg-[#1E3063] text-amber-300' : 'bg-rose-500 text-white'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
               </button>
-            </div>
+            );
+          })}
+        </nav>
+      </div>
 
-            {/* Mobile search */}
-            <form onSubmit={handleSearchSubmit} className="px-4 py-3">
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 opacity-50"
-                  style={NS.searchIcon}
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search cars..."
-                  className="w-full pl-9 pr-4 py-2 rounded-full text-sm border outline-none font-sans"
-                  style={NS.searchInput}
-                />
-              </div>
-            </form>
+      {/* Mobile Drawer Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#17244B] border-t border-navy-600/50 px-4 pt-3 pb-6 space-y-3 animate-fade-in max-h-[calc(100vh-80px)] overflow-y-auto">
+          <div className="pb-1">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search Toyota, Subaru, County..."
+              className="w-full px-4 py-3 bg-white/10 text-white placeholder-slate-300 border border-white/20 rounded-xl text-xs min-h-[44px] focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+          </div>
 
-            {/* Mobile nav links */}
-            <div className="px-2 py-1">
-              {NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={() => handleNav(item.path, item.key)}
-                    className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
-                      currentPage === item.key ? 'nav-link active' : ''
-                    }`}
-                    style={getNavItemStyle(currentPage === item.key)}
-                  >
-                    <Icon size={18} />
-                    {item.label}
-                  </button>
-                );
-              })}
-              {authUser &&
-                AUTH_NAV_ITEMS.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.key}
-                      onClick={() => handleNav(item.path, item.key)}
-                      className={`flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer bg-transparent border-none text-left ${
-                        currentPage === item.key ? 'nav-link active' : ''
-                      }`}
-                      style={getNavItemStyle(currentPage === item.key)}
-                    >
-                      <Icon size={18} />
-                      {item.label}
-                    </button>
-                  );
-                })}
-            </div>
-
-            <div className="border-t my-2" style={NS.divider} />
-
-            {/* Mobile user section */}
-            {authUser && (
-              <div className="px-4 py-3">
-                <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                    style={NS.sellBtn}
-                  >
-                    {userInitials}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate" style={NS.menuItemText}>
-                      {authUser.name}
-                    </p>
-                    <p className="text-xs opacity-60 truncate" style={NS.menuItemText}>
-                      {authUser.email}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <button
-                    onClick={() => handleNav('/dashboard', 'dashboard')}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                    style={NS.menuItemText}
-                  >
-                    <LayoutDashboard size={16} />
-                    Dashboard
-                  </button>
-                  {authUser.role === 'admin' && (
-                    <button
-                      onClick={() => handleNav('/theme-studio', 'theme-studio')}
-                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={NS.menuItemText}
-                    >
-                      <Palette size={16} />
-                      Theme Studio
-                    </button>
-                  )}
-                  {authUser.role === 'admin' && (
-                    <button
-                      onClick={() => handleNav('/admin', 'admin')}
-                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={NS.menuItemText}
-                    >
-                      <Shield size={16} />
-                      Admin Panel
-                    </button>
-                  )}
-                  {(authUser.role === 'dealer' || authUser.role === 'admin') && (
-                    <button
-                      onClick={() => handleNav('/dealer-verify', 'dealer-verify')}
-                      className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                      style={NS.menuItemText}
-                    >
-                      <ClipboardCheck size={16} />
-                      Dealer Verification
-                    </button>
-                  )}
-                </div>
-
-                <div className="border-t mt-2 pt-2" style={NS.divider}>
-                  <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      onSignOut();
-                    }}
-                    className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer bg-transparent border-none text-left"
-                    style={NS.mobileSignOut}
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {!authUser && (
-              <div className="px-4 py-3 space-y-2">
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeNav === item.id;
+              return (
                 <button
-                  onClick={() => handleNav('/login', 'login')}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                  style={NS.sellBtn}
+                  key={item.id}
+                  onClick={() => {
+                    onNavClick(item.id);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`flex items-center gap-2 p-3 rounded-xl text-xs font-bold text-left transition-colors min-h-[44px] ${
+                    isActive ? 'bg-amber-400 text-[#17244B] shadow-sm' : 'text-slate-200 hover:bg-white/10'
+                  }`}
                 >
-                  <LogIn size={16} />
-                  Sign In
+                  <Icon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                  {item.badge && (
+                    <span className="ml-auto text-[8px] bg-rose-500 text-white px-1 rounded font-extrabold">
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
-                <button
-                  onClick={() => handleNav('/register', 'register')}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer"
-                  style={NS.registerBtn}
-                >
-                  Register
-                </button>
-              </div>
-            )}
+              );
+            })}
+          </div>
 
-            {/* Mobile sell button */}
-            {authUser && (
-              <div className="px-4 pb-4">
-                <button
-                  onClick={() => handleNav('/dealer/add-car', 'sell')}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full text-sm font-semibold transition-colors cursor-pointer border-none"
-                  style={NS.sellBtn}
-                >
-                  <Tag size={16} />
-                  Sell a Vehicle
-                </button>
-              </div>
-            )}
+          <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
+            <button
+              onClick={() => {
+                onOpenAlerts();
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 py-2 px-3 hover:text-amber-300 font-bold min-h-[44px]"
+            >
+              <Bell className="w-4 h-4 text-amber-400" />
+              <span>Price Drop Alerts</span>
+            </button>
+            <button
+              onClick={() => {
+                onOpenAuth();
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 py-2 px-3 text-amber-300 font-bold min-h-[44px]"
+            >
+              <User className="w-4 h-4" />
+              <span>Sign In</span>
+            </button>
           </div>
         </div>
       )}
-
-      {/* Spacer for fixed navbar */}
-      <div className="h-16" />
-    </>
+    </header>
   );
-}
+};
+
+export default Navbar;
