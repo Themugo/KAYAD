@@ -38,11 +38,13 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Input } from '../ui/Input';
+import type React from 'react';
+import type { FC } from 'react';
 import { NavigationBar } from '../common/NavigationBar';
 import { Skeleton, VehicleDetailSkeleton } from '../ui/Skeleton';
 import { PriceAlertModal } from './PriceAlertModal';
 
-export const VehicleDetailPage: React.FC = () => {
+export const VehicleDetailPage: FC = () => {
   const { 
     selectedVehicle, 
     placeBid, 
@@ -126,12 +128,12 @@ export const VehicleDetailPage: React.FC = () => {
   if (!vehicle) {
     return (
       <div className="py-20 text-center max-w-xl mx-auto space-y-4 px-4">
-        <div className="w-16 h-16 rounded-3xl bg-[#1E3063]/10 text-[#1E3063] flex items-center justify-center mx-auto">
-          <Info className="w-8 h-8 text-[#00C9CE]" />
+        <div className="w-16 h-16 rounded-3xl bg-[#2E4080]/10 text-[#2E4080] flex items-center justify-center mx-auto">
+          <Info className="w-8 h-8 text-[#23EBFF]" />
         </div>
-        <h2 className="text-2xl font-black text-[#1E3063] font-serif">Vehicle Not Selected</h2>
+        <h2 className="text-2xl font-black text-[#2E4080] font-serif">Vehicle Not Selected</h2>
         <p className="text-slate-500 font-medium text-sm">Please select a vehicle from our showroom inventory to view full specifications and inspection reports.</p>
-        <Button onClick={() => navigateTo('gallery')} className="mt-4 bg-[#1E3063] text-white font-bold hover:bg-[#121D33]">
+        <Button onClick={() => navigateTo('gallery')} className="mt-4 bg-[#2E4080] text-white font-bold hover:bg-[#1B2647]">
           Return to Showroom Inventory
         </Button>
       </div>
@@ -261,12 +263,12 @@ export const VehicleDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 bg-[#FCF9F4] pb-28 md:pb-12 text-[#1E3063] font-sans">
+    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 bg-[#FCF9F4] pb-28 md:pb-12 text-[#2E4080] font-sans">
       
       {/* Toast Notification Floating Alert */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-2xl shadow-2xl border border-[#00C9CE]/40 flex items-center gap-2.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 duration-200">
-          <Sparkles className="w-4 h-4 text-[#00C9CE] shrink-0" />
+        <div className="fixed top-20 right-4 z-50 bg-[#2E4080] text-white px-4 py-3 rounded-2xl shadow-2xl border border-[#23EBFF]/40 flex items-center gap-2.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 duration-200">
+          <Sparkles className="w-4 h-4 text-[#23EBFF] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -280,7 +282,7 @@ export const VehicleDetailPage: React.FC = () => {
           {/* Breadcrumb path */}
           <div className="flex items-center gap-2 text-xs text-[#6B7A99] font-semibold">
             <button 
-              className="hover:underline hover:text-[#1E3063] cursor-pointer" 
+              className="hover:underline hover:text-[#2E4080] cursor-pointer" 
               onClick={() => navigateTo('gallery')}
             >
               Inventory
@@ -288,10 +290,10 @@ export const VehicleDetailPage: React.FC = () => {
             <span>/</span>
             <span>{vehicle.make}</span>
             <span>/</span>
-            <span className="text-[#00C9CE] font-bold">{vehicle.year} {vehicle.model}</span>
+            <span className="text-[#23EBFF] font-bold">{vehicle.year} {vehicle.model}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E3063] tracking-tight font-serif leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#2E4080] tracking-tight font-serif leading-tight">
             {vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`}
           </h1>
 
@@ -300,12 +302,12 @@ export const VehicleDetailPage: React.FC = () => {
             {/* Escrow Protected Badge */}
             <button
               onClick={() => navigateTo('escrow')}
-              className="px-3 py-1.5 rounded-xl bg-[#00C9CE]/15 hover:bg-[#00C9CE]/25 text-[#1E3063] border border-[#00C9CE]/40 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
+              className="px-3 py-1.5 rounded-xl bg-[#23EBFF]/15 hover:bg-[#23EBFF]/25 text-[#2E4080] border border-[#23EBFF]/40 text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
               title="Click to view M-Pesa Escrow Guarantee"
             >
-              <Lock className="w-3.5 h-3.5 text-[#00C9CE] group-hover:scale-110 transition-transform" />
+              <Lock className="w-3.5 h-3.5 text-[#23EBFF] group-hover:scale-110 transition-transform" />
               <span>M-Pesa Escrow Protected</span>
-              <ChevronRight className="w-3 h-3 text-[#1E3063]/60" />
+              <ChevronRight className="w-3 h-3 text-[#2E4080]/60" />
             </button>
 
             {/* Auction or Fixed Price Status Badge */}
@@ -326,12 +328,12 @@ export const VehicleDetailPage: React.FC = () => {
             {/* Pre-Inspection Badge */}
             <button
               onClick={() => navigateTo('ghost_check', vehicle.id)}
-              className="px-3 py-1.5 rounded-xl bg-[#1E3063] hover:bg-[#121D33] text-white border border-[#1E3063] text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
+              className="px-3 py-1.5 rounded-xl bg-[#2E4080] hover:bg-[#1B2647] text-white border border-[#2E4080] text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer group shadow-2xs"
               title="Click to book 150-Point Pre-Purchase Inspection"
             >
-              <Wrench className="w-3.5 h-3.5 text-[#00C9CE] group-hover:scale-110 transition-transform" />
+              <Wrench className="w-3.5 h-3.5 text-[#23EBFF] group-hover:scale-110 transition-transform" />
               <span>150-Point Inspected</span>
-              <ChevronRight className="w-3 h-3 text-[#00C9CE]" />
+              <ChevronRight className="w-3 h-3 text-[#23EBFF]" />
             </button>
 
             {/* Availability Status */}
@@ -343,18 +345,18 @@ export const VehicleDetailPage: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#3D4F6F]">
             <span className="flex items-center gap-1 font-semibold">
-              <MapPin className="w-3.5 h-3.5 text-[#00C9CE]" />
+              <MapPin className="w-3.5 h-3.5 text-[#23EBFF]" />
               {vehicle.location}
             </span>
             <span className="text-[#E2D8C7]">•</span>
             <span className="font-semibold flex items-center gap-1.5">
               <span>VIN:</span>
-              <code className="font-mono bg-[#F6F1E8] border border-[#E2D8C7] px-2 py-0.5 rounded text-[#1E3063] font-bold">
+              <code className="font-mono bg-[#F6F1E8] border border-[#E2D8C7] px-2 py-0.5 rounded text-[#2E4080] font-bold">
                 {vehicle.vin}
               </code>
               <button 
                 onClick={handleCopyVin}
-                className="p-1 text-[#6B7A99] hover:text-[#1E3063] transition-colors cursor-pointer"
+                className="p-1 text-[#6B7A99] hover:text-[#2E4080] transition-colors cursor-pointer"
                 title="Copy VIN"
               >
                 {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -374,19 +376,19 @@ export const VehicleDetailPage: React.FC = () => {
             onClick={() => setIsAlertModalOpen(true)}
             className={`px-3.5 py-2.5 rounded-xl border font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
               existingAlert
-                ? 'bg-[#1E3063] text-white border-[#1E3063] ring-2 ring-[#00C9CE]/50'
-                : 'border-[#E2D8C7] bg-white text-[#1E3063] hover:border-[#00C9CE] hover:bg-[#F6F1E8]'
+                ? 'bg-[#2E4080] text-white border-[#2E4080] ring-2 ring-[#23EBFF]/50'
+                : 'border-[#E2D8C7] bg-white text-[#2E4080] hover:border-[#23EBFF] hover:bg-[#F6F1E8]'
             }`}
             title={existingAlert ? `Price Alert Active (< KSh ${existingAlert.targetPrice.toLocaleString()})` : "Set Price Alert"}
           >
             {existingAlert ? (
               <>
-                <BellRing className="w-4 h-4 text-[#00C9CE] animate-bounce" />
+                <BellRing className="w-4 h-4 text-[#23EBFF] animate-bounce" />
                 <span>Alert Active</span>
               </>
             ) : (
               <>
-                <Bell className="w-4 h-4 text-[#00C9CE]" />
+                <Bell className="w-4 h-4 text-[#23EBFF]" />
                 <span>Price Alert</span>
               </>
             )}
@@ -394,7 +396,7 @@ export const VehicleDetailPage: React.FC = () => {
 
           <button
             onClick={handleShareVehicle}
-            className="p-2.5 rounded-xl border border-[#E2D8C7] bg-white text-[#1E3063] hover:border-[#1E3063] transition-all cursor-pointer shadow-2xs"
+            className="p-2.5 rounded-xl border border-[#E2D8C7] bg-white text-[#2E4080] hover:border-[#2E4080] transition-all cursor-pointer shadow-2xs"
             title="Share Vehicle"
           >
             {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
@@ -405,7 +407,7 @@ export const VehicleDetailPage: React.FC = () => {
             className={`p-2.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
               isSaved
                 ? 'bg-[#DC3545]/10 border-[#DC3545] text-[#DC3545]'
-                : 'border-[#E2D8C7] bg-white text-[#1E3063] hover:border-[#1E3063]'
+                : 'border-[#E2D8C7] bg-white text-[#2E4080] hover:border-[#2E4080]'
             }`}
             title={isSaved ? "Remove from Favorites" : "Save to Favorites"}
           >
@@ -414,7 +416,7 @@ export const VehicleDetailPage: React.FC = () => {
 
           <button
             onClick={() => openChat(vehicle.id)}
-            className="px-4 py-2.5 rounded-xl bg-[#00C9CE] text-[#1E3063] font-black text-xs flex items-center gap-2 shadow-xs hover:bg-[#00b8bc] transition-all uppercase tracking-wider cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#23EBFF] text-[#2E4080] font-black text-xs flex items-center gap-2 shadow-xs hover:bg-[#23EBFF] transition-all uppercase tracking-wider cursor-pointer"
           >
             <MessageSquareText className="w-4 h-4" />
             <span>Chat Dealer</span>
@@ -471,8 +473,8 @@ export const VehicleDetailPage: React.FC = () => {
                   }`}
                 />
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-[#1E3063] to-[#0F1B38] text-white space-y-3">
-                  <div className="w-16 h-16 rounded-3xl bg-[#00C9CE]/20 border border-[#00C9CE]/40 flex items-center justify-center text-[#00C9CE]">
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-[#2E4080] to-[#141E3F] text-white space-y-3">
+                  <div className="w-16 h-16 rounded-3xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF]">
                     <ShieldCheck className="w-8 h-8" />
                   </div>
                   <h4 className="text-lg font-serif font-black">{formattedFullTitle}</h4>
@@ -491,7 +493,7 @@ export const VehicleDetailPage: React.FC = () => {
                   </Badge>
                 )}
                 {activeImgIndex === 0 && (
-                  <span className="px-2.5 py-1 rounded-xl bg-[#1E3063]/90 text-white font-mono text-[10px] font-bold border border-white/20 shadow-xs">
+                  <span className="px-2.5 py-1 rounded-xl bg-[#2E4080]/90 text-white font-mono text-[10px] font-bold border border-white/20 shadow-xs">
                     Primary Showroom Angle
                   </span>
                 )}
@@ -499,7 +501,7 @@ export const VehicleDetailPage: React.FC = () => {
 
               {/* Image Counter & Fullscreen Trigger */}
               <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-                <div className="bg-[#1E3063]/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20 shadow-sm">
+                <div className="bg-[#2E4080]/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white border border-white/20 shadow-sm">
                   {activeImgIndex + 1} / {totalImages} Pictures
                 </div>
                 <button
@@ -507,16 +509,16 @@ export const VehicleDetailPage: React.FC = () => {
                     e.stopPropagation();
                     setIsFullscreen(true);
                   }}
-                  className="p-2 rounded-full bg-[#1E3063]/90 backdrop-blur-md hover:bg-[#121D33] text-white border border-white/20 shadow-sm transition-all cursor-pointer"
+                  className="p-2 rounded-full bg-[#2E4080]/90 backdrop-blur-md hover:bg-[#1B2647] text-white border border-white/20 shadow-sm transition-all cursor-pointer"
                   title="Fullscreen Lightbox Mode"
                 >
-                  <Maximize2 className="w-4 h-4 text-[#00C9CE]" />
+                  <Maximize2 className="w-4 h-4 text-[#23EBFF]" />
                 </button>
               </div>
 
               {/* Zoom Magnifier Lens Badge Indicator */}
-              <div className="absolute bottom-4 left-4 bg-[#1E3063]/85 backdrop-blur-md px-3 py-1.5 rounded-2xl text-[11px] font-bold text-white border border-white/20 z-10 flex items-center gap-2 shadow-md pointer-events-none">
-                <ZoomIn className="w-3.5 h-3.5 text-[#00C9CE]" />
+              <div className="absolute bottom-4 left-4 bg-[#2E4080]/85 backdrop-blur-md px-3 py-1.5 rounded-2xl text-[11px] font-bold text-white border border-white/20 z-10 flex items-center gap-2 shadow-md pointer-events-none">
+                <ZoomIn className="w-3.5 h-3.5 text-[#23EBFF]" />
                 <span>{isDoubleTapZoomed ? 'Double Tap / Click to Reset' : 'Hover or Tap to Magnify'}</span>
               </div>
 
@@ -526,7 +528,7 @@ export const VehicleDetailPage: React.FC = () => {
                   e.stopPropagation();
                   handlePrevImage();
                 }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#1E3063]/80 hover:bg-[#1E3063] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#2E4080]/80 hover:bg-[#2E4080] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
                 aria-label="Previous Image"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -536,7 +538,7 @@ export const VehicleDetailPage: React.FC = () => {
                   e.stopPropagation();
                   handleNextImage();
                 }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#1E3063]/80 hover:bg-[#1E3063] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-[#2E4080]/80 hover:bg-[#2E4080] text-white border border-white/20 transition-all opacity-90 group-hover:opacity-100 z-10 cursor-pointer"
                 aria-label="Next Image"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -551,12 +553,12 @@ export const VehicleDetailPage: React.FC = () => {
                   onClick={() => selectImage(idx)}
                   className={`relative w-24 sm:w-28 h-16 sm:h-20 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     activeImgIndex === idx
-                      ? 'border-[#00C9CE] scale-105 shadow-md ring-2 ring-[#00C9CE]/30'
+                      ? 'border-[#23EBFF] scale-105 shadow-md ring-2 ring-[#23EBFF]/30'
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
                   <img src={img} alt={`Thumb ${idx + 1}`} width={112} height={80} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-                  <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-[#1E3063]/90 text-white px-1.5 py-0.2 rounded">
+                  <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-[#2E4080]/90 text-white px-1.5 py-0.2 rounded">
                     #{idx + 1}
                   </span>
                 </button>
@@ -566,44 +568,44 @@ export const VehicleDetailPage: React.FC = () => {
 
           {/* Technical Specifications Matrix */}
           <div className="p-6 rounded-3xl bg-white border border-[#E2D8C7] space-y-4 shadow-xs">
-            <h3 className="text-lg font-bold text-[#1E3063] font-serif flex items-center justify-between">
+            <h3 className="text-lg font-bold text-[#2E4080] font-serif flex items-center justify-between">
               <span>Technical Specifications</span>
-              <span className="text-xs font-mono font-bold text-[#00C9CE]">KAYAD Verified</span>
+              <span className="text-xs font-mono font-bold text-[#23EBFF]">KAYAD Verified</span>
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Year</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.year}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.year}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Mileage</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.mileage.toLocaleString()} km</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.mileage.toLocaleString()} km</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Fuel Type</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.fuelType}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.fuelType}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Transmission</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.transmission}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.transmission}</span>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Engine</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.engine}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.engine}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Horsepower</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.horsepower} HP</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.horsepower} HP</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Exterior Color</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.exteriorColor || 'Metallic'}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.exteriorColor || 'Metallic'}</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7]">
                 <span className="text-[#6B7A99] font-bold uppercase block text-[10px]">Condition</span>
-                <span className="text-sm font-extrabold text-[#1E3063]">{vehicle.condition || 'Excellent'}</span>
+                <span className="text-sm font-extrabold text-[#2E4080]">{vehicle.condition || 'Excellent'}</span>
               </div>
             </div>
 
@@ -624,7 +626,7 @@ export const VehicleDetailPage: React.FC = () => {
                 {vehicle.features.map((feat, i) => (
                   <span
                     key={i}
-                    className="px-3 py-1 rounded-xl text-xs font-semibold bg-[#F6F1E8] text-[#1E3063] border border-[#E2D8C7]"
+                    className="px-3 py-1 rounded-xl text-xs font-semibold bg-[#F6F1E8] text-[#2E4080] border border-[#E2D8C7]"
                   >
                     {feat}
                   </span>
@@ -635,10 +637,10 @@ export const VehicleDetailPage: React.FC = () => {
 
           {/* 150-Point Inspection Section */}
           {vehicle.inspection && (
-            <div className="p-6 rounded-3xl bg-[#1E3063] text-white border border-[#1E3063] space-y-4 shadow-md relative overflow-hidden">
+            <div className="p-6 rounded-3xl bg-[#2E4080] text-white border border-[#2E4080] space-y-4 shadow-md relative overflow-hidden">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#00C9CE]/20 border border-[#00C9CE]/40 flex items-center justify-center text-[#00C9CE] shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF] shrink-0">
                     <CheckCircle2 className="w-7 h-7" />
                   </div>
                   <div>
@@ -646,7 +648,7 @@ export const VehicleDetailPage: React.FC = () => {
                       <h3 className="text-base sm:text-lg font-bold text-white font-serif">
                         150-Point Ghost Check Certification
                       </h3>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#00C9CE] text-[#1E3063]">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase bg-[#23EBFF] text-[#2E4080]">
                         Verified
                       </span>
                     </div>
@@ -656,7 +658,7 @@ export const VehicleDetailPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-left sm:text-right shrink-0">
-                  <span className="text-3xl sm:text-4xl font-black text-[#00C9CE] font-serif block">
+                  <span className="text-3xl sm:text-4xl font-black text-[#23EBFF] font-serif block">
                     {vehicle.inspection.score}/100
                   </span>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block">
@@ -668,44 +670,44 @@ export const VehicleDetailPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
                   <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Engine & Powertrain</span>
-                  <span className="text-xs font-extrabold text-[#2ECC71]">{vehicle.inspection.engineHealth}</span>
+                  <span className="text-xs font-extrabold text-[#3ddb72]">{vehicle.inspection.engineHealth}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
                   <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Body & Chassis Integrity</span>
-                  <span className="text-xs font-extrabold text-[#00C9CE]">{vehicle.inspection.bodyCondition}</span>
+                  <span className="text-xs font-extrabold text-[#23EBFF]">{vehicle.inspection.bodyCondition}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 space-y-1">
                   <span className="text-[10px] text-slate-300 font-bold block uppercase tracking-wider">Electronics & Systems</span>
-                  <span className="text-xs font-extrabold text-[#2ECC71]">{vehicle.inspection.interiorHealth}</span>
+                  <span className="text-xs font-extrabold text-[#3ddb72]">{vehicle.inspection.interiorHealth}</span>
                 </div>
               </div>
             </div>
           )}
 
           {/* KAYAD Guarantees & Buyer Protection - Redesigned with Brand Theme Colors */}
-          <div className="p-6 rounded-3xl bg-[#1E3063] text-white border border-[#1E3063] space-y-4 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-[#00C9CE]/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="p-6 rounded-3xl bg-[#2E4080] text-white border border-[#2E4080] space-y-4 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#23EBFF]/15 rounded-full blur-2xl pointer-events-none" />
             
             <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3.5 relative z-10">
               <h3 className="text-base font-bold text-white font-serif flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-[#00C9CE]" />
+                <ShieldCheck className="w-5 h-5 text-[#23EBFF]" />
                 <span>Buyer Protection & Trust Guarantees</span>
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#00C9CE]/20 text-[#00C9CE] border border-[#00C9CE]/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#23EBFF]/20 text-[#23EBFF] border border-[#23EBFF]/40">
                 100% KAYAD Verified
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs relative z-10">
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#00C9CE]/40 transition-colors">
-                <CheckCircle2 className="w-4 h-4 text-[#00C9CE] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#23EBFF]/40 transition-colors">
+                <CheckCircle2 className="w-4 h-4 text-[#23EBFF] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Official Title & Logbook Cleared</span>
                   <span className="text-slate-300 text-[11px] leading-relaxed">NTSA logbook ownership verified with zero outstanding encumbrances.</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#00C9CE]/40 transition-colors">
+              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#23EBFF]/40 transition-colors">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Accident & Chassis Inspection Passed</span>
@@ -713,16 +715,16 @@ export const VehicleDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#00C9CE]/40 transition-colors">
-                <Lock className="w-4 h-4 text-[#00C9CE] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#23EBFF]/40 transition-colors">
+                <Lock className="w-4 h-4 text-[#23EBFF] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Secure M-Pesa Buyer Protection</span>
                   <span className="text-slate-300 text-[11px] leading-relaxed">Direct M-Pesa or bank transfer backed by 48-hour physical inspection.</span>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#00C9CE]/40 transition-colors">
-                <FileText className="w-4 h-4 text-[#00C9CE] shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-2xl bg-white/10 border border-white/15 flex items-start gap-3 hover:border-[#23EBFF]/40 transition-colors">
+                <FileText className="w-4 h-4 text-[#23EBFF] shrink-0 mt-0.5" />
                 <div>
                   <span className="font-extrabold text-white block">Complete Service History</span>
                   <span className="text-slate-300 text-[11px] leading-relaxed">Verified franchise maintenance logbook and authentic odometer check.</span>
@@ -732,14 +734,14 @@ export const VehicleDetailPage: React.FC = () => {
           </div>
 
           {/* Book Inspection Panel */}
-          <div className="p-6 rounded-3xl bg-[#121D33] text-white border border-white/10 space-y-4 shadow-lg relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-[#1B2647] text-white border border-white/10 space-y-4 shadow-lg relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#00C9CE]/20 border border-[#00C9CE]/40 flex items-center justify-center text-[#00C9CE] shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF] shrink-0">
                   <Wrench className="w-5 h-5" />
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono font-extrabold uppercase text-[#00C9CE] tracking-wider">
+                  <div className="text-[10px] font-mono font-extrabold uppercase text-[#23EBFF] tracking-wider">
                     GHOST CHECK VERIFICATION
                   </div>
                   <h3 className="text-lg font-black text-white font-serif">
@@ -748,7 +750,7 @@ export const VehicleDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <span className="px-3 py-1 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] text-xs font-mono font-bold border border-[#00C9CE]/30 w-fit">
+              <span className="px-3 py-1 rounded-full bg-[#23EBFF]/20 text-[#23EBFF] text-xs font-mono font-bold border border-[#23EBFF]/30 w-fit">
                 From KSh 4,500
               </span>
             </div>
@@ -760,7 +762,7 @@ export const VehicleDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => navigateTo('ghost_check', vehicle.id)}
-                className="w-full py-3 px-4 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all uppercase tracking-wider cursor-pointer"
+                className="w-full py-3 px-4 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs flex items-center justify-center gap-2 shadow-md transition-all uppercase tracking-wider cursor-pointer"
               >
                 <Wrench className="w-4 h-4" />
                 <span>Book Inspection Now</span>
@@ -770,7 +772,7 @@ export const VehicleDetailPage: React.FC = () => {
                 onClick={() => navigateTo('ghost_check', vehicle.id)}
                 className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center justify-center gap-2 border border-white/20 transition-all cursor-pointer"
               >
-                <FileText className="w-4 h-4 text-[#00C9CE]" />
+                <FileText className="w-4 h-4 text-[#23EBFF]" />
                 <span>See Sample Reports</span>
               </button>
             </div>
@@ -790,7 +792,7 @@ export const VehicleDetailPage: React.FC = () => {
                 Listed Purchase Price
               </span>
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-3xl font-black text-[#1E3063] font-serif">
+                <span className="text-3xl font-black text-[#2E4080] font-serif">
                   KSh {vehicle.price.toLocaleString()}
                 </span>
                 <span className="text-xs text-emerald-700 font-extrabold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 shrink-0">
@@ -801,9 +803,9 @@ export const VehicleDetailPage: React.FC = () => {
               {/* Buy Now Direct Protection CTA Button (Primary Action) */}
               <button
                 onClick={handleBuyNowEscrow}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-[#1E3063] cursor-pointer mt-2"
+                className="w-full py-3.5 px-4 rounded-xl bg-[#2E4080] hover:bg-[#141E3F] text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-[#2E4080] cursor-pointer mt-2"
               >
-                <Lock className="w-4 h-4 text-[#00C9CE]" />
+                <Lock className="w-4 h-4 text-[#23EBFF]" />
                 <span>Buy Now via M-Pesa Protection</span>
               </button>
 
@@ -817,17 +819,17 @@ export const VehicleDetailPage: React.FC = () => {
                 onClick={() => setIsAlertModalOpen(true)}
                 className={`w-full py-2.5 px-3 rounded-2xl border text-xs font-bold flex items-center justify-between transition-all cursor-pointer mt-1 ${
                   existingAlert
-                    ? 'bg-[#00C9CE]/15 text-[#1E3063] border-[#00C9CE]/40 hover:bg-[#00C9CE]/25'
-                    : 'bg-[#F6F1E8] text-[#1E3063] border-[#E2D8C7] hover:bg-[#E8E1D5]'
+                    ? 'bg-[#23EBFF]/15 text-[#2E4080] border-[#23EBFF]/40 hover:bg-[#23EBFF]/25'
+                    : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:bg-[#E8E1D5]'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <BellRing className={`w-4 h-4 ${existingAlert ? 'text-[#00C9CE] animate-pulse' : 'text-[#6B7A99]'}`} />
+                  <BellRing className={`w-4 h-4 ${existingAlert ? 'text-[#23EBFF] animate-pulse' : 'text-[#6B7A99]'}`} />
                   <span className="truncate">
                     {existingAlert ? `Price Alert: < KSh ${existingAlert.targetPrice.toLocaleString()}` : 'Get notified if price drops'}
                   </span>
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#00C9CE] underline shrink-0">
+                <span className="text-[10px] font-black uppercase tracking-wider text-[#23EBFF] underline shrink-0">
                   {existingAlert ? 'Manage' : 'Set Alert'}
                 </span>
               </button>
@@ -844,12 +846,12 @@ export const VehicleDetailPage: React.FC = () => {
                     Live Auction
                   </Badge>
                 </div>
-                <p className="text-2xl font-black text-[#1E3063] font-serif">
+                <p className="text-2xl font-black text-[#2E4080] font-serif">
                   KSh {currentPrice.toLocaleString()}
                 </p>
 
                 {bidSuccess && (
-                  <p className="text-xs font-bold text-[#1E3063] bg-[#2ECC71]/20 p-2.5 rounded-xl border border-[#2ECC71]/40">
+                  <p className="text-xs font-bold text-[#2E4080] bg-[#3ddb72]/20 p-2.5 rounded-xl border border-[#3ddb72]/40">
                     {bidSuccess}
                   </p>
                 )}
@@ -869,7 +871,7 @@ export const VehicleDetailPage: React.FC = () => {
                   />
                   <button
                     type="submit"
-                    className="w-full py-3.5 rounded-xl bg-[#2ECC71] hover:bg-[#25b862] text-[#1E3063] font-extrabold text-xs tracking-wider uppercase transition-all shadow-md cursor-pointer"
+                    className="w-full py-3.5 rounded-xl bg-[#3ddb72] hover:bg-[#3ddb72] text-[#2E4080] font-extrabold text-xs tracking-wider uppercase transition-all shadow-md cursor-pointer"
                   >
                     Place Binding Bid
                   </button>
@@ -884,15 +886,15 @@ export const VehicleDetailPage: React.FC = () => {
                   <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider">
                     Buy Now Instant Price
                   </span>
-                  <span className="text-lg font-black text-[#1E3063] font-serif">
+                  <span className="text-lg font-black text-[#2E4080] font-serif">
                     KSh {vehicle.buyNowPrice.toLocaleString()}
                   </span>
                 </div>
                 <button
                   onClick={handleBuyNowEscrow}
-                  className="w-full py-3.5 rounded-xl bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-[#1E3063] cursor-pointer"
+                  className="w-full py-3.5 rounded-xl bg-[#2E4080] hover:bg-[#141E3F] text-white font-extrabold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-md border border-[#2E4080] cursor-pointer"
                 >
-                  <Lock className="w-4 h-4 text-[#00C9CE]" />
+                  <Lock className="w-4 h-4 text-[#23EBFF]" />
                   <span>Buy Now via M-Pesa Escrow</span>
                 </button>
                 <p className="text-[11px] text-[#6B7A99] text-center leading-normal font-medium">
@@ -903,22 +905,22 @@ export const VehicleDetailPage: React.FC = () => {
           </div>
 
           {/* Verified Dealer Card */}
-          <div className="p-6 rounded-3xl bg-[#1E3063] text-white border border-[#1E3063] space-y-4 shadow-md">
+          <div className="p-6 rounded-3xl bg-[#2E4080] text-white border border-[#2E4080] space-y-4 shadow-md">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#00C9CE]/20 border border-[#00C9CE]/40 flex items-center justify-center text-[#00C9CE] shrink-0 font-bold text-xl font-serif">
+              <div className="w-12 h-12 rounded-2xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF] shrink-0 font-bold text-xl font-serif">
                 {vehicle.sellerName.charAt(0)}
               </div>
               <div>
                 <p className="text-xs text-slate-300 font-semibold">Listed by Certified Dealer</p>
                 <h4 className="text-base font-bold text-white font-serif">{vehicle.sellerName}</h4>
-                <p className="text-xs text-[#00C9CE] font-bold">★ {vehicle.sellerRating} Verified KAYAD Dealer</p>
+                <p className="text-xs text-[#23EBFF] font-bold">★ {vehicle.sellerRating} Verified KAYAD Dealer</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button
                 onClick={() => openChat(vehicle.id)}
-                className="py-2.5 px-3 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                className="py-2.5 px-3 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
               >
                 <MessageSquareText className="w-3.5 h-3.5" />
                 <span>Chat Dealer</span>
@@ -932,7 +934,7 @@ export const VehicleDetailPage: React.FC = () => {
                 }}
                 className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 border border-white/20 transition-all cursor-pointer"
               >
-                <Phone className="w-3.5 h-3.5 text-[#00C9CE]" />
+                <Phone className="w-3.5 h-3.5 text-[#23EBFF]" />
                 <span>Call Dealer</span>
               </a>
             </div>
@@ -947,8 +949,8 @@ export const VehicleDetailPage: React.FC = () => {
 
           {/* Financing Estimator */}
           <div className="p-6 rounded-3xl bg-white border border-[#E2D8C7] space-y-4 shadow-xs">
-            <div className="flex items-center gap-2 font-bold text-[#1E3063] text-sm font-serif">
-              <Calculator className="w-4 h-4 text-[#00C9CE]" />
+            <div className="flex items-center gap-2 font-bold text-[#2E4080] text-sm font-serif">
+              <Calculator className="w-4 h-4 text-[#23EBFF]" />
               <span>Financing Calculator (KSh)</span>
             </div>
 
@@ -959,7 +961,7 @@ export const VehicleDetailPage: React.FC = () => {
                   type="number"
                   value={downPayment}
                   onChange={e => setDownPayment(e.target.value)}
-                  className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#1E3063] focus:outline-none focus:ring-1 focus:ring-[#00C9CE]"
+                  className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#2E4080] focus:outline-none focus:ring-1 focus:ring-[#23EBFF]"
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -968,7 +970,7 @@ export const VehicleDetailPage: React.FC = () => {
                   <select
                     value={loanTerm}
                     onChange={e => setLoanTerm(parseInt(e.target.value))}
-                    className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#1E3063] focus:outline-none focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#2E4080] focus:outline-none focus:ring-1 focus:ring-[#23EBFF]"
                   >
                     <option value={36}>36 Months</option>
                     <option value={48}>48 Months</option>
@@ -983,14 +985,14 @@ export const VehicleDetailPage: React.FC = () => {
                     step="0.1"
                     value={interestRate}
                     onChange={e => setInterestRate(parseFloat(e.target.value))}
-                    className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#1E3063] focus:outline-none focus:ring-1 focus:ring-[#00C9CE]"
+                    className="w-full p-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl font-bold text-[#2E4080] focus:outline-none focus:ring-1 focus:ring-[#23EBFF]"
                   />
                 </div>
               </div>
 
               <div className="p-3 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7] text-center">
                 <span className="text-[10px] text-[#6B7A99] font-bold uppercase block">Estimated Monthly Payment</span>
-                <span className="text-2xl font-black text-[#1E3063] font-serif">KSh {estimatedMonthly.toLocaleString()}/mo</span>
+                <span className="text-2xl font-black text-[#2E4080] font-serif">KSh {estimatedMonthly.toLocaleString()}/mo</span>
               </div>
             </div>
           </div>
@@ -999,9 +1001,9 @@ export const VehicleDetailPage: React.FC = () => {
       </div>
 
       {/* Floating Bottom Action Bar for Mobile Devices */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1E3063]/95 backdrop-blur-lg border-t border-white/10 p-3.5 shadow-2xl flex items-center justify-between gap-3">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#2E4080]/95 backdrop-blur-lg border-t border-white/10 p-3.5 shadow-2xl flex items-center justify-between gap-3">
         <div>
-          <span className="text-[10px] font-mono text-[#00C9CE] font-bold block uppercase">Price</span>
+          <span className="text-[10px] font-mono text-[#23EBFF] font-bold block uppercase">Price</span>
           <span className="text-base font-black text-white font-serif">
             KSh {(vehicle.buyNowPrice || vehicle.price).toLocaleString()}
           </span>
@@ -1013,12 +1015,12 @@ export const VehicleDetailPage: React.FC = () => {
             className="p-3 rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold text-xs flex items-center justify-center cursor-pointer"
             title="Chat Dealer"
           >
-            <MessageSquareText className="w-4 h-4 text-[#00C9CE]" />
+            <MessageSquareText className="w-4 h-4 text-[#23EBFF]" />
           </button>
 
           <button
             onClick={handleBuyNowEscrow}
-            className="py-3 px-4 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-black text-xs flex items-center gap-1.5 shadow-md uppercase tracking-wider cursor-pointer"
+            className="py-3 px-4 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs flex items-center gap-1.5 shadow-md uppercase tracking-wider cursor-pointer"
           >
             <Lock className="w-3.5 h-3.5" />
             <span>Buy via Escrow</span>
@@ -1036,7 +1038,7 @@ export const VehicleDetailPage: React.FC = () => {
               <h3 className="text-sm sm:text-base font-extrabold font-serif text-white">
                 {vehicle.title}
               </h3>
-              <p className="text-xs text-[#00C9CE] font-mono font-bold">
+              <p className="text-xs text-[#23EBFF] font-mono font-bold">
                 Picture {activeImgIndex + 1} of {totalImages} • Use ← → or Esc keys
               </p>
             </div>
@@ -1047,7 +1049,7 @@ export const VehicleDetailPage: React.FC = () => {
                 className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer"
                 title={isZoomed ? "Zoom Out" : "Zoom In"}
               >
-                {isZoomed ? <ZoomOut className="w-5 h-5 text-[#00C9CE]" /> : <ZoomIn className="w-5 h-5 text-[#00C9CE]" />}
+                {isZoomed ? <ZoomOut className="w-5 h-5 text-[#23EBFF]" /> : <ZoomIn className="w-5 h-5 text-[#23EBFF]" />}
               </button>
 
               <button
@@ -1102,7 +1104,7 @@ export const VehicleDetailPage: React.FC = () => {
                 onClick={() => setActiveImgIndex(idx)}
                 className={`relative w-20 h-14 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                   activeImgIndex === idx
-                    ? 'border-[#00C9CE] scale-105 shadow-lg ring-2 ring-[#00C9CE]/50'
+                    ? 'border-[#23EBFF] scale-105 shadow-lg ring-2 ring-[#23EBFF]/50'
                     : 'border-transparent opacity-50 hover:opacity-100'
                 }`}
               >

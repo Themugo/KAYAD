@@ -1,4 +1,7 @@
+import type { FC } from 'react';
+import type React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ShieldCheck, 
   Store, 
@@ -19,16 +22,12 @@ import {
   FileCheck2,
   Award
 } from 'lucide-react';
-import { useMarketplace } from '../../context/MarketplaceContext';
-import { useAuth } from '../../context/AuthContext';
-import { UserRole } from '../../types';
 import { Button } from '../ui/Button';
 
 type AccountType = 'private' | 'dealer';
 
-export const SellPage: React.FC = () => {
-  const { navigateTo } = useMarketplace();
-  const { openAuthModal, login } = useAuth();
+export const SellPage: FC = () => {
+  const navigate = useNavigate();
 
   // Step state: 1 = Choose Account Type, 2 = Your Details
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -64,27 +63,25 @@ export const SellPage: React.FC = () => {
       setIsSubmitting(false);
       setIsSuccess(true);
 
-      // Auto login user with the onboarded role (seller or dealer)
-      const targetRole: UserRole = selectedType === 'dealer' ? 'dealer' : 'seller';
-      const userEmail = formData.email.trim() || `seller_${Date.now()}@kayad.co.ke`;
-      login(userEmail, targetRole);
-
+      // This form doesn't collect a password, so we can't create a real
+      // session here. Send the user to real registration to finish
+      // creating their account instead of faking a login.
       setTimeout(() => {
-        navigateTo('dashboard');
+        navigate('/register');
       }, 1800);
     }, 1000);
   };
 
   return (
-    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#1E3063] font-sans">
+    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#2E4080] font-sans">
       
       {/* 1. Top Hero Section */}
-      <div className="p-5 sm:p-7 rounded-2xl bg-[#1E3063] text-white border border-white/20 shadow-lg relative overflow-hidden text-center space-y-4">
-        <div className="absolute top-0 right-1/2 translate-x-1/2 w-96 h-96 bg-[#00C9CE]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="p-5 sm:p-7 rounded-2xl bg-[#2E4080] text-white border border-white/20 shadow-lg relative overflow-hidden text-center space-y-4">
+        <div className="absolute top-0 right-1/2 translate-x-1/2 w-96 h-96 bg-[#23EBFF]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 space-y-3 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] text-xs font-black uppercase tracking-wider border border-[#00C9CE]/40">
-            <Sparkles className="w-4 h-4 text-[#00C9CE]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#23EBFF]/20 text-[#23EBFF] text-xs font-black uppercase tracking-wider border border-[#23EBFF]/40">
+            <Sparkles className="w-4 h-4 text-[#23EBFF]" />
             <span>KAYAD SELLER ONBOARDING EXPERIENCE</span>
           </div>
 
@@ -99,7 +96,7 @@ export const SellPage: React.FC = () => {
           {/* Value Props Bar */}
           <div className="pt-2 grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-left text-xs max-w-2xl mx-auto">
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#00C9CE] shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-[#23EBFF] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Escrow Vault</span>
                 <span className="text-[9px] text-slate-300 block">Guaranteed funds</span>
@@ -107,7 +104,7 @@ export const SellPage: React.FC = () => {
             </div>
 
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
-              <User className="w-4 h-4 text-[#2ECC71] shrink-0" />
+              <User className="w-4 h-4 text-[#3ddb72] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Verified Buyers</span>
                 <span className="text-[9px] text-slate-300 block">Pre-qualified leads</span>
@@ -115,7 +112,7 @@ export const SellPage: React.FC = () => {
             </div>
 
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
-              <FileCheck2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+              <FileCheck2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">150-Pt Audits</span>
                 <span className="text-[9px] text-slate-300 block">Certified reports</span>
@@ -123,7 +120,7 @@ export const SellPage: React.FC = () => {
             </div>
 
             <div className="p-2.5 rounded-xl bg-white/10 border border-white/15 flex items-center gap-2">
-              <Globe2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+              <Globe2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
               <div>
                 <span className="font-bold text-white block text-[11px]">Nationwide Reach</span>
                 <span className="text-[9px] text-slate-300 block">All 47 counties</span>
@@ -139,7 +136,7 @@ export const SellPage: React.FC = () => {
           {/* Connector Line */}
           <div className="absolute top-1/2 left-0 right-0 h-1 bg-[#E2D8C7] -translate-y-1/2 z-0" />
           <div 
-            className="absolute top-1/2 left-0 h-1 bg-[#00C9CE] -translate-y-1/2 z-0 transition-all duration-300"
+            className="absolute top-1/2 left-0 h-1 bg-[#23EBFF] -translate-y-1/2 z-0 transition-all duration-300"
             style={{ width: currentStep === 1 ? '0%' : '100%' }}
           />
 
@@ -150,14 +147,14 @@ export const SellPage: React.FC = () => {
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-sm transition-all ${
               currentStep === 1 
-                ? 'bg-[#1E3063] text-[#00C9CE] ring-4 ring-[#00C9CE]/30 shadow-md' 
-                : 'bg-[#00C9CE] text-[#1E3063]'
+                ? 'bg-[#2E4080] text-[#23EBFF] ring-4 ring-[#23EBFF]/30 shadow-md' 
+                : 'bg-[#23EBFF] text-[#2E4080]'
             }`}>
               1
             </div>
             <div className="text-left hidden sm:block">
-              <span className="text-[10px] font-black uppercase text-[#00C9CE] tracking-wider block">Step 01</span>
-              <span className={`text-xs font-bold font-serif ${currentStep === 1 ? 'text-[#1E3063]' : 'text-[#6B7A99]'}`}>
+              <span className="text-[10px] font-black uppercase text-[#23EBFF] tracking-wider block">Step 01</span>
+              <span className={`text-xs font-bold font-serif ${currentStep === 1 ? 'text-[#2E4080]' : 'text-[#6B7A99]'}`}>
                 Select Seller Type
               </span>
             </div>
@@ -170,14 +167,14 @@ export const SellPage: React.FC = () => {
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-sm transition-all ${
               currentStep === 2 
-                ? 'bg-[#1E3063] text-[#00C9CE] ring-4 ring-[#00C9CE]/30 shadow-md' 
+                ? 'bg-[#2E4080] text-[#23EBFF] ring-4 ring-[#23EBFF]/30 shadow-md' 
                 : 'bg-[#E2D8C7] text-[#6B7A99]'
             }`}>
               2
             </div>
             <div className="text-left hidden sm:block">
               <span className="text-[10px] font-black uppercase text-[#6B7A99] tracking-wider block">Step 02</span>
-              <span className={`text-xs font-bold font-serif ${currentStep === 2 ? 'text-[#1E3063]' : 'text-[#6B7A99]'}`}>
+              <span className={`text-xs font-bold font-serif ${currentStep === 2 ? 'text-[#2E4080]' : 'text-[#6B7A99]'}`}>
                 Seller Onboarding Profile
               </span>
             </div>
@@ -190,7 +187,7 @@ export const SellPage: React.FC = () => {
         /* STEP 1: Choose Account Type */
         <div className="p-6 sm:p-10 rounded-3xl bg-white border border-[#E2D8C7] shadow-sm space-y-8">
           <div className="text-center space-y-1.5 border-b border-[#E8E1D5] pb-6">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#1E3063] font-serif tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#2E4080] font-serif tracking-tight">
               Select Your Seller Onboarding Path
             </h2>
             <p className="text-xs sm:text-sm text-[#6B7A99] font-medium">
@@ -206,17 +203,17 @@ export const SellPage: React.FC = () => {
               onClick={() => setSelectedType('private')}
               className={`p-6 sm:p-8 rounded-3xl border-2 transition-all cursor-pointer relative flex flex-col justify-between space-y-6 ${
                 selectedType === 'private'
-                  ? 'border-[#00C9CE] bg-[#F0FCFC] shadow-lg ring-2 ring-[#00C9CE]/20'
-                  : 'border-[#E2D8C7] bg-[#F6F1E8]/50 hover:border-[#1E3063]/30'
+                  ? 'border-[#23EBFF] bg-[#E8FDFF] shadow-lg ring-2 ring-[#23EBFF]/20'
+                  : 'border-[#E2D8C7] bg-[#F6F1E8]/50 hover:border-[#2E4080]/30'
               }`}
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1E3063] text-[#00C9CE] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-[#2E4080] text-[#23EBFF] flex items-center justify-center">
                     <User className="w-6 h-6" />
                   </div>
                   {selectedType === 'private' && (
-                    <div className="w-7 h-7 rounded-full bg-[#00C9CE] text-[#1E3063] flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-[#23EBFF] text-[#2E4080] flex items-center justify-center">
                       <Check className="w-4 h-4 stroke-[3]" />
                     </div>
                   )}
@@ -224,10 +221,10 @@ export const SellPage: React.FC = () => {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-black text-[#1E3063] font-serif">
+                    <h3 className="text-xl font-black text-[#2E4080] font-serif">
                       Private Seller
                     </h3>
-                    <span className="px-2 py-0.5 rounded bg-[#1E3063]/10 text-[#1E3063] text-[9px] font-extrabold uppercase">Individual Owner</span>
+                    <span className="px-2 py-0.5 rounded bg-[#2E4080]/10 text-[#2E4080] text-[9px] font-extrabold uppercase">Individual Owner</span>
                   </div>
                   <p className="text-xs text-[#3D4F6F] font-medium leading-relaxed mt-1">
                     Ideal for individual vehicle owners seeking a safe, professional sales process with full escrow protection. No business registration required.
@@ -236,20 +233,20 @@ export const SellPage: React.FC = () => {
 
                 {/* Features List */}
                 <ul className="space-y-2.5 pt-2 border-t border-[#E8E1D5]">
-                  <li className="flex items-center gap-2.5 text-xs text-[#1E3063] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+                  <li className="flex items-center gap-2.5 text-xs text-[#2E4080] font-semibold">
+                    <CheckCircle2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
                     <span>List up to 3 personal vehicles concurrently</span>
                   </li>
-                  <li className="flex items-center gap-2.5 text-xs text-[#1E3063] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+                  <li className="flex items-center gap-2.5 text-xs text-[#2E4080] font-semibold">
+                    <CheckCircle2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
                     <span>CBK-regulated Escrow Vault payment protection</span>
                   </li>
-                  <li className="flex items-center gap-2.5 text-xs text-[#1E3063] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+                  <li className="flex items-center gap-2.5 text-xs text-[#2E4080] font-semibold">
+                    <CheckCircle2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
                     <span>Free KAYAD Verified Listing Certification Badge</span>
                   </li>
-                  <li className="flex items-center gap-2.5 text-xs text-[#1E3063] font-semibold">
-                    <CheckCircle2 className="w-4 h-4 text-[#00C9CE] shrink-0" />
+                  <li className="flex items-center gap-2.5 text-xs text-[#2E4080] font-semibold">
+                    <CheckCircle2 className="w-4 h-4 text-[#23EBFF] shrink-0" />
                     <span>Direct encrypted buyer messaging & offer management</span>
                   </li>
                 </ul>
@@ -257,7 +254,7 @@ export const SellPage: React.FC = () => {
 
               {/* Price Tag */}
               <div className="pt-4 border-t border-[#E8E1D5]">
-                <span className="text-xs font-black text-[#1E3063] uppercase tracking-wider block">
+                <span className="text-xs font-black text-[#2E4080] uppercase tracking-wider block">
                   Zero Monthly Subscriptions · Standard Escrow Safety
                 </span>
               </div>
@@ -268,13 +265,13 @@ export const SellPage: React.FC = () => {
               onClick={() => setSelectedType('dealer')}
               className={`p-6 sm:p-8 rounded-3xl border-2 transition-all cursor-pointer relative flex flex-col justify-between space-y-6 ${
                 selectedType === 'dealer'
-                  ? 'border-[#1E3063] bg-[#121D33] text-white shadow-xl ring-2 ring-[#00C9CE]/30'
-                  : 'border-[#E2D8C7] bg-[#F6F1E8]/50 hover:border-[#1E3063]/30'
+                  ? 'border-[#2E4080] bg-[#1B2647] text-white shadow-xl ring-2 ring-[#23EBFF]/30'
+                  : 'border-[#E2D8C7] bg-[#F6F1E8]/50 hover:border-[#2E4080]/30'
               }`}
             >
               {/* Popular Badge */}
               <div className="absolute top-4 right-4">
-                <span className="px-3 py-1 rounded-full bg-[#2ECC71] text-[#121D33] text-[10px] font-black uppercase tracking-wider shadow-sm">
+                <span className="px-3 py-1 rounded-full bg-[#3ddb72] text-[#1B2647] text-[10px] font-black uppercase tracking-wider shadow-sm">
                   Recommended for Showrooms
                 </span>
               </div>
@@ -282,12 +279,12 @@ export const SellPage: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
-                    selectedType === 'dealer' ? 'bg-[#00C9CE] text-[#1E3063]' : 'bg-[#1E3063] text-[#00C9CE]'
+                    selectedType === 'dealer' ? 'bg-[#23EBFF] text-[#2E4080]' : 'bg-[#2E4080] text-[#23EBFF]'
                   }`}>
                     <Store className="w-6 h-6" />
                   </div>
                   {selectedType === 'dealer' && (
-                    <div className="w-7 h-7 rounded-full bg-[#2ECC71] text-[#121D33] flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-[#3ddb72] text-[#1B2647] flex items-center justify-center">
                       <Check className="w-4 h-4 stroke-[3]" />
                     </div>
                   )}
@@ -295,10 +292,10 @@ export const SellPage: React.FC = () => {
 
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className={`text-xl font-black font-serif ${selectedType === 'dealer' ? 'text-white' : 'text-[#1E3063]'}`}>
+                    <h3 className={`text-xl font-black font-serif ${selectedType === 'dealer' ? 'text-white' : 'text-[#2E4080]'}`}>
                       Verified Dealership
                     </h3>
-                    <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${selectedType === 'dealer' ? 'bg-[#00C9CE]/20 text-[#00C9CE]' : 'bg-[#1E3063]/10 text-[#1E3063]'}`}>Pro Inventory</span>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${selectedType === 'dealer' ? 'bg-[#23EBFF]/20 text-[#23EBFF]' : 'bg-[#2E4080]/10 text-[#2E4080]'}`}>Pro Inventory</span>
                   </div>
                   <p className={`text-xs font-medium leading-relaxed mt-1 ${selectedType === 'dealer' ? 'text-slate-300' : 'text-[#3D4F6F]'}`}>
                     Designed for commercial dealerships & showroom managers requiring full inventory scaling, auction marketplace listing, and priority search placement.
@@ -307,24 +304,24 @@ export const SellPage: React.FC = () => {
 
                 {/* Features List */}
                 <ul className={`space-y-2.5 pt-2 border-t ${selectedType === 'dealer' ? 'border-white/10' : 'border-[#E8E1D5]'}`}>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#1E3063]'}`}>
-                    <CheckCircle2 className="w-4 h-4 text-[#2ECC71] shrink-0" />
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#2E4080]'}`}>
+                    <CheckCircle2 className="w-4 h-4 text-[#3ddb72] shrink-0" />
                     <span>Unlimited vehicle inventory listings</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#1E3063]'}`}>
-                    <CheckCircle2 className="w-4 h-4 text-[#2ECC71] shrink-0" />
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#2E4080]'}`}>
+                    <CheckCircle2 className="w-4 h-4 text-[#3ddb72] shrink-0" />
                     <span>KAYAD Auction & Marketplace channel access</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#1E3063]'}`}>
-                    <CheckCircle2 className="w-4 h-4 text-[#2ECC71] shrink-0" />
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#2E4080]'}`}>
+                    <CheckCircle2 className="w-4 h-4 text-[#3ddb72] shrink-0" />
                     <span>Priority placement in buyer search results</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#1E3063]'}`}>
-                    <CheckCircle2 className="w-4 h-4 text-[#2ECC71] shrink-0" />
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#2E4080]'}`}>
+                    <CheckCircle2 className="w-4 h-4 text-[#3ddb72] shrink-0" />
                     <span>Verified Dealership Trust Badge & Showroom Page</span>
                   </li>
-                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#1E3063]'}`}>
-                    <CheckCircle2 className="w-4 h-4 text-[#2ECC71] shrink-0" />
+                  <li className={`flex items-center gap-2.5 text-xs font-semibold ${selectedType === 'dealer' ? 'text-slate-200' : 'text-[#2E4080]'}`}>
+                    <CheckCircle2 className="w-4 h-4 text-[#3ddb72] shrink-0" />
                     <span>Dedicated KAYAD Account Manager & Bulk Upload tools</span>
                   </li>
                 </ul>
@@ -332,7 +329,7 @@ export const SellPage: React.FC = () => {
 
               {/* Price Tag */}
               <div className={`pt-4 border-t ${selectedType === 'dealer' ? 'border-white/10' : 'border-[#E8E1D5]'}`}>
-                <span className={`text-xs font-black uppercase tracking-wider block ${selectedType === 'dealer' ? 'text-[#00C9CE]' : 'text-[#1E3063]'}`}>
+                <span className={`text-xs font-black uppercase tracking-wider block ${selectedType === 'dealer' ? 'text-[#23EBFF]' : 'text-[#2E4080]'}`}>
                   100% Free Onboarding · Full Pro Inventory Access Included
                 </span>
               </div>
@@ -343,8 +340,8 @@ export const SellPage: React.FC = () => {
           {/* Footer Bar */}
           <div className="pt-6 border-t border-[#E8E1D5] flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
-              onClick={() => openAuthModal()}
-              className="text-xs font-bold text-[#1E3063] hover:text-[#00C9CE] underline cursor-pointer"
+              onClick={() => navigate('/sign-in')}
+              className="text-xs font-bold text-[#2E4080] hover:text-[#23EBFF] underline cursor-pointer"
             >
               Already registered on KAYAD? Sign In to Seller Portal
             </button>
@@ -352,8 +349,8 @@ export const SellPage: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleContinue}
-              className="w-full sm:w-auto bg-[#1E3063] hover:bg-[#0B1628] text-white font-black text-xs py-3.5 px-10 uppercase tracking-wider shadow-md cursor-pointer"
-              rightIcon={<ArrowRight className="w-4 h-4 text-[#00C9CE]" />}
+              className="w-full sm:w-auto bg-[#2E4080] hover:bg-[#141E3F] text-white font-black text-xs py-3.5 px-10 uppercase tracking-wider shadow-md cursor-pointer"
+              rightIcon={<ArrowRight className="w-4 h-4 text-[#23EBFF]" />}
             >
               Proceed to Onboarding Profile
             </Button>
@@ -364,17 +361,17 @@ export const SellPage: React.FC = () => {
         <div className="p-6 sm:p-10 rounded-3xl bg-white border border-[#E2D8C7] shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-[#E8E1D5] pb-4">
             <div>
-              <span className="text-[10px] font-black uppercase text-[#00C9CE] tracking-widest block">
+              <span className="text-[10px] font-black uppercase text-[#23EBFF] tracking-widest block">
                 {selectedType === 'dealer' ? 'DEALERSHIP ONBOARDING PROFILE' : 'PRIVATE SELLER ONBOARDING PROFILE'}
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-[#1E3063] font-serif tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#2E4080] font-serif tracking-tight">
                 Enter Seller Verification Details
               </h2>
             </div>
 
             <button
               onClick={() => setCurrentStep(1)}
-              className="px-3 py-1.5 rounded-xl border border-[#E2D8C7] bg-[#F6F1E8] text-xs font-bold text-[#1E3063] flex items-center gap-1.5 hover:bg-[#E2D8C7] cursor-pointer"
+              className="px-3 py-1.5 rounded-xl border border-[#E2D8C7] bg-[#F6F1E8] text-xs font-bold text-[#2E4080] flex items-center gap-1.5 hover:bg-[#E2D8C7] cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
@@ -382,8 +379,8 @@ export const SellPage: React.FC = () => {
           </div>
 
           {isSuccess ? (
-            <div className="p-8 rounded-3xl bg-[#2ECC71]/20 border border-[#2ECC71]/40 text-[#121D33] text-center space-y-3">
-              <CheckCircle2 className="w-12 h-12 text-[#2ECC71] mx-auto" />
+            <div className="p-8 rounded-3xl bg-[#3ddb72]/20 border border-[#3ddb72]/40 text-[#1B2647] text-center space-y-3">
+              <CheckCircle2 className="w-12 h-12 text-[#3ddb72] mx-auto" />
               <h3 className="text-xl font-extrabold font-serif">Seller Profile Onboarded Successfully!</h3>
               <p className="text-xs font-semibold">
                 Your {selectedType === 'dealer' ? 'Dealership' : 'Private Seller'} account is verified. Redirecting to your KAYAD Seller Dashboard...
@@ -393,7 +390,7 @@ export const SellPage: React.FC = () => {
             <form onSubmit={handleSubmitDetails} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1.5">
                     {selectedType === 'dealer' ? 'Registered Business / Showroom Name *' : 'Full Legal Name *'}
                   </label>
                   <div className="relative">
@@ -404,13 +401,13 @@ export const SellPage: React.FC = () => {
                       value={formData.fullName}
                       onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                       placeholder={selectedType === 'dealer' ? 'Apex Luxury Motors Ltd' : 'John Mwangi'}
-                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080] focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1.5">
                     Phone Number (M-Pesa Registered) *
                   </label>
                   <div className="relative">
@@ -421,13 +418,13 @@ export const SellPage: React.FC = () => {
                       value={formData.phone}
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+254 700 000 000"
-                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080] focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1.5">
                     Official Email Address *
                   </label>
                   <div className="relative">
@@ -438,13 +435,13 @@ export const SellPage: React.FC = () => {
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
                       placeholder="seller@example.com"
-                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080] focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1.5">
                     Primary Region / County
                   </label>
                   <div className="relative">
@@ -452,7 +449,7 @@ export const SellPage: React.FC = () => {
                     <select
                       value={formData.city}
                       onChange={e => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                      className="w-full pl-10 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080] focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                     >
                       <option value="Nairobi">Nairobi Metropolitan</option>
                       <option value="Mombasa">Mombasa & Coast</option>
@@ -468,8 +465,8 @@ export const SellPage: React.FC = () => {
               <div className="p-5 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7] space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Car className="w-5 h-5 text-[#00C9CE]" />
-                    <h4 className="text-sm font-extrabold text-[#1E3063] font-serif">
+                    <Car className="w-5 h-5 text-[#23EBFF]" />
+                    <h4 className="text-sm font-extrabold text-[#2E4080] font-serif">
                       First Vehicle Preview (Optional)
                     </h4>
                   </div>
@@ -486,7 +483,7 @@ export const SellPage: React.FC = () => {
                       value={formData.carTitle}
                       onChange={e => setFormData({ ...formData, carTitle: e.target.value })}
                       placeholder="e.g. Toyota Land Cruiser Prado"
-                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063]"
+                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080]"
                     />
                   </div>
 
@@ -497,7 +494,7 @@ export const SellPage: React.FC = () => {
                       value={formData.price}
                       onChange={e => setFormData({ ...formData, price: e.target.value })}
                       placeholder="6500000"
-                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063]"
+                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080]"
                     />
                   </div>
 
@@ -508,7 +505,7 @@ export const SellPage: React.FC = () => {
                       value={formData.year}
                       onChange={e => setFormData({ ...formData, year: e.target.value })}
                       placeholder="2021"
-                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#1E3063]"
+                      className="w-full px-3 py-2 bg-white border border-[#E2D8C7] rounded-xl text-xs font-bold text-[#2E4080]"
                     />
                   </div>
                 </div>
@@ -516,7 +513,7 @@ export const SellPage: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                 <p className="text-xs text-[#6B7A99] font-semibold flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#2ECC71]" />
+                  <ShieldCheck className="w-4 h-4 text-[#3ddb72]" />
                   Protected under Central Bank of Kenya ring-fenced escrow guidelines
                 </p>
 
@@ -524,7 +521,7 @@ export const SellPage: React.FC = () => {
                   type="submit"
                   disabled={isSubmitting}
                   variant="primary"
-                  className="w-full sm:w-auto bg-[#1E3063] hover:bg-[#0B1628] text-white font-black text-xs py-3.5 px-8 uppercase tracking-wider shadow-md cursor-pointer"
+                  className="w-full sm:w-auto bg-[#2E4080] hover:bg-[#141E3F] text-white font-black text-xs py-3.5 px-8 uppercase tracking-wider shadow-md cursor-pointer"
                 >
                   {isSubmitting ? 'Onboarding Seller Account...' : 'Complete Seller Onboarding'}
                 </Button>

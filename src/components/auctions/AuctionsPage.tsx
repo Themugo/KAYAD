@@ -6,6 +6,8 @@ import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { NavigationBar } from '../common/NavigationBar';
 import { SearchBar } from '../ui/SearchBar';
+import type React from 'react';
+import type { FC } from 'react';
 
 interface AuctionLot {
   id: string;
@@ -254,9 +256,9 @@ const INITIAL_AUCTION_LOTS: AuctionLot[] = [
   }
 ];
 
-export const AuctionsPage: React.FC = () => {
+export const AuctionsPage: FC = () => {
   const { placeBid, navigateTo } = useMarketplace();
-  const { user, openAuthModal } = useAuth();
+  const { user } = useAuth();
 
   const [lots, setLots] = useState<AuctionLot[]>(INITIAL_AUCTION_LOTS);
   const [userDepositTier, setUserDepositTier] = useState<'none' | 'standard' | 'premium'>('none');
@@ -412,15 +414,15 @@ export const AuctionsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#1E3063] font-sans">
+    <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#FCF9F4] text-[#2E4080] font-sans">
       {/* Top Hero / Header */}
-      <div className="p-4 sm:p-5 lg:p-6 rounded-2xl bg-[#1E3063] text-white border border-white/10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#00C9CE]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="p-4 sm:p-5 lg:p-6 rounded-2xl bg-[#2E4080] text-white border border-white/10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#23EBFF]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 space-y-1.5 max-w-2xl text-center md:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#00C9CE]/20 text-[#00C9CE] text-[10px] font-mono font-black uppercase tracking-[0.2em] border border-[#00C9CE]/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#2ECC71] animate-pulse" />
+          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#23EBFF]/20 text-[#23EBFF] text-[10px] font-mono font-black uppercase tracking-[0.2em] border border-[#23EBFF]/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3ddb72] animate-pulse" />
             <span>LIVE COMPETITIVE BIDDING</span>
           </div>
 
@@ -436,17 +438,17 @@ export const AuctionsPage: React.FC = () => {
         {/* Live Stats Chips */}
         <div className="relative z-10 flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 shrink-0 w-full md:w-auto">
           <div className="px-3 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2 text-xs text-white">
-            <Gavel className="w-4 h-4 text-[#00C9CE] shrink-0" />
+            <Gavel className="w-4 h-4 text-[#23EBFF] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#00C9CE] leading-none">Active Lots</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#23EBFF] leading-none">Active Lots</p>
               <p className="text-[11px] font-medium text-slate-200">{lots.filter(l => l.status === 'live').length} Live ({lots.length} Total)</p>
             </div>
           </div>
 
           <div className="px-3 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-2 text-xs text-white">
-            <User className="w-4 h-4 text-[#2ECC71] shrink-0" />
+            <User className="w-4 h-4 text-[#3ddb72] shrink-0" />
             <div>
-              <p className="font-mono font-black text-[9px] uppercase text-[#2ECC71] leading-none">Bidders</p>
+              <p className="font-mono font-black text-[9px] uppercase text-[#3ddb72] leading-none">Bidders</p>
               <p className="text-[11px] font-medium text-slate-200">340+ Verified</p>
             </div>
           </div>
@@ -455,9 +457,9 @@ export const AuctionsPage: React.FC = () => {
             onClick={() => setDepositModalTier(userDepositTier === 'none' ? 'standard' : null)}
             className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 flex items-center gap-2 text-xs text-white cursor-pointer transition-all text-left"
           >
-            <ShieldCheck className={`w-4 h-4 ${userDepositTier !== 'none' ? 'text-[#2ECC71]' : 'text-[#00C9CE]'} shrink-0`} />
+            <ShieldCheck className={`w-4 h-4 ${userDepositTier !== 'none' ? 'text-[#3ddb72]' : 'text-[#23EBFF]'} shrink-0`} />
             <div>
-              <p className={`font-mono font-black text-[9px] uppercase ${userDepositTier !== 'none' ? 'text-[#2ECC71]' : 'text-[#00C9CE]'} leading-none`}>
+              <p className={`font-mono font-black text-[9px] uppercase ${userDepositTier !== 'none' ? 'text-[#3ddb72]' : 'text-[#23EBFF]'} leading-none`}>
                 {userDepositTier !== 'none' ? 'Deposit Active' : 'Trust Gate'}
               </p>
               <p className="text-[11px] font-medium text-slate-200">
@@ -469,13 +471,13 @@ export const AuctionsPage: React.FC = () => {
       </div>
 
       {/* Live Auction Activity Ticker & Market Summary Strip */}
-      <div className="bg-[#1E3063] text-white rounded-2xl p-3 sm:p-4 border border-[#E2D8C7]/20 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 overflow-hidden">
+      <div className="bg-[#2E4080] text-white rounded-2xl p-3 sm:p-4 border border-[#E2D8C7]/20 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 overflow-hidden">
         <div className="flex items-center gap-2.5 w-full sm:w-auto overflow-hidden">
           <span className="flex h-2.5 w-2.5 relative shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2ECC71] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2ECC71]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3ddb72] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#3ddb72]"></span>
           </span>
-          <span className="px-2 py-0.5 rounded bg-[#00C9CE]/20 text-[#00C9CE] text-[10px] font-mono font-black uppercase tracking-wider shrink-0 border border-[#00C9CE]/30">
+          <span className="px-2 py-0.5 rounded bg-[#23EBFF]/20 text-[#23EBFF] text-[10px] font-mono font-black uppercase tracking-wider shrink-0 border border-[#23EBFF]/30">
             LIVE TICKER
           </span>
           <p className="text-xs text-slate-200 font-medium truncate animate-fade-in">
@@ -485,23 +487,23 @@ export const AuctionsPage: React.FC = () => {
 
         <div className="hidden lg:flex items-center gap-4 text-[11px] font-mono shrink-0 text-slate-300 border-l border-white/15 pl-4">
           <div className="flex items-center gap-1.5">
-            <BarChart2 className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <BarChart2 className="w-3.5 h-3.5 text-[#23EBFF]" />
             <span>CLEARANCE: <strong className="text-white">98.4%</strong></span>
           </div>
           <div className="flex items-center gap-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-[#2ECC71]" />
+            <TrendingUp className="w-3.5 h-3.5 text-[#3ddb72]" />
             <span>SETTLED: <strong className="text-white">KES 184M+</strong></span>
           </div>
         </div>
       </div>
 
       {reminderNotice && (
-        <div className="p-3.5 rounded-2xl bg-[#00C9CE]/15 border border-[#00C9CE]/40 text-[#1E3063] text-xs font-bold flex items-center justify-between gap-2 animate-fade-in">
+        <div className="p-3.5 rounded-2xl bg-[#23EBFF]/15 border border-[#23EBFF]/40 text-[#2E4080] text-xs font-bold flex items-center justify-between gap-2 animate-fade-in">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#00C9CE] shrink-0" />
+            <Clock className="w-4 h-4 text-[#23EBFF] shrink-0" />
             <span>{reminderNotice}</span>
           </div>
-          <button onClick={() => setReminderNotice(null)} className="p-1 hover:bg-[#00C9CE]/20 rounded-lg">
+          <button onClick={() => setReminderNotice(null)} className="p-1 hover:bg-[#23EBFF]/20 rounded-lg">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -539,10 +541,10 @@ export const AuctionsPage: React.FC = () => {
 
         {filteredLots.length === 0 ? (
           <div className="p-10 sm:p-14 text-center bg-white border border-[#E2D8C7] rounded-3xl space-y-4 shadow-sm">
-            <div className="w-14 h-14 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7] flex items-center justify-center mx-auto text-[#00C9CE]">
+            <div className="w-14 h-14 rounded-2xl bg-[#F6F1E8] border border-[#E2D8C7] flex items-center justify-center mx-auto text-[#23EBFF]">
               <Gavel className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-extrabold text-[#1E3063] font-serif">
+            <h3 className="text-lg font-extrabold text-[#2E4080] font-serif">
               No Auction Lots Match Your Search
             </h3>
             <p className="text-xs text-[#6B7A99] font-medium max-w-md mx-auto leading-relaxed">
@@ -554,7 +556,7 @@ export const AuctionsPage: React.FC = () => {
                 setSearchQuery('');
                 setFilterCategory('all');
               }}
-              className="border-[#E2D8C7] text-[#1E3063] font-bold text-xs hover:bg-[#F6F1E8]"
+              className="border-[#E2D8C7] text-[#2E4080] font-bold text-xs hover:bg-[#F6F1E8]"
             >
               Reset Search & Filters
             </Button>
@@ -596,43 +598,43 @@ export const AuctionsPage: React.FC = () => {
                       {/* Top Badges */}
                       <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2 max-w-[80%]">
                         {lot.featured && (
-                          <span className="px-3 py-1 rounded-full bg-[#1E3063] text-[#00C9CE] text-[10px] font-black uppercase tracking-wider shadow-md">
+                          <span className="px-3 py-1 rounded-full bg-[#2E4080] text-[#23EBFF] text-[10px] font-black uppercase tracking-wider shadow-md">
                             FEATURED LOT
                           </span>
                         )}
                         
                         {status === 'live' && (
-                          <span className="px-3 py-1 rounded-full bg-[#2ECC71] text-[#1E3063] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#1E3063] animate-pulse" />
+                          <span className="px-3 py-1 rounded-full bg-[#3ddb72] text-[#2E4080] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#2E4080] animate-pulse" />
                             LIVE AUCTION
                           </span>
                         )}
 
                         {/* Reserve Status Badge */}
                         {lot.reserveStatus === 'met' && (
-                          <span className="px-2.5 py-1 rounded-full bg-[#2ECC71] text-[#1E3063] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3 text-[#1E3063]" />
+                          <span className="px-2.5 py-1 rounded-full bg-[#3ddb72] text-[#2E4080] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-[#2E4080]" />
                             RESERVE MET
                           </span>
                         )}
 
                         {lot.reserveStatus === 'near' && status === 'live' && (
-                          <span className="px-2.5 py-1 rounded-full bg-amber-500 text-[#1E3063] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <Flame className="w-3 h-3 text-[#1E3063]" />
+                          <span className="px-2.5 py-1 rounded-full bg-amber-500 text-[#2E4080] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <Flame className="w-3 h-3 text-[#2E4080]" />
                             RESERVE NEAR
                           </span>
                         )}
 
                         {lot.reserveStatus === 'no_reserve' && status === 'live' && (
-                          <span className="px-2.5 py-1 rounded-full bg-[#00C9CE] text-[#1E3063] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-[#1E3063]" />
+                          <span className="px-2.5 py-1 rounded-full bg-[#23EBFF] text-[#2E4080] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-[#2E4080]" />
                             NO RESERVE
                           </span>
                         )}
 
                         {status === 'upcoming' && (
-                          <span className="px-3 py-1 rounded-full bg-[#00C9CE] text-[#1E3063] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-[#1E3063]" />
+                          <span className="px-3 py-1 rounded-full bg-[#23EBFF] text-[#2E4080] text-[10px] font-black uppercase tracking-wider shadow-md flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[#2E4080]" />
                             COMING UP
                           </span>
                         )}
@@ -658,13 +660,13 @@ export const AuctionsPage: React.FC = () => {
 
                       {/* Countdown Overlay Box */}
                       <div className={`absolute bottom-3 right-3 px-3 py-1.5 rounded-xl border backdrop-blur-md text-xs font-mono font-bold flex items-center gap-1.5 shadow-lg ${
-                        isClosingSoon ? 'bg-rose-700/95 text-white border-rose-400 animate-pulse' : 'bg-[#1E3063]/90 text-white border-white/20'
+                        isClosingSoon ? 'bg-rose-700/95 text-white border-rose-400 animate-pulse' : 'bg-[#2E4080]/90 text-white border-white/20'
                       }`}>
-                        <Clock className="w-3.5 h-3.5 text-[#00C9CE]" />
+                        <Clock className="w-3.5 h-3.5 text-[#23EBFF]" />
                         {status === 'live' && (
                           <>
                             <span>{isClosingSoon ? 'CLOSING IN' : 'Ends in'}</span>
-                            <span className="text-[#00C9CE] font-black tabular-nums">
+                            <span className="text-[#23EBFF] font-black tabular-nums">
                               {timer.hh} : {timer.mm} : {timer.ss}
                             </span>
                           </>
@@ -672,7 +674,7 @@ export const AuctionsPage: React.FC = () => {
                         {status === 'upcoming' && startTimer && (
                           <>
                             <span>Starts in</span>
-                            <span className="text-[#00C9CE] font-black tabular-nums">
+                            <span className="text-[#23EBFF] font-black tabular-nums">
                               {startTimer.hh} : {startTimer.mm} : {startTimer.ss}
                             </span>
                           </>
@@ -686,7 +688,7 @@ export const AuctionsPage: React.FC = () => {
                     {/* Brand & Title Info */}
                     <div>
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-black uppercase tracking-widest text-[#00C9CE] block">
+                        <span className="text-[11px] font-black uppercase tracking-widest text-[#23EBFF] block">
                           {lot.brand}
                         </span>
                         {lot.estMarketValue && (
@@ -698,7 +700,7 @@ export const AuctionsPage: React.FC = () => {
 
                       <h3 
                         onClick={() => navigateTo('vehicle_detail', lot.vehicleId)}
-                        className="text-xl font-extrabold text-[#1E3063] font-serif hover:text-[#00C9CE] cursor-pointer transition-colors"
+                        className="text-xl font-extrabold text-[#2E4080] font-serif hover:text-[#23EBFF] cursor-pointer transition-colors"
                       >
                         {lot.title} {lot.year}
                       </h3>
@@ -709,8 +711,8 @@ export const AuctionsPage: React.FC = () => {
 
                       {/* Watcher & Bid Momentum Pills */}
                       <div className="flex flex-wrap items-center gap-2 pt-2 text-[11px] font-semibold text-[#6B7A99]">
-                        <span className="inline-flex items-center gap-1 bg-[#F6F1E8] px-2.5 py-1 rounded-lg border border-[#E2D8C7] text-[#1E3063] text-[10px] font-bold">
-                          <Eye className="w-3 h-3 text-[#00C9CE]" />
+                        <span className="inline-flex items-center gap-1 bg-[#F6F1E8] px-2.5 py-1 rounded-lg border border-[#E2D8C7] text-[#2E4080] text-[10px] font-bold">
+                          <Eye className="w-3 h-3 text-[#23EBFF]" />
                           {lot.watchers || 28} Watching
                         </span>
 
@@ -721,8 +723,8 @@ export const AuctionsPage: React.FC = () => {
                           </span>
                         ) : null}
 
-                        <span className="inline-flex items-center gap-1 text-[10px] text-[#1E3063] font-bold bg-[#2ECC71]/10 px-2.5 py-1 rounded-lg border border-[#2ECC71]/30">
-                          <ShieldCheck className="w-3.5 h-3.5 text-[#2ECC71]" />
+                        <span className="inline-flex items-center gap-1 text-[10px] text-[#2E4080] font-bold bg-[#3ddb72]/10 px-2.5 py-1 rounded-lg border border-[#3ddb72]/30">
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#3ddb72]" />
                           Audit {lot.inspectionScore}/100
                         </span>
                       </div>
@@ -734,25 +736,25 @@ export const AuctionsPage: React.FC = () => {
                         <span className="text-[10px] font-bold text-[#6B7A99] uppercase tracking-wider block">
                           Starting Bid
                         </span>
-                        <span className="text-sm font-extrabold text-[#1E3063] font-serif">
+                        <span className="text-sm font-extrabold text-[#2E4080] font-serif">
                           KES {lot.startingBid.toLocaleString()}
                         </span>
                         {bidIncrease > 0 && (
-                          <span className="text-[10px] font-bold text-[#2ECC71] block mt-0.5">
+                          <span className="text-[10px] font-bold text-[#3ddb72] block mt-0.5">
                             +{bidIncrease}% growth
                           </span>
                         )}
                       </div>
 
                       <div className="border-l border-[#E2D8C7] pl-4">
-                        <span className="text-[10px] font-bold text-[#00C9CE] uppercase tracking-wider block">
+                        <span className="text-[10px] font-bold text-[#23EBFF] uppercase tracking-wider block">
                           {status === 'ended' ? 'Winning Hammer Bid' : 'Current High Bid'}
                         </span>
-                        <span className="text-lg font-black text-[#1E3063] font-serif block">
+                        <span className="text-lg font-black text-[#2E4080] font-serif block">
                           KES {lot.currentBid.toLocaleString()}
                         </span>
                         <span className="text-[10px] font-extrabold text-[#6B7A99]">
-                          {status === 'live' && <span className="text-[#2ECC71]">{lot.bidsCount} bids placed · Live</span>}
+                          {status === 'live' && <span className="text-[#3ddb72]">{lot.bidsCount} bids placed · Live</span>}
                           {status === 'upcoming' && <span>0 bids · Pre-bidding Opens Soon</span>}
                           {status === 'ended' && <span>{lot.bidsCount} total bids · Finalized</span>}
                           {status === 'canceled' && <span className="text-rose-600">Auction Canceled</span>}
@@ -768,8 +770,8 @@ export const AuctionsPage: React.FC = () => {
                     <Button
                       variant="primary"
                       onClick={() => handleOpenBidModal(lot)}
-                      className="flex-1 bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs py-3 uppercase tracking-wider shadow-sm"
-                      leftIcon={<Gavel className="w-4 h-4 text-[#00C9CE]" />}
+                      className="flex-1 bg-[#2E4080] hover:bg-[#141E3F] text-white font-extrabold text-xs py-3 uppercase tracking-wider shadow-sm"
+                      leftIcon={<Gavel className="w-4 h-4 text-[#23EBFF]" />}
                     >
                       Place Bid
                     </Button>
@@ -782,8 +784,8 @@ export const AuctionsPage: React.FC = () => {
                         setReminderNotice(`Opening reminder activated for ${lot.title}! You will be notified 15 minutes before live bidding starts.`);
                         setTimeout(() => setReminderNotice(null), 4500);
                       }}
-                      className="flex-1 bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-extrabold text-xs py-3 uppercase tracking-wider shadow-sm"
-                      leftIcon={<Clock className="w-4 h-4 text-[#1E3063]" />}
+                      className="flex-1 bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-extrabold text-xs py-3 uppercase tracking-wider shadow-sm"
+                      leftIcon={<Clock className="w-4 h-4 text-[#2E4080]" />}
                     >
                       Set Opening Reminder
                     </Button>
@@ -801,7 +803,7 @@ export const AuctionsPage: React.FC = () => {
                   <Button
                     variant="outline"
                     onClick={() => navigateTo('vehicle_detail', lot.vehicleId)}
-                    className="px-4 py-3 border-[#E2D8C7] text-[#1E3063] font-bold text-xs hover:bg-[#F6F1E8]"
+                    className="px-4 py-3 border-[#E2D8C7] text-[#2E4080] font-bold text-xs hover:bg-[#F6F1E8]"
                   >
                     View Lot
                   </Button>
@@ -816,35 +818,35 @@ export const AuctionsPage: React.FC = () => {
       {/* Auction Rules & Guidelines */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E2D8C7] shadow-xs space-y-4">
         <div className="flex items-center gap-2 pb-3 border-b border-[#E8E1D5]">
-          <ShieldCheck className="w-5 h-5 text-[#00C9CE]" />
-          <h3 className="text-lg font-extrabold text-[#1E3063] font-serif">
+          <ShieldCheck className="w-5 h-5 text-[#23EBFF]" />
+          <h3 className="text-lg font-extrabold text-[#2E4080] font-serif">
             Auction Rules & Guidelines
           </h3>
         </div>
 
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs text-[#3D4F6F] font-medium">
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>Minimum bid increment is KES 50,000</span>
           </li>
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>All bids are binding and legally enforceable</span>
           </li>
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>Payment must be completed within 24 hours of winning</span>
           </li>
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>Guaranteed verified title transfer upon winning auction</span>
           </li>
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>All auction vehicles have been pre-inspected (150-Point Audit)</span>
           </li>
           <li className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F6F1E8]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] mt-1.5 shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] mt-1.5 shrink-0" />
             <span>Seller pays 2.5% commission; buyer pays 0% fee</span>
           </li>
         </ul>
@@ -856,27 +858,27 @@ export const AuctionsPage: React.FC = () => {
           <div className="relative w-full max-w-lg p-6 sm:p-8 bg-white rounded-3xl shadow-2xl border border-[#E2D8C7] space-y-6">
             <button
               onClick={() => setActiveBidLot(null)}
-              className="absolute top-4 right-4 p-2 text-[#6B7A99] hover:text-[#1E3063] rounded-full hover:bg-[#F6F1E8]"
+              className="absolute top-4 right-4 p-2 text-[#6B7A99] hover:text-[#2E4080] rounded-full hover:bg-[#F6F1E8]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-[#00C9CE] tracking-wider">
+              <span className="text-[10px] font-black uppercase text-[#23EBFF] tracking-wider">
                 LIVE BID HUD · LOT #{activeBidLot.id}
               </span>
-              <h3 className="text-xl font-extrabold text-[#1E3063] font-serif">
+              <h3 className="text-xl font-extrabold text-[#2E4080] font-serif">
                 {activeBidLot.title} {activeBidLot.year}
               </h3>
               <p className="text-xs text-[#6B7A99] font-medium">
-                Current High Bid: <strong className="text-[#1E3063]">KES {activeBidLot.currentBid.toLocaleString()}</strong>
+                Current High Bid: <strong className="text-[#2E4080]">KES {activeBidLot.currentBid.toLocaleString()}</strong>
               </p>
             </div>
 
             {userDepositTier === 'none' && (
               <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold flex items-center gap-1.5 text-[#1E3063]">
+                  <span className="font-bold flex items-center gap-1.5 text-[#2E4080]">
                     <Lock className="w-4 h-4 text-amber-600" />
                     Bidding Security Deposit Required
                   </span>
@@ -888,8 +890,8 @@ export const AuctionsPage: React.FC = () => {
                 <Button
                   type="button"
                   onClick={() => setDepositModalTier('standard')}
-                  className="w-full bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs py-2.5 uppercase tracking-wider"
-                  leftIcon={<ShieldCheck className="w-4 h-4 text-[#00C9CE]" />}
+                  className="w-full bg-[#2E4080] hover:bg-[#141E3F] text-white font-extrabold text-xs py-2.5 uppercase tracking-wider"
+                  leftIcon={<ShieldCheck className="w-4 h-4 text-[#23EBFF]" />}
                 >
                   Unlock Security Deposit (KES 500,000 Hold)
                 </Button>
@@ -897,8 +899,8 @@ export const AuctionsPage: React.FC = () => {
             )}
 
             {bidSuccessMessage && (
-              <div className="p-3 rounded-xl bg-[#2ECC71]/15 text-[#1E3063] border border-[#2ECC71]/40 text-xs font-bold flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-[#2ECC71]" />
+              <div className="p-3 rounded-xl bg-[#3ddb72]/15 text-[#2E4080] border border-[#3ddb72]/40 text-xs font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#3ddb72]" />
                 <span>{bidSuccessMessage}</span>
               </div>
             )}
@@ -912,7 +914,7 @@ export const AuctionsPage: React.FC = () => {
 
             <form onSubmit={handlePlaceBidSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1.5">
                   Enter Your Bid Amount (KES)
                 </label>
                 <input
@@ -920,7 +922,7 @@ export const AuctionsPage: React.FC = () => {
                   required
                   value={bidAmountInput}
                   onChange={e => setBidAmountInput(Number(e.target.value))}
-                  className="w-full px-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-base font-black text-[#1E3063] focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                  className="w-full px-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-base font-black text-[#2E4080] focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                 />
               </div>
 
@@ -929,28 +931,28 @@ export const AuctionsPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setBidAmountInput(prev => prev + 50000)}
-                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#1E3063] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
+                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#2E4080] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
                 >
                   + KES 50k
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidAmountInput(prev => prev + 100000)}
-                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#1E3063] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
+                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#2E4080] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
                 >
                   + KES 100k
                 </button>
                 <button
                   type="button"
                   onClick={() => setBidAmountInput(prev => prev + 250000)}
-                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#1E3063] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
+                  className="flex-1 py-2 bg-[#F6F1E8] hover:bg-[#E2D8C7] text-[#2E4080] text-xs font-extrabold rounded-xl border border-[#E2D8C7]"
                 >
                   + KES 250k
                 </button>
               </div>
 
               <div className="p-3 rounded-xl bg-[#FCF9F4] border border-[#E2D8C7] text-[11px] text-slate-600 space-y-1">
-                <p className="font-bold text-[#1E3063]">
+                <p className="font-bold text-[#2E4080]">
                   Bidder Guarantee:
                 </p>
                 <p>
@@ -961,7 +963,7 @@ export const AuctionsPage: React.FC = () => {
               <Button
                 type="submit"
                 variant="primary"
-                className="w-full bg-[#1E3063] hover:bg-[#0B1628] text-white font-black text-xs py-3.5 uppercase tracking-wider"
+                className="w-full bg-[#2E4080] hover:bg-[#141E3F] text-white font-black text-xs py-3.5 uppercase tracking-wider"
               >
                 Confirm Binding Bid of KES {bidAmountInput.toLocaleString()}
               </Button>
@@ -976,16 +978,16 @@ export const AuctionsPage: React.FC = () => {
           <div className="relative w-full max-w-lg p-6 sm:p-8 bg-white rounded-3xl shadow-2xl border border-[#E2D8C7] space-y-6">
             <button
               onClick={() => setDepositModalTier(null)}
-              className="absolute top-4 right-4 p-2 text-[#6B7A99] hover:text-[#1E3063] rounded-full hover:bg-[#F6F1E8]"
+              className="absolute top-4 right-4 p-2 text-[#6B7A99] hover:text-[#2E4080] rounded-full hover:bg-[#F6F1E8]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase text-[#00C9CE] tracking-wider">
+              <span className="text-[10px] font-black uppercase text-[#23EBFF] tracking-wider">
                 TRUST GATE DEPOSIT UNLOCK
               </span>
-              <h3 className="text-xl font-extrabold text-[#1E3063] font-serif">
+              <h3 className="text-xl font-extrabold text-[#2E4080] font-serif">
                 {depositModalTier === 'standard' ? 'Standard Tier (KES 500,000)' : 'Premium Tier (KES 1,000,000)'}
               </h3>
               <p className="text-xs text-[#6B7A99] font-medium">
@@ -994,14 +996,14 @@ export const AuctionsPage: React.FC = () => {
             </div>
 
             {depositSuccessMsg ? (
-              <div className="p-4 rounded-2xl bg-[#2ECC71]/15 text-[#1E3063] border border-[#2ECC71]/40 text-xs font-bold text-center space-y-2">
-                <CheckCircle2 className="w-8 h-8 text-[#2ECC71] mx-auto" />
+              <div className="p-4 rounded-2xl bg-[#3ddb72]/15 text-[#2E4080] border border-[#3ddb72]/40 text-xs font-bold text-center space-y-2">
+                <CheckCircle2 className="w-8 h-8 text-[#3ddb72] mx-auto" />
                 <p>{depositSuccessMsg}</p>
               </div>
             ) : (
               <form onSubmit={handleProcessDeposit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-2">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-2">
                     Payment Gateway
                   </label>
                   <div className="grid grid-cols-2 gap-3">
@@ -1010,11 +1012,11 @@ export const AuctionsPage: React.FC = () => {
                       onClick={() => setDepositPaymentMethod('mpesa')}
                       className={`p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 ${
                         depositPaymentMethod === 'mpesa'
-                          ? 'border-[#2ECC71] bg-[#2ECC71]/15 text-[#1E3063]'
+                          ? 'border-[#3ddb72] bg-[#3ddb72]/15 text-[#2E4080]'
                           : 'border-[#E2D8C7] text-[#6B7A99]'
                       }`}
                     >
-                      <Phone className="w-4 h-4 text-[#2ECC71]" />
+                      <Phone className="w-4 h-4 text-[#3ddb72]" />
                       M-Pesa Express
                     </button>
 
@@ -1023,18 +1025,18 @@ export const AuctionsPage: React.FC = () => {
                       onClick={() => setDepositPaymentMethod('rtgs')}
                       className={`p-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 ${
                         depositPaymentMethod === 'rtgs'
-                          ? 'border-[#00C9CE] bg-[#00C9CE]/15 text-[#1E3063]'
+                          ? 'border-[#23EBFF] bg-[#23EBFF]/15 text-[#2E4080]'
                           : 'border-[#E2D8C7] text-[#6B7A99]'
                       }`}
                     >
-                      <Building2 className="w-4 h-4 text-[#00C9CE]" />
+                      <Building2 className="w-4 h-4 text-[#23EBFF]" />
                       RTGS Bank Wire
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#1E3063] uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-[#2E4080] uppercase tracking-wider mb-1">
                     {depositPaymentMethod === 'mpesa' ? 'M-Pesa Mobile Number' : 'Sender Bank Account'}
                   </label>
                   <input
@@ -1042,7 +1044,7 @@ export const AuctionsPage: React.FC = () => {
                     required
                     value={depositPhone}
                     onChange={e => setDepositPhone(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-semibold text-[#1E3063]"
+                    className="w-full px-4 py-2.5 bg-[#F6F1E8] border border-[#E2D8C7] rounded-xl text-xs font-semibold text-[#2E4080]"
                   />
                 </div>
 
@@ -1050,7 +1052,7 @@ export const AuctionsPage: React.FC = () => {
                   type="submit"
                   disabled={isProcessingDeposit}
                   variant="primary"
-                  className="w-full bg-[#1E3063] hover:bg-[#0B1628] text-white font-extrabold text-xs py-3.5 uppercase tracking-wider"
+                  className="w-full bg-[#2E4080] hover:bg-[#141E3F] text-white font-extrabold text-xs py-3.5 uppercase tracking-wider"
                 >
                   {isProcessingDeposit ? 'Processing Deposit Hold...' : `Confirm Deposit of KES ${depositModalTier === 'standard' ? '500,000' : '1,000,000'}`}
                 </Button>

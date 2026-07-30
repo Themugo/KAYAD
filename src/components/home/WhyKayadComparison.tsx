@@ -1,7 +1,8 @@
 import { Check, X, Shield, Award, ArrowRight } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import type { FC } from 'react';
 
-export const WhyKayadComparison: React.FC = () => {
+export const WhyKayadComparison: FC = () => {
   const { navigateTo } = useMarketplace();
 
   const comparisonRows = [

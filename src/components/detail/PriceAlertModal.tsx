@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
   X, 
@@ -17,6 +17,8 @@ import {
 import { Vehicle, PriceAlert } from '../../types';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
+import type React from 'react';
+import type { FC } from 'react';
 
 interface PriceAlertModalProps {
   isOpen: boolean;
@@ -26,7 +28,7 @@ interface PriceAlertModalProps {
   onShowToast: (msg: string) => void;
 }
 
-export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
+export const PriceAlertModal: FC<PriceAlertModalProps> = ({
   isOpen,
   onClose,
   vehicle,
@@ -114,16 +116,16 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E2D8C7] text-[#1E3063]"
+          className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-[#E2D8C7] text-[#2E4080]"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-5 bg-[#1E3063] text-white border-b border-white/10">
+          <div className="flex items-center justify-between p-5 bg-[#2E4080] text-white border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#00C9CE]/20 border border-[#00C9CE]/40 flex items-center justify-center text-[#00C9CE] shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#23EBFF]/20 border border-[#23EBFF]/40 flex items-center justify-center text-[#23EBFF] shrink-0">
                 <BellRing className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#00C9CE] block">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#23EBFF] block">
                   KAYAD Market Sentinel
                 </span>
                 <h3 className="text-lg font-black font-serif text-white">
@@ -151,11 +153,11 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                 className="w-16 h-16 rounded-xl object-cover shrink-0 border border-white/60 shadow-xs"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-[#1E3063] truncate">{vehicle.title}</h4>
+                <h4 className="text-sm font-bold text-[#2E4080] truncate">{vehicle.title}</h4>
                 <p className="text-xs text-[#6B7A99]">VIN: {vehicle.vin}</p>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-semibold text-[#6B7A99]">Current Listed Price:</span>
-                  <span className="text-sm font-black text-[#1E3063] font-serif">
+                  <span className="text-sm font-black text-[#2E4080] font-serif">
                     KSh {currentPrice.toLocaleString()}
                   </span>
                 </div>
@@ -165,8 +167,8 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
             {/* Target Price Threshold Input */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-[#1E3063] flex items-center gap-1.5">
-                  <TrendingDown className="w-4 h-4 text-[#00C9CE]" />
+                <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] flex items-center gap-1.5">
+                  <TrendingDown className="w-4 h-4 text-[#23EBFF]" />
                   <span>Alert Target Price Threshold (KSh)</span>
                 </label>
                 {numericTarget > 0 && isTargetBelowCurrent && (
@@ -184,7 +186,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                   type="number"
                   value={targetPrice}
                   onChange={e => setTargetPrice(e.target.value)}
-                  className="w-full pl-14 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-2xl text-base font-extrabold text-[#1E3063] font-mono focus:outline-none focus:ring-2 focus:ring-[#00C9CE]"
+                  className="w-full pl-14 pr-4 py-3 bg-[#F6F1E8] border border-[#E2D8C7] rounded-2xl text-base font-extrabold text-[#2E4080] font-mono focus:outline-none focus:ring-2 focus:ring-[#23EBFF]"
                   placeholder="e.g. 1300000"
                   required
                 />
@@ -196,28 +198,28 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setPresetPrice(0)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#1E3063] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
                 >
                   Any Price Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(5)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#1E3063] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
                 >
                   -5% Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(10)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#1E3063] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
                 >
                   -10% Drop
                 </button>
                 <button
                   type="button"
                   onClick={() => setPresetPrice(15)}
-                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#1E3063] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white hover:bg-[#2E4080] hover:text-white border border-[#E2D8C7] transition-all cursor-pointer"
                 >
                   -15% Drop
                 </button>
@@ -226,7 +228,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
 
             {/* Notification Triggers Checkboxes */}
             <div className="space-y-3 pt-2 border-t border-[#E8E1D5]">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-[#1E3063] block">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] block">
                 Notification Triggers
               </label>
 
@@ -236,11 +238,11 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                     type="checkbox"
                     checked={alertOnPriceDrop}
                     onChange={e => setAlertOnPriceDrop(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-[#00C9CE] rounded accent-[#00C9CE] cursor-pointer"
+                    className="mt-1 w-4 h-4 text-[#23EBFF] rounded accent-[#23EBFF] cursor-pointer"
                   />
                   <div>
-                    <span className="text-xs font-extrabold text-[#1E3063] block flex items-center gap-1.5">
-                      <TrendingDown className="w-3.5 h-3.5 text-[#00C9CE]" />
+                    <span className="text-xs font-extrabold text-[#2E4080] block flex items-center gap-1.5">
+                      <TrendingDown className="w-3.5 h-3.5 text-[#23EBFF]" />
                       <span>Notify when Price Drops below threshold</span>
                     </span>
                     <span className="text-[11px] text-[#6B7A99]">
@@ -254,10 +256,10 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                     type="checkbox"
                     checked={alertOnStatusChange}
                     onChange={e => setAlertOnStatusChange(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-[#00C9CE] rounded accent-[#00C9CE] cursor-pointer"
+                    className="mt-1 w-4 h-4 text-[#23EBFF] rounded accent-[#23EBFF] cursor-pointer"
                   />
                   <div>
-                    <span className="text-xs font-extrabold text-[#1E3063] block flex items-center gap-1.5">
+                    <span className="text-xs font-extrabold text-[#2E4080] block flex items-center gap-1.5">
                       <Tag className="w-3.5 h-3.5 text-[#E67E22]" />
                       <span>Notify when Vehicle Status Changes</span>
                     </span>
@@ -271,7 +273,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
 
             {/* Notification Delivery Method */}
             <div className="space-y-3 pt-2 border-t border-[#E8E1D5]">
-              <label className="text-xs font-extrabold uppercase tracking-wider text-[#1E3063] block">
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#2E4080] block">
                 Alert Delivery Channels
               </label>
 
@@ -281,11 +283,11 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('in_app')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'in_app'
-                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#1E3063] border-[#E2D8C7] hover:border-[#1E3063]'
+                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
+                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
                   }`}
                 >
-                  <Bell className="w-4 h-4 text-[#00C9CE]" />
+                  <Bell className="w-4 h-4 text-[#23EBFF]" />
                   <span className="text-xs font-bold">In-App Bell</span>
                 </button>
 
@@ -294,11 +296,11 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('email')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'email'
-                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#1E3063] border-[#E2D8C7] hover:border-[#1E3063]'
+                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
+                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
                   }`}
                 >
-                  <Mail className="w-4 h-4 text-[#00C9CE]" />
+                  <Mail className="w-4 h-4 text-[#23EBFF]" />
                   <span className="text-xs font-bold">Email Digest</span>
                 </button>
 
@@ -307,21 +309,21 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                   onClick={() => setNotifyMethod('both')}
                   className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 ${
                     notifyMethod === 'both'
-                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
-                      : 'bg-[#F6F1E8] text-[#1E3063] border-[#E2D8C7] hover:border-[#1E3063]'
+                      ? 'bg-[#2E4080] text-white border-[#2E4080] shadow-xs'
+                      : 'bg-[#F6F1E8] text-[#2E4080] border-[#E2D8C7] hover:border-[#2E4080]'
                   }`}
                 >
-                  <Smartphone className="w-4 h-4 text-[#00C9CE]" />
+                  <Smartphone className="w-4 h-4 text-[#23EBFF]" />
                   <span className="text-xs font-bold">In-App + SMS</span>
                 </button>
               </div>
             </div>
 
             {/* Test Simulation Controls */}
-            <div className="p-4 rounded-2xl bg-[#0B1628] text-white border border-[#00C9CE]/30 space-y-3">
+            <div className="p-4 rounded-2xl bg-[#141E3F] text-white border border-[#23EBFF]/30 space-y-3">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#00C9CE]" />
-                <span className="text-xs font-black uppercase text-[#00C9CE] tracking-wider">
+                <Zap className="w-4 h-4 text-[#23EBFF]" />
+                <span className="text-xs font-black uppercase text-[#23EBFF] tracking-wider">
                   Live Alert Testing Sandbox
                 </span>
               </div>
@@ -336,7 +338,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                     simulatePriceChange(vehicle.id, dropPrice);
                     onShowToast(`Simulated KSh 100,000 price drop! Check top notification bell.`);
                   }}
-                  className="py-2.5 px-3 rounded-xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-black text-xs transition-all cursor-pointer shadow-xs"
+                  className="py-2.5 px-3 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs transition-all cursor-pointer shadow-xs"
                 >
                   ⚡ Simulate Price Drop (-100k)
                 </button>
@@ -368,7 +370,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-3 rounded-xl bg-[#F6F1E8] hover:bg-[#E8E1D5] text-[#1E3063] font-bold text-xs transition-all cursor-pointer"
+                  className="px-4 py-3 rounded-xl bg-[#F6F1E8] hover:bg-[#E8E1D5] text-[#2E4080] font-bold text-xs transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -376,7 +378,7 @@ export const PriceAlertModal: React.FC<PriceAlertModalProps> = ({
 
               <button
                 type="submit"
-                className="flex-1 py-3.5 px-6 rounded-2xl bg-[#00C9CE] hover:bg-[#00b8bc] text-[#1E3063] font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-3.5 px-6 rounded-2xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] font-black text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Save Price Alert</span>

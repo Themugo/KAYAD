@@ -11,8 +11,9 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import type { FC } from 'react';
 
-export const TrustVerificationSection: React.FC = () => {
+export const TrustVerificationSection: FC = () => {
   const { navigateTo } = useMarketplace();
 
   const verificationPoints = [

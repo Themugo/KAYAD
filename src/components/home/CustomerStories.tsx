@@ -1,6 +1,7 @@
 import { Star, MapPin } from 'lucide-react';
+import type { FC } from 'react';
 
-export const CustomerStories: React.FC = () => {
+export const CustomerStories: FC = () => {
   const testimonials = [
     {
       name: 'Dr. James Mwangi',

@@ -1,9 +1,11 @@
+import type React from 'react';
 import { useState } from 'react';
 import { Search, SlidersHorizontal, ArrowRight, ShieldCheck, MapPin, DollarSign, Calendar, Fuel, Gauge, Car } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { BodyStyle, FuelType, TransmissionType } from '../../types';
+import type { FC } from 'react';
 
-export const GlobalSearchSection: React.FC = () => {
+export const GlobalSearchSection: FC = () => {
   const { navigateTo, setFilters, resetFilters } = useMarketplace();
 
   const [keyword, setKeyword] = useState('');

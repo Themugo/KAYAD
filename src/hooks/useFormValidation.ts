@@ -12,9 +12,9 @@ export interface FieldConfig<T = any> {
   requiredMessage?: string;
 }
 
-export interface FormConfig<T extends Record<string, any>> {
+export type FormConfig<T extends Record<string, any>> = {
   [K in keyof T]?: FieldConfig<T[K]>;
-}
+};
 
 interface FieldState {
   value: any;

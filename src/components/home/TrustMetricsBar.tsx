@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ShieldCheck, Users, Car, CheckCircle2, Award } from 'lucide-react';
+import type { FC } from 'react';
 
-export const TrustMetricsBar: React.FC = () => {
+export const TrustMetricsBar: FC = () => {
   const [escrowAmount, setEscrowAmount] = useState(0);
   const [members, setMembers] = useState(0);
   const [vehicles, setVehicles] = useState(0);

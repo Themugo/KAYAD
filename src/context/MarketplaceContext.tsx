@@ -1,6 +1,31 @@
+import type React from 'react';
 import { createContext, useContext, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Vehicle, FilterState, EscrowContract, Bid, NotificationItem, Advert, PriceAlert } from '../types';
 import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
+import type { FC } from 'react';
+
+// Maps this context's internal page-name convention to this app's real
+// react-router paths. navigateTo() used to only update local state, which
+// the real routed app never read — clicking any button wired to it did
+// nothing visible. This keeps the internal state (still used by pages in
+// this tree that aren't wired to real routes yet) while also actually
+// navigating.
+const PAGE_TO_PATH: Record<PageView, string> = {
+  home: '/',
+  gallery: '/gallery',
+  vehicle_detail: '/car',
+  auctions: '/auction',
+  ghost_check: '/ghost-checker',
+  how_it_works: '/about',
+  about: '/about',
+  escrow: '/escrow',
+  dashboard: '/buyer',
+  dealer_profile: '/dealer',
+  admin: '/admin',
+  support: '/support',
+  sell: '/sell',
+};
 
 export const initialAdverts: Advert[] = [
   {
@@ -112,7 +137,7 @@ const initialFilters: FilterState = {
 
 const MarketplaceContext = createContext<MarketplaceContextType | undefined>(undefined);
 
-export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activePage, setActivePage] = useState<PageView>('home');
   const [navHistory, setNavHistory] = useState<PageView[]>(['home']);
   const [navIndex, setNavIndex] = useState<number>(0);
@@ -130,20 +155,25 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [activeChatVehicleId, setActiveChatVehicleId] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   const navigateTo = (page: PageView, vehicleId?: string) => {
     if (vehicleId) {
       setSelectedVehicleId(vehicleId);
     }
-    
+
     if (page !== activePage) {
       const newHistory = navHistory.slice(0, navIndex + 1);
       newHistory.push(page);
       setNavHistory(newHistory);
       setNavIndex(newHistory.length - 1);
     }
-    
+
     setActivePage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    const path = PAGE_TO_PATH[page] ?? '/';
+    navigate(page === 'vehicle_detail' && vehicleId ? `${path}/${vehicleId}` : path);
   };
 
   const goBack = () => {

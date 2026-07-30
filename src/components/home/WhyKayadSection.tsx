@@ -1,6 +1,7 @@
 import { ShieldCheck, Lock, UserCheck, Shield } from 'lucide-react';
+import type { FC } from 'react';
 
-export const WhyKayadSection: React.FC = () => {
+export const WhyKayadSection: FC = () => {
   const cards = [
     {
       title: 'Verified Vehicles',

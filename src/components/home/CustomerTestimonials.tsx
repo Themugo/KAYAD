@@ -1,6 +1,7 @@
 import { Star, ShieldCheck, Quote, MapPin, CheckCircle2 } from 'lucide-react';
+import type { FC } from 'react';
 
-export const CustomerTestimonials: React.FC = () => {
+export const CustomerTestimonials: FC = () => {
   const testimonials = [
     {
       name: 'Dr. James K. Mwangi',

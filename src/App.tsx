@@ -1,410 +1,380 @@
-import { lazy, Suspense, useState } from 'react';
-import { Routes, Route, useNavigate, useLocation, BrowserRouter, useParams } from 'react-router-dom';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import Navbar from './components/Navbar';
-import Footer from './components/layout/Footer';
-import CompareDrawer from './components/features/car/CompareDrawer';
-import MobileBottomNav from './components/layout/MobileBottomNav';
-import DemoModeBanner from './components/features/common/DemoModeBanner';
-import { LoadingPage } from './components/features/common/LoadingPage';
-import SWUpdateBanner from './components/features/common/SWUpdateBanner';
-import { ErrorBoundary } from './components/ui/ErrorBoundary';
-import { ToastProvider } from './context/ToastContext';
-import { AuthProvider, RequireAuth, RequireAdmin, RequireAdminPage, RequireDealer } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
-import { NotificationProvider } from './context/NotificationContext';
-import { BrandingProvider } from './context/BrandingContext';
-import { CompareProvider } from './context/CompareContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { MarketplaceProvider } from './context/MarketplaceContext';
-import Home from './pages/Home';
-import Gallery from './pages/Gallery';
-import CarDetail from './pages/CarDetail';
-import SignIn from './pages/SignIn';
-import { CARS } from './data/cars';
-import type { User } from './types';
-import type { Car } from './components/features/car/CarCard';
+import VehicleMarketplace from './features/VehicleMarketplace';
+import VehicleDetailModal from './components/VehicleDetailModal';
+import CompareModal from './components/CompareModal';
+import AuthModal from './components/AuthModal';
+import PriceAlertsModal from './components/PriceAlertsModal';
 
-// Lazy-loaded pages for code splitting
-const Compare = lazy(() => import('./pages/Compare'));
-const Favorites = lazy(() => import('./pages/Favorites'));
-const Auction = lazy(() => import('./pages/Auction'));
-const EscrowVault = lazy(() => import('./pages/EscrowVault'));
-const EscrowPage = lazy(() => import('./pages/EscrowPage'));
-const PreInspection = lazy(() => import('./pages/PreInspection'));
-const Support = lazy(() => import('./pages/Support'));
-const Profile = lazy(() => import('./pages/Profile'));
-const Notifications = lazy(() => import('./pages/Notifications'));
-const Payments = lazy(() => import('./pages/Payments'));
-const Chat = lazy(() => import('./pages/Chat'));
-const DealerProfile = lazy(() => import('./pages/DealerProfile'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const CreateAccount = lazy(() => import('./pages/CreateAccount'));
-const Showroom = lazy(() => import('./pages/Showroom'));
+import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
+import { Vehicle, ChatMessage, UserProfile } from './types';
+import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
-const AuctionCalendar = lazy(() => import('./pages/AuctionCalendar'));
-const AuctionLivePage = lazy(() => import('./pages/AuctionLivePage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-const TermsPage = lazy(() => import('./pages/TermsPage'));
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
-const ContactPage = lazy(() => import('./pages/ContactPage'));
-const AboutPage = lazy(() => import('./pages/AboutPage'));
-const GhostCheckerInfo = lazy(() => import('./pages/GhostCheckerInfo'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
-const PhoneVerifyPage = lazy(() => import('./pages/PhoneVerifyPage'));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
-const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
-const ForcePasswordChange = lazy(() => import('./pages/ForcePasswordChange'));
-const BuyerDashboard = lazy(() => import('./pages/BuyerDashboard'));
-const DisputesPage = lazy(() => import('./pages/DisputesPage'));
-const DisputeDetailPage = lazy(() => import('./pages/DisputeDetailPage'));
-const InspectorApply = lazy(() => import('./pages/InspectorApply'));
-const InspectorDashboard = lazy(() => import('./pages/InspectorDashboard'));
-const PostRegPackageSelect = lazy(() => import('./pages/PostRegPackageSelect'));
+// Views
+import AuctionsView from './features/AuctionsView';
+import EscrowView from './features/EscrowView';
+import InspectionsView from './features/InspectionsView';
+import FinancingView from './features/FinancingView';
+import DealersView from './features/DealersView';
+import DashboardView from './features/DashboardView';
+import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
+import ChatView from './features/ChatView';
+import AdminView from './features/AdminView';
+import SupportView from './features/SupportView';
 
-// Dealer pages
-const DealerDashboardPage = lazy(() => import('./pages/dealer/DealerDashboard'));
-const DealerOnboarding = lazy(() => import('./pages/dealer/DealerOnboarding'));
-const DealerSetup = lazy(() => import('./pages/dealer/DealerSetup'));
-const AddCarPage = lazy(() => import('./pages/dealer/AddCarPage'));
-const EditCarPage = lazy(() => import('./pages/dealer/EditCarPage'));
-const DealerAuctionSetup = lazy(() => import('./pages/dealer/DealerAuctionSetup'));
-const DealerAnalytics = lazy(() => import('./pages/dealer/DealerAnalytics'));
-const DealerSettlement = lazy(() => import('./pages/dealer/DealerSettlement'));
-const DealerTeam = lazy(() => import('./pages/dealer/DealerTeam'));
-const DealerSettings = lazy(() => import('./pages/dealer/DealerSettings'));
-const DealerAuditLog = lazy(() => import('./pages/dealer/DealerAuditLog'));
+export function App() {
+  const [activeNav, setActiveNav] = useState<string>('marketplace');
+  const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Authenticated User State (null = anonymous public visitor)
+  const [user, setUser] = useState<UserProfile | null>(null);
 
-// Admin pages
-const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
-const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
-const AdminSellers = lazy(() => import('./pages/admin/AdminSellers'));
-const AdminCars = lazy(() => import('./pages/admin/AdminCars'));
-const AdminCarModeration = lazy(() => import('./pages/admin/AdminCarModeration'));
-const AdminAuctions = lazy(() => import('./pages/admin/AdminAuctions'));
-const AdminBids = lazy(() => import('./pages/admin/AdminBids'));
-const AdminEscrows = lazy(() => import('./pages/admin/AdminEscrows'));
-const AdminEscrowVault = lazy(() => import('./pages/admin/AdminEscrowVault'));
-const AdminReviews = lazy(() => import('./pages/admin/AdminReviews'));
-const AdminReferrals = lazy(() => import('./pages/admin/AdminReferrals'));
-const AdminChatModeration = lazy(() => import('./pages/admin/AdminChatModeration'));
-const AdminMarketData = lazy(() => import('./pages/admin/AdminMarketData'));
-const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
-const AdminNtsaQueue = lazy(() => import('./pages/admin/AdminNtsaQueue'));
-const AdminInspections = lazy(() => import('./pages/admin/AdminInspections'));
-const AdminInspectorApplications = lazy(() => import('./pages/admin/AdminInspectorApplications'));
-const AdminSecurityLog = lazy(() => import('./pages/admin/AdminSecurityLog'));
-const AdManager = lazy(() => import('./pages/admin/AdManager'));
-const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
-const AdminStaff = lazy(() => import('./pages/admin/AdminStaff'));
-const AdminStaffPermissions = lazy(() => import('./pages/admin/AdminStaffPermissions'));
-const ControlRoom = lazy(() => import('./pages/admin/ControlRoom'));
-const PanicRoom = lazy(() => import('./pages/admin/PanicRoom'));
-const WebhoistOverview = lazy(() => import('./pages/admin/WebhoistOverview'));
-const OperationsDashboard = lazy(() => import('./pages/admin/OperationsDashboard'));
-const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
-const AuctionIntegrityPage = lazy(() => import('./pages/admin/AuctionIntegrityPage'));
-const AdminDealerVerifications = lazy(() => import('./pages/admin/AdminDealerVerifications'));
-const AdminReports = lazy(() => import('./pages/admin/AdminReports'));
-const AdminSupportTickets = lazy(() => import('./pages/admin/AdminSupportTickets'));
-const AdminBroadcast = lazy(() => import('./pages/admin/AdminBroadcast'));
-const AdminFeedback = lazy(() => import('./pages/admin/AdminFeedback'));
-const ThemeStudio = lazy(() => import('./pages/admin/ThemeStudio'));
+  // Interactive States
+  const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES);
+  const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
+  const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+  
+  // Modal Trigger States
+  const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
+  const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
+  const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
+  const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
 
-export type { Car, User };
-
-// Legacy support for existing components
-interface AuthUser {
-  name: string;
-  email: string;
-  role: 'private-seller' | 'dealer' | 'admin';
-  dealership?: string;
-}
-
-// Page wrapper components for backward compatibility
-function AuthGuard({ children }: { children: React.ReactNode }) {
-  return <RequireAuth>{children}</RequireAuth>;
-}
-
-function AdminGuard({ children }: { children: React.ReactNode }) {
-  return <RequireAdmin>{children}</RequireAdmin>;
-}
-
-function SecureAdminGuard({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
-  return <RequireAdminPage roles={roles}>{children}</RequireAdminPage>;
-}
-
-function DealerGuard({ children }: { children: React.ReactNode }) {
-  return <RequireDealer>{children}</RequireDealer>;
-}
-
-// CarDetailRoute must be defined outside App to avoid recreation on each render
-function CarDetailRoute() {
-  const { id } = useParams();
-  const car = CARS.find((item) => String(item.id) === String(id));
-  const navigate = useNavigate();
-  const handleSetPage = (page: string) => navigate('/' + page);
-  const handleViewCar = (car: Car) => {
-    navigate('/car/' + (car.id || car._id));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  if (!car) {
-    return <NotFoundPage />;
-  }
-
-  return <CarDetail car={car} setPage={handleSetPage} viewCar={handleViewCar} />;
-}
-
-
-function AppContent() {
-  const [page, setPage] = useState('home');
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const viewCar = (car: Car) => {
-    setSelectedCar(car);
-    setPage('car-detail');
-    navigate('/car/' + (car.id || car._id));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleLogin = (user: AuthUser) => {
-    setAuthUser(user);
-  };
-
-  const handleSignOut = () => {
-    setAuthUser(null);
-    setPage('home');
-    navigate('/');
-  };
-
-  const handleSetPage = (newPage: string) => {
-    setPage(newPage);
-    navigate('/' + newPage);
-  };
-
-  const getCurrentPage = () => {
-    const path = location.pathname;
-    if (path === '/' || path === '') return 'home';
-    if (path === '/gallery') return 'gallery';
-    if (path === '/compare') return 'compare';
-    if (path === '/favorites') return 'favorites';
-    if (path === '/profile') return 'profile';
-    if (path === '/notifications') return 'notifications';
-    if (path === '/payments') return 'payments';
-    if (path === '/chat') return 'chat';
-    if (path === '/dealer/:id') return 'dealer-profile';
-    if (path === '/auction') return 'auction';
-    if (path === '/escrow') return 'escrow';
-    if (path === '/escrow-transactions') return 'escrow-transactions';
-    if (path === '/pre-inspection') return 'pre-inspection';
-    if (path === '/support') return 'support';
-    if (path.startsWith('/car/')) return 'car-detail';
-    if (path === '/dashboard') return 'dashboard';
-    if (path === '/create-account') return 'create-account';
-    if (path === '/sign-in') return 'sign-in';
-    if (path === '/showroom') return 'showroom';
-    return 'home';
-  };
-
-  const currentPage = getCurrentPage();
-
-  const renderPage = () => {
-    switch (page) {
-      case 'home':
-        return <Home setPage={handleSetPage} viewCar={viewCar} />;
-      case 'gallery':
-        return <Gallery setPage={handleSetPage} viewCar={viewCar} />;
-      case 'compare':
-        return <Compare setPage={handleSetPage} viewCar={viewCar} />;
-      case 'favorites':
-        return <Favorites setPage={handleSetPage} viewCar={viewCar} />;
-      case 'profile':
-        return <Profile setPage={handleSetPage} authUser={authUser} />;
-      case 'notifications':
-        return <Notifications />;
-      case 'payments':
-        return <Payments />;
-      case 'chat':
-        return <Chat />;
-      case 'dealer-profile':
-        return <DealerProfile setPage={handleSetPage} viewCar={viewCar} />;
-      case 'escrow-transactions':
-        return <EscrowPage />;
-      case 'showroom':
-        return <Showroom />;
-      case 'auction':
-        return <Auction setPage={handleSetPage} viewCar={viewCar} />;
-      case 'escrow':
-        return <EscrowVault setPage={handleSetPage} />;
-      case 'pre-inspection':
-        return <PreInspection setPage={handleSetPage} />;
-      case 'support':
-        return <Support setPage={handleSetPage} />;
-      case 'car-detail':
-        return selectedCar
-          ? <CarDetail car={selectedCar} setPage={handleSetPage} viewCar={viewCar} />
-          : <Gallery setPage={handleSetPage} viewCar={viewCar} />;
-      case 'dashboard':
-        return authUser
-          ? <Dashboard setPage={handleSetPage} viewCar={viewCar} authUser={authUser} onSignOut={handleSignOut} />
-          : <SignIn setPage={handleSetPage} onLogin={handleLogin} />;
-      case 'create-account':
-        return <CreateAccount setPage={handleSetPage} onLogin={handleLogin} />;
-      case 'sign-in':
-        return <SignIn setPage={handleSetPage} onLogin={handleLogin} />;
-      default:
-        return <Home setPage={handleSetPage} viewCar={viewCar} />;
+  // Central Navigation Handler: Opens Vehicle Details & Updates URL
+  const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
+    if (typeof vehicleOrId === 'string') {
+      const found = vehicles.find((v) => v.id === vehicleOrId);
+      if (found) {
+        setQuickViewVehicle(found);
+        setInvalidVehicleId(null);
+        setVehicleDetailUrl(found.id);
+      } else {
+        setQuickViewVehicle(null);
+        setInvalidVehicleId(vehicleOrId);
+        setVehicleDetailUrl(vehicleOrId);
+      }
+    } else {
+      setQuickViewVehicle(vehicleOrId);
+      setInvalidVehicleId(null);
+      setVehicleDetailUrl(vehicleOrId.id);
     }
-  };
+  }, [vehicles]);
+
+  // Central Close Handler: Clears Vehicle Details & Removes URL Param
+  const handleCloseVehicleDetails = useCallback(() => {
+    setQuickViewVehicle(null);
+    setInvalidVehicleId(null);
+    setVehicleDetailUrl(null);
+  }, []);
+
+  // Listen for initial URL vehicle parameter and popstate (browser back/forward)
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const urlVehicleId = getVehicleIdFromUrl();
+      if (urlVehicleId) {
+        const found = vehicles.find((v) => v.id === urlVehicleId);
+        if (found) {
+          setQuickViewVehicle(found);
+          setInvalidVehicleId(null);
+        } else {
+          setQuickViewVehicle(null);
+          setInvalidVehicleId(urlVehicleId);
+        }
+      } else {
+        setQuickViewVehicle(null);
+        setInvalidVehicleId(null);
+      }
+    };
+
+    handleUrlSync();
+
+    window.addEventListener('popstate', handleUrlSync);
+    return () => window.removeEventListener('popstate', handleUrlSync);
+  }, [vehicles]);
+
+  // Toggle Save
+  const handleToggleSave = useCallback((id: string) => {
+    setSavedVehicles((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }, []);
+
+  // Toggle Compare
+  const handleToggleCompare = useCallback((id: string) => {
+    setComparedVehicles((prev) => {
+      if (prev.includes(id)) return prev.filter((item) => item !== id);
+      if (prev.length >= 4) return prev; // max 4
+      return [...prev, id];
+    });
+  }, []);
+
+  // Add Vehicle Handler
+  const handleAddVehicle = useCallback((newVehicle: Vehicle) => {
+    setVehicles((prev) => [newVehicle, ...prev]);
+  }, []);
+
+  // Escrow CTA Handler
+  const handleStartEscrow = useCallback((vehicle: Vehicle) => {
+    setQuickViewVehicle(null);
+    setSelectedChatVehicle(vehicle);
+    setActiveNav('escrow');
+  }, []);
+
+  // Update Vehicle Auction Status Handler
+  const handleUpdateVehicleAuctionStatus = useCallback((vehicleId: string, isAuction: boolean) => {
+    setVehicles((prev) =>
+      prev.map((v) => (v.id === vehicleId ? { ...v, isAuction } : v))
+    );
+  }, []);
+
+  // Contact Seller Handler
+  const handleContactSeller = useCallback((vehicle: Vehicle) => {
+    setQuickViewVehicle(null);
+    setSelectedChatVehicle(vehicle);
+    setActiveNav('chat');
+  }, []);
+
+  // Send Chat Message
+  const handleSendMessage = useCallback((text: string) => {
+    const newMsg: ChatMessage = {
+      id: `m-${Date.now()}`,
+      sender: 'user',
+      text,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      vehicleTitle: selectedChatVehicle?.title
+    };
+    setMessages((prev) => [...prev, newMsg]);
+  }, [selectedChatVehicle]);
+
+  // Select Dealer Vehicles Shortcut
+  const handleSelectDealerVehicles = useCallback((dealerName: string) => {
+    setSearchQuery(dealerName);
+    setActiveNav('marketplace');
+  }, []);
+
+  const savedVehiclesList = useMemo(() => {
+    return vehicles.filter((v) => savedVehicles.includes(v.id));
+  }, [vehicles, savedVehicles]);
+
+  const comparedVehiclesList = useMemo(() => {
+    return vehicles.filter((v) => comparedVehicles.includes(v.id));
+  }, [vehicles, comparedVehicles]);
+
   return (
-    <>
-      <Suspense fallback={<LoadingPage />}>
-        <Routes>
-          {/* Legacy routes for backward compatibility */}
-          <Route path="/" element={renderPage()} />
-          <Route path="/:page" element={renderPage()} />
-
-          {/* Public pages */}
-          <Route path="/home" element={<Home setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/gallery" element={<Gallery setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/showroom" element={<Showroom />} />
-          <Route path="/car/:id" element={<CarDetailRoute />} />
-          <Route path="/compare" element={<Compare setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/auction" element={<Auction setPage={handleSetPage} viewCar={viewCar} />} />
-          <Route path="/auction-calendar" element={<AuctionCalendar />} />
-          <Route path="/auction/:id" element={<AuctionLivePage />} />
-          <Route path="/escrow" element={<EscrowVault setPage={handleSetPage} />} />
-          <Route path="/escrow-vault" element={<EscrowVault setPage={handleSetPage} />} />
-          <Route path="/pre-inspection" element={<PreInspection setPage={handleSetPage} />} />
-          <Route path="/support" element={<Support setPage={handleSetPage} />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/ghost-checker" element={<GhostCheckerInfo />} />
-
-          {/* Auth pages */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/phone-verify" element={<PhoneVerifyPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/force-password-change" element={<ForcePasswordChange />} />
-
-          {/* Authenticated user pages */}
-          <Route path="/buyer" element={<AuthGuard><BuyerDashboard /></AuthGuard>} />
-          <Route path="/profile" element={<AuthGuard><Profile setPage={handleSetPage} authUser={authUser} /></AuthGuard>} />
-          <Route path="/payments" element={<AuthGuard><Payments /></AuthGuard>} />
-          <Route path="/chat" element={<AuthGuard><Chat /></AuthGuard>} />
-          <Route path="/chat/:threadId" element={<AuthGuard><Chat /></AuthGuard>} />
-          <Route path="/notifications" element={<AuthGuard><Notifications /></AuthGuard>} />
-          <Route path="/favorites" element={<AuthGuard><Favorites setPage={handleSetPage} viewCar={viewCar} /></AuthGuard>} />
-          <Route path="/escrow/:id" element={<AuthGuard><EscrowPage /></AuthGuard>} />
-          <Route path="/disputes" element={<AuthGuard><DisputesPage /></AuthGuard>} />
-          <Route path="/disputes/:id" element={<AuthGuard><DisputeDetailPage /></AuthGuard>} />
-
-          {/* Inspector pages */}
-          <Route path="/inspector" element={<AuthGuard><InspectorDashboard /></AuthGuard>} />
-          <Route path="/inspector/apply" element={<AuthGuard><InspectorApply /></AuthGuard>} />
-
-          {/* Dealer/Seller pages */}
-          <Route path="/dealer" element={<DealerGuard><DealerDashboardPage /></DealerGuard>} />
-          <Route path="/dealer/onboarding" element={<DealerGuard><DealerOnboarding /></DealerGuard>} />
-          <Route path="/dealer/setup" element={<DealerGuard><DealerSetup /></DealerGuard>} />
-          <Route path="/dealer/add-car" element={<DealerGuard><AddCarPage /></DealerGuard>} />
-          <Route path="/dealer/edit-car/:id" element={<DealerGuard><EditCarPage /></DealerGuard>} />
-          <Route path="/dealer/auction-setup" element={<DealerGuard><DealerAuctionSetup /></DealerGuard>} />
-          <Route path="/dealer/analytics" element={<DealerGuard><DealerAnalytics /></DealerGuard>} />
-          <Route path="/dealer/settlement" element={<DealerGuard><DealerSettlement /></DealerGuard>} />
-          <Route path="/dealer/team" element={<DealerGuard><DealerTeam /></DealerGuard>} />
-          <Route path="/dealer/activity-log" element={<DealerGuard><DealerAuditLog /></DealerGuard>} />
-          <Route path="/dealer/settings" element={<DealerGuard><DealerSettings /></DealerGuard>} />
-          <Route path="/dealer/choose-plan" element={<DealerGuard><PostRegPackageSelect /></DealerGuard>} />
-
-          {/* Admin pages */}
-          <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
-          <Route path="/admin/users" element={<SecureAdminGuard roles={["superadmin","admin","technical_support","hr","moderator"]}><AdminUsers /></SecureAdminGuard>} />
-          <Route path="/admin/sellers" element={<SecureAdminGuard roles={["superadmin","admin","hr"]}><AdminSellers /></SecureAdminGuard>} />
-          <Route path="/admin/cars" element={<SecureAdminGuard roles={["superadmin","admin","moderator","technical_support"]}><AdminCars /></SecureAdminGuard>} />
-          <Route path="/admin/moderation" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminCarModeration /></SecureAdminGuard>} />
-          <Route path="/admin/auctions" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminAuctions /></SecureAdminGuard>} />
-          <Route path="/admin/bids" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminBids /></SecureAdminGuard>} />
-          <Route path="/admin/escrows" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrows /></SecureAdminGuard>} />
-          <Route path="/admin/escrow-vault" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminEscrowVault /></SecureAdminGuard>} />
-          <Route path="/admin/reviews" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminReviews /></SecureAdminGuard>} />
-          <Route path="/admin/referrals" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminReferrals /></SecureAdminGuard>} />
-          <Route path="/admin/chats" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminChatModeration /></SecureAdminGuard>} />
-          <Route path="/admin/market-data" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminMarketData /></SecureAdminGuard>} />
-          <Route path="/admin/transactions" element={<SecureAdminGuard roles={["superadmin","admin","accounts","escrow_officer"]}><AdminTransactions /></SecureAdminGuard>} />
-          <Route path="/admin/ntsa-queue" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminNtsaQueue /></SecureAdminGuard>} />
-          <Route path="/admin/inspections" element={<SecureAdminGuard roles={["superadmin","admin","ghost_checker"]}><AdminInspections /></SecureAdminGuard>} />
-          <Route path="/admin/inspector-applications" element={<SecureAdminGuard><AdminInspectorApplications /></SecureAdminGuard>} />
-          <Route path="/admin/security-log" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminSecurityLog /></SecureAdminGuard>} />
-          <Route path="/admin/ads" element={<SecureAdminGuard roles={["superadmin","admin","marketing","ad_manager"]}><AdManager /></SecureAdminGuard>} />
-          <Route path="/admin/settings" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminSettings /></SecureAdminGuard>} />
-          <Route path="/admin/staff" element={<SecureAdminGuard roles={["superadmin","admin","hr"]}><AdminStaff /></SecureAdminGuard>} />
-          <Route path="/admin/staff-permissions" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminStaffPermissions /></SecureAdminGuard>} />
-          <Route path="/admin/control-room" element={<SecureAdminGuard roles={["superadmin","admin"]}><ControlRoom /></SecureAdminGuard>} />
-          <Route path="/admin/panic-room" element={<SecureAdminGuard roles={["superadmin"]}><PanicRoom /></SecureAdminGuard>} />
-          <Route path="/admin/webhoist" element={<SecureAdminGuard roles={["superadmin"]}><WebhoistOverview /></SecureAdminGuard>} />
-          <Route path="/admin/operations-dashboard" element={<SecureAdminGuard><OperationsDashboard /></SecureAdminGuard>} />
-          <Route path="/admin/disputes" element={<SecureAdminGuard><AdminDisputes /></SecureAdminGuard>} />
-          <Route path="/admin/disputes/:id" element={<SecureAdminGuard><DisputeDetailPage /></SecureAdminGuard>} />
-          <Route path="/admin/auction-integrity" element={<SecureAdminGuard><AuctionIntegrityPage /></SecureAdminGuard>} />
-          <Route path="/admin/dealer-verifications" element={<SecureAdminGuard><AdminDealerVerifications /></SecureAdminGuard>} />
-          <Route path="/admin/reports" element={<SecureAdminGuard roles={["superadmin","admin","moderator"]}><AdminReports /></SecureAdminGuard>} />
-          <Route path="/admin/support-tickets" element={<SecureAdminGuard roles={["superadmin","admin","technical_support"]}><AdminSupportTickets /></SecureAdminGuard>} />
-          <Route path="/admin/broadcast" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminBroadcast /></SecureAdminGuard>} />
-          <Route path="/admin/feedback" element={<SecureAdminGuard roles={["superadmin","admin"]}><AdminFeedback /></SecureAdminGuard>} />
-          <Route path="/admin/theme-studio" element={<SecureAdminGuard roles={["superadmin","admin"]}><ThemeStudio /></SecureAdminGuard>} />
-
-          {/* 404 */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+    <div className="min-h-screen bg-[#F6F1E8] text-slate-800 flex flex-col font-sans">
+      {/* 1. Header Navigation */}
       <Navbar
-        currentPage={currentPage}
-        setPage={handleSetPage}
-        authUser={authUser}
-        onSignOut={handleSignOut}
+        user={user}
+        savedCount={savedVehicles.length}
+        activeNav={activeNav}
+        onNavClick={(nav) => setActiveNav(nav)}
+        selectedCounty={selectedCounty}
+        onCountyChange={(c) => setSelectedCounty(c)}
+        onOpenAuth={() => setShowAuthModal(true)}
+        onOpenAlerts={() => setShowAlertsModal(true)}
+        onLogout={() => setUser(null)}
       />
-      <Footer setPage={handleSetPage} />
-      <CompareDrawer />
-      <MobileBottomNav authUser={authUser} />
-      <DemoModeBanner />
-      <SWUpdateBanner />
-    </>
+
+      {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        {/* Module Switcher Rendering */}
+        {activeNav === 'marketplace' && (
+            <VehicleMarketplace
+              vehicles={vehicles}
+              savedVehicles={savedVehicles}
+              comparedVehicles={comparedVehicles}
+              onToggleSave={handleToggleSave}
+              onToggleCompare={handleToggleCompare}
+              onQuickView={handleOpenVehicleDetails}
+              onStartEscrow={handleStartEscrow}
+              selectedCounty={selectedCounty}
+              onCountyChange={(c) => setSelectedCounty(c)}
+              searchQuery={searchQuery}
+              onSearchChange={(q) => setSearchQuery(q)}
+              onOpenCompareModal={() => setShowCompareModal(true)}
+              onNavigate={(nav) => setActiveNav(nav)}
+              onOpenAuth={() => setShowAuthModal(true)}
+            />
+          )}
+
+          {activeNav === 'auctions' && (
+            <AuctionsView
+              vehicles={vehicles}
+              user={user}
+              onOpenAuth={() => setShowAuthModal(true)}
+              onStartEscrow={handleStartEscrow}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onUpdateVehicleAuctionStatus={handleUpdateVehicleAuctionStatus}
+            />
+          )}
+
+          {activeNav === 'escrow' && (
+            <EscrowView
+              deals={MOCK_ESCROW_DEALS}
+            />
+          )}
+
+          {activeNav === 'inspections' && (
+            <InspectionsView
+              vehicles={vehicles}
+              onViewVehicleDetails={handleOpenVehicleDetails}
+            />
+          )}
+
+          {activeNav === 'financing' && (
+            <FinancingView 
+              vehicles={vehicles}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+            />
+          )}
+
+          {activeNav === 'dealers' && (
+            <DealersView
+              dealers={MOCK_DEALERS}
+              vehicles={vehicles}
+              onSelectDealerVehicles={handleSelectDealerVehicles}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onStartEscrow={handleStartEscrow}
+              onAddVehicle={handleAddVehicle}
+            />
+          )}
+
+          {activeNav === 'dashboard' && (
+            <DashboardView
+              savedVehicles={savedVehicles}
+              vehicles={vehicles}
+              deals={MOCK_ESCROW_DEALS}
+              user={user}
+              messages={messages}
+              comparedVehicles={comparedVehicles}
+              onNavigate={(nav) => setActiveNav(nav)}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onToggleSave={handleToggleSave}
+              onToggleCompare={handleToggleCompare}
+              onStartEscrow={handleStartEscrow}
+              onContactSeller={handleContactSeller}
+              onOpenCompareModal={() => setShowCompareModal(true)}
+              onOpenAlertsModal={() => setShowAlertsModal(true)}
+              onOpenAuthModal={() => setShowAuthModal(true)}
+            />
+          )}
+
+          {activeNav === 'chat' && (
+            <ChatView
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              selectedVehicle={selectedChatVehicle}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onNavigateToEscrow={() => setActiveNav('escrow')}
+              onNavigateToInspections={() => setActiveNav('inspections')}
+              onNavigateToFinancing={() => setActiveNav('financing')}
+            />
+          )}
+
+          {activeNav === 'admin' && (
+            <AdminView
+              vehicles={vehicles}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+            />
+          )}
+
+          {activeNav === 'support' && (
+            <SupportView />
+          )}
+
+          {activeNav === 'saved' && (
+            <VehicleMarketplace
+              vehicles={savedVehiclesList}
+              savedVehicles={savedVehicles}
+              comparedVehicles={comparedVehicles}
+              onToggleSave={handleToggleSave}
+              onToggleCompare={handleToggleCompare}
+              onQuickView={handleOpenVehicleDetails}
+              onStartEscrow={handleStartEscrow}
+              selectedCounty={selectedCounty}
+              onCountyChange={(c) => setSelectedCounty(c)}
+              searchQuery=""
+              onSearchChange={() => {}}
+              onOpenCompareModal={() => setShowCompareModal(true)}
+            />
+          )}
+
+          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard') && (
+            <PrivateSellerDashboardView
+              vehicles={vehicles}
+              user={user}
+              deals={MOCK_ESCROW_DEALS}
+              messages={messages}
+              onNavigate={(nav) => setActiveNav(nav)}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onOpenAuthModal={() => setShowAuthModal(true)}
+            />
+          )}
+        </main>
+
+      {/* 3. Footer */}
+      <footer className="bg-[#17244B] text-slate-300 text-xs py-8 border-t border-navy-600/40 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-400 text-[#17244B] font-black flex items-center justify-center">
+              K
+            </div>
+            <div>
+              <p className="font-bold text-white">KAYAD Automotive Marketplace East Africa</p>
+              <p className="text-[11px] text-slate-400">Verified Automotive & Escrow Platform East Africa</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6 text-slate-300">
+            <button onClick={() => setActiveNav('marketplace')} className="hover:text-amber-300">Marketplace</button>
+            <button onClick={() => setActiveNav('escrow')} className="hover:text-amber-300">Escrow Vault</button>
+            <button onClick={() => setActiveNav('financing')} className="hover:text-amber-300">Financing</button>
+            <button onClick={() => setActiveNav('support')} className="hover:text-amber-300">Support & Disputes</button>
+          </div>
+        </div>
+      </footer>
+
+      {/* 4. Modals */}
+      <VehicleDetailModal
+        vehicle={quickViewVehicle}
+        notFoundId={invalidVehicleId}
+        allVehicles={vehicles}
+        onClose={handleCloseVehicleDetails}
+        onStartEscrow={handleStartEscrow}
+        onContactSeller={handleContactSeller}
+        onRequestInspection={() => setActiveNav('inspections')}
+        isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
+        onToggleSave={handleToggleSave}
+        onSelectVehicle={handleOpenVehicleDetails}
+      />
+
+      {showCompareModal && (
+        <CompareModal
+          vehicles={comparedVehiclesList}
+          onClose={() => setShowCompareModal(false)}
+          onRemove={handleToggleCompare}
+          onStartEscrow={handleStartEscrow}
+          onQuickViewVehicle={handleOpenVehicleDetails}
+        />
+      )}
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onLogin={(loggedInUser) => setUser(loggedInUser)}
+      />
+
+      <PriceAlertsModal
+        isOpen={showAlertsModal}
+        onClose={() => setShowAlertsModal(false)}
+      />
+    </div>
   );
 }
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <ToastProvider>
-          <BrandingProvider>
-            <AuthProvider>
-              <SocketProvider>
-                <NotificationProvider>
-                  <MarketplaceProvider>
-                    <CompareProvider>
-                      <ErrorBoundary>
-                        <AppContent />
-                      </ErrorBoundary>
-                    </CompareProvider>
-                  </MarketplaceProvider>
-                </NotificationProvider>
-              </SocketProvider>
-            </AuthProvider>
-          </BrandingProvider>
-        </ToastProvider>
-      </ThemeProvider>
-    </BrowserRouter>
-  );
-}
+export default App;

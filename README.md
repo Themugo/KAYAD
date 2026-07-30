@@ -1,68 +1,20 @@
-# Gari Motors — Kenya's Premium Car Marketplace
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Live bidding, escrow payments, and M-Pesa integration for the East African automotive market.
+# Run and deploy your AI Studio app
 
-## Tech Stack
+This contains everything you need to run your app locally.
 
-- **Frontend:** React 18, Vite 5, React Router 6
-- **Backend:** Supabase (PostgreSQL, Auth, Storage, Realtime)
-- **Styling:** Custom CSS with CSS variables (no framework)
+View your app in AI Studio: https://ai.studio/apps/acc4ec54-c8b9-41c5-8298-c0ae5f11f3c4
 
-## Features
+## Run Locally
 
-- Browse and search vehicles with advanced filters
-- Live auction bidding with real-time updates
-- M-Pesa escrow payments for secure transactions
-- Dealer dashboard with analytics
-- Admin panel for platform management
-- Role-based access control (admin, dealer, broker, user)
-- Favorites and saved searches
-- In-app messaging between buyers and sellers
-- Vehicle image galleries with Supabase Storage
+**Prerequisites:**  Node.js
 
-## Getting Started
 
-```bash
-npm install
-npm run dev      # development server on port 3000
-npm run build    # production build
-npm run lint     # ESLint
-```
-
-## Environment
-
-Supabase credentials are pre-configured in `.env`.
-
-## Project Structure
-
-```text
-src/
-├── api/           Supabase client and data access layer
-├── components/    Reusable UI components
-├── context/       React contexts (Auth, Socket, Toast)
-├── data/          Static data (car brands, testimonials)
-├── hooks/         Custom React hooks
-├── pages/         Route components (public, dealer/, admin/)
-└── utils/         Helper functions
-```
-
-## Backend
-
-The backend is a separate Node.js service located in the [`backend/`](backend/) directory. It handles:
-
-- REST API endpoints (see [`API_GUIDE.md`](API_GUIDE.md))
-- WebSocket connections for real-time updates
-- Background job processing with Bull queues
-
-See the [Backend README](backend/README.md) for backend-specific setup instructions.
-
-## Documentation
-
-- [API Guide](API_GUIDE.md) — REST API documentation
-- [Contributing Guide](CONTRIBUTING.md) — How to contribute to this project
-- [Deployment Guide](DEPLOY.md) — Deployment instructions
-- [Monitoring & Observability](MONITORING.md) — Metrics and alerting setup
-
-## Contributing
-
-We welcome contributions! Please read our [Contributing Guide](CONTRIBUTING.md) before submitting pull requests.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

@@ -27,6 +27,7 @@ export interface Car {
   createdAt?: string;
   currentBid?: number;
   auctionEnd?: string;
+  bidsCount?: number;
   listedDate?: string;
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import type React from 'react';
 import { X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import LazyImage from './LazyImage';
 

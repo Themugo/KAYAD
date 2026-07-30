@@ -10,8 +10,9 @@ import {
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { BodyStyle } from '../../types';
+import type { FC } from 'react';
 
-export const BrowseByCategory: React.FC = () => {
+export const BrowseByCategory: FC = () => {
   const { navigateTo, setFilters, resetFilters } = useMarketplace();
 
   const categories = [

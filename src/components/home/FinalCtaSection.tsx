@@ -1,7 +1,8 @@
 import { ArrowRight, Car, Gavel } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import type { FC } from 'react';
 
-export const FinalCtaSection: React.FC = () => {
+export const FinalCtaSection: FC = () => {
   const { navigateTo } = useMarketplace();
 
   return (

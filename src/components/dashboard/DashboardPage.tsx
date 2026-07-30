@@ -26,10 +26,12 @@ import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { VehicleCard } from '../gallery/VehicleCard';
 import { SearchBar } from '../ui/SearchBar';
+import type React from 'react';
+import type { FC } from 'react';
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage: FC = () => {
   const { vehicles, savedVehicleIds, bids, escrowContracts, navigateTo, addNewVehicle, priceAlerts, removePriceAlert } = useMarketplace();
-  const { user, role, switchRole } = useAuth();
+  const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'overview' | 'bids' | 'escrow' | 'saved' | 'alerts'>('overview');
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,18 +82,18 @@ export const DashboardPage: React.FC = () => {
             <Badge variant="blue" icon={<LayoutDashboard className="w-3.5 h-3.5" />}>
               KAYAD Workspace
             </Badge>
-            <span className="text-xs text-[#6B7A99] capitalize font-bold">Role: {role}</span>
+            <span className="text-xs text-[#6B7A99] capitalize font-bold">Role: {user?.role ?? 'user'}</span>
           </div>
-          <h1 className="text-3xl font-extrabold text-[#1E3063] font-serif tracking-tight mt-1">
+          <h1 className="text-3xl font-extrabold text-[#2E4080] font-serif tracking-tight mt-1">
             Welcome back, {user?.name || 'Member'}
           </h1>
         </div>
 
         <div className="flex items-center gap-3">
-          {(role === 'dealer' || role === 'seller') && (
+          {user?.role === 'dealer' && (
             <Button
               variant="primary"
-              className="bg-[#1E3063] hover:bg-[#0B1628] text-white font-bold"
+              className="bg-[#2E4080] hover:bg-[#141E3F] text-white font-bold"
               onClick={() => setIsAddModalOpen(true)}
               leftIcon={<Plus className="w-4 h-4" />}
             >
@@ -105,7 +107,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-white border border-[#E2D8C7] shadow-xs">
           <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider block">Active Bids</span>
-          <span className="text-2xl font-black text-[#1E3063] font-serif">{myBids.length}</span>
+          <span className="text-2xl font-black text-[#2E4080] font-serif">{myBids.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#E2D8C7] shadow-xs">
           <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider block">Saved Vehicles</span>
@@ -113,15 +115,15 @@ export const DashboardPage: React.FC = () => {
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#E2D8C7] shadow-xs">
           <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider block">Price Alerts</span>
-          <span className="text-2xl font-black text-[#00C9CE] font-serif">{priceAlerts.length}</span>
+          <span className="text-2xl font-black text-[#23EBFF] font-serif">{priceAlerts.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#E2D8C7] shadow-xs">
           <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider block">Escrow Deals</span>
-          <span className="text-2xl font-black text-[#2ECC71] font-serif">{escrowContracts.length}</span>
+          <span className="text-2xl font-black text-[#3ddb72] font-serif">{escrowContracts.length}</span>
         </div>
         <div className="p-4 rounded-2xl bg-white border border-[#E2D8C7] shadow-xs">
           <span className="text-xs font-bold text-[#6B7A99] uppercase tracking-wider block">Inventory</span>
-          <span className="text-2xl font-black text-[#1E3063] font-serif">{vehicles.length}</span>
+          <span className="text-2xl font-black text-[#2E4080] font-serif">{vehicles.length}</span>
         </div>
       </div>
 
@@ -139,8 +141,8 @@ export const DashboardPage: React.FC = () => {
             onClick={() => setActiveTab(tab.id as any)}
             className={`px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer ${
               activeTab === tab.id
-                ? 'bg-[#1E3063] text-white font-bold shadow-xs'
-                : 'text-[#6B7A99] hover:text-[#1E3063]'
+                ? 'bg-[#2E4080] text-white font-bold shadow-xs'
+                : 'text-[#6B7A99] hover:text-[#2E4080]'
             }`}
           >
             {tab.label}
@@ -166,7 +168,7 @@ export const DashboardPage: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          <h3 className="text-base font-extrabold text-[#1E3063] font-serif">Your Saved Favorites ({filteredSavedVehicles.length})</h3>
+          <h3 className="text-base font-extrabold text-[#2E4080] font-serif">Your Saved Favorites ({filteredSavedVehicles.length})</h3>
           {filteredSavedVehicles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {filteredSavedVehicles.map(v => (
@@ -183,7 +185,7 @@ export const DashboardPage: React.FC = () => {
 
       {activeTab === 'saved' && (
         <div className="space-y-6">
-          <h3 className="text-base font-extrabold text-[#1E3063] font-serif">Saved Favorites ({filteredSavedVehicles.length})</h3>
+          <h3 className="text-base font-extrabold text-[#2E4080] font-serif">Saved Favorites ({filteredSavedVehicles.length})</h3>
           {filteredSavedVehicles.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {filteredSavedVehicles.map(v => (
@@ -200,16 +202,16 @@ export const DashboardPage: React.FC = () => {
 
       {activeTab === 'bids' && (
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-[#1E3063] font-serif">Active Bidding Activity ({filteredBids.length})</h3>
+          <h3 className="text-base font-extrabold text-[#2E4080] font-serif">Active Bidding Activity ({filteredBids.length})</h3>
           {filteredBids.length > 0 ? (
             <div className="bg-white border border-[#E2D8C7] rounded-2xl divide-y divide-[#E8E1D5] shadow-xs">
               {filteredBids.map((bid, idx) => (
                 <div key={idx} className="p-4 flex items-center justify-between text-xs font-mono font-bold">
                   <div>
-                    <span className="text-[#1E3063] font-extrabold block">Vehicle ID: {bid.vehicleId}</span>
+                    <span className="text-[#2E4080] font-extrabold block">Vehicle ID: {bid.vehicleId}</span>
                     <span className="text-[#6B7A99]">Placed by: {bid.bidderName}</span>
                   </div>
-                  <span className="text-[#00C9CE] bg-[#1E3063] px-3 py-1 rounded-xl font-mono font-black">
+                  <span className="text-[#23EBFF] bg-[#2E4080] px-3 py-1 rounded-xl font-mono font-black">
                     KES {bid.amount.toLocaleString()}
                   </span>
                 </div>
@@ -225,7 +227,7 @@ export const DashboardPage: React.FC = () => {
 
       {activeTab === 'alerts' && (
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-[#1E3063] font-serif">Configured Price Alerts ({priceAlerts.length})</h3>
+          <h3 className="text-base font-extrabold text-[#2E4080] font-serif">Configured Price Alerts ({priceAlerts.length})</h3>
           {priceAlerts.length > 0 ? (
             <div className="bg-white border border-[#E2D8C7] rounded-2xl divide-y divide-[#E8E1D5] shadow-xs overflow-hidden">
               {priceAlerts.map((alert) => {
@@ -233,15 +235,15 @@ export const DashboardPage: React.FC = () => {
                 return (
                   <div key={alert.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F6F1E8]/40 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#00C9CE]/15 border border-[#00C9CE]/30 flex items-center justify-center text-[#00C9CE] shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[#23EBFF]/15 border border-[#23EBFF]/30 flex items-center justify-center text-[#23EBFF] shrink-0">
                         <BellRing className="w-5 h-5" />
                       </div>
                       <div>
-                        <span className="text-sm font-extrabold text-[#1E3063] block">
+                        <span className="text-sm font-extrabold text-[#2E4080] block">
                           {alert.vehicleTitle}
                         </span>
                         <div className="flex flex-wrap items-center gap-2 mt-0.5 text-xs text-[#6B7A99]">
-                          <span>Current: <strong className="text-[#1E3063]">KSh {targetVehicle?.price.toLocaleString() || alert.currentPriceAtSet.toLocaleString()}</strong></span>
+                          <span>Current: <strong className="text-[#2E4080]">KSh {targetVehicle?.price.toLocaleString() || alert.currentPriceAtSet.toLocaleString()}</strong></span>
                           <span>•</span>
                           <span className="text-emerald-700 font-bold">Alert Target: KSh {alert.targetPrice.toLocaleString()}</span>
                         </div>
@@ -251,10 +253,10 @@ export const DashboardPage: React.FC = () => {
                     <div className="flex items-center gap-2 self-end sm:self-center">
                       <button
                         onClick={() => navigateTo('vehicle_detail', alert.vehicleId)}
-                        className="px-3 py-1.5 rounded-xl bg-[#1E3063] hover:bg-[#2A407E] text-white font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-[#2E4080] hover:bg-[#2E4080] text-white font-extrabold text-xs flex items-center gap-1 transition-all cursor-pointer"
                       >
                         <span>View Vehicle</span>
-                        <ExternalLink className="w-3.5 h-3.5 text-[#00C9CE]" />
+                        <ExternalLink className="w-3.5 h-3.5 text-[#23EBFF]" />
                       </button>
 
                       <button
@@ -279,13 +281,13 @@ export const DashboardPage: React.FC = () => {
 
       {activeTab === 'escrow' && (
         <div className="space-y-4">
-          <h3 className="text-base font-extrabold text-[#1E3063] font-serif">Active Escrow Contracts ({escrowContracts.length})</h3>
+          <h3 className="text-base font-extrabold text-[#2E4080] font-serif">Active Escrow Contracts ({escrowContracts.length})</h3>
           {escrowContracts.length > 0 ? (
             <div className="bg-white border border-[#E2D8C7] rounded-2xl divide-y divide-[#E8E1D5] shadow-xs">
               {escrowContracts.map(contract => (
                 <div key={contract.id} className="p-4 flex items-center justify-between text-xs font-mono font-bold">
                   <div>
-                    <span className="text-[#1E3063] font-extrabold block">Contract ID: {contract.id}</span>
+                    <span className="text-[#2E4080] font-extrabold block">Contract ID: {contract.id}</span>
                     <span className="text-[#6B7A99]">Status: {contract.status}</span>
                   </div>
                   <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">

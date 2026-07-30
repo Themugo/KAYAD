@@ -10,8 +10,9 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import type { FC } from 'react';
 
-export const Hero: React.FC = () => {
+export const Hero: FC = () => {
   const { navigateTo, vehicles, resetFilters } = useMarketplace();
 
   // Spotlight vehicles slider
@@ -38,7 +39,7 @@ export const Hero: React.FC = () => {
   };
 
   return (
-    <section className="w-full bg-[#FCF9F4] text-[#1E3063] pt-0 pb-1 sm:pb-2 border-b border-[#E8E1D5] transition-colors">
+    <section className="w-full bg-[#FCF9F4] text-[#2E4080] pt-0 pb-1 sm:pb-2 border-b border-[#E8E1D5] transition-colors">
       {/* Full-width Edge-to-Edge Hero Card Slider touching navbar */}
       {activeVehicle && (
         <div className="relative w-full h-[350px] sm:h-[420px] lg:h-[480px] bg-slate-900 group shadow-lg overflow-hidden">
@@ -58,13 +59,13 @@ export const Hero: React.FC = () => {
 
           {/* Top Left Slogan Overlay - Elevated & Scaled for Phone/Desktop */}
           <div className="absolute top-5 sm:top-8 lg:top-12 left-5 sm:left-10 lg:left-14 xl:left-16 z-10 max-w-[85%] sm:max-w-xl md:max-w-2xl pointer-events-auto">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-[#00C9CE]/40 text-[#00C9CE] text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest shadow-md mb-2 sm:mb-2.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00C9CE] animate-pulse" />
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-[#23EBFF]/40 text-[#23EBFF] text-[10px] sm:text-xs font-mono font-black uppercase tracking-widest shadow-md mb-2 sm:mb-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#23EBFF] animate-pulse" />
               <span>Kenya's Premium Car Market</span>
             </div>
             
             <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-serif font-black text-white uppercase tracking-tight leading-tight drop-shadow-xl">
-              Drive Your Dream <span className="text-[#00C9CE] underline decoration-[#00C9CE]/40 decoration-wavy decoration-1 underline-offset-4">Today</span>
+              Drive Your Dream <span className="text-[#23EBFF] underline decoration-[#23EBFF]/40 decoration-wavy decoration-1 underline-offset-4">Today</span>
             </h1>
 
             <p className="mt-1.5 sm:mt-2.5 text-[11px] sm:text-xs md:text-sm font-sans font-medium text-slate-200/95 leading-relaxed drop-shadow-md max-w-sm sm:max-w-lg">
@@ -79,7 +80,7 @@ export const Hero: React.FC = () => {
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
                 className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                  idx === currentSlide ? 'w-5 bg-[#00C9CE]' : 'w-1.5 bg-white/50 hover:bg-white'
+                  idx === currentSlide ? 'w-5 bg-[#23EBFF]' : 'w-1.5 bg-white/50 hover:bg-white'
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
@@ -112,7 +113,7 @@ export const Hero: React.FC = () => {
                 onClick={() => setCurrentSlide(idx)}
                 className={`group relative h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   idx === currentSlide 
-                    ? 'w-6 sm:w-8 bg-[#00C9CE] shadow-[0_0_8px_#00C9CE]' 
+                    ? 'w-6 sm:w-8 bg-[#23EBFF] shadow-[0_0_8px_#23EBFF]' 
                     : 'w-2 bg-white/40 hover:bg-white/80 hover:w-3'
                 }`}
                 aria-label={`Go to slide ${idx + 1}: ${vehicle.title}`}
@@ -135,18 +136,18 @@ export const Hero: React.FC = () => {
                     if (resetFilters) resetFilters();
                     navigateTo('gallery');
                   }}
-                  className="group px-3.5 sm:px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-[#00C9CE] text-white hover:text-[#1E3063] border border-white/20 hover:border-[#00C9CE] text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95"
+                  className="group px-3.5 sm:px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-[#23EBFF] text-white hover:text-[#2E4080] border border-white/20 hover:border-[#23EBFF] text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95"
                 >
-                  <Car className="w-3.5 h-3.5 text-[#00C9CE] group-hover:text-[#1E3063] transition-colors" />
+                  <Car className="w-3.5 h-3.5 text-[#23EBFF] group-hover:text-[#2E4080] transition-colors" />
                   <span>Browse Cars</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => navigateTo('sell')}
-                  className="group px-3.5 sm:px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-white text-white hover:text-[#1E3063] border border-white/20 hover:border-white text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95"
+                  className="group px-3.5 sm:px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-white text-white hover:text-[#2E4080] border border-white/20 hover:border-white text-xs font-mono font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-lg flex items-center gap-2 hover:scale-105 active:scale-95"
                 >
-                  <Tag className="w-3.5 h-3.5 text-amber-400 group-hover:text-[#1E3063] transition-colors" />
+                  <Tag className="w-3.5 h-3.5 text-amber-400 group-hover:text-[#2E4080] transition-colors" />
                   <span>Sell a Vehicle</span>
                 </button>
               </div>
@@ -158,10 +159,10 @@ export const Hero: React.FC = () => {
               >
                 {/* Specs Metadata Line */}
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono text-slate-300">
-                  <span className="text-[#00C9CE] font-bold">{activeVehicle.year}</span>
+                  <span className="text-[#23EBFF] font-bold">{activeVehicle.year}</span>
                   <span>•</span>
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-[#00C9CE]" />
+                    <MapPin className="w-3.5 h-3.5 text-[#23EBFF]" />
                     {activeVehicle.location}
                   </span>
                   <span>•</span>
@@ -171,7 +172,7 @@ export const Hero: React.FC = () => {
                 {/* Vehicle Title */}
                 <h3 
                   onClick={() => navigateTo('vehicle_detail', activeVehicle.id)}
-                  className="text-xs sm:text-base lg:text-lg font-serif font-bold text-white hover:text-[#00C9CE] transition-colors cursor-pointer line-clamp-1 max-w-xl"
+                  className="text-xs sm:text-base lg:text-lg font-serif font-bold text-white hover:text-[#23EBFF] transition-colors cursor-pointer line-clamp-1 max-w-xl"
                 >
                   Featured: {activeVehicle.title}
                 </h3>
@@ -180,14 +181,14 @@ export const Hero: React.FC = () => {
                 <div className="flex items-center gap-3 sm:gap-4 mt-0.5">
                   <div className="text-left md:text-right">
                     <span className="text-[9px] sm:text-[10px] font-mono uppercase text-slate-400 block tracking-wider">Verified Price</span>
-                    <span className="text-base sm:text-xl lg:text-2xl font-mono font-black text-[#00C9CE]">
+                    <span className="text-base sm:text-xl lg:text-2xl font-mono font-black text-[#23EBFF]">
                       KES {(activeVehicle.currentBid || activeVehicle.price).toLocaleString()}
                     </span>
                   </div>
 
                   <button
                     onClick={() => navigateTo('vehicle_detail', activeVehicle.id)}
-                    className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#00C9CE] hover:bg-[#00b5b9] text-[#1E3063] text-[11px] sm:text-xs font-mono font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 shadow-lg hover:scale-[1.02] shrink-0"
+                    className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-[#23EBFF] hover:bg-[#23EBFF] text-[#2E4080] text-[11px] sm:text-xs font-mono font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 shadow-lg hover:scale-[1.02] shrink-0"
                   >
                     <span>Inspect & Buy</span>
                     <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[2.5]" />

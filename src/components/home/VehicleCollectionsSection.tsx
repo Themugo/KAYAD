@@ -12,8 +12,9 @@ import {
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { BodyStyle } from '../../types';
+import type { FC } from 'react';
 
-export const VehicleCollectionsSection: React.FC = () => {
+export const VehicleCollectionsSection: FC = () => {
   const { navigateTo, setFilters, resetFilters } = useMarketplace();
 
   const collections = [

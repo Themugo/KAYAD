@@ -1,14 +1,16 @@
+import type React from 'react';
 import { useState } from 'react';
 import { Sparkles, ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { VehicleCard } from '../gallery/VehicleCard';
 import { FeaturedVehiclesSkeleton } from '../ui/Skeleton';
+import type { FC } from 'react';
 
 interface FeaturedVehiclesProps {
   isLoading?: boolean;
 }
 
-export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: propsIsLoading }) => {
+export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIsLoading }) => {
   const { vehicles, navigateTo, setFilters, resetFilters, isLoading: contextIsLoading } = useMarketplace();
   const isLoading = propsIsLoading ?? contextIsLoading;
   const [activeFilter, setActiveFilter] = useState<'All' | 'SUV' | 'Pickup' | 'Auctions'>('All');
@@ -52,11 +54,11 @@ export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: p
         {/* Section Header & Search Bar Row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#E8E1D5]">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1E3063]/10 border border-[#1E3063]/20 text-[#1E3063] font-mono font-black text-[10px] sm:text-xs tracking-wider uppercase mb-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#00C9CE]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#2E4080]/10 border border-[#2E4080]/20 text-[#2E4080] font-mono font-black text-[10px] sm:text-xs tracking-wider uppercase mb-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#23EBFF]" />
               <span>PREMIUM VERIFIED SELECTION</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E3063] font-serif tracking-tight">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#2E4080] font-serif tracking-tight">
               Featured Vehicles
             </h2>
             <p className="text-xs sm:text-sm text-[#6B7A99] font-sans font-medium mt-0.5">
@@ -72,11 +74,11 @@ export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: p
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Toyota, Prado, Land Rover..."
-              className="w-full pl-10 pr-20 py-2.5 rounded-xl bg-white border border-[#E2D8C7] text-[#1E3063] placeholder-[#6B7A99]/70 text-xs font-sans font-medium focus:outline-none focus:border-[#00C9CE] focus:ring-2 focus:ring-[#00C9CE]/20 transition-all shadow-xs"
+              className="w-full pl-10 pr-20 py-2.5 rounded-xl bg-white border border-[#E2D8C7] text-[#2E4080] placeholder-[#6B7A99]/70 text-xs font-sans font-medium focus:outline-none focus:border-[#23EBFF] focus:ring-2 focus:ring-[#23EBFF]/20 transition-all shadow-xs"
             />
             <button
               type="submit"
-              className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-[#1E3063] hover:bg-[#121D33] text-white text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
+              className="absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-[#2E4080] hover:bg-[#1B2647] text-white text-[10px] font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
             >
               Search
             </button>
@@ -92,8 +94,8 @@ export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: p
                 onClick={() => setActiveFilter(filter)}
                 className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all cursor-pointer ${
                   activeFilter === filter
-                    ? 'bg-[#1E3063] text-white shadow-md border border-[#1E3063]'
-                    : 'bg-white border border-[#E2D8C7] text-[#1E3063] hover:bg-[#F6F1E8]'
+                    ? 'bg-[#2E4080] text-white shadow-md border border-[#2E4080]'
+                    : 'bg-white border border-[#E2D8C7] text-[#2E4080] hover:bg-[#F6F1E8]'
                 }`}
               >
                 {filter.toUpperCase()}
@@ -121,7 +123,7 @@ export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: p
             </p>
             <button
               onClick={() => setSearchQuery('')}
-              className="px-4 py-2 bg-[#1E3063] text-white text-xs font-mono font-bold rounded-xl cursor-pointer"
+              className="px-4 py-2 bg-[#2E4080] text-white text-xs font-mono font-bold rounded-xl cursor-pointer"
             >
               Clear Search Filter
             </button>
@@ -132,10 +134,10 @@ export const FeaturedVehicles: React.FC<FeaturedVehiclesProps> = ({ isLoading: p
         <div className="text-center pt-2">
           <button
             onClick={() => navigateTo('gallery')}
-            className="px-8 py-3.5 rounded-2xl bg-[#1E3063] hover:bg-[#121D33] text-white font-mono font-black text-xs uppercase tracking-wider transition-all inline-flex items-center gap-2 shadow-lg cursor-pointer hover:scale-[1.02]"
+            className="px-8 py-3.5 rounded-2xl bg-[#2E4080] hover:bg-[#1B2647] text-white font-mono font-black text-xs uppercase tracking-wider transition-all inline-flex items-center gap-2 shadow-lg cursor-pointer hover:scale-[1.02]"
           >
             <span>Browse Full Marketplace Inventory</span>
-            <ArrowRight className="w-4 h-4 text-[#00C9CE]" />
+            <ArrowRight className="w-4 h-4 text-[#23EBFF]" />
           </button>
         </div>
 

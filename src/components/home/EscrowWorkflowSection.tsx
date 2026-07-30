@@ -15,8 +15,9 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import type { FC } from 'react';
 
-export const EscrowWorkflowSection: React.FC = () => {
+export const EscrowWorkflowSection: FC = () => {
   const { navigateTo } = useMarketplace();
   const [activeStepIndex, setActiveStepIndex] = useState(0);
 

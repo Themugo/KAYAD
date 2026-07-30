@@ -278,4 +278,66 @@ export function EmptyState({
   );
 }
 
+export function FeaturedVehiclesSkeleton() {
+  return (
+    <section className="bg-[#FCF9F4] py-10 sm:py-14 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
+        <div className="text-center space-y-3">
+          <div className="h-6 w-40 bg-warm-200 rounded-full mx-auto animate-pulse" />
+          <div className="h-8 w-64 bg-warm-200 rounded mx-auto animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-3xl overflow-hidden border border-[#E8E1D5] bg-white">
+              <div className="h-40 bg-warm-200 animate-pulse" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-3/4 bg-warm-200 rounded animate-pulse" />
+                <div className="h-4 w-1/2 bg-warm-200 rounded animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function LiveAuctionsSkeleton() {
+  return (
+    <section className="py-10 sm:py-14 bg-[#F6F1E8] px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
+        <div className="h-8 w-72 bg-warm-200 rounded animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-3xl overflow-hidden border border-[#E2D8C7] bg-white grid grid-cols-1 md:grid-cols-2">
+              <div className="h-64 bg-warm-200 animate-pulse" />
+              <div className="p-6 space-y-3">
+                <div className="h-4 w-1/2 bg-warm-200 rounded animate-pulse" />
+                <div className="h-6 w-3/4 bg-warm-200 rounded animate-pulse" />
+                <div className="h-16 bg-warm-200 rounded-2xl animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function VehicleDetailSkeleton() {
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="h-8 w-64 bg-warm-200 rounded animate-pulse" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="aspect-[4/3] rounded-3xl bg-warm-200 animate-pulse" />
+        <div className="space-y-4">
+          <div className="h-6 w-3/4 bg-warm-200 rounded animate-pulse" />
+          <div className="h-10 w-1/2 bg-warm-200 rounded animate-pulse" />
+          <div className="h-24 bg-warm-200 rounded-2xl animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default Skeleton;

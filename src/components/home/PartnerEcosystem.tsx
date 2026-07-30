@@ -1,6 +1,7 @@
 import { Building2, ShieldCheck, Landmark, Shield, Lock, CreditCard } from 'lucide-react';
+import type { FC } from 'react';
 
-export const PartnerEcosystem: React.FC = () => {
+export const PartnerEcosystem: FC = () => {
   const partners = [
     { name: 'Central Bank of Kenya', role: 'Escrow Regulation', icon: <Landmark className="w-5 h-5 text-slate-400" /> },
     { name: 'Kenya Revenue Authority', role: 'TIMS Logbook API', icon: <ShieldCheck className="w-5 h-5 text-slate-400" /> },

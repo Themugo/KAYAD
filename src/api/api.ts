@@ -1,111 +1,23 @@
-﻿// src/api/api.ts
-// ============================================================
-// KAYAD — FULL API LAYER
-// Every backend route mapped exactly to the Express routes.
-// Production-grade: structured logging, abort-aware, no token leaks.
-// ============================================================
+import axios from 'axios';
 
-import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
-import { logInfo } from "../utils/logger";
-
-const BASE = "/api";
-
-const api: AxiosInstance = axios.create({
-  baseURL: BASE,
-  withCredentials: true,
-  timeout: 15000,
+export const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
-const IDEMPOTENT_METHODS = new Set(["get", "head", "options"]);
-const MAX_RETRIES = 2;
-
-api.interceptors.request.use(
-  (config) => {
-    if (import.meta.env?.DEV) {
-      logInfo("API request", {
-        method: (config.method ?? "get").toString().toUpperCase(),
-        url: config.url,
-      });
-    }
-
-    // H-5 FIX: Read XSRF-TOKEN cookie and send it as a header for CSRF protection.
-    // Without this, the backend csrfProtection middleware rejects all state-changing requests.
-    const method = String(config.method || "get").toLowerCase();
-    if (!["get", "head", "options"].includes(method)) {
-      const xsrfMatch = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-      if (xsrfMatch) {
-        config.headers["X-XSRF-Token"] = decodeURIComponent(xsrfMatch[1]);
-      }
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => Promise.reject(error)
-);
-
-let _refreshing = false;
-let _queue: Array<{ res: () => void; rej: (err: unknown) => void }> = [];
-
-api.interceptors.response.use(
-  (r) => r,
-  async (err) => {
-    const orig = err.config || {};
-    const method = String(orig.method || "get").toLowerCase();
-    const status = err.response?.status;
-    const canRetry =
-      IDEMPOTENT_METHODS.has(method) && ((status !== undefined && RETRYABLE_STATUSES.has(status)) || !err.response);
-
-    if (canRetry && (orig._retryCount || 0) < MAX_RETRIES) {
-      orig._retryCount = (orig._retryCount || 0) + 1;
-      await new Promise<void>((resolve) => setTimeout(resolve, 300 * 2 ** ((orig._retryCount || 1) - 1)));
-      return api(orig);
-    }
-
-    const requestUrl: string = orig?.url || "";
-    const skipRefresh =
-      requestUrl.includes("/auth/login") ||
-      requestUrl.includes("/auth/register") ||
-      requestUrl.includes("/auth/forgot-password") ||
-      requestUrl.includes("/auth/reset-password") ||
-      requestUrl.includes("/auth/refresh");
-
-    if (err.response?.status === 401 && !skipRefresh && !orig._retry) {
-      if (_refreshing) {
-        return new Promise<void>((res, rej) => _queue.push({ res, rej })).then(() => api(orig));
-      }
-      orig._retry = true;
-      _refreshing = true;
-      try {
-        // H-5 FIX: Include CSRF token in refresh request too.
-        const xsrfRefresh = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-        const xsrfHeader = xsrfRefresh ? { "X-XSRF-Token": decodeURIComponent(xsrfRefresh[1]) } : {};
-        await axios.post(`${BASE}/auth/refresh`, {}, { withCredentials: true, headers: xsrfHeader });
-        _queue.forEach((p) => p.res());
-        _queue = [];
-        return api(orig);
-      } catch {
-        _queue.forEach((p) => p.rej(undefined));
-        _queue = [];
-        window.dispatchEvent(new Event("kayad:auth-expired"));
-      } finally {
-        _refreshing = false;
-      }
-    }
-    return Promise.reject(err);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('kayad_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 
-const unwrap = (res: AxiosResponse) => res.data;
-
-// Export shared utilities for api.exports.ts
-export { api, unwrap };
-export default api;
-
-// Re-export all API modules (unchanged shape from your original)
-export * from "./api.exports";
+export const unwrap = (response: any) => {
+  if (response && response.data !== undefined) {
+    return response.data;
+  }
+  return response;
+};
