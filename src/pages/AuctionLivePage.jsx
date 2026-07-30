@@ -281,7 +281,7 @@ export default function AuctionLivePage() {
                     />
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    Small commitment fee sent directly to dealer
+                    Bid security sent to auction organizer
                   </div>
                 </div>
 
@@ -308,19 +308,19 @@ export default function AuctionLivePage() {
               <div className="card" style={{ padding: 16 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
                   <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}>🔒 How Bidding Works</strong>
-                  <p>1. Place your bid + M-Pesa commitment to the dealer.</p>
+                  <p>1. Place your bid + M-Pesa commitment to the auction organizer.</p>
                   <p>2. If you win, full payment goes into <strong>escrow</strong>.</p>
                   <p>3. Escrow releases when car is received & confirmed.</p>
                 </div>
               </div>
 
-              {/* Dealer */}
+              {/* Auction Organizer */}
               {car.dealer && (
                 <div className="card" style={{ padding: 16, marginTop: 12 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Seller</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Auction Organizer</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--gold)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A1628', fontWeight: 700 }}>
-                      {(car.dealer?.name || 'D')[0].toUpperCase()}
+                      {(car.dealer?.name || 'A')[0].toUpperCase()}
                     </div>
                     <div>
                       <div style={{ fontWeight: 600, fontSize: 14 }}>{car.dealer?.name}</div>
