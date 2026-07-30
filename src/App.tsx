@@ -21,6 +21,7 @@ import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
 import ChatView from './features/ChatView';
 import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
+import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -285,6 +286,10 @@ export function App() {
 
           {activeNav === 'support' && (
             <SupportView />
+          )}
+
+          {activeNav === 'broadcast' && (
+            <LiveAuctionBroadcastPage />
           )}
 
           {activeNav === 'saved' && (

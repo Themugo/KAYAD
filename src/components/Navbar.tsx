@@ -223,9 +223,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('broadcast')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'auctions'
+                  activeNav === 'broadcast'
                     ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
                     : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
@@ -635,9 +635,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('broadcast')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
-                  activeNav === 'auctions' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
