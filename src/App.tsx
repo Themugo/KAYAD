@@ -23,6 +23,7 @@ import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
 import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
 import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
+import KAYADLive from './pages/KAYADLive';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -295,6 +296,10 @@ export function App() {
 
           {activeNav === 'discovery' && (
             <AuctionDiscoveryNetwork />
+          )}
+
+          {activeNav === 'kayadlive' && (
+            <KAYADLive />
           )}
 
           {activeNav === 'saved' && (

@@ -27,7 +27,9 @@ import {
   Sliders,
   Sparkles,
   CheckCircle2,
-  Landmark
+  Landmark,
+  Radio,
+  Play,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -223,6 +225,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
+                onClick={() => handleNavSelect('kayadlive')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'kayadlive'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
                 onClick={() => handleNavSelect('discovery')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'discovery'
@@ -231,7 +245,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Discover</span>
+                <span>Auctions</span>
               </button>
 
               <button
@@ -242,8 +256,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
-                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Live</span>
+                <Play className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Watch Live</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">
                   NOW
                 </span>
@@ -647,6 +661,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
+                onClick={() => handleNavSelect('kayadlive')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'kayadlive' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Radio className="w-4 h-4" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
                 onClick={() => handleNavSelect('discovery')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
                   activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
@@ -663,8 +687,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Radio className="w-4 h-4" />
-                  <span>Live Auctions</span>
+                  <Play className="w-4 h-4" />
+                  <span>Watch Live</span>
                 </div>
                 <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
               </button>
