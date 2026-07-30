@@ -510,65 +510,202 @@ const SpectatorCTA: FC<{ onRegister: () => void }> = ({ onRegister }) => (
   </Card>
 );
 
-const AuctionClosedSummary: FC<{ auction: LiveAuction; winningAlias: string }> = ({ auction, winningAlias }) => (
-  <div className="space-y-6">
-    <Card className="bg-gradient-to-br from-[#1E3063] to-[#2a4080] text-white overflow-hidden">
-      <div className="p-8 text-center">
-        <div className="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center mx-auto mb-4">
-          <Trophy className="w-10 h-10 text-white" />
-        </div>
-        <h2 className="text-2xl font-black mb-2">Auction Closed</h2>
-        <p className="text-slate-300">Winner Confirmed</p>
-      </div>
-    </Card>
+const AuctionClosedSummary: FC<{ auction: LiveAuction; winningAlias: string }> = ({ auction, winningAlias }) => {
+  // Bid progression data
+  const bidProgression = useMemo(() => {
+    const points = [];
+    let amount = auction.auction.startingBid;
+    for (let i = 0; i < auction.auction.bidsCount; i++) {
+      amount += Math.floor(Math.random() * 500000) + 100000;
+      points.push({ bid: i + 1, amount: Math.min(amount, auction.auction.currentBid) });
+    }
+    return points;
+  }, [auction.auction.bidsCount, auction.auction.startingBid, auction.auction.currentBid]);
 
-    <Card>
-      <div className="p-6 space-y-4">
-        <div className="text-center">
-          <p className="text-sm text-slate-500 mb-1">Winning Bid</p>
-          <p className="text-4xl font-black text-emerald-600">{formatCurrency(auction.auction.currentBid)}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500 mb-1">Winner Alias</p>
-            <p className="text-2xl font-bold text-[#1E3063]">{winningAlias}</p>
-          </div>
-          <div className="text-center p-4 bg-slate-50 rounded-xl">
-            <p className="text-sm text-slate-500 mb-1">Total Bids</p>
-            <p className="text-2xl font-bold text-[#1E3063]">{auction.auction.bidsCount}</p>
-          </div>
-        </div>
-      </div>
-    </Card>
+  const maxBid = Math.max(...bidProgression.map(p => p.amount));
 
-    <Card className="bg-amber-50 border-amber-200">
-      <div className="p-5">
-        <h4 className="font-bold text-amber-800 mb-3">Next Steps</h4>
-        <div className="space-y-3 text-sm text-amber-700">
-          <p>1. The winner will contact <strong>{auction.organizer.name}</strong> directly.</p>
-          <p>2. Payment is made to the Auction Organizer—not to KAYAD.</p>
-          <p>3. Upon payment confirmation, ownership transfer will be arranged.</p>
+  return (
+    <div className="space-y-6">
+      {/* Trophy Header */}
+      <Card className="bg-gradient-to-br from-[#1E3063] to-[#2a4080] text-white overflow-hidden">
+        <div className="p-8 text-center">
+          <div className="w-24 h-24 rounded-full bg-emerald-500 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <Trophy className="w-12 h-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-black mb-2">Auction Completed</h2>
+          <p className="text-slate-300">Congratulations to the winning bidder</p>
+        </div>
+      </Card>
+
+      {/* Winner & Vehicle */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <div className="p-6">
+            <img 
+              src={auction.vehicle.images[0]} 
+              alt={auction.vehicle.title}
+              className="w-full aspect-[16/10] object-cover rounded-xl mb-4"
+            />
+            <h3 className="font-bold text-[#1E3063]">{auction.vehicle.title}</h3>
+            <p className="text-sm text-slate-500">{auction.vehicle.year} • {auction.vehicle.mileage}</p>
+          </div>
+        </Card>
+
+        <div className="space-y-4">
+          <Card className="bg-emerald-50 border-2 border-emerald-200">
+            <div className="p-6 text-center">
+              <p className="text-sm text-emerald-600 mb-1">Winning Bid</p>
+              <p className="text-4xl font-black text-emerald-700">{formatCurrency(auction.auction.currentBid)}</p>
+            </div>
+          </Card>
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="p-4 text-center">
+              <p className="text-xs text-slate-500 mb-1">Winner</p>
+              <p className="text-xl font-bold text-[#1E3063]">{winningAlias}</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <p className="text-xs text-slate-500 mb-1">Total Bids</p>
+              <p className="text-xl font-bold text-[#1E3063]">{auction.auction.bidsCount}</p>
+            </Card>
+          </div>
+          <Card className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Building2 className="w-4 h-4 text-slate-400" />
+              <span className="text-sm font-medium text-slate-700">{auction.organizer.name}</span>
+              {auction.organizer.verified && <ShieldCheck className="w-4 h-4 text-emerald-500" />}
+            </div>
+            <p className="text-xs text-slate-500">Organized by verified auctioneer</p>
+          </Card>
         </div>
       </div>
-    </Card>
 
-    <Card className="bg-blue-50 border-blue-200">
-      <div className="p-5">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5" />
-          <div>
-            <p className="font-bold text-blue-800 mb-1">About This Auction</p>
-            <p className="text-sm text-blue-700">
-              KAYAD facilitated this auction as a technology platform. 
-              All payments are handled directly between the winning bidder and the Auction Organizer. 
-              KAYAD does not collect auction payments.
-            </p>
+      {/* Bid Progression Chart */}
+      <Card>
+        <div className="p-5 border-b border-slate-200">
+          <h3 className="font-bold text-[#1E3063]">Bid Progression</h3>
+        </div>
+        <div className="p-5">
+          <div className="relative h-32">
+            <div className="absolute inset-0 flex items-end justify-between gap-2 px-2">
+              {bidProgression.map((point, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center">
+                  <div 
+                    className="w-full bg-gradient-to-t from-emerald-500 to-emerald-300 rounded-t"
+                    style={{ height: `${(point.amount / maxBid) * 100}%` }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-between mt-2 text-xs text-slate-500">
+            <span>Start: {formatCurrency(auction.auction.startingBid)}</span>
+            <span>End: {formatCurrency(auction.auction.currentBid)}</span>
           </div>
         </div>
-      </div>
-    </Card>
-  </div>
-);
+      </Card>
+
+      {/* Auction Insights */}
+      <Card>
+        <div className="p-5 border-b border-slate-200">
+          <h3 className="font-bold text-[#1E3063]">Auction Insights</h3>
+        </div>
+        <div className="p-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'Registered Bidders', value: auction.metrics.registeredBidders, icon: <Users className="w-5 h-5" /> },
+              { label: 'Peak Spectators', value: auction.metrics.viewers, icon: <Eye className="w-5 h-5" /> },
+              { label: 'Duration', value: '8h 15m', icon: <Clock className="w-5 h-5" /> },
+              { label: 'Reserve', value: reserveMet ? 'Achieved' : 'Not Met', icon: reserveMet ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" /> },
+            ].map((item, i) => (
+              <div key={i} className="text-center p-4 bg-slate-50 rounded-xl">
+                <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center ${
+                  item.label === 'Reserve' && reserveMet ? 'bg-emerald-100 text-emerald-600' :
+                  item.label === 'Reserve' ? 'bg-amber-100 text-amber-600' :
+                  'bg-slate-100 text-slate-600'
+                }`}>
+                  {item.icon}
+                </div>
+                <p className="text-lg font-black text-[#1E3063]">{item.value}</p>
+                <p className="text-xs text-slate-500">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      {/* Next Steps */}
+      <Card className="bg-amber-50 border-amber-200">
+        <div className="p-5">
+          <h4 className="font-bold text-amber-800 mb-3 flex items-center gap-2">
+            <ArrowRight className="w-5 h-5" />
+            What Happens Next
+          </h4>
+          <div className="space-y-3 text-sm text-amber-700">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-amber-800">1</span>
+              </div>
+              <p>The winner will contact <strong>{auction.organizer.name}</strong> directly to arrange payment.</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-amber-800">2</span>
+              </div>
+              <p>Payment is made to the Auction Organizer—not to KAYAD.</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0">
+                <span className="text-xs font-bold text-amber-800">3</span>
+              </div>
+              <p>Upon payment confirmation, ownership transfer and vehicle collection will be arranged.</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Related Auctions */}
+      <Card>
+        <div className="p-5 border-b border-slate-200">
+          <h3 className="font-bold text-[#1E3063]">Upcoming Auctions</h3>
+        </div>
+        <div className="p-4 space-y-3">
+          {[
+            { title: 'BMW X7 M50i xDrive', organizer: 'Premium Auto Auctions', date: 'Jan 18, 2026', image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=400&q=80' },
+            { title: 'MERCEDES-AMG GT', organizer: 'NCBA Bank Kenya', date: 'Jan 20, 2026', image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=400&q=80' },
+          ].map((auction, i) => (
+            <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
+              <img src={auction.image} alt={auction.title} className="w-16 h-12 rounded-lg object-cover" />
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-slate-800 truncate">{auction.title}</p>
+                <p className="text-xs text-slate-500">{auction.organizer} • {auction.date}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-slate-400" />
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* KAYAD Role */}
+      <Card className="bg-blue-50 border-blue-200">
+        <div className="p-5">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+              <Info className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-bold text-blue-800 mb-1">About This Auction</p>
+              <p className="text-sm text-blue-700">
+                KAYAD facilitated this auction as a technology platform. 
+                All payments are handled directly between the winning bidder and the Auction Organizer. 
+                KAYAD does not collect auction payments.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+};
 
 // Main Component
 export const LiveEventExperience: FC<{ auctionId?: string }> = ({ auctionId }) => {
@@ -729,26 +866,41 @@ export const LiveEventExperience: FC<{ auctionId?: string }> = ({ auctionId }) =
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Button variant="outline">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Previous Auction
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm">
-              <Calendar className="w-4 h-4 mr-2" />
-              Upcoming
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <Button variant="outline" size="sm" className="flex-shrink-0">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Previous Live</span>
+              <span className="sm:hidden">Prev</span>
             </Button>
-            <Button variant="ghost" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Replays
+            
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm">
+                <Calendar className="w-4 h-4 mr-1" />
+                <span className="hidden md:inline">Upcoming Auctions</span>
+                <span className="md:hidden">Upcoming</span>
+              </Button>
+              <div className="w-px h-6 bg-slate-200" />
+              <Button variant="ghost" size="sm">
+                <RefreshCw className="w-4 h-4 mr-1" />
+                <span className="hidden md:inline">Replay Archive</span>
+                <span className="md:hidden">Replays</span>
+              </Button>
+              <div className="w-px h-6 bg-slate-200" />
+              <Button variant="ghost" size="sm">
+                <Eye className="w-4 h-4 mr-1" />
+                <span className="hidden md:inline">All Live Auctions</span>
+                <span className="md:hidden">Live</span>
+              </Button>
+            </div>
+            
+            <Button variant="outline" size="sm" className="flex-shrink-0">
+              <span className="hidden sm:inline">Next Live</span>
+              <span className="sm:hidden">Next</span>
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </div>
-          <Button variant="outline">
-            Next Auction
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
         </div>
       </div>
     </div>
