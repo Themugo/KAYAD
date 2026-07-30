@@ -61,10 +61,21 @@ export interface AuctionSession {
     isVerified: boolean;
     verificationBadge?: 'verified' | 'premium' | 'government' | 'bank' | 'licensed';
     profileUrl?: string;
+    // Contact information
+    contact?: {
+      phone?: string;
+      email?: string;
+      address?: string;
+      website?: string;
+      businessHours?: string;
+      operatingRegion?: string;
+    };
+    // Legacy flat contact fields (for backward compatibility)
     phone?: string;
     email?: string;
     address?: string;
     website?: string;
+    businessHours?: string;
     rating?: number;
     yearsOnPlatform?: number;
     completedAuctions?: number;
@@ -77,7 +88,8 @@ export interface AuctionSession {
       tillNumber?: string;
       wireInstructions?: string;
     };
-    businessHours?: string;
+    // Refund policy
+    refundPolicy?: string;
   };
   category: 'Bank Repossession' | 'Direct Import' | 'Fleet Clearance' | 'Dealer Clearance' | 'Government Disposal' | 'Premium Public';
   status: 'Upcoming' | 'Live' | 'Ended' | 'Awaiting Settlement';
