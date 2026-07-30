@@ -616,7 +616,7 @@ export const LiveAuctionRoomModal: React.FC<LiveAuctionRoomModalProps> = ({
 
                 {autoBidEnabled && (
                   <form onSubmit={handleSetAutoBid} className="space-y-2 pt-1">
-                    <p className="text-[10px] text-slate-300">Set max budget limit. KAYAD will auto-bid incrementally up to this amount.</p>
+                    <p className="text-[10px] text-slate-300">Set your maximum budget. The system will auto-bid on your behalf up to this limit.</p>
                     <div className="flex gap-2">
                       <Input
                         type="number"
