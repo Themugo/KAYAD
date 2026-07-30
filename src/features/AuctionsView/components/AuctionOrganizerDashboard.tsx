@@ -100,7 +100,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
 
   // Create auction form state
   const [newAuctionTitle, setNewAuctionTitle] = useState('');
-  const [newAuctionSeller, setNewAuctionSeller] = useState('KAYAD Premier Auctioneers');
+  const [newAuctionOrganizer, setNewAuctionOrganizer] = useState('');
   const [newStartingPrice, setNewStartingPrice] = useState('1500000');
   const [newReservePrice, setNewReservePrice] = useState('2000000');
   const [newMinIncrement, setNewMinIncrement] = useState('10000');
@@ -227,6 +227,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
     if (!newAuctionTitle.trim()) return;
 
     const newId = `SESSION-${Math.floor(100 + Math.random() * 900)}`;
+    const organizerName = newAuctionOrganizer || 'Auction Organizer';
     const dummyVehicle: Vehicle = {
       id: `V-${Math.floor(1000 + Math.random() * 9000)}`,
       title: newAuctionTitle,
@@ -240,7 +241,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
       location: 'Nairobi',
       county: 'Nairobi',
       sellerType: 'Verified Dealer',
-      sellerName: newAuctionSeller,
+      sellerName: organizerName,
       sellerRating: 4.9,
       verified: true,
       inspectionPassed: true,
@@ -257,8 +258,15 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
       vehicleTitle: newAuctionTitle,
       vehicle: dummyVehicle,
       sellerId: 'SELL-001',
-      sellerName: newAuctionSeller,
+      sellerName: organizerName,
       sellerType: 'Verified Dealer',
+      organizer: {
+        id: `org-${Date.now()}`,
+        name: organizerName,
+        type: 'verified_dealer',
+        isVerified: true,
+        verificationBadge: 'verified',
+      },
       category: 'Bank Repossession',
       startingPrice: Number(newStartingPrice) || 1000000,
       reservePrice: Number(newReservePrice) || 1500000,
@@ -1001,12 +1009,12 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-700 block">Seller / Consignor Company</label>
+                      <label className="text-xs font-bold text-slate-700 block">Auction Organizer Name</label>
                       <Input
                         type="text"
-                        value={newAuctionSeller}
-                        onChange={(e) => setNewAuctionSeller(e.target.value)}
-                        placeholder="e.g., KAYAD Premier Auctioneers"
+                        value={newAuctionOrganizer}
+                        onChange={(e) => setNewAuctionOrganizer(e.target.value)}
+                        placeholder="e.g., ABC Motors Kenya"
                         className="text-xs font-medium"
                       />
                     </div>
