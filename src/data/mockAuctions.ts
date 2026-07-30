@@ -1,8 +1,123 @@
-import { AuctionSession, Vehicle } from '../types';
+import { AuctionSession, Vehicle, AuctionOrganizerType } from '../types';
 import { INITIAL_VEHICLES } from './mockVehicles';
 
 const nissanVehicle = INITIAL_VEHICLES.find(v => v.id === 'v4') || INITIAL_VEHICLES[3];
 const mercVehicle = INITIAL_VEHICLES.find(v => v.id === 'v6') || INITIAL_VEHICLES[5];
+
+// Mock Auction Organizers
+const ORGANIZERS = {
+  ncbBank: {
+    id: 'org-ncba',
+    name: 'NCBA Bank Kenya',
+    type: 'commercial_bank' as AuctionOrganizerType,
+    logo: 'https://ui-avatars.com/api/?name=NCBA&background=1E3063&color=fff&size=128',
+    isVerified: true,
+    verificationBadge: 'bank' as const,
+    profileUrl: '/organizer/ncba-bank',
+    phone: '+254 722 889 012',
+    email: 'repossessed@ncbank.co.ke',
+    address: 'NCBA Tower, Upper Hill Road, Nairobi',
+    website: 'https://www.ncbagroup.com/kenya',
+    rating: 4.8,
+    yearsOnPlatform: 4,
+    completedAuctions: 156,
+    paymentDetails: {
+      bankName: 'NCBA Bank Kenya PLC',
+      accountName: 'NCBA Asset Disposal Account',
+      accountNumber: '0123456789012',
+      paybill: '880100',
+    },
+    businessHours: 'Mon-Fri: 8:00 AM - 5:00 PM',
+  },
+  crownMotors: {
+    id: 'org-crown',
+    name: 'Crown Motors Kenya',
+    type: 'verified_dealer' as AuctionOrganizerType,
+    logo: 'https://ui-avatars.com/api/?name=CM&background=C85A32&color=fff&size=128',
+    isVerified: true,
+    verificationBadge: 'verified' as const,
+    profileUrl: '/organizer/crown-motors',
+    phone: '+254 711 222 333',
+    email: 'auctions@crownmotors.co.ke',
+    address: 'Mombasa Road, Industrial Area, Nairobi',
+    rating: 4.6,
+    yearsOnPlatform: 6,
+    completedAuctions: 89,
+    paymentDetails: {
+      bankName: 'Equity Bank Kenya',
+      accountName: 'Crown Motors Kenya Ltd',
+      accountNumber: '0987654321098',
+      paybill: '247247',
+      tillNumber: '5902148',
+    },
+    businessHours: 'Mon-Sat: 8:00 AM - 6:00 PM',
+  },
+  coastlineAuto: {
+    id: 'org-coastline',
+    name: 'Coastline Auto Ltd',
+    type: 'verified_dealer' as AuctionOrganizerType,
+    logo: 'https://ui-avatars.com/api/?name=CA&background=1E3063&color=fff&size=128',
+    isVerified: true,
+    verificationBadge: 'premium' as const,
+    profileUrl: '/organizer/coastline-auto',
+    phone: '+254 733 444 555',
+    email: 'sales@coastlineauto.co.ke',
+    address: 'Nkrumah Road, Mombasa',
+    rating: 4.5,
+    yearsOnPlatform: 3,
+    completedAuctions: 42,
+    paymentDetails: {
+      bankName: 'Standard Chartered Bank Kenya',
+      accountName: 'Coastline Auto Limited',
+      accountNumber: '0123456789001',
+    },
+    businessHours: 'Mon-Fri: 8:30 AM - 5:30 PM',
+  },
+  kenyaGov: {
+    id: 'org-gok',
+    name: 'Kenya Government Disposal Agency',
+    type: 'government_disposal_agency' as AuctionOrganizerType,
+    logo: 'https://ui-avatars.com/api/?name=GOK&background=006600&color=fff&size=128',
+    isVerified: true,
+    verificationBadge: 'government' as const,
+    profileUrl: '/organizer/government-disposal',
+    phone: '+254 20 491 0000',
+    email: 'disposal@treasury.go.ke',
+    address: 'Treasury Building, Harambee Avenue, Nairobi',
+    website: 'https://www.treasury.go.ke',
+    rating: 4.9,
+    yearsOnPlatform: 5,
+    completedAuctions: 234,
+    paymentDetails: {
+      bankName: 'Central Bank of Kenya',
+      accountName: 'Government of Kenya Disposal Fund',
+      accountNumber: '1000189013',
+      paybill: '222222',
+    },
+    businessHours: 'Mon-Fri: 8:00 AM - 4:00 PM',
+  },
+  fleetDisposal: {
+    id: 'org-fleet',
+    name: 'Safaricom Fleet Disposal',
+    type: 'fleet_disposal_company' as AuctionOrganizerType,
+    logo: 'https://ui-avatars.com/api/?name=SF&background=00A651&color=fff&size=128',
+    isVerified: true,
+    verificationBadge: 'licensed' as const,
+    profileUrl: '/organizer/safaricom-fleet',
+    phone: '+254 722 100 100',
+    email: 'fleet.auction@safaricom.co.ke',
+    address: 'Safaricom Campus, Upper Hill, Nairobi',
+    rating: 4.7,
+    yearsOnPlatform: 2,
+    completedAuctions: 28,
+    paymentDetails: {
+      bankName: 'Absa Bank Kenya',
+      accountName: 'Safaricom PLC Fleet Disposal',
+      accountNumber: '2057654321',
+    },
+    businessHours: 'Mon-Fri: 9:00 AM - 5:00 PM',
+  },
+};
 
 export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
   {
@@ -13,6 +128,7 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     sellerId: 'd3',
     sellerName: nissanVehicle.sellerName,
     sellerType: nissanVehicle.sellerType,
+    organizer: ORGANIZERS.ncbBank,
     category: 'Bank Repossession',
     status: 'Live',
     startingPrice: 1800000,
@@ -48,6 +164,7 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     sellerId: 'd1',
     sellerName: mercVehicle.sellerName,
     sellerType: mercVehicle.sellerType,
+    organizer: ORGANIZERS.crownMotors,
     category: 'Direct Import',
     status: 'Live',
     startingPrice: 3500000,
@@ -81,6 +198,7 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     sellerId: 'd1',
     sellerName: 'Crown Motors Kenya',
     sellerType: 'Verified Dealer',
+    organizer: ORGANIZERS.fleetDisposal,
     category: 'Fleet Clearance',
     status: 'Upcoming',
     startingPrice: 5900000,
@@ -108,7 +226,8 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     sellerId: 'd2',
     sellerName: 'Coastline Auto Ltd',
     sellerType: 'Verified Dealer',
-    category: 'Direct Import',
+    organizer: ORGANIZERS.kenyaGov,
+    category: 'Government Disposal',
     status: 'Ended',
     startingPrice: 2800000,
     reservePrice: 3100000,
@@ -130,3 +249,6 @@ export const INITIAL_AUCTION_SESSIONS: AuctionSession[] = [
     ]
   }
 ];
+
+// Export organizers for reference
+export const MOCK_ORGANIZERS = ORGANIZERS;

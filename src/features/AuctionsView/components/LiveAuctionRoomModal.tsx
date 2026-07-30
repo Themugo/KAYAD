@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
+import { OrganizerProfile } from '../../../components/organizer';
 import { 
   Gavel, 
   Clock, 
@@ -24,9 +25,28 @@ import {
   Activity, 
   Award,
   Sparkles,
-  HelpCircle
+  HelpCircle,
+  ExternalLink,
+  Star,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
+
+// Helper to get organizer type display name
+const getOrganizerTypeDisplay = (type?: string): string => {
+  const typeMap: Record<string, string> = {
+    verified_dealer: 'Verified Dealer',
+    licensed_auctioneer: 'Licensed Auctioneer',
+    commercial_bank: 'Commercial Bank',
+    microfinance_institution: 'Microfinance Institution',
+    fleet_disposal_company: 'Fleet Disposal Company',
+    government_disposal_agency: 'Government Agency',
+    insurance_salvage_company: 'Insurance Salvage',
+    corporate_fleet_owner: 'Corporate Fleet',
+  };
+  return type ? typeMap[type] || type : 'Auction Organizer';
+};
 
 interface LiveAuctionRoomModalProps {
   isOpen: boolean;
@@ -182,13 +202,23 @@ export const LiveAuctionRoomModal: React.FC<LiveAuctionRoomModalProps> = ({
               SESSION: #{session.id}
             </Badge>
 
-            {/* ORGANIZER DISPLAY */}
-            <div className="hidden md:flex items-center gap-1.5 text-slate-300 border-l border-white/15 pl-3">
-              <Building2 className="w-3.5 h-3.5 text-amber-300" />
-              <span>Organizer: <strong className="text-white">{session.sellerName}</strong></span>
-              <Badge variant="success" size="sm" className="bg-emerald-500/20 text-emerald-300 text-[9px] border border-emerald-400/30">
-                Verified Organizer
-              </Badge>
+            {/* ORGANIZER DISPLAY - Prominently shows auction organizer */}
+            <div className="hidden md:flex items-center gap-2 text-slate-300 border-l border-white/15 pl-3">
+              <div className="w-6 h-6 rounded-full bg-[#1E3063] flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+                {session.organizer?.logo ? (
+                  <img src={session.organizer.logo} alt={session.organizer.name} className="w-full h-full object-cover" />
+                ) : (
+                  session.organizer?.name?.charAt(0) || 'A'
+                )}
+              </div>
+              <span>Auction conducted by: <strong className="text-white">{session.organizer?.name || session.sellerName}</strong></span>
+              <span className="text-[10px] text-slate-400">({getOrganizerTypeDisplay(session.organizer?.type)})</span>
+              {session.organizer?.isVerified && (
+                <Badge variant="success" size="sm" className="bg-emerald-500/20 text-emerald-300 text-[9px] border border-emerald-400/30">
+                  <ShieldCheck className="w-3 h-3 mr-0.5" />
+                  Verified
+                </Badge>
+              )}
             </div>
           </div>
 
@@ -282,7 +312,7 @@ export const LiveAuctionRoomModal: React.FC<LiveAuctionRoomModalProps> = ({
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </h1>
               <p className="text-xs text-slate-300 mt-1 line-clamp-2">
-                {vehicle.title} — Inspected & Certified by {session.sellerName}.
+                {vehicle.title} — Auction organized by {session.organizer?.name || session.sellerName}.
               </p>
             </div>
 
@@ -450,7 +480,7 @@ export const LiveAuctionRoomModal: React.FC<LiveAuctionRoomModalProps> = ({
                     <Lock className="w-4 h-4 text-amber-300 shrink-0" />
                     <div>
                       <span className="font-extrabold text-white block">Bidder Registration Required</span>
-                      <span className="text-[11px] text-slate-300">Pay deposit to {session.sellerName} to enter</span>
+                      <span className="text-[11px] text-slate-300">Pay security deposit to {session.organizer?.name || session.sellerName}</span>
                     </div>
                   </div>
                   <Button

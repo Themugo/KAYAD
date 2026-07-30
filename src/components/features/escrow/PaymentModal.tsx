@@ -6,18 +6,18 @@ import { formatPhone } from '../../../utils/helpers';
 
 const TYPE_META: Record<string, { label: string; desc: string; sub: string }> = {
   escrow: {
-    label: 'Escrow Payment',
-    desc: 'Your payment is held securely in escrow until you confirm receipt of the car. Funds are only released to the seller after your approval.',
+    label: 'Organizer Escrow Payment',
+    desc: 'Your payment is held securely in escrow until you confirm receipt of the car. Funds are only released to the auction organizer after your approval.',
     sub: 'Held in escrow · Released on your confirmation',
   },
   bid: {
     label: 'Bid Security Deposit',
-    desc: 'This is a bid security deposit paid to the seller to secure your bid. It shows you are a serious buyer.',
-    sub: 'Paid to the seller · Non-refundable if you win',
+    desc: 'This is a bid security deposit paid to the auction organizer to secure your bid. It shows you are a serious buyer.',
+    sub: 'Paid to organizer · Refundable per organizer policy',
   },
   listing: {
     label: 'Listing Fee',
-    desc: 'One-time listing fee paid to Kayad platform to publish your car listing.',
+    desc: 'One-time listing fee paid to KAYAD platform to publish your car listing.',
     sub: 'Platform fee · One-time payment',
   },
 };
@@ -192,8 +192,8 @@ export default function PaymentModal({ onClose, amount, carId, type = 'escrow', 
             <div style={{ fontSize: 56, marginBottom: 12 }}>✅</div>
             <h3 style={{ color: 'var(--green)', marginBottom: 8 }}>Payment Confirmed!</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>
-              {type === 'escrow' ? 'Your payment is held in escrow. The seller will be notified.' :
-               type === 'bid' ? 'Your bid security deposit has been paid to the seller.' :
+              {type === 'escrow' ? 'Your payment is held in escrow. The auction organizer will be notified.' :
+               type === 'bid' ? 'Your bid security deposit has been received by the auction organizer.' :
                'Your listing fee has been received.'}
             </p>
           </div>

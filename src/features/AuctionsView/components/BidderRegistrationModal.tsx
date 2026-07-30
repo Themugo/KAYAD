@@ -81,9 +81,11 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
   if (!isOpen) return null;
 
   const depositAmount = session.bidSecurityAmount || 50000;
-  const organizerBank = session.bidSecurityBank || 'NCBA Bank Kenya PLC';
-  const organizerAccountName = session.bidSecurityAccountName || `${session.sellerName} Bidding Escrow`;
-  const organizerPaybillOrAcc = session.bidSecurityPaybillOrAccount || 'Paybill 888100 | Acc: AUC-DEPOSIT';
+  const organizerName = session.organizer?.name || session.sellerName;
+  const organizerBank = session.organizer?.paymentDetails?.bankName || session.bidSecurityBank || 'NCBA Bank Kenya PLC';
+  const organizerAccountName = session.organizer?.paymentDetails?.accountName || session.bidSecurityAccountName || `${organizerName} Bidding Escrow`;
+  const organizerPaybill = session.organizer?.paymentDetails?.paybill || '888100';
+  const organizerTill = session.organizer?.paymentDetails?.tillNumber || '5902148';
 
   const handleCopy = (text: string, fieldName: string) => {
     navigator.clipboard.writeText(text);
@@ -141,12 +143,12 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">KAYAD Auction Governance</span>
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider">KAYAD Auction Technology</span>
                 <Badge variant="neutral" size="sm" className="bg-white/10 text-slate-200 text-[10px]">
-                  Accreditation Portal
+                  Bidder Registration
                 </Badge>
               </div>
-              <h2 className="text-lg font-black font-display text-white mt-0.5">Bidder Verification & Access Registration</h2>
+              <h2 className="text-lg font-black font-display text-white mt-0.5">Register to Bid — {organizerName}</h2>
             </div>
           </div>
           <button
@@ -199,7 +201,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                   <span>Mandatory Auction Conduct & Bidding Rules</span>
                 </div>
                 <p className="text-slate-600 text-xs leading-relaxed">
-                  You are registering to bid on <strong className="text-[#1E3063]">{session.vehicleTitle}</strong> organized by <strong className="text-[#1E3063]">{session.sellerName}</strong>. Please review the mandatory bidding rules:
+                  You are registering to bid on <strong className="text-[#1E3063]">{session.vehicleTitle}</strong> organized by <strong className="text-[#1E3063]">{organizerName}</strong>. Please review the mandatory bidding rules:
                 </p>
               </div>
 
@@ -210,7 +212,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#1E3063] text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p><strong>Bid Security Deposit Requirement:</strong> A refundable deposit of <strong>Ksh {depositAmount.toLocaleString()}</strong> must be paid directly to the event custodian ({session.sellerName}) before room entry is authorized.</p>
+                  <p><strong>Bid Security Deposit Requirement:</strong> A refundable deposit of <strong>Ksh {depositAmount.toLocaleString()}</strong> must be paid to the auction organizer ({organizerName}) before room entry is authorized.</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="w-5 h-5 rounded-full bg-[#1E3063] text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">3</span>
@@ -405,7 +407,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                 <div>
                   <h4 className="text-sm font-black text-[#1E3063] font-display flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-emerald-600" />
-                    <span>Pay Bid Security to Organizer ({session.sellerName})</span>
+                    <span>Pay Bid Security to Organizer ({organizerName})</span>
                   </h4>
                   <p className="text-slate-500 text-xs mt-0.5">
                     Deposit is paid directly to the verified custodian account below.
@@ -455,7 +457,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-amber-300" />
-                    <span className="font-black text-amber-300">{session.sellerName} Official Account</span>
+                    <span className="font-black text-amber-300">{organizerName} Official Account</span>
                   </div>
                   <Badge variant="success" size="sm" className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                     Verified Organizer
@@ -509,9 +511,9 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                   <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
                     <div>
                       <span className="text-slate-400 font-medium">Lipa Na M-Pesa Buy Goods Till</span>
-                      <p className="font-mono font-bold text-lg text-amber-300">5902148</p>
+                      <p className="font-mono font-bold text-lg text-amber-300">{organizerTill}</p>
                     </div>
-                    <span className="text-xs text-slate-300">Target: {session.sellerName}</span>
+                    <span className="text-xs text-slate-300">Target: {organizerName}</span>
                   </div>
                 )}
 
@@ -601,7 +603,7 @@ export const BidderRegistrationModal: React.FC<BidderRegistrationModalProps> = (
                 </Badge>
                 <h3 className="text-xl font-black text-[#1E3063] font-display mt-2">Auction Room Access Granted!</h3>
                 <p className="text-xs text-slate-600 max-w-md mx-auto">
-                  Your bid security deposit of <strong>Ksh {depositAmount.toLocaleString()}</strong> has been verified by {session.sellerName}.
+                  Your bid security deposit of <strong>Ksh {depositAmount.toLocaleString()}</strong> has been verified by {organizerName}.
                 </p>
               </div>
 
