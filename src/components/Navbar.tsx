@@ -223,6 +223,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'discovery'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Discover</span>
+              </button>
+
+              <button
                 onClick={() => handleNavSelect('broadcast')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'broadcast'
@@ -230,10 +242,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
-                <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Auctions</span>
+                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Live</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">
-                  LIVE
+                  NOW
                 </span>
               </button>
             </nav>
@@ -635,14 +647,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Gavel className="w-4 h-4" />
+                <span>Auction Discovery</span>
+              </button>
+
+              <button
                 onClick={() => handleNavSelect('broadcast')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
                   activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Gavel className="w-4 h-4" />
-                  <span>Auctions</span>
+                  <Radio className="w-4 h-4" />
+                  <span>Live Auctions</span>
                 </div>
                 <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
               </button>

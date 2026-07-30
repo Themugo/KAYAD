@@ -22,6 +22,7 @@ import ChatView from './features/ChatView';
 import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
 import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
+import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -290,6 +291,10 @@ export function App() {
 
           {activeNav === 'broadcast' && (
             <LiveAuctionBroadcastPage />
+          )}
+
+          {activeNav === 'discovery' && (
+            <AuctionDiscoveryNetwork />
           )}
 
           {activeNav === 'saved' && (
