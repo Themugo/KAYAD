@@ -932,7 +932,7 @@ export const LiveAuctionRoom: FC<LiveAuctionRoomProps> = ({
       isMe: true,
     };
     
-    setBids(prev => [...prev.map(b => ({ ...b, status: b.isMe ? 'outbid' : b.status })), newBid);
+    setBids(prev => [...prev.map(b => ({ ...b, status: b.isMe ? 'outbid' : b.status })), newBid]);
     addNotification(`Your bid of ${formatCurrency(amount)} has been placed!`);
     onPlaceBid(amount);
   };
