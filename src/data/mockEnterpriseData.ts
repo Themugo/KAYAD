@@ -142,7 +142,7 @@ export interface ApiEndpointRecord {
 }
 
 // Mock initial data sets
-export classNameMockEnterpriseData {
+export class MockEnterpriseData {
   static dealers: DealerRecord[] = [
     {
       id: 'D-01',

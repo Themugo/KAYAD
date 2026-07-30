@@ -52,7 +52,8 @@ export interface AuctionSession {
   sellerId: string;
   sellerName: string;
   sellerType: 'Verified Dealer' | 'Private Seller';
-  category: 'Bank Repossession' | 'Direct Import' | 'Fleet Clearance' | 'Dealer Clearance';
+  organizerType?: 'Verified Dealer' | 'Licensed Auctioneer' | 'Bank' | 'Fleet Owner' | 'Government Disposal Agency' | 'Private Seller';
+  category: 'Bank Repossession' | 'Direct Import' | 'Fleet Clearance' | 'Dealer Clearance' | 'Government Disposal' | 'Premium Public';
   status: 'Upcoming' | 'Live' | 'Ended' | 'Awaiting Settlement';
   startingPrice: number;
   reservePrice: number;
@@ -66,6 +67,18 @@ export interface AuctionSession {
   reserveMet: boolean;
   bidHistory: BidRecord[];
   termsAndConditions: string[];
+  // Viewing Schedule & Location
+  viewingDates?: string;
+  viewingLocation?: string;
+  // Bid Security Deposit Configuration
+  bidSecurityAmount?: number;
+  bidSecurityBank?: string;
+  bidSecurityAccountName?: string;
+  bidSecurityPaybillOrAccount?: string;
+  bidSecurityRefundPolicy?: string;
+  bidSecurityVerificationMethod?: string;
+  // Winning Payment Instructions
+  handoverInstructions?: string;
 }
 
 export interface SavedSearch {
@@ -235,17 +248,62 @@ export interface EscrowTransaction {
 }
 
 export type UnifiedCommCategory = 
-  | 'messages' 
-  | 'notifications' 
-  | 'escrow' 
-  | 'auctions' 
-  | 'inspections' 
-  | 'finance' 
-  | 'announcements' 
+  | 'inquiry'
+  | 'purchase'
+  | 'seller'
+  | 'dealer'
+  | 'auction'
+  | 'inspection'
+  | 'escrow'
+  | 'finance'
+  | 'support'
+  | 'notification'
+  | 'messages'
+  | 'auctions'
+  | 'inspections'
+  | 'notifications'
+  | 'announcements'
   | 'saved_searches';
 
-export type MessageAttachmentType = 'text' | 'image' | 'document' | 'location' | 'appointment';
+export type MessageAttachmentType = 'text' | 'image' | 'document' | 'inspection_pdf' | 'video' | 'location' | 'appointment' | 'payment_receipt';
 export type MessageReadStatus = 'sent' | 'delivered' | 'read';
+
+export interface SharedTransactionFile {
+  id: string;
+  fileName: string;
+  fileType: 'pdf' | 'logbook' | 'invoice' | 'receipt' | 'image' | 'video' | 'doc';
+  fileSize?: string;
+  uploadedAt: string;
+  uploadedBy?: string;
+  url?: string;
+}
+
+export interface ConversationTimelineNode {
+  id: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  status: 'completed' | 'current' | 'upcoming';
+  actor?: string;
+}
+
+export interface ConversationParticipant {
+  id: string;
+  name: string;
+  role: string;
+  avatar?: string;
+  onlineStatus?: 'online' | 'offline' | 'away';
+  lastSeen?: string;
+  isTyping?: boolean;
+}
+
+export interface SmartActionItem {
+  id: string;
+  label: string;
+  actionKey: string;
+  variant?: 'primary' | 'secondary' | 'accent' | 'coral' | 'outline';
+  iconName?: string;
+}
 
 export interface MessageAttachment {
   type: MessageAttachmentType;
@@ -261,6 +319,11 @@ export interface MessageAttachment {
   appointmentTime?: string;
   appointmentLocation?: string;
   appointmentStatus?: 'Confirmed' | 'Pending' | 'Rescheduled' | 'Cancelled';
+  paymentAmount?: number;
+  paymentMethod?: string;
+  paymentReference?: string;
+  videoDuration?: string;
+  inspectionScore?: number;
 }
 
 export interface UnifiedMessageItem {
@@ -280,6 +343,7 @@ export interface UnifiedMessageItem {
   vehicleTitle?: string;
   vehicleImage?: string;
   vehiclePrice?: number;
+  referenceNumber?: string;
   escrowId?: string;
   inspectionId?: string;
   loanAppRef?: string;
@@ -292,26 +356,92 @@ export interface UnifiedMessageItem {
 export interface UnifiedChatThread {
   id: string;
   category: UnifiedCommCategory;
+  referenceNumber: string;
+  transactionType: string;
+  currentStatus: string;
+  currentStage: string;
+  
   participantName: string;
   participantRole: string;
   participantAvatar: string;
   participantVerified: boolean;
+  participantStatus?: 'online' | 'offline' | 'away';
+  isTyping?: boolean;
+
   unreadCount: number;
   lastMessage: string;
   lastTimestamp: string;
+  isArchived?: boolean;
   
   // Vehicle context
   vehicleId?: string;
   vehicleTitle?: string;
   vehicleImage?: string;
   vehiclePrice?: number;
+  vehicleVin?: string;
+  vehicleLocation?: string;
+  vehicleMileage?: string;
   
-  // Transaction context
+  // Transaction context refs
   escrowId?: string;
   inspectionId?: string;
   loanAppRef?: string;
   auctionId?: string;
+
+  // Counterparty info (Protected PII)
+  counterpartyInfo: {
+    name: string;
+    role: string;
+    maskedPhone: string;
+    unmaskedPhone?: string;
+    rating: number;
+    trustScore: number;
+    verifiedSince: string;
+    location: string;
+    county: string;
+  };
   
+  // Structured live sub-summaries for context panel
+  escrowSummary?: {
+    vaultId: string;
+    amountLocked: number;
+    bankVault: string;
+    step: number;
+    totalSteps: number;
+    status: string;
+  };
+  inspectionSummary?: {
+    reportId: string;
+    score: number;
+    inspectorName: string;
+    station: string;
+    chassisStatus: string;
+    obdStatus: string;
+    status: string;
+  };
+  financeSummary?: {
+    partnerBank: string;
+    loanCode: string;
+    approvedLimit: number;
+    interestRate: string;
+    monthlyInstallment: number;
+    status: string;
+  };
+  auctionSummary?: {
+    auctionCode: string;
+    currentBid: number;
+    reservePrice: number;
+    bidsCount: number;
+    timeLeft: string;
+    status: string;
+  };
+
+  // Timeline history & Participants & Smart Actions & Files
+  participants: ConversationParticipant[];
+  timeline: ConversationTimelineNode[];
+  smartActions: SmartActionItem[];
+  sharedFiles: SharedTransactionFile[];
+
   messages: UnifiedMessageItem[];
 }
 
