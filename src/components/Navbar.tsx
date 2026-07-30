@@ -464,6 +464,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                           Dealer Management
                         </div>
                         <button
+                          onClick={() => handleNavSelect('dealer-business')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-bold text-[#00C9CE]"
+                        >
+                          <LayoutDashboard className="w-4 h-4 text-[#00C9CE]" />
+                          <span>Dealer Business Center</span>
+                        </button>
+                        <button
                           onClick={() => handleNavSelect('dashboard')}
                           className="w-full text-left px-4 py-1.5 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-bold text-[#1E3063]"
                         >
