@@ -265,8 +265,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             </nav>
           </div>
 
-          {/* CENTER SECTION: Pre-Purchase Inspection, Financing, Support */}
+          {/* CENTER SECTION: My Garage, Pre-Purchase Inspection, Financing, Support */}
           <nav className="hidden lg:flex items-center space-x-2 text-xs font-semibold text-slate-600">
+            <button
+              onClick={() => handleNavSelect('buyer-platform')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'buyer-platform'
+                  ? 'bg-[#D4AF37] text-[#0A1628] font-bold shadow-2xs'
+                  : 'hover:text-[#0A1628] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
+              <span>My Garage</span>
+            </button>
+
             <button
               onClick={() => handleNavSelect('inspections')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${

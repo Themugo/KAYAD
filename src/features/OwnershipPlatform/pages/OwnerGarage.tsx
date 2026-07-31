@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Car,
-  Garage,
+  Warehouse,
   Wrench,
   Bell,
   FileText,
@@ -122,7 +122,7 @@ export default function OwnerGarage() {
   const [selectedVehicle, setSelectedVehicle] = useState<typeof SAMPLE_VEHICLES[0] | null>(null);
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <Garage size={18} /> },
+    { id: 'overview', label: 'Overview', icon: <Warehouse size={18} /> },
     { id: 'vehicles', label: 'My Vehicles', icon: <Car size={18} /> },
     { id: 'reminders', label: 'Reminders', icon: <Bell size={18} /> },
     { id: 'documents', label: 'Documents', icon: <FileText size={18} /> },
@@ -137,7 +137,7 @@ export default function OwnerGarage() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
-                <Garage size={32} color={KAYAD_COLORS.white} />
+                <Warehouse size={32} color={KAYAD_COLORS.white} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white">My Garage</h1>
