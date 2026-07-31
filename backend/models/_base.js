@@ -143,6 +143,11 @@ const TABLE_MAP = {
   CountryRule: "country_rules",
   PartnerRequirement: "partner_requirements",
   Release: "releases",
+  // Executive Intelligence Platform Models
+  ExecutiveMetric: "executive_metrics",
+  IntelligenceReport: "intelligence_reports",
+  Forecast: "forecasts",
+  Benchmark: "benchmarks",
 };
 
 // ────────────────────────────────────────────────────────────────
