@@ -125,6 +125,13 @@ const TABLE_MAP = {
   Alert: "alerts",
   HealthCheck: "health_checks",
   SelfHealingAction: "self_healing_actions",
+  // Enterprise Integration Platform Models
+  APIEndpoint: "api_endpoints",
+  Partner: "partners",
+  Webhook: "webhooks",
+  Plugin: "plugins",
+  IntegrationTemplate: "integration_templates",
+  APIKey: "api_keys",
 };
 
 // ────────────────────────────────────────────────────────────────
