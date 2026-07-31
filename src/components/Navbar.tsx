@@ -265,8 +265,20 @@ export const Navbar: React.FC<NavbarProps> = ({
             </nav>
           </div>
 
-          {/* CENTER SECTION: Pre-Purchase Inspection, Financing, Support */}
+          {/* CENTER SECTION: My Garage, Pre-Purchase Inspection, Financing, Support */}
           <nav className="hidden lg:flex items-center space-x-2 text-xs font-semibold text-slate-600">
+            <button
+              onClick={() => handleNavSelect('buyer-platform')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'buyer-platform'
+                  ? 'bg-[#D4AF37] text-[#0A1628] font-bold shadow-2xs'
+                  : 'hover:text-[#0A1628] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
+              <span>My Garage</span>
+            </button>
+
             <button
               onClick={() => handleNavSelect('inspections')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
@@ -338,12 +350,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button
-              onClick={() => handleNavSelect('sell')}
+              onClick={() => handleNavSelect('seller-platform')}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#C85A32] hover:bg-[#B34E28] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
-              <span>List Vehicle</span>
+              <span>Sell Vehicle</span>
             </button>
 
             {/* AUTHENTICATED USER DROPDOWN OR LOGIN BUTTON (Secondary CTA: White bg, Navy border) */}
@@ -420,11 +432,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleNavSelect('sell')}
+                        onClick={() => handleNavSelect('seller-platform')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
                       >
                         <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>My Vehicles</span>
+                        <span>Sell Vehicle</span>
                       </button>
 
                       <button
