@@ -99,6 +99,15 @@ const TABLE_MAP = {
   VXWidget: "vx_widgets",
   VXVersion: "vx_versions",
   VXStyle: "vx_styles",
+  // Experience Orchestration Platform (XOS) Models
+  Experience: "experiences",
+  Campaign: "campaigns",
+  Audience: "audiences",
+  Journey: "journeys",
+  SeasonalTheme: "seasonal_themes",
+  HomepageVariant: "homepage_variants",
+  NavigationRule: "navigation_rules",
+  ExperienceAnalytics: "experience_analytics",
 };
 
 // ────────────────────────────────────────────────────────────────
