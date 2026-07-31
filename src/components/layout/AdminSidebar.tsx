@@ -5,7 +5,7 @@ import {
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
-  Radio,
+  Radio, Palette, Zap, Database,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -21,6 +21,9 @@ interface LinkItem {
 
 const ALL_LINKS: LinkItem[] = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/cms', icon: Palette, label: 'Content Studio' },
+  { to: '/admin/automation', icon: Zap, label: 'Automation Studio' },
+  { to: '/admin/config', icon: Database, label: 'Configuration Center' },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
   { to: '/admin/cars', icon: Car, label: 'Listings' },

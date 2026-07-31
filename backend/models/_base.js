@@ -48,6 +48,35 @@ const TABLE_MAP = {
   TransactionLedger: "transaction_ledger", Localization: "localizations",
   UserPreference: "user_preferences", BidderDeposit: "bidder_deposits",
   BidLog: "bid_logs",
+  // CMS Models
+  CMSPage: "cms_pages",
+  CMSContent: "cms_contents",
+  CMSMedia: "cms_media",
+  CMSCampaign: "cms_campaigns",
+  CMSBanner: "cms_banners",
+  CMSFaq: "cms_faqs",
+  CMSTaxonomy: "cms_taxonomies",
+  CMSRevision: "cms_revisions",
+  CMSABTest: "cms_ab_tests",
+  CMSAnalytics: "cms_analytics",
+  // Automation Models
+  Workflow: "workflows",
+  WorkflowTrigger: "workflow_triggers",
+  WorkflowAction: "workflow_actions",
+  WorkflowLog: "workflow_logs",
+  AutomationTask: "automation_tasks",
+  BusinessRule: "business_rules",
+  ApprovalChain: "approval_chains",
+  NotificationTemplate: "notification_templates",
+  ScheduledJob: "scheduled_jobs",
+  // Configuration Models
+  ConfigEntry: "config_entries",
+  FeatureFlag: "feature_flags",
+  ReferenceData: "reference_data",
+  VehicleMasterData: "vehicle_master_data",
+  LocationMasterData: "location_master_data",
+  CountryConfig: "country_configs",
+  ConfigAuditLog: "config_audit_logs",
 };
 
 // ────────────────────────────────────────────────────────────────

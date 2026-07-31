@@ -108,6 +108,9 @@ import feedbackRoutes from "./routes/feedbackRoutes.js";
 import announcementRoutes from "./routes/announcementRoutes.js";
 import supportTicketAdminRoutes from "./routes/supportTicketAdminRoutes.js";
 import bulkAdminRoutes from "./routes/bulkAdminRoutes.js";
+import cmsRoutes from "./routes/cmsRoutes.js";
+import automationRoutes from "./routes/automationRoutes.js";
+import configurationRoutes from "./routes/configurationRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
@@ -681,6 +684,9 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/admin/support-tickets", supportTicketAdminRoutes);
 app.use("/api/admin/bulk", bulkAdminRoutes);
+app.use("/api/cms", cmsRoutes);
+app.use("/api/automation", automationRoutes);
+app.use("/api/config", configurationRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
