@@ -119,6 +119,12 @@ const TABLE_MAP = {
   Scenario: "scenarios",
   SimulationResult: "simulation_results",
   Prediction: "predictions",
+  // Enterprise Control Plane Models
+  PlatformMetric: "platform_metrics",
+  Incident: "incidents",
+  Alert: "alerts",
+  HealthCheck: "health_checks",
+  SelfHealingAction: "self_healing_actions",
 };
 
 // ────────────────────────────────────────────────────────────────
