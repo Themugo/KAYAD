@@ -148,6 +148,11 @@ const TABLE_MAP = {
   IntelligenceReport: "intelligence_reports",
   Forecast: "forecasts",
   Benchmark: "benchmarks",
+  // Enterprise Command Center Models
+  OperationLog: "operation_logs",
+  CommandAction: "command_actions",
+  WarRoom: "war_rooms",
+  DashboardWidget: "dashboard_widgets",
 };
 
 // ────────────────────────────────────────────────────────────────

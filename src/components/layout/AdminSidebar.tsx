@@ -6,7 +6,7 @@ import {
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
   Radio, Palette, Zap, Database, Layers, Layout, Target, Bot, Binary,
-  Activity as OpsIcon, Globe, Shield as GovernanceIcon, Brain,
+  Activity as OpsIcon, Globe, Shield as GovernanceIcon, Brain, Command,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -34,6 +34,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/integration', icon: Globe, label: 'Integration Studio', superadmin: true },
   { to: '/admin/governance', icon: GovernanceIcon, label: 'Governance Studio', superadmin: true },
   { to: '/admin/intelligence', icon: Brain, label: 'Intelligence Center', superadmin: true },
+  { to: '/admin/command-center', icon: Command, label: 'Command Center', superadmin: true },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
   { to: '/admin/cars', icon: Car, label: 'Listings' },
