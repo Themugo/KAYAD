@@ -24,6 +24,7 @@ import SupportView from './features/SupportView';
 import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
 import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 import KAYADLive from './pages/KAYADLive';
+import { DealerBusinessCenter } from './features/DealerBusinessCenter';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -316,6 +317,13 @@ export function App() {
               searchQuery=""
               onSearchChange={() => {}}
               onOpenCompareModal={() => setShowCompareModal(true)}
+            />
+          )}
+
+          {activeNav === 'dealer-business' && (
+            <DealerBusinessCenter
+              onNavigate={(nav) => setActiveNav(nav)}
+              onOpenAuthModal={() => setShowAuthModal(true)}
             />
           )}
 
