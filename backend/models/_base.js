@@ -77,6 +77,17 @@ const TABLE_MAP = {
   LocationMasterData: "location_master_data",
   CountryConfig: "country_configs",
   ConfigAuditLog: "config_audit_logs",
+  // Low-Code Platform Models
+  BusinessObject: "business_objects",
+  ObjectField: "object_fields",
+  ObjectRelationship: "object_relationships",
+  FormDefinition: "form_definitions",
+  ViewDefinition: "view_definitions",
+  ObjectPermission: "object_permissions",
+  ObjectIndex: "object_indexes",
+  ObjectVersion: "object_versions",
+  CustomDashboard: "custom_dashboards",
+  ObjectData: "object_data",
 };
 
 // ────────────────────────────────────────────────────────────────
