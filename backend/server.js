@@ -115,6 +115,7 @@ import lowCodeRoutes from "./routes/lowCodeRoutes.js";
 import vxpRoutes from "./routes/vxpRoutes.js";
 import xosRoutes from "./routes/xosRoutes.js";
 import aiPlatformRoutes from "./routes/aiPlatformRoutes.js";
+import digitalTwinRoutes from "./routes/digitalTwinRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
@@ -695,6 +696,7 @@ app.use("/api/lowcode", lowCodeRoutes);
 app.use("/api/vxp", vxpRoutes);
 app.use("/api/xos", xosRoutes);
 app.use("/api/ai", aiPlatformRoutes);
+app.use("/api/digital-twin", digitalTwinRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────

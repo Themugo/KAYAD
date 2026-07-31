@@ -114,6 +114,11 @@ const TABLE_MAP = {
   AIConversation: "ai_conversations",
   AIPrompt: "ai_prompts",
   AIWorkspace: "ai_workspaces",
+  // Digital Twin Platform Models
+  Simulation: "simulations",
+  Scenario: "scenarios",
+  SimulationResult: "simulation_results",
+  Prediction: "predictions",
 };
 
 // ────────────────────────────────────────────────────────────────
