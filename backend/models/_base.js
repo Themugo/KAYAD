@@ -168,6 +168,10 @@ const TABLE_MAP = {
   Inspector: "inspectors",
   Inspection: "inspections",
   VehiclePassport: "vehicle_passports",
+  // Dealer Platform Models
+  DealerProfile: "dealer_profiles",
+  DealerSubscription: "dealer_subscriptions",
+  DealerAnalytics: "dealer_analytics",
 };
 
 // ────────────────────────────────────────────────────────────────
