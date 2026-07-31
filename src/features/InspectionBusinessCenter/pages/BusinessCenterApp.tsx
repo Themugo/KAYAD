@@ -21,9 +21,16 @@ import {
   Building,
   Award,
   AlertTriangle,
+  FolderOpen,
+  CheckCircle,
 } from 'lucide-react';
 import ExecutiveHome from './ExecutiveHome';
 import BookingManagement from './BookingManagement';
+import CalendarView from './CalendarView';
+import EngineerManagement from './EngineerManagement';
+import ReportReviewCenter from './ReportReviewCenter';
+import BusinessAnalytics from './BusinessAnalytics';
+import FinanceCenter from './FinanceCenter';
 
 const KAYAD_COLORS = {
   lightNavy: '#1e3a5f',
@@ -53,13 +60,13 @@ export default function BusinessCenterApp({ providerId }: { providerId: string }
     { id: 'bookings', label: 'Bookings', icon: <ClipboardList size={20} />, badge: 3 },
     { id: 'calendar', label: 'Calendar', icon: <Calendar size={20} /> },
     { id: 'engineers', label: 'Engineers', icon: <Users size={20} /> },
-    { id: 'reports', label: 'Reports', icon: <FileText size={20} />, badge: 2 },
+    { id: 'reports', label: 'Report Review', icon: <FileText size={20} />, badge: 2 },
     { id: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
     { id: 'finance', label: 'Finance', icon: <DollarSign size={20} /> },
     { id: 'customers', label: 'Customers', icon: <Building size={20} /> },
     { id: 'marketing', label: 'Marketing', icon: <Package size={20} /> },
-    { id: 'documents', label: 'Documents', icon: <Award size={20} /> },
-    { id: 'quality', label: 'Quality', icon: <AlertTriangle size={20} /> },
+    { id: 'documents', label: 'Documents', icon: <FolderOpen size={20} /> },
+    { id: 'quality', label: 'Quality', icon: <CheckCircle size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   ];
 
@@ -228,23 +235,23 @@ export default function BusinessCenterApp({ providerId }: { providerId: string }
             )}
             
             {activeSection === 'calendar' && (
-              <PlaceholderPage title="Calendar" description="Professional scheduling with day, week, and month views" />
+              <CalendarView providerId={providerId} />
             )}
             
             {activeSection === 'engineers' && (
-              <PlaceholderPage title="Engineer Management" description="Manage your team, schedules, and assignments" />
+              <EngineerManagement providerId={providerId} />
             )}
             
             {activeSection === 'reports' && (
-              <PlaceholderPage title="Report Review Center" description="Quality assurance workflow for inspection reports" />
+              <ReportReviewCenter providerId={providerId} />
             )}
             
             {activeSection === 'analytics' && (
-              <PlaceholderPage title="Business Analytics" description="Performance metrics and growth insights" />
+              <BusinessAnalytics providerId={providerId} />
             )}
             
             {activeSection === 'finance' && (
-              <PlaceholderPage title="Finance Center" description="Revenue, payments, and settlements" />
+              <FinanceCenter providerId={providerId} />
             )}
             
             {activeSection === 'customers' && (
