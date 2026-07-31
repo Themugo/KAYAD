@@ -132,6 +132,17 @@ const TABLE_MAP = {
   Plugin: "plugins",
   IntegrationTemplate: "integration_templates",
   APIKey: "api_keys",
+  // Enterprise Governance Platform Models
+  GovernancePolicy: "governance_policies",
+  ChangeRequest: "change_requests",
+  ApprovalRule: "approval_rules",
+  FeatureLifecycle: "feature_lifecycles",
+  RiskAssessment: "risk_assessments",
+  DecisionRegister: "decision_registers",
+  EnterpriseStandard: "enterprise_standards",
+  CountryRule: "country_rules",
+  PartnerRequirement: "partner_requirements",
+  Release: "releases",
 };
 
 // ────────────────────────────────────────────────────────────────

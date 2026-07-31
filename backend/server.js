@@ -118,6 +118,7 @@ import aiPlatformRoutes from "./routes/aiPlatformRoutes.js";
 import digitalTwinRoutes from "./routes/digitalTwinRoutes.js";
 import ecpRoutes from "./routes/ecpRoutes.js";
 import eipRoutes from "./routes/eipRoutes.js";
+import governanceRoutes from "./routes/governanceRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
@@ -701,6 +702,7 @@ app.use("/api/ai", aiPlatformRoutes);
 app.use("/api/digital-twin", digitalTwinRoutes);
 app.use("/api/ecp", ecpRoutes);
 app.use("/api/integration", eipRoutes);
+app.use("/api/governance", governanceRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
