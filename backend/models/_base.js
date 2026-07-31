@@ -88,6 +88,17 @@ const TABLE_MAP = {
   ObjectVersion: "object_versions",
   CustomDashboard: "custom_dashboards",
   ObjectData: "object_data",
+  // Visual Experience Platform (VXP) Models
+  VXPage: "vx_pages",
+  VXSection: "vx_sections",
+  VXComponent: "vx_components",
+  VXTheme: "vx_themes",
+  VXLayout: "vx_layouts",
+  VXAdvertisement: "vx_advertisements",
+  VXCard: "vx_cards",
+  VXWidget: "vx_widgets",
+  VXVersion: "vx_versions",
+  VXStyle: "vx_styles",
 };
 
 // ────────────────────────────────────────────────────────────────

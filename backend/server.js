@@ -112,6 +112,7 @@ import cmsRoutes from "./routes/cmsRoutes.js";
 import automationRoutes from "./routes/automationRoutes.js";
 import configurationRoutes from "./routes/configurationRoutes.js";
 import lowCodeRoutes from "./routes/lowCodeRoutes.js";
+import vxpRoutes from "./routes/vxpRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
@@ -689,6 +690,7 @@ app.use("/api/cms", cmsRoutes);
 app.use("/api/automation", automationRoutes);
 app.use("/api/config", configurationRoutes);
 app.use("/api/lowcode", lowCodeRoutes);
+app.use("/api/vxp", vxpRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
