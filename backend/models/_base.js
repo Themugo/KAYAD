@@ -153,6 +153,11 @@ const TABLE_MAP = {
   CommandAction: "command_actions",
   WarRoom: "war_rooms",
   DashboardWidget: "dashboard_widgets",
+  // Continuous Improvement Platform Models
+  Improvement: "improvements",
+  Experiment: "experiments",
+  ProductHealth: "product_health",
+  InnovationIdea: "innovation_ideas",
 };
 
 // ────────────────────────────────────────────────────────────────
