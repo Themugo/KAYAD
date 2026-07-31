@@ -1,6 +1,6 @@
 // ============================================================
 // KAYAD WEBSITE BUILDER / CMS
-// CMS SERVICE - Dynamic Frontend Rendering Engine
+// ENHANCED CMS SERVICE - Complete Website Builder Platform
 // ============================================================
 
 import db from '../../db/index.js';
@@ -8,9 +8,76 @@ import { logInfo, logError } from '../../utils/logger.js';
 
 /**
  * CMS Service
- * Dynamic website rendering from database
+ * Complete Website Builder & Content Management Platform
  */
 class CMSService {
+
+  // ============================================================
+  // GLOBAL WEBSITE SETTINGS
+  // ============================================================
+
+  /**
+   * Get all website settings
+   */
+  async getWebsiteSettings() {
+    let settings = await db.findOne('website_settings', { is_active: true });
+    
+    if (!settings) {
+      // Create default settings
+      settings = await db.create('website_settings', {
+        website_name: 'KAYAD',
+        website_tagline: 'Africa\'s Smartest Automotive Platform',
+        primary_color: '#1e3a5f',
+        secondary_color: '#64748b',
+        accent_color: '#c4a484',
+        success_color: '#10b981',
+        warning_color: '#f59e0b',
+        danger_color: '#ef4444',
+        background_color: '#f5f0e8',
+        surface_color: '#ffffff',
+        container_max_width: '1280px',
+        font_family: 'Inter, sans-serif',
+        button_style: 'rounded',
+        card_style: 'elevated',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
+    
+    return settings;
+  }
+
+  /**
+   * Update website settings
+   */
+  async updateWebsiteSettings(settingsData, userId, userName) {
+    let settings = await db.findOne('website_settings', { is_active: true });
+    
+    // Create version before update
+    if (settings) {
+      await this.createContentVersion('settings', settings.id, settings, 'Website settings updated', userId, userName);
+      
+      await db.update('website_settings', settings.id, {
+        ...settingsData,
+        updated_at: new Date(),
+      });
+      
+      settings = await db.findOne('website_settings', { is_active: true });
+    }
+    
+    // Log the change
+    await this.logAudit({
+      userId,
+      userName,
+      actionType: 'update',
+      contentType: 'settings',
+      contentId: settings?.id,
+      changeSummary: 'Website settings updated',
+    });
+    
+    return settings;
+  }
 
   // ============================================================
   // PAGE MANAGEMENT
@@ -19,15 +86,29 @@ class CMSService {
   /**
    * Get published page by slug
    */
-  async getPublishedPage(slug) {
+  async getPublishedPage(slug, userRole = 'guest', countryCode = 'KE') {
     const page = await db.findOne('cms_pages', { slug, status: 'published' });
     if (!page) return null;
 
-    // Get page sections
-    const sections = await db.find('cms_page_sections', { 
+    // Get page sections (check visibility rules)
+    const allSections = await db.find('cms_page_sections', { 
       page_id: page.id, 
       is_active: true 
     }, { sort: { ordering: 1 } });
+
+    // Filter sections by visibility
+    const now = new Date();
+    const sections = allSections.filter(s => {
+      // Check mobile/desktop visibility
+      if (s.show_on_mobile === false) return false;
+      if (s.show_on_desktop === false) return false;
+      
+      // Check scheduling
+      if (s.schedule_start && new Date(s.schedule_start) > now) return false;
+      if (s.schedule_end && new Date(s.schedule_end) < now) return false;
+      
+      return true;
+    });
 
     // Get hero section if exists
     const heroSection = sections.find(s => s.section_type === 'hero');
@@ -39,15 +120,15 @@ class CMSService {
     // Get footer config
     const footer = await db.findOne('cms_footer_configs', { is_active: true });
 
-    // Get theme
-    const theme = await db.findOne('cms_theme_configs', { is_active: true });
+    // Get global settings
+    const settings = await this.getWebsiteSettings();
 
-    // Get navigation
-    const navigation = await this.getActiveNavigation('main');
-    const mobileNav = await this.getActiveNavigation('mobile');
+    // Get navigation with permission filtering
+    const navigation = await this.getActiveNavigation('main', userRole, countryCode);
+    const mobileNav = await this.getActiveNavigation('mobile', userRole, countryCode);
 
-    // Get active popup
-    const popup = await this.getActivePopup();
+    // Get active promotions
+    const promotions = await this.getActivePromotions(userRole, countryCode);
 
     // Get announcement
     const announcement = await this.getActiveAnnouncement();
@@ -60,10 +141,10 @@ class CMSService {
       })),
       hero: heroConfig,
       footer,
-      theme,
+      settings,
       navigation,
       mobileNav,
-      popup,
+      promotions,
       announcement,
     };
   }
@@ -570,6 +651,232 @@ class CMSService {
   }
 
   // ============================================================
+  // PROMOTIONS
+  // ============================================================
+
+  /**
+   * Get active promotions
+   */
+  async getActivePromotions(userRole = 'all', countryCode = 'KE') {
+    const now = new Date();
+    
+    const promotions = await db.find('cms_promotions', {
+      status: 'active',
+      start_date: { $lte: now },
+      end_date: { $gte: now },
+    });
+
+    // Filter by targeting
+    return promotions.filter(p => {
+      const targets = p.target_user_types || ['all'];
+      return targets.includes('all') || targets.includes(userRole);
+    });
+  }
+
+  /**
+   * Get all promotions
+   */
+  async getPromotions(filters = {}) {
+    const query = {};
+    if (filters.status) query.status = filters.status;
+    if (filters.promotionType) query.promotion_type = filters.promotionType;
+
+    return db.find('cms_promotions', query, { sort: { created_at: -1 } });
+  }
+
+  /**
+   * Create promotion
+   */
+  async createPromotion(promotionData) {
+    const promotionCode = `PROMO-${Date.now().toString(36).toUpperCase()}`;
+
+    return db.create('cms_promotions', {
+      promotion_code: promotionCode,
+      promotion_name: promotionData.promotionName,
+      description: promotionData.description,
+      promotion_type: promotionData.promotionType,
+      title: promotionData.title,
+      subtitle: promotionData.subtitle,
+      content: promotionData.content,
+      cta_text: promotionData.ctaText,
+      cta_url: promotionData.ctaUrl,
+      image_url: promotionData.imageUrl,
+      position: promotionData.position,
+      size: promotionData.size,
+      target_pages: promotionData.targetPages || [],
+      target_countries: promotionData.targetCountries || [],
+      target_user_types: promotionData.targetUserTypes || ['all'],
+      start_date: promotionData.startDate,
+      end_date: promotionData.endDate,
+      status: 'draft',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  /**
+   * Update promotion
+   */
+  async updatePromotion(promotionId, promotionData) {
+    await db.update('cms_promotions', promotionId, {
+      ...promotionData,
+      updated_at: new Date(),
+    });
+
+    return db.findById('cms_promotions', promotionId);
+  }
+
+  /**
+   * Track promotion impression
+   */
+  async trackPromotionImpression(promotionId) {
+    const promotion = await db.findById('cms_promotions', promotionId);
+    if (promotion) {
+      await db.update('cms_promotions', promotionId, {
+        impressions: (promotion.impressions || 0) + 1,
+      });
+    }
+  }
+
+  /**
+   * Track promotion click
+   */
+  async trackPromotionClick(promotionId) {
+    const promotion = await db.findById('cms_promotions', promotionId);
+    if (promotion) {
+      await db.update('cms_promotions', promotionId, {
+        clicks: (promotion.clicks || 0) + 1,
+      });
+    }
+  }
+
+  // ============================================================
+  // MEDIA LIBRARY
+  // ============================================================
+
+  /**
+   * Get media items
+   */
+  async getMediaItems(filters = {}) {
+    const query = { status: 'active' };
+    if (filters.mediaType) query.media_type = filters.mediaType;
+    if (filters.folder) query.folder = filters.folder;
+
+    return db.find('cms_media', query, { sort: { created_at: -1 } });
+  }
+
+  /**
+   * Upload media
+   */
+  async uploadMedia(mediaData) {
+    const mediaCode = `MEDIA-${Date.now().toString(36).toUpperCase()}`;
+
+    return db.create('cms_media', {
+      media_code: mediaCode,
+      file_name: mediaData.fileName,
+      original_name: mediaData.originalName,
+      media_type: mediaData.mediaType,
+      mime_type: mediaData.mimeType,
+      url: mediaData.url,
+      thumbnail_url: mediaData.thumbnailUrl,
+      optimized_url: mediaData.optimizedUrl,
+      width: mediaData.width,
+      height: mediaData.height,
+      file_size: mediaData.fileSize,
+      folder: mediaData.folder,
+      tags: mediaData.tags || [],
+      alt_text: mediaData.altText,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  /**
+   * Delete media
+   */
+  async deleteMedia(mediaId) {
+    await db.update('cms_media', mediaId, {
+      status: 'deleted',
+      updated_at: new Date(),
+    });
+  }
+
+  // ============================================================
+  // FORMS
+  // ============================================================
+
+  /**
+   * Get form
+   */
+  async getForm(formCode) {
+    return db.findOne('cms_forms', { form_code: formCode, status: 'active' });
+  }
+
+  /**
+   * Get form submissions
+   */
+  async getFormSubmissions(formId, filters = {}) {
+    const query = { form_id: formId };
+    if (filters.status) query.status = filters.status;
+
+    return db.find('cms_form_submissions', query, { sort: { created_at: -1 } });
+  }
+
+  /**
+   * Submit form
+   */
+  async submitForm(formCode, formData, userInfo = {}) {
+    const form = await db.findOne('cms_forms', { form_code: formCode });
+    if (!form) throw new Error('Form not found');
+
+    const submissionCode = `SUB-${Date.now().toString(36).toUpperCase()}`;
+
+    // Save submission
+    const submission = await db.create('cms_form_submissions', {
+      submission_code: submissionCode,
+      form_id: form.id,
+      form_data: formData,
+      user_id: userInfo.userId,
+      user_email: userInfo.email,
+      user_ip: userInfo.ip,
+      user_agent: userInfo.userAgent,
+      status: 'new',
+      created_at: new Date(),
+    });
+
+    // Update submission count
+    await db.update('cms_forms', form.id, {
+      total_submissions: (form.total_submissions || 0) + 1,
+      last_submission_at: new Date(),
+    });
+
+    return { success: true, submissionCode, submission };
+  }
+
+  /**
+   * Create form
+   */
+  async createForm(formData) {
+    const formCode = `FORM-${Date.now().toString(36).toUpperCase()}`;
+
+    return db.create('cms_forms', {
+      form_code: formCode,
+      form_name: formData.formName,
+      form_type: formData.formType,
+      fields: formData.fields || [],
+      submit_button_text: formData.submitButtonText || 'Submit',
+      success_message: formData.successMessage,
+      redirect_url: formData.redirectUrl,
+      notify_enabled: formData.notifyEnabled || false,
+      notify_email: formData.notifyEmail,
+      captcha_enabled: formData.captchaEnabled !== false,
+      status: 'active',
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+  }
+
+  // ============================================================
   // SEO
   // ============================================================
 
@@ -583,14 +890,19 @@ class CMSService {
   /**
    * Update SEO config
    */
-  async updateSEOConfig(configData) {
+  async updateSEOConfig(configData, userId, userName) {
     let config = await db.findOne('cms_seo_configs', { is_active: true });
 
     if (config) {
+      // Create version
+      await this.createContentVersion('seo', config.id, config, 'SEO config updated', userId, userName);
+      
       await db.update('cms_seo_configs', config.id, {
         ...configData,
         updated_at: new Date(),
       });
+      
+      config = await db.findOne('cms_seo_configs', { is_active: true });
     } else {
       config = await db.create('cms_seo_configs', {
         config_code: 'SEO-DEFAULT',
@@ -602,6 +914,103 @@ class CMSService {
     }
 
     return config;
+  }
+
+  // ============================================================
+  // AUDIT LOG
+  // ============================================================
+
+  /**
+   * Log audit entry
+   */
+  async logAudit(auditData) {
+    const logCode = `AUDIT-${Date.now().toString(36).toUpperCase()}`;
+
+    return db.create('cms_audit_log', {
+      log_code: logCode,
+      user_id: auditData.userId,
+      user_name: auditData.userName,
+      user_role: auditData.userRole,
+      action_type: auditData.actionType,
+      content_type: auditData.contentType,
+      content_id: auditData.contentId,
+      content_name: auditData.contentName,
+      before_state: auditData.beforeState,
+      after_state: auditData.afterState,
+      change_summary: auditData.changeSummary,
+      ip_address: auditData.ipAddress,
+      user_agent: auditData.userAgent,
+      created_at: new Date(),
+    });
+  }
+
+  /**
+   * Get audit log
+   */
+  async getAuditLog(filters = {}) {
+    const query = {};
+    if (filters.contentType) query.content_type = filters.contentType;
+    if (filters.userId) query.user_id = filters.userId;
+    if (filters.actionType) query.action_type = filters.actionType;
+
+    return db.find('cms_audit_log', query, { sort: { created_at: -1 }, limit: filters.limit || 100 });
+  }
+
+  // ============================================================
+  // USER PERMISSIONS
+  // ============================================================
+
+  /**
+   * Get user permissions
+   */
+  async getUserPermissions(userId) {
+    let permissions = await db.findOne('cms_user_permissions', { user_id: userId, is_active: true });
+    
+    if (!permissions) {
+      // Return default viewer permissions
+      permissions = {
+        role: 'viewer',
+        can_edit_pages: false,
+        can_edit_navigation: false,
+        can_edit_theme: false,
+        can_edit_promotions: false,
+        can_manage_media: false,
+        can_manage_forms: false,
+        can_publish: false,
+        can_manage_users: false,
+        can_view_analytics: false,
+        can_manage_seo: false,
+      };
+    }
+    
+    return permissions;
+  }
+
+  /**
+   * Update user permissions
+   */
+  async updateUserPermissions(userId, permissionsData) {
+    let permissions = await db.findOne('cms_user_permissions', { user_id: userId });
+    
+    if (permissions) {
+      await db.update('cms_user_permissions', permissions.id, {
+        ...permissionsData,
+        updated_at: new Date(),
+      });
+    } else {
+      permissions = await db.create('cms_user_permissions', {
+        user_id: userId,
+        user_email: permissionsData.email,
+        user_name: permissionsData.name,
+        role: permissionsData.role,
+        ...permissionsData,
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
+    
+    return permissions;
   }
 
   // ============================================================
@@ -648,7 +1057,7 @@ class CMSService {
   /**
    * Rollback to version
    */
-  async rollbackToVersion(versionId) {
+  async rollbackToVersion(versionId, userId, userName) {
     const version = await db.findById('cms_content_versions', versionId);
     if (!version) throw new Error('Version not found');
 
@@ -664,21 +1073,100 @@ class CMSService {
           updated_at: new Date(),
         });
         break;
-      case 'theme':
-        await db.update('cms_theme_configs', version.content_id, {
+      case 'settings':
+        await db.update('website_settings', version.content_id, {
           ...snapshot,
           updated_at: new Date(),
         });
         break;
       case 'navigation':
-        await db.update('cms_navigation', version.content_id, {
+        await db.update('cms_navigations', version.content_id, {
+          ...snapshot,
+          updated_at: new Date(),
+        });
+        break;
+      case 'footer':
+        await db.update('cms_footer_configs', version.content_id, {
+          ...snapshot,
+          updated_at: new Date(),
+        });
+        break;
+      case 'seo':
+        await db.update('cms_seo_configs', version.content_id, {
           ...snapshot,
           updated_at: new Date(),
         });
         break;
     }
 
+    // Log the rollback
+    await this.logAudit({
+      userId,
+      userName,
+      actionType: 'rollback',
+      contentType: version.content_type,
+      contentId: version.content_id,
+      changeSummary: `Rolled back to version ${version.version_number}`,
+    });
+
     return { success: true };
+  }
+
+  // ============================================================
+  // A/B TESTING
+  // ============================================================
+
+  /**
+   * Get A/B test for content
+   */
+  async getActiveABTest(targetType, targetId) {
+    return db.findOne('cms_ab_tests', {
+      target_type: targetType,
+      target_id: targetId,
+      status: 'running',
+    });
+  }
+
+  /**
+   * Get variant for user
+   */
+  async getVariantForUser(testId, userId) {
+    const test = await db.findById('cms_ab_tests', testId);
+    if (!test || !test.variants) return null;
+
+    // Simple hash-based distribution
+    const hash = (userId || 'anonymous').split('').reduce((a, b) => {
+      a = ((a << 5) - a) + b.charCodeAt(0);
+      return a & a;
+    }, 0);
+    
+    const random = Math.abs(hash) % 100;
+    let cumulative = 0;
+    
+    for (const variant of test.variants) {
+      cumulative += variant.weight || 50;
+      if (random < cumulative) {
+        return variant;
+      }
+    }
+    
+    return test.variants[0];
+  }
+
+  /**
+   * Track A/B test conversion
+   */
+  async trackABConversion(testId, variantId, metric) {
+    const test = await db.findById('cms_ab_tests', testId);
+    if (!test || !test.metrics) return;
+
+    const metrics = { ...test.metrics };
+    if (!metrics[variantId]) {
+      metrics[variantId] = {};
+    }
+    metrics[variantId][metric] = (metrics[variantId][metric] || 0) + 1;
+
+    await db.update('cms_ab_tests', testId, { metrics });
   }
 
   // ============================================================
@@ -689,6 +1177,9 @@ class CMSService {
    * Initialize default CMS content
    */
   async initializeDefaults() {
+    // Create default settings
+    await this.getWebsiteSettings();
+
     // Create default page
     const existingPage = await db.findOne('cms_pages', { slug: '/' });
     if (!existingPage) {
@@ -702,48 +1193,38 @@ class CMSService {
     }
 
     // Create default navigation
-    const existingNav = await db.findOne('cms_navigation', { nav_code: 'main' });
+    const existingNav = await db.findOne('cms_navigations', { nav_code: 'main' });
     if (!existingNav) {
-      await db.create('cms_navigation', {
+      const nav = await db.create('cms_navigations', {
         nav_code: 'main',
         nav_name: 'Main Navigation',
-        items: [
-          { label: 'Buy', url: '/marketplace', item_type: 'link' },
-          { label: 'Sell', url: '/sell', item_type: 'link' },
-          { label: 'Auction', url: '/auction', item_type: 'link' },
-          { label: 'Finance', url: '/finance', item_type: 'link' },
-          { label: 'Inspect', url: '/inspection', item_type: 'link' },
-          { label: 'Dealers', url: '/dealers', item_type: 'link' },
-        ],
-        settings: { sticky: true },
+        settings: JSON.stringify({ sticky: true, transparent: false }),
         is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
       });
-    }
 
-    // Create default theme
-    const existingTheme = await db.findOne('cms_theme_configs', { theme_code: 'default' });
-    if (!existingTheme) {
-      await db.create('cms_theme_configs', {
-        theme_code: 'default',
-        theme_name: 'KAYAD Default Theme',
-        is_default: true,
-        is_active: true,
-        colors: {
-          primary: '#1e3a5f',
-          secondary: '#64748b',
-          accent: '#c4a484',
-          success: '#10b981',
-          warning: '#f59e0b',
-          danger: '#ef4444',
-          info: '#3b82f6',
-          background: '#f5f0e8',
-          surface: '#ffffff',
-        },
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
+      // Add default nav items
+      const defaultItems = [
+        { label: 'Buy', url: '/marketplace', item_type: 'link', ordering: 1 },
+        { label: 'Sell', url: '/sell', item_type: 'link', ordering: 2 },
+        { label: 'Auction', url: '/auction', item_type: 'link', ordering: 3 },
+        { label: 'Finance', url: '/finance', item_type: 'link', ordering: 4 },
+        { label: 'Inspect', url: '/inspection', item_type: 'link', ordering: 5 },
+        { label: 'Dealers', url: '/dealers', item_type: 'link', ordering: 6 },
+      ];
+
+      for (const item of defaultItems) {
+        await db.create('cms_nav_items', {
+          nav_id: nav.id,
+          item_code: `NAV-${Date.now().toString(36)}`,
+          ...item,
+          is_visible: true,
+          is_active: true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+      }
     }
 
     // Create default footer
@@ -752,7 +1233,7 @@ class CMSService {
       await db.create('cms_footer_configs', {
         footer_code: 'default',
         config_name: 'Default Footer',
-        columns: [
+        columns: JSON.stringify([
           { title: 'Marketplace', links: [
             { label: 'Buy a Car', url: '/marketplace' },
             { label: 'Sell a Car', url: '/sell' },
@@ -773,11 +1254,42 @@ class CMSService {
             { label: 'Terms of Service', url: '/terms' },
             { label: 'Cookie Policy', url: '/cookies' },
           ]},
-        ],
-        copyright_text: '© 2026 KAYAD. All rights reserved.',
+        ]),
         show_newsletter: true,
         newsletter_placeholder: 'Enter your email',
         newsletter_button_text: 'Subscribe',
+        copyright_text: '© 2026 KAYAD. All rights reserved.',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
+
+    // Create default SEO config
+    const existingSeo = await db.findOne('cms_seo_configs', { config_code: 'SEO-DEFAULT' });
+    if (!existingSeo) {
+      await db.create('cms_seo_configs', {
+        config_code: 'SEO-DEFAULT',
+        site_name: 'KAYAD',
+        site_tagline: 'Africa\'s Smartest Automotive Platform',
+        default_meta_title: 'KAYAD - Africa\'s Smartest Automotive Platform',
+        default_meta_description: 'Buy, sell, auction and finance vehicles with confidence on East Africa\'s most trusted automotive platform.',
+        is_active: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+    }
+
+    // Create default car grid config
+    const existingCarGrid = await db.findOne('cms_car_grid_configs', { config_code: 'default' });
+    if (!existingCarGrid) {
+      await db.create('cms_car_grid_configs', {
+        config_code: 'default',
+        config_name: 'Default Car Grid',
+        display_mode: 'grid',
+        columns_desktop: 4,
+        columns_tablet: 2,
+        columns_mobile: 1,
         is_active: true,
         created_at: new Date(),
         updated_at: new Date(),
