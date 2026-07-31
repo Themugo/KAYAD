@@ -1,84 +1,323 @@
 import { Link } from 'react-router-dom';
 
-// Enterprise Design Tokens
-// Previously a separate dark black-and-gold theme (#050505 background,
-// literal gold accent) completely disconnected from the premium
-// light blue/white theme used everywhere else in the app — meaning
-// every dashboard using this file rendered inconsistently with the
-// rest of the product. Aligned to the same design system here.
+// ============================================================
+// KAYAD UNIFIED DESIGN SYSTEM
+// Premium Light Theme for Enterprise Dashboards
+// ============================================================
+
+// Design Tokens - Unified across all enterprise components
 export const EnterpriseTokens = {
-  gold: '#16C4A4',
-  goldLight: 'rgba(22, 196, 164, 0.8)',
-  goldBg: 'rgba(22, 196, 164, 0.1)',
-  goldBorder: 'rgba(22, 196, 164, 0.25)',
-  bg: '#F8FAFC',
-  card: '#FFFFFF',
-  surface: '#F1F5F9',
-  border: 'rgba(15, 23, 42, 0.08)',
-  borderLight: 'rgba(15, 23, 42, 0.14)',
+  // Brand Colors (KAYAD Design System)
+  navy: '#17244B',
+  navyLight: '#1e3054',
+  navyDark: '#0f1833',
+  beige: '#F6F1E8',
+  beigeLight: '#FAF7F2',
+  white: '#FFFFFF',
+  
+  // Semantic Colors
+  emerald: '#10B981',
+  emeraldLight: '#D1FAE5',
+  terracotta: '#C77B58',
+  terracottaLight: '#FDE8E0',
+  softBlue: '#60A5FA',
+  softBlueLight: '#DBEAFE',
+  mutedOrange: '#FB923C',
+  mutedOrangeLight: '#FED7AA',
+  mutedCrimson: '#EF4444',
+  mutedCrimsonLight: '#FEE2E2',
+  purple: '#8B5CF6',
+  purpleLight: '#EDE9FE',
+  
+  // Neutrals
+  slate: {
+    50: '#F8FAFC',
+    100: '#F1F5F9',
+    200: '#E2E8F0',
+    300: '#CBD5E1',
+    400: '#94A3B8',
+    500: '#64748B',
+    600: '#475569',
+    700: '#334155',
+    800: '#1E293B',
+    900: '#0F172A',
+  },
+  
+  // Semantic Aliases
   success: '#10B981',
-  successBg: 'rgba(16, 185, 129, 0.1)',
-  warning: '#f59e0b',
-  warningBg: 'rgba(245, 158, 11, 0.1)',
-  danger: '#ef4444',
-  dangerBg: 'rgba(239, 68, 68, 0.1)',
-  info: '#3b82f6',
-  infoBg: 'rgba(59, 130, 246, 0.1)',
-  purple: '#a855f7',
-  purpleBg: 'rgba(168, 85, 247, 0.1)',
-  textPrimary: '#0F172A',
+  successBg: '#D1FAE5',
+  successBorder: '#A7F3D0',
+  warning: '#F59E0B',
+  warningBg: '#FEF3C7',
+  warningBorder: '#FDE68A',
+  danger: '#EF4444',
+  dangerBg: '#FEE2E2',
+  dangerBorder: '#FECACA',
+  info: '#3B82F6',
+  infoBg: '#DBEAFE',
+  infoBorder: '#BFDBFE',
+  
+  // Text Colors
+  textPrimary: '#1E293B',
   textSecondary: '#475569',
-  textMuted: '#94A3B8',
-  textDim: '#CBD5E1',
+  textMuted: '#64748B',
+  textDisabled: '#94A3B8',
+  
+  // Backgrounds
+  bg: '#F6F1E8',
+  bgLight: '#FAF7F2',
+  card: '#FFFFFF',
+  surface: '#F8FAFC',
+  surfaceHover: '#F1F5F9',
+  
+  // Borders
+  border: 'rgba(15, 23, 42, 0.08)',
+  borderLight: 'rgba(15, 23, 42, 0.05)',
+  borderMedium: 'rgba(15, 23, 42, 0.12)',
+  borderFocus: '#17244B',
+  
+  // Shadows
+  shadow: '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+  shadowSm: '0 1px 2px rgba(0, 0, 0, 0.04)',
+  shadowMd: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+  shadowLg: '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04)',
+  shadowCard: '0 2px 8px -1px rgba(30, 48, 99, 0.06), 0 1px 4px -1px rgba(30, 48, 99, 0.04)',
+  shadowCardHover: '0 12px 24px -4px rgba(30, 48, 99, 0.12), 0 4px 8px -2px rgba(30, 48, 99, 0.06)',
 };
 
+// Common Styles
 const S = {
-  card: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 16, overflow: 'hidden', transition: 'border-color 0.2s, box-shadow 0.2s' },
-  cardHover: { border: '1px solid var(--border)', transition: 'border-color 0.2s' },
-  header: { padding: '18px 22px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  body: { padding: '22px' },
-  kpi: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden' },
-  kpiBg: { position: 'absolute', right: -18, top: -18, width: 72, height: 72, borderRadius: '50%', opacity: 0.06 },
-  kpiIcon: { width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 12 },
-  kpiLabel: { fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 },
-  kpiValue: { fontSize: '1.8rem', fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', color: '#fff', lineHeight: 1, marginBottom: 4 },
-  kpiSub: { fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 2 },
-  badge: (c) => ({ padding: '3px 10px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: `${c}14`, color: c }),
+  // Card styles
+  card: {
+    background: EnterpriseTokens.card,
+    border: `1px solid ${EnterpriseTokens.border}`,
+    borderRadius: 16,
+    overflow: 'hidden',
+    transition: 'all 0.2s ease',
+  },
+  cardHover: {
+    boxShadow: EnterpriseTokens.shadowCardHover,
+    borderColor: EnterpriseTokens.borderMedium,
+  },
+  header: {
+    padding: '16px 20px',
+    borderBottom: `1px solid ${EnterpriseTokens.border}`,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  body: {
+    padding: '20px',
+  },
+  
+  // KPI Card styles
+  kpi: {
+    background: EnterpriseTokens.card,
+    border: `1px solid ${EnterpriseTokens.border}`,
+    borderRadius: 14,
+    padding: '20px',
+    position: 'relative',
+    overflow: 'hidden',
+    transition: 'all 0.2s ease',
+  },
+  kpiBg: {
+    position: 'absolute',
+    right: -20,
+    top: -20,
+    width: 80,
+    height: 80,
+    borderRadius: '50%',
+    opacity: 0.06,
+  },
+  kpiIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: 18,
+    marginBottom: 12,
+  },
+  kpiLabel: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: EnterpriseTokens.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    marginBottom: 4,
+  },
+  kpiValue: {
+    fontSize: '1.75rem',
+    fontFamily: 'Outfit, sans-serif',
+    fontWeight: 700,
+    color: EnterpriseTokens.textPrimary,
+    lineHeight: 1.1,
+    marginBottom: 4,
+  },
+  kpiSub: {
+    fontSize: 12,
+    color: EnterpriseTokens.textMuted,
+    marginTop: 2,
+  },
+  
+  // Badge styles
+  badge: (color, bgColor) => ({
+    padding: '4px 10px',
+    borderRadius: 9999,
+    fontSize: 11,
+    fontWeight: 600,
+    background: bgColor || `${color}15`,
+    color: color,
+    display: 'inline-flex',
+    alignItems: 'center',
+  }),
+  
+  // Grid layouts
   grid2: { display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: 24 },
   grid3: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 },
-  actionLink: { display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', textDecoration: 'none', color: 'inherit', transition: 'border-color 0.2s' },
-  activityItem: { display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' },
-  timelineDot: (c) => ({ width: 10, height: 10, borderRadius: '50%', background: c, flexShrink: 0, marginTop: 5 }),
-  notification: { display: 'flex', gap: 12, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer' },
+  grid4: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 },
+  
+  // Quick action styles
+  actionLink: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '14px 16px',
+    borderRadius: 12,
+    background: EnterpriseTokens.surface,
+    border: `1px solid ${EnterpriseTokens.border}`,
+    textDecoration: 'none',
+    color: 'inherit',
+    transition: 'all 0.2s ease',
+    cursor: 'pointer',
+  },
+  
+  // Activity item styles
+  activityItem: {
+    display: 'flex',
+    gap: 12,
+    padding: '12px 0',
+    borderBottom: `1px solid ${EnterpriseTokens.borderLight}`,
+  },
+  timelineDot: (color) => ({
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: color,
+    flexShrink: 0,
+    marginTop: 6,
+  }),
+  
+  // Notification styles
+  notification: {
+    display: 'flex',
+    gap: 12,
+    padding: '12px 0',
+    borderBottom: `1px solid ${EnterpriseTokens.borderLight}`,
+    cursor: 'pointer',
+  },
+  
+  // Table styles
   table: { width: '100%', borderCollapse: 'collapse' },
-  th: { textAlign: 'left', fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700, padding: '12px 16px', borderBottom: '1px solid var(--border)' },
-  td: { padding: '12px 16px', fontSize: 13, borderBottom: '1px solid rgba(255,255,255,0.03)' },
+  th: {
+    textAlign: 'left',
+    fontSize: 11,
+    fontWeight: 600,
+    color: EnterpriseTokens.textMuted,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    padding: '12px 16px',
+    borderBottom: `1px solid ${EnterpriseTokens.border}`,
+    background: EnterpriseTokens.surface,
+  },
+  td: {
+    padding: '14px 16px',
+    fontSize: 13,
+    color: EnterpriseTokens.textSecondary,
+    borderBottom: `1px solid ${EnterpriseTokens.borderLight}`,
+  },
+  
+  // Empty state
+  emptyState: {
+    textAlign: 'center',
+    padding: '40px 20px',
+    color: EnterpriseTokens.textMuted,
+  },
+  
+  // Skeleton loading
+  skeleton: {
+    background: `linear-gradient(90deg, ${EnterpriseTokens.surface} 25%, ${EnterpriseTokens.surfaceHover} 50%, ${EnterpriseTokens.surface} 75%)`,
+    backgroundSize: '200% 100%',
+    animation: 'shimmer 1.5s infinite',
+    borderRadius: 8,
+  },
 };
 
-export function EnterpriseCard({ children, header, action, className, onMouseEnter, onMouseLeave, style }) {
+// ============================================================
+// ENTERPRISE COMPONENTS
+// ============================================================
+
+export function EnterpriseCard({ 
+  children, 
+  header, 
+  action, 
+  className, 
+  onMouseEnter, 
+  onMouseLeave, 
+  style,
+  noPadding = false 
+}) {
   return (
-    <div style={{ ...S.card, ...style }} className={className} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <div 
+      style={{ ...S.card, ...style }} 
+      className={className}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
       {header && (
         <div style={S.header}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{header}</span>
-          {action && <span style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 600, cursor: 'pointer' }}>{action}</span>}
+          <span style={{ fontSize: 14, fontWeight: 700, color: EnterpriseTokens.textPrimary }}>
+            {header}
+          </span>
+          {action && (
+            <span style={{ fontSize: 12, color: EnterpriseTokens.navy, fontWeight: 600, cursor: 'pointer' }}>
+              {action}
+            </span>
+          )}
         </div>
       )}
-      <div style={header ? S.body : { padding: '22px' }}>{children}</div>
+      <div style={noPadding ? { padding: 0 } : header ? S.body : { padding: '20px' }}>
+        {children}
+      </div>
     </div>
   );
 }
 
-export function EnterpriseKPI({ icon, label, value, sub, trend, accent = 'rgba(22, 196, 164, 1)' }) {
+export function EnterpriseKPI({ 
+  icon, 
+  label, 
+  value, 
+  sub, 
+  trend, 
+  accent = EnterpriseTokens.navy,
+  className 
+}) {
   return (
-    <div style={S.kpi}>
+    <div style={{ ...S.kpi, ...(className || {}) }}>
       <div style={{ ...S.kpiBg, background: accent }} />
-      <div style={{ ...S.kpiIcon, background: `${accent}14`, color: accent }}>{icon}</div>
+      <div style={{ ...S.kpiIcon, background: `${accent}12`, color: accent }}>
+        {icon}
+      </div>
       <div style={S.kpiLabel}>{label}</div>
       <div style={S.kpiValue}>{value ?? '—'}</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         {trend !== undefined && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: trend >= 0 ? '#22c55e' : '#ef4444' }}>
+          <span style={{ 
+            fontSize: 12, 
+            fontWeight: 600, 
+            color: trend >= 0 ? EnterpriseTokens.success : EnterpriseTokens.danger 
+          }}>
             {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
           </span>
         )}
@@ -90,253 +329,344 @@ export function EnterpriseKPI({ icon, label, value, sub, trend, accent = 'rgba(2
 
 export function EnterpriseTimeline({ items }) {
   if (!items || items.length === 0) {
-    return <div style={{ textAlign: 'center', padding: 24, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No recent activity</div>;
+    return (
+      <div style={S.emptyState}>
+        <p>No recent activity</p>
+      </div>
+    );
   }
+  
   return (
     <div>
       {items.map((item, i) => (
-        <div key={i} style={{ display: 'flex', gap: 14, padding: '10px 0', borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-          <div style={S.timelineDot(item.color || 'var(--gold)')} />
+        <div key={i} style={{ ...S.activityItem, borderBottom: i < items.length - 1 ? `1px solid ${EnterpriseTokens.borderLight}` : 'none' }}>
+          <div style={S.timelineDot(item.color || EnterpriseTokens.navy)} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginBottom: 2 }}>{item.title}</div>
-            {item.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4 }}>{item.description}</div>}
+            <p style={{ fontSize: 13, fontWeight: 500, color: EnterpriseTokens.textPrimary, marginBottom: 2 }}>
+              {item.title}
+            </p>
+            <p style={{ fontSize: 12, color: EnterpriseTokens.textMuted }}>
+              {item.description}
+            </p>
           </div>
-          {item.time && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', whiteSpace: 'nowrap', marginTop: 2 }}>{item.time}</div>}
+          {item.time && (
+            <span style={{ fontSize: 11, color: EnterpriseTokens.textDisabled, whiteSpace: 'nowrap' }}>
+              {item.time}
+            </span>
+          )}
         </div>
       ))}
-    </div>
-  );
-}
-
-export function EnterpriseStatus({ label, color = 'rgba(255,255,255,0.4)' }) {
-  return <span style={S.badge(color)}>{label}</span>;
-}
-
-
-
-export function EnterpriseNotification({ items, onDismiss }) {
-  if (!items || items.length === 0) {
-    return <div style={{ textAlign: 'center', padding: 24, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No notifications</div>;
-  }
-  return (
-    <div>
-      {items.map((n, i) => (
-        <div key={i} style={S.notification} onClick={() => n.onClick?.()}>
-          <div style={{ flexShrink: 0 }}>
-            <span style={{ fontSize: 16 }}>{n.icon || '🔔'}</span>
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: n.unread ? 700 : 500, color: '#fff', marginBottom: 2 }}>{n.title}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{n.description}</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{n.time}</span>
-            {n.unread && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)' }} />}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function EnterpriseTaskSummary({ tasks }) {
-  const total = tasks.reduce((s, t) => s + t.count, 0);
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(tasks.length, 5)}, 1fr)`, gap: 12 }}>
-      {tasks.map((t, i) => (
-        <div key={i} style={{ textAlign: 'center', padding: '14px 8px', borderRadius: 12, background: `${t.color}0d`, border: `1px solid ${t.color}1a` }}>
-          <div style={{ fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)', fontStyle: 'italic', color: t.color, lineHeight: 1 }}>{t.count}</div>
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.label}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function EnterpriseChart({ data, label, height = 160, color = 'var(--gold)' }) {
-  const max = Math.max(...data, 1);
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height, paddingTop: 8 }}>
-        {data.map((v, i) => (
-          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: '100%', height: `${(v / max) * 100}%`, background: `linear-gradient(180deg, ${color} 0%, ${color}40 100%)`, borderRadius: '4px 4px 0 0', minHeight: 4, transition: 'height 0.3s' }} />
-          </div>
-        ))}
-      </div>
-      {label && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: 8 }}>{label}</div>}
-    </div>
-  );
-}
-
-export function EnterpriseTable({ columns, rows, emptyMessage = 'No data' }) {
-  if (!rows || rows.length === 0) {
-    return <div style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>{emptyMessage}</div>;
-  }
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={S.table}>
-        <thead>
-          <tr>
-            {columns.map((col, i) => (
-              <th key={i} style={{ ...S.th, textAlign: col.align || 'left' }}>{col.label}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, ri) => (
-            <tr key={ri}>
-              {columns.map((col, ci) => (
-                <td key={ci} style={{ ...S.td, textAlign: col.align || 'left', color: col.color || '#fff' }}>
-                  {col.render ? col.render(row[col.key], row) : row[col.key]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-export function DashboardHeader({ badge, greeting, name, subtitle, actions }) {
-  return (
-    <div style={{ background: 'linear-gradient(180deg, rgba(22, 196, 164, 0.04) 0%, transparent 100%)', borderBottom: '1px solid var(--border)', padding: '40px 0 36px' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
-          <div>
-            {badge && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <span style={{ fontSize: 9, color: 'var(--gold)', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase' }}>{badge}</span>
-              </div>
-            )}
-            <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)', color: '#fff', margin: 0 }}>
-              {greeting}, <span style={{ color: 'var(--gold)' }}>{name}</span>
-            </h1>
-            {subtitle && <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: 13, marginTop: 4 }}>{subtitle}</p>}
-          </div>
-          {actions && <div style={{ display: 'flex', gap: 8 }}>{actions}</div>}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function EnterpriseMetricRow({ icon, label, value, sub, trend, color }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: '1px solid ' + S.card.border }}>
-      <div style={{ width: 36, height: 36, borderRadius: 10, background: (color || '#D4C4A8') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', color: color || '#D4C4A8' }}>
-        {icon}
-      </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{label}</div>
-        {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{sub}</div>}
-      </div>
-      <div style={{ textAlign: 'right' }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{value}</div>
-        {trend !== undefined && (
-          <div style={{ fontSize: 10, fontWeight: 700, color: trend >= 0 ? '#22c55e' : '#ef4444' }}>
-            {trend >= 0 ? '↑' : '↓'} {Math.abs(trend)}%
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export function EnterpriseRevenue({ label, value, sub, period }) {
-  return (
-    <div style={{
-      background: 'linear-gradient(135deg, rgba(22, 196, 164, 0.08) 0%, #FFFFFF 100%)',
-      border: '1px solid rgba(22, 196, 164, 0.2)',
-      borderRadius: 14,
-      padding: '20px 22px',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      <div style={{
-        position: 'absolute',
-        right: -30,
-        top: -30,
-        width: 120,
-        height: 120,
-        borderRadius: '50%',
-        border: '1px solid rgba(22, 196, 164, 0.2)',
-        opacity: 0.3,
-      }} />
-      <div style={{ fontSize: 10, fontWeight: 700, color: '#D4C4A8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: '2rem', fontWeight: 900, fontStyle: 'italic', color: '#D4C4A8', lineHeight: 1, marginBottom: 8 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>{sub}</div>}
-      {period && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{period}</div>}
-    </div>
-  );
-}
-
-export function EnterpriseDonut({ value, max, label, color }) {
-  const percent = Math.round((value / max) * 100);
-  const r = 36;
-  const c = 2 * Math.PI * r;
-  const offset = c - (percent / 100) * c;
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <svg width="90" height="90" viewBox="0 0 90 90" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="45" cy="45" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
-        <circle cx="45" cy="45" r={r} fill="none" stroke={color || '#D4C4A8'} strokeWidth="6"
-          strokeDasharray={c} strokeDashoffset={offset} strokeLinecap="round" />
-      </svg>
-      <div style={{ marginTop: -65, fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>{percent}%</div>
-      {label && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{label}</div>}
-    </div>
-  );
-}
-
-export function EnterpriseProgress({ value, max, color, label, showPercent }) {
-  const percent = Math.round((value / max) * 100);
-  return (
-    <div>
-      {(label || showPercent) && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-          {label && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{label}</span>}
-          {showPercent && <span style={{ fontSize: 11, fontWeight: 700, color: color || '#D4C4A8' }}>{percent}%</span>}
-        </div>
-      )}
-      <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-        <div style={{
-          height: '100%',
-          width: percent + '%',
-          background: color || '#D4C4A8',
-          borderRadius: 3,
-          transition: 'width 0.3s',
-        }} />
-      </div>
     </div>
   );
 }
 
 export function EnterpriseNotifications({ items }) {
   if (!items || items.length === 0) {
-    return <div style={{ textAlign: 'center', padding: 32, color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No new notifications</div>;
+    return (
+      <div style={S.emptyState}>
+        <p>No notifications</p>
+      </div>
+    );
   }
+  
   return (
     <div>
-      {items.map((n, i) => (
-        <div key={i} style={{
-          display: 'flex',
-          gap: 12,
-          padding: '14px 0',
-          borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          cursor: n.to ? 'pointer' : 'default',
-        }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: (n.color || '#D4C4A8') + '15', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: 16 }}>{n.icon || '🔔'}</span>
-          </div>
+      {items.map((item, i) => (
+        <div key={i} style={{ ...S.notification, borderBottom: i < items.length - 1 ? `1px solid ${EnterpriseTokens.borderLight}` : 'none' }}>
+          <div style={{ fontSize: 20 }}>{item.icon}</div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: n.unread ? 700 : 500, color: '#fff' }}>{n.title}</div>
-            {n.description && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{n.description}</div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <p style={{ fontSize: 13, fontWeight: 500, color: EnterpriseTokens.textPrimary }}>
+                {item.title}
+              </p>
+              {item.unread && (
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: EnterpriseTokens.info }} />
+              )}
+            </div>
+            <p style={{ fontSize: 12, color: EnterpriseTokens.textMuted, marginTop: 2 }}>
+              {item.description}
+            </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-            {n.time && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{n.time}</span>}
-            {n.unread && <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D4C4A8' }} />}
+          {item.time && (
+            <span style={{ fontSize: 11, color: EnterpriseTokens.textDisabled, whiteSpace: 'nowrap' }}>
+              {item.time}
+            </span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function EnterpriseRevenue({ data, height = 200 }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ ...S.emptyState, height }}>
+        <p>No revenue data</p>
+      </div>
+    );
+  }
+  
+  const maxValue = Math.max(...data.map(d => d.value));
+  
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height }}>
+      {data.map((item, i) => (
+        <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <div 
+            style={{ 
+              width: '100%', 
+              background: `linear-gradient(180deg, ${EnterpriseTokens.navy} 0%, ${EnterpriseTokens.navyLight} 100%)`,
+              borderRadius: '6px 6px 0 0',
+              minHeight: 4,
+              height: `${(item.value / maxValue) * (height - 40)}px`,
+              transition: 'height 0.3s ease',
+            }} 
+          />
+          <span style={{ fontSize: 10, color: EnterpriseTokens.textMuted }}>
+            {item.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function EnterpriseChart({ data, type = 'line', height = 200 }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ ...S.emptyState, height }}>
+        <p>No chart data</p>
+      </div>
+    );
+  }
+  
+  const maxValue = Math.max(...data.map(d => d.value));
+  
+  if (type === 'bar') {
+    return (
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height }}>
+        {data.map((item, i) => (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div 
+              style={{ 
+                width: '100%', 
+                background: EnterpriseTokens.surface,
+                borderRadius: 4,
+                minHeight: 2,
+                height: `${(item.value / maxValue) * (height - 30)}px`,
+              }} 
+            />
+            <span style={{ fontSize: 10, color: EnterpriseTokens.textMuted }}>
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  // Default: line chart visualization
+  return (
+    <div style={{ position: 'relative', height }}>
+      <svg width="100%" height="100%" style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={EnterpriseTokens.navy} stopOpacity="0.2" />
+            <stop offset="100%" stopColor={EnterpriseTokens.navy} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* Area fill */}
+        <path
+          d={`
+            M ${data.map((_, i) => `${(i / (data.length - 1)) * 100}%`).join(' L ')}
+            L 100% 100%
+            L 0 100%
+            Z
+          `}
+          fill="url(#chartGradient)"
+        />
+        {/* Line */}
+        <polyline
+          points={data.map((item, i) => `${(i / (data.length - 1)) * 100}%,${100 - (item.value / maxValue) * 80}%`).join(' ')}
+          fill="none"
+          stroke={EnterpriseTokens.navy}
+          strokeWidth="2"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        {/* Dots */}
+        {data.map((item, i) => (
+          <circle
+            key={i}
+            cx={`${(i / (data.length - 1)) * 100}%`}
+            cy={`${100 - (item.value / maxValue) * 80}%`}
+            r="3"
+            fill={EnterpriseTokens.white}
+            stroke={EnterpriseTokens.navy}
+            strokeWidth="2"
+          />
+        ))}
+      </svg>
+      {/* Labels */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+        {data.map((item, i) => (
+          <span key={i} style={{ fontSize: 10, color: EnterpriseTokens.textMuted }}>
+            {item.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function EnterpriseDonut({ data, size = 120 }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={{ ...S.emptyState, width: size, height: size }}>
+        <p>No data</p>
+      </div>
+    );
+  }
+  
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  let currentAngle = -90;
+  
+  const paths = data.map((item, i) => {
+    const angle = (item.value / total) * 360;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + angle;
+    currentAngle = endAngle;
+    
+    const start = polarToCartesian(size / 2, size / 2, size / 2 - 10, startAngle);
+    const end = polarToCartesian(size / 2, size / 2, size / 2 - 10, endAngle);
+    const largeArcFlag = angle > 180 ? 1 : 0;
+    
+    const d = [
+      `M ${start.x} ${start.y}`,
+      `A ${size / 2 - 10} ${size / 2 - 10} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`,
+    ].join(' ');
+    
+    return { ...item, d, color: item.color || Object.values(EnterpriseTokens)[i + 10] };
+  });
+  
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+      <svg width={size} height={size}>
+        {paths.map((item, i) => (
+          <path
+            key={i}
+            d={item.d}
+            fill="none"
+            stroke={item.color}
+            strokeWidth="20"
+            strokeLinecap="round"
+          />
+        ))}
+        <circle cx={size / 2} cy={size / 2} r={size / 2 - 25} fill={EnterpriseTokens.card} />
+        <text x={size / 2} y={size / 2} textAnchor="middle" dominantBaseline="middle" fill={EnterpriseTokens.textPrimary} fontSize={20} fontWeight="700">
+          {total.toLocaleString()}
+        </text>
+      </svg>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {data.map((item, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ width: 10, height: 10, borderRadius: 2, background: item.color || Object.values(EnterpriseTokens)[i + 10] }} />
+            <span style={{ fontSize: 12, color: EnterpriseTokens.textSecondary }}>
+              {item.label}: {item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function polarToCartesian(cx, cy, radius, angle) {
+  const rad = (angle * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(rad),
+    y: cy + radius * Math.sin(rad),
+  };
+}
+
+export function EnterpriseTable({ columns, data, emptyMessage = 'No data available' }) {
+  if (!data || data.length === 0) {
+    return (
+      <div style={S.emptyState}>
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
+  
+  return (
+    <table style={S.table}>
+      <thead>
+        <tr>
+          {columns.map((col, i) => (
+            <th key={i} style={{ ...S.th, textAlign: col.align || 'left' }}>
+              {col.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((row, i) => (
+          <tr key={i}>
+            {columns.map((col, j) => (
+              <td key={j} style={{ ...S.td, textAlign: col.align || 'left' }}>
+                {col.render ? col.render(row[col.key], row) : row[col.key]}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+export function EnterpriseBadge({ children, variant = 'default', className }) {
+  const variants = {
+    default: { bg: EnterpriseTokens.surface, color: EnterpriseTokens.textSecondary },
+    success: { bg: EnterpriseTokens.successBg, color: EnterpriseTokens.success },
+    warning: { bg: EnterpriseTokens.warningBg, color: EnterpriseTokens.warning },
+    danger: { bg: EnterpriseTokens.dangerBg, color: EnterpriseTokens.danger },
+    info: { bg: EnterpriseTokens.infoBg, color: EnterpriseTokens.info },
+  };
+  
+  const style = variants[variant] || variants.default;
+  
+  return (
+    <span 
+      style={{ 
+        ...S.badge(style.color, style.bg),
+        ...(className || {})
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function EnterpriseMetricRow({ items }) {
+  return (
+    <div style={{ display: 'flex', gap: 16 }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ flex: 1 }}>
+          <p style={{ fontSize: 11, color: EnterpriseTokens.textMuted, marginBottom: 4 }}>{item.label}</p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <span style={{ fontSize: 20, fontWeight: 700, color: EnterpriseTokens.textPrimary }}>
+              {item.value}
+            </span>
+            {item.trend !== undefined && (
+              <span style={{ 
+                fontSize: 12, 
+                fontWeight: 600,
+                color: item.trend >= 0 ? EnterpriseTokens.success : EnterpriseTokens.danger 
+              }}>
+                {item.trend >= 0 ? '↑' : '↓'} {Math.abs(item.trend)}%
+              </span>
+            )}
           </div>
         </div>
       ))}
@@ -344,90 +674,147 @@ export function EnterpriseNotifications({ items }) {
   );
 }
 
-export function EnterpriseAction({ icon, label, desc, to, onClick, color }) {
-  const accent = color || '#D4C4A8';
+export function DashboardHeader({ title, subtitle, actions }) {
   return (
-    <Link to={to || '#'} onClick={onClick} style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 14,
-      padding: '14px 16px',
-      background: '#151520',
-      border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 12,
-      textDecoration: 'none',
-      transition: 'border-color 0.2s, transform 0.2s',
-    }}>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{icon}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
       <div>
-        <div style={{ fontWeight: 600, fontSize: 13, color: '#fff' }}>{label}</div>
-        {desc && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{desc}</div>}
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: EnterpriseTokens.textPrimary, marginBottom: 4 }}>
+          {title}
+        </h1>
+        {subtitle && (
+          <p style={{ fontSize: 14, color: EnterpriseTokens.textMuted }}>
+            {subtitle}
+          </p>
+        )}
       </div>
-    </Link>
-  );
-}
-
-export function EnterpriseQuickActions({ actions, cols = 4 }) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
-      {actions.map((a, i) => <EnterpriseAction key={i} {...a} />)}
+      {actions && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
 
-export function EnterpriseBadge({ label, color, variant = 'default' }) {
-  const bg = (color || '#D4C4A8') + '15';
-  const textColor = color || '#D4C4A8';
+export function EnterpriseTabs({ tabs, activeTab, onChange }) {
   return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: variant === 'pill' ? '4px 12px' : '3px 10px',
-      borderRadius: variant === 'pill' ? 9999 : 6,
-      fontSize: 10,
-      fontWeight: 700,
-      background: bg,
-      color: textColor,
-      textTransform: 'uppercase',
-      letterSpacing: '0.06em',
+    <div style={{ 
+      display: 'flex', 
+      gap: 4, 
+      padding: 4,
+      background: EnterpriseTokens.surface,
+      borderRadius: 10,
+      border: `1px solid ${EnterpriseTokens.border}`,
     }}>
-      {label}
-    </span>
+      {tabs.map((tab) => (
+        <button
+          key={tab.value}
+          onClick={() => onChange(tab.value)}
+          style={{
+            flex: 1,
+            padding: '8px 16px',
+            borderRadius: 8,
+            border: 'none',
+            background: activeTab === tab.value ? EnterpriseTokens.card : 'transparent',
+            color: activeTab === tab.value ? EnterpriseTokens.textPrimary : EnterpriseTokens.textMuted,
+            fontWeight: activeTab === tab.value ? 600 : 500,
+            fontSize: 13,
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: activeTab === tab.value ? EnterpriseTokens.shadowSm : 'none',
+          }}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
-export function EnterpriseTabs({ tabs, active, onChange }) {
+export function EnterpriseProgress({ value, max = 100, color = EnterpriseTokens.navy, showLabel = true }) {
+  const percentage = (value / max) * 100;
+  
   return (
-    <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 20 }}>
-      {tabs.map(tab => (
-        <button key={tab.id} onClick={() => onChange(tab.id)} style={{
-          padding: '12px 16px',
-          background: 'none',
-          border: 'none',
-          borderBottom: active === tab.id ? '2px solid #D4C4A8' : '2px solid transparent',
-          color: active === tab.id ? '#fff' : 'rgba(255,255,255,0.4)',
-          fontSize: 13,
-          fontWeight: 600,
-          cursor: 'pointer',
-          transition: 'color 0.2s',
-        }}>
-          {tab.icon && <span style={{ marginRight: 6 }}>{tab.icon}</span>}
-          {tab.label}
-          {tab.count !== undefined && (
-            <span style={{
-              marginLeft: 6,
-              padding: '2px 8px',
-              background: active === tab.id ? 'rgba(22, 196, 164, 0.1)' : 'rgba(255,255,255,0.05)',
-              borderRadius: 9999,
-              fontSize: 10,
-              fontWeight: 700,
-              color: active === tab.id ? '#D4C4A8' : 'rgba(255,255,255,0.4)',
-            }}>
-              {tab.count}
-            </span>
-          )}
-        </button>
+    <div>
+      {showLabel && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: EnterpriseTokens.textMuted }}>
+            {value} / {max}
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: EnterpriseTokens.textSecondary }}>
+            {percentage.toFixed(0)}%
+          </span>
+        </div>
+      )}
+      <div style={{ 
+        width: '100%', 
+        height: 6, 
+        background: EnterpriseTokens.surface, 
+        borderRadius: 3, 
+        overflow: 'hidden' 
+      }}>
+        <div style={{ 
+          width: `${percentage}%`, 
+          height: '100%', 
+          background: color,
+          borderRadius: 3,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+export function EnterpriseQuickActions({ items }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+      {items.map((item, i) => (
+        <Link key={i} to={item.to} style={S.actionLink}>
+          <span style={{ fontSize: 20 }}>{item.icon}</span>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 600, color: EnterpriseTokens.textPrimary }}>
+              {item.label}
+            </p>
+            {item.desc && (
+              <p style={{ fontSize: 11, color: EnterpriseTokens.textMuted }}>
+                {item.desc}
+              </p>
+            )}
+          </div>
+        </Link>
       ))}
+    </div>
+  );
+}
+
+// Skeleton loader component
+export function EnterpriseSkeleton({ width = '100%', height = 20, className }) {
+  return (
+    <div 
+      style={{ 
+        ...S.skeleton, 
+        width, 
+        height,
+        ...(className || {})
+      }} 
+    />
+  );
+}
+
+// Empty state component
+export function EnterpriseEmpty({ icon, title, description, action }) {
+  return (
+    <div style={{ ...S.emptyState, padding: '48px 24px' }}>
+      {icon && <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>}
+      <h3 style={{ fontSize: 16, fontWeight: 600, color: EnterpriseTokens.textPrimary, marginBottom: 8 }}>
+        {title || 'No data available'}
+      </h3>
+      {description && (
+        <p style={{ fontSize: 14, color: EnterpriseTokens.textMuted, marginBottom: 16 }}>
+          {description}
+        </p>
+      )}
+      {action}
     </div>
   );
 }
