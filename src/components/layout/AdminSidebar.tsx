@@ -7,7 +7,7 @@ import {
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
   Radio, Palette, Zap, Database, Layers, Layout, Target, Bot, Binary,
   Activity as OpsIcon, Globe, Shield as GovernanceIcon, Brain, Command,
-  Lightbulb, Factory,
+  Lightbulb, Factory, ClipboardList,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -38,6 +38,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/command-center', icon: Command, label: 'Command Center', superadmin: true },
   { to: '/admin/improvement', icon: Lightbulb, label: 'Improvement Center', superadmin: true },
   { to: '/admin/platform-factory', icon: Factory, label: 'Platform Factory', superadmin: true },
+  { to: '/admin/ghost-checkers', icon: ClipboardList, label: 'Ghost Checkers', superadmin: true },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
   { to: '/admin/cars', icon: Car, label: 'Listings' },

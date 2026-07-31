@@ -163,6 +163,11 @@ const TABLE_MAP = {
   PlatformTemplate: "platform_templates",
   PlatformComponent: "platform_components",
   PlatformBrand: "platform_brands",
+  // Ghost Checkers Models
+  InspectionPackage: "inspection_packages",
+  Inspector: "inspectors",
+  Inspection: "inspections",
+  VehiclePassport: "vehicle_passports",
 };
 
 // ────────────────────────────────────────────────────────────────
