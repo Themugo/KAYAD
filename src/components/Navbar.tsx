@@ -350,12 +350,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button
-              onClick={() => handleNavSelect('sell')}
+              onClick={() => handleNavSelect('seller-platform')}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#C85A32] hover:bg-[#B34E28] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
-              <span>List Vehicle</span>
+              <span>Sell Vehicle</span>
             </button>
 
             {/* AUTHENTICATED USER DROPDOWN OR LOGIN BUTTON (Secondary CTA: White bg, Navy border) */}
@@ -432,11 +432,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleNavSelect('sell')}
+                        onClick={() => handleNavSelect('seller-platform')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
                       >
                         <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>My Vehicles</span>
+                        <span>Sell Vehicle</span>
                       </button>
 
                       <button

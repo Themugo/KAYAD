@@ -25,6 +25,7 @@ import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
 import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
 import KAYADLive from './pages/KAYADLive';
 import { BuyerPlatform } from './features/OwnershipPlatform';
+import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -305,6 +306,10 @@ export function App() {
 
           {activeNav === 'buyer-platform' && (
             <BuyerPlatform />
+          )}
+
+          {activeNav === 'seller-platform' && (
+            <PrivateSellerPlatform />
           )}
 
           {activeNav === 'saved' && (
