@@ -108,6 +108,12 @@ const TABLE_MAP = {
   HomepageVariant: "homepage_variants",
   NavigationRule: "navigation_rules",
   ExperienceAnalytics: "experience_analytics",
+  // AI Platform Builder Models
+  AICommand: "ai_commands",
+  AIKnowledge: "ai_knowledge",
+  AIConversation: "ai_conversations",
+  AIPrompt: "ai_prompts",
+  AIWorkspace: "ai_workspaces",
 };
 
 // ────────────────────────────────────────────────────────────────

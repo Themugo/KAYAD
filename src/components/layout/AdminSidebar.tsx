@@ -5,7 +5,7 @@ import {
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
-  Radio, Palette, Zap, Database, Layers, Layout, Target,
+  Radio, Palette, Zap, Database, Layers, Layout, Target, Bot,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -27,6 +27,7 @@ const ALL_LINKS: LinkItem[] = [
   { to: '/admin/lowcode', icon: Layers, label: 'Business Object Studio', superadmin: true },
   { to: '/admin/vxp', icon: Layout, label: 'Visual Experience Studio', superadmin: true },
   { to: '/admin/xos', icon: Target, label: 'Experience Studio', superadmin: true },
+  { to: '/admin/ai', icon: Bot, label: 'AI Platform Builder', superadmin: true },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
   { to: '/admin/cars', icon: Car, label: 'Listings' },
