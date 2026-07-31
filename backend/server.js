@@ -122,6 +122,7 @@ import governanceRoutes from "./routes/governanceRoutes.js";
 import intelligenceRoutes from "./routes/intelligenceRoutes.js";
 import commandCenterRoutes from "./routes/commandCenterRoutes.js";
 import improvementRoutes from "./routes/improvementRoutes.js";
+import platformFactoryRoutes from "./routes/platformFactoryRoutes.js";
 import { startIntegrityCron } from "./services/auctionIntegrityCron.js";
 import { startVerificationDeadlineCron } from "./services/deadlineService.js";
 
@@ -709,6 +710,7 @@ app.use("/api/governance", governanceRoutes);
 app.use("/api/intelligence", intelligenceRoutes);
 app.use("/api/command-center", commandCenterRoutes);
 app.use("/api/improvement", improvementRoutes);
+app.use("/api/platform-factory", platformFactoryRoutes);
 app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────

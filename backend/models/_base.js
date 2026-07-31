@@ -158,6 +158,11 @@ const TABLE_MAP = {
   Experiment: "experiments",
   ProductHealth: "product_health",
   InnovationIdea: "innovation_ideas",
+  // Platform Factory Models
+  PlatformProduct: "platform_products",
+  PlatformTemplate: "platform_templates",
+  PlatformComponent: "platform_components",
+  PlatformBrand: "platform_brands",
 };
 
 // ────────────────────────────────────────────────────────────────
