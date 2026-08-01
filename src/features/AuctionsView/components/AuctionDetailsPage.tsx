@@ -39,10 +39,10 @@ import {
   X,
   ExternalLink
 } from 'lucide-react';
-import { Card } from '../../components/ui/Card';
-import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
-import { AuctionDisclaimer } from '../../components/auction/AuctionDisclaimer';
+import { Card } from '../../../components/ui/Card';
+import { Badge } from '../../../components/ui/Badge';
+import { Button } from '../../../components/ui/Button';
+import { AuctionDisclaimer } from '../../../components/auction/AuctionDisclaimer';
 import type { FC } from 'react';
 
 // ============================================================

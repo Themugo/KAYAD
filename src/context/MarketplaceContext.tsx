@@ -1,11 +1,11 @@
 import type React from 'react';
 import { createContext, useContext, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Vehicle } from '../types';
+import { Vehicle, BodyStyle } from '../types';
 import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
 import type { FC } from 'react';
 
-// Local type definitions (types/index.ts has these)
+// Local type definitions for context state
 type EscrowStatus = 'initiated' | 'buyer_funded' | 'inspection_pending' | 'inspection_approved' | 'delivery_in_transit' | 'buyer_accepted' | 'disputed' | 'completed' | 'refunded';
 
 interface EscrowMilestone {
@@ -16,7 +16,7 @@ interface EscrowMilestone {
   timestamp?: string;
 }
 
-interface EscrowContract {
+interface EscrowContractData {
   id: string;
   vehicleId: string;
   vehicleTitle: string;
@@ -33,7 +33,7 @@ interface EscrowContract {
   updatedAt?: string;
 }
 
-interface Bid {
+interface BidData {
   id: string;
   vehicleId: string;
   bidderId: string;
@@ -43,7 +43,7 @@ interface Bid {
   isAutoBid?: boolean;
 }
 
-interface NotificationItem {
+interface NotificationItemData {
   id: string;
   userId: string;
   title: string;
@@ -55,23 +55,9 @@ interface NotificationItem {
   vehicleId?: string;
 }
 
-type BodyStyle = 'sedan' | 'suv' | 'truck' | 'coupe' | 'hatchback' | 'van' | 'wagon' | 'convertible';
-
-interface FilterState {
-  searchQuery: string;
-  makes: string[];
-  bodyStyles: BodyStyle[];
-  minYear: number;
-  maxYear: number;
-  minPrice: number;
-  maxPrice: number;
-  maxMileage: number;
-  transmission: string[];
-  fuelType: string[];
-  listingType: 'all' | 'auction' | 'fixed';
-  certifiedOnly: boolean;
-  sortBy: 'featured' | 'newest' | 'price_asc' | 'price_desc' | 'year_desc' | 'mileage_asc' | 'ending_soon';
-}
+export interface EscrowContractLocal extends EscrowContractData {}
+export interface BidLocal extends BidData {}
+export interface NotificationItemLocal extends NotificationItemData {}
 
 interface Advert {
   id: string;
@@ -88,7 +74,7 @@ interface Advert {
   createdAt: string;
 }
 
-interface PriceAlert {
+interface PriceAlertData {
   id: string;
   userId: string;
   vehicleId: string;
@@ -100,6 +86,24 @@ interface PriceAlert {
   notifyMethod: 'in_app' | 'email' | 'both';
   createdAt: string;
   isActive: boolean;
+}
+
+export interface PriceAlertLocal extends PriceAlertData {}
+
+export interface FilterState {
+  searchQuery: string;
+  makes: string[];
+  bodyStyles: BodyStyle[];
+  minYear: number;
+  maxYear: number;
+  minPrice: number;
+  maxPrice: number;
+  maxMileage: number;
+  transmission: string[];
+  fuelType: string[];
+  listingType: 'all' | 'auction' | 'fixed';
+  certifiedOnly: boolean;
+  sortBy: 'featured' | 'newest' | 'price_asc' | 'price_desc' | 'year_desc' | 'mileage_asc' | 'ending_soon';
 }
 
 // Maps this context's internal page-name convention to this app's real
@@ -186,12 +190,12 @@ interface MarketplaceContextType {
   filters: FilterState;
   setFilters: React.Dispatch<React.SetStateAction<FilterState>>;
   resetFilters: () => void;
-  bids: Bid[];
+  bids: BidLocal[];
   placeBid: (vehicleId: string, amount: number, bidderName: string, bidderId: string) => boolean;
-  escrowContracts: EscrowContract[];
-  initiateEscrow: (vehicle: Vehicle, buyerId: string, buyerName: string) => EscrowContract;
+  escrowContracts: EscrowContractLocal[];
+  initiateEscrow: (vehicle: Vehicle, buyerId: string, buyerName: string) => EscrowContractLocal;
   updateEscrowStep: (contractId: string, nextStep: number) => void;
-  notifications: NotificationItem[];
+  notifications: NotificationItemLocal[];
   unreadNotifsCount: number;
   markNotificationRead: (id: string) => void;
   isChatOpen: boolean;
@@ -206,10 +210,10 @@ interface MarketplaceContextType {
   addAdvert: (advData: Omit<Advert, 'id' | 'clicksCount' | 'createdAt'>) => Advert;
   toggleAdvertStatus: (id: string) => void;
   deleteAdvert: (id: string) => void;
-  priceAlerts: PriceAlert[];
-  setPriceAlert: (alertData: Omit<PriceAlert, 'id' | 'createdAt' | 'isActive'>) => PriceAlert;
+  priceAlerts: PriceAlertLocal[];
+  setPriceAlert: (alertData: Omit<PriceAlertLocal, 'id' | 'createdAt' | 'isActive'>) => PriceAlertLocal;
   removePriceAlert: (vehicleId: string) => void;
-  getPriceAlertForVehicle: (vehicleId: string) => PriceAlert | undefined;
+  getPriceAlertForVehicle: (vehicleId: string) => PriceAlertLocal | undefined;
   simulatePriceChange: (vehicleId: string, newPrice: number) => void;
   simulateStatusChange: (vehicleId: string, newStatus: Vehicle['status']) => void;
   isLoading: boolean;
@@ -244,9 +248,9 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [savedVehicleIds, setSavedVehicleIds] = useState<string[]>(['veh_1', 'veh_5']);
   const [filters, setFilters] = useState<FilterState>(initialFilters);
-  const [bids, setBids] = useState<Bid[]>(mockBids);
-  const [escrowContracts, setEscrowContracts] = useState<EscrowContract[]>(mockEscrowContracts);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(mockNotifications);
+  const [bids, setBids] = useState<BidLocal[]>(mockBids as BidLocal[]);
+  const [escrowContracts, setEscrowContracts] = useState<EscrowContractLocal[]>(mockEscrowContracts as EscrowContractLocal[]);
+  const [notifications, setNotifications] = useState<NotificationItemLocal[]>(mockNotifications as NotificationItemLocal[]);
   
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [activeChatVehicleId, setActiveChatVehicleId] = useState<string | null>(null);
@@ -318,7 +322,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     const minBid = (target.currentBid || target.price) + 500;
     if (amount < minBid) return false;
 
-    const newBid: Bid = {
+    const newBid: BidLocal = {
       id: `bid_${Date.now()}`,
       vehicleId,
       bidderId,
@@ -343,7 +347,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     );
 
     // Trigger Notification
-    const newNotif: NotificationItem = {
+    const newNotif: NotificationItemLocal = {
       id: `notif_${Date.now()}`,
       userId: bidderId,
       title: 'Bid Placed Successfully',
@@ -357,14 +361,14 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     return true;
   };
 
-  const initiateEscrow = (vehicle: Vehicle, buyerId: string, buyerName: string): EscrowContract => {
+  const initiateEscrow = (vehicle: Vehicle, buyerId: string, buyerName: string): EscrowContractLocal => {
     const existing = escrowContracts.find(e => e.vehicleId === vehicle.id && e.buyerId === buyerId);
     if (existing) return existing;
 
     const price = vehicle.buyNowPrice || vehicle.currentBid || vehicle.price;
     const fee = Math.round(price * 0.005); // 0.5% escrow fee
 
-    const newContract: EscrowContract = {
+    const newContract: EscrowContractLocal = {
       id: `escrow_KYD_${Math.floor(10000 + Math.random() * 90000)}`,
       vehicleId: vehicle.id,
       vehicleTitle: vehicle.title,
@@ -417,7 +421,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
             return { ...m, status: 'upcoming' as const };
           });
 
-          const statusMap: Record<number, EscrowContract['status']> = {
+          const statusMap: Record<number, EscrowStatus> = {
             1: 'initiated',
             2: 'buyer_funded',
             3: 'inspection_pending',
@@ -518,7 +522,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     setAdverts(prev => prev.filter(a => a.id !== id));
   };
 
-  const [priceAlerts, setPriceAlerts] = useState<PriceAlert[]>([
+  const [priceAlerts, setPriceAlerts] = useState<PriceAlertLocal[]>([
     {
       id: 'alert_1',
       userId: 'user_1',
@@ -534,9 +538,9 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     }
   ]);
 
-  const setPriceAlert = (alertData: Omit<PriceAlert, 'id' | 'createdAt' | 'isActive'>): PriceAlert => {
+  const setPriceAlert = (alertData: Omit<PriceAlertLocal, 'id' | 'createdAt' | 'isActive'>): PriceAlertLocal => {
     const existingIndex = priceAlerts.findIndex(a => a.vehicleId === alertData.vehicleId && a.userId === alertData.userId);
-    const newAlert: PriceAlert = {
+    const newAlert: PriceAlertLocal = {
       ...alertData,
       id: existingIndex >= 0 ? priceAlerts[existingIndex].id : `alert_${Date.now()}`,
       createdAt: new Date().toISOString(),
@@ -550,7 +554,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     }
 
     // Post a notification confirming alert activation
-    const notif: NotificationItem = {
+    const notif: NotificationItemLocal = {
       id: `notif_${Date.now()}`,
       userId: alertData.userId,
       title: 'Price Alert Set',
@@ -569,7 +573,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     setPriceAlerts(prev => prev.filter(a => a.vehicleId !== vehicleId));
   };
 
-  const getPriceAlertForVehicle = (vehicleId: string): PriceAlert | undefined => {
+  const getPriceAlertForVehicle = (vehicleId: string): PriceAlertLocal | undefined => {
     return priceAlerts.find(a => a.vehicleId === vehicleId && a.isActive);
   };
 
@@ -589,7 +593,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
     const dropAmount = oldPrice - newPrice;
 
     if (priceDropped) {
-      const notif: NotificationItem = {
+      const notif: NotificationItemLocal = {
         id: `notif_${Date.now()}`,
         userId: alert ? alert.userId : 'user_1',
         title: `🚨 Price Drop: ${target.title}`,
@@ -618,7 +622,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       draft: 'In Draft Review'
     };
 
-    const notif: NotificationItem = {
+    const notif: NotificationItemLocal = {
       id: `notif_${Date.now()}`,
       userId: alert ? alert.userId : 'user_1',
       title: `⚡ Vehicle Status Update: ${target.title}`,

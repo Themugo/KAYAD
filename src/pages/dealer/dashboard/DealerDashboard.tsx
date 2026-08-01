@@ -7,7 +7,7 @@ import {
   PieChart, Activity, Users as TeamIcon, ShoppingBag, Bell,
   Settings, FileText, Send, RefreshCw, ArrowUpRight, ArrowDownRight,
   UserPlus, Shield, Award, CreditCard, CalendarCheck, ClipboardCheck,
-  Gavel, X, Loader2, TrendingRight,
+  Gavel, X, Loader2, TrendingUp,
 } from 'lucide-react';
 import * as dealerApi from '../../services/dealerPlatformApi';
 

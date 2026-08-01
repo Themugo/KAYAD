@@ -21,7 +21,7 @@ import {
   Eye as EyeIcon, Heart as HeartIcon, MessageSquare as MessageSquareIcon, Timer, TrendingUp as TrendingUpIcon,
   Lightbulb, Target, Zap,
   HelpCircle, BookOpen, AlertTriangle, Info, ExternalLink as ExternalLinkIcon,
-  Phone as PhoneIcon, Mail as MailIcon, MessageQuestion,
+  Phone as PhoneIcon, Mail as MailIcon,
   Calendar as CalendarIcon, MapPin as MapPinIcon, Clock as ClockIcon,
   UserCheck, CheckCircle2,
   // Finance specific

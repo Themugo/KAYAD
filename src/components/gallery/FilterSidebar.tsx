@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Filter, RotateCcw, Check, Search, ShieldCheck, Tag, Car, Zap, ChevronDown, MapPin, Sparkles } from 'lucide-react';
-import { useMarketplace } from '../../context/MarketplaceContext';
-import { BodyStyle, TransmissionType, FuelType } from '../../types';
+import { useMarketplace, FilterState } from '../../context/MarketplaceContext';
+import { TransmissionType, FuelType } from '../../types';
 import type { FC } from 'react';
 
 export const FilterSidebar: FC = () => {
