@@ -6,43 +6,18 @@ interface CountdownDisplayProps {
   showDays?: boolean | 'auto';
 }
 
-export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: CountdownDisplayProps) {
-  const { d, h, m, s, expired, urgent } = useCountdown(endTime);
+interface BlockProps {
+  value: number;
+  label: string;
+  isLast: boolean;
+  urgent: boolean;
+  accent: string;
+  dims: { box: number; num: number; lbl: number; gap: number; sep: number };
+  key?: string;
+}
 
-  if (expired) {
-    return (
-      <span style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        padding: '5px 12px', borderRadius: 8,
-        background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
-        color: '#ef4444', fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
-      }}>
-        Auction Ended
-      </span>
-    );
-  }
-
-  const dims = {
-    sm: { box: 38, num: 17, lbl: 8,  gap: 5, sep: 15 },
-    md: { box: 54, num: 24, lbl: 9,  gap: 7, sep: 20 },
-    lg: { box: 72, num: 34, lbl: 10, gap: 9, sep: 26 },
-  }[size] || { box: 54, num: 24, lbl: 9, gap: 7, sep: 20 };
-
-  const includeDays = showDays === true || (showDays === 'auto' && d > 0);
-  const accent = urgent ? '#ef4444' : 'var(--gold, #D4C4A8)';
-
-  const segments: [number, string][] = [
-    ...(includeDays ? [[d, 'Days'] as [number, string]] : []),
-    [h, 'Hrs'], [m, 'Min'], [s, 'Sec'],
-  ];
-
-  interface BlockProps {
-    value: number;
-    label: string;
-    isLast: boolean;
-  }
-
-  const Block = ({ value, label, isLast }: BlockProps) => (
+function Block({ value, label, isLast, urgent, accent, dims }: BlockProps) {
+  return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
         <div style={{
@@ -76,11 +51,42 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
       )}
     </>
   );
+}
+
+export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: CountdownDisplayProps) {
+  const { d, h, m, s, expired, urgent } = useCountdown(endTime);
+
+  if (expired) {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: '5px 12px', borderRadius: 8,
+        background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+        color: '#ef4444', fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
+      }}>
+        Auction Ended
+      </span>
+    );
+  }
+
+  const dims = {
+    sm: { box: 38, num: 17, lbl: 8,  gap: 5, sep: 15 },
+    md: { box: 54, num: 24, lbl: 9,  gap: 7, sep: 20 },
+    lg: { box: 72, num: 34, lbl: 10, gap: 9, sep: 26 },
+  }[size] || { box: 54, num: 24, lbl: 9, gap: 7, sep: 20 };
+
+  const includeDays = showDays === true || (showDays === 'auto' && d > 0);
+  const accent = urgent ? '#ef4444' : 'var(--gold, #D4C4A8)';
+
+  const segments: [number, string][] = [
+    ...(includeDays ? [[d, 'Days'] as [number, string]] : []),
+    [h, 'Hrs'], [m, 'Min'], [s, 'Sec'],
+  ];
 
   return (
     <div style={{ display: 'inline-flex', alignItems: 'flex-start', gap: dims.gap }}>
       {segments.map(([value, label], i) => (
-        <Block key={label} value={value} label={label} isLast={i === segments.length - 1} />
+        <Block key={label} value={value} label={label} isLast={i === segments.length - 1} urgent={urgent} accent={accent} dims={dims} />
       ))}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FC } from 'react';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Users, Gavel, DollarSign, FileText, Megaphone, Plus, Trash2, Eye, ExternalLink, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { Badge } from '../ui/Badge';
@@ -23,7 +23,7 @@ const PRESET_IMAGES = [
   { label: 'Off-Road 4x4', url: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80' },
 ];
 
-export const AdminPage: React.FC = () => {
+export const AdminPage: FC = () => {
   const { vehicles, escrowContracts, navigateTo } = useMarketplace();
 
   // Advert Form State

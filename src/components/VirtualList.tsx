@@ -1,20 +1,20 @@
 // High-performance virtualized list for rendering 100k+ items
 // Uses windowing technique to only render visible items + buffer
 
-import { useState, useEffect, useRef, useCallback, useMemo, memo, CSSProperties } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo, type CSSProperties, type ReactNode, type ComponentType, type UIEvent } from 'react';
 import useIntersectionObserver from '../hooks/useIntersectionObserver';
 
 interface VirtualListProps<T> {
   items: T[];
-  renderItem: (item: T, index: number) => React.ReactNode;
+  renderItem: (item: T, index: number) => ReactNode;
   estimatedItemHeight?: number;
   overscan?: number;
   className?: string;
   style?: CSSProperties;
   onEndReached?: () => void;
   onEndReachedThreshold?: number;
-  ListFooter?: React.ComponentType;
-  ListEmpty?: React.ComponentType;
+  ListFooter?: ComponentType;
+  ListEmpty?: ComponentType;
   keyExtractor?: (item: T, index: number) => string;
   horizontal?: boolean;
 }
@@ -121,7 +121,7 @@ export default function VirtualList<T>({
   }, [items.length, estimatedItemHeight, overscan, state.scrollTop, horizontal]);
 
   // Handle scroll
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
     const scrollTop = horizontal ? target.scrollLeft : target.scrollTop;
     
@@ -257,13 +257,13 @@ export default function VirtualList<T>({
 // Simplified version for simple row-based lists
 interface SimpleVirtualListProps<T> {
   items: T[];
-  renderRow: (item: T, index: number) => React.ReactNode;
+  renderRow: (item: T, index: number) => ReactNode;
   rowHeight: number;
   className?: string;
   style?: CSSProperties;
   onLoadMore?: () => void;
   hasMore?: boolean;
-  loadingComponent?: React.ReactNode;
+  loadingComponent?: ReactNode;
 }
 
 export function SimpleVirtualList<T>({

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode } from 'react';
 import { ChevronDown, X, SlidersHorizontal, Search } from 'lucide-react';
 import '../styles/layout.css';
 
@@ -15,7 +15,15 @@ const COLOR_MAP = {
   Maroon:'#7B0000',Pearl:'#F0EAD6',Navy:'#1E3A5F',Teal:'#14B8A6',
 };
 
-function Section({ title, children, defaultOpen = true, count, active }) {
+interface SectionProps {
+  title: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  count?: number;
+  active?: boolean;
+}
+
+function Section({ title, children, defaultOpen = true, count = 0, active = false }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="search-section">
@@ -33,7 +41,15 @@ function Section({ title, children, defaultOpen = true, count, active }) {
   );
 }
 
-function Chip({ active, onClick, children, count }) {
+interface ChipProps {
+  active?: boolean;
+  onClick?: () => void;
+  children: ReactNode;
+  count?: number;
+  key?: string;
+}
+
+function Chip({ active = false, onClick, children, count }: ChipProps) {
   return (
     <button onClick={onClick} className={`search-chip ${active ? 'search-chip-active' : 'search-chip-inactive'}`}>
       {children}

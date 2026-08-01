@@ -1,10 +1,10 @@
 interface FooterProps {
-  setPage: (page: string) => void;
+  setPage?: (page: string) => void;
 }
 
 export default function Footer({ setPage }: FooterProps) {
   const nav = (page: string) => {
-    setPage(page);
+    setPage?.(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

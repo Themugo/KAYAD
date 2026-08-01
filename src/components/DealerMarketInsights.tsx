@@ -13,9 +13,10 @@ interface Recommendation {
 
 interface RecommendationCardProps {
   rec: Recommendation;
+  key?: string;
 }
 
-function RecommendationCard({ rec }: RecommendationCardProps) {
+function RecommendationCard({ rec, key: _key }: RecommendationCardProps) {
   const isOverpriced = rec.priceDiff > 5;
   const isUnderpriced = rec.priceDiff < -5;
   return (

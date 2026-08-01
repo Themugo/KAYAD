@@ -1,6 +1,8 @@
 // src/components/Skeleton.tsx
 // Usage: <SkeletonCard /> or <SkeletonRow /> or <SkeletonText lines={3} />
 
+import type { CSSProperties } from 'react';
+
 const pulse = {
   background: 'linear-gradient(90deg, var(--surface) 25%, var(--card) 50%, var(--surface) 75%)',
   backgroundSize: '200% 100%',
@@ -22,7 +24,8 @@ interface BlockProps {
   w?: string | number;
   h?: string | number;
   r?: number;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
+  key?: string;
 }
 
 const Block = ({ w = '100%', h = 16, r = 6, style = {} }: BlockProps) => (

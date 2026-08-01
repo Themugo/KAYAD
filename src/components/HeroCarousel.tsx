@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type TouchEvent } from 'react';
 import { ChevronLeft, ChevronRight, MapPin, Shield, Star, Eye, Clock } from 'lucide-react';
 import { formatKES, timeAgo } from '../utils/helpers';
 import { carsAPI } from '../api/api';
@@ -11,7 +11,7 @@ interface FeaturedCar {
   price: number;
   currentBid?: number;
   year: number;
-  mileage?: number;
+  mileage?: number | string;
   fuel?: string;
   location?: { city?: string };
   images?: Array<{ url?: string } | string>;
@@ -141,12 +141,12 @@ export default function HeroCarousel({ onViewCar }: HeroCarouselProps) {
   };
 
   // Touch handlers for swipe
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (e: TouchEvent) => {
     setTouchStart(e.touches[0].clientX);
     pauseAutoplay();
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchEnd = (e: TouchEvent) => {
     if (touchStart === null) return;
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStart - touchEnd;

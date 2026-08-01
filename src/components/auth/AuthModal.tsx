@@ -1,20 +1,30 @@
-import { useState } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { UserRole } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, User, Building2, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
 
-export const AuthModal: React.FC = () => {
-  const { isAuthModalOpen, closeAuthModal, login } = useAuth();
+type UserRole = 'buyer' | 'dealer' | 'mechanic' | 'admin';
+
+interface UserProfile {
+  name: string;
+  email: string;
+  role: UserRole;
+  verified: boolean;
+  imageUrl?: string;
+}
+
+export const AuthModal: FC = () => {
+  const { login } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('buyer');
   const [companyName, setCompanyName] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!email) return;
     login(email, selectedRole);
@@ -24,8 +34,8 @@ export const AuthModal: React.FC = () => {
 
   return (
     <Modal
-      isOpen={isAuthModalOpen}
-      onClose={closeAuthModal}
+      isOpen={isOpen}
+      onClose={() => setIsOpen(false)}
       maxWidth="md"
     >
       <div className="space-y-5 p-1">

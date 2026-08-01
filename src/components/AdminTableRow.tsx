@@ -2,11 +2,11 @@
 // Reusable row component for admin tables
 
 import { MoreVertical, Edit, Trash2, Eye, CheckCircle, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
 interface Action {
   label: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   onClick: () => void;
   variant?: 'primary' | 'danger' | 'default';
 }
@@ -155,4 +155,4 @@ export function AdminUserRow({
   );
 }
 
-export default AdminTableRow;
+export default AdminCarRow;

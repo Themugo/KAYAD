@@ -28,6 +28,9 @@ interface Car {
   isDemo?: boolean;
   isPromoted?: boolean;
   escrowEnabled?: boolean;
+  status?: string;
+  paymentStatus?: string;
+  createdAt?: string;
   dealer?: { name?: string; businessName?: string; logo?: string; _id?: string; role?: string; verified?: boolean };
   seller?: { name?: string; avatar?: string; _id?: string };
 }
