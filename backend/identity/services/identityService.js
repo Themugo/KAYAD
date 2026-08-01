@@ -680,7 +680,7 @@ class IdentityService {
       totalEnabled: new Set(mfaEnabled.map(m => m.user_id)).size,
       totalUsers: totalUsers.length,
       percentage: totalUsers.length > 0 
-        ? Math.round((new Set(mfaEnabled.map(m => m.user_id)).size / totalUsers.length * 100) 
+        ? Math.round(new Set(mfaEnabled.map(m => m.user_id)).size / totalUsers.length * 100) 
         : 0,
     };
   }
