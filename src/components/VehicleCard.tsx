@@ -256,7 +256,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               {sellerDisplayName}
             </span>
             {vehicle.verified && (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" title="Verified Seller" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
             )}
           </div>
 

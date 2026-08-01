@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { MessageSquare, Send, Lock } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -26,7 +26,7 @@ export default function InternalNotes({
   const [isPrivate, setIsPrivate] = useState(false);
   const { user } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!newNote.trim() || !user) return;
 

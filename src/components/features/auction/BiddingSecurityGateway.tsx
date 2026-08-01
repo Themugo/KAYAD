@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { biddingSecurityAPI, formatKES } from '../../../api/api.exports';
 
 interface BiddingSecurityGatewayProps {
@@ -9,7 +9,7 @@ interface BiddingSecurityGatewayProps {
   onAuthorized?: () => void;
 }
 
-export const BiddingSecurityGateway: React.FC<BiddingSecurityGatewayProps> = ({
+export const BiddingSecurityGateway: FC<BiddingSecurityGatewayProps> = ({
   isOpen,
   onClose,
   carId,

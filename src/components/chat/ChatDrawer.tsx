@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, type FC, type FormEvent } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MessageSquareText, X, Send, ShieldCheck, DollarSign, Car, ExternalLink } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
-export const ChatDrawer: React.FC = () => {
+export const ChatDrawer: FC = () => {
   const { isChatOpen, closeChat, activeChatVehicleId, vehicles, navigateTo, initiateEscrow } = useMarketplace();
   const { user } = useAuth();
 
@@ -27,7 +27,7 @@ export const ChatDrawer: React.FC = () => {
 
   if (!isChatOpen) return null;
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = (e: FormEvent) => {
     e.preventDefault();
     if (!messageText.trim()) return;
 

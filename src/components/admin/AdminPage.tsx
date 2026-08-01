@@ -1,4 +1,4 @@
-import { useState, type FC } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import { ShieldCheck, CheckCircle2, AlertTriangle, Users, Gavel, DollarSign, FileText, Megaphone, Plus, Trash2, Eye, ExternalLink, Sparkles, Image as ImageIcon } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { Badge } from '../ui/Badge';
@@ -60,7 +60,7 @@ export const AdminPage: FC = () => {
   const [formPlacement, setFormPlacement] = useState('Hero Banner');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleCreateAdvert = (e: React.FormEvent) => {
+  const handleCreateAdvert = (e: FormEvent) => {
     e.preventDefault();
     if (!formTitle.trim()) return;
 

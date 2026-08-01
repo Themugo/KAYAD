@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, TrendingDown, Camera, DollarSign, BarChart3, Lightbulb } from 'lucide-react';
-import { marketAPI } from '../api/api';
+import { marketAPI } from '../../api/api';
+import type { JSX } from 'react';
 
 interface Recommendation {
   carId: string;
@@ -125,7 +126,7 @@ export default function DealerMarketInsights() {
             <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing Recommendations</span>
           </div>
           {data.recommendations?.slice(0, 4).map(rec => (
-            <RecommendationCard key={rec.carId} rec={rec} />
+            <RecommendationCard key={rec.carId} rec={rec} /> as JSX.Element
           ))}
         </div>
       )}

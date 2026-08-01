@@ -463,7 +463,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               <p className="text-xs text-slate-500">Daily bid volume over selected period</p>
             </div>
             <Badge 
-              variant={bidTrends.trend === 'up' ? 'success' : bidTrends.trend === 'down' ? 'error' : 'neutral'}
+              variant={bidTrends.trend === 'up' ? 'success' : bidTrends.trend === 'down' ? 'danger' : 'neutral'}
               className={
                 bidTrends.trend === 'up' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
                 bidTrends.trend === 'down' ? 'bg-red-100 text-red-700 border-red-200' :

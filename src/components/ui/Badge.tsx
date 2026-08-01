@@ -1,5 +1,5 @@
 
-export type BadgeVariant = 'brand' | 'success' | 'danger' | 'warning' | 'info' | 'neutral';
+export type BadgeVariant = 'brand' | 'success' | 'danger' | 'warning' | 'info' | 'neutral' | 'emerald' | 'blue' | 'amber';
 export type BadgeSize = 'sm' | 'md';
 
 export interface BadgeProps {
@@ -45,6 +45,11 @@ export const Badge: React.FC<BadgeProps> = ({
       color: outline ? 'var(--color-success)' : 'var(--color-success-dark)',
       border: outline ? '1px solid var(--color-success)' : '1px solid transparent',
     },
+    emerald: {
+      background: outline ? 'transparent' : 'var(--color-success-subtle)',
+      color: outline ? 'var(--color-success)' : 'var(--color-success-dark)',
+      border: outline ? '1px solid var(--color-success)' : '1px solid transparent',
+    },
     danger: {
       background: outline ? 'transparent' : 'var(--color-danger-subtle)',
       color: outline ? 'var(--color-danger)' : 'var(--color-danger-dark)',
@@ -55,10 +60,20 @@ export const Badge: React.FC<BadgeProps> = ({
       color: outline ? 'var(--color-warning)' : 'var(--color-warning-dark)',
       border: outline ? '1px solid var(--color-warning)' : '1px solid transparent',
     },
+    amber: {
+      background: outline ? 'transparent' : '#fef3c7',
+      color: outline ? '#d97706' : '#b45309',
+      border: outline ? '1px solid #d97706' : '1px solid transparent',
+    },
     info: {
       background: outline ? 'transparent' : 'var(--color-info-subtle)',
       color: outline ? 'var(--color-info)' : 'var(--color-info-dark)',
       border: outline ? '1px solid var(--color-info)' : '1px solid transparent',
+    },
+    blue: {
+      background: outline ? 'transparent' : '#dbeafe',
+      color: outline ? '#2563eb' : '#1d4ed8',
+      border: outline ? '1px solid #2563eb' : '1px solid transparent',
     },
     neutral: {
       background: outline ? 'transparent' : 'var(--color-bg-secondary)',

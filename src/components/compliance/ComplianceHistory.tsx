@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo, type ReactNode, type FC } from 'react';
 import {
   History,
   Calendar,
@@ -30,7 +30,7 @@ export interface ComplianceHistoryProps {
 
 // Action icons and colors
 const ACTION_STYLES: Record<string, {
-  icon: React.ReactNode;
+  icon: ReactNode;
   color: string;
   bgColor: string;
   label: string;
@@ -121,7 +121,7 @@ const ACTION_STYLES: Record<string, {
   },
 };
 
-export const ComplianceHistory: React.FC<ComplianceHistoryProps> = ({
+export const ComplianceHistory: FC<ComplianceHistoryProps> = ({
   audits,
   onExport,
 }) => {
@@ -285,7 +285,7 @@ export const ComplianceHistory: React.FC<ComplianceHistoryProps> = ({
 
       {/* Timeline */}
       <div className="space-y-6">
-        {Object.entries(groupedAudits).map(([date, dayAudits]) => (
+        {(Object.entries(groupedAudits) as [string, ComplianceAuditEntry[]][]).map(([date, dayAudits]) => (
           <div key={date}>
             <div className="flex items-center gap-3 mb-4">
               <Calendar className="w-4 h-4 text-slate-400" />

@@ -40,6 +40,7 @@ export function CountdownDisplay({ endTime, size = 'md', showDays = 'auto' }: Co
     value: number;
     label: string;
     isLast: boolean;
+    key?: string;
   }
 
   const Block = ({ value, label, isLast }: BlockProps) => (

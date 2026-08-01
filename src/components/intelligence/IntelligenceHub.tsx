@@ -124,7 +124,7 @@ const AlertCard: React.FC<{
       alert.severity === 'medium' ? 'bg-amber-50 border-amber-200' :
       'bg-slate-50 border-slate-200'
     } ${!alert.isRead ? 'ring-2 ring-offset-1' : ''}`}
-    style={!alert.isRead ? { ringColor: severityColor + '40' } : undefined}>
+    style={!alert.isRead ? { boxShadow: `0 0 0 2px ${severityColor}40` } : undefined}>
       <div className="flex items-start gap-3">
         <div 
           className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -391,7 +391,7 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Badge variant="error" className="bg-red-100 text-red-700 border-red-200">
+            <Badge variant="danger" className="bg-red-100 text-red-700 border-red-200">
               {kpiPanel.criticalAlerts} Critical Alerts
             </Badge>
             <span className="text-xs text-slate-500">
@@ -423,7 +423,7 @@ export const IntelligenceHub: React.FC<IntelligenceHubProps> = ({
               <Bell className="w-5 h-5" />
               Alert Center
               {unreadAlerts > 0 && (
-                <Badge variant="error" size="sm" className="bg-red-100 text-red-700">
+                <Badge variant="danger" size="sm" className="bg-red-100 text-red-700">
                   {unreadAlerts} new
                 </Badge>
               )}

@@ -200,13 +200,13 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
           <span className="search-range-sep">–</span>
           <RangeInput placeholder="Max" value={priceMax} onChange={v => onFilterChange('priceMax', v)} />
         </div>
-        {[
+        {([
           ['Under 680K',  0,        680000],
           ['680K – 1.5M', 680000,   1500000],
           ['1.5M – 3.6M', 1500000,  3600000],
           ['3.6M – 10M',  3600000,  10000000],
           ['Over 10M',    10000000, 999999999],
-        ].map(([label, min, max]) => {
+        ] as [string, number, number][]).map(([label, min, max]) => {
           const cnt = cars.filter(c => c.price >= min && c.price <= max).length;
           const active = Number(priceMin)===min && Number(priceMax)===max;
           return <Chip key={label} active={active} onClick={() => onFilterChange('priceRange',`${min}-${max}`)} count={cnt}>{label}</Chip>;

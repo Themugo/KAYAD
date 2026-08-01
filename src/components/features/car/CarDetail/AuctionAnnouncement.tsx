@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Gavel, Clock, ExternalLink, X } from 'lucide-react';
-import { formatKES } from '../../../utils/helpers';
+import { formatKES } from '../../../../utils/helpers';
 
 interface AuctionAnnouncementProps {
   car: any;

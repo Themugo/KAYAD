@@ -1,9 +1,106 @@
 import type React from 'react';
 import { createContext, useContext, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Vehicle, FilterState, EscrowContract, Bid, NotificationItem, Advert, PriceAlert } from '../types';
+import { Vehicle } from '../types';
 import { mockVehicles, mockEscrowContracts, mockBids, mockNotifications } from '../data/mockData';
 import type { FC } from 'react';
+
+// Local type definitions (types/index.ts has these)
+type EscrowStatus = 'initiated' | 'buyer_funded' | 'inspection_pending' | 'inspection_approved' | 'delivery_in_transit' | 'buyer_accepted' | 'disputed' | 'completed' | 'refunded';
+
+interface EscrowMilestone {
+  step: number;
+  title: string;
+  description: string;
+  status: 'completed' | 'current' | 'upcoming';
+  timestamp?: string;
+}
+
+interface EscrowContract {
+  id: string;
+  vehicleId: string;
+  vehicleTitle: string;
+  vehicleImage: string;
+  buyerId: string;
+  buyerName: string;
+  sellerId: string;
+  sellerName: string;
+  agreedPrice: number;
+  escrowFee: number;
+  status: EscrowStatus;
+  milestones: EscrowMilestone[];
+  createdAt: string;
+  updatedAt?: string;
+}
+
+interface Bid {
+  id: string;
+  vehicleId: string;
+  bidderId: string;
+  bidderName: string;
+  amount: number;
+  placedAt: string;
+  isAutoBid?: boolean;
+}
+
+interface NotificationItem {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'bid' | 'outbid' | 'auction_won' | 'escrow' | 'message' | 'system' | 'price_alert' | 'price_drop' | 'status_change';
+  isRead: boolean;
+  createdAt: string;
+  linkUrl?: string;
+  vehicleId?: string;
+}
+
+type BodyStyle = 'sedan' | 'suv' | 'truck' | 'coupe' | 'hatchback' | 'van' | 'wagon' | 'convertible';
+
+interface FilterState {
+  searchQuery: string;
+  makes: string[];
+  bodyStyles: BodyStyle[];
+  minYear: number;
+  maxYear: number;
+  minPrice: number;
+  maxPrice: number;
+  maxMileage: number;
+  transmission: string[];
+  fuelType: string[];
+  listingType: 'all' | 'auction' | 'fixed';
+  certifiedOnly: boolean;
+  sortBy: 'featured' | 'newest' | 'price_asc' | 'price_desc' | 'year_desc' | 'mileage_asc' | 'ending_soon';
+}
+
+interface Advert {
+  id: string;
+  title: string;
+  subtitle: string;
+  badgeTag: string;
+  ctaText: string;
+  ctaPage: 'gallery' | 'auctions' | 'ghost_check' | 'escrow' | 'dashboard' | 'support';
+  theme: 'cyan_navy' | 'emerald_escrow' | 'gold_luxury' | 'sunset_red';
+  placement: 'homepage' | 'auctions' | 'search_feed';
+  imageUrl?: string;
+  isActive: boolean;
+  clicksCount: number;
+  createdAt: string;
+}
+
+interface PriceAlert {
+  id: string;
+  userId: string;
+  vehicleId: string;
+  vehicleTitle: string;
+  targetPrice: number;
+  alertOnPriceDrop: boolean;
+  alertOnStatusChange: boolean;
+  currentPriceAtSet: number;
+  notifyMethod: 'in_app' | 'email' | 'both';
+  createdAt: string;
+  isActive: boolean;
+}
 
 // Maps this context's internal page-name convention to this app's real
 // react-router paths. navigateTo() used to only update local state, which

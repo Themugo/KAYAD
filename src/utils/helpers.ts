@@ -77,8 +77,7 @@ export const bidCommitmentAmount = (bidAmount) =>
   Math.ceil(Number(bidAmount) * 0.05); // 5% commitment
 
 // ─── Validation ─────────────────────────────────────────
-export const validateEmail = (email) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+// validateEmail is exported from security.ts for comprehensive validation
 
 export const validatePassword = (pw) =>
   pw && pw.length >= 6;

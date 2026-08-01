@@ -33,7 +33,15 @@ function Section({ title, children, defaultOpen = true, count, active }) {
   );
 }
 
-function Chip({ active, onClick, children, count }) {
+interface ChipProps {
+  active: any;
+  onClick: any;
+  children: any;
+  count: any;
+  key?: string;
+}
+
+function Chip({ active, onClick, children, count }: ChipProps) {
   return (
     <button onClick={onClick} className={`search-chip ${active ? 'search-chip-active' : 'search-chip-inactive'}`}>
       {children}
@@ -142,7 +150,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
       </Section>
 
       {/* ── QUICK FILTERS ── */}
-      <Section title="Quick Filters" defaultOpen={false} count={0}>
+      <Section title="Quick Filters" defaultOpen={false} count={0} active={false}>
         {quickFilters.map((qf, i) => (
           <button key={i} onClick={() => {
             Object.entries(qf.filters).forEach(([k, v]) => onFilterChange(k, v));
@@ -193,7 +201,7 @@ export default function SearchSidebar({ cars = [], filters, onFilterChange, onBr
         ].map(([label, min, max]) => {
           const cnt = cars.filter(c => c.price >= min && c.price <= max).length;
           const active = Number(priceMin)===min && Number(priceMax)===max;
-          return <Chip key={label} active={active} onClick={() => onFilterChange('priceRange',`${min}-${max}`)} count={cnt}>{label}</Chip>;
+          return <Chip key={String(label)} active={active} onClick={() => onFilterChange('priceRange',`${min}-${max}`)} count={cnt}>{label}</Chip>;
         })}
       </Section>
 

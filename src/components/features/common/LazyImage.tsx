@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import useIntersectionObserver from '../../../hooks/useIntersectionObserver';
 import { getCloudinarySrcSet } from '../../../utils/helpers';
 
@@ -14,7 +14,7 @@ interface LazyImageProps {
   fallback?: string;
   width?: number;
   height?: number;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   className?: string;
   onLoad?: () => void;
   onError?: () => void;

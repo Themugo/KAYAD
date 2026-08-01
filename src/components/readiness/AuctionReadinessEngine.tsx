@@ -155,7 +155,7 @@ const CheckItem: React.FC<{
             {check.label}
           </span>
           {isRequired && !check.isComplete && (
-            <Badge variant="error" size="sm" className="text-[10px] bg-red-100 text-red-700 border-red-200">
+            <Badge variant="danger" size="sm" className="text-[10px] bg-red-100 text-red-700 border-red-200">
               Required
             </Badge>
           )}
@@ -229,7 +229,7 @@ const ReadinessSectionAccordion: React.FC<{
               Complete
             </Badge>
           ) : hasCritical ? (
-            <Badge variant="error" size="sm" className="bg-red-100 text-red-700 border-red-200">
+            <Badge variant="danger" size="sm" className="bg-red-100 text-red-700 border-red-200">
               <AlertCircle className="w-3 h-3 mr-1" />
               {totalCount - completedCount} Required
             </Badge>

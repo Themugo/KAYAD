@@ -6,9 +6,11 @@ export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
+  subtitle?: string;
   description?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  maxWidth?: string;
   closeOnBackdrop?: boolean;
   closeOnEscape?: boolean;
   showCloseButton?: boolean;

@@ -1,7 +1,24 @@
 import { Vehicle, Dealer, EscrowTransaction, ChatMessage } from '../types';
 
+// Default values for required Vehicle properties
+const defaultVehicleProps = {
+  vin: 'UNKNOWN',
+  engine: 'Unknown',
+  horsepower: 0,
+  interiorColor: 'Black',
+  isDealerCertified: false,
+  savedCount: 0,
+  status: 'active' as const,
+  createdAt: new Date().toISOString(),
+  sellerId: 'unknown',
+  listingType: 'fixed' as const,
+  images: [] as string[],
+};
+
 export const INITIAL_VEHICLES: Vehicle[] = [
   {
+    ...defaultVehicleProps,
+    ...defaultVehicleProps,
     id: 'v1',
     title: '2021 Toyota Land Cruiser Prado TX-L 2.8L',
     make: 'Toyota',
@@ -14,10 +31,10 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     transmission: 'Automatic',
     driveType: '4WD',
     bodyStyle: 'SUV',
-    condition: 'Foreign Used',
+    condition: 'Excellent',
     location: 'Westlands, Nairobi',
     county: 'Nairobi',
-    color: 'Pearl White',
+    exteriorColor: 'Pearl White',
     engineSize: '2800 cc',
     sellerType: 'Verified Dealer',
     sellerName: 'Crown Motors Kenya',
@@ -38,6 +55,8 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     responseTime: '< 15 mins'
   },
   {
+    ...defaultVehicleProps,
+    ...defaultVehicleProps,
     id: 'v2',
     title: '2019 Subaru Outback 2.5i EyeSight Limited',
     make: 'Subaru',
@@ -46,14 +65,14 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     price: 3250000,
     marketPriceAvg: 3400000,
     mileage: 52000,
-    fuelType: 'Petrol',
-    transmission: 'CVT Automatic',
+    fuelType: 'Gasoline',
+    transmission: 'CVT',
     driveType: 'AWD',
     bodyStyle: 'Wagon',
-    condition: 'Foreign Used',
+    condition: 'Excellent',
     location: 'Nyali, Mombasa',
     county: 'Mombasa',
-    color: 'Crystal Black',
+    exteriorColor: 'Crystal Black',
     engineSize: '2500 cc',
     sellerType: 'Verified Dealer',
     sellerName: 'Coastline Auto Ltd',
@@ -73,6 +92,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     responseTime: '< 30 mins'
   },
   {
+    ...defaultVehicleProps,
     id: 'v3',
     title: '2020 Mazda CX-5 2.2 XD L Package SkyActiv',
     make: 'Mazda',
@@ -85,10 +105,10 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     transmission: 'Automatic',
     driveType: '2WD',
     bodyStyle: 'SUV',
-    condition: 'Foreign Used',
+    condition: 'Excellent',
     location: 'Thika Road, Kiambu',
     county: 'Kiambu',
-    color: 'Soul Red Crystal',
+    exteriorColor: 'Soul Red Crystal',
     engineSize: '2200 cc Turbo',
     sellerType: 'Private Seller', // Private seller -> ALWAYS requires escrow
     sellerName: 'David K.',
@@ -106,6 +126,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     responseTime: '< 1 hour'
   },
   {
+    ...defaultVehicleProps,
     id: 'v4',
     title: '2018 Nissan X-Trail 20X Hybrid 4WD',
     make: 'Nissan',
@@ -118,10 +139,10 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     transmission: 'Automatic',
     driveType: '4WD',
     bodyStyle: 'SUV',
-    condition: 'Locally Used',
+    condition: 'Good',
     location: 'Central, Eldoret',
     county: 'Eldoret',
-    color: 'Titanium Olive',
+    exteriorColor: 'Titanium Olive',
     engineSize: '2000 cc Hybrid',
     sellerType: 'Verified Dealer',
     sellerName: 'Rift Valley Motors',
@@ -140,6 +161,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     responseTime: '< 15 mins'
   },
   {
+    ...defaultVehicleProps,
     id: 'v5',
     title: '2022 Isuzu D-Max V-Cross 3.0L 4x4 Double Cab',
     make: 'Isuzu',
@@ -151,11 +173,11 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     fuelType: 'Diesel',
     transmission: 'Automatic',
     driveType: '4WD',
-    bodyStyle: 'Pickup',
-    condition: 'Locally Used',
+    bodyStyle: 'Truck',
+    condition: 'Good',
     location: 'Milimani, Nakuru',
     county: 'Nakuru',
-    color: 'Valencia Orange',
+    exteriorColor: 'Valencia Orange',
     engineSize: '3000 cc',
     sellerType: 'Verified Dealer',
     sellerName: 'Great Rift Autos',
@@ -172,6 +194,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     responseTime: '< 10 mins'
   },
   {
+    ...defaultVehicleProps,
     id: 'v6',
     title: '2017 Mercedes-Benz E-Class E250 AMG Line',
     make: 'Mercedes-Benz',
@@ -180,14 +203,14 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     price: 4350000,
     marketPriceAvg: 4500000,
     mileage: 58000,
-    fuelType: 'Petrol',
+    fuelType: 'Gasoline',
     transmission: 'Automatic',
     driveType: '2WD',
     bodyStyle: 'Sedan',
-    condition: 'Foreign Used',
+    condition: 'Excellent',
     location: 'Karen, Nairobi',
     county: 'Nairobi',
-    color: 'Obsidian Black',
+    exteriorColor: 'Obsidian Black',
     engineSize: '2000 cc Turbo',
     sellerType: 'Verified Dealer',
     sellerName: 'Prestige Cars Nairobi',
@@ -209,6 +232,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
 
 export const MOCK_DEALERS: Dealer[] = [
   {
+    ...defaultVehicleProps,
     id: 'd1',
     name: 'Crown Motors Kenya',
     type: 'Enterprise Dealer',
@@ -228,6 +252,7 @@ export const MOCK_DEALERS: Dealer[] = [
     description: 'Nairobi premier licensed luxury SUV & commercial vehicle showroom. Specializing in Japanese, UK and South African imports with full logbook warranty.'
   },
   {
+    ...defaultVehicleProps,
     id: 'd2',
     name: 'Coastline Auto Ltd',
     type: 'Enterprise Dealer',
@@ -247,6 +272,7 @@ export const MOCK_DEALERS: Dealer[] = [
     description: 'Direct port clearing and dealership hub in Mombasa. Zero middleman markup with direct escrow release upon physical port/yard delivery.'
   },
   {
+    ...defaultVehicleProps,
     id: 'd3',
     name: 'Great Rift Autos',
     type: 'Enterprise Dealer',
@@ -266,6 +292,7 @@ export const MOCK_DEALERS: Dealer[] = [
     description: 'Leading Rift Valley dealership for double cabs, commercial pickups, and agricultural 4WD vehicles with verified service histories.'
   },
   {
+    ...defaultVehicleProps,
     id: 'd4',
     name: 'David K. (Private Owner)',
     type: 'Private Seller',
@@ -288,6 +315,7 @@ export const MOCK_DEALERS: Dealer[] = [
 
 export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
   {
+    ...defaultVehicleProps,
     id: 'ESC-901-KE',
     vehicleId: 'v1',
     vehicleTitle: 'Toyota Land Cruiser Prado TX-L 2.8L',
@@ -352,6 +380,7 @@ export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
     ]
   },
   {
+    ...defaultVehicleProps,
     id: 'ESC-902-KE',
     vehicleId: 'v2',
     vehicleTitle: 'Subaru Outback 2.5i EyeSight Limited',
@@ -390,6 +419,7 @@ export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
     ]
   },
   {
+    ...defaultVehicleProps,
     id: 'ESC-903-KE',
     vehicleId: 'v3',
     vehicleTitle: 'Isuzu D-Max V-Cross 3.0 4x4',
@@ -454,6 +484,7 @@ export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
     ]
   },
   {
+    ...defaultVehicleProps,
     id: 'ESC-904-KE',
     vehicleId: 'v4',
     vehicleTitle: 'Mercedes-Benz C200 AMG-Line 2019',
@@ -510,6 +541,7 @@ export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
     ]
   },
   {
+    ...defaultVehicleProps,
     id: 'ESC-905-KE',
     vehicleId: 'v5',
     vehicleTitle: 'Mazda CX-5 2.2D AWD L-Package',
@@ -584,6 +616,7 @@ export const MOCK_ESCROW_DEALS: EscrowTransaction[] = [
 
 export const MOCK_MESSAGES: ChatMessage[] = [
   {
+    ...defaultVehicleProps,
     id: 'm1',
     sender: 'seller',
     text: 'Jambo! The Toyota Prado is currently available at our Westlands showroom. Would you like to view the NTSA logbook copy or schedule a drive?',
@@ -591,6 +624,7 @@ export const MOCK_MESSAGES: ChatMessage[] = [
     vehicleTitle: 'Toyota Land Cruiser Prado TX-L 2.8L'
   },
   {
+    ...defaultVehicleProps,
     id: 'm2',
     sender: 'user',
     text: 'Is the 150-point inspection report uploaded to KAYAD Escrow?',
@@ -598,6 +632,7 @@ export const MOCK_MESSAGES: ChatMessage[] = [
     vehicleTitle: 'Toyota Land Cruiser Prado TX-L 2.8L'
   },
   {
+    ...defaultVehicleProps,
     id: 'm3',
     sender: 'seller',
     text: 'Yes! Certified by KAYAD Inspectors yesterday. You can lock this price with Escrow protection anytime.',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type TouchEvent } from 'react';
 import { X, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import LazyImage from '../common/LazyImage';
 
@@ -51,8 +51,8 @@ export default function GalleryModal({ car, initialIdx = 0, onClose }: GalleryMo
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => { touchX.current = e.touches[0].clientX; }, []);
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => { touchX.current = e.touches[0].clientX; }, []);
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     if (touchX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
     if (dx > 50) prev();

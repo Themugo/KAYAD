@@ -1,5 +1,5 @@
 import { Sun, Moon } from 'lucide-react';
-import { useTheme } from './ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface ThemeToggleProps {
   size?: number;
@@ -12,7 +12,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   className = '',
   style,
 }) => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleDarkMode } = useTheme();
 
   const buttonStyle: React.CSSProperties = {
     display: 'flex',
@@ -34,7 +34,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     <button
       className={className}
       style={buttonStyle}
-      onClick={toggleTheme}
+      onClick={toggleDarkMode}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >

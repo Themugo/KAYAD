@@ -7,7 +7,7 @@ import {
   ArrowRight, Loader2, Sparkles, SortAsc, BookmarkPlus, AlertCircle, Gavel,
   Award, FileCheck, Percent, RefreshCw, MessageCircle, Video, Camera, ZoomIn,
   Calculator, CalendarCheck, User, Clock3, MapPinned, FileText, Wrench,
-  Check, Info, ArrowUpRight, ArrowDownRight, BarChart3, PieChart, TrendingRight,
+  Check, Info, ArrowUpRight, ArrowDownRight, BarChart3, PieChart,
   AlertTriangle, ThumbsUp, ThumbsDown, Bot, Send, Loader, ExternalLink
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 interface Vehicle {
   _id: string;
   title: string;
+  make: string;
   price: number;
   originalPrice?: number;
   year: number;
@@ -862,7 +863,7 @@ export const PremiumVehicleDetails: React.FC = () => {
   ];
 
   const specs = [
-    ['Make', vehicle.brand || 'Toyota'],
+    ['Make', vehicle.make || 'Toyota'],
     ['Model', vehicle.bodyType],
     ['Year', vehicle.year.toString()],
     ['Fuel Type', vehicle.fuel],

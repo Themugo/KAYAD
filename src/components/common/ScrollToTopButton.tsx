@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export const ScrollToTopButton: React.FC = () => {
+export const ScrollToTopButton: FC = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {

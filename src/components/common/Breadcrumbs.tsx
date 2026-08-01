@@ -1,3 +1,4 @@
+import { type FC } from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 import { useMarketplace, PageView } from '../../context/MarketplaceContext';
 
@@ -7,7 +8,7 @@ interface BreadcrumbItem {
   isCurrent?: boolean;
 }
 
-export const Breadcrumbs: React.FC = () => {
+export const Breadcrumbs: FC = () => {
   const { activePage, navigateTo, selectedVehicle } = useMarketplace();
 
   if (activePage === 'home') {

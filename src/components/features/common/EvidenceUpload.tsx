@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { Upload, X, File, AlertCircle } from 'lucide-react';
 
 interface EvidenceUploadProps {
@@ -16,7 +16,7 @@ export default function EvidenceUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newFiles = Array.from(e.target.files || []);
     if (files.length + newFiles.length > maxFiles) {
       setError(`Maximum ${maxFiles} files allowed`);

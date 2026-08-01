@@ -1,39 +1,9 @@
-export interface Vehicle {
-  id: string;
-  title: string;
-  make: string;
-  model: string;
-  year: number;
-  price: number;
-  marketPriceAvg?: number;
-  mileage: number;
-  fuelType: 'Diesel' | 'Petrol' | 'Hybrid' | 'Electric';
-  transmission: 'Automatic' | 'Manual' | 'CVT Automatic';
-  driveType?: '2WD' | '4WD' | 'AWD';
-  bodyStyle?: 'SUV' | 'Sedan' | 'Hatchback' | 'Pickup' | 'Wagon' | 'Van/Minibus';
-  condition?: 'Foreign Used' | 'Locally Used' | 'Brand New';
-  location: string;
-  county: string;
-  color?: string;
-  engineSize?: string;
-  sellerType: 'Verified Dealer' | 'Private Seller';
-  sellerName: string;
-  sellerRating: number;
-  verified: boolean;
-  inspectionPassed: boolean;
-  inspectionReportId?: string;
-  escrowEligible: boolean;
-  financeAvailable: boolean;
-  isAuction?: boolean;
-  auctionEndsAt?: string;
-  currentBid?: number;
-  image: string;
-  additionalImages?: string[];
-  description?: string;
-  features?: string[];
-  listingFreshness: string;
-  responseTime?: string;
-}
+// Re-export types from types/index for consistency
+export type { Vehicle as Vehicle } from './types/index';
+export type { BodyStyle } from './types/index';
+export type { TransmissionType } from './types/index';
+export type { FuelType } from './types/index';
+export type { VehicleCondition } from './types/index';
 
 export interface BidRecord {
   id: string;

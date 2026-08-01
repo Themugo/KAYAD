@@ -299,7 +299,15 @@ export function getMockCar(id) {
   return MOCK_CARS.find((c) => c.id === Number(id)) || null;
 }
 
-export function filterMockCars(filters = {}) {
+export function filterMockCars(filters: {
+  search?: string;
+  brand?: string;
+  fuel?: string;
+  transmission?: string;
+  bodyType?: string;
+  priceMax?: string;
+  auctionStatus?: string;
+} = {}) {
   let results = [...MOCK_CARS];
   if (filters.search) {
     const q = filters.search.toLowerCase();

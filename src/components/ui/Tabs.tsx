@@ -73,7 +73,7 @@ export const TabList: React.FC<TabListProps> = ({
     borderBottom: '1px solid var(--color-border)',
     overflowX: 'auto',
     scrollbarWidth: 'none',
-    MsOverflowStyle: 'none',
+    msOverflowStyle: 'none',
   };
 
   return (

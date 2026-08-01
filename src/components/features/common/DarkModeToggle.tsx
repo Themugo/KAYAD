@@ -1,4 +1,5 @@
 import { useTheme } from '../../../context/ThemeContext';
+import type { FC } from 'react';
 
 interface DarkModeToggleProps {
   size?: 'sm' | 'md' | 'lg';
@@ -6,7 +7,7 @@ interface DarkModeToggleProps {
   className?: string;
 }
 
-export const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
+export const DarkModeToggle: FC<DarkModeToggleProps> = ({
   size = 'md',
   showLabel = false,
   className = '',

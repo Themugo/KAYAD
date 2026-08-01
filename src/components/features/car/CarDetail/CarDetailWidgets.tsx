@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, type TouchEvent, type ComponentType } from 'react';
 import { ChevronLeft, ChevronRight, Star, BarChart3 } from 'lucide-react';
-import { useCompare } from '../../../context/CompareContext';
+import { useCompare } from '../../../../context/CompareContext';
 
 export function firstImage(car: any, idx = 0): string | null {
   const imgs = car?.images || [];
@@ -26,11 +26,11 @@ export function GalleryImage({ car, idx, onPrev, onNext, total, onOpenGallery }:
   const src = (!err && firstImage(car, idx)) ||
     'https://images.unsplash.com/photo-1503376780353-7e8f0e4b39f4?q=80&w=1600&fit=crop';
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     touchX.current = e.touches[0].clientX;
   }, []);
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     if (touchX.current === null) return;
     const dx = e.changedTouches[0].clientX - touchX.current;
     if (dx > 50) onPrev();
@@ -151,7 +151,7 @@ export function GalleryThumbnails({ car, selectedIdx, onSelect }: GalleryThumbna
 }
 
 interface SpecItemProps {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: ComponentType<{ size?: number; className?: string }>;
   label: string;
   value: string | number;
   delay?: number;

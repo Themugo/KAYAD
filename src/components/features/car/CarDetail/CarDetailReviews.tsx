@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Star, MessageCircle } from 'lucide-react';
-import { timeAgo } from '../../../utils/helpers';
+import { timeAgo } from '../../../../utils/helpers';
 
 interface Review {
   _id: string;
@@ -26,7 +26,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!comment.trim()) return;
 

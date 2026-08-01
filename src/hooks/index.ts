@@ -2,14 +2,14 @@
 export { useApi } from './useApi';
 export { useAbortController } from './useAbortController';
 export { useCountdown } from './useCountdown';
-export { useDebouncedValue } from './useDebouncedValue';
+export { default as useDebouncedValue } from './useDebouncedValue';
 export { useFocusManagement } from './useFocusManagement';
 export { useInfiniteScroll } from './useInfiniteScroll';
-export { useIntersectionObserver } from './useIntersectionObserver';
+export { default as useIntersectionObserver } from './useIntersectionObserver';
 export { useLocalization } from './useLocalization';
-export { useMediaQuery } from './useMediaQuery';
-export { usePageMeta } from './usePageMeta';
-export { useSwipeBack } from './useSwipeBack';
+export { default as useMediaQuery, useIsMobile, useIsTablet, useIsDesktop, usePrefersDarkMode } from './useMediaQuery';
+export { default as usePageMeta } from './usePageMeta';
+export { default as useSwipeBack } from './useSwipeBack';
 
 // Accessibility hooks
 export {

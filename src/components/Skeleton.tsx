@@ -25,7 +25,7 @@ interface BlockProps {
   h?: string | number;
   r?: number;
   style?: CSSProperties;
-  key?: string;
+  key?: string | number;
 }
 
 const Block = ({ w = '100%', h = 16, r = 6, style = {} }: BlockProps) => (

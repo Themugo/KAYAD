@@ -27,7 +27,7 @@ export const AuthModal: FC = () => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    login(email, selectedRole);
+    login({ email, password });
     setEmail('');
     setPassword('');
   };

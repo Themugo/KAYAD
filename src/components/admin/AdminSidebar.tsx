@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
@@ -8,8 +8,8 @@ import {
   Radio,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { adminAPI } from '../api/api';
-import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../utils/permissions';
+import { adminAPI } from '../../api/api';
+import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../../utils/permissions';
 
 interface LinkItem {
   to: string;

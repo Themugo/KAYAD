@@ -1,4 +1,4 @@
-import { Vehicle, DealerProfile, EscrowContract, UserProfile, NotificationItem, Bid } from '../types';
+import { Vehicle, DealerProfile, EscrowContract, UserProfile, NotificationItem, Bid } from '../types/index';
 
 export const mockUsers: UserProfile[] = [
   {

@@ -262,7 +262,7 @@ export interface UserProfile {
   reviewsCount?: number;
 }
 
-export type VehicleCondition = 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair';
+export type VehicleCondition = 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair' | 'Brand New';
 export type TransmissionType = 'Automatic' | 'Manual' | 'Dual-Clutch' | 'CVT' | 'Direct Drive' | '10-Speed Automatic' | '8-Speed Automatic';
 export type FuelType = 'Gasoline' | 'Diesel' | 'Hybrid' | 'Plug-in Hybrid' | 'Electric';
 export type BodyStyle = 'Sedan' | 'SUV' | 'Coupe' | 'Truck' | 'Convertible' | 'Hatchback' | 'Wagon';
@@ -293,29 +293,45 @@ export interface Vehicle {
   buyNowPrice?: number;
   mileage: number;
   location: string;
+  county?: string;
   bodyStyle: BodyStyle;
   transmission: TransmissionType;
   fuelType: FuelType;
   engine: string;
+  engineSize?: string;
   horsepower: number;
+  driveType?: '2WD' | '4WD' | 'AWD';
   exteriorColor: string;
   interiorColor: string;
   condition: VehicleCondition;
   listingType: ListingType;
   images: string[];
+  image?: string;
+  additionalImages?: string[];
   description: string;
   features: string[];
   sellerId: string;
   sellerName: string;
   sellerAvatar?: string;
   sellerRating: number;
+  sellerType?: 'Verified Dealer' | 'Private Seller';
   isDealerCertified: boolean;
   dealerId?: string;
+  verified?: boolean;
+  isAuction?: boolean;
   auctionEndsAt?: string;
+  auctionEnds?: string;
   bidsCount?: number;
-  viewsCount: number;
+  viewsCount?: number;
   savedCount: number;
   inspection?: VehicleInspection;
+  inspectionPassed?: boolean;
+  inspectionReportId?: string;
+  escrowEligible?: boolean;
+  financeAvailable?: boolean;
+  responseTime?: string;
+  listingFreshness?: string;
+  marketPriceAvg?: number;
   status: 'active' | 'sold' | 'pending' | 'draft';
   createdAt: string;
 }

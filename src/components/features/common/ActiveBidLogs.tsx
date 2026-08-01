@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { bidLogsAPI, formatKES } from '../../../api/api.exports';
 
 interface ActiveBidLogsProps {
@@ -8,7 +8,7 @@ interface ActiveBidLogsProps {
   showStats?: boolean;
 }
 
-export const ActiveBidLogs: React.FC<ActiveBidLogsProps> = ({
+export const ActiveBidLogs: FC<ActiveBidLogsProps> = ({
   carId,
   className = '',
   maxItems = 10,

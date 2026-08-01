@@ -1,6 +1,6 @@
 import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Gauge, MapPin, ArrowRight } from 'lucide-react';
 import LazyImage from '../common/LazyImage';
 
@@ -28,6 +28,9 @@ interface Car {
   isDemo?: boolean;
   isPromoted?: boolean;
   escrowEnabled?: boolean;
+  status?: string;
+  paymentStatus?: string;
+  createdAt?: string;
   dealer?: { name?: string; businessName?: string; logo?: string; _id?: string; role?: string; verified?: boolean };
   seller?: { name?: string; avatar?: string; _id?: string };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { ledgerAPI, escrowAPI, formatKES } from '../../../api/api.exports';
 
 interface SecureEscrowHubProps {
@@ -6,7 +6,7 @@ interface SecureEscrowHubProps {
   compact?: boolean;
 }
 
-export const SecureEscrowHub: React.FC<SecureEscrowHubProps> = ({
+export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
   className = '',
   compact = false,
 }) => {

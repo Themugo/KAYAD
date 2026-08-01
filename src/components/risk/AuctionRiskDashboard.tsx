@@ -259,7 +259,7 @@ const CategoryFilter: React.FC<{
           backgroundColor: cat.color + '15',
           color: cat.color,
           borderColor: selectedCategories.includes(key as RiskCategory) ? cat.color : 'transparent',
-          ringColor: cat.color,
+          boxShadow: selectedCategories.includes(key as RiskCategory) ? `0 0 0 2px ${cat.color}40` : undefined,
         }}
       >
         {CATEGORY_ICONS[key]}
@@ -411,7 +411,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
             </div>
           </div>
           {!canPublish && (
-            <Badge variant="error" className="bg-red-100 text-red-700 border-red-200">
+            <Badge variant="danger" className="bg-red-100 text-red-700 border-red-200">
               {blockingRisks.length} Blocking
             </Badge>
           )}
@@ -491,7 +491,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
                   backgroundColor: SEVERITY_STYLES[sev].color + '20',
                   color: SEVERITY_STYLES[sev].color,
                   borderColor: selectedSeverities.includes(sev) ? SEVERITY_STYLES[sev].color : 'transparent',
-                  ringColor: SEVERITY_STYLES[sev].color,
+                  boxShadow: selectedSeverities.includes(sev) ? `0 0 0 2px ${SEVERITY_STYLES[sev].color}40` : undefined,
                 }}
               >
                 {SEVERITY_STYLES[sev].label}

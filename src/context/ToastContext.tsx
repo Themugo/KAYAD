@@ -1,5 +1,25 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import type { Toast, ToastType, ToastContextValue } from '../types';
+
+// Local type definitions (types/index.ts has these)
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+interface Toast {
+  id: string;
+  type: ToastType;
+  message: string;
+  duration?: number;
+}
+
+interface ToastContextValue {
+  toasts: Toast[];
+  addToast: (toast: Omit<Toast, 'id'>) => void;
+  removeToast: (id: string) => void;
+  success: (message: string, duration?: number) => void;
+  error: (message: string, duration?: number) => void;
+  warning: (message: string, duration?: number) => void;
+  info: (message: string, duration?: number) => void;
+  toast: (message: string, type?: ToastType) => void;
+}
 
 const ToastCtx = createContext<ToastContextValue | null>(null);
 

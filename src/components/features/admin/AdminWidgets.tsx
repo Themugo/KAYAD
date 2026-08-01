@@ -2,12 +2,13 @@
 // overviews. Pure presentation — matches the dark theme + mockup language.
 
 import { Link } from 'react-router-dom';
+import type { ReactNode } from 'react';
 
 interface StatTileProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: number | string;
-  sub?: React.ReactNode;
+  sub?: ReactNode;
   color?: string;
   to?: string;
   trend?: number;

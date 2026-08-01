@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Gavel, Clock, Users, AlertCircle, CheckCircle, Loader } from 'lucide-react';
-import { formatKES } from '../../../utils/helpers';
+import { formatKES } from '../../../../utils/helpers';
 
 interface InlineBiddingProps {
   car: any;

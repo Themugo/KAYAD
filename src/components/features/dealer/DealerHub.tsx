@@ -5,6 +5,7 @@ import {
   Settings, Bell, Plus, TrendingUp, ChevronDown, Menu, X,
   Package, ShoppingCart, DollarSign, Eye, Heart, Star, TrendingDown
 } from 'lucide-react';
+import { Vehicle } from '../../../types/index';
 
 // Navigation items
 const NAV_ITEMS = [
@@ -16,6 +17,16 @@ const NAV_ITEMS = [
 ];
 
 // Metric card component
+interface DealerMetricProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  trend?: number;
+  trendLabel?: string;
+  accent?: 'gold' | 'views' | 'leads' | 'sales' | 'revenue' | 'inventory' | 'rating';
+  className?: string;
+}
+
 export const DealerMetric = memo(function DealerMetric({ 
   icon, 
   label, 
@@ -24,7 +35,7 @@ export const DealerMetric = memo(function DealerMetric({
   trendLabel,
   accent = 'gold',
   className = '' 
-}) {
+}: DealerMetricProps) {
   const iconColors = {
     gold: { bg: 'rgba(22, 196, 164, 0.12)', color: '#16C4A4' },
     views: { bg: 'rgba(59, 130, 246, 0.15)', color: '#60A5FA' },
@@ -62,6 +73,16 @@ export const DealerMetric = memo(function DealerMetric({
 });
 
 // Quick action button
+interface DealerActionProps {
+  icon: React.ReactNode;
+  label: string;
+  description?: string;
+  to?: string;
+  onClick?: () => void;
+  variant?: 'default' | 'gold';
+  className?: string;
+}
+
 export const DealerAction = memo(function DealerAction({ 
   icon, 
   label, 
@@ -70,7 +91,7 @@ export const DealerAction = memo(function DealerAction({
   onClick,
   variant = 'default',
   className = '' 
-}) {
+}: DealerActionProps) {
   const content = (
     <>
       <div className="dealer-action__icon" style={variant === 'gold' ? {} : { background: 'var(--dealer-elevated)' }}>
@@ -97,7 +118,17 @@ export const DealerAction = memo(function DealerAction({
 });
 
 // Lead funnel component
-export const DealerFunnel = memo(function DealerFunnel({ stages }) {
+interface DealerFunnelStage {
+  type: 'new' | 'contacted' | 'interested' | 'negotiating' | 'closed';
+  label: string;
+  count: number;
+}
+
+interface DealerFunnelProps {
+  stages: DealerFunnelStage[];
+}
+
+export const DealerFunnel = memo(function DealerFunnel({ stages }: DealerFunnelProps) {
   return (
     <div className="dealer-funnel">
       {stages.map((stage, i) => (
@@ -111,13 +142,32 @@ export const DealerFunnel = memo(function DealerFunnel({ stages }) {
 });
 
 // Leads table
+interface Lead {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  vehicle: string;
+  status: 'new' | 'contacted' | 'negotiating' | 'closed-won' | 'closed-lost';
+  value: number;
+  createdAt: string;
+}
+
+interface DealerLeadsTableProps {
+  leads: Lead[];
+  onView?: (id: string) => void;
+  onContact?: (id: string) => void;
+  onConvert?: (id: string) => void;
+  className?: string;
+}
+
 export const DealerLeadsTable = memo(function DealerLeadsTable({ 
   leads, 
   onView, 
   onContact,
   onConvert,
   className = '' 
-}) {
+}: DealerLeadsTableProps) {
   const statusColors = {
     new: 'dealer-leads__status--new',
     contacted: 'dealer-leads__status--contacted',
@@ -174,13 +224,13 @@ export const DealerLeadsTable = memo(function DealerLeadsTable({
               </td>
               <td className="dealer-leads__cell">
                 <div className="dealer-leads__actions">
-                  <button className="dealer-leads__action" onClick={() => onView?.(lead)} title="View">
+                  <button className="dealer-leads__action" onClick={() => onView?.(lead.id)} title="View">
                     <Eye size={14} />
                   </button>
-                  <button className="dealer-leads__action" onClick={() => onContact?.(lead)} title="Contact">
+                  <button className="dealer-leads__action" onClick={() => onContact?.(lead.id)} title="Contact">
                     <MessageSquare size={14} />
                   </button>
-                  <button className="dealer-leads__action" onClick={() => onConvert?.(lead)} title="Convert">
+                  <button className="dealer-leads__action" onClick={() => onConvert?.(lead.id)} title="Convert">
                     <DollarSign size={14} />
                   </button>
                 </div>
@@ -194,13 +244,33 @@ export const DealerLeadsTable = memo(function DealerLeadsTable({
 });
 
 // Inventory card
+interface DealerInventoryCardData {
+  id: string;
+  title: string;
+  image?: string;
+  price?: number;
+  status?: string;
+  featured?: boolean;
+  views?: number;
+  inquiries?: number;
+  days?: number;
+}
+
+interface DealerInventoryCardProps {
+  car: DealerInventoryCardData;
+  onEdit?: () => void;
+  onPromote?: () => void;
+  onDelete?: () => void;
+  className?: string;
+}
+
 export const DealerInventoryCard = memo(function DealerInventoryCard({ 
   car, 
   onEdit, 
   onPromote, 
   onDelete,
   className = '' 
-}) {
+}: DealerInventoryCardProps) {
   const statusMap = {
     active: 'active',
     pending: 'pending',
@@ -251,12 +321,19 @@ export const DealerInventoryCard = memo(function DealerInventoryCard({
 });
 
 // Analytics chart placeholder
+interface DealerChartProps {
+  title: string;
+  period?: string;
+  children?: React.ReactNode;
+  className?: string;
+}
+
 export const DealerChart = memo(function DealerChart({ 
   title, 
   period,
   children,
   className = '' 
-}) {
+}: DealerChartProps) {
   return (
     <div className={`dealer-chart ${className}`}>
       <div className="dealer-chart__header">
@@ -271,7 +348,17 @@ export const DealerChart = memo(function DealerChart({
 });
 
 // Insights panel
-export const DealerInsights = memo(function DealerInsights({ insights }) {
+interface Insight {
+  type: 'tip' | 'alert' | 'info';
+  title: string;
+  description: string;
+}
+
+interface DealerInsightsProps {
+  insights: Insight[];
+}
+
+export const DealerInsights = memo(function DealerInsights({ insights }: DealerInsightsProps) {
   return (
     <div className="dealer-insights">
       <h3 className="dealer-insights__title">AI Insights</h3>

@@ -1,11 +1,12 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import type { CSSProperties } from 'react';
 
 interface BackButtonProps {
   fallback?: string;
   label?: string;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 // Goes to the ACTUAL previous page the user came from (browser history),

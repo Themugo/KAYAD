@@ -164,7 +164,7 @@ export const OperatorRiskChecklist: React.FC<OperatorRiskChecklistProps> = ({
           <div className="flex items-center gap-2 mb-3">
             <AlertOctagon className="w-5 h-5 text-red-600" />
             <h3 className="font-bold text-slate-800">Issues Requiring Action</h3>
-            <Badge variant="error" size="sm">{blockingRisks.length}</Badge>
+            <Badge variant="danger" size="sm">{blockingRisks.length}</Badge>
           </div>
           <div className="space-y-3">
             {blockingRisks.map((risk) => (

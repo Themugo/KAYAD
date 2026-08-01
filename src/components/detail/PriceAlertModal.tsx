@@ -14,7 +14,7 @@ import {
   Trash2,
   BellRing
 } from 'lucide-react';
-import { Vehicle, PriceAlert } from '../../types';
+import { Vehicle, PriceAlert } from '../../types/index';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import type React from 'react';

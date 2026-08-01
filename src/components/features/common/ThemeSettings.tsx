@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FC } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { preferencesAPI } from '../../../api/api.exports';
 
@@ -6,7 +6,7 @@ interface ThemeSettingsProps {
   className?: string;
 }
 
-export const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className = '' }) => {
+export const ThemeSettings: FC<ThemeSettingsProps> = ({ className = '' }) => {
   const { theme, setTheme } = useTheme();
   const [saving, setSaving] = useState(false);
 

@@ -26,6 +26,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src", "e2e"],
-  "exclude": ["node_modules", "dist", "lib"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "lib", "e2e"]
 }

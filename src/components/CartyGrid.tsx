@@ -1,6 +1,6 @@
 import { useState, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 import { Gauge, MapPin, ArrowRight } from 'lucide-react';
 import LazyImage from './LazyImage';
 

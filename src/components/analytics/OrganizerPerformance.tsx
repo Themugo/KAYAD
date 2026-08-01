@@ -150,7 +150,7 @@ export const OrganizerPerformanceChart: React.FC<OrganizerPerformanceChartProps>
                       {benchmarkDiff !== 0 && (
                         <Badge 
                           size="sm"
-                          variant={benchmarkDiff > 0 ? 'success' : 'error'}
+                          variant={benchmarkDiff > 0 ? 'success' : 'danger'}
                           className={benchmarkDiff > 0 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-700 border-red-200'}
                         >
                           {benchmarkDiff > 0 ? '+' : ''}{formatPercent(benchmarkDiff)}

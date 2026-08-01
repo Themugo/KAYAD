@@ -89,7 +89,7 @@ const ComplianceCheckItem: React.FC<{
             {check.label}
           </span>
           {check.severity === 'required' && !check.isComplete && (
-            <Badge variant="error" size="sm" className="text-[10px] bg-red-100 text-red-700 border-red-200">
+            <Badge variant="danger" size="sm" className="text-[10px] bg-red-100 text-red-700 border-red-200">
               Required
             </Badge>
           )}

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { inspectionAPI, formatKES } from '../../../api/api';
 import { useAuth } from '../../../context/AuthContext';
 import { Eye, Star, ShieldCheck, Clock, ChevronRight } from 'lucide-react';
-import GhostCheckOrderModal from './GhostCheckOrderModal';
+import GhostCheckOrderModal from '../../GhostCheckOrderModal';
 
 interface InspectionButtonProps {
   carId: string;

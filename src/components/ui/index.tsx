@@ -425,7 +425,7 @@ export interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement
   wrapperClassName?: string;
 }
 
-export const LazyImage: React.FC<LazyImageProps> = ({
+export const Image: React.FC<LazyImageProps> = ({
   src,
   alt,
   className = '',
@@ -493,4 +493,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
     </div>
   );
 };
+
+// Export Image as LazyImage for backward compatibility
+export const LazyImage = Image;
 
