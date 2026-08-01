@@ -5,7 +5,9 @@ import {
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   UserCheck, Crown, Shield, Star, Lock as VaultIcon, ChevronLeft, PanelRight,
   Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
-  Radio,
+  Radio, Palette, Zap, Database, Layers, Layout, Target, Bot, Binary,
+  Activity as OpsIcon, Globe, Shield as GovernanceIcon, Brain, Command,
+  Lightbulb, Factory, ClipboardList,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -21,6 +23,22 @@ interface LinkItem {
 
 const ALL_LINKS: LinkItem[] = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/cms', icon: Palette, label: 'Content Studio' },
+  { to: '/admin/automation', icon: Zap, label: 'Automation Studio' },
+  { to: '/admin/config', icon: Database, label: 'Configuration Center' },
+  { to: '/admin/lowcode', icon: Layers, label: 'Business Object Studio', superadmin: true },
+  { to: '/admin/vxp', icon: Layout, label: 'Visual Experience Studio', superadmin: true },
+  { to: '/admin/xos', icon: Target, label: 'Experience Studio', superadmin: true },
+  { to: '/admin/ai', icon: Bot, label: 'AI Platform Builder', superadmin: true },
+  { to: '/admin/digital-twin', icon: Binary, label: 'Digital Twin Center', superadmin: true },
+  { to: '/admin/control-center', icon: OpsIcon, label: 'Control Center', superadmin: true },
+  { to: '/admin/integration', icon: Globe, label: 'Integration Studio', superadmin: true },
+  { to: '/admin/governance', icon: GovernanceIcon, label: 'Governance Studio', superadmin: true },
+  { to: '/admin/intelligence', icon: Brain, label: 'Intelligence Center', superadmin: true },
+  { to: '/admin/command-center', icon: Command, label: 'Command Center', superadmin: true },
+  { to: '/admin/improvement', icon: Lightbulb, label: 'Improvement Center', superadmin: true },
+  { to: '/admin/platform-factory', icon: Factory, label: 'Platform Factory', superadmin: true },
+  { to: '/admin/ghost-checkers', icon: ClipboardList, label: 'Ghost Checkers', superadmin: true },
   { to: '/admin/users', icon: Users, label: 'Users' },
   { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
   { to: '/admin/cars', icon: Car, label: 'Listings' },

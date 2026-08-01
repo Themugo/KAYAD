@@ -65,9 +65,12 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
     minute: '2-digit'
   });
 
-  const organizerName = session.sellerName || 'AutoYard Kenya Operations';
-  const organizerPhone = session.organizerPhone || '+254 722 889 012';
-  const organizerEmail = session.organizerEmail || 'settlements@autoyard.co.ke';
+  const organizerName = session.organizer?.name || session.sellerName || 'Auction Organizer';
+  const organizerPhone = session.organizer?.phone || session.organizerPhone || '+254 722 889 012';
+  const organizerEmail = session.organizer?.email || session.organizerEmail || 'settlements@example.co.ke';
+  const organizerPaymentBank = session.organizer?.paymentDetails?.bankName || 'Organizer Bank';
+  const organizerPaymentAccount = session.organizer?.paymentDetails?.accountName || 'Organizer Account';
+  const organizerPaymentAccountNumber = session.organizer?.paymentDetails?.accountNumber || session.organizer?.paymentDetails?.paybill || '';
   const yardLocation = session.viewingLocation || vehicle.location || 'Nairobi Yard 4B, Mombasa Road, Nairobi';
 
   const handleCopyRef = () => {

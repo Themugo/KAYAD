@@ -52,7 +52,45 @@ export interface AuctionSession {
   sellerId: string;
   sellerName: string;
   sellerType: 'Verified Dealer' | 'Private Seller';
-  organizerType?: 'Verified Dealer' | 'Licensed Auctioneer' | 'Bank' | 'Fleet Owner' | 'Government Disposal Agency' | 'Private Seller';
+  // Organizer (Auction owner - always required)
+  organizer: {
+    id: string;
+    name: string;
+    type: AuctionOrganizerType;
+    logo?: string;
+    isVerified: boolean;
+    verificationBadge?: 'verified' | 'premium' | 'government' | 'bank' | 'licensed';
+    profileUrl?: string;
+    // Contact information
+    contact?: {
+      phone?: string;
+      email?: string;
+      address?: string;
+      website?: string;
+      businessHours?: string;
+      operatingRegion?: string;
+    };
+    // Legacy flat contact fields (for backward compatibility)
+    phone?: string;
+    email?: string;
+    address?: string;
+    website?: string;
+    businessHours?: string;
+    rating?: number;
+    yearsOnPlatform?: number;
+    completedAuctions?: number;
+    // Payment details
+    paymentDetails?: {
+      bankName: string;
+      accountName: string;
+      accountNumber?: string;
+      paybill?: string;
+      tillNumber?: string;
+      wireInstructions?: string;
+    };
+    // Refund policy
+    refundPolicy?: string;
+  };
   category: 'Bank Repossession' | 'Direct Import' | 'Fleet Clearance' | 'Dealer Clearance' | 'Government Disposal' | 'Premium Public';
   status: 'Upcoming' | 'Live' | 'Ended' | 'Awaiting Settlement';
   startingPrice: number;
@@ -70,16 +108,24 @@ export interface AuctionSession {
   // Viewing Schedule & Location
   viewingDates?: string;
   viewingLocation?: string;
-  // Bid Security Deposit Configuration
+  // Bid Security Deposit Configuration (managed by organizer)
   bidSecurityAmount?: number;
-  bidSecurityBank?: string;
-  bidSecurityAccountName?: string;
-  bidSecurityPaybillOrAccount?: string;
   bidSecurityRefundPolicy?: string;
   bidSecurityVerificationMethod?: string;
   // Winning Payment Instructions
   handoverInstructions?: string;
 }
+
+// Re-export AuctionOrganizerType for convenience
+export type AuctionOrganizerType = 
+  | 'verified_dealer'
+  | 'licensed_auctioneer'
+  | 'commercial_bank'
+  | 'microfinance_institution'
+  | 'fleet_disposal_company'
+  | 'government_disposal_agency'
+  | 'insurance_salvage_company'
+  | 'corporate_fleet_owner';
 
 export interface SavedSearch {
   id: string;

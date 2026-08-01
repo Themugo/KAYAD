@@ -1,10 +1,11 @@
 name: Dependabot Auto-Merge
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  check_suite:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+  workflow_run:
     types: [completed]
+    workflows: ["CI"]
 
 permissions:
   contents: write
@@ -14,45 +15,92 @@ jobs:
   auto-merge:
     name: Auto-Merge Dependabot PRs
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
-    
+    # Only run for Dependabot PRs
+    if: |
+      (github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.actor.login == 'dependabot[bot]')
+
     steps:
-      - name: Wait for CI checks
-        id: wait-ci
+      - name: Check PR and CI status
+        id: check-status
         uses: actions/github-script@v7
         with:
+          result-encoding: string
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
+            // Get PR number from different event types
+            let prNumber;
+            let owner = context.repo.owner;
+            let repo = context.repo.repo;
+
+            if (context.eventName === 'workflow_run') {
+              // For workflow_run, get PR number from the workflow's head branch
+              const workflowRun = context.payload.workflow_run;
+              const headBranch = workflowRun.head_branch;
+              
+              // Query for PRs with this head branch
+              const { data: prs } = await github.rest.pulls.list({
+                owner,
+                repo,
+                head: `${owner}:${headBranch}`,
+                state: 'open'
+              });
+              
+              if (prs.length === 0) {
+                console.log('No PR found for workflow run, skipping');
+                process.exit(1);
+              }
+              prNumber = prs[0].number;
+              console.log(`Found PR #${prNumber} from workflow run`);
+            } else {
+              prNumber = context.payload.pull_request.number;
+            }
+
             // Get the PR details
             const { data: pr } = await github.rest.pulls.get({
               owner,
               repo,
               pull_number: prNumber,
             });
-            
+
+            console.log(`Checking PR #${prNumber}: ${pr.title}`);
+            console.log(`PR author: ${pr.user.login}`);
+            console.log(`PR mergeable: ${pr.mergeable}`);
+            console.log(`PR state: ${pr.state}`);
+
+            // Only proceed if author is dependabot
+            if (pr.user.login !== 'dependabot[bot]') {
+              console.log('Not a Dependabot PR, skipping');
+              process.exit(1);
+            }
+
+            // Check if PR is already merged
+            if (pr.merged) {
+              console.log('PR already merged, skipping');
+              process.exit(1);
+            }
+
             // Check if PR is mergeable
             if (pr.mergeable !== true) {
               console.log('PR is not mergeable (conflicts or other issues)');
               process.exit(1);
             }
-            
-            // Get the combined status
+
+            // Check the combined status of the PR
             const { data: status } = await github.rest.repos.getCombinedStatus({
               owner,
               repo,
               ref: pr.head.sha,
             });
-            
-            console.log('Combined status:', status.state);
-            console.log('Statuses:', status.statuses.map(s => `${s.context}: ${s.state}`).join(', '));
-            
-            // For Dependabot PRs, we wait for the checks to complete
-            // The status will be 'success', 'failure', or 'pending'
+
+            console.log(`Combined status: ${status.state}`);
+            console.log('Individual statuses:');
+            status.statuses.forEach(s => {
+              console.log(`  - ${s.context}: ${s.state}`);
+            });
+
+            // All checks must pass
             if (status.state === 'success') {
-              console.log('All checks passed!');
+              console.log('All checks passed! Proceeding with merge.');
             } else if (status.state === 'failure') {
               console.log('Some checks failed, cannot auto-merge');
               process.exit(1);
@@ -60,22 +108,46 @@ jobs:
               console.log('Checks still pending...');
               process.exit(1);
             }
-            
+
       - name: Enable auto-merge
-        if: steps.wait-ci.conclusion == 'success'
+        if: steps.check-status.result == 'success'
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            
+            // Get PR number from different event types
+            let prNumber;
+            let owner = context.repo.owner;
+            let repo = context.repo.repo;
+
+            if (context.eventName === 'workflow_run') {
+              const workflowRun = context.payload.workflow_run;
+              const headBranch = workflowRun.head_branch;
+              
+              const { data: prs } = await github.rest.pulls.list({
+                owner,
+                repo,
+                head: `${owner}:${headBranch}`,
+                state: 'open'
+              });
+              
+              if (prs.length === 0) {
+                console.log('No PR found for workflow run');
+                process.exit(1);
+              }
+              prNumber = prs[0].number;
+            } else {
+              prNumber = context.payload.pull_request.number;
+            }
+
+            // Get PR node ID
             const { data: pr } = await github.rest.pulls.get({
               owner,
               repo,
               pull_number: prNumber,
             });
-            
+
+            console.log(`Enabling auto-merge for PR #${prNumber}`);
+
             // Enable auto-merge using GraphQL
             try {
               await github.graphql(`

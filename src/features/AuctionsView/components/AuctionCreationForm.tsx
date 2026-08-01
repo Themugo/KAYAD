@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Vehicle, AuctionSession } from '../../../types';
+import { Vehicle, AuctionSession, AuctionOrganizerType } from '../../../types';
 import { 
   Gavel, 
   Building2, 
@@ -21,6 +21,16 @@ import {
   Info
 } from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
+
+// Map display types to organizer types
+const DISPLAY_TO_ORGANIZER_TYPE: Record<string, AuctionOrganizerType> = {
+  'Verified Dealer': 'verified_dealer',
+  'Licensed Auctioneer': 'licensed_auctioneer',
+  'Commercial Bank': 'commercial_bank',
+  'Fleet Disposal Company': 'fleet_disposal_company',
+  'Government Disposal Agency': 'government_disposal_agency',
+  'Corporate Fleet Owner': 'corporate_fleet_owner',
+};
 
 export interface AuctionCreationFormProps {
   availableVehicles: Vehicle[];
@@ -78,7 +88,7 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
   );
 
   const [organizerName, setOrganizerName] = useState<string>('Simbas Motors & Licensed Auctioneers');
-  const [organizerType, setOrganizerType] = useState<'Verified Dealer' | 'Licensed Auctioneer' | 'Bank' | 'Fleet Owner'>('Verified Dealer');
+  const [organizerType, setOrganizerType] = useState<'Verified Dealer' | 'Licensed Auctioneer' | 'Commercial Bank' | 'Fleet Disposal Company' | 'Government Disposal Agency' | 'Corporate Fleet Owner'>('Verified Dealer');
   const [verificationSuccessMessage, setVerificationSuccessMessage] = useState<string | null>(null);
 
   // Check role-based permission: only 'dealer' or 'auctioneer' (or 'admin') authorized
@@ -121,7 +131,13 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
       sellerId: 'org-custom',
       sellerName: organizerName,
       sellerType: 'Verified Dealer',
-      organizerType,
+      organizer: {
+        id: `org-${Date.now()}`,
+        name: organizerName,
+        type: DISPLAY_TO_ORGANIZER_TYPE[organizerType] || 'verified_dealer',
+        isVerified: true,
+        verificationBadge: organizerType === 'Commercial Bank' ? 'bank' : 'verified',
+      },
       category,
       status: 'Live',
       startingPrice: Number(startingPrice),
@@ -142,15 +158,12 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
       viewingDates,
       viewingLocation,
       bidSecurityAmount: Number(bidSecurityAmount),
-      bidSecurityBank,
-      bidSecurityAccountName,
-      bidSecurityPaybillOrAccount,
       bidSecurityRefundPolicy,
       bidHistory: []
     };
 
     // Trigger confirmation alert upon successful submission
-    alert(`✅ AUCTION PUBLISHED SUCCESSFULLY!\n\nAuction Title: ${auctionTitle}\nOpening Bid: Ksh ${Number(startingPrice).toLocaleString()}\nBid Security: Ksh ${Number(bidSecurityAmount).toLocaleString()} (${bidSecurityBank})\n\nYour live vehicle auction is now visible on KAYAD Marketplace.`);
+    alert(`✅ AUCTION PUBLISHED SUCCESSFULLY!\n\nAuction Title: ${auctionTitle}\nOpening Bid: Ksh ${Number(startingPrice).toLocaleString()}\nBid Security: Ksh ${Number(bidSecurityAmount).toLocaleString()}\nOrganizer: ${organizerName}\n\nYour live vehicle auction is now visible on KAYAD Marketplace.`);
 
     onAuctionCreated(newAuctionSession);
   };

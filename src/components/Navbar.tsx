@@ -27,7 +27,9 @@ import {
   Sliders,
   Sparkles,
   CheckCircle2,
-  Landmark
+  Landmark,
+  Radio,
+  Play,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -223,24 +225,60 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('kayadlive')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'auctions'
+                  activeNav === 'kayadlive'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'discovery'
                     ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
                     : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                 }`}
               >
                 <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
                 <span>Auctions</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('broadcast')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'broadcast'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Play className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Watch Live</span>
                 <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">
-                  LIVE
+                  NOW
                 </span>
               </button>
             </nav>
           </div>
 
-          {/* CENTER SECTION: Pre-Purchase Inspection, Financing, Support */}
+          {/* CENTER SECTION: My Garage, Pre-Purchase Inspection, Financing, Support */}
           <nav className="hidden lg:flex items-center space-x-2 text-xs font-semibold text-slate-600">
+            <button
+              onClick={() => handleNavSelect('buyer-platform')}
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                activeNav === 'buyer-platform'
+                  ? 'bg-[#D4AF37] text-[#0A1628] font-bold shadow-2xs'
+                  : 'hover:text-[#0A1628] hover:bg-[#F5F2EB]'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
+              <span>My Garage</span>
+            </button>
+
             <button
               onClick={() => handleNavSelect('inspections')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
@@ -254,15 +292,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <button
-              onClick={() => handleNavSelect('financing')}
+              onClick={() => handleNavSelect('finance')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                activeNav === 'financing'
-                  ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                  : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                activeNav === 'finance'
+                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                  : 'hover:text-emerald-600 hover:bg-emerald-50'
               }`}
             >
-              <CreditCard className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
-              <span>Financing</span>
+              <CreditCard className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[1.75]" />
+              <span>Finance</span>
             </button>
 
             <button
@@ -312,12 +350,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
             <button
-              onClick={() => handleNavSelect('sell')}
+              onClick={() => handleNavSelect('seller-platform')}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#C85A32] hover:bg-[#B34E28] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
-              <span>List Vehicle</span>
+              <span>Sell Vehicle</span>
             </button>
 
             {/* AUTHENTICATED USER DROPDOWN OR LOGIN BUTTON (Secondary CTA: White bg, Navy border) */}
@@ -394,11 +432,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
 
                       <button
-                        onClick={() => handleNavSelect('sell')}
+                        onClick={() => handleNavSelect('seller-platform')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-medium text-slate-700 hover:text-[#1E3063]"
                       >
                         <Car className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>My Vehicles</span>
+                        <span>Sell Vehicle</span>
                       </button>
 
                       <button
@@ -635,14 +673,34 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('auctions')}
+                onClick={() => handleNavSelect('kayadlive')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'kayadlive' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Radio className="w-4 h-4" />
+                <span>KAYAD LIVE</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('discovery')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Gavel className="w-4 h-4" />
+                <span>Auction Discovery</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('broadcast')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
-                  activeNav === 'auctions' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Gavel className="w-4 h-4" />
-                  <span>Auctions</span>
+                  <Play className="w-4 h-4" />
+                  <span>Watch Live</span>
                 </div>
                 <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
               </button>

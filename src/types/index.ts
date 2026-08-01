@@ -453,3 +453,117 @@ export interface Advert {
   clicksCount: number;
   createdAt: string;
 }
+
+// ============================================================
+// Auction Organizer Types
+// ============================================================
+
+export type AuctionOrganizerType = 
+  | 'verified_dealer'
+  | 'licensed_auctioneer'
+  | 'commercial_bank'
+  | 'microfinance_institution'
+  | 'fleet_disposal_company'
+  | 'government_disposal_agency'
+  | 'insurance_salvage_company'
+  | 'corporate_fleet_owner';
+
+export interface OrganizerContact {
+  phone?: string;
+  email?: string;
+  website?: string;
+}
+
+export interface OrganizerAddress {
+  street?: string;
+  city?: string;
+  county?: string;
+  country?: string;
+  postalCode?: string;
+}
+
+export interface OrganizerBusinessHours {
+  weekdays?: string;
+  saturday?: string;
+  sunday?: string;
+  holidays?: string;
+}
+
+export interface OrganizerPaymentDetails {
+  bankName: string;
+  accountName: string;
+  accountNumber?: string;
+  paybill?: string;
+  tillNumber?: string;
+  swiftCode?: string;
+  wireInstructions?: string;
+}
+
+export interface AuctionOrganizer {
+  id: string;
+  name: string;
+  type: AuctionOrganizerType;
+  logo?: string;
+  bannerImage?: string;
+  isVerified: boolean;
+  verificationBadge?: 'verified' | 'premium' | 'government' | 'bank' | 'licensed';
+  address?: OrganizerAddress;
+  contacts?: OrganizerContact;
+  businessHours?: OrganizerBusinessHours;
+  website?: string;
+  yearsOnPlatform?: number;
+  completedAuctions?: number;
+  customerRating?: number;
+  totalReviews?: number;
+  profileUrl?: string;
+  bio?: string;
+  paymentDetails?: OrganizerPaymentDetails;
+  supportedPaymentMethods?: ('mpesa' | 'bank_transfer' | 'cash' | 'card')[];
+  createdAt?: string;
+}
+
+// ============================================================
+// Auction Session with Organizer (Enhanced)
+// ============================================================
+
+export interface AuctionSessionOrganizer {
+  organizerId: string;
+  organizerName: string;
+  organizerType: AuctionOrganizerType;
+  organizerLogo?: string;
+  organizerVerified: boolean;
+  organizerProfileUrl?: string;
+  organizerPhone?: string;
+  organizerEmail?: string;
+  organizerAddress?: OrganizerAddress;
+  organizerWebsite?: string;
+  organizerRating?: number;
+  organizerYearsOnPlatform?: number;
+  organizerCompletedAuctions?: number;
+}
+
+// ============================================================
+// Helper type to get display name for organizer type
+// ============================================================
+
+export const ORGANIZER_TYPE_DISPLAY_NAMES: Record<AuctionOrganizerType, string> = {
+  verified_dealer: 'Verified Dealer',
+  licensed_auctioneer: 'Licensed Auctioneer',
+  commercial_bank: 'Commercial Bank',
+  microfinance_institution: 'Microfinance Institution',
+  fleet_disposal_company: 'Fleet Disposal Company',
+  government_disposal_agency: 'Government Disposal Agency',
+  insurance_salvage_company: 'Insurance Salvage Company',
+  corporate_fleet_owner: 'Corporate Fleet Owner',
+};
+
+export const ORGANIZER_TYPE_ICONS: Record<AuctionOrganizerType, string> = {
+  verified_dealer: '🏢',
+  licensed_auctioneer: '🔨',
+  commercial_bank: '🏦',
+  microfinance_institution: '💰',
+  fleet_disposal_company: '🚗',
+  government_disposal_agency: '🏛️',
+  insurance_salvage_company: '📋',
+  corporate_fleet_owner: '🚙',
+};

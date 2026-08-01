@@ -1,4 +1,4 @@
-import { AuctionsPage } from '../components/auctions/AuctionsPage';
+import { AuctionsPageRefactored } from '../components/auctions/AuctionsPageRefactored';
 import type { Car } from '../components/features/car/CarCard';
 
 interface AuctionProps {
@@ -6,9 +6,10 @@ interface AuctionProps {
   viewCar?: (car: Car) => void;
 }
 
-// Same pattern as Home.tsx / Gallery.tsx / CarDetail.tsx: AuctionsPage is
-// self-contained via useMarketplace() and useAuth(). setPage/viewCar kept
-// for compatibility with App.tsx's existing route wiring but unused.
+// Refactored AuctionsPage with correct business model:
+// - Auction Organizers conduct auctions
+// - Payments go directly to organizers, not KAYAD
+// - KAYAD provides marketplace technology
 export default function Auction(_props: AuctionProps) {
-  return <AuctionsPage />;
+  return <AuctionsPageRefactored />;
 }

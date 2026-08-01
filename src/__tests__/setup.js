@@ -142,7 +142,16 @@ vi.mock('lucide-react', () => {
     'Signal2', 'Signal3', 'Signal4', 'Signal5', 'Bug', 'BugOff', 'Ant', 'Worm',
     'Pest', 'Locust', 'Apple', 'Banana', 'Cherry', 'Grape', 'Lemon', 'Lime',
     'Orange', 'Peach', 'Pear', 'Pepper', 'Watermelon', 'Carrot', 'Eggplant',
-    'Tomato', 'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn'];
+    'Tomato',     'Potato', 'Corn', 'HotPepper', 'Pumpkin', 'Mushroom', 'Acorn', 'CheckCircle2', 
+    'Loader2', 'ClipboardCheck', 'ClipboardList', 'ClipboardX', 'Trophy', 'Medal', 'Award', 
+    'Crown', 'Gem', 'Diamond', 'Gift', 'GiftCard', 'FileSearch', 'FileOutput', 'Terminal',
+    'Code', 'Code2', 'Terminal2', 'Bug', 'BugOff', 'Ant', 'Locust', 'GitBranch', 'GitCommit',
+    'GitMerge', 'GitPullRequest', 'GitCompare', 'Github', 'Gitlab', 'Bitbucket', 'Figma',
+    'Framer', 'Sketch', 'Notion', 'Slack', 'Teams', 'Zoom', 'Video', 'VideoOff',
+    'ImagePlus', 'ImageMinus', 'Crop', 'RotateCw', 'RotateCcw', 'FlipHorizontal', 'FlipVertical',
+    'Palette', 'Paintbrush', 'PaintBucket', 'Brush', 'Pencil', 'Pen', 'Highlighter',
+    'Eraser', 'Ruler', 'Triangle', 'Square', 'Hexagon', 'Octagon', 'Pentagon',
+    'CircleDot', 'CircleDashed', 'CircleSlash', 'Aperture', 'Focus', 'Grid3x3', 'Grid2x2'];
   return icons.reduce((acc, icon) => {
     acc[icon] = () => React.createElement('span', { 'data-testid': `icon-${icon.toLowerCase()}` }, icon);
     return acc;

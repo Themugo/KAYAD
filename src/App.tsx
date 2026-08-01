@@ -21,6 +21,12 @@ import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
 import ChatView from './features/ChatView';
 import AdminView from './features/AdminView';
 import SupportView from './features/SupportView';
+import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
+import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
+import KAYADLive from './pages/KAYADLive';
+import { BuyerPlatform } from './features/OwnershipPlatform';
+import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
+import { FinanceMarketplace } from './features/FinancePlatform';
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -285,6 +291,30 @@ export function App() {
 
           {activeNav === 'support' && (
             <SupportView />
+          )}
+
+          {activeNav === 'broadcast' && (
+            <LiveAuctionBroadcastPage />
+          )}
+
+          {activeNav === 'discovery' && (
+            <AuctionDiscoveryNetwork />
+          )}
+
+          {activeNav === 'kayadlive' && (
+            <KAYADLive />
+          )}
+
+          {activeNav === 'buyer-platform' && (
+            <BuyerPlatform />
+          )}
+
+          {activeNav === 'seller-platform' && (
+            <PrivateSellerPlatform />
+          )}
+
+          {activeNav === 'finance' && (
+            <FinanceMarketplace />
           )}
 
           {activeNav === 'saved' && (
