@@ -44,7 +44,8 @@ export async function trackCoreWebVitals() {
     const webVitals = await import('web-vitals');
     const { onCLS, onINP, onFCP, onLCP, onTTFB } = webVitals;
 
-    const trackMetric = (metric: any, name: string) => {
+    const trackMetric = (metric: any) => {
+      const name = metric.name;
       sentry.captureMessage(`${name} Metric`, {
         level: 'info',
         tags: { metric: name, value: metric.value, rating: metric.rating },

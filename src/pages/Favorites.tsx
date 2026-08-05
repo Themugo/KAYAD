@@ -28,7 +28,7 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
         setFavorites(favs);
       } catch (err) {
         console.error('Failed to load favorites:', err);
-        toast.error('Failed to load favorites');
+        toast('Failed to load favorites', 'error');
       } finally {
         setLoading(false);
       }
@@ -40,9 +40,9 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
     try {
       await favoritesAPI.remove(String(id));
       setFavorites(prev => prev.filter(f => f.id !== id));
-      toast.success('Removed from favorites');
+      toast('Removed from favorites', 'success');
     } catch (err) {
-      toast.error('Failed to remove favorite');
+      toast('Failed to remove favorite', 'error');
     }
   };
 
@@ -52,9 +52,9 @@ export default function Favorites({ setPage, viewCar }: FavoritesProps) {
       setFavorites(prev => prev.map(f => 
         f.id === id ? { ...f, priceAlert: !currentState } : f
       ));
-      toast.success(!currentState ? 'Price alert enabled' : 'Price alert disabled');
+      toast(!currentState ? 'Price alert enabled' : 'Price alert disabled', 'success');
     } catch (err) {
-      toast.error('Failed to update price alert');
+      toast('Failed to update price alert', 'error');
     }
   };
 

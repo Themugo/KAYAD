@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 // --- BUTTON COMPONENT ---
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'ghost' | 'danger' | 'coral';
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   fullWidth?: boolean;
@@ -30,7 +30,8 @@ export const Button: React.FC<ButtonProps> = ({
     accent: 'bg-amber-400 hover:bg-amber-500 text-[#17244B] shadow-sm',
     outline: 'border border-slate-300 hover:bg-slate-50 text-slate-700',
     ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm'
+    danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
+    coral: 'bg-[#D96B43] hover:bg-[#c65a34] text-white shadow-sm'
   };
 
   const sizeStyles = {
@@ -54,7 +55,7 @@ export const Button: React.FC<ButtonProps> = ({
 
 // --- BADGE COMPONENT ---
 export interface BadgeProps {
-  variant?: 'verified' | 'inspected' | 'escrow' | 'live' | 'accent' | 'neutral' | 'success' | 'warning' | 'danger';
+  variant?: 'verified' | 'inspected' | 'escrow' | 'live' | 'accent' | 'neutral' | 'success' | 'warning' | 'danger' | 'outline' | 'secondary';
   size?: 'sm' | 'md';
   children: React.ReactNode;
   className?: string;
@@ -77,7 +78,9 @@ export const Badge: React.FC<BadgeProps> = ({
     neutral: 'bg-slate-100 text-slate-700 border border-slate-200',
     success: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     warning: 'bg-amber-50 text-amber-800 border border-amber-200',
-    danger: 'bg-rose-50 text-rose-700 border border-rose-200'
+    danger: 'bg-rose-50 text-rose-700 border border-rose-200',
+    outline: 'bg-transparent text-slate-600 border border-slate-300',
+    secondary: 'bg-slate-200 text-slate-800 border border-slate-300'
   };
 
   const sizeStyles = {
@@ -258,7 +261,7 @@ export interface ModalProps {
   onClose: () => void;
   title?: React.ReactNode;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl' | '5xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -276,6 +279,7 @@ export const Modal: React.FC<ModalProps> = ({
     lg: 'max-w-lg',
     xl: 'max-w-xl',
     '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
     '4xl': 'max-w-4xl',
     '5xl': 'max-w-5xl'
   };

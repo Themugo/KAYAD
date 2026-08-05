@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle, AuctionSession, AuctionOrganizerType } from '../../../types';
+import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 import { 
   Gavel, 
   Building2, 
@@ -106,7 +107,7 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
       id: `AUC-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       vehicleId: selectedVehicle ? selectedVehicle.id : 'v-custom',
       vehicleTitle: auctionTitle,
-      vehicle: selectedVehicle || {
+      vehicle: selectedVehicle || createPlaceholderVehicle({
         id: 'v-custom',
         title: auctionTitle,
         make: 'Toyota',
@@ -127,7 +128,7 @@ export const AuctionCreationForm: React.FC<AuctionCreationFormProps> = ({
         financeAvailable: true,
         image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
         listingFreshness: 'Just now'
-      },
+      }),
       sellerId: 'org-custom',
       sellerName: organizerName,
       sellerType: 'Verified Dealer',

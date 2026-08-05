@@ -51,7 +51,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
         Skip to main content
       </a>
       <DemoModeBanner />
-      <Navbar />
+      <Navbar
+        user={null}
+        activeNav=""
+        onNavClick={() => {}}
+        selectedCounty=""
+        onCountyChange={() => {}}
+        onOpenAuth={() => {}}
+        onOpenAlerts={() => {}}
+      />
       <main id="app-main-content" className="app-main" role="main" tabIndex={-1} style={{ paddingBottom: 'var(--bottom-nav-h, 0px)' }}>
         {children}
       </main>

@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { VehicleCard } from '../VehicleCard';
+import { createPlaceholderVehicle } from '../../utils/vehicleDefaults';
 
 // ============================================================
 // TYPES
@@ -652,32 +653,39 @@ const VehicleGrid: React.FC<{
         ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
         : 'grid-cols-1'
     }`}>
-      {vehicles.map((vehicle) => (
-        <VehicleCard
-          key={vehicle._id}
-          car={{
-            ...vehicle,
-            id: vehicle._id,
-            image: vehicle.images[0],
-            images: vehicle.images,
-            dealerName: vehicle.dealer.name,
-            dealerRating: vehicle.dealer.rating,
-            dealerVerified: vehicle.dealer.verified,
-            has_inspection: vehicle.inspectionStatus === 'completed',
-            financeOption: vehicle.financeAvailable,
-            featured: vehicle.featured,
-            isNew: vehicle.isNew,
-            auction_status: vehicle.auctionStatus,
-            currentBid: vehicle.currentBid,
-          }}
-          showDealer
-          showTrust
-          showCompare
-          showFinance={vehicle.financeAvailable}
-          onSave={(car, saved) => console.log('Save:', car.id, saved)}
-          onCompare={(car, selected) => console.log('Compare:', car.id, selected)}
-        />
-      ))}
+      {vehicles.map((vehicle) => {
+        const [make, ...modelParts] = vehicle.title.split(' ');
+        return (
+          <VehicleCard
+            key={vehicle._id}
+            vehicle={createPlaceholderVehicle({
+              id: vehicle._id,
+              title: vehicle.title,
+              make,
+              model: modelParts.join(' ') || vehicle.title,
+              year: vehicle.year,
+              price: vehicle.price,
+              mileage: vehicle.mileage,
+              images: vehicle.images,
+              image: vehicle.images[0],
+              location: vehicle.location,
+              sellerName: vehicle.dealer.name,
+              sellerRating: vehicle.dealer.rating || 0,
+              isDealerCertified: vehicle.dealer.verified,
+              inspectionPassed: vehicle.inspectionStatus === 'completed',
+              financeAvailable: vehicle.financeAvailable,
+              isAuction: vehicle.isAuction,
+              currentBid: vehicle.currentBid,
+            })}
+            isSaved={false}
+            isCompared={false}
+            onToggleSave={(id) => console.log('Save:', id)}
+            onToggleCompare={(id) => console.log('Compare:', id)}
+            onQuickView={(v) => console.log('Quick view:', v.id)}
+            onStartEscrow={(v) => console.log('Start escrow:', v.id)}
+          />
+        );
+      })}
     </div>
   );
 };

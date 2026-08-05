@@ -2,19 +2,21 @@
 // Stitch Design System Button
 // Aligns with Heritage Tech design language
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 'accent' | 'success';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   children?: React.ReactNode;
 }
 
-export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       variant = 'primary',
@@ -23,6 +25,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       loading = false,
       icon,
       iconPosition = 'left',
+      leftIcon,
+      rightIcon,
       children,
       className = '',
       disabled,
@@ -96,6 +100,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         color: '#ffffff',
         borderColor: 'var(--color-error)',
       },
+      outline: {
+        background: 'transparent',
+        color: 'var(--text-primary)',
+        borderColor: 'var(--border, #cbd5e1)',
+      },
+      accent: {
+        background: 'var(--color-accent, #C85A32)',
+        color: '#ffffff',
+        borderColor: 'transparent',
+      },
+      success: {
+        background: 'var(--color-success, #059669)',
+        color: '#ffffff',
+        borderColor: 'transparent',
+      },
     };
 
     const style: React.CSSProperties = {
@@ -130,7 +149,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           <>
             {icon && iconPosition === 'left' && icon}
+            {leftIcon}
             {children}
+            {rightIcon}
             {icon && iconPosition === 'right' && icon}
           </>
         )}

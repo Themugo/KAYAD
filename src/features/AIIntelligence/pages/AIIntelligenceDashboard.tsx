@@ -220,14 +220,14 @@ export default function AIIntelligenceDashboard() {
                     {!feedbackGiven[rec.id] && (
                       <div className="flex gap-1">
                         <button 
-                          onClick={() => handleFeedback(rec.id, true)}
+                          onClick={() => handleFeedback(String(rec.id), true)}
                           className="p-1.5 rounded hover:bg-gray-100"
                           title="Helpful"
                         >
                           <ThumbsUp size={16} style={{ color: KAYAD_COLORS.softBlue }} />
                         </button>
                         <button 
-                          onClick={() => handleFeedback(rec.id, false)}
+                          onClick={() => handleFeedback(String(rec.id), false)}
                           className="p-1.5 rounded hover:bg-gray-100"
                           title="Not Helpful"
                         >

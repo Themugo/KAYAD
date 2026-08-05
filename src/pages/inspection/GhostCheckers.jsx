@@ -5,7 +5,7 @@ import {
   Phone, Mail, MessageCircle, Calendar, User, FileCheck, Award,
   BarChart3, Bot, Zap, Eye, AlertTriangle, ThumbsUp, Download,
   Camera, Mic, FileText, Check, X, ArrowRight, Globe, Truck,
-  Building2, Banknote, Percent, Bot as BotIcon, Loader2
+  Building2, Banknote, Percent, Bot as BotIcon, Loader2, Menu
 } from 'lucide-react';
 import * as gcApi from '../../services/ghostCheckersApi';
 

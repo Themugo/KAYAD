@@ -8,7 +8,7 @@ import tsparser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'build/**', '*.min.js', 'backend/**', 'lib/**', 'artifacts/**', 'e2e/**', 'docs/**', 'public/**', 'src/components/PerformanceMonitor.tsx']
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'build/**', '*.min.js', 'backend/**', 'lib/**', 'artifacts/**', 'e2e/**', 'docs/**', 'public/**', 'load-test.js', 'load-tests/**', 'src/components/PerformanceMonitor.tsx']
   },
   {
     files: ['**/*.{js,jsx}'],

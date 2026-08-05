@@ -254,6 +254,15 @@ export interface Defect {
   isResolved?: boolean;
 }
 
+export interface FindingCategory {
+  category: InspectionCategory;
+  label: string;
+  passedCount: number;
+  attentionCount: number;
+  failedCount: number;
+  findings: Defect[];
+}
+
 export interface Progress {
   pointsPercentage: number;
   stagesPercentage: number;

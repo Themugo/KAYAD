@@ -3,27 +3,6 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 
-vi.mock('lucide-react', () => ({
-  Search: 'Search',
-  X: 'X',
-  Menu: 'Menu',
-  LogIn: 'LogIn',
-  LogOut: 'LogOut',
-  LayoutDashboard: 'LayoutDashboard',
-  ChevronDown: 'ChevronDown',
-  Home: 'Home',
-  Images: 'Images',
-  Gavel: 'Gavel',
-  Shield: 'Shield',
-  ClipboardCheck: 'ClipboardCheck',
-  MessageCircle: 'MessageCircle',
-  Tag: 'Tag',
-  Heart: 'Heart',
-  BarChart3: 'BarChart3',
-  Bell: 'Bell',
-  User: 'User',
-}));
-
 vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({
     user: { _id: 'u1', name: 'TestUser', role: 'dealer' },
@@ -67,6 +46,6 @@ describe('Navbar', () => {
 
   it('renders nav links', () => {
     render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
-    expect(screen.getAllByText('Gallery').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
   });
 });

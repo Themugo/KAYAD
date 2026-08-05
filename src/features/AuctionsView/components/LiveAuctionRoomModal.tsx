@@ -405,7 +405,7 @@ export const LiveAuctionRoomModal: React.FC<LiveAuctionRoomModalProps> = ({
               {roomViewTab === 'specs' && (
                 <div className="grid grid-cols-2 gap-3 text-slate-300 p-3 bg-white/5 rounded-xl border border-white/10">
                   <div><span className="text-slate-400">Engine:</span> {vehicle.engineSize || '2.0L Turbo'}</div>
-                  <div><span className="text-slate-400">Color:</span> {vehicle.color || 'White'}</div>
+                  <div><span className="text-slate-400">Color:</span> {vehicle.exteriorColor || 'White'}</div>
                   <div><span className="text-slate-400">Duty Status:</span> <strong className="text-emerald-400">Fully Paid</strong></div>
                   <div><span className="text-slate-400">Location Yard:</span> {vehicle.location || 'Nairobi Yard'}</div>
                 </div>

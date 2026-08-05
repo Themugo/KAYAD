@@ -293,7 +293,7 @@ export const DealerInventoryCard = memo(function DealerInventoryCard({
           )}
         </div>
         <div className="dealer-inventory-card__menu">
-          <button className="dealer-leads__action" onClick={() => onEdit?.(car)}>✏️</button>
+          <button className="dealer-leads__action" onClick={() => onEdit?.()}>✏️</button>
         </div>
       </div>
       <div className="dealer-inventory-card__body">

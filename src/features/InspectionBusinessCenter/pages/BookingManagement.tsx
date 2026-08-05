@@ -20,6 +20,7 @@ import {
   Search,
   MoreVertical,
   AlertCircle,
+  DollarSign,
 } from 'lucide-react';
 import type { Booking, BookingStatus } from '../types/businessCenter';
 import { BOOKING_STATUS_LABELS } from '../types/businessCenter';
@@ -31,6 +32,7 @@ const KAYAD_COLORS = {
   emerald: '#10b981',
   mutedTerracotta: '#c4a484',
   softBlue: '#64748b',
+  red: '#dc2626',
 };
 
 interface BookingManagementProps {
@@ -322,7 +324,7 @@ function BookingCard({
       }`}
       style={{ 
         backgroundColor: KAYAD_COLORS.white,
-        ringColor: statusColors[booking.status]
+        ['--tw-ring-color' as any]: statusColors[booking.status]
       }}
     >
       <div className="flex justify-between items-start mb-3">

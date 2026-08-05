@@ -3,7 +3,7 @@
 // SMART INBOX & MESSAGING
 // ============================================================
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Inbox,

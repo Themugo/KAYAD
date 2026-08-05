@@ -460,7 +460,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
           </div>
           <div className="mt-4 pt-4 border-t border-slate-200">
             <Badge 
-              variant={qaResult.passed ? 'success' : 'error'}
+              variant={qaResult.passed ? 'success' : 'danger'}
               className={qaResult.passed ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-red-100 text-red-800 border-red-200'}
             >
               {qaResult.passed ? 'All QA checks passed' : 'QA validation failed'}

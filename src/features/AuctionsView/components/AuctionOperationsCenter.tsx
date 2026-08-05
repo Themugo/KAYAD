@@ -52,7 +52,8 @@ import {
   Landmark,
   Users as UsersIcon,
   PieChart,
-  Clock3
+  Clock3,
+  Trophy
 } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';

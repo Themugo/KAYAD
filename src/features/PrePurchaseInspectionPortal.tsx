@@ -1271,7 +1271,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
           isOpen={showReportBuilderModal}
           onClose={() => setShowReportBuilderModal(false)}
           title="150-Point Pre-Purchase Audit Builder"
-          size="2xl"
+          maxWidth="2xl"
         >
           <div className="space-y-6 text-xs max-h-[80vh] overflow-y-auto pr-2">
             {/* Header info bar */}
@@ -1453,7 +1453,7 @@ export const PrePurchaseInspectionPortal: React.FC<PrePurchaseInspectionPortalPr
           isOpen={showPdfCertificateModal}
           onClose={() => setShowPdfCertificateModal(false)}
           title="Official 150-Point Audit Certificate (PDF Preview)"
-          size="xl"
+          maxWidth="xl"
         >
           <div className="space-y-6 text-xs max-h-[80vh] overflow-y-auto pr-2">
             {/* Certificate Document Visual */}

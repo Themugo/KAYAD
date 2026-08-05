@@ -3,7 +3,7 @@
 // INSPECTION WORKSPACE
 // ============================================================
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle,
@@ -112,12 +112,13 @@ interface DigitalInspectionWorkspaceProps {
 
 export default function DigitalInspectionWorkspace({ inspectionId, onComplete }: DigitalInspectionWorkspaceProps) {
   const [inspection, setInspection] = useState(SAMPLE_INSPECTION);
+  const [points, setPoints] = useState<InspectionPoint[]>(SAMPLE_POINTS);
   const [activeStage, setActiveStage] = useState<WorkflowStage>(inspection.currentStage);
   const [selectedPoint, setSelectedPoint] = useState<InspectionPoint | null>(null);
   const [showEvidenceModal, setShowEvidenceModal] = useState(false);
   const [showDefectModal, setShowDefectModal] = useState(false);
 
-  const stages = [
+  const stages: { name: WorkflowStage; order: number; icon: ReactNode }[] = [
     { name: 'job_verification', order: 1, icon: <Settings size={16} /> },
     { name: 'customer_confirmation', order: 2, icon: <User size={16} /> },
     { name: 'vehicle_identification', order: 3, icon: <Car size={16} /> },
@@ -139,10 +140,7 @@ export default function DigitalInspectionWorkspace({ inspectionId, onComplete }:
   ];
 
   const handlePointRating = (pointId: string, rating: ConditionRating) => {
-    setInspection(prev => ({
-      ...prev,
-      points: prev.points?.map(p => p.id === pointId ? { ...p, conditionRating: rating } : p) || [],
-    }));
+    setPoints(prev => prev.map(p => p.id === pointId ? { ...p, conditionRating: rating } : p));
   };
 
   const handleAddEvidence = (pointId: string, type: string) => {
@@ -260,7 +258,7 @@ export default function DigitalInspectionWorkspace({ inspectionId, onComplete }:
 
         {/* Inspection Points Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {SAMPLE_POINTS.map(point => (
+          {points.map(point => (
             <InspectionPointCard
               key={point.id}
               point={point}
@@ -328,7 +326,7 @@ export default function DigitalInspectionWorkspace({ inspectionId, onComplete }:
             onClose={() => setSelectedPoint(null)}
             onAddEvidence={() => setShowEvidenceModal(true)}
             onAddDefect={() => setShowDefectModal(true)}
-            onRate={handlePointRating}
+            onRate={(rating) => selectedPoint && handlePointRating(selectedPoint.id, rating)}
           />
         )}
       </AnimatePresence>

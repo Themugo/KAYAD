@@ -1102,7 +1102,7 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
           isOpen={showDecisionModal}
           onClose={() => setShowDecisionModal(false)}
           title={`Record Underwriting Decision: ${selectedApp.applicantName}`}
-          maxWidth="max-w-xl"
+          maxWidth="xl"
         >
           <div className="space-y-4 text-xs">
             <div className="p-3 bg-slate-50 rounded-xl space-y-1">
@@ -1153,7 +1153,7 @@ export const BankFinancingPortal: React.FC<BankFinancingPortalProps> = ({
           isOpen={showDetailModal}
           onClose={() => setShowDetailModal(false)}
           title={`Financing File Audit: ${selectedApp.appRef}`}
-          maxWidth="max-w-3xl"
+          maxWidth="3xl"
         >
           <div className="space-y-5 text-xs">
             <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-200">

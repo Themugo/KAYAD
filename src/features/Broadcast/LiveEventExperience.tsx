@@ -511,6 +511,8 @@ const SpectatorCTA: FC<{ onRegister: () => void }> = ({ onRegister }) => (
 );
 
 const AuctionClosedSummary: FC<{ auction: LiveAuction; winningAlias: string }> = ({ auction, winningAlias }) => {
+  const reserveMet = !auction.auction.reservePrice || auction.auction.currentBid >= auction.auction.reservePrice;
+
   // Bid progression data
   const bidProgression = useMemo(() => {
     const points = [];

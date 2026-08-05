@@ -22,7 +22,7 @@ class MockIntersectionObserver {
       intersectionRatio: 1,
       boundingClientRect: target.getBoundingClientRect(),
       intersectionRect: target.getBoundingClientRect(),
-      rootBounds: this.options?.root?.getBoundingClientRect() || null,
+      rootBounds: (this.options?.root instanceof Element ? this.options.root.getBoundingClientRect() : null),
       time: Date.now(),
     };
     this.callback([entry], this);
@@ -163,7 +163,7 @@ class MockCanvasRenderingContext2D {
   transform() {}
 }
 
-HTMLCanvasElement.prototype.getContext = () => new MockCanvasRenderingContext2D();
+HTMLCanvasElement.prototype.getContext = (() => new MockCanvasRenderingContext2D()) as any;
 
 // Mock HTMLElement.dataset
 if (typeof HTMLElement !== 'undefined') {

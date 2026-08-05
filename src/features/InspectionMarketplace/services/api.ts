@@ -2,7 +2,7 @@
 // KAYAD INSPECTION MARKETPLACE - API SERVICE
 // ============================================================
 
-import { apiClient } from '@/lib/api-client-react';
+import { api as apiClient } from '../../../api/api';
 import type {
   InspectionProvider,
   InspectionPackage,

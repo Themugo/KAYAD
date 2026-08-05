@@ -485,7 +485,7 @@ export const OrganizerManagementConsole: React.FC<OrganizerManagementConsoleProp
                       </thead>
                       <tbody className="divide-y divide-slate-100 font-medium">
                         {sessions.map((session) => {
-                          const upg = activeUpgrades[session.id] || { listingFeePaid: true };
+                          const upg = activeUpgrades[session.id] || { listingFeePaid: true, featuredUpgrade: false, homepagePromo: false, sponsoredPlacement: false, premiumAnalytics: false };
                           return (
                             <tr key={session.id} className="hover:bg-slate-50 transition-colors">
                               <td className="p-3">

@@ -4,18 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import DealerDashboard from '../../../pages/dealer/DealerDashboard';
 
 // Mock lucide-react before importing components
-vi.mock('lucide-react', () => ({
-  LayoutDashboard: () => null,
-  Car: () => null,
-  Users: () => null,
-  Plus: () => null,
-  BarChart3: () => null,
-  MessageSquare: () => null,
-  DollarSign: () => null,
-  Settings: () => null,
-  ChevronRight: () => null,
-}));
-
 vi.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({
     user: { _id: 'u1', name: 'Test Dealer', role: 'dealer', approved: true },

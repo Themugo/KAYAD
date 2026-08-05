@@ -13,7 +13,7 @@ export interface Car {
   fuel: string;
   city: string;
   type: 'SUV' | 'Pickup' | 'Sedan' | 'Wagon';
-  badges: ('escrow' | 'auction' | 'verified' | 'sponsored' | 'financing' | 'negotiable' | string)[];
+  badges?: ('escrow' | 'auction' | 'verified' | 'sponsored' | 'financing' | 'negotiable' | string)[];
   image: string;
   transmission?: string;
   engine?: string;
@@ -56,7 +56,7 @@ function CarCardComponent({
 
   const now = Date.now();
   const auctionEnd = car.auctionEnd ? new Date(car.auctionEnd).getTime() : 0;
-  const isOnAuction = car.badges.includes('auction') && auctionEnd > now;
+  const isOnAuction = (car.badges || []).includes('auction') && auctionEnd > now;
   const currentPrice = isOnAuction && car.currentBid && car.currentBid > 0 ? car.currentBid : car.price;
   const formattedPrice = `KES ${currentPrice.toLocaleString('en-KE')}`;
 
@@ -108,7 +108,7 @@ function CarCardComponent({
                 LIVE
               </span>
             )}
-            {car.badges.includes('escrow') && (
+            {(car.badges || []).includes('escrow') && (
               <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(30,30,30,0.88)', color: '#fff' }}>
                 <Shield size={10} />
                 ESCROW
@@ -243,7 +243,7 @@ function CarCardComponent({
               LIVE
             </span>
           )}
-          {car.badges.includes('escrow') && (
+          {(car.badges || []).includes('escrow') && (
             <span
               className="card-badge absolute bottom-1.5 left-1.5 backdrop-blur-sm"
               style={{ background: 'rgba(30,30,30,0.88)', color: '#fff', fontSize: 7 }}
@@ -400,7 +400,7 @@ function CarCardComponent({
               LIVE
             </span>
           )}
-          {car.badges.includes('escrow') && (
+          {(car.badges || []).includes('escrow') && (
             <span className="card-badge backdrop-blur-sm" style={{ background: 'rgba(30,30,30,0.88)', color: '#fff' }}>
               <Shield size={10} />
               ESCROW

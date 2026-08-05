@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CarDetailPage from '../../pages/CarDetail';
+import { MarketplaceProvider } from '../../context/MarketplaceContext';
 
 vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
 
@@ -88,13 +89,14 @@ describe('CarDetailPage', () => {
   afterEach(() => { cleanup(); });
 
   it('renders car title from mock', async () => {
-    render(<MemoryRouter initialEntries={['/cars/mock1']}><CarDetailPage /></MemoryRouter>);
-    const titles = await screen.findAllByText('Test Luxury Car');
+    render(<MemoryRouter initialEntries={['/cars/veh_1']}><MarketplaceProvider><CarDetailPage /></MarketplaceProvider></MemoryRouter>);
+    const titles = await screen.findAllByText(/Porsche 911 GT3 RS/);
     expect(titles.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders Message Dealer button', async () => {
-    render(<MemoryRouter initialEntries={['/cars/mock1']}><CarDetailPage /></MemoryRouter>);
-    expect(await screen.findByText('Message Dealer')).toBeInTheDocument();
+  it('renders Chat Dealer button', async () => {
+    render(<MemoryRouter initialEntries={['/cars/veh_1']}><MarketplaceProvider><CarDetailPage /></MarketplaceProvider></MemoryRouter>);
+    const buttons = await screen.findAllByText('Chat Dealer');
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 });

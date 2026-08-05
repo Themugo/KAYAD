@@ -313,7 +313,8 @@ type FinanceSection =
   | 'advisor' 
   | 'admin' 
   | 'compliance' 
-  | 'analytics';
+  | 'analytics'
+  | 'help';
 
 export default function FinanceMarketplace() {
   const [activeSection, setActiveSection] = useState<FinanceSection>('home');

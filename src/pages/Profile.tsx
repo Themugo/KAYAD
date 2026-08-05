@@ -59,10 +59,10 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     setLoading(true);
     try {
       await updateProfile({ [editingField]: editValue });
-      toast.success('Profile updated successfully');
+      toast('Profile updated successfully', 'success');
       setEditingField(null);
     } catch (err) {
-      toast.error('Failed to update profile');
+      toast('Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }

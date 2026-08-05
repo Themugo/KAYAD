@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, Dealer, DealerTeamMember, DealerLead, DealerPromotion, DealerAnalytics } from '../types';
+import { createPlaceholderVehicle } from '../utils/vehicleDefaults';
 import { 
   INITIAL_DEALER_BUSINESSES, 
   INITIAL_DEALER_TEAM, 
@@ -447,7 +448,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
   const handleCreateFromVin = () => {
     if (!decodedSpecs) return;
 
-    const created: Vehicle = {
+    const created: Vehicle = createPlaceholderVehicle({
       id: `v-vin-${Date.now()}`,
       title: `${decodedSpecs.year} ${decodedSpecs.make} ${decodedSpecs.model}`,
       make: decodedSpecs.make,
@@ -469,7 +470,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
       image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800',
       listingFreshness: 'Just Listed (VIN Decoded)',
       responseTime: '< 10 mins'
-    };
+    });
 
     onAddVehicle?.(created);
     setShowVinDecoderModal(false);
@@ -496,7 +497,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
         const mileage = parseInt(parts[4]?.trim() || '45000');
         const loc = parts[5]?.trim() || 'Nairobi Yard';
 
-        const created: Vehicle = {
+        const created: Vehicle = createPlaceholderVehicle({
           id: `v-csv-${Date.now()}-${i}`,
           title: `${year} ${make} ${model}`,
           make,
@@ -504,7 +505,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
           year,
           price,
           mileage,
-          fuelType: 'Petrol',
+          fuelType: 'Gasoline',
           transmission: 'Automatic',
           location: loc,
           county: 'Nairobi',
@@ -518,7 +519,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
           image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=800',
           listingFreshness: 'Bulk CSV Imported',
           responseTime: '< 10 mins'
-        };
+        });
 
         onAddVehicle?.(created);
         added++;
@@ -555,7 +556,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
       return;
     }
 
-    const createdVehicle: Vehicle = {
+    const createdVehicle: Vehicle = createPlaceholderVehicle({
       id: `v-d-${Date.now()}`,
       title: newTitle,
       make: newMake,
@@ -577,7 +578,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
       image: newImage || 'https://images.unsplash.com/photo-1590362891991-f776e747a588?auto=format&fit=crop&q=80&w=800',
       listingFreshness: 'Just Listed',
       responseTime: '< 10 mins'
-    };
+    });
 
     onAddVehicle?.(createdVehicle);
     setShowAddVehicleModal(false);
@@ -1186,7 +1187,7 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
               ].map((col) => {
                 const colLeads = leads.filter(l => {
                   if (col.stage.includes('New') && l.status === 'New Lead') return true;
-                  if (col.stage.includes('Contacted') && (l.status === 'Contacted' || l.status === 'Qualified')) return true;
+                  if (col.stage.includes('Contacted') && l.status === 'In Contact') return true;
                   if (col.stage.includes('Test Drive') && l.status === 'Test Drive Scheduled') return true;
                   if (col.stage.includes('Escrow') && l.status === 'Deposit Paid') return true;
                   return false;

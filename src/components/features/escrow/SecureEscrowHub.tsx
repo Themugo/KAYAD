@@ -110,7 +110,7 @@ export const SecureEscrowHub: FC<SecureEscrowHubProps> = ({
           <div className="p-4 rounded-xl bg-brand-50 dark:bg-brand-900/20">
             <p className="text-sm text-charcoal-500 dark:text-cream-300">Transactions</p>
             <p className="text-lg font-bold text-brand-600">
-              {Object.values(summary?.byType || {}).reduce((sum: number, t: any) => sum + t.count, 0)}
+              {(Object.values(summary?.byType || {}) as any[]).reduce((sum: number, t: any) => sum + t.count, 0)}
             </p>
           </div>
         </div>

@@ -36,48 +36,72 @@ interface Metadata {
 }
 
 interface SEOHeadProps {
-  metadata: Metadata;
+  metadata?: Metadata;
+  title?: string;
+  description?: string;
 }
 
-const SEOHead = ({ metadata }: SEOHeadProps) => {
-  if (!metadata) return null;
+const buildDefaultMetadata = (title: string, description: string): Metadata => ({
+  title,
+  description,
+  openGraph: {
+    title,
+    description,
+    type: 'website',
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    image: '',
+    siteName: 'KAYAD',
+    locale: 'en_KE',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+    image: '',
+  },
+  canonical: typeof window !== 'undefined' ? window.location.href : '',
+});
+
+const SEOHead = ({ metadata, title, description }: SEOHeadProps) => {
+  const resolvedMetadata = metadata || (title ? buildDefaultMetadata(title, description || '') : null);
+  if (!resolvedMetadata) return null;
 
   return (
     <Helmet>
-      <title>{metadata.title}</title>
-      <meta name="description" content={metadata.description} />
+      <title>{resolvedMetadata.title}</title>
+      <meta name="description" content={resolvedMetadata.description} />
       
       {/* OpenGraph */}
-      <meta property="og:title" content={metadata.openGraph.title} />
-      <meta property="og:description" content={metadata.openGraph.description} />
-      <meta property="og:type" content={metadata.openGraph.type} />
-      <meta property="og:url" content={metadata.openGraph.url} />
-      <meta property="og:image" content={metadata.openGraph.image} />
-      <meta property="og:site_name" content={metadata.openGraph.siteName} />
-      <meta property="og:locale" content={metadata.openGraph.locale} />
-      {metadata.openGraph.priceAmount && (
-        <meta property="og:price:amount" content={metadata.openGraph.priceAmount} />
+      <meta property="og:title" content={resolvedMetadata.openGraph.title} />
+      <meta property="og:description" content={resolvedMetadata.openGraph.description} />
+      <meta property="og:type" content={resolvedMetadata.openGraph.type} />
+      <meta property="og:url" content={resolvedMetadata.openGraph.url} />
+      <meta property="og:image" content={resolvedMetadata.openGraph.image} />
+      <meta property="og:site_name" content={resolvedMetadata.openGraph.siteName} />
+      <meta property="og:locale" content={resolvedMetadata.openGraph.locale} />
+      {resolvedMetadata.openGraph.priceAmount && (
+        <meta property="og:price:amount" content={resolvedMetadata.openGraph.priceAmount} />
       )}
-      {metadata.openGraph.priceCurrency && (
-        <meta property="og:price:currency" content={metadata.openGraph.priceCurrency} />
+      {resolvedMetadata.openGraph.priceCurrency && (
+        <meta property="og:price:currency" content={resolvedMetadata.openGraph.priceCurrency} />
       )}
-      {metadata.openGraph.availability && (
-        <meta property="og:availability" content={metadata.openGraph.availability} />
+      {resolvedMetadata.openGraph.availability && (
+        <meta property="og:availability" content={resolvedMetadata.openGraph.availability} />
       )}
       
       {/* Twitter Cards */}
-      <meta name="twitter:card" content={metadata.twitter.card} />
-      <meta name="twitter:title" content={metadata.twitter.title} />
-      <meta name="twitter:description" content={metadata.twitter.description} />
-      <meta name="twitter:image" content={metadata.twitter.image} />
+      <meta name="twitter:card" content={resolvedMetadata.twitter.card} />
+      <meta name="twitter:title" content={resolvedMetadata.twitter.title} />
+      <meta name="twitter:description" content={resolvedMetadata.twitter.description} />
+      <meta name="twitter:image" content={resolvedMetadata.twitter.image} />
       
       {/* Canonical URL */}
-      <link rel="canonical" href={metadata.canonical} />
+      <link rel="canonical" href={resolvedMetadata.canonical} />
       
       {/* Structured Data */}
-      {metadata.structuredData && (
+      {resolvedMetadata.structuredData && (
         <script type="application/ld+json">
-          {JSON.stringify(metadata.structuredData)}
+          {JSON.stringify(resolvedMetadata.structuredData)}
         </script>
       )}
     </Helmet>

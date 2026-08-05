@@ -54,7 +54,7 @@ export const CreateAuctionModal: React.FC<CreateAuctionModalProps> = ({
               onClose();
             }}
             onCancel={onClose}
-            currentUserRole={currentUserRole}
+            userRole={currentUserRole}
             isUserVerified={isUserVerified}
           />
         </div>

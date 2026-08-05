@@ -278,4 +278,6 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   );
 });
 
+VehicleCard.displayName = 'VehicleCard';
+
 export default VehicleCard;

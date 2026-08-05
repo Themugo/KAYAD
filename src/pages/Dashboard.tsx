@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import SEOHead from '../components/features/common/SEOHead';
 
 export default function Dashboard() {
-  const { user, isDealer, isAdmin, isInspector } = useAuth();
+  const { user, isDealer, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const isInspector = user?.role === 'ghost_checker';
 
   useEffect(() => {
     // Redirect based on user role

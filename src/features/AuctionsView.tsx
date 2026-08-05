@@ -1680,14 +1680,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             setLiveRoomSession(prev => prev ? {
               ...prev,
               currentBid: amount,
-              totalBids: prev.totalBids + 1,
+              totalBidsCount: prev.totalBidsCount + 1,
               reserveMet: amount >= prev.reservePrice ? true : prev.reserveMet,
               bidHistory: [
                 {
                   id: `bid-${Date.now()}`,
                   amount: amount,
                   bidderName: bidderName,
-                  time: 'Just now',
+                  timestamp: new Date().toISOString(),
+                  status: 'Highest Bid',
                   verifiedDeposit: true
                 },
                 ...prev.bidHistory
@@ -1725,7 +1726,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         onClose={() => setIsOrganizerConsoleOpen(false)}
         sessions={sessions}
         verifiedBiddersMap={verifiedBiddersMap}
-        onApproveBidder={handleRegistrationComplete}
+        onApproveBidder={(_sessionId, profile) => handleRegistrationComplete(profile)}
         onCreateNewAuction={() => setShowInlineCreateForm(true)}
         onOpenLiveRoom={(sess) => handleOpenLiveRoom(sess)}
         onPublishResults={(sess) => handleOpenCompletion(sess, undefined, sess.currentBid)}

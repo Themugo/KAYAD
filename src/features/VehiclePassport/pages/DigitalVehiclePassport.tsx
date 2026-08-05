@@ -2,7 +2,7 @@
 // KAYAD DIGITAL VEHICLE PASSPORT™ - MAIN PAGE
 // ============================================================
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   QrCode,

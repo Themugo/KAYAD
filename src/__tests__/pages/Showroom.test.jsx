@@ -23,7 +23,6 @@ vi.mock('../../components/features/common/SeoStructuredData', () => ({
   ItemListStructuredData: () => null,
   BreadcrumbStructuredData: () => null,
 }));
-vi.mock('../showroom/components/ShowroomEmptyState', () => ({ default: () => null }));
 
 describe('Showroom', () => {
   afterEach(() => { cleanup(); });
@@ -38,8 +37,8 @@ describe('Showroom', () => {
     expect(screen.getByText('The Gallery')).toBeInTheDocument();
   });
 
-  it('shows empty state message', () => {
+  it('falls back to demo cars when the API returns none', async () => {
     render(<MemoryRouter><Showroom /></MemoryRouter>);
-    expect(screen.getByText(/No vehicles in the showroom yet/)).toBeInTheDocument();
+    expect(await screen.findByText('C 300 AMG')).toBeInTheDocument();
   });
 });

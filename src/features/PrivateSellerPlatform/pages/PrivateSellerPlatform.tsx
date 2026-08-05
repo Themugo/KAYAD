@@ -17,7 +17,7 @@ import {
   BarChart3, Sparkles, ArrowUpRight, RefreshCw, DollarSign as DollarSignIcon,
   MessageCircle, Mail, Phone, Bell as BellIcon, CalendarCheck, Users,
   BadgeCheck, BadgeDollarSign, ShieldAlert, ShieldCheck as ShieldCheckVerified,
-  ShieldCheck, Fingerprint, IdCard, Phone, MailCheck,
+  Fingerprint, IdCard, MailCheck,
   PlusCircle as PlusCircleIcon, Settings2, ExternalLink, Filter, SortAsc, Grid, List,
   ClipboardList, ListChecks, ListOrdered, CheckSquare, Square,
   Eye as EyeIcon, Heart as HeartIcon, MessageSquare as MessageSquareIcon, Timer, TrendingUp as TrendingUpIcon,

@@ -556,7 +556,7 @@ export const AuctionRiskDashboard: React.FC<AuctionRiskDashboardProps> = ({
                     <RiskAlert
                       key={risk.id}
                       risk={risk}
-                      onResolve={onResolveRisk}
+                      onResolve={onResolveRisk ? (id: string) => onResolveRisk(id, 'Resolved by admin') : undefined}
                       onDismiss={onDismissRisk}
                       isAdmin={isAdminView}
                     />

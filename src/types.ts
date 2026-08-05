@@ -1,9 +1,6 @@
 // Re-export types from types/index for consistency
-export type { Vehicle as Vehicle } from './types/index';
-export type { BodyStyle } from './types/index';
-export type { TransmissionType } from './types/index';
-export type { FuelType } from './types/index';
-export type { VehicleCondition } from './types/index';
+import type { Vehicle, BodyStyle, TransmissionType, FuelType, VehicleCondition } from './types/index';
+export type { Vehicle, BodyStyle, TransmissionType, FuelType, VehicleCondition };
 
 export interface BidRecord {
   id: string;
@@ -12,6 +9,7 @@ export interface BidRecord {
   amount: number;
   timestamp: string;
   status: 'Highest Bid' | 'Outbid' | 'Winning';
+  verifiedDeposit?: boolean;
 }
 
 export interface AuctionSession {
@@ -82,6 +80,14 @@ export interface AuctionSession {
   bidSecurityAmount?: number;
   bidSecurityRefundPolicy?: string;
   bidSecurityVerificationMethod?: string;
+  // Legacy flat organizer/bid-security fields (for backward compatibility)
+  organizerType?: string;
+  organizerPhone?: string;
+  organizerEmail?: string;
+  bidSecurityBank?: string;
+  bidSecurityAccountName?: string;
+  bidSecurityPaybillOrAccount?: string;
+  viewingHours?: string;
   // Winning Payment Instructions
   handoverInstructions?: string;
 }
@@ -408,6 +414,7 @@ export interface UnifiedChatThread {
   counterpartyInfo: {
     name: string;
     role: string;
+    avatar?: string;
     maskedPhone: string;
     unmaskedPhone?: string;
     rating: number;
@@ -580,6 +587,7 @@ export interface UserProfile {
   phone: string;
   role: 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | 'admin';
   avatar: string;
+  isVerified?: boolean;
   unreadMessagesCount?: number;
   unreadNotificationsCount?: number;
 }

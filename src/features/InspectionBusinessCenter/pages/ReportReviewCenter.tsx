@@ -21,6 +21,7 @@ import {
   MessageSquare,
   CheckCircle,
   Edit,
+  Plus,
 } from 'lucide-react';
 
 const KAYAD_COLORS = {

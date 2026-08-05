@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Vehicle, AuctionSession } from '../../../types';
+import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 import { 
   Gavel, 
@@ -74,14 +75,14 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   const selectedSession = sessions.find(s => s.id === selectedSessionId) || sessions[0];
 
   const [activeTab, setActiveTab] = useState<
-    'monitor' | 'create' | 'vehicles' | 'bidders' | 'publish' | 'reports' | 'revenue' | 'engagement' | 'broadcaster'
+    'monitor' | 'create' | 'vehicles' | 'bidders' | 'publish' | 'reports' | 'revenue' | 'engagement' | 'broadcaster' | 'settings'
   >('monitor');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'live' | 'upcoming' | 'ended'>('all');
 
   // Form states for settings modification
   const [editingReserve, setEditingReserve] = useState<number>(selectedSession?.reservePrice || 0);
-  const [editingIncrement, setEditingIncrement] = useState<number>(selectedSession?.minIncrement || 10000);
+  const [editingIncrement, setEditingIncrement] = useState<number>(selectedSession?.minimumIncrement || 10000);
   const [editingStartingPrice, setEditingStartingPrice] = useState<number>(selectedSession?.startingPrice || 0);
   const [isPaused, setIsPaused] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState('');
@@ -119,7 +120,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   React.useEffect(() => {
     if (selectedSession) {
       setEditingReserve(selectedSession.reservePrice || 0);
-      setEditingIncrement(selectedSession.minIncrement || 10000);
+      setEditingIncrement(selectedSession.minimumIncrement || 10000);
       setEditingStartingPrice(selectedSession.startingPrice || 0);
     }
   }, [selectedSessionId, selectedSession]);
@@ -130,7 +131,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
   const filteredSessions = sessions.filter(s => {
     const matchesSearch = s.vehicleTitle.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           s.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || s.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || s.status.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -228,7 +229,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
 
     const newId = `SESSION-${Math.floor(100 + Math.random() * 900)}`;
     const organizerName = newAuctionOrganizer || 'Auction Organizer';
-    const dummyVehicle: Vehicle = {
+    const dummyVehicle: Vehicle = createPlaceholderVehicle({
       id: `V-${Math.floor(1000 + Math.random() * 9000)}`,
       title: newAuctionTitle,
       make: 'Toyota',
@@ -250,7 +251,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
       isAuction: true,
       image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=800&q=80',
       listingFreshness: 'Just Added'
-    };
+    });
 
     const newSession: AuctionSession = {
       id: newId,
@@ -351,7 +352,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
     const updated: AuctionSession = {
       ...selectedSession,
       reservePrice: editingReserve,
-      minIncrement: editingIncrement,
+      minimumIncrement: editingIncrement,
       startingPrice: editingStartingPrice,
       reserveMet
     };
@@ -749,13 +750,13 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
                             </span>
                           </td>
                           <td className="p-3 font-mono font-bold text-[#1E3063]">
-                            +Ksh {(session.minIncrement || 10000).toLocaleString()}
+                            +Ksh {(session.minimumIncrement || 10000).toLocaleString()}
                           </td>
                           <td className="p-3">
                             <Badge 
-                              variant={session.status === 'live' ? 'live' : 'neutral'} 
+                              variant={session.status === 'Live' ? 'live' : 'neutral'} 
                               size="sm"
-                              className={session.status === 'live' ? 'bg-[#C85A32] text-white font-bold' : 'bg-slate-200 text-slate-700'}
+                              className={session.status === 'Live' ? 'bg-[#C85A32] text-white font-bold' : 'bg-slate-200 text-slate-700'}
                             >
                               {session.status.toUpperCase()}
                             </Badge>
@@ -838,7 +839,7 @@ export const AuctionOrganizerDashboard: React.FC<AuctionOrganizerDashboardProps>
 
                     <div className="p-3 bg-white/5 rounded-xl border border-white/10">
                       <span className="text-slate-400 text-[10px] font-bold uppercase block">Configured Min Increment</span>
-                      <span className="text-xl font-black font-mono text-white">+Ksh {(selectedSession.minIncrement || 10000).toLocaleString()}</span>
+                      <span className="text-xl font-black font-mono text-white">+Ksh {(selectedSession.minimumIncrement || 10000).toLocaleString()}</span>
                     </div>
                   </div>
                 </Card>

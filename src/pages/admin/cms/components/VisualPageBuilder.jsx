@@ -92,9 +92,10 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             </button>
           </div>
         );
-      case 'heading':
+      case 'heading': {
         const HeadingTag = block.props.level || 'h2';
         return <HeadingTag className="text-2xl font-bold text-slate-800">{block.props.text}</HeadingTag>;
+      }
       case 'paragraph':
         return <p className="text-slate-600 leading-relaxed">{block.props.text}</p>;
       case 'image':
@@ -112,7 +113,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             )}
           </div>
         );
-      case 'button':
+      case 'button': {
         const buttonStyles = {
           primary: 'bg-[#17244B] text-white hover:bg-[#1e3054]',
           secondary: 'bg-white text-[#17244B] border border-[#17244B] hover:bg-slate-50',
@@ -123,6 +124,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             {block.props.text}
           </button>
         );
+      }
       case 'vehicleCarousel':
         return (
           <div className="bg-slate-50 rounded-lg p-6">
@@ -153,7 +155,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
         );
       case 'auctionBanner':
       case 'inspectionBanner':
-      case 'financeBanner':
+      case 'financeBanner': {
         const bgColors = {
           auctionBanner: 'from-purple-600 to-purple-800',
           inspectionBanner: 'from-emerald-600 to-emerald-800',
@@ -168,6 +170,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             </button>
           </div>
         );
+      }
       case 'container':
         return (
           <div className="rounded-lg border-2 border-dashed border-slate-300 p-8 text-center text-slate-400">

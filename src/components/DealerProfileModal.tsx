@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Dealer, Vehicle, DealerReview } from '../types';
+import { Dealer, Vehicle, DealerReview, BodyStyle } from '../types';
 import { 
   Building2, 
   ShieldCheck, 
@@ -143,7 +143,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
   // Unique Body Styles in this Dealer's Stock
   const dealerBodyStyles = useMemo(() => {
-    const set = Array.from(new Set(dealerVehicles.map((v) => v.bodyStyle).filter((b): b is string => Boolean(b)))).sort();
+    const set = Array.from(new Set(dealerVehicles.map((v) => v.bodyStyle).filter((b): b is BodyStyle => Boolean(b)))).sort();
     return ['All', ...set];
   }, [dealerVehicles]);
 

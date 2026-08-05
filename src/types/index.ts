@@ -329,9 +329,12 @@ export interface Vehicle {
   inspectionReportId?: string;
   escrowEligible?: boolean;
   financeAvailable?: boolean;
+  inspectionBookingAvailable?: boolean;
   responseTime?: string;
   listingFreshness?: string;
   marketPriceAvg?: number;
+  isNewArrival?: boolean;
+  badge?: string;
   status: 'active' | 'sold' | 'pending' | 'draft';
   createdAt: string;
 }

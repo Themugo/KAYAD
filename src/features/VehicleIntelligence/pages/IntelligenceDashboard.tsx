@@ -389,7 +389,7 @@ export default function IntelligenceDashboard() {
               </div>
               <div className="rounded-xl p-4 shadow-md text-center" style={{ backgroundColor: KAYAD_COLORS.white }}>
                 <div className="w-12 h-12 mx-auto mb-2 rounded-full flex items-center justify-center" style={{ backgroundColor: `${KAYAD_COLORS.amber}20` }}>
-                  <Copy size={24} style={{ color: KAYAD_COLORS.amber }} />
+                  <Copy size={24} color={KAYAD_COLORS.amber} />
                 </div>
                 <h4 className="font-medium mb-1" style={{ color: KAYAD_COLORS.lightNavy }}>Duplicate Check</h4>
                 <p className="text-xs" style={{ color: KAYAD_COLORS.softBlue }}>Active monitoring</p>

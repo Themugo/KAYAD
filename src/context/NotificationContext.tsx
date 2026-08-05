@@ -10,6 +10,7 @@ interface Notification {
   type?: string;
   read: boolean;
   createdAt: string;
+  link?: string;
 }
 
 interface NotificationContextValue {

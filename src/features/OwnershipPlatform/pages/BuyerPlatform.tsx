@@ -24,7 +24,7 @@ import {
   // Actions
   PlusCircle, Settings2, ExternalLink, Filter, SortAsc, Grid, List,
   // Value & Resale
-  TrendingDown, BarChart3, Sparkles, ArrowUpRight, RefreshCw,
+  TrendingDown, BarChart3, Sparkles, ArrowUpRight, RefreshCw, Battery,
 } from 'lucide-react';
 
 // ============================================================
@@ -2310,7 +2310,7 @@ function AICopilotSection({ vehicles }: { vehicles: Vehicle[] }) {
               className="flex-1 px-4 py-2 rounded-lg border outline-none focus:ring-2"
               style={{ 
                 borderColor: KAYAD_THEME.slate[200],
-                focusRingColor: KAYAD_THEME.gold,
+                ['--tw-ring-color' as any]: KAYAD_THEME.gold,
               }}
             />
             <button 

@@ -78,7 +78,7 @@ export function getChannelStatus() {
     failed: data.failed || 0,
     queued: data.queued || 0,
     successRate: calculateSuccessRate(data.delivered, data.failed),
-    status: getChannelStatus(data.failed),
+    status: getChannelHealthStatus(data.failed),
   }));
 }
 
@@ -102,7 +102,7 @@ function calculateSuccessRate(delivered, failed) {
 /**
  * Get channel health status
  */
-function getChannelStatus(failed) {
+function getChannelHealthStatus(failed) {
   if (failed > 100) return 'critical';
   if (failed > 10) return 'degraded';
   return 'healthy';

@@ -222,7 +222,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       v.make.toLowerCase().includes(q) || 
                       v.model.toLowerCase().includes(q) ||
                       v.sellerName.toLowerCase().includes(q) ||
-                      v.dealerName?.toLowerCase().includes(q) ||
                       v.location.toLowerCase().includes(q) ||
                       v.county.toLowerCase().includes(q);
         if (!match) return false;
@@ -253,8 +252,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       if (selectedSellerType !== 'All') {
         if (selectedSellerType === 'Verified Dealer' && v.sellerType !== 'Verified Dealer') return false;
         if (selectedSellerType === 'Private Seller' && v.sellerType !== 'Private Seller') return false;
-        if (selectedSellerType === 'Bank Repossession' && v.sellerType !== 'Bank Repossession' && !v.title.toLowerCase().includes('bank')) return false;
-        if (selectedSellerType === 'Direct Port Import' && v.sellerType !== 'Direct Port Import' && !v.title.toLowerCase().includes('import')) return false;
+        if (selectedSellerType === 'Bank Repossession' && !v.title.toLowerCase().includes('bank')) return false;
+        if (selectedSellerType === 'Direct Port Import' && !v.title.toLowerCase().includes('import')) return false;
       }
 
       // 9. Numerical Ranges

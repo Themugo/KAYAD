@@ -34,6 +34,7 @@ interface AuthContextValue {
   register: (body: any) => Promise<any>;
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
+  updateProfile: (body: any) => Promise<any>;
 }
 
 const AuthCtx = createContext<AuthContextValue | null>(null);
@@ -92,6 +93,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setLoading(false);
   }, []);
 
+  const updateProfile = useCallback(async (body: any) => {
+    const data = await authAPI.updateProfile(body);
+    setUser(normalizeUser(data.user || data));
+    return data;
+  }, []);
+
   const isAdmin       = STAFF_ROLES.includes(user?.role as any);
   const isDealer      = user?.role === 'dealer';
   const isBroker      = user?.role === 'broker';
@@ -116,8 +123,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
-    login, register, logout, setUser,
-  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser]);
+    login, register, logout, setUser, updateProfile,
+  }), [user, loading, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser, updateProfile]);
 
   return (
     <AuthCtx.Provider value={value}>

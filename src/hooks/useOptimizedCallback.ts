@@ -6,20 +6,43 @@ export function useStableCallback<T extends (...args: any[]) => any>(
   deps: React.DependencyList
 ): T {
   const callbackRef = useRef(callback);
-  
+  const stableFnRef = useRef<T | undefined>(undefined);
+  const prevDepsRef = useRef<React.DependencyList | undefined>(undefined);
+
   // Update ref on each render
   useEffect(() => {
     callbackRef.current = callback;
   });
-  
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useCallback((...args: any[]) => callbackRef.current(...args), deps) as T;
+
+  const depsChanged =
+    !prevDepsRef.current ||
+    deps.length !== prevDepsRef.current.length ||
+    deps.some((dep, i) => dep !== prevDepsRef.current![i]);
+
+  if (depsChanged || !stableFnRef.current) {
+    stableFnRef.current = ((...args: any[]) => callbackRef.current(...args)) as T;
+    prevDepsRef.current = deps;
+  }
+
+  return stableFnRef.current;
 }
 
 // Memoize expensive computations
 export function useMemoized<T>(factory: () => T, deps: React.DependencyList): T {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(factory, deps);
+  const valueRef = useRef<T | undefined>(undefined);
+  const prevDepsRef = useRef<React.DependencyList | undefined>(undefined);
+
+  const depsChanged =
+    !prevDepsRef.current ||
+    deps.length !== prevDepsRef.current.length ||
+    deps.some((dep, i) => dep !== prevDepsRef.current![i]);
+
+  if (depsChanged || valueRef.current === undefined) {
+    valueRef.current = factory();
+    prevDepsRef.current = deps;
+  }
+
+  return valueRef.current;
 }
 
 // Create a stable reference that only updates when value changes

@@ -146,7 +146,6 @@ export function useFormValidation<T extends Record<string, any>>(
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const initialValuesRef = useRef(values);
 
   const values = useMemo(() => {
     const result: any = {};
@@ -155,6 +154,8 @@ export function useFormValidation<T extends Record<string, any>>(
     }
     return result as T;
   }, [fields]);
+
+  const initialValuesRef = useRef(values);
 
   const errors = useMemo(() => {
     const result: any = {};

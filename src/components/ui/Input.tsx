@@ -2,7 +2,7 @@
 // Stitch Design System Input
 // Aligns with Heritage Tech design language
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
@@ -11,11 +11,12 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  leftIcon?: React.ReactNode;
   fullWidth?: boolean;
 }
 
 // Stitch: 48px height for mobile touch, teal focus glow
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+export const Input = forwardRef<HTMLInputElement, InputProps>(
   (
     {
       label,
@@ -24,6 +25,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       size = 'md',
       icon,
       iconPosition = 'left',
+      leftIcon,
       fullWidth = true,
       className = '',
       style,
@@ -32,6 +34,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     // Stitch: Height based on size (48px mobile)
+    const effectiveIcon = icon ?? leftIcon;
+    const effectiveIconPosition = icon ? iconPosition : 'left';
     const inputHeights: Record<string, string> = {
       sm: '32px',
       md: '40px',
@@ -98,14 +102,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
     const inputWithIconStyle: React.CSSProperties = {
       ...inputBaseStyle,
-      paddingLeft: icon && iconPosition === 'left' ? 'calc(var(--space-4) + 24px)' : undefined,
-      paddingRight: icon && iconPosition === 'right' ? 'calc(var(--space-4) + 24px)' : undefined,
+      paddingLeft: effectiveIcon && effectiveIconPosition === 'left' ? 'calc(var(--space-4) + 24px)' : undefined,
+      paddingRight: effectiveIcon && effectiveIconPosition === 'right' ? 'calc(var(--space-4) + 24px)' : undefined,
     };
 
     const iconWrapperInternalStyle: React.CSSProperties = {
       position: 'absolute',
-      left: iconPosition === 'left' ? 'var(--space-3)' : undefined,
-      right: iconPosition === 'right' ? 'var(--space-3)' : undefined,
+      left: effectiveIconPosition === 'left' ? 'var(--space-3)' : undefined,
+      right: effectiveIconPosition === 'right' ? 'var(--space-3)' : undefined,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -132,10 +136,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <div style={containerStyle} className={className}>
         {label && <label style={labelStyle}>{label}</label>}
         <div style={iconWrapperStyle}>
-          {icon && <span style={iconWrapperInternalStyle}>{icon}</span>}
+          {effectiveIcon && <span style={iconWrapperInternalStyle}>{effectiveIcon}</span>}
           <input
             ref={ref}
-            style={icon ? inputWithIconStyle : inputBaseStyle}
+            style={effectiveIcon ? inputWithIconStyle : inputBaseStyle}
             onFocus={handleFocus}
             onBlur={handleBlur}
             {...props}

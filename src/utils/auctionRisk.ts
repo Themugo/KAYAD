@@ -644,8 +644,8 @@ export function detectInspectionRisks(ctx: RiskCheckContext): RiskItem[] {
   }
 
   // Expired Inspection Certificate
-  if (vehicle.inspectionDate) {
-    const inspectionDate = new Date(vehicle.inspectionDate);
+  if (vehicle.inspection?.inspectedAt) {
+    const inspectionDate = new Date(vehicle.inspection.inspectedAt);
     const monthsSinceInspection = (Date.now() - inspectionDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
     
     if (monthsSinceInspection > 3) {

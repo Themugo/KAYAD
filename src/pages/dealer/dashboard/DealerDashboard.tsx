@@ -7,9 +7,9 @@ import {
   PieChart, Activity, Users as TeamIcon, ShoppingBag, Bell,
   Settings, FileText, Send, RefreshCw, ArrowUpRight, ArrowDownRight,
   UserPlus, Shield, Award, CreditCard, CalendarCheck, ClipboardCheck,
-  Gavel, X, Loader2, TrendingUp,
+  Gavel, X, Loader2,
 } from 'lucide-react';
-import * as dealerApi from '../../services/dealerPlatformApi';
+import * as dealerApi from '../../../services/dealerPlatformApi';
 
 // ============================================================
 // DESIGN TOKENS
@@ -54,7 +54,7 @@ const StatCard = ({ title, value, change, icon: Icon, color = colors.navy }) => 
 );
 
 /** Lead Pipeline Stage */
-const PipelineStage = ({ stage, count, value, color }) => (
+const PipelineStage = ({ stage, count, value, color }: { stage: string; count: number; value?: number; color: string }) => (
   <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-100">
     <div className="flex items-center gap-3">
       <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: color }} />
@@ -137,7 +137,7 @@ const AICopilot = () => {
     'Generate inventory report',
   ];
 
-  const handleSend = async (q) => {
+  const handleSend = async (q?: string) => {
     const query = q || question;
     if (!query.trim()) return;
     
@@ -312,7 +312,7 @@ export default function DealerDashboard() {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventory', icon: Car },
     { id: 'leads', label: 'Leads', icon: Users, badge: dashboard?.overview?.leads?.new },
-    { id: 'pipeline', label: 'Pipeline', icon: TrendingRight },
+    { id: 'pipeline', label: 'Pipeline', icon: ArrowRight },
     { id: 'customers', label: 'Customers', icon: ShoppingBag },
     { id: 'marketing', label: 'Marketing', icon: Zap },
     { id: 'auctions', label: 'Auctions', icon: Gavel },

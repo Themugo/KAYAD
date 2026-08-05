@@ -87,6 +87,7 @@ interface Vehicle {
 const MOCK_VEHICLE: Vehicle = {
   _id: '1',
   title: 'Toyota Land Cruiser 300 GX-R',
+  make: 'Toyota',
   price: 3200000,
   originalPrice: 3450000,
   year: 2023,

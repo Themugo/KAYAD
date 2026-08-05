@@ -17,11 +17,6 @@ export const supabase: SupabaseClient = createClient(safeUrl, safeKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    cookieOptions: {
-      secure: import.meta.env.PROD,
-      sameSite: 'strict',
-      maxAge: 60 * 60 * 1000,
-    },
   },
   realtime: {
     params: { eventsPerSecond: 10 },
