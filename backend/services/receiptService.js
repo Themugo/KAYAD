@@ -1,6 +1,7 @@
 import { sendRawEmail } from "./email.service.js";
 import { sendSMS } from "../utils/sms.js";
-import { logInfo } from "../utils/logger.js";
+import { logInfo, logError } from "../utils/logger.js";
+import { withRetry } from "../utils/retry.js";
 import { create } from "../db/index.js";
 
 const sendWhatsApp = async (to, message) => {
@@ -8,14 +9,18 @@ const sendWhatsApp = async (to, message) => {
     try {
       const { default: twilio } = await import("twilio");
       const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-      await client.messages.create({
-        from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER || "+14155238886"}`,
-        to: `whatsapp:${to}`,
-        body: message,
-      });
+      await withRetry(
+        () =>
+          client.messages.create({
+            from: `whatsapp:${process.env.TWILIO_WHATSAPP_NUMBER || "+14155238886"}`,
+            to: `whatsapp:${to}`,
+            body: message,
+          }),
+        { timeoutMs: 15000 },
+      );
       return;
     } catch (err) {
-      console.error("WhatsApp error:", err.message);
+      logError("WhatsApp receipt send failed", err, { to });
     }
   }
   logInfo(`[WA fallback] Receipt notification to ${to}`);

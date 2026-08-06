@@ -8,6 +8,7 @@ import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 import { triggerAlert } from "../config/alerting.js";
 import { findOne } from "../db/index.js";
+import { getMpesaAccessToken } from "./mpesaAuth.service.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -106,34 +107,9 @@ const mpesaConfig = createServiceConfig("mpesa", {
   },
 });
 
-const getAccessToken = async (baseUrl, consumerKey, consumerSecret) => {
-  const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64");
-  const startTime = Date.now();
-
-  try {
-    const res = await withRetry(
-      () =>
-        axios.get(`${baseUrl}/oauth/v1/generate?grant_type=client_credentials`, {
-          headers: { Authorization: `Basic ${auth}` },
-          timeout: 15000,
-        }),
-      mpesaConfig,
-    );
-
-    const duration = Date.now() - startTime;
-    recordMetric("mpesa_token_fetch_duration", duration);
-    incrementCounter("mpesa_token_fetch_success");
-
-    return res.data.access_token;
-  } catch (err) {
-    const duration = Date.now() - startTime;
-    recordMetric("mpesa_token_fetch_duration", duration, { status: "error" });
-    incrementCounter("mpesa_token_fetch_failure", { error_type: err.code || "unknown" });
-
-    logError("M-Pesa token fetch failed", err, { baseUrl });
-    throw err;
-  }
-};
+// Token fetching (with caching) now lives in mpesaAuth.service.js, shared
+// with the B2C disbursement flow - see that file for why.
+const getAccessToken = getMpesaAccessToken;
 
 const formatPhone = (phone) => {
   if (phone.startsWith("0")) return "254" + phone.slice(1);

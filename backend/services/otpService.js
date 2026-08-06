@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import axios from "axios";
-import { logInfo } from "../utils/logger.js";
+import { logInfo, logError } from "../utils/logger.js";
+import { withRetry } from "../utils/retry.js";
 import { update } from "../db/index.js";
 
 const AT_API_KEY = process.env.AT_API_KEY;
@@ -9,34 +10,25 @@ const FROM_EMAIL = process.env.EMAIL_FROM || "noreply@kayad.space";
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(String(otp)).digest("hex");
 
-const retry = async (fn, retries = 2, delay = 1000) => {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      if (attempt === retries) throw err;
-      await new Promise((r) => setTimeout(r, delay * attempt));
-    }
-  }
-};
-
 const sendSMS = async (to, message) => {
   if (AT_API_KEY) {
     try {
-      await retry(() =>
-        axios.post(
-          "https://api.africastalking.com/version1/messaging",
-          {
-            username: AT_USERNAME,
-            to,
-            message,
-          },
-          { headers: { ApiKey: AT_API_KEY, Accept: "application/json" } },
-        ),
+      await withRetry(
+        () =>
+          axios.post(
+            "https://api.africastalking.com/version1/messaging",
+            {
+              username: AT_USERNAME,
+              to,
+              message,
+            },
+            { headers: { ApiKey: AT_API_KEY, Accept: "application/json" }, timeout: 15000 },
+          ),
+        { serviceName: "sms" },
       );
       return;
     } catch (err) {
-      console.error("SMS error:", err.message);
+      logError("OTP SMS send failed", err, { to: to.slice(0, -4) + "****" });
     }
   }
   logInfo(`OTP sent via SMS to ${to.slice(0, -4)}****`);
@@ -47,10 +39,10 @@ const sendEmail = async (to, subject, text) => {
     try {
       const { default: sgMail } = await import("@sendgrid/mail");
       sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      await retry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }));
+      await withRetry(() => sgMail.send({ to, from: FROM_EMAIL, subject, text }), { serviceName: "email" });
       return;
     } catch (err) {
-      console.error("Email error:", err.message);
+      logError("OTP email send failed", err, { to });
     }
   }
   logInfo(`OTP email to ${to}: ${subject}`);
