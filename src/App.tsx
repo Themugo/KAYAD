@@ -23,9 +23,9 @@ const PrivateSellerDashboardView = lazy(() => import('./features/PrivateSellerDa
 const ChatView = lazy(() => import('./features/ChatView'));
 const AdminView = lazy(() => import('./features/AdminView'));
 const SupportView = lazy(() => import('./features/SupportView'));
-const LiveAuctionBroadcastPage = lazy(() => import('./pages/LiveAuctionBroadcastPage'));
-const AuctionDiscoveryNetwork = lazy(() => import('./pages/AuctionDiscoveryNetwork'));
-const KAYADLive = lazy(() => import('./pages/KAYADLive'));
+const LiveAuctionBroadcastPage = lazy(() => import('./features/LiveAuctionBroadcastPage'));
+const AuctionDiscoveryNetwork = lazy(() => import('./features/AuctionDiscoveryNetwork'));
+const KAYADLive = lazy(() => import('./features/KAYADLive'));
 const BuyerPlatform = lazy(() => import('./features/OwnershipPlatform').then(m => ({ default: m.BuyerPlatform })));
 const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatform').then(m => ({ default: m.PrivateSellerPlatform })));
 const FinanceMarketplace = lazy(() => import('./features/FinancePlatform').then(m => ({ default: m.FinanceMarketplace })));

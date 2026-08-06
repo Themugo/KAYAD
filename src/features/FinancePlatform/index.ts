@@ -2,4 +2,4 @@
 // KAYAD FINANCE MARKETPLACE - INDEX
 // ============================================================
 
-export { default as FinanceMarketplace } from './pages/FinanceMarketplace';
+export { default as FinanceMarketplace } from './components/FinanceMarketplace';

@@ -1,0 +1,1510 @@
+import React, { useState, useMemo } from 'react';
+import { EscrowTransaction, EscrowLogEntry, EscrowDispute } from '../../../types';
+import { 
+  Shield, 
+  Lock, 
+  CheckCircle2, 
+  Landmark, 
+  Clock, 
+  ArrowRight, 
+  Search, 
+  ShieldCheck, 
+  FileCheck, 
+  UserCheck, 
+  Building2,
+  Sparkles,
+  ChevronRight,
+  Info,
+  PlusCircle,
+  AlertTriangle,
+  History,
+  TrendingUp,
+  DollarSign,
+  Car,
+  FileText,
+  MessageSquare,
+  RefreshCw,
+  AlertCircle,
+  HelpCircle,
+  Eye,
+  Check,
+  User,
+  ShieldAlert,
+  Download,
+  Upload,
+  PhoneCall
+} from 'lucide-react';
+import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../../../components/ui';
+
+interface EscrowViewProps {
+  deals: EscrowTransaction[];
+}
+
+export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) => {
+  const [dealsList, setDealsList] = useState<EscrowTransaction[]>(initialDeals);
+  const [dealSearch, setDealSearch] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>('journey');
+  const [selectedDeal, setSelectedDeal] = useState<EscrowTransaction>(initialDeals[0]);
+  
+  // Perspective Role Switcher: Buyer, Seller, Administrator
+  const [userRole, setUserRole] = useState<'Buyer' | 'Seller' | 'Administrator'>('Buyer');
+
+  // Sub-modals for Inspection & Dispute
+  const [showInspectionModal, setShowInspectionModal] = useState<boolean>(false);
+  const [showDisputeModal, setShowDisputeModal] = useState<boolean>(false);
+  const [disputeReasonInput, setDisputeReasonInput] = useState<string>('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // New Escrow Form State
+  const [newSellerType, setNewSellerType] = useState<'Private Seller' | 'Verified Dealer'>('Private Seller');
+  const [newVehicleTitle, setNewVehicleTitle] = useState<string>('');
+  const [newAmount, setNewAmount] = useState<string>('');
+  const [newBuyerName, setNewBuyerName] = useState<string>('');
+  const [newSellerName, setNewSellerName] = useState<string>('');
+  const [formSuccess, setFormSuccess] = useState<boolean>(false);
+
+  // Auto-clear Toast
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // 6-Step Visual Escrow Purchase Timeline Protocol Definition
+  const escrowTimelineSteps = [
+    { 
+      step: 1, 
+      id: 'reserved', 
+      title: 'Vehicle Reserved', 
+      desc: 'Price agreed & offer locked by both parties.',
+      controller: 'Seller & Buyer Agreement'
+    },
+    { 
+      step: 2, 
+      id: 'deposit', 
+      title: 'Buyer Deposits Funds', 
+      desc: 'Funds locked in neutral NCBA Custodian Vault.',
+      controller: 'Awaiting Vault Confirmation'
+    },
+    { 
+      step: 3, 
+      id: 'inspection', 
+      title: 'Inspection Completed', 
+      desc: '150-Point technical audit & VIN verification.',
+      controller: 'Certified Inspector & Kayad'
+    },
+    { 
+      step: 4, 
+      id: 'approval', 
+      title: 'Buyer Approves Vehicle', 
+      desc: 'Buyer signs off on physical condition.',
+      controller: 'Buyer Release Sign-off'
+    },
+    { 
+      step: 5, 
+      id: 'transfer', 
+      title: 'Logbook Transfer', 
+      desc: 'NTSA TIMS electronic title transfer verified.',
+      controller: 'NTSA TIMS Portal'
+    },
+    { 
+      step: 6, 
+      id: 'released', 
+      title: 'Seller Paid', 
+      desc: 'Bank vault releases payout to seller.',
+      controller: 'Bank Custodian Disbursed'
+    }
+  ];
+
+  const filteredDeals = useMemo(() => {
+    if (!dealSearch) return dealsList;
+    const q = dealSearch.toLowerCase();
+    return dealsList.filter(
+      (d) =>
+        d.id.toLowerCase().includes(q) ||
+        d.vehicleTitle.toLowerCase().includes(q) ||
+        d.buyerName.toLowerCase().includes(q) ||
+        d.sellerName.toLowerCase().includes(q)
+    );
+  }, [dealsList, dealSearch]);
+
+  const totalVaultValue = dealsList.reduce((sum, d) => sum + d.amount, 0);
+
+  // Helper function to derive expected next action and current fund controller
+  const getWorkflowContext = (deal: EscrowTransaction) => {
+    if (deal.status === 'Dispute Under Review' || deal.dispute) {
+      return {
+        singleStatusText: 'Dispute Opened — Custodian Funds Frozen in Vault',
+        badgeVariant: 'warning' as const,
+        fundController: 'KAYAD Legal & NCBA Trustee Custody (Frozen)',
+        nextActionRole: 'Administrator / Legal Compliance',
+        nextActionText: 'Reviewing evidence & mechanic logs to resolve dispute.'
+      };
+    }
+
+    switch (deal.step) {
+      case 1:
+        return {
+          singleStatusText: 'Awaiting Buyer Vault Deposit',
+          badgeVariant: 'escrow' as const,
+          fundController: 'Buyer (Awaiting Vault Transfer)',
+          nextActionRole: 'Buyer',
+          nextActionText: 'Deposit purchase funds into NCBA Custodian Bank Vault.'
+        };
+      case 2:
+        return {
+          singleStatusText: 'Vault Deposit Received — Awaiting Inspection',
+          badgeVariant: 'escrow' as const,
+          fundController: 'NCBA Trustee Custodian Vault #NCBA-ESC-88201',
+          nextActionRole: 'Certified Inspector',
+          nextActionText: 'Dispatch mechanic to conduct 150-point technical audit.'
+        };
+      case 3:
+        return {
+          singleStatusText: '150-Point Technical Inspection Completed',
+          badgeVariant: 'verified' as const,
+          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          nextActionRole: 'Buyer',
+          nextActionText: 'Review 150-Point Audit Report and approve vehicle.'
+        };
+      case 4:
+        return {
+          singleStatusText: 'Awaiting Buyer Approval',
+          badgeVariant: 'escrow' as const,
+          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          nextActionRole: 'Buyer',
+          nextActionText: 'Sign electronic approval certificate to initiate title transfer.'
+        };
+      case 5:
+        return {
+          singleStatusText: 'Ownership Transfer In Progress (NTSA TIMS)',
+          badgeVariant: 'verified' as const,
+          fundController: 'NCBA Trustee Custodian Vault (Neutral Hold)',
+          nextActionRole: 'Seller & NTSA TIMS',
+          nextActionText: 'Confirm NTSA TIMS electronic logbook assignment.'
+        };
+      case 6:
+      default:
+        return {
+          singleStatusText: 'Transaction Completed & Seller Disbursed',
+          badgeVariant: 'success' as const,
+          fundController: 'Seller Account (Funds Released)',
+          nextActionRole: 'None',
+          nextActionText: 'Transaction settled successfully. Logbook transferred.'
+        };
+    }
+  };
+
+  // Workflow Handlers
+  const handleCreateEscrow = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newVehicleTitle || !newAmount || !newBuyerName || !newSellerName) return;
+
+    const newDeal: EscrowTransaction = {
+      id: `ESC-2026-${Math.floor(1000 + Math.random() * 9000)}-KE`,
+      vehicleId: `v-${Date.now()}`,
+      vehicleTitle: newVehicleTitle,
+      vehicleImage: 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
+      amount: Number(newAmount),
+      vehiclePrice: Number(newAmount),
+      buyerName: newBuyerName,
+      buyerPhone: '+254 700 *** ***',
+      sellerName: newSellerName,
+      sellerPhone: '+254 711 *** ***',
+      sellerType: newSellerType,
+      status: 'Awaiting Buyer Deposit',
+      step: 2,
+      updatedAt: 'Just now',
+      depositDate: 'Pending Deposit',
+      paymentMethod: 'NCBA Custodian Bank Wire / M-Pesa',
+      bankReference: 'NCBA-ESC-NEW',
+      vaultHolder: 'NCBA Trustee Custodian Vault',
+      whoControlsFunds: 'Awaiting Deposit',
+      inspectionStatus: 'Booked',
+      transferStatus: 'Verification',
+      timelineLogs: [
+        {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toLocaleString(),
+          title: 'Escrow Agreement Initiated',
+          description: `Custom escrow created for ${newVehicleTitle} at Ksh ${Number(newAmount).toLocaleString()}.`,
+          actor: 'Buyer',
+          type: 'info'
+        }
+      ]
+    };
+
+    setDealsList([newDeal, ...dealsList]);
+    setSelectedDeal(newDeal);
+    setFormSuccess(true);
+    triggerToast('New Escrow Purchase Journey initiated successfully!');
+
+    setTimeout(() => {
+      setFormSuccess(false);
+      setActiveTab('journey');
+      setNewVehicleTitle('');
+      setNewAmount('');
+      setNewBuyerName('');
+      setNewSellerName('');
+    }, 1500);
+  };
+
+  // Advance deal workflow step
+  const handleAdvanceStep = (dealId: string) => {
+    setDealsList(prev => prev.map(d => {
+      if (d.id === dealId) {
+        const nextStep = Math.min(d.step + 1, 6);
+        let nextStatus = d.status;
+        let transferStatus = d.transferStatus;
+        let inspectionStatus = d.inspectionStatus;
+
+        if (nextStep === 2) {
+          nextStatus = 'Deposit Deposited';
+        } else if (nextStep === 3) {
+          nextStatus = 'Inspection Completed';
+          inspectionStatus = 'Report Available';
+        } else if (nextStep === 4) {
+          nextStatus = 'Awaiting Buyer Approval';
+        } else if (nextStep === 5) {
+          nextStatus = 'Ownership Transfer In Progress';
+          transferStatus = 'NTSA Processing';
+        } else if (nextStep === 6) {
+          nextStatus = 'Transaction Completed';
+          transferStatus = 'Completed';
+        }
+
+        const newLog: EscrowLogEntry = {
+          id: `log-${Date.now()}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          title: `Advanced to Step ${nextStep}: ${escrowTimelineSteps[nextStep - 1].title}`,
+          description: `Workflow milestone completed under ${userRole} role control.`,
+          actor: userRole === 'Buyer' ? 'Buyer' : userRole === 'Seller' ? 'Seller' : 'Bank Custodian',
+          type: 'success'
+        };
+
+        const updated: EscrowTransaction = { 
+          ...d, 
+          step: nextStep, 
+          status: nextStatus,
+          transferStatus,
+          inspectionStatus,
+          updatedAt: 'Just now',
+          timelineLogs: [newLog, ...(d.timelineLogs || [])]
+        };
+
+        if (selectedDeal.id === dealId) setSelectedDeal(updated);
+        triggerToast(`Advanced deal #${d.id} to Step ${nextStep}: ${escrowTimelineSteps[nextStep - 1].title}`);
+        return updated;
+      }
+      return d;
+    }));
+  };
+
+  // Open Dispute Handler
+  const handleOpenDisputeSubmit = () => {
+    if (!disputeReasonInput.trim()) return;
+
+    const newDispute: EscrowDispute = {
+      id: `DSP-2026-${Math.floor(100 + Math.random() * 900)}`,
+      openedAt: new Date().toLocaleString(),
+      openedBy: userRole === 'Seller' ? 'Seller' : 'Buyer',
+      reason: disputeReasonInput,
+      status: 'Under Review',
+      evidence: [
+        { title: 'Buyer Dispute Statement', fileType: 'PDF Document', uploadedAt: new Date().toLocaleString() },
+        { title: '150-Point Technical Report Snapshot', fileType: 'PNG Image', uploadedAt: new Date().toLocaleString() }
+      ],
+      updates: [
+        {
+          timestamp: new Date().toLocaleString(),
+          author: `${selectedDeal.buyerName} (${userRole})`,
+          note: disputeReasonInput
+        },
+        {
+          timestamp: new Date().toLocaleString(),
+          author: 'KAYAD Legal & NCBA Trustee',
+          note: 'Transaction paused. Custodian funds frozen in NCBA Vault #NCBA-ESC-FREEZE. Case auditor assigned.'
+        }
+      ]
+    };
+
+    const newLog: EscrowLogEntry = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      title: 'Dispute Raised by Buyer',
+      description: disputeReasonInput,
+      actor: 'Buyer',
+      type: 'dispute'
+    };
+
+    const updatedDeal: EscrowTransaction = {
+      ...selectedDeal,
+      status: 'Dispute Under Review',
+      dispute: newDispute,
+      whoControlsFunds: 'KAYAD Legal & NCBA Trustee (Frozen in Vault)',
+      updatedAt: 'Just now',
+      timelineLogs: [newLog, ...(selectedDeal.timelineLogs || [])]
+    };
+
+    setSelectedDeal(updatedDeal);
+    setDealsList(prev => prev.map(d => d.id === updatedDeal.id ? updatedDeal : d));
+    setShowDisputeModal(false);
+    setDisputeReasonInput('');
+    triggerToast('Dispute opened. Funds frozen in custodian vault pending legal audit.');
+  };
+
+  const currentContext = getWorkflowContext(selectedDeal);
+
+  return (
+    <div className="space-y-6 bg-[#FDFBF7] min-h-screen pb-12">
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="fixed top-20 right-6 z-50 bg-[#1E3063] text-white px-4 py-3 rounded-2xl shadow-xl border border-amber-400/40 flex items-center gap-2 animate-bounce">
+          <Sparkles className="w-5 h-5 text-amber-400 shrink-0" />
+          <span className="text-xs font-bold">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Standalone Header Banner */}
+      <PageHeader
+        badgeIcon={<Lock className="w-4 h-4 text-amber-400" />}
+        badgeText="Bank-Backed Custodian Portal"
+        title="KAYAD Escrow Purchase Journey & Financial Settlement"
+        description="Eliminating buyer & seller risk through visual package-tracking escrow clarity, 150-point technical mechanic audits, and direct NTSA TIMS logbook title clearance."
+        rightElement={
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant={activeTab === 'journey' ? 'primary' : 'outline'}
+              size="md"
+              onClick={() => setActiveTab('journey')}
+              className="bg-[#1E3063] text-white font-bold"
+            >
+              <Lock className="w-4 h-4 text-amber-400" />
+              <span>Escrow Purchase Journey</span>
+            </Button>
+            <Button
+              variant={activeTab === 'deals' ? 'primary' : 'outline'}
+              size="md"
+              onClick={() => setActiveTab('deals')}
+              className="font-bold text-slate-700"
+            >
+              <FileText className="w-4 h-4 text-emerald-600" />
+              <span>All Protected Deals ({dealsList.length})</span>
+            </Button>
+            <Button
+              variant={activeTab === 'create' ? 'primary' : 'outline'}
+              size="md"
+              onClick={() => setActiveTab('create')}
+              className="font-bold text-slate-700"
+            >
+              <PlusCircle className="w-4 h-4 text-[#C85A32]" />
+              <span>Initiate Vault Agreement</span>
+            </Button>
+          </div>
+        }
+      />
+
+      {/* KPI Stats Bar */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatWidget
+          label="Total Locked Vault Volume"
+          value={`Ksh ${totalVaultValue.toLocaleString()}`}
+          trend="NCBA & SCB Custody"
+          trendType="positive"
+          icon={<Landmark className="w-4 h-4 text-emerald-600" />}
+        />
+
+        <StatWidget
+          label="Active Protected Transactions"
+          value={dealsList.length}
+          trend="100% In Compliance"
+          trendType="positive"
+          icon={<Lock className="w-4 h-4 text-amber-500" />}
+        />
+
+        <StatWidget
+          label="Avg Settlement Time"
+          value="< 36 Hours"
+          trend="Instant Bank Transfer"
+          trendType="neutral"
+          icon={<Clock className="w-4 h-4 text-blue-500" />}
+        />
+
+        <StatWidget
+          label="NTSA TIMS Title Clearance"
+          value="100% Authentic"
+          trend="Direct TIMS Portal Match"
+          trendType="positive"
+          icon={<FileCheck className="w-4 h-4 text-emerald-600" />}
+        />
+      </div>
+
+      {/* PERSPECTIVE ROLE SWITCHER BAR */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-slate-700 font-bold">
+          <UserCheck className="w-4 h-4 text-[#1E3063]" />
+          <span>Active Role Perspective:</span>
+          <span className="text-[11px] text-slate-500 font-normal hidden md:inline">
+            (Switch roles to experience contextual workflow action buttons)
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-x-auto">
+          <button
+            onClick={() => setUserRole('Buyer')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              userRole === 'Buyer'
+                ? 'bg-[#1E3063] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <User className="w-3.5 h-3.5 text-amber-300" /> Buyer View
+          </button>
+
+          <button
+            onClick={() => setUserRole('Seller')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              userRole === 'Seller'
+                ? 'bg-[#1E3063] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <Building2 className="w-3.5 h-3.5 text-emerald-400" /> Seller View
+          </button>
+
+          <button
+            onClick={() => setUserRole('Administrator')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-1.5 ${
+              userRole === 'Administrator'
+                ? 'bg-[#C85A32] text-white shadow-xs'
+                : 'text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-200" /> Administrator / Custodian
+          </button>
+        </div>
+      </div>
+
+      {/* TAB 1: ESCROW PURCHASE JOURNEY DASHBOARD */}
+      {activeTab === 'journey' && selectedDeal && (
+        <div className="space-y-6">
+          {/* DEAL SELECTOR ROW */}
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#1E3063] shrink-0">
+              <Car className="w-4 h-4 text-[#C85A32]" />
+              <span>Select Active Deal:</span>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+              {dealsList.map((d) => (
+                <button
+                  key={d.id}
+                  onClick={() => setSelectedDeal(d)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold shrink-0 border transition-all flex items-center gap-2 ${
+                    selectedDeal.id === d.id
+                      ? 'bg-[#1E3063] text-white border-[#1E3063] shadow-xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <span className="font-mono text-[11px] opacity-80">{d.id}</span>
+                  <span className="truncate max-w-[140px]">{d.vehicleTitle}</span>
+                  {d.dispute && (
+                    <span className="w-2 h-2 rounded-full bg-[#E5484D] animate-ping" title="Dispute Open" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 1. SINGLE CLEAR TRANSACTION STATUS BANNER */}
+          <Card className="p-5 bg-gradient-to-r from-[#1E3063] via-[#17244B] to-slate-900 text-white border border-slate-700 shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Badge variant={currentContext.badgeVariant} size="md">
+                  <Lock className="w-3.5 h-3.5 text-amber-300" /> Ref #{selectedDeal.id}
+                </Badge>
+                <span className="text-xs text-slate-300 font-mono font-bold">
+                  Updated {selectedDeal.updatedAt}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-300 font-medium">Vault Custodian:</span>
+                <span className="text-xs text-amber-300 font-extrabold bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20">
+                  {selectedDeal.vaultHolder || 'NCBA Custodian Bank'}
+                </span>
+              </div>
+            </div>
+
+            {/* Single Clear Status Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+              <div>
+                <p className="text-[11px] uppercase tracking-wider font-extrabold text-amber-400 font-display">
+                  Current Transaction Status
+                </p>
+                <h2 className="text-xl sm:text-2xl font-black text-white font-display mt-0.5 flex items-center gap-2">
+                  {selectedDeal.dispute ? (
+                    <AlertTriangle className="w-6 h-6 text-[#E5484D] shrink-0" />
+                  ) : (
+                    <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
+                  )}
+                  {currentContext.singleStatusText}
+                </h2>
+              </div>
+
+              <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl border border-white/15 text-xs text-slate-200 space-y-0.5 shrink-0">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-300">Who Controls Funds Now?</p>
+                <p className="font-extrabold text-amber-300 flex items-center gap-1.5">
+                  <Landmark className="w-4 h-4 text-emerald-400" />
+                  {selectedDeal.whoControlsFunds || currentContext.fundController}
+                </p>
+              </div>
+            </div>
+
+            {/* EXPECTED NEXT ACTION BANNER */}
+            <div className={`p-3.5 rounded-xl border flex items-start sm:items-center justify-between gap-3 text-xs ${
+              selectedDeal.dispute 
+                ? 'bg-[#E5484D]/15 border-[#E5484D]/40 text-rose-100'
+                : 'bg-emerald-950/40 border-emerald-400/30 text-emerald-100'
+            }`}>
+              <div className="flex items-start gap-2.5">
+                <Info className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-extrabold text-white text-xs">
+                    Expected Next Action: <span className="text-amber-300">[{currentContext.nextActionRole}]</span>
+                  </p>
+                  <p className="text-[11px] text-slate-200 mt-0.5 leading-normal">
+                    {currentContext.nextActionText}
+                  </p>
+                </div>
+              </div>
+
+              <Badge variant="neutral" size="sm" className="bg-white/15 text-white shrink-0 font-bold">
+                Step {selectedDeal.step} of 6
+              </Badge>
+            </div>
+          </Card>
+
+          {/* 2. VISUAL ESCROW TIMELINE STEPPER */}
+          <Card className="p-6 bg-white border border-slate-200 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                <ShieldCheck className="w-4.5 h-4.5 text-emerald-600" />
+                Package-Tracking Visual Escrow Progress Timeline
+              </h3>
+              <span className="text-xs text-slate-500 font-bold">
+                Progress: Step {selectedDeal.step} of 6 Completed
+              </span>
+            </div>
+
+            {/* Stepper Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-2">
+              {escrowTimelineSteps.map((st) => {
+                const isDone = selectedDeal.step > st.step || selectedDeal.step === 6;
+                const isCurrent = selectedDeal.step === st.step && selectedDeal.step < 6;
+                return (
+                  <div
+                    key={st.step}
+                    className={`p-3.5 rounded-2xl border text-xs relative flex flex-col justify-between transition-all ${
+                      isDone
+                        ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 shadow-2xs'
+                        : isCurrent
+                        ? 'bg-amber-50 border-amber-300 text-amber-950 ring-2 ring-amber-400/40 shadow-sm'
+                        : 'bg-slate-50 border-slate-200 text-slate-400 opacity-75'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className={`w-6 h-6 rounded-full font-black text-xs flex items-center justify-center font-display ${
+                          isDone
+                            ? 'bg-emerald-600 text-white'
+                            : isCurrent
+                            ? 'bg-[#1E3063] text-amber-300'
+                            : 'bg-slate-200 text-slate-500'
+                        }`}>
+                          {isDone ? <Check className="w-3.5 h-3.5" /> : st.step}
+                        </span>
+
+                        {isCurrent && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" title="Active Step" />
+                        )}
+                      </div>
+
+                      <p className={`font-extrabold text-xs font-display ${
+                        isDone ? 'text-emerald-950' : isCurrent ? 'text-[#1E3063]' : 'text-slate-600'
+                      }`}>
+                        {st.title}
+                      </p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">
+                        {st.desc}
+                      </p>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-slate-200/60 text-[9px] font-bold text-slate-500">
+                      Controller: {st.controller}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+
+          {/* 3. DUAL COLUMN DASHBOARD GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* LEFT COLUMN: VEHICLE & PAYMENT SUMMARY */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* VEHICLE SUMMARY CARD */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                    <Car className="w-4.5 h-4.5 text-[#C85A32]" />
+                    Protected Vehicle Item Summary
+                  </h3>
+                  <Badge variant="neutral" size="sm" className="font-mono">
+                    VIN: {selectedDeal.vin || 'KDJ150-0098271'}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start gap-4">
+                  <div className="w-full sm:w-44 h-32 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0 relative">
+                    <img 
+                      src={selectedDeal.vehicleImage || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800'} 
+                      alt={selectedDeal.vehicleTitle}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-1 right-1 bg-black/70 text-white text-[10px] px-2 py-0.5 rounded font-mono font-bold">
+                      {selectedDeal.plateNumber || 'KDF 892X'}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 flex-1 text-xs">
+                    <div>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase">Vehicle Title</span>
+                      <h4 className="text-lg font-black text-[#1E3063] font-display">{selectedDeal.vehicleTitle}</h4>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">Agreed Sale Price</p>
+                        <p className="text-base font-black text-[#1E3063]">
+                          Ksh {selectedDeal.amount.toLocaleString()}
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">Seller Verification</p>
+                        <p className="font-extrabold text-emerald-950 flex items-center gap-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                          {selectedDeal.sellerName}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium pt-1">
+                      <span>Buyer: <strong>{selectedDeal.buyerName}</strong></span>
+                      <span>Seller Type: <strong>{selectedDeal.sellerType || 'Verified Seller'}</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* PAYMENT & CUSTODY SECTION */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                    <Landmark className="w-4.5 h-4.5 text-emerald-600" />
+                    Custodial Payment Details & Vault Balance
+                  </h3>
+                  <Badge variant="escrow" size="sm">
+                    Protected by NCBA / SCB Trustee
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Deposit Date & Time</p>
+                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.depositDate || '2026-07-28 14:30'}</p>
+                    <p className="text-[10px] text-slate-500">Timestamped Audit Record</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Payment Channel</p>
+                    <p className="font-extrabold text-[#1E3063]">{selectedDeal.paymentMethod || 'NCBA Bank Wire'}</p>
+                    <p className="text-[10px] text-slate-500">Ref: {selectedDeal.bankReference || 'NCBA-ESC-88201'}</p>
+                  </div>
+
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">Locked Vault Balance</p>
+                    <p className="font-black text-emerald-700 text-sm">Ksh {selectedDeal.amount.toLocaleString()}</p>
+                    <p className="text-[10px] text-emerald-800 font-bold">100% Fully Funded</p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-slate-700 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Financial Safety Guarantee: Funds are released ONLY upon explicit buyer sign-off and NTSA TIMS logbook transfer.</span>
+                  </div>
+                  <Badge variant="neutral" size="sm" className="shrink-0 font-bold">
+                    Zero Risk Payout
+                  </Badge>
+                </div>
+              </Card>
+
+              {/* INSPECTION INTEGRATION CARD */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <FileCheck className="w-4.5 h-4.5 text-blue-600" />
+                    <h3 className="text-sm font-extrabold text-[#1E3063] font-display">
+                      150-Point Technical Inspection Status
+                    </h3>
+                  </div>
+
+                  <Badge 
+                    variant={
+                      selectedDeal.inspectionStatus === 'Report Available' || selectedDeal.inspectionStatus === 'Completed'
+                        ? 'success'
+                        : selectedDeal.inspectionStatus === 'Reinspection Required'
+                        ? 'warning'
+                        : 'neutral'
+                    }
+                    size="sm"
+                  >
+                    {selectedDeal.inspectionStatus || 'Booked'}
+                  </Badge>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                  <div className="space-y-1">
+                    <p className="font-extrabold text-[#1E3063] flex items-center gap-2">
+                      <span>Inspection Report #{selectedDeal.inspectionReportId || 'INS-2026-8801'}</span>
+                      {selectedDeal.inspectionScore && (
+                        <span className="bg-emerald-100 text-emerald-900 px-2 py-0.5 rounded-full text-[10px] font-black">
+                          Score: {selectedDeal.inspectionScore}/100
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-slate-600 text-[11px]">
+                      Audited by KAYAD Certified Master Mechanic Eng. Patrick Kamau (NTSA Verified).
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => setShowInspectionModal(true)}
+                    className="font-bold text-[#1E3063] border-[#1E3063] hover:bg-slate-100 shrink-0"
+                  >
+                    <Eye className="w-4 h-4 text-blue-600" />
+                    <span>View Inspection Audit Report</span>
+                  </Button>
+                </div>
+              </Card>
+
+              {/* LOGBOOK TITLE TRANSFER VISUALIZER */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                    <FileText className="w-4.5 h-4.5 text-emerald-600" />
+                    NTSA TIMS Ownership Transfer Visualizer
+                  </h3>
+                  <span className="text-xs text-slate-500 font-mono font-bold">
+                    Ref: {selectedDeal.transferReference || 'TIMS-V-00214'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-1 text-xs">
+                  {[
+                    { key: 'Verification', label: '1. TIMS Match', desc: 'Logbook Owner Checked' },
+                    { key: 'Transfer Submitted', label: '2. Application Sent', desc: 'Electronic Transfer ID' },
+                    { key: 'NTSA Processing', label: '3. NTSA Approval', desc: 'TIMS Portal Syncing' },
+                    { key: 'Completed', label: '4. Title Transferred', desc: 'New Owner Logbook' }
+                  ].map((tf, idx) => {
+                    const isPassed = selectedDeal.step > 4 || (selectedDeal.step === 4 && idx === 0);
+                    const isCurrent = selectedDeal.step === 5 && idx === 2;
+                    return (
+                      <div
+                        key={tf.key}
+                        className={`p-3 rounded-xl border font-medium ${
+                          isPassed
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                            : isCurrent
+                            ? 'bg-amber-50 border-amber-300 text-amber-900 ring-1 ring-amber-400'
+                            : 'bg-slate-50 border-slate-200 text-slate-400'
+                        }`}
+                      >
+                        <p className="font-extrabold text-xs">{tf.label}</p>
+                        <p className="text-[10px] text-slate-500">{tf.desc}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+            </div>
+
+            {/* RIGHT COLUMN: ROLE-AWARE ACTIONS & DISPUTES & NOTIFICATIONS */}
+            <div className="space-y-6">
+
+              {/* ROLE-AWARE CONTEXTUAL ACTION BUTTONS PANEL */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-amber-500" />
+                    {userRole} Contextual Workflow Actions
+                  </h3>
+                  <Badge variant="neutral" size="sm" className="font-bold">
+                    Role: {userRole}
+                  </Badge>
+                </div>
+
+                <div className="space-y-2.5 text-xs">
+                  {userRole === 'Buyer' && (
+                    <>
+                      {selectedDeal.step === 1 && (
+                        <Button
+                          variant="primary"
+                          size="md"
+                          fullWidth
+                          onClick={() => handleAdvanceStep(selectedDeal.id)}
+                          className="bg-[#1E3063] text-white font-extrabold shadow-xs"
+                        >
+                          <Lock className="w-4 h-4 text-amber-300" />
+                          <span>Pay Deposit into NCBA Vault</span>
+                        </Button>
+                      )}
+
+                      {selectedDeal.step >= 3 && selectedDeal.step <= 4 && (
+                        <Button
+                          variant="primary"
+                          size="md"
+                          fullWidth
+                          onClick={() => handleAdvanceStep(selectedDeal.id)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Approve Vehicle & Authorize Logbook Transfer</span>
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        fullWidth
+                        onClick={() => {
+                          setShowInspectionModal(true);
+                          triggerToast('Inspection report opened for buyer verification.');
+                        }}
+                        className="bg-slate-100 text-[#1E3063] font-bold border border-slate-200"
+                      >
+                        <RefreshCw className="w-4 h-4 text-blue-600" />
+                        <span>Request Technical Reinspection</span>
+                      </Button>
+
+                      {!selectedDeal.dispute && (
+                        <Button
+                          variant="outline"
+                          size="md"
+                          fullWidth
+                          onClick={() => setShowDisputeModal(true)}
+                          className="text-[#E5484D] border-[#E5484D]/40 hover:bg-rose-50 font-bold"
+                        >
+                          <AlertTriangle className="w-4 h-4 text-[#E5484D]" />
+                          <span>Report Issue / Open Dispute</span>
+                        </Button>
+                      )}
+                    </>
+                  )}
+
+                  {userRole === 'Seller' && (
+                    <>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        fullWidth
+                        onClick={() => triggerToast('Vehicle availability confirmed by seller.')}
+                        className="bg-[#1E3063] text-white font-extrabold shadow-xs"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-amber-300" />
+                        <span>Confirm Vehicle Availability</span>
+                      </Button>
+
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        fullWidth
+                        onClick={() => handleAdvanceStep(selectedDeal.id)}
+                        className="bg-emerald-50 text-emerald-950 border border-emerald-300 font-bold"
+                      >
+                        <Upload className="w-4 h-4 text-emerald-600" />
+                        <span>Upload TIMS Logbook Documents</span>
+                      </Button>
+
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 font-medium">
+                        <strong>Seller Payout Status:</strong> Payout of Ksh {selectedDeal.amount.toLocaleString()} will be disbursed directly into your registered bank account upon NTSA TIMS clearance.
+                      </div>
+                    </>
+                  )}
+
+                  {userRole === 'Administrator' && (
+                    <>
+                      <Button
+                        variant="primary"
+                        size="md"
+                        fullWidth
+                        onClick={() => handleAdvanceStep(selectedDeal.id)}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold shadow-xs"
+                      >
+                        <Landmark className="w-4 h-4" />
+                        <span>Release Vault Funds to Seller</span>
+                      </Button>
+
+                      {selectedDeal.dispute && (
+                        <Button
+                          variant="secondary"
+                          size="md"
+                          fullWidth
+                          onClick={() => {
+                            const updatedDeal = {
+                              ...selectedDeal,
+                              status: 'Completed',
+                              dispute: undefined,
+                              whoControlsFunds: 'Disbursed to Seller (Dispute Resolved)',
+                              updatedAt: 'Just now'
+                            };
+                            setSelectedDeal(updatedDeal);
+                            setDealsList(prev => prev.map(d => d.id === updatedDeal.id ? updatedDeal : d));
+                            triggerToast('Dispute resolved by Admin. Vault funds released.');
+                          }}
+                          className="bg-amber-100 text-[#17244B] border border-amber-300 font-bold"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-[#C85A32]" />
+                          <span>Resolve Dispute & Release Funds</span>
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        size="md"
+                        fullWidth
+                        onClick={() => triggerToast('Transaction paused for compliance audit.')}
+                        className="text-[#C85A32] border-[#C85A32] hover:bg-amber-50 font-bold"
+                      >
+                        <Lock className="w-4 h-4" />
+                        <span>Pause Transaction for Audit</span>
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </Card>
+
+              {/* DEDICATED DISPUTE PANEL */}
+              {selectedDeal.dispute ? (
+                <Card className="p-5 bg-rose-50/70 border border-rose-200 shadow-xs space-y-4">
+                  <div className="flex items-center justify-between border-b border-rose-200 pb-3">
+                    <h3 className="text-sm font-extrabold text-[#E5484D] font-display flex items-center gap-2">
+                      <AlertTriangle className="w-4.5 h-4.5 text-[#E5484D]" />
+                      Active Dispute Resolution Panel
+                    </h3>
+                    <Badge variant="warning" size="sm" className="bg-[#E5484D] text-white font-bold">
+                      {selectedDeal.dispute.status}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2 text-xs">
+                    <p className="text-[11px] font-bold text-slate-700">Reason for Dispute:</p>
+                    <p className="p-3 bg-white rounded-xl border border-rose-200 text-slate-800 leading-relaxed font-medium">
+                      "{selectedDeal.dispute.reason}"
+                    </p>
+
+                    <p className="text-[11px] font-bold text-slate-700 pt-1">Evidence Submitted ({selectedDeal.dispute.evidence.length}):</p>
+                    <div className="space-y-1.5">
+                      {selectedDeal.dispute.evidence.map((ev, i) => (
+                        <div key={i} className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-[11px]">
+                          <span className="font-bold text-[#1E3063] flex items-center gap-1.5">
+                            <FileText className="w-3.5 h-3.5 text-blue-600" />
+                            {ev.title}
+                          </span>
+                          <span className="text-slate-400 font-mono">{ev.fileType}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-[11px] font-bold text-slate-700 pt-1">Case Investigation Updates:</p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                      {selectedDeal.dispute.updates.map((up, i) => (
+                        <div key={i} className="p-2.5 bg-white rounded-xl border border-slate-200 space-y-0.5 text-[11px]">
+                          <div className="flex justify-between font-bold text-slate-700">
+                            <span>{up.author}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{up.timestamp}</span>
+                          </div>
+                          <p className="text-slate-600 leading-normal">{up.note}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-2 border-t border-rose-200 flex items-center justify-between">
+                      <span className="text-[10px] text-slate-500 font-medium">Resolution Timeline: 24-48 Hours</span>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => triggerToast('Escalated to Lead KAYAD Legal Arbitrator.')}
+                        className="bg-[#C85A32] text-white font-bold text-xs"
+                      >
+                        <PhoneCall className="w-3.5 h-3.5" />
+                        <span>Escalate Case</span>
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-5 bg-slate-50 border border-slate-200 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-extrabold text-[#1E3063] font-display flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                      Dispute Guarantee Shield Active
+                    </h4>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full font-bold">
+                      Zero Open Disputes
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    If the vehicle fails physical 150-point inspection or title transfer encounters encumbrances, the buyer can open a 1-click dispute to freeze vault funds immediately.
+                  </p>
+                </Card>
+              )}
+
+              {/* NOTIFICATIONS & AUDIT TIMELINE LOG */}
+              <Card className="p-5 bg-white border border-slate-200 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-sm font-extrabold text-[#1E3063] font-display flex items-center gap-2">
+                    <History className="w-4.5 h-4.5 text-blue-600" />
+                    Transaction Activity & Notification Audit Log
+                  </h3>
+                  <span className="text-[10px] text-slate-400 font-mono font-bold">Live Stream</span>
+                </div>
+
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                  {(selectedDeal.timelineLogs || []).map((log) => (
+                    <div key={log.id} className="flex items-start gap-3 text-xs border-b border-slate-100 pb-2.5 last:border-0">
+                      <div className={`p-1.5 rounded-full mt-0.5 shrink-0 ${
+                        log.type === 'success'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : log.type === 'dispute'
+                          ? 'bg-rose-100 text-[#E5484D]'
+                          : log.type === 'warning'
+                          ? 'bg-amber-100 text-amber-800'
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+
+                      <div className="space-y-0.5 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-extrabold text-[#1E3063]">{log.title}</p>
+                          <span className="text-[10px] text-slate-400 font-mono">{log.timestamp}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">{log.description}</p>
+                        <span className="text-[10px] font-bold text-slate-400">Actor: {log.actor}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* SUPPORT CONTACT SHORTCUT */}
+              <div className="p-4 bg-[#1E3063] text-white rounded-2xl border border-slate-700 flex items-center justify-between gap-3 text-xs">
+                <div>
+                  <p className="font-extrabold text-amber-300 font-display">Need Custody Officer Assistance?</p>
+                  <p className="text-[11px] text-slate-300">Dedicated KAYAD Escrow Desk: +254 700 999 000</p>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => triggerToast('Connected to KAYAD Senior Financial Officer.')}
+                  className="bg-amber-400 text-[#17244B] font-black hover:bg-amber-300 shrink-0"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Contact Vault Officer</span>
+                </Button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: ALL PROTECTED DEALS TABLE */}
+      {activeTab === 'deals' && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl p-4 shadow-xs border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="w-full sm:w-96">
+              <Input
+                placeholder="Search Deal ID, vehicle title, buyer or seller..."
+                value={dealSearch}
+                onChange={(e) => setDealSearch(e.target.value)}
+                icon={<Search className="w-4 h-4" />}
+              />
+            </div>
+
+            <div className="text-xs text-slate-500 font-bold flex items-center gap-2">
+              <span>Protected Queue Balance:</span>
+              <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-lg font-black text-sm">
+                Ksh {totalVaultValue.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          <Card className="overflow-hidden bg-white border border-slate-200">
+            <CardHeader className="bg-slate-50 border-b border-slate-200 py-4 flex flex-row items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2 text-[#1E3063]">
+                <Lock className="w-4 h-4 text-amber-500" />
+                Live Escrow Vault Transaction Queue ({filteredDeals.length})
+              </CardTitle>
+            </CardHeader>
+
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Deal Ref</TableHead>
+                  <TableHead>Vehicle Item</TableHead>
+                  <TableHead>Vault Balance</TableHead>
+                  <TableHead>Parties</TableHead>
+                  <TableHead>Current Stage</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredDeals.map((d) => (
+                  <TableRow 
+                    key={d.id} 
+                    className={`hover:bg-slate-50 transition-colors ${
+                      selectedDeal?.id === d.id ? 'bg-amber-50/50' : ''
+                    }`}
+                  >
+                    <TableCell className="font-mono font-extrabold text-xs text-[#1E3063]">{d.id}</TableCell>
+                    <TableCell className="font-extrabold text-xs text-[#1E3063]">{d.vehicleTitle}</TableCell>
+                    <TableCell className="font-black text-xs text-slate-900">Ksh {d.amount.toLocaleString()}</TableCell>
+                    <TableCell className="font-medium text-xs text-slate-600">
+                      <div className="space-y-0.5">
+                        <p className="font-bold text-slate-800">{d.buyerName} <span className="text-slate-400 font-normal">(Buyer)</span></p>
+                        <p className="text-slate-500">{d.sellerName} <span className="text-slate-400 font-normal">(Seller)</span></p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={d.status === 'Completed' ? 'success' : d.dispute ? 'warning' : 'escrow'} 
+                        size="sm"
+                      >
+                        <CheckCircle2 className="w-3 h-3" /> {d.status} (Step {d.step}/6)
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedDeal(d);
+                            setActiveTab('journey');
+                          }}
+                        >
+                          <span>Open Journey</span>
+                        </Button>
+                        {d.step < 6 && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAdvanceStep(d.id)}
+                            title="Simulate Next Workflow Step"
+                          >
+                            <span>Advance Step</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </div>
+      )}
+
+      {/* TAB 3: INITIATE CUSTOM ESCROW AGREEMENT */}
+      {activeTab === 'create' && (
+        <Card className="p-6 max-w-3xl mx-auto space-y-6 bg-white border border-slate-200">
+          <div>
+            <Badge variant="escrow" size="md">
+              <Lock className="w-4 h-4 text-amber-500" /> Custom Escrow Agreement
+            </Badge>
+            <h3 className="text-2xl font-black text-[#1E3063] font-display mt-2">
+              Initiate Bank-Backed Escrow Agreement
+            </h3>
+            <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+              Create a secure Escrow Vault deposit agreement for any vehicle transaction. Funds will be deposited into the neutral custodian account and held until inspection and NTSA TIMS logbook transfer are verified.
+            </p>
+          </div>
+
+          {formSuccess ? (
+            <div className="bg-emerald-50 border border-emerald-300 p-6 rounded-2xl text-center space-y-3">
+              <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+              <h4 className="text-xl font-bold text-emerald-950">Escrow Agreement Created!</h4>
+              <p className="text-xs text-emerald-800">
+                Escrow Vault agreement has been generated and added to the active transaction queue.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleCreateEscrow} className="space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-slate-700">Seller Category</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setNewSellerType('Private Seller')}
+                    className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer ${
+                      newSellerType === 'Private Seller'
+                        ? 'bg-[#1E3063] text-white border-[#1E3063]'
+                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    <UserCheck className="w-4 h-4 text-amber-400" />
+                    <span>Private Seller (Mandatory Escrow)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewSellerType('Verified Dealer')}
+                    className={`p-3 rounded-xl border font-bold flex items-center justify-center gap-2 cursor-pointer ${
+                      newSellerType === 'Verified Dealer'
+                        ? 'bg-[#1E3063] text-white border-[#1E3063]'
+                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4 text-amber-400" />
+                    <span>Verified Dealer (Escrow Enabled)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Vehicle Title & Spec</label>
+                  <Input
+                    placeholder="e.g. 2021 Toyota Prado TX 2.8L"
+                    value={newVehicleTitle}
+                    onChange={(e) => setNewVehicleTitle(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Agreed Sale Price (Ksh)</label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 4500000"
+                    value={newAmount}
+                    onChange={(e) => setNewAmount(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Buyer Full Name</label>
+                  <Input
+                    placeholder="e.g. James Mwangi"
+                    value={newBuyerName}
+                    onChange={(e) => setNewBuyerName(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Seller / Business Name</label>
+                  <Input
+                    placeholder="e.g. Samuel K. / Rift Valley Motors"
+                    value={newSellerName}
+                    onChange={(e) => setNewSellerName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="bg-amber-50 p-4 rounded-xl border border-amber-200 space-y-1">
+                <p className="font-bold text-[#17244B] flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-amber-600" />
+                  KAYAD Escrow Vault Guarantee Policy
+                </p>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Funds will be deposited directly into NCBA Custodian Account #NCBA-ESC-88201. KAYAD holds zero-liability release authorization until physical 150-point inspection and NTSA TIMS logbook clearance pass.
+                </p>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="bg-[#1E3063] text-white font-extrabold"
+              >
+                <Lock className="w-4 h-4 text-amber-400" />
+                <span>Create Escrow Agreement & Generate Vault ID</span>
+              </Button>
+            </form>
+          )}
+        </Card>
+      )}
+
+      {/* SUB-MODAL 1: 150-POINT TECHNICAL INSPECTION REPORT VIEWER */}
+      {showInspectionModal && selectedDeal && (
+        <Modal
+          isOpen={true}
+          onClose={() => setShowInspectionModal(false)}
+          title={`150-Point Inspection Report — ${selectedDeal.vehicleTitle}`}
+          maxWidth="lg"
+        >
+          <div className="space-y-5 text-xs text-slate-700">
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-600 text-white rounded-xl shadow-xs">
+                  <FileCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h4 className="text-base font-extrabold text-emerald-950 font-display">
+                    Clean Technical Certification Pass
+                  </h4>
+                  <p className="text-xs text-emerald-800">
+                    Inspected on-site by NTSA Verified Mechanic Eng. Patrick Kamau
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] uppercase font-bold text-emerald-700">Overall Score</p>
+                <p className="text-2xl font-black text-emerald-950">{selectedDeal.inspectionScore || 94}/100</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] text-slate-400 font-bold uppercase">VIN Audit</p>
+                <p className="font-extrabold text-emerald-700">✓ Verified Clean</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] text-slate-400 font-bold uppercase">Engine & Gearbox</p>
+                <p className="font-extrabold text-emerald-700">✓ 98% Rating</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] text-slate-400 font-bold uppercase">Chassis & Bodywork</p>
+                <p className="font-extrabold text-emerald-700">✓ Zero Accident Frame</p>
+              </div>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] text-slate-400 font-bold uppercase">OBD-II Diagnostics</p>
+                <p className="font-extrabold text-emerald-700">✓ 0 Fault Codes</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-2">
+              <p className="font-extrabold text-[#1E3063] text-xs">Inspector Notes & Recommendation:</p>
+              <p className="text-slate-600 leading-relaxed text-[11px]">
+                "Vehicle is in pristine mechanical condition. Engine compression test meets OEM specifications. All electronics, brake pads (80% remaining), and suspension bushings are verified authentic. Highly recommended for Escrow Vault clearance."
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => triggerToast('Inspection Report PDF downloaded.')}
+                className="font-bold text-slate-700"
+              >
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>Download Report PDF</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => {
+                  setShowInspectionModal(false);
+                  handleAdvanceStep(selectedDeal.id);
+                }}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Approve Inspection & Proceed</span>
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* SUB-MODAL 2: OPEN DISPUTE FORM VIEWER */}
+      {showDisputeModal && selectedDeal && (
+        <Modal
+          isOpen={true}
+          onClose={() => setShowDisputeModal(false)}
+          title={`Raise Formal Escrow Dispute — Ref #${selectedDeal.id}`}
+          maxWidth="md"
+        >
+          <div className="space-y-4 text-xs text-slate-700">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-[#E5484D]">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Immediate Custodian Vault Freeze Guarantee</span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-normal">
+                Submitting this dispute will immediately freeze all funds (Ksh {selectedDeal.amount.toLocaleString()}) inside the NCBA Trustee Custodian Vault. No funds can be released to the seller until KAYAD legal mediation completes.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-extrabold text-[#1E3063]">Reason for Dispute</label>
+              <textarea
+                rows={4}
+                placeholder="Describe the defect, unmentioned issue, or non-compliance found during inspection..."
+                value={disputeReasonInput}
+                onChange={(e) => setDisputeReasonInput(e.target.value)}
+                className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#E5484D] focus:border-[#E5484D] text-xs"
+              />
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-600 space-y-1">
+              <p className="font-bold text-[#1E3063]">Automatic Evidence Attached:</p>
+              <p>✓ 150-Point Mechanic Inspection Audit Log</p>
+              <p>✓ NCBA Custodian Vault Bank Deposit Statement</p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => setShowDisputeModal(false)}
+                className="font-bold text-slate-600"
+              >
+                <span>Cancel</span>
+              </Button>
+
+              <Button
+                variant="primary"
+                size="md"
+                onClick={handleOpenDisputeSubmit}
+                className="bg-[#E5484D] hover:bg-rose-700 text-white font-extrabold shadow-sm"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span>Submit Dispute & Freeze Vault Funds</span>
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+};
+
+export default EscrowView;

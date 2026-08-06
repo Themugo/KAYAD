@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
-import { OrganizerProfile } from '../../../components/organizer';
+import { OrganizerProfile } from './organizer';
 import { 
   Gavel, 
   Clock, 
