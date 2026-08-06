@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { UserProfile } from '../../../types';
 import { Home, DollarSign, FileText, TrendingUp, Bot, ChevronRight, Menu, X, User, Shield, Car, Camera, CheckCircle, Circle, ArrowRight, BarChart3, Sparkles, MessageCircle, BadgeCheck, ShieldCheck as ShieldCheckVerified, PlusCircle as PlusCircleIcon, Eye as EyeIcon, Heart as HeartIcon, HelpCircle, Calendar as CalendarIcon } from 'lucide-react';
 
 // ============================================================
@@ -396,9 +397,19 @@ type PlatformSection =
   | 'copilot' 
   | 'help';
 
-export default function PrivateSellerPlatform() {
+export default function PrivateSellerPlatform({ user }: { user?: UserProfile | null } = {}) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Merge the real authenticated user (if signed in) over the demo seller
+  // profile - SAMPLE_SELLER previously stood alone as a second, conflicting
+  // source of "who is the current user", same issue as BuyerPlatform had.
+  const displaySeller = {
+    ...SAMPLE_SELLER,
+    name: user?.name || SAMPLE_SELLER.name,
+    email: user?.email || SAMPLE_SELLER.email,
+    phone: user?.phone || SAMPLE_SELLER.phone,
+  };
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
 
   const handleSectionChange = useCallback((section: PlatformSection) => {
@@ -482,7 +493,7 @@ export default function PrivateSellerPlatform() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeSection === 'home' && <SellerHomeSection seller={SAMPLE_SELLER} stats={SAMPLE_STATS} onNavigate={handleSectionChange} />}
+              {activeSection === 'home' && <SellerHomeSection seller={displaySeller} stats={SAMPLE_STATS} onNavigate={handleSectionChange} />}
               {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} />}
               {activeSection === 'pricing' && <PricingAssistantSection />}
               {activeSection === 'trust-center' && <TrustCenterSection verification={SAMPLE_VERIFICATION} />}

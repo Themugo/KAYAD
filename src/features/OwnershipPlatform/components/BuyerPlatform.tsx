@@ -4,8 +4,8 @@
 // ============================================================
 
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { UserProfile } from '../../../types';
 import { // Navigation & Layout
   Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock, Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X, User, LogOut, Globe, Shield, Search, Plus, // Vehicle & Warehouse
   Car, Circle, Fuel, Gauge, Wrench, Calendar, MapPin, Star, Trophy, // Status & Health
@@ -473,14 +473,27 @@ type PlatformSection = 'home' | 'garage' | 'watchlist' | 'purchase' | 'inspectio
 
 interface BuyerPlatformProps {
   onNavigate?: (section: string) => void;
+  user?: UserProfile | null;
 }
 
-export default function BuyerPlatform({ onNavigate }: BuyerPlatformProps) {
-  const navigate = useNavigate();
+export default function BuyerPlatform({ onNavigate, user }: BuyerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Merge the real authenticated user (if signed in) over the demo profile -
+  // SAMPLE_USER previously stood alone here as a second, conflicting source
+  // of "who is the current user" completely disconnected from App.tsx's
+  // real user state. Fields the real UserProfile type doesn't have
+  // (loyalty tier, points, purchase history) stay as demo defaults, since
+  // there's no backend tracking those yet.
+  const displayUser = {
+    ...SAMPLE_USER,
+    name: user?.name || SAMPLE_USER.name,
+    email: user?.email || SAMPLE_USER.email,
+    phone: user?.phone || SAMPLE_USER.phone,
+  };
 
   const handleSectionChange = useCallback((section: PlatformSection) => {
     setActiveSection(section);
@@ -569,7 +582,7 @@ export default function BuyerPlatform({ onNavigate }: BuyerPlatformProps) {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeSection === 'home' && <BuyerHome user={SAMPLE_USER} vehicles={SAMPLE_VEHICLES} onNavigate={handleSectionChange} />}
+              {activeSection === 'home' && <BuyerHome user={displayUser} vehicles={SAMPLE_VEHICLES} onNavigate={handleSectionChange} />}
               {activeSection === 'garage' && <GarageSection vehicles={SAMPLE_VEHICLES} selectedVehicle={selectedVehicle} onSelectVehicle={setSelectedVehicle} />}
               {activeSection === 'watchlist' && <WatchlistSection items={SAMPLE_WATCHLIST} />}
               {activeSection === 'purchase' && <PurchaseJourneySection journeys={SAMPLE_PURCHASE_JOURNEYS} />}
@@ -580,10 +593,10 @@ export default function BuyerPlatform({ onNavigate }: BuyerPlatformProps) {
               {activeSection === 'reminders' && <RemindersSection reminders={SAMPLE_REMINDERS} vehicles={SAMPLE_VEHICLES} />}
               {activeSection === 'expenses' && <ExpensesSection expenses={SAMPLE_EXPENSES} vehicles={SAMPLE_VEHICLES} />}
               {activeSection === 'resale' && <ResaleCenterSection valuations={SAMPLE_RESALE} vehicles={SAMPLE_VEHICLES} />}
-              {activeSection === 'rewards' && <RewardsSection rewards={SAMPLE_REWARDS} userPoints={SAMPLE_USER.loyaltyPoints} />}
+              {activeSection === 'rewards' && <RewardsSection rewards={SAMPLE_REWARDS} userPoints={displayUser.loyaltyPoints} />}
               {activeSection === 'copilot' && <AICopilotSection vehicles={SAMPLE_VEHICLES} />}
               {activeSection === 'messages' && <MessagesSection messages={SAMPLE_MESSAGES} />}
-              {activeSection === 'settings' && <SettingsSection user={SAMPLE_USER} />}
+              {activeSection === 'settings' && <SettingsSection user={displayUser} />}
             </motion.div>
           </AnimatePresence>
         </div>

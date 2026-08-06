@@ -343,11 +343,11 @@ export function App() {
           )}
 
           {activeNav === 'buyer-platform' && (
-            <BuyerPlatform onNavigate={navigateTo} />
+            <BuyerPlatform onNavigate={navigateTo} user={user} />
           )}
 
           {activeNav === 'seller-platform' && (
-            <PrivateSellerPlatform />
+            <PrivateSellerPlatform user={user} />
           )}
 
           {activeNav === 'finance' && (
