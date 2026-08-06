@@ -479,7 +479,7 @@ if (NODE_ENV !== "production") {
 }
 
 // ─── API ROUTES (VERSIONED) ───────────────────────────────────
-app.use("/api/v1", v1Routes);
+app.use("/api/v1", checkSystemStatus, v1Routes);
 app.use("/api/v2", v2Routes);
 
 // ─── DASHBOARD ROUTES (ROLE-BASED) ───────────────────────────
@@ -719,8 +719,11 @@ app.use(seoRoutes);
 
 // ─── API VERSIONING ──────────────────────────────────────────
 // /api/v1/* — versioned alias for all routes above
+// (the /api/v1 -> v1Routes mount itself lives earlier, in the
+// "API ROUTES (VERSIONED)" section - it was duplicated here by
+// mistake, registering the identical router at the identical path
+// a second time; removed rather than keeping both.)
 app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
-app.use("/api/v1", checkSystemStatus, v1Routes);
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
 // Note: In newer Sentry versions, handlers are auto-instrumented

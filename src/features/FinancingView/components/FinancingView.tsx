@@ -451,7 +451,11 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => {
+              setActiveTab(tab.id as any);
+              const el = document.getElementById(`section-${tab.id}`);
+              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
             className={`px-4 py-3 border-b-2 text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer ${
               activeTab === tab.id
                 ? 'border-[#1E3063] text-[#1E3063] bg-amber-50/60 rounded-t-xl'
@@ -467,7 +471,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           3. FINANCE CALCULATOR (Interactive & Precise)
           ========================================== */}
-      <div ref={calculatorRef} className="space-y-4">
+      <div ref={calculatorRef} id="section-calculator" className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
             <Calculator className="w-5 h-5 text-amber-500" />
@@ -676,7 +680,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           4. LENDER MARKETPLACE (Partner Institutions Grid)
           ========================================== */}
-      <div className="space-y-4 pt-4">
+      <div id="section-lenders" className="space-y-4 pt-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
@@ -914,7 +918,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           6. APPLICATION JOURNEY & STATUS TRACKER
           ========================================== */}
-      <div className="space-y-6 pt-4">
+      <div id="section-tracker" className="space-y-6 pt-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
@@ -1042,7 +1046,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       {/* ==========================================
           7. SECURE DOCUMENT UPLOAD MODULE
           ========================================== */}
-      <div className="space-y-4 pt-4">
+      <div id="section-eligibility" className="space-y-4 pt-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-black text-[#1E3063] font-display flex items-center gap-2">
             <FileText className="w-5 h-5 text-amber-500" />

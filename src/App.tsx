@@ -52,6 +52,36 @@ export function App() {
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
   const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
 
+  // Views that require a signed-in user. Attempting to navigate to one of
+  // these while anonymous opens the auth modal instead of the view itself -
+  // repairs a route-protection gap where any visitor could reach the admin
+  // panel or personal dashboard with no login check at all.
+  const PROTECTED_VIEWS = useMemo(() => new Set(['admin', 'dashboard']), []);
+  const navigateTo = useCallback((nav: string) => {
+    if (PROTECTED_VIEWS.has(nav) && !user) {
+      setShowAuthModal(true);
+      return;
+    }
+    setActiveNav(nav);
+  }, [user, PROTECTED_VIEWS]);
+
+  // Route map: every activeNav value the Module Switcher below actually
+  // renders a view for. Anything else falls back to 'marketplace' - the
+  // equivalent of a 404-to-home redirect for this custom router, so a
+  // stray or future-feature nav target never leaves the user on a blank
+  // screen with no way forward.
+  const VALID_VIEWS = useMemo(() => new Set([
+    'marketplace', 'saved', 'auctions', 'escrow', 'inspections', 'financing',
+    'dealers', 'dashboard', 'chat', 'admin', 'support', 'broadcast',
+    'discovery', 'kayadlive', 'buyer-platform', 'seller-platform', 'finance',
+    'sell', 'seller', 'seller-dashboard',
+  ]), []);
+  useEffect(() => {
+    if (!VALID_VIEWS.has(activeNav)) {
+      setActiveNav('marketplace');
+    }
+  }, [activeNav, VALID_VIEWS]);
+
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
   const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
     if (typeof vehicleOrId === 'string') {
@@ -129,7 +159,7 @@ export function App() {
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
-    setActiveNav('escrow');
+    navigateTo('escrow');
   }, []);
 
   // Update Vehicle Auction Status Handler
@@ -143,7 +173,7 @@ export function App() {
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
-    setActiveNav('chat');
+    navigateTo('chat');
   }, []);
 
   // Send Chat Message
@@ -161,7 +191,7 @@ export function App() {
   // Select Dealer Vehicles Shortcut
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
     setSearchQuery(dealerName);
-    setActiveNav('marketplace');
+    navigateTo('marketplace');
   }, []);
 
   const savedVehiclesList = useMemo(() => {
@@ -179,7 +209,7 @@ export function App() {
         user={user}
         savedCount={savedVehicles.length}
         activeNav={activeNav}
-        onNavClick={(nav) => setActiveNav(nav)}
+        onNavClick={(nav) => navigateTo(nav)}
         selectedCounty={selectedCounty}
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={() => setShowAuthModal(true)}
@@ -210,7 +240,7 @@ export function App() {
               searchQuery={searchQuery}
               onSearchChange={(q) => setSearchQuery(q)}
               onOpenCompareModal={() => setShowCompareModal(true)}
-              onNavigate={(nav) => setActiveNav(nav)}
+              onNavigate={(nav) => navigateTo(nav)}
               onOpenAuth={() => setShowAuthModal(true)}
             />
           )}
@@ -265,7 +295,7 @@ export function App() {
               user={user}
               messages={messages}
               comparedVehicles={comparedVehicles}
-              onNavigate={(nav) => setActiveNav(nav)}
+              onNavigate={(nav) => navigateTo(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onToggleSave={handleToggleSave}
               onToggleCompare={handleToggleCompare}
@@ -283,9 +313,9 @@ export function App() {
               onSendMessage={handleSendMessage}
               selectedVehicle={selectedChatVehicle}
               onQuickViewVehicle={handleOpenVehicleDetails}
-              onNavigateToEscrow={() => setActiveNav('escrow')}
-              onNavigateToInspections={() => setActiveNav('inspections')}
-              onNavigateToFinancing={() => setActiveNav('financing')}
+              onNavigateToEscrow={() => navigateTo('escrow')}
+              onNavigateToInspections={() => navigateTo('inspections')}
+              onNavigateToFinancing={() => navigateTo('financing')}
             />
           )}
 
@@ -301,7 +331,7 @@ export function App() {
           )}
 
           {activeNav === 'broadcast' && (
-            <LiveAuctionBroadcastPage />
+            <LiveAuctionBroadcastPage onNavigate={navigateTo} onOpenAuth={() => setShowAuthModal(true)} />
           )}
 
           {activeNav === 'discovery' && (
@@ -313,7 +343,7 @@ export function App() {
           )}
 
           {activeNav === 'buyer-platform' && (
-            <BuyerPlatform />
+            <BuyerPlatform onNavigate={navigateTo} />
           )}
 
           {activeNav === 'seller-platform' && (
@@ -347,7 +377,7 @@ export function App() {
               user={user}
               deals={MOCK_ESCROW_DEALS}
               messages={messages}
-              onNavigate={(nav) => setActiveNav(nav)}
+              onNavigate={(nav) => navigateTo(nav)}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onOpenAuthModal={() => setShowAuthModal(true)}
             />
@@ -369,10 +399,10 @@ export function App() {
           </div>
 
           <div className="flex items-center gap-6 text-slate-300">
-            <button onClick={() => setActiveNav('marketplace')} className="hover:text-amber-300">Marketplace</button>
-            <button onClick={() => setActiveNav('escrow')} className="hover:text-amber-300">Escrow Vault</button>
-            <button onClick={() => setActiveNav('financing')} className="hover:text-amber-300">Financing</button>
-            <button onClick={() => setActiveNav('support')} className="hover:text-amber-300">Support & Disputes</button>
+            <button onClick={() => navigateTo('marketplace')} className="hover:text-amber-300">Marketplace</button>
+            <button onClick={() => navigateTo('escrow')} className="hover:text-amber-300">Escrow Vault</button>
+            <button onClick={() => navigateTo('financing')} className="hover:text-amber-300">Financing</button>
+            <button onClick={() => navigateTo('support')} className="hover:text-amber-300">Support & Disputes</button>
           </div>
         </div>
       </footer>
@@ -385,7 +415,7 @@ export function App() {
         onClose={handleCloseVehicleDetails}
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
-        onRequestInspection={() => setActiveNav('inspections')}
+        onRequestInspection={() => navigateTo('inspections')}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}

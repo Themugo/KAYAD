@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Gavel, Clock, Shield, ShieldCheck, Building2, CheckCircle2, AlertCircle, ChevronRight, MapPin, Calendar, Eye, Users, FileText, ClipboardCheck, Car, Info, AlertTriangle, Wifi, WifiOff, Radio, Trophy, CreditCard, BookOpen, TrendingUp, Star, MessageSquare, HelpCircle, UserPlus, CalendarPlus, Bookmark, ArrowRight, ArrowLeft, Check, RefreshCw, Zap, EyeOff, Award, Truck, Scale, ArrowUpRight } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -1010,9 +1009,7 @@ const AuctionClosedSummary: React.FC<{ auction: LiveAuction; winningAlias: strin
 };
 
 // Main Component
-const LiveAuctionBroadcastPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { id } = useParams();
+const LiveAuctionBroadcastPage: React.FC<{ onNavigate?: (nav: string) => void; onOpenAuth?: () => void }> = ({ onNavigate, onOpenAuth }) => {
   const [auction] = useState<LiveAuction>(MOCK_AUCTION);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isConnected, setIsConnected] = useState(true);
@@ -1033,9 +1030,9 @@ const LiveAuctionBroadcastPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
-                <Link to="/" className="w-10 h-10 rounded-xl bg-[#1E3063] flex items-center justify-center">
+                <button onClick={() => onNavigate?.('marketplace')} className="w-10 h-10 rounded-xl bg-[#1E3063] flex items-center justify-center">
                   <Radio className="w-5 h-5 text-white" />
-                </Link>
+                </button>
                 <div>
                   <h1 className="font-bold text-[#1E3063]">Live Auction</h1>
                   <p className="text-xs text-slate-500 font-mono">{auction.reference}</p>
@@ -1075,7 +1072,7 @@ const LiveAuctionBroadcastPage: React.FC = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         {isEnded ? (
-          <AuctionClosedSummary auction={auction} winningAlias="B-227" onBrowse={() => navigate('/auctions')} />
+          <AuctionClosedSummary auction={auction} winningAlias="B-227" onBrowse={() => onNavigate?.('auctions')} />
         ) : (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main Column */}
@@ -1159,7 +1156,7 @@ const LiveAuctionBroadcastPage: React.FC = () => {
             <div className="space-y-6">
               <EventSidebar auction={auction} currentStage={auction.stage} />
               <VehicleSpotlight auction={auction} onImageClick={setSelectedImage} />
-              <SpectatorCTA onRegister={() => navigate('/register')} />
+              <SpectatorCTA onRegister={() => onOpenAuth?.()} />
             </div>
           </div>
         )}
@@ -1176,7 +1173,7 @@ const LiveAuctionBroadcastPage: React.FC = () => {
             </Button>
 
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/auctions')}>
+              <Button variant="ghost" size="sm" onClick={() => onNavigate?.('auctions')}>
                 <Calendar className="w-4 h-4 mr-1" />
                 <span className="hidden md:inline">Upcoming Auctions</span>
                 <span className="md:hidden">Upcoming</span>
@@ -1188,7 +1185,7 @@ const LiveAuctionBroadcastPage: React.FC = () => {
                 <span className="md:hidden">Replays</span>
               </Button>
               <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-              <Button variant="ghost" size="sm" onClick={() => navigate('/auctions')}>
+              <Button variant="ghost" size="sm" onClick={() => onNavigate?.('auctions')}>
                 <Eye className="w-4 h-4 mr-1" />
                 <span className="hidden md:inline">All Live Auctions</span>
                 <span className="md:hidden">Live</span>

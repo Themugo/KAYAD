@@ -10,7 +10,7 @@ interface EscrowViewProps {
 export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) => {
   const [dealsList, setDealsList] = useState<EscrowTransaction[]>(initialDeals);
   const [dealSearch, setDealSearch] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create' | 'rules'>('journey');
+  const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create'>('journey');
   const [selectedDeal, setSelectedDeal] = useState<EscrowTransaction>(initialDeals[0]);
   
   // Perspective Role Switcher: Buyer, Seller, Administrator

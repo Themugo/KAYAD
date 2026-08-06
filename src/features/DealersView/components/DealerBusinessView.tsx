@@ -1163,6 +1163,34 @@ export const DealerBusinessView: React.FC<DealerBusinessViewProps> = ({
             </div>
           )}
 
+          {/* INQUIRIES VIEW */}
+          {leadsSubTab === 'inquiries' && (
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Vehicle</TableHead>
+                    <TableHead>Phone Number</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Assigned Rep</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leads.map((l) => (
+                    <TableRow key={l.id}>
+                      <TableCell className="font-extrabold text-xs text-[#1E3063]">{l.customerName}</TableCell>
+                      <TableCell className="text-xs text-slate-600">{l.vehicleTitle}</TableCell>
+                      <TableCell className="font-mono text-xs">{l.customerPhone}</TableCell>
+                      <TableCell><Badge variant="neutral" size="sm">{l.status}</Badge></TableCell>
+                      <TableCell className="text-xs font-bold text-[#1E3063]">{l.assignedToName}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+
           {/* CALL LOGS VIEW */}
           {leadsSubTab === 'calls' && (
             <Card className="overflow-hidden">
