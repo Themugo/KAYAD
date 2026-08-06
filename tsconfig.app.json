@@ -18,6 +18,12 @@
     "allowJs": true,
     "checkJs": false,
 
+    /* Path aliases — kept in sync with tsconfig.json and vite.config.ts */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+
     /* Production integration checks */
     "strict": false,
     "noUnusedLocals": false,
