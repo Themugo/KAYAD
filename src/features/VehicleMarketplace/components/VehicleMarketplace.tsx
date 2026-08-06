@@ -1,42 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Vehicle } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { 
-  SlidersHorizontal, 
-  Search, 
-  RotateCcw, 
-  MapPin, 
-  Map, 
-  Grid, 
-  List as ListIcon, 
-  Sparkles, 
-  ArrowRightLeft,
-  Filter,
-  X,
-  Bookmark,
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Zap,
-  Tag,
-  Sliders,
-  Layers,
-  Car,
-  Building2,
-  UserCheck,
-  Gavel,
-  ShieldCheck,
-  CheckCircle2,
-  Lock,
-  Landmark,
-  Eye,
-  Clock,
-  Bell,
-  PanelLeftClose,
-  PanelLeftOpen,
-  LayoutGrid
-} from 'lucide-react';
-import { Input, Select, Button, Badge, Card, SkeletonGrid } from '../../../components/ui';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid } from 'lucide-react';
+import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];

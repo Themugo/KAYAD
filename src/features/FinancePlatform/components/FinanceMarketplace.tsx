@@ -5,33 +5,8 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
-  Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X,
-  User, LogOut, Moon, Sun, Globe, Shield, BellRing, Search, Plus, Minus,
-  Car, Camera, Image, Gauge, Wrench, Calendar, MapPin, Star, Trophy,
-  CheckCircle, AlertCircle, XCircle, Clock3, Package, Truck, Key, ShieldCheck,
-  Check, Circle, ArrowRight, ArrowLeft, PlusCircle, MinusCircle,
-  File, FileCheck, Upload, Download, Eye, Trash2, Share2, Copy, FileUp,
-  CreditCard, Building, Receipt, PiggyBank, Percent, TrendingDown,
-  BarChart3, Sparkles, ArrowUpRight, RefreshCw, DollarSign as DollarSignIcon,
-  MessageCircle, Mail, Phone, Bell as BellIcon, CalendarCheck, Users,
-  BadgeCheck, BadgeDollarSign, ShieldAlert, ShieldCheck as ShieldCheckVerified,
-  PlusCircle as PlusCircleIcon, Settings2, ExternalLink, Filter, SortAsc, Grid, List,
-  Eye as EyeIcon, Heart as HeartIcon, MessageSquare as MessageSquareIcon, Timer, TrendingUp as TrendingUpIcon,
-  Lightbulb, Target, Zap,
-  HelpCircle, BookOpen, AlertTriangle, Info, ExternalLink as ExternalLinkIcon,
-  Phone as PhoneIcon, Mail as MailIcon,
-  Calendar as CalendarIcon, MapPin as MapPinIcon, Clock as ClockIcon,
-  UserCheck, CheckCircle2,
-  // Finance specific
-  Calculator, Landmark, Wallet, Handshake, FileBadge, Users as UsersIcon,
-  TrendingDown as TrendingDownIcon, PieChart, BarChart, Activity,
-  ShieldCheck as ShieldCheckIcon, Lock, Unlock, EyeOff, Building2,
-  CreditCard as CreditCardIcon, Banknote, ScrollText, Scale,
-  Briefcase, GraduationCap, Factory, Truck as TruckIcon,
-  Umbrella, HeartPulse, ShieldPlus, AlertTriangle as AlertTriangleIcon,
-} from 'lucide-react';
+import { Home, FileText, Clock, Bot, Settings, Menu, X, Shield, Car, MapPin, Star, CheckCircle, Check, Circle, ArrowRight, ArrowLeft, Upload, Download, FileUp, Building, Receipt, PiggyBank, DollarSign as DollarSignIcon, ShieldCheck as ShieldCheckVerified, HelpCircle, AlertTriangle, Info, // Finance specific
+  Calculator, Landmark, Handshake, FileBadge, Users as UsersIcon, TrendingDown as TrendingDownIcon, PieChart, Activity, ShieldCheck as ShieldCheckIcon, Lock, Building2, CreditCard as CreditCardIcon, Banknote, ScrollText, Scale, Briefcase, Truck as TruckIcon, Umbrella, HeartPulse, ShieldPlus, AlertTriangle as AlertTriangleIcon } from 'lucide-react';
 
 // ============================================================
 // TYPES & INTERFACES

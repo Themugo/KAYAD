@@ -1,31 +1,7 @@
 import React, { useState } from 'react';
 import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
-import { 
-  Award, 
-  CheckCircle2, 
-  FileText, 
-  Download, 
-  Printer, 
-  Copy, 
-  Check, 
-  Building2, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  ShieldCheck, 
-  AlertCircle, 
-  QrCode, 
-  X, 
-  ExternalLink,
-  Car,
-  CreditCard,
-  Truck,
-  Sparkles,
-  ArrowRight,
-  Info
-} from 'lucide-react';
+import { Award, CheckCircle2, FileText, Download, Printer, Copy, Check, Building2, Phone, Mail, MapPin, AlertCircle, QrCode, X, Car, CreditCard, Truck, ArrowRight } from 'lucide-react';
 import { Card, Badge, Button } from '../../../components/ui';
 
 interface PostAuctionCompletionModalProps {

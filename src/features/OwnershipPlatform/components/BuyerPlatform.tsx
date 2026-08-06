@@ -3,29 +3,18 @@
 // Sections 1-18: Discovery → Purchase → Ownership → Upgrade
 // ============================================================
 
-import { useState, useEffect, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  // Navigation & Layout
-  Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
-  Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X,
-  User, LogOut, Moon, Sun, Globe, Shield, BellRing, Search, Plus, Minus,
-  // Vehicle & Warehouse
-  Car, Circle, Fuel, Gauge, Wrench, Calendar, MapPin, Star, Trophy,
-  // Status & Health
-  CheckCircle, AlertCircle, XCircle, Clock3, Package, Truck, Key, ShieldCheck,
-  // Documents
-  File, FileCheck, Upload, Download, Eye, Trash2, Share2, Copy,
-  // Finance
-  CreditCard, Building, Receipt, PiggyBank, Percent, Banknote,
-  // Communication
-  MessageCircle, Mail, Phone, Bell as BellIcon, CalendarCheck, Users,
-  // Actions
-  PlusCircle, Settings2, ExternalLink, Filter, SortAsc, Grid, List,
-  // Value & Resale
-  TrendingDown, BarChart3, Sparkles, ArrowUpRight, RefreshCw, Battery,
-} from 'lucide-react';
+import { // Navigation & Layout
+  Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock, Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X, User, LogOut, Globe, Shield, Search, Plus, // Vehicle & Warehouse
+  Car, Circle, Fuel, Gauge, Wrench, Calendar, MapPin, Star, Trophy, // Status & Health
+  CheckCircle, AlertCircle, ShieldCheck, // Documents
+  File, FileCheck, Upload, Download, Eye, Share2, // Finance
+  CreditCard, Building, Receipt, // Communication
+  MessageCircle, // Actions
+  Settings2, Grid, List, // Value & Resale
+  TrendingDown, BarChart3, Sparkles, Battery } from 'lucide-react';
 
 // ============================================================
 // TYPES & INTERFACES

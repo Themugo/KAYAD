@@ -1,26 +1,5 @@
 import React from 'react';
-import { 
-  ShieldCheck, 
-  Award, 
-  Building2, 
-  Landmark, 
-  MapPin,
-  Phone,
-  Mail,
-  Globe,
-  Clock,
-  Star,
-  TrendingUp,
-  Users,
-  CheckCircle2,
-  AlertTriangle,
-  ExternalLink,
-  ChevronRight,
-  FileText,
-  ThumbsUp,
-  Clock3,
-  BadgeDollarSign
-} from 'lucide-react';
+import { ShieldCheck, Landmark, MapPin, Phone, Mail, Clock, Star, TrendingUp, Users, CheckCircle2, ExternalLink, FileText } from 'lucide-react';
 import { Card } from '../../../../components/ui/Card';
 import { Badge } from '../../../../components/ui/Badge';
 import { TrustBadge, OrganizerTypeBadge, getOrganizerBadge } from './TrustBadge';

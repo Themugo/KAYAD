@@ -1,78 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Vehicle } from '../../../types';
-import { 
-  Lock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ShieldCheck, 
-  FileCheck, 
-  Search, 
-  Filter, 
-  Eye, 
-  ShieldAlert,
-  Building2,
-  UserCheck,
-  Zap,
-  Activity,
-  LayoutDashboard,
-  Car,
-  Users,
-  Wrench,
-  Landmark,
-  Shield,
-  Gavel,
-  ClipboardCheck,
-  AlertOctagon,
-  Ticket,
-  FileText,
-  PieChart,
-  CreditCard,
-  Percent,
-  Settings,
-  History,
-  Key,
-  Server,
-  Download,
-  Unlock,
-  RefreshCw,
-  PlusCircle,
-  TrendingUp,
-  Sliders,
-  BellRing
-} from 'lucide-react';
-import { 
-  PageHeader, 
-  StatWidget, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell, 
-  Badge, 
-  Button, 
-  Input, 
-  LazyImage,
-  Select
-} from '../../../components/ui';
-import { 
-  MockEnterpriseData, 
-  DealerRecord, 
-  PrivateSellerRecord, 
-  MechanicRecord, 
-  BankPartnerRecord, 
-  EscrowTxnRecord, 
-  AuctionRecord, 
-  InspectionRecord, 
-  DisputeRecord, 
-  FraudFlagRecord, 
-  SupportTicketRecord, 
-  AuditLogRecord, 
-  ApiEndpointRecord 
-} from '../../../data/mockEnterpriseData';
+import { Lock, ShieldCheck, Search, ShieldAlert, Building2, Zap, LayoutDashboard, Car, Users, Wrench, Landmark, Shield, Gavel, ClipboardCheck, AlertOctagon, Ticket, FileText, PieChart, CreditCard, Percent, Settings, History, Key, Server, Download, Unlock, TrendingUp, Sliders } from 'lucide-react';
+import { PageHeader, StatWidget, Card, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Select } from '../../../components/ui';
+import { MockEnterpriseData, DealerRecord, PrivateSellerRecord, EscrowTxnRecord, DisputeRecord, FraudFlagRecord, AuditLogRecord } from '../../../data/mockEnterpriseData';
 
 interface AdminViewProps {
   vehicles: Vehicle[];

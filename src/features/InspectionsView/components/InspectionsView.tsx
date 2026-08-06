@@ -8,50 +8,8 @@ import {
   INITIAL_INSPECTION_PAYMENTS, 
   INITIAL_INSPECTION_RATINGS 
 } from '../../../data/mockInspections';
-import { 
-  ShieldCheck, 
-  Search, 
-  MapPin, 
-  Star, 
-  CheckCircle2, 
-  Clock, 
-  DollarSign, 
-  FileCheck, 
-  UserCheck, 
-  Award, 
-  Wrench, 
-  Calendar, 
-  PlusCircle, 
-  ChevronRight, 
-  X, 
-  Download, 
-  Eye, 
-  Lock, 
-  AlertTriangle, 
-  TrendingUp, 
-  Landmark, 
-  Building2, 
-  Phone, 
-  Mail,
-  Sparkles,
-  Percent,
-  Check,
-  ThumbsUp,
-  Filter,
-  Car,
-  AlertCircle,
-  FileText,
-  Layers,
-  ExternalLink,
-  Shield,
-  Activity,
-  Info,
-  Navigation,
-  User,
-  CheckSquare,
-  Share2
-} from 'lucide-react';
-import { PageHeader, StatWidget, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Modal } from '../../../components/ui';
+import { ShieldCheck, Search, MapPin, Star, CheckCircle2, Clock, FileCheck, Award, Wrench, Calendar, PlusCircle, X, Download, Eye, Sparkles, Check, ThumbsUp, Activity, Navigation, User } from 'lucide-react';
+import { PageHeader, Card, CardHeader, CardTitle, CardContent, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, LazyImage, Modal } from '../../../components/ui';
 
 interface InspectionsViewProps {
   vehicles: Vehicle[];

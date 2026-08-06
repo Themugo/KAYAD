@@ -1,53 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
-import { isEscrowApplicable, getEscrowBadgeLabel } from '../utils/escrow';
-import { 
-  CheckCircle2, 
-  MapPin, 
-  Lock, 
-  MessageSquare, 
-  Heart, 
-  FileCheck, 
-  ShieldCheck, 
-  Landmark, 
-  Calculator, 
-  Gauge, 
-  Fuel, 
-  Sliders, 
-  Sparkles, 
-  Phone, 
-  Zap, 
-  Info, 
-  ChevronRight, 
-  ChevronLeft, 
-  Shield, 
-  Star, 
-  Award, 
-  Clock, 
-  ArrowRight, 
-  SearchX, 
-  AlertCircle, 
-  Gavel,
-  Maximize2,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  Building2,
-  UserCheck,
-  Car,
-  Wrench,
-  Share2,
-  ExternalLink,
-  Eye,
-  Calendar,
-  Layers,
-  ShieldAlert,
-  PlayCircle,
-  RotateCw,
-  Compass,
-  CheckSquare,
-  Sparkle
-} from 'lucide-react';
+import { isEscrowApplicable } from '../utils/escrow';
+import { CheckCircle2, MapPin, Lock, MessageSquare, Heart, FileCheck, ShieldCheck, Landmark, Calculator, Gauge, Fuel, Sliders, Sparkles, Zap, ChevronRight, ChevronLeft, Award, ArrowRight, SearchX, AlertCircle, Gavel, Maximize2, ChevronDown, ChevronUp, Check, Building2, Car, Wrench, Share2, Calendar, Layers, PlayCircle, RotateCw, Compass, CheckSquare } from 'lucide-react';
 import { Modal, Badge, Button, Card, LazyImage } from './ui';
 
 interface VehicleDetailModalProps {

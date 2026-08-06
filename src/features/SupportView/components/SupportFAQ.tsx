@@ -1,21 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Search, 
-  ShieldCheck, 
-  ClipboardCheck, 
-  Lock, 
-  Landmark, 
-  FileText, 
-  HelpCircle, 
-  CheckCircle2, 
-  MessageSquare, 
-  PhoneCall, 
-  ExternalLink,
-  Sparkles,
-  Car
-} from 'lucide-react';
+import { ChevronDown, ChevronUp, Search, ShieldCheck, ClipboardCheck, Lock, Landmark, FileText, HelpCircle, CheckCircle2, MessageSquare, PhoneCall, Sparkles } from 'lucide-react';
 import { Card, Badge, Input, Button } from '../../../components/ui';
 
 export type FAQCategory = 'all' | 'inspections' | 'escrow' | 'financing' | 'ntsa';

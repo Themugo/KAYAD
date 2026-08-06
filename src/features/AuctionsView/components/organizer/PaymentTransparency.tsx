@@ -1,15 +1,5 @@
 import React from 'react';
-import { 
-  Building2, 
-  Banknote, 
-  CreditCard, 
-  Clock, 
-  ShieldCheck,
-  AlertTriangle,
-  CheckCircle2,
-  Copy,
-  ExternalLink
-} from 'lucide-react';
+import { Building2, Banknote, Clock, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Card } from '../../../../components/ui/Card';
 import { Badge } from '../../../../components/ui/Badge';
 import type { AuctionOrganizerType } from '../../../../types';

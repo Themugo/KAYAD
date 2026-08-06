@@ -5,28 +5,7 @@
 
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
-  Bell, TrendingUp, Award, Bot, MessageSquare, Settings, ChevronRight, Menu, X,
-  User, LogOut, Moon, Sun, Globe, Shield, BellRing, Search, Plus, Minus,
-  Car, Camera, Image, Gauge, Wrench, Calendar, MapPin, Star, Trophy,
-  CheckCircle, AlertCircle, XCircle, Clock3, Package, Truck, Key, ShieldCheck,
-  Check, Circle, ArrowRight, ArrowLeft, PlusCircle, MinusCircle,
-  File, FileCheck, Upload, Download, Eye, Trash2, Share2, Copy, FileUp,
-  CreditCard, Building, Receipt, PiggyBank, Percent, Banknote, TrendingDown,
-  BarChart3, Sparkles, ArrowUpRight, RefreshCw, DollarSign as DollarSignIcon,
-  MessageCircle, Mail, Phone, Bell as BellIcon, CalendarCheck, Users,
-  BadgeCheck, BadgeDollarSign, ShieldAlert, ShieldCheck as ShieldCheckVerified,
-  Fingerprint, IdCard, MailCheck,
-  PlusCircle as PlusCircleIcon, Settings2, ExternalLink, Filter, SortAsc, Grid, List,
-  ClipboardList, ListChecks, ListOrdered, CheckSquare, Square,
-  Eye as EyeIcon, Heart as HeartIcon, MessageSquare as MessageSquareIcon, Timer, TrendingUp as TrendingUpIcon,
-  Lightbulb, Target, Zap,
-  HelpCircle, BookOpen, AlertTriangle, Info, ExternalLink as ExternalLinkIcon,
-  Phone as PhoneIcon, Mail as MailIcon,
-  Calendar as CalendarIcon, MapPin as MapPinIcon, Clock as ClockIcon,
-  UserCheck, CheckCircle2,
-} from 'lucide-react';
+import { Home, DollarSign, FileText, TrendingUp, Bot, ChevronRight, Menu, X, User, Shield, Car, Camera, CheckCircle, Circle, ArrowRight, BarChart3, Sparkles, MessageCircle, BadgeCheck, ShieldCheck as ShieldCheckVerified, PlusCircle as PlusCircleIcon, Eye as EyeIcon, Heart as HeartIcon, HelpCircle, Calendar as CalendarIcon } from 'lucide-react';
 
 // ============================================================
 // TYPES & INTERFACES

@@ -1,67 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile, SavedSearch } from '../../../types';
-import { INITIAL_MECHANICS, INITIAL_INSPECTION_BOOKINGS } from '../../../data/mockInspections';
-import { INITIAL_AUCTION_SESSIONS } from '../../../data/mockAuctions';
-import { 
-  LayoutDashboard, 
-  Heart, 
-  Lock, 
-  Bell, 
-  Gavel, 
-  ArrowRight, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Clock, 
-  TrendingDown, 
-  Eye, 
-  Sparkles,
-  Zap,
-  Building2,
-  FileText,
-  Users,
-  UserCheck,
-  Phone,
-  Mail,
-  PlusCircle,
-  X,
-  Search,
-  Filter,
-  Shield,
-  Briefcase,
-  Check,
-  Car,
-  Calculator,
-  Wrench,
-  Bookmark,
-  AlertTriangle,
-  Upload,
-  FileCheck,
-  MessageSquare,
-  Compass,
-  Trash2,
-  ExternalLink,
-  ChevronRight,
-  ChevronDown,
-  CheckSquare,
-  Info,
-  Layers,
-  Scale,
-  RefreshCw,
-  Award
-} from 'lucide-react';
-import { 
-  PageHeader, 
-  StatWidget, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  Badge, 
-  Button, 
-  LazyImage,
-  Input,
-  Select,
-  Modal
-} from '../../../components/ui';
+import { Heart, Lock, Bell, Gavel, ArrowRight, ShieldCheck, CheckCircle2, Clock, TrendingDown, Eye, Sparkles, Zap, Building2, UserCheck, Car, Calculator, Wrench, Bookmark, AlertTriangle, Upload, FileCheck, MessageSquare, Trash2, ChevronRight, Scale } from 'lucide-react';
+import { Card, Badge, Button, LazyImage, Modal } from '../../../components/ui';
 
 interface DashboardViewProps {
   savedVehicles: string[];

@@ -9,40 +9,7 @@ import { LiveAuctionRoomModal } from './LiveAuctionRoomModal';
 import { PostAuctionCompletionModal } from './PostAuctionCompletionModal';
 import { OrganizerManagementConsole } from './OrganizerManagementConsole';
 import { AuctionOrganizerDashboard } from './AuctionOrganizerDashboard';
-import { 
-  Gavel, 
-  Clock, 
-  Lock, 
-  CheckCircle2, 
-  ShieldCheck, 
-  History, 
-  X, 
-  Bell, 
-  Calendar, 
-  FileText, 
-  Check, 
-  ChevronRight, 
-  Search, 
-  Filter, 
-  Heart, 
-  TrendingUp, 
-  ArrowRight, 
-  Shield, 
-  Tag, 
-  RotateCcw,
-  Sparkles,
-  Zap,
-  DollarSign,
-  UserCheck,
-  Building2,
-  BarChart2,
-  Info,
-  Award,
-  PlusCircle,
-  EyeOff,
-  UserPlus,
-  Wrench
-} from 'lucide-react';
+import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, LazyImage, Input } from '../../../components/ui';
 
 interface AuctionsViewProps {

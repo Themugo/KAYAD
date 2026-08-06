@@ -1,56 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Vehicle, EscrowTransaction, ChatMessage, UserProfile } from '../../../types';
-import { 
-  Car, 
-  PlusCircle, 
-  Lock, 
-  CheckCircle2, 
-  Clock, 
-  TrendingUp, 
-  Eye, 
-  MessageSquare, 
-  ShieldCheck, 
-  DollarSign, 
-  FileText, 
-  AlertTriangle, 
-  Sparkles, 
-  Edit3, 
-  PauseCircle, 
-  PlayCircle, 
-  Trash2, 
-  Check, 
-  X, 
-  User, 
-  Phone, 
-  Mail, 
-  ArrowRight, 
-  ExternalLink, 
-  Upload, 
-  FileCheck, 
-  Wrench, 
-  Building2, 
-  CreditCard, 
-  RefreshCw, 
-  HelpCircle,
-  Search,
-  Filter,
-  CheckSquare,
-  Award,
-  ChevronRight,
-  ChevronDown
-} from 'lucide-react';
-import { 
-  PageHeader, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  Badge, 
-  Button, 
-  LazyImage,
-  Input,
-  Select,
-  Modal
-} from '../../../components/ui';
+import { Car, PlusCircle, Lock, CheckCircle2, Clock, Eye, MessageSquare, ShieldCheck, DollarSign, FileText, AlertTriangle, Sparkles, PauseCircle, PlayCircle, Trash2, Check, X, ArrowRight, Upload, Wrench, ChevronRight } from 'lucide-react';
+import { Card, Badge, Button, LazyImage, Input, Modal } from '../../../components/ui';
 
 export interface SellerOffer {
   id: string;

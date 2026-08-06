@@ -1,31 +1,6 @@
 import React, { useState } from 'react';
 import { AuctionSession } from '../../../types';
-import { 
-  ShieldCheck, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  FileText, 
-  Download, 
-  Wrench, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Star, 
-  User, 
-  Check, 
-  Building, 
-  Info, 
-  X, 
-  ChevronRight,
-  ExternalLink,
-  Car,
-  AlertCircle,
-  Copy,
-  Sparkles,
-  ArrowRight
-} from 'lucide-react';
+import { Calendar, Clock, MapPin, Phone, Mail, FileText, Download, Wrench, CheckCircle2, Star, Check, Building, X, Car, AlertCircle, Copy, ArrowRight } from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 
 export interface InspectorOption {

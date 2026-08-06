@@ -1,44 +1,8 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { Vehicle } from '../../../types';
 import BankFinancingPortal from './BankFinancingPortal';
-import { 
-  CreditCard, 
-  Calculator, 
-  ArrowRight, 
-  Landmark, 
-  CheckCircle2, 
-  Percent, 
-  FileCheck, 
-  Sparkles, 
-  ShieldCheck, 
-  Building2,
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  UploadCloud,
-  FileText,
-  AlertCircle,
-  Info,
-  Check,
-  X,
-  ExternalLink,
-  Lock,
-  Shield,
-  Car,
-  HelpCircle,
-  UserCheck,
-  Sliders,
-  DollarSign,
-  Briefcase,
-  FileSpreadsheet,
-  ArrowUpRight,
-  RefreshCw,
-  SearchCheck,
-  CheckSquare,
-  Square,
-  Search
-} from 'lucide-react';
-import { PageHeader, StatWidget, Card, Badge, Button, LazyImage } from '../../../components/ui';
+import { Calculator, ArrowRight, Landmark, CheckCircle2, Percent, FileCheck, Sparkles, ShieldCheck, Building2, Clock, ChevronDown, ChevronUp, UploadCloud, FileText, Info, X, Car, HelpCircle, UserCheck, Sliders, DollarSign, Briefcase, FileSpreadsheet, CheckSquare, Square } from 'lucide-react';
+import { StatWidget, Card, Badge, Button, LazyImage } from '../../../components/ui';
 
 interface FinancingViewProps {
   vehicles?: Vehicle[];

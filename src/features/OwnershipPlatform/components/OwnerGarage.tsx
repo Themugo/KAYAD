@@ -5,28 +5,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Car,
-  Warehouse,
-  Wrench,
-  Bell,
-  FileText,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  Clock,
-  Calendar,
-  DollarSign,
-  Fuel,
-  Shield,
-  ClipboardCheck,
-  Heart,
-  Eye,
-  ArrowRight,
-  ChevronRight,
-  Plus,
-  Settings,
-} from 'lucide-react';
+import { Car, Warehouse, Wrench, Bell, FileText, TrendingUp, TrendingDown, AlertTriangle, Calendar, DollarSign, Shield, ClipboardCheck, ChevronRight, Plus, Settings } from 'lucide-react';
 
 const KAYAD_COLORS = {
   lightNavy: '#1e3a5f',

@@ -2,46 +2,7 @@ import React, { useState } from 'react';
 import { Vehicle, AuctionSession } from '../../../types';
 import { createPlaceholderVehicle } from '../../../utils/vehicleDefaults';
 import { Card, Badge, Button, Input } from '../../../components/ui';
-import { 
-  Gavel, 
-  Users, 
-  TrendingUp, 
-  ShieldCheck, 
-  Settings, 
-  Activity, 
-  Clock, 
-  DollarSign, 
-  Eye, 
-  CheckCircle2, 
-  Play, 
-  Pause, 
-  Edit3, 
-  BarChart2, 
-  Radio, 
-  Zap, 
-  Search, 
-  ChevronRight, 
-  X, 
-  Sparkles, 
-  Sliders, 
-  Building2,
-  Lock,
-  ArrowUpRight,
-  AlertTriangle,
-  RefreshCw,
-  Award,
-  FileText,
-  Download,
-  UserCheck,
-  XCircle,
-  Crown,
-  Tag,
-  Percent,
-  Star,
-  Megaphone,
-  Layers,
-  Plus
-} from 'lucide-react';
+import { Gavel, Users, TrendingUp, ShieldCheck, Settings, Clock, DollarSign, Eye, CheckCircle2, Play, Pause, BarChart2, Radio, Zap, Search, X, Sparkles, Sliders, Building2, Lock, Award, FileText, Download, UserCheck, XCircle, Crown, Star, Megaphone, Plus } from 'lucide-react';
 
 export interface AuctionOrganizerDashboardProps {
   isOpen?: boolean;

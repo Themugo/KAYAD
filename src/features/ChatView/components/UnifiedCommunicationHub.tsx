@@ -1,57 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { 
-  UnifiedChatThread, 
-  UnifiedMessageItem, 
-  UnifiedCommCategory, 
-  MessageAttachment, 
-  Vehicle,
-  SharedTransactionFile
-} from '../../../types';
+import { UnifiedChatThread, UnifiedMessageItem, MessageAttachment, Vehicle, SharedTransactionFile } from '../../../types';
 import { MOCK_UNIFIED_THREADS } from '../../../data/mockUnifiedCommunication';
-import { 
-  MessageSquare, 
-  Bell, 
-  Lock, 
-  Gavel, 
-  ClipboardCheck, 
-  Landmark, 
-  Search, 
-  Send, 
-  Paperclip, 
-  Image as ImageIcon, 
-  FileText, 
-  MapPin, 
-  Calendar, 
-  Check, 
-  CheckCheck, 
-  ShieldCheck, 
-  Eye, 
-  Download, 
-  X, 
-  Sparkles, 
-  Car, 
-  ArrowUpRight,
-  Clock,
-  Sliders,
-  Filter,
-  Building2,
-  Users,
-  Ticket,
-  ChevronLeft,
-  Phone,
-  Unlock,
-  Video,
-  Plus,
-  AlertOctagon,
-  FileCheck,
-  CheckCircle2,
-  UserCheck,
-  Upload,
-  Info,
-  Shield,
-  Layers,
-  ChevronRight
-} from 'lucide-react';
+import { MessageSquare, Bell, Lock, Gavel, ClipboardCheck, Landmark, Search, Send, Paperclip, Image as ImageIcon, FileText, MapPin, Calendar, Check, CheckCheck, ShieldCheck, Eye, Download, Sparkles, Car, ArrowUpRight, Clock, Building2, Users, Ticket, ChevronLeft, Unlock, FileCheck, UserCheck, Upload, Info, Layers } from 'lucide-react';
 import { Card, Badge, Button, Input, Modal, LazyImage } from '../../../components/ui';
 
 interface UnifiedCommunicationHubProps {

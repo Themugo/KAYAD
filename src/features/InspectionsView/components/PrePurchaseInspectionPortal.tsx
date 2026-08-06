@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating, Vehicle } from '../../../types';
+import React, { useState } from 'react';
+import { Mechanic, InspectionBooking, InspectionReport, InspectionPayment, InspectionRating } from '../../../types';
 import { 
   INITIAL_MECHANICS, 
   INITIAL_INSPECTION_REPORTS, 
@@ -7,71 +7,8 @@ import {
   INITIAL_INSPECTION_PAYMENTS, 
   INITIAL_INSPECTION_RATINGS 
 } from '../../../data/mockInspections';
-import { 
-  ShieldCheck, 
-  Wrench, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  FileText, 
-  DollarSign, 
-  Star, 
-  Users, 
-  MapPin, 
-  Tag, 
-  Building2, 
-  BarChart3, 
-  PlusCircle, 
-  CheckCircle2, 
-  AlertTriangle, 
-  X, 
-  Camera, 
-  Video, 
-  Download, 
-  Upload, 
-  Edit3, 
-  Trash2, 
-  Eye, 
-  Send, 
-  Search, 
-  Filter, 
-  Phone, 
-  Mail, 
-  Lock, 
-  Check, 
-  Printer, 
-  Sparkles, 
-  Shield, 
-  Award, 
-  Car, 
-  TrendingUp, 
-  Landmark, 
-  CreditCard, 
-  ArrowRight, 
-  ChevronRight, 
-  Share2, 
-  FileCheck,
-  Zap,
-  RefreshCw,
-  Sliders,
-  CheckSquare
-} from 'lucide-react';
-import { 
-  StatWidget, 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell, 
-  Badge, 
-  Button, 
-  Input, 
-  LazyImage,
-  Modal 
-} from '../../../components/ui';
+import { ShieldCheck, Calendar as CalendarIcon, Clock, FileText, DollarSign, Star, Users, MapPin, Tag, Building2, BarChart3, CheckCircle2, X, Camera, Video, Download, Upload, Edit3, Eye, Search, Phone, Lock, Check, Printer, Sparkles, Award, TrendingUp, FileCheck, Zap, CheckSquare } from 'lucide-react';
+import { StatWidget, Card, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../../../components/ui';
 
 export type PortalModuleTab = 
   | 'dashboard' 

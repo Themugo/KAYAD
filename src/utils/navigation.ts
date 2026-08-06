@@ -1,4 +1,3 @@
-import { Vehicle } from '../types';
 
 export const VEHICLE_PARAM = 'vehicleId';
 

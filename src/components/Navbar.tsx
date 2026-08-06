@@ -1,36 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Car, 
-  PlusCircle, 
-  Menu, 
-  X, 
-  MapPin, 
-  ShieldCheck, 
-  User, 
-  ChevronDown,
-  Gavel,
-  CreditCard,
-  HelpCircle,
-  Heart,
-  Bell,
-  LogOut,
-  LayoutDashboard,
-  MessageSquare,
-  Building2,
-  Lock,
-  Settings,
-  Bookmark,
-  BarChart3,
-  Layers,
-  Calendar,
-  FileText,
-  Sliders,
-  Sparkles,
-  CheckCircle2,
-  Landmark,
-  Radio,
-  Play,
-} from 'lucide-react';
+import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, Gavel, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark, Radio, Play } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface NavbarProps {

@@ -1,43 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Dealer, Vehicle, DealerReview, BodyStyle } from '../../../types';
-import { 
-  Building2, 
-  ShieldCheck, 
-  MapPin, 
-  Star, 
-  Phone, 
-  Mail, 
-  CheckCircle2, 
-  Clock, 
-  UserCheck, 
-  Lock, 
-  Award, 
-  ExternalLink,
-  MessageSquare,
-  FileCheck,
-  Share2,
-  Heart,
-  Navigation,
-  Calendar,
-  Filter,
-  Search,
-  X,
-  Check,
-  ArrowRight,
-  Sparkles,
-  ChevronRight,
-  ThumbsUp,
-  Wrench,
-  Shield,
-  CreditCard,
-  Globe,
-  Landmark,
-  Eye,
-  Compass,
-  Car,
-  ChevronLeft
-} from 'lucide-react';
-import { Modal, Badge, Button, Input, Select, Card, LazyImage } from '../../../components/ui';
+import { Dealer, Vehicle, BodyStyle } from '../../../types';
+import { Building2, ShieldCheck, MapPin, Star, Phone, Mail, CheckCircle2, Clock, UserCheck, Lock, Award, MessageSquare, FileCheck, Share2, Heart, Navigation, Calendar, Search, X, ArrowRight, Sparkles, ChevronRight, CreditCard, Globe, Landmark, Eye, Compass, Car } from 'lucide-react';
+import { Modal, Badge, Button, LazyImage } from '../../../components/ui';
 import VehicleCard from '../../../components/VehicleCard';
 import { INITIAL_DEALER_BUSINESSES } from '../../../data/mockDealersData';
 

@@ -1,18 +1,5 @@
 import React from 'react';
-import { 
-  ShieldCheck, 
-  Award, 
-  Building2, 
-  Landmark, 
-  Users, 
-  CheckCircle2,
-  BadgeCheck,
-  Banknote,
-  FileCheck,
-  Clock,
-  ThumbsUp,
-  AlertCircle
-} from 'lucide-react';
+import { ShieldCheck, Award, Building2, Landmark, Users, CheckCircle2, BadgeCheck, Banknote, FileCheck, Clock, ThumbsUp } from 'lucide-react';
 import type { AuctionOrganizerType } from '../../../../types';
 
 export interface TrustBadgeProps {

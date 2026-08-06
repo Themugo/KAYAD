@@ -1,22 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Dealer, Vehicle } from '../../../types';
-import { 
-  Building2, 
-  ShieldCheck, 
-  MapPin, 
-  Star, 
-  ExternalLink, 
-  Search, 
-  Phone, 
-  Mail, 
-  CheckCircle2, 
-  UserCheck, 
-  Lock, 
-  Sparkles, 
-  Filter,
-  Crown,
-  Layers
-} from 'lucide-react';
+import { Building2, ShieldCheck, MapPin, Star, ExternalLink, Search, Phone, Mail, CheckCircle2, UserCheck, Sparkles, Filter, Crown } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, Input, LazyImage } from '../../../components/ui';
 import DealerProfileModal from './DealerProfileModal';
 import DealerBusinessView from './DealerBusinessView';

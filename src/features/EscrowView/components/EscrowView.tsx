@@ -1,39 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { EscrowTransaction, EscrowLogEntry, EscrowDispute } from '../../../types';
-import { 
-  Shield, 
-  Lock, 
-  CheckCircle2, 
-  Landmark, 
-  Clock, 
-  ArrowRight, 
-  Search, 
-  ShieldCheck, 
-  FileCheck, 
-  UserCheck, 
-  Building2,
-  Sparkles,
-  ChevronRight,
-  Info,
-  PlusCircle,
-  AlertTriangle,
-  History,
-  TrendingUp,
-  DollarSign,
-  Car,
-  FileText,
-  MessageSquare,
-  RefreshCw,
-  AlertCircle,
-  HelpCircle,
-  Eye,
-  Check,
-  User,
-  ShieldAlert,
-  Download,
-  Upload,
-  PhoneCall
-} from 'lucide-react';
+import { Lock, CheckCircle2, Landmark, Clock, Search, ShieldCheck, FileCheck, UserCheck, Building2, Sparkles, ChevronRight, Info, PlusCircle, AlertTriangle, History, Car, FileText, MessageSquare, RefreshCw, Eye, Check, User, ShieldAlert, Download, Upload, PhoneCall } from 'lucide-react';
 import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../../../components/ui';
 
 interface EscrowViewProps {

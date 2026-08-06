@@ -1,36 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
-import { OrganizerProfile } from './organizer';
-import { 
-  Gavel, 
-  Clock, 
-  ShieldCheck, 
-  Building2, 
-  Lock, 
-  TrendingUp, 
-  UserPlus, 
-  EyeOff, 
-  ChevronLeft, 
-  ChevronRight, 
-  AlertCircle, 
-  CheckCircle2, 
-  Bookmark, 
-  BookmarkCheck, 
-  Bot, 
-  Zap, 
-  Info, 
-  FileText, 
-  X, 
-  Activity, 
-  Award,
-  Sparkles,
-  HelpCircle,
-  ExternalLink,
-  Star,
-  Phone,
-  Mail
-} from 'lucide-react';
+import { Clock, ShieldCheck, Lock, TrendingUp, EyeOff, ChevronLeft, ChevronRight, AlertCircle, CheckCircle2, Bookmark, BookmarkCheck, Bot, Info, X, Activity, Award } from 'lucide-react';
 import { Card, Badge, Button, Input } from '../../../components/ui';
 
 // Helper to get organizer type display name
