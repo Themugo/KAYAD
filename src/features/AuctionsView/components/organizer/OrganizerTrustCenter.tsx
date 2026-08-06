@@ -1,7 +1,6 @@
 import React from 'react';
 import { ShieldCheck, Landmark, MapPin, Phone, Mail, Clock, Star, TrendingUp, Users, CheckCircle2, ExternalLink, FileText } from 'lucide-react';
-import { Card } from '../../../../components/ui/Card';
-import { Badge } from '../../../../components/ui/Badge';
+import { Card, Badge } from '../../../../components/ui';
 import { TrustBadge, OrganizerTypeBadge, getOrganizerBadge } from './TrustBadge';
 import { BuyerProtectionNotice } from './BuyerProtectionNotice';
 import { PaymentTransparency, PaymentDetails } from './PaymentTransparency';

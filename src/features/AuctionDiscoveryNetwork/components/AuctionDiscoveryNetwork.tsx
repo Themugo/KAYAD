@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Gavel, Clock, Shield, ShieldCheck, Building2, CheckCircle2, ChevronRight, MapPin, Calendar, Eye, Users, FileText, ClipboardCheck, Play, Radio, Trophy, BookOpen, Star, UserPlus, Bookmark, RefreshCw, Bell, Search, Filter, Grid, List, Mail, Award, Truck, FileCheck, Car as CarIcon, Landmark, Gem, Bus, BookmarkPlus, Globe, CalendarDays, CalendarClock, Building } from 'lucide-react';
-import { Card } from '../../../components/ui/Card';
-import { Badge } from '../../../components/ui/Badge';
-import { Button } from '../../../components/ui/Button';
+import { Card, Badge, Button } from '../../../components/ui';
 
 // Types
 type AuctionStatus = 'live' | 'upcoming' | 'completed';

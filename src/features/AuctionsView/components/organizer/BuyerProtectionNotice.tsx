@@ -1,6 +1,6 @@
 import React from 'react';
 import { Shield, Info, AlertCircle } from 'lucide-react';
-import { Card } from '../../../../components/ui/Card';
+import { Card } from '../../../../components/ui';
 
 export interface BuyerProtectionNoticeProps {
   variant?: 'compact' | 'full' | 'inline';

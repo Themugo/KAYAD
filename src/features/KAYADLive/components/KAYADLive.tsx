@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { Radio, Car, ShieldCheck, Building2, Eye, Users, ClipboardCheck, Play, BookOpen, RefreshCw, Bell, Search, Filter, Grid, FileCheck, VideoOff, Globe, CalendarClock, Newspaper, Star as StarIcon, MapPin, ChevronRight, PlayCircle, Building, Shield, Calendar, Calculator, Banknote, PiggyBank, GraduationCap as GraduationCapIcon, Sparkles } from 'lucide-react';
-import { Card } from '../../../components/ui/Card';
-import { Badge } from '../../../components/ui/Badge';
-import { Button } from '../../../components/ui/Button';
+import { Card, Badge, Button } from '../../../components/ui';
 
 // Types
 type ContentChannel = 'live' | 'dealer' | 'arrivals' | 'inspection' | 'news' | 'guides' | 'financing' | 'reviews' | 'events';

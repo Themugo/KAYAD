@@ -1,7 +1,6 @@
 import React from 'react';
 import { Building2, Banknote, Clock, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Card } from '../../../../components/ui/Card';
-import { Badge } from '../../../../components/ui/Badge';
+import { Card, Badge } from '../../../../components/ui';
 import type { AuctionOrganizerType } from '../../../../types';
 
 export interface PaymentDetails {

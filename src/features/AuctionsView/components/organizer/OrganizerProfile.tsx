@@ -14,8 +14,7 @@ import {
   Users,
   CheckCircle2
 } from 'lucide-react';
-import { Badge } from '../../../../components/ui/Badge';
-import { Card } from '../../../../components/ui/Card';
+import { Badge, Card } from '../../../../components/ui';
 import type { AuctionOrganizerType } from '../../../../types';
 
 export interface OrganizerProfileProps {
