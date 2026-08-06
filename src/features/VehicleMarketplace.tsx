@@ -510,6 +510,39 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       </div>
 
+      {/* 1.5 TRUST STRIP — the three things that make KAYAD a marketplace, not a listings board */}
+      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl px-4 py-3.5 sm:px-6 shadow-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <Lock className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-black text-white leading-tight">Escrow-Protected Payments</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">Funds held safely until you confirm handover</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 sm:pl-6">
+            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-black text-white leading-tight">150-Point Certified</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">Every inspected listing checked before it's live</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 sm:pl-6">
+            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <Gavel className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-black text-white leading-tight">Live Vehicle Auctions</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">Bid in real time on verified stock</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 2. FILTER SUMMARY (Removable Chips) */}
       {activeFilters.length > 0 && (
         <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-2 text-xs">
@@ -976,7 +1009,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <div
                 key={`rv-${v.id}`}
                 onClick={() => handleVehicleSelect(v)}
-                className="w-64 shrink-0 bg-white rounded-2xl p-3 border border-slate-200 hover:border-[#1E3063]/40 hover:shadow-md transition-all cursor-pointer space-y-2"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleVehicleSelect(v);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View details for ${v.title}`}
+                className="w-64 shrink-0 bg-white rounded-2xl p-3 border border-slate-200 hover:border-[#1E3063]/40 hover:shadow-md transition-all cursor-pointer space-y-2 focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:ring-offset-2"
               >
                 <div className="relative h-32 rounded-xl overflow-hidden bg-slate-100">
                   <img src={v.image} alt={v.title} className="w-full h-full object-cover" />

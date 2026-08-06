@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI } from '../../../api/api';
-import CartyGrid from '../../../components/CartyGrid';
 import useMediaQuery from '../../../hooks/useMediaQuery';
+
+// Local stub replacing removed duplicate component (this file is dead code / unreachable from the live app)
+const CartyGrid = ({ car }: any) => (
+  <div className="border rounded-lg p-3">{car?.title || `${car?.make} ${car?.model}`}</div>
+);
 
 export default function SimilarCars({ carId, brand }) {
   const [cars, setCars] = useState([]);

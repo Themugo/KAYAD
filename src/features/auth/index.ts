@@ -1,1 +1,2 @@
-export * from '../../components/auth/AuthModal';
+// (barrel emptied — prior export pointed to a now-removed duplicate file)
+export {};

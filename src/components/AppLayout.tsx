@@ -1,10 +1,6 @@
 import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { adminAPI } from '../api/api';
 import Navbar from './Navbar';
-import Footer from './Footer';
-import CompareDrawer from './CompareDrawer';
-import DemoModeBanner from './DemoModeBanner';
-import MobileBottomNav from './MobileBottomNav';
 
 interface SiteConfig {
   fontDisplay?: string;
@@ -50,7 +46,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <a href="#app-main-content" className="skip-link">
         Skip to main content
       </a>
-      <DemoModeBanner />
       <Navbar
         user={null}
         activeNav=""
@@ -63,9 +58,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <main id="app-main-content" className="app-main" role="main" tabIndex={-1} style={{ paddingBottom: 'var(--bottom-nav-h, 0px)' }}>
         {children}
       </main>
-      <Footer />
-      <MobileBottomNav />
-      <CompareDrawer />
     </div>
   );
 }

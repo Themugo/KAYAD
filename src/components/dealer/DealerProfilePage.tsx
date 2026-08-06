@@ -4,11 +4,31 @@ import { useState } from 'react';
 import { Building2, Star, MapPin, Phone, Mail, ShieldCheck, CheckCircle2, Calendar } from 'lucide-react';
 import { mockDealers } from '../../data/mockData';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { VehicleCard } from '../gallery/VehicleCard';
 import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
-import { Input } from '../ui/Input';
-import { SearchBar } from '../ui/SearchBar';
+
+// Local stubs replacing removed duplicate UI components (this file is dead code / unreachable from the live app)
+const Input = ({ label, ...props }: any) => (
+  <div>
+    {label && <label className="block text-sm font-medium mb-1">{label}</label>}
+    <input {...props} className="w-full px-3 py-2 border rounded-lg" />
+  </div>
+);
+const Modal = ({ isOpen, onClose, title, subtitle, children }: any) => {
+  if (!isOpen) return null;
+  return (
+    <div role="dialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+        {title && <h2 className="text-lg font-bold">{title}</h2>}
+        {subtitle && <p className="text-sm text-slate-500 mb-4">{subtitle}</p>}
+        {children}
+      </div>
+    </div>
+  );
+};
+const VehicleCard = ({ vehicle }: any) => (
+  <div className="border rounded-lg p-3">{vehicle?.make} {vehicle?.model}</div>
+);
+const SearchBar = (_props: any) => null;
 
 export const DealerProfilePage: FC = () => {
   const { vehicles, openChat } = useMarketplace();

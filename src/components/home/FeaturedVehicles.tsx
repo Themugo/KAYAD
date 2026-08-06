@@ -2,8 +2,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { Sparkles, ArrowRight, Search, ShieldCheck } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { VehicleCard } from '../gallery/VehicleCard';
-import { FeaturedVehiclesSkeleton } from '../ui/Skeleton';
+import { VehicleCard } from '../VehicleCard';
 import type { FC } from 'react';
 
 interface FeaturedVehiclesProps {
@@ -17,7 +16,7 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
   const [searchQuery, setSearchQuery] = useState('');
 
   if (isLoading) {
-    return <FeaturedVehiclesSkeleton />;
+    return null;
   }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -113,7 +112,16 @@ export const FeaturedVehicles: FC<FeaturedVehiclesProps> = ({ isLoading: propsIs
         {filteredVehicles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {filteredVehicles.slice(0, 8).map(vehicle => (
-              <VehicleCard key={vehicle.id} vehicle={vehicle} />
+              <VehicleCard
+                key={vehicle.id}
+                vehicle={vehicle}
+                isSaved={false}
+                isCompared={false}
+                onToggleSave={() => {}}
+                onToggleCompare={() => {}}
+                onQuickView={() => {}}
+                onStartEscrow={() => {}}
+              />
             ))}
           </div>
         ) : (

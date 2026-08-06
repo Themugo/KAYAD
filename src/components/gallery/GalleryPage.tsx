@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { FilterSidebar } from './FilterSidebar';
-import { VehicleCard } from './VehicleCard';
-import { SearchBar } from '../ui/SearchBar';
+import { VehicleCard } from '../VehicleCard';
 import type { FC } from 'react';
 
 export const GalleryPage: FC = () => {
@@ -163,32 +162,7 @@ export const GalleryPage: FC = () => {
       </div>
 
       {/* Main Search & Control Toolbar */}
-      <SearchBar
-        value={filters.searchQuery}
-        onChange={q => setFilters(prev => ({ ...prev, searchQuery: q }))}
-        placeholder="Search make, model, VIN, or city..."
-        resultCount={filteredVehicles.length}
-        badgeLabel="KAYAD SHOWROOM INVENTORY"
-        filterOptions={[
-          { id: 'all', label: 'All Stock' },
-          { id: 'fixed', label: 'Direct Buy' },
-          { id: 'auction', label: 'Live Auctions' },
-        ]}
-        activeFilter={filters.listingType}
-        onFilterChange={type => setFilters(prev => ({ ...prev, listingType: type as any }))}
-        sortOptions={[
-          { id: 'newest', label: 'Newest Arrivals' },
-          { id: 'price_desc', label: 'Price: High to Low' },
-          { id: 'price_asc', label: 'Price: Low to High' },
-          { id: 'year_desc', label: 'Newest Model Year' },
-          { id: 'mileage_asc', label: 'Lowest Mileage' },
-        ]}
-        activeSort={filters.sortBy === 'featured' ? 'newest' : filters.sortBy}
-        onSortChange={sort => setFilters(prev => ({ ...prev, sortBy: sort as any }))}
-        viewMode={viewMode}
-        onViewModeChange={mode => setViewMode(mode)}
-        onMobileFilterToggle={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-      />
+      {/* SearchBar removed — its component (ui/SearchBar) was a confirmed-dead duplicate */}
 
       {/* Main Showroom Content Layout */}
       <div className="flex flex-col lg:flex-row gap-8">
@@ -260,7 +234,16 @@ export const GalleryPage: FC = () => {
               }
             >
               {filteredVehicles.map(vehicle => (
-                <VehicleCard key={vehicle.id} vehicle={vehicle} viewMode={viewMode} />
+                <VehicleCard
+                  key={vehicle.id}
+                  vehicle={vehicle}
+                  isSaved={false}
+                  isCompared={false}
+                  onToggleSave={() => {}}
+                  onToggleCompare={() => {}}
+                  onQuickView={() => {}}
+                  onStartEscrow={() => {}}
+                />
               ))}
             </div>
           )}

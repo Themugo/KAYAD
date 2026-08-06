@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import VehicleDetailModal from './components/VehicleDetailModal';
@@ -10,23 +10,25 @@ import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from
 import { Vehicle, ChatMessage, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 
-// Views
-import AuctionsView from './features/AuctionsView';
-import EscrowView from './features/EscrowView';
-import InspectionsView from './features/InspectionsView';
-import FinancingView from './features/FinancingView';
-import DealersView from './features/DealersView';
-import DashboardView from './features/DashboardView';
-import PrivateSellerDashboardView from './features/PrivateSellerDashboardView';
-import ChatView from './features/ChatView';
-import AdminView from './features/AdminView';
-import SupportView from './features/SupportView';
-import LiveAuctionBroadcastPage from './pages/LiveAuctionBroadcastPage';
-import AuctionDiscoveryNetwork from './pages/AuctionDiscoveryNetwork';
-import KAYADLive from './pages/KAYADLive';
-import { BuyerPlatform } from './features/OwnershipPlatform';
-import { PrivateSellerPlatform } from './features/PrivateSellerPlatform';
-import { FinanceMarketplace } from './features/FinancePlatform';
+// Views — lazy-loaded so each is its own chunk, downloaded only when the
+// user navigates there, instead of all being bundled into the initial load.
+// VehicleMarketplace stays a static import since it's the default/landing view.
+const AuctionsView = lazy(() => import('./features/AuctionsView'));
+const EscrowView = lazy(() => import('./features/EscrowView'));
+const InspectionsView = lazy(() => import('./features/InspectionsView'));
+const FinancingView = lazy(() => import('./features/FinancingView'));
+const DealersView = lazy(() => import('./features/DealersView'));
+const DashboardView = lazy(() => import('./features/DashboardView'));
+const PrivateSellerDashboardView = lazy(() => import('./features/PrivateSellerDashboardView'));
+const ChatView = lazy(() => import('./features/ChatView'));
+const AdminView = lazy(() => import('./features/AdminView'));
+const SupportView = lazy(() => import('./features/SupportView'));
+const LiveAuctionBroadcastPage = lazy(() => import('./pages/LiveAuctionBroadcastPage'));
+const AuctionDiscoveryNetwork = lazy(() => import('./pages/AuctionDiscoveryNetwork'));
+const KAYADLive = lazy(() => import('./pages/KAYADLive'));
+const BuyerPlatform = lazy(() => import('./features/OwnershipPlatform').then(m => ({ default: m.BuyerPlatform })));
+const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatform').then(m => ({ default: m.PrivateSellerPlatform })));
+const FinanceMarketplace = lazy(() => import('./features/FinancePlatform').then(m => ({ default: m.FinanceMarketplace })));
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -189,6 +191,11 @@ export function App() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
         {/* Module Switcher Rendering */}
+        <Suspense fallback={
+          <div className="flex items-center justify-center py-24">
+            <div className="w-8 h-8 border-4 border-slate-200 border-t-[#17244B] rounded-full animate-spin" />
+          </div>
+        }>
         {activeNav === 'marketplace' && (
             <VehicleMarketplace
               vehicles={vehicles}
@@ -345,6 +352,7 @@ export function App() {
               onOpenAuthModal={() => setShowAuthModal(true)}
             />
           )}
+        </Suspense>
         </main>
 
       {/* 3. Footer */}

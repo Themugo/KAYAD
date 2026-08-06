@@ -1,4 +1,3 @@
-import { Modal } from '../ui/Modal';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { CheckCircle, AlertTriangle, ShieldCheck, Database, Layers, ArrowRight, Download, Server } from 'lucide-react';
@@ -9,14 +8,12 @@ interface ArchitectureReportModalProps {
 }
 
 export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="KAYAD Automotive Architecture & Systems Matrix"
-      subtitle="Technical Specifications & Architecture Overview for KAYAD"
-      maxWidth="4xl"
-    >
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div onClick={(e) => e.stopPropagation()} className="bg-white dark:bg-slate-900 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+      <h2 className="text-xl font-bold mb-1">KAYAD Automotive Architecture & Systems Matrix</h2>
+      <p className="text-sm text-slate-500 mb-4">Technical Specifications & Architecture Overview for KAYAD</p>
       <div className="space-y-8 text-slate-800 dark:text-slate-200">
         {/* Executive Summary */}
         <div className="p-5 rounded-2xl bg-[#00C9A7]/10 border border-[#00C9A7]/20">
@@ -157,6 +154,7 @@ export const ArchitectureReportModal: React.FC<ArchitectureReportModalProps> = (
           </Button>
         </div>
       </div>
-    </Modal>
+    </div>
+    </div>
   );
 };

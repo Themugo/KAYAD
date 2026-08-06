@@ -4,7 +4,6 @@ import { MessageSquareText, X, Send, ShieldCheck, DollarSign, Car, ExternalLink 
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
 
 export const ChatDrawer: FC = () => {
   const { isChatOpen, closeChat, activeChatVehicleId, vehicles, navigateTo, initiateEscrow } = useMarketplace();
@@ -223,14 +222,16 @@ export const ChatDrawer: FC = () => {
               <p className="text-xs text-[#6B7A99]">
                 Offers accepted by the dealer will immediately transition into a secure KAYAD Escrow agreement.
               </p>
-              <Input
-                label="Offer Amount (USD)"
-                type="number"
-                placeholder={`e.g. ${targetVehicle?.price}`}
-                value={offerAmount}
-                onChange={e => setOfferAmount(e.target.value)}
-                leftIcon={<DollarSign className="w-4 h-4" />}
-              />
+              <div>
+                <label className="block text-sm font-medium mb-1">Offer Amount (USD)</label>
+                <input
+                  type="number"
+                  placeholder={`e.g. ${targetVehicle?.price}`}
+                  value={offerAmount}
+                  onChange={e => setOfferAmount(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg"
+                />
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={() => setOfferModalOpen(false)}>
                   Cancel

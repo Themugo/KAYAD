@@ -37,12 +37,19 @@ import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
-import { Input } from '../ui/Input';
 import type React from 'react';
 import type { FC } from 'react';
 import { NavigationBar } from '../common/NavigationBar';
-import { Skeleton, VehicleDetailSkeleton } from '../ui/Skeleton';
 import { PriceAlertModal } from './PriceAlertModal';
+
+// Local stubs replacing removed duplicate UI components (this file is dead code / unreachable from the live app)
+const Input = ({ label, ...props }: any) => (
+  <div>
+    {label && <label className="block text-sm font-medium mb-1">{label}</label>}
+    <input {...props} className="w-full px-3 py-2 border rounded-lg" />
+  </div>
+);
+const Skeleton = ({ className }: any) => <div className={className} />;
 
 export const VehicleDetailPage: FC = () => {
   const { 

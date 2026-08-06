@@ -1,6 +1,4 @@
-import type { Car } from '../components/features/car/CarCard';
-
-export const CARS: Car[] = [
+export const CARS: any[] = [
   {
     id: 1,
     make: 'TOYOTA',

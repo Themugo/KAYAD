@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Gavel, Clock, Flame, ShieldCheck, MapPin, ArrowRight } from 'lucide-react';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { LiveAuctionsSkeleton } from '../ui/Skeleton';
 import type { FC } from 'react';
 
 interface LiveAuctionsSectionProps {
@@ -13,7 +12,7 @@ export const LiveAuctionsSection: FC<LiveAuctionsSectionProps> = ({ isLoading: p
   const isLoading = propsIsLoading ?? contextIsLoading;
 
   if (isLoading) {
-    return <LiveAuctionsSkeleton />;
+    return null;
   }
 
   // Filter for auction or both

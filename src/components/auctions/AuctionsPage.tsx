@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { NavigationBar } from '../common/NavigationBar';
-import { SearchBar } from '../ui/SearchBar';
 import type React from 'react';
 import type { FC } from 'react';
 
@@ -512,32 +511,6 @@ export const AuctionsPage: FC = () => {
       {/* Live Active Lots Directory */}
       <div className="space-y-6">
         {/* Standardized KAYAD Search Bar */}
-        <SearchBar
-          value={searchQuery}
-          onChange={setSearchQuery}
-          placeholder="Search lot by make, model, VIN, or hub..."
-          resultCount={filteredLots.length}
-          badgeLabel="LIVE AUCTION DIRECTORY"
-          filterOptions={[
-            { id: 'all', label: 'All Auctions' },
-            { id: 'live', label: 'Live Bidding' },
-            { id: 'upcoming', label: 'Coming Up' },
-            { id: 'ended', label: 'Ended / Closed' },
-            { id: 'canceled', label: 'Canceled' },
-            { id: 'suspended', label: 'Suspended' },
-            { id: 'featured', label: 'Featured Only' },
-          ]}
-          activeFilter={filterCategory}
-          onFilterChange={setFilterCategory}
-          sortOptions={[
-            { id: 'ending_soon', label: 'Ends Soonest' },
-            { id: 'bid_high', label: 'Highest Bid' },
-            { id: 'bid_low', label: 'Lowest Bid' },
-            { id: 'most_bids', label: 'Most Active' },
-          ]}
-          activeSort={sortBy}
-          onSortChange={setSortBy}
-        />
 
         {filteredLots.length === 0 ? (
           <div className="p-10 sm:p-14 text-center bg-white border border-[#E2D8C7] rounded-3xl space-y-4 shadow-sm">
