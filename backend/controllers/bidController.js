@@ -10,6 +10,7 @@ import { sendSMS } from "../utils/sms.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { applySnipingProtection } from "../utils/snipeGuard.js";
 import { getIO } from "../utils/io.js";
+import { getSupabase } from "../utils/supabase.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { findOrCreateLeadFromAuction, addLeadActivity, updateLeadStage } from "../services/leadService.js";
 import { logAuctionBidPlaced } from "../services/auditService.js";
@@ -342,11 +343,58 @@ export const placeBid = async (req, res) => {
     if (payment.mode === "mock") {
       const previousHighestBidder = car.highestBidder;
 
+      // Race-condition fix: car.save() (used everywhere else in this
+      // codebase) does an unconditional UPDATE ... WHERE id = ?, with no
+      // check against the current_bid value this request actually read.
+      // Two concurrent bids on the same car could both read the same
+      // currentBid, both pass the "is my bid higher" validation above,
+      // and then "last write wins" on the plain update - meaning the
+      // recorded highest bid/bidder could end up being whichever request
+      // happened to commit last, not whichever bid was actually higher.
+      // startSession()/session.save() provide no protection either -
+      // utils/supabaseSession.js is a Mongoose-API-compatible stub that
+      // tracks an in-memory boolean and does not wrap anything in a real
+      // database transaction.
+      //
+      // Fixed with optimistic concurrency instead of a real transaction
+      // (which would require rearchitecting the shared save() used by
+      // every model in this codebase - far riskier than this focused
+      // fix): the update is conditioned on current_bid still matching
+      // the value this request read. If another bid committed in
+      // between, this UPDATE affects zero rows, and the request is
+      // rejected with a clear, retryable error instead of silently
+      // overwriting a legitimately higher concurrent bid.
+      const sb = getSupabase();
+      // Schema default is `current_bid NUMERIC DEFAULT 0` (never null in
+      // the database), so normalizing a possibly-null/undefined in-memory
+      // value to 0 here always matches what's actually stored.
+      const previousBidValue = car.currentBid ?? 0;
+      const { data: raceCheckedRows, error: raceCheckError } = await sb
+        .from("cars")
+        .update({
+          current_bid: amount,
+          highest_bidder_id: userId,
+          bids_count: (car.bidsCount || 0) + 1,
+        })
+        .eq("id", carId)
+        .eq("current_bid", previousBidValue)
+        .select("id");
+
+      if (raceCheckError) throw raceCheckError;
+
+      if (!raceCheckedRows || raceCheckedRows.length === 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(409).json({
+          success: false,
+          message: "Another bid was placed just before yours. Please refresh and try again.",
+          code: "BID_CONFLICT",
+        });
+      }
+
       car.currentBid = amount;
       car.highestBidder = userId;
       car.bidsCount = (car.bidsCount || 0) + 1;
-
-      await car.save({ session });
 
       // ⏱ SNIPING PROTECTION BEFORE AUTO-BID
       await applySnipingProtection(car);
