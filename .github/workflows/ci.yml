@@ -67,7 +67,53 @@ jobs:
         run: npm ci
 
       - name: Dependency audit
-        run: npm audit --audit-level=high
+        run: |
+          # GHSA-qwww-vcr4-c8h2 (react-router RSC-mode CSRF advisory) is
+          # allowlisted here after investigation: this app is a
+          # client-only Vite SPA using zero React Server Components, so
+          # the advisory doesn't apply to how it's actually used. The
+          # suggested fix (npm audit fix --force) downgrades to
+          # react-router-dom@7.11.0, which carries 9 vulnerabilities
+          # instead of 1 - a regression, not a fix - and no patched
+          # version exists yet that resolves this without introducing
+          # worse issues. Any OTHER high/critical advisory still fails
+          # the build normally; this only allowlists this one, specific,
+          # already-triaged finding.
+          ALLOWLIST="GHSA-qwww-vcr4-c8h2"
+          npm audit --json > /tmp/audit.json 2>/dev/null || true
+          RESULT=$(python3 - "$ALLOWLIST" << 'PYEOF'
+          import json, sys
+          allowlist = set(sys.argv[1].split())
+          with open('/tmp/audit.json') as f:
+              data = json.load(f)
+          all_advisory_ids = set()
+          high_crit_packages = []
+          for name, v in data.get('vulnerabilities', {}).items():
+              sev = v.get('severity')
+              has_direct = False
+              for via in v.get('via', []):
+                  if isinstance(via, dict) and via.get('url'):
+                      gid = via['url'].rstrip('/').split('/')[-1]
+                      all_advisory_ids.add(gid)
+                      has_direct = True
+              if sev in ('high', 'critical'):
+                  high_crit_packages.append(name)
+          unexpected = all_advisory_ids - allowlist
+          if unexpected:
+              print("FAIL:unexpected_advisory:" + ",".join(sorted(unexpected)))
+          elif high_crit_packages and not all_advisory_ids:
+              print("FAIL:unverifiable:" + ",".join(high_crit_packages))
+          else:
+              print("PASS")
+          PYEOF
+          )
+          if [[ "$RESULT" == PASS ]]; then
+            echo "No unexpected high/critical vulnerabilities (GHSA-qwww-vcr4-c8h2 allowlisted, see above)."
+          else
+            echo "::error::Dependency audit failed: $RESULT"
+            echo "Run 'npm audit' locally to see full details."
+            exit 1
+          fi
 
       - name: Check for secrets in code
         run: |
