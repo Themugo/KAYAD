@@ -25,7 +25,6 @@ import { globalLimiter, authLimiter, adminLimiter, webhookLimiter, socketRateLim
 
 // ─── Security Middleware ───────────────────────────────────────
 import { mongoSanitize as sanitizeInput, xssProtection, paginationCap, extraHeaders, bodyGuard, hppProtection } from "./middleware/security.js";
-import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection, csrfToken } from "./middleware/csrf.js";
 import { idempotencyCheck } from "./middleware/idempotency.js";
@@ -733,7 +732,21 @@ app.use(seoRoutes);
 // "API ROUTES (VERSIONED)" section - it was duplicated here by
 // mistake, registering the identical router at the identical path
 // a second time; removed rather than keeping both.)
-app.use("/api/v1/payments/callback", mpesaIpWhitelist, validateMpesaCallback);
+//
+// Also removed a dead app.use("/api/v1/payments/callback", ...) that
+// used to sit here: it only had 2 middleware (mpesaIpWhitelist,
+// validateMpesaCallback) and no terminal route handler, so even in
+// the hypothetical case it was ever reached it wouldn't have done
+// anything. It never was reached anyway - v1Routes (mounted earlier,
+// in the VERSIONED section) already has its own complete /payments
+// mount (routes/v1.js -> paymentRoutes.js), which has its own full
+// /callback route at the identical path
+// (router.post("/callback", mpesaIpWhitelist, validateMpesaCallback,
+// idempotencyCheck, asyncHandler(mpesaCallback))) - IP whitelist,
+// validation, idempotency, AND the actual mpesaCallback business
+// logic, all present. That's the one real M-Pesa callback handler;
+// this was a vestigial, non-functional duplicate of just its first
+// two middleware.
 
 // ─── ERROR HANDLING ───────────────────────────────────────────
 // Note: In newer Sentry versions, handlers are auto-instrumented
