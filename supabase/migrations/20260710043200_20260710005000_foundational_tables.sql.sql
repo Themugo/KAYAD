@@ -11,19 +11,26 @@ repository's migration history, which means the committed migrations cannot
 be applied to a fresh database: every REFERENCES cars(id) / REFERENCES
 profiles(id) foreign key in the later migration would fail immediately.
 
-This migration reconstructs those missing foundational tables. `auctions` is
-included too, even though it isn't in the later migration's list, because
-`bids` cannot exist without it (bids.auction_id references auctions.id).
+This migration reconstructs those missing foundational tables.
 
-Column choices for profiles/cars are cross-referenced against the specific
-ALTER TABLE ... ADD COLUMN statements in the later migration (email,
-super_admin, dealer_approved_at, last_login_at, deleted_at for profiles;
-deleted_at, slug, approved, inspection_status for cars) and against
-db/schema_clean.sql, this codebase's most complete standalone schema
-reference, adjusted from schema_clean.sql's self-contained `users` table
-(which has its own password column) to the Supabase-idiomatic `profiles`
-pattern the later migration's own comments describe: "User profiles
-(linked to auth.users)".
+Column choices for profiles/cars are cross-referenced against three
+sources rather than invented: the specific ALTER TABLE ... ADD COLUMN
+statements in the later migration (email, super_admin,
+dealer_approved_at, last_login_at, deleted_at for profiles; deleted_at,
+slug, approved, inspection_status for cars); the exact column list
+seed_demo_vehicles.sql.sql's INSERT statement sets on cars (brand, fuel,
+engine, location_city, auction_status, auction_end, current_bid,
+bids_count, allow_bid, allow_buy, is_promoted, is_verified_dealer,
+deal_rating - all of which disagree with backend/db/schema_clean.sql's
+naming, and take precedence here since they're already-committed,
+already-real evidence rather than a standalone reference doc); and the
+update_car_bid_stats.sql.sql RPC function, which proves bids reference
+cars.id directly (bids.car_id) rather than a separate auctions entity -
+there is no auctions table in this migration. profiles itself is
+adjusted from schema_clean.sql's self-contained `users` table (which has
+its own password column) to the Supabase-idiomatic `profiles` pattern
+the later migration's own comments describe: "User profiles (linked to
+auth.users)".
 */
 
 -- ═══════════════════════════════════════════════════════
@@ -81,39 +88,63 @@ CREATE POLICY "public_read_profiles" ON profiles
 
 -- ═══════════════════════════════════════════════════════
 -- CARS (vehicle listings)
+--
+-- CORRECTED from this file's first version, which had wrongly used
+-- backend/db/schema_clean.sql's column names (make, fuel_type, location,
+-- a normalized has_auction boolean) without checking them against this
+-- repo's own already-existing seed_demo_vehicles.sql.sql migration and
+-- update_car_bid_stats.sql.sql RPC function - both of which are real,
+-- already-committed evidence of the actual expected column names, and
+-- disagree with schema_clean.sql on several of them (brand not make,
+-- fuel not fuel_type, location_city not location, auction fields stored
+-- directly on the car row rather than a separate normalized entity).
+-- Column list here is the union of: every column
+-- seed_demo_vehicles.sql.sql's INSERT explicitly sets, every column the
+-- main schema migration's ALTER TABLE statements add, and the additional
+-- columns real backend service code (duplicateVehicleService.js,
+-- vehicleAnalyticsService.js) selects that weren't already covered.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS cars (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   dealer_id UUID REFERENCES profiles(id),
   title TEXT NOT NULL,
   slug TEXT,
-  make TEXT NOT NULL,
+  brand TEXT NOT NULL,
   model TEXT NOT NULL,
   year INTEGER NOT NULL,
   price NUMERIC NOT NULL,
   mileage INTEGER,
-  fuel_type TEXT,
+  fuel TEXT,
   transmission TEXT,
   body_type TEXT,
   color TEXT,
+  engine TEXT,
   condition TEXT,
   description TEXT,
+  features TEXT[] DEFAULT '{}',
   images TEXT[] DEFAULT '{}',
-  featured_image TEXT,
-  location TEXT,
+  location_city TEXT,
+  vin TEXT,
+  chassis_number TEXT,
+  registration_number TEXT,
+  is_flagged_duplicate BOOLEAN DEFAULT false,
   status TEXT DEFAULT 'available' CHECK (status IN ('available','sold','pending','reserved','hidden','draft')),
   views INTEGER DEFAULT 0,
-  featured BOOLEAN DEFAULT false,
-  has_auction BOOLEAN DEFAULT false,
-  is_verified BOOLEAN DEFAULT false,
   approved BOOLEAN DEFAULT true,
   inspection_status TEXT DEFAULT 'pending',
-  vin TEXT,
-  engine_capacity TEXT,
-  drive_type TEXT,
-  seats INTEGER,
-  doors INTEGER,
-  features TEXT[] DEFAULT '{}',
+  is_verified_dealer BOOLEAN DEFAULT false,
+  is_promoted BOOLEAN DEFAULT false,
+  deal_rating TEXT,
+  -- Auction fields live directly on the car row (denormalized) rather
+  -- than a separate auctions table - confirmed by update_car_bid_stats.sql.sql,
+  -- which updates cars.current_bid/cars.bids_count directly, and by
+  -- bids.car_id below (not bids.auction_id).
+  auction_status TEXT DEFAULT 'none',
+  auction_end TIMESTAMPTZ,
+  current_bid NUMERIC DEFAULT 0,
+  bids_count INTEGER DEFAULT 0,
+  allow_bid BOOLEAN DEFAULT false,
+  allow_buy BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   deleted_at TIMESTAMPTZ
@@ -123,7 +154,8 @@ CREATE INDEX IF NOT EXISTS idx_cars_dealer_id ON cars(dealer_id);
 CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
 CREATE INDEX IF NOT EXISTS idx_cars_slug ON cars(slug);
 CREATE INDEX IF NOT EXISTS idx_cars_deleted_at ON cars(deleted_at);
-CREATE INDEX IF NOT EXISTS idx_cars_make_model ON cars(make, model);
+CREATE INDEX IF NOT EXISTS idx_cars_brand_model ON cars(brand, model);
+CREATE INDEX IF NOT EXISTS idx_cars_auction_status ON cars(auction_status);
 
 ALTER TABLE cars ENABLE ROW LEVEL SECURITY;
 
@@ -139,56 +171,30 @@ CREATE POLICY "dealer_manage_own_cars" ON cars
   WITH CHECK (auth.uid() = dealer_id);
 
 -- ═══════════════════════════════════════════════════════
--- AUCTIONS (not documented in the later migration's list, but
--- required by bids.auction_id below)
--- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS auctions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  car_id UUID REFERENCES cars(id),
-  seller_id UUID REFERENCES profiles(id),
-  start_price NUMERIC NOT NULL,
-  reserve_price NUMERIC,
-  current_bid NUMERIC DEFAULT 0,
-  highest_bidder_id UUID REFERENCES profiles(id),
-  bid_increment NUMERIC DEFAULT 100,
-  start_time TIMESTAMPTZ NOT NULL,
-  end_time TIMESTAMPTZ NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','active','paused','ended','cancelled')),
-  winner_id UUID REFERENCES profiles(id),
-  final_price NUMERIC,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  deleted_at TIMESTAMPTZ
-);
-
-CREATE INDEX IF NOT EXISTS idx_auctions_car_id ON auctions(car_id);
-CREATE INDEX IF NOT EXISTS idx_auctions_seller_id ON auctions(seller_id);
-CREATE INDEX IF NOT EXISTS idx_auctions_highest_bidder_id ON auctions(highest_bidder_id);
-CREATE INDEX IF NOT EXISTS idx_auctions_winner_id ON auctions(winner_id);
-CREATE INDEX IF NOT EXISTS idx_auctions_status ON auctions(status);
-
-ALTER TABLE auctions ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "public_read_auctions" ON auctions;
-CREATE POLICY "public_read_auctions" ON auctions
-  FOR SELECT TO anon, authenticated
-  USING (deleted_at IS NULL);
-
--- ═══════════════════════════════════════════════════════
 -- BIDS
+--
+-- CORRECTED: the first version of this file gave bids an auction_id
+-- foreign key to a separate auctions table, following
+-- schema_clean.sql's normalized design. update_car_bid_stats.sql.sql
+-- (already in this repo's migration history) proves that's wrong -
+-- its RPC does `WHERE bids.car_id = ...` directly against cars, with
+-- no auctions table involved at all. No live backend code references
+-- auction_id either (the only match, ecpController.js, belongs to one
+-- of the unfinished enterprise-platform subsystems documented in the
+-- migration report, not the real bidding flow). The auctions table
+-- from the first version of this file has been removed entirely -
+-- there was no real evidence for it.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS bids (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  auction_id UUID REFERENCES auctions(id),
+  car_id UUID NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
   user_id UUID REFERENCES profiles(id),
   amount NUMERIC NOT NULL,
-  is_auto_bid BOOLEAN DEFAULT false,
-  max_auto_bid_amount NUMERIC,
   status TEXT DEFAULT 'active' CHECK (status IN ('active','outbid','won','lost','cancelled','refunded')),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_bids_auction_id ON bids(auction_id);
+CREATE INDEX IF NOT EXISTS idx_bids_car_id ON bids(car_id);
 CREATE INDEX IF NOT EXISTS idx_bids_user_id ON bids(user_id);
 
 ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
