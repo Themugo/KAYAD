@@ -1,45 +1,88 @@
 /*
-# Gari Motors — Foundational Tables (profiles, cars, auctions, bids, favorites, car_views)
+# Gari Motors — Foundational Tables (users, profiles, cars, bids, favorites, car_views)
 
 ## Why this migration exists
 The next migration in this history (20260710043238_..._gari_motors_full_schema.sql.sql)
 documents itself as extending "existing base tables (profiles, cars, bids,
-car_views, favorites)" and does `ALTER TABLE profiles ...` / `ALTER TABLE cars ...`
-against them directly - it assumes these tables were "already created in a
-prior migration." That prior migration does not exist anywhere in this
-repository's migration history, which means the committed migrations cannot
-be applied to a fresh database: every REFERENCES cars(id) / REFERENCES
-profiles(id) foreign key in the later migration would fail immediately.
+car_views, favorites)" and does `ALTER TABLE profiles ...` / `ALTER TABLE
+cars ...` against them directly - it assumes these tables were "already
+created in a prior migration." That prior migration does not exist
+anywhere in this repository's migration history, which means the
+committed migrations cannot be applied to a fresh database: every
+REFERENCES cars(id) / REFERENCES profiles(id) foreign key in the later
+migration would fail immediately.
 
-This migration reconstructs those missing foundational tables.
+## users vs. profiles - a real architectural fork, resolved
+The later migration's own comments describe profiles as "linked to
+auth.users" - Supabase's built-in, session-based authentication. But the
+actual backend (confirmed directly: controllers/authController.js hashes
+passwords with bcrypt and issues its own JWTs; backend/models/_base.js's
+TABLE_MAP routes the User model to a table literally named "users", not
+"profiles"; raw Supabase queries in server.js and chatController.js query
+"users" directly) runs its own self-contained authentication system, not
+Supabase Auth. These are two incompatible designs that both exist in this
+codebase and were never reconciled - confirmed with the project owner
+which one is real: the custom bcrypt/JWT system is real; the "profiles
+linked to auth.users" framing in the later migration's comments describes
+something that was never actually built.
 
-Column choices for profiles/cars are cross-referenced against three
-sources rather than invented: the specific ALTER TABLE ... ADD COLUMN
-statements in the later migration (email, super_admin,
-dealer_approved_at, last_login_at, deleted_at for profiles; deleted_at,
-slug, approved, inspection_status for cars); the exact column list
-seed_demo_vehicles.sql.sql's INSERT statement sets on cars (brand, fuel,
-engine, location_city, auction_status, auction_end, current_bid,
-bids_count, allow_bid, allow_buy, is_promoted, is_verified_dealer,
-deal_rating - all of which disagree with backend/db/schema_clean.sql's
-naming, and take precedence here since they're already-committed,
-already-real evidence rather than a standalone reference doc); and the
-update_car_bid_stats.sql.sql RPC function, which proves bids reference
+Resolved as: `users` is the real, primary table - matching the 21+
+backend files, the model layer, and the actual working auth flow. It has
+its own `password` column (bcrypt hash) and no dependency on
+Supabase's `auth.users`. `profiles` still exists, but only as a minimal
+table whose sole purpose is to give the later migration's `ALTER TABLE
+profiles` / `REFERENCES profiles(id)` / RLS-policy statements something
+valid to point at, since that migration cannot be edited (it may already
+be applied to a real database). `profiles.id` references `users(id)`
+directly as a 1:1 extension, not `auth.users(id)`.
+
+All foreign keys from cars/bids/favorites/car_views that represent "the
+user who did this" point at `users(id)`, matching what the real
+application code (TABLE_MAP, raw queries) actually expects.
+
+RLS is enabled on every table below as a safe default, but no
+auth.uid()-based policies are defined, because auth.uid() only resolves
+inside a Supabase-session request - this backend always connects with
+the Supabase service-role key (confirmed in backend/utils/supabase.js),
+which bypasses RLS entirely. Authorization happens in the Express/JWT
+middleware layer (backend/middleware/auth.js, role.js, rbac.js), not at
+the Postgres layer. Writing auth.uid()-based policies here would be
+inert and misleading about how this app actually enforces access.
+
+## Column choices for cars
+Cross-referenced against three sources rather than invented: the
+ALTER TABLE cars ADD COLUMN statements in the later migration (slug,
+approved, inspection_status, deleted_at); the exact column list
+seed_demo_vehicles.sql.sql's INSERT statement sets (brand, fuel, engine,
+location_city, auction_status, auction_end, current_bid, bids_count,
+allow_bid, allow_buy, is_promoted, is_verified_dealer, deal_rating - all
+of which disagree with backend/db/schema_clean.sql's naming, and take
+precedence here as already-committed, already-real evidence); and
+update_car_bid_stats.sql.sql's RPC function, which proves bids reference
 cars.id directly (bids.car_id) rather than a separate auctions entity -
-there is no auctions table in this migration. profiles itself is
-adjusted from schema_clean.sql's self-contained `users` table (which has
-its own password column) to the Supabase-idiomatic `profiles` pattern
-the later migration's own comments describe: "User profiles (linked to
-auth.users)".
+there is no auctions table in this migration. highest_bidder_id,
+drive_type, and has_auction were added after cross-checking
+backend/utils/fieldMap.js's FIELD_ALIASES.cars against real, multi-file
+backend usage (bidController.js, escrowVaultController.js,
+smsBiddingController.js, auction.service.js, paymentCallback.service.js,
+carController.js, dealerHealthScoreService.js) - has_auction is a
+GENERATED column derived from auction_status rather than a second,
+independently-writable boolean, since auction_status is already the real
+source of truth for that fact.
+
+car_views' shape was inferred from its RLS policies in the later
+migration, since no CREATE TABLE for it exists anywhere to copy from.
 */
 
 -- ═══════════════════════════════════════════════════════
--- PROFILES (linked to Supabase auth.users)
+-- USERS (the real, primary identity table - custom bcrypt/JWT auth,
+-- not Supabase Auth)
 -- ═══════════════════════════════════════════════════════
-CREATE TABLE IF NOT EXISTS profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
-  email TEXT UNIQUE,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'user'
     CHECK (role = ANY (ARRAY['user'::text, 'dealer'::text, 'broker'::text, 'admin'::text, 'superadmin'::text])),
   super_admin BOOLEAN DEFAULT false,
@@ -50,63 +93,45 @@ CREATE TABLE IF NOT EXISTS profiles (
   business_name TEXT,
   location TEXT,
   bio TEXT DEFAULT '',
-  dealer_rating NUMERIC(2,1) DEFAULT 4.5,
+  rating NUMERIC(2,1) DEFAULT 4.5,
+  inspections_completed INTEGER DEFAULT 0,
   dealer_approved_at TIMESTAMPTZ,
   escrow_approved BOOLEAN DEFAULT false,
   verified_buyer BOOLEAN DEFAULT false,
   total_sales NUMERIC DEFAULT 0,
   listing_count INTEGER DEFAULT 0,
   referral_code TEXT UNIQUE,
-  referred_by UUID REFERENCES profiles(id),
+  referred_by UUID REFERENCES users(id),
   last_login_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
-CREATE INDEX IF NOT EXISTS idx_profiles_referred_by ON profiles(referred_by);
-CREATE INDEX IF NOT EXISTS idx_profiles_deleted_at ON profiles(deleted_at);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_referred_by ON users(referred_by);
+CREATE INDEX IF NOT EXISTS idx_users_deleted_at ON users(deleted_at);
+
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- ═══════════════════════════════════════════════════════
+-- PROFILES (minimal compatibility table - exists only so the later
+-- migration's ALTER TABLE profiles / REFERENCES profiles(id) / RLS
+-- policies have something valid to point at; see header comment)
+-- ═══════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "select_own_profile" ON profiles;
-CREATE POLICY "select_own_profile" ON profiles
-  FOR SELECT TO authenticated
-  USING (auth.uid() = id);
-
-DROP POLICY IF EXISTS "update_own_profile" ON profiles;
-CREATE POLICY "update_own_profile" ON profiles
-  FOR UPDATE TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id);
-
-DROP POLICY IF EXISTS "public_read_profiles" ON profiles;
-CREATE POLICY "public_read_profiles" ON profiles
-  FOR SELECT TO anon, authenticated
-  USING (status = 'approved');
-
 -- ═══════════════════════════════════════════════════════
 -- CARS (vehicle listings)
---
--- CORRECTED from this file's first version, which had wrongly used
--- backend/db/schema_clean.sql's column names (make, fuel_type, location,
--- a normalized has_auction boolean) without checking them against this
--- repo's own already-existing seed_demo_vehicles.sql.sql migration and
--- update_car_bid_stats.sql.sql RPC function - both of which are real,
--- already-committed evidence of the actual expected column names, and
--- disagree with schema_clean.sql on several of them (brand not make,
--- fuel not fuel_type, location_city not location, auction fields stored
--- directly on the car row rather than a separate normalized entity).
--- Column list here is the union of: every column
--- seed_demo_vehicles.sql.sql's INSERT explicitly sets, every column the
--- main schema migration's ALTER TABLE statements add, and the additional
--- columns real backend service code (duplicateVehicleService.js,
--- vehicleAnalyticsService.js) selects that weren't already covered.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS cars (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  dealer_id UUID REFERENCES profiles(id),
+  dealer_id UUID REFERENCES users(id),
   title TEXT NOT NULL,
   slug TEXT,
   brand TEXT NOT NULL,
@@ -119,6 +144,7 @@ CREATE TABLE IF NOT EXISTS cars (
   body_type TEXT,
   color TEXT,
   engine TEXT,
+  drive_type TEXT,
   condition TEXT,
   description TEXT,
   features TEXT[] DEFAULT '{}',
@@ -143,52 +169,33 @@ CREATE TABLE IF NOT EXISTS cars (
   auction_end TIMESTAMPTZ,
   current_bid NUMERIC DEFAULT 0,
   bids_count INTEGER DEFAULT 0,
+  highest_bidder_id UUID REFERENCES users(id),
   allow_bid BOOLEAN DEFAULT false,
   allow_buy BOOLEAN DEFAULT true,
+  has_auction BOOLEAN GENERATED ALWAYS AS (auction_status IS DISTINCT FROM 'none') STORED,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now(),
   deleted_at TIMESTAMPTZ
 );
 
 CREATE INDEX IF NOT EXISTS idx_cars_dealer_id ON cars(dealer_id);
+CREATE INDEX IF NOT EXISTS idx_cars_highest_bidder_id ON cars(highest_bidder_id);
 CREATE INDEX IF NOT EXISTS idx_cars_status ON cars(status);
 CREATE INDEX IF NOT EXISTS idx_cars_slug ON cars(slug);
 CREATE INDEX IF NOT EXISTS idx_cars_deleted_at ON cars(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_cars_brand_model ON cars(brand, model);
 CREATE INDEX IF NOT EXISTS idx_cars_auction_status ON cars(auction_status);
+CREATE INDEX IF NOT EXISTS idx_cars_has_auction ON cars(has_auction);
 
 ALTER TABLE cars ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "public_read_cars" ON cars;
-CREATE POLICY "public_read_cars" ON cars
-  FOR SELECT TO anon, authenticated
-  USING (status != 'draft' AND status != 'hidden' AND deleted_at IS NULL);
-
-DROP POLICY IF EXISTS "dealer_manage_own_cars" ON cars;
-CREATE POLICY "dealer_manage_own_cars" ON cars
-  FOR ALL TO authenticated
-  USING (auth.uid() = dealer_id)
-  WITH CHECK (auth.uid() = dealer_id);
-
 -- ═══════════════════════════════════════════════════════
 -- BIDS
---
--- CORRECTED: the first version of this file gave bids an auction_id
--- foreign key to a separate auctions table, following
--- schema_clean.sql's normalized design. update_car_bid_stats.sql.sql
--- (already in this repo's migration history) proves that's wrong -
--- its RPC does `WHERE bids.car_id = ...` directly against cars, with
--- no auctions table involved at all. No live backend code references
--- auction_id either (the only match, ecpController.js, belongs to one
--- of the unfinished enterprise-platform subsystems documented in the
--- migration report, not the real bidding flow). The auctions table
--- from the first version of this file has been removed entirely -
--- there was no real evidence for it.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS bids (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   car_id UUID NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES profiles(id),
+  user_id UUID REFERENCES users(id),
   amount NUMERIC NOT NULL,
   status TEXT DEFAULT 'active' CHECK (status IN ('active','outbid','won','lost','cancelled','refunded')),
   created_at TIMESTAMPTZ DEFAULT now()
@@ -199,22 +206,12 @@ CREATE INDEX IF NOT EXISTS idx_bids_user_id ON bids(user_id);
 
 ALTER TABLE bids ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "select_own_bids" ON bids;
-CREATE POLICY "select_own_bids" ON bids
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "insert_own_bids" ON bids;
-CREATE POLICY "insert_own_bids" ON bids
-  FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
 -- ═══════════════════════════════════════════════════════
 -- FAVORITES
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS favorites (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES profiles(id),
+  user_id UUID REFERENCES users(id),
   car_id UUID REFERENCES cars(id),
   created_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE(user_id, car_id)
@@ -225,28 +222,13 @@ CREATE INDEX IF NOT EXISTS idx_favorites_car_id ON favorites(car_id);
 
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "select_own_favorites_base" ON favorites;
-CREATE POLICY "select_own_favorites_base" ON favorites
-  FOR SELECT TO authenticated
-  USING (auth.uid() = user_id);
-
-DROP POLICY IF EXISTS "manage_own_favorites" ON favorites;
-CREATE POLICY "manage_own_favorites" ON favorites
-  FOR ALL TO authenticated
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
 -- ═══════════════════════════════════════════════════════
 -- CAR_VIEWS (vehicle view tracking)
--- Column shape inferred from the later migration's RLS policies for this
--- table: INSERT is open to anon+authenticated ("anyone can insert views"),
--- SELECT is open to anon+authenticated ("public can read aggregate") - so
--- user_id must be nullable to allow anonymous view records.
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS car_views (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   car_id UUID NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES profiles(id),
+  user_id UUID REFERENCES users(id),
   ip_address TEXT,
   viewed_at TIMESTAMPTZ DEFAULT now()
 );
