@@ -28,8 +28,13 @@ something that was never actually built.
 
 Resolved as: `users` is the real, primary table - matching the 21+
 backend files, the model layer, and the actual working auth flow. It has
-its own `password` column (bcrypt hash) and no dependency on
-Supabase's `auth.users`. `profiles` still exists, but only as a minimal
+its own identity, no dependency on Supabase's auth.users (its credentials
+- password, tokenVersion, login lockout, email verification, reset
+tokens - live on a separate user_auth table, added in a later migration
+after finding that split is how the real code, not just the database,
+actually works: controllers/authController.js's User.create() never
+sets password at all - it's written separately via UserAuth.create()).
+`profiles` still exists, but only as a minimal
 table whose sole purpose is to give the later migration's `ALTER TABLE
 profiles` / `REFERENCES profiles(id)` / RLS-policy statements something
 valid to point at, since that migration cannot be edited (it may already
@@ -82,7 +87,6 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'user'
     CHECK (role = ANY (ARRAY['user'::text, 'dealer'::text, 'broker'::text, 'admin'::text, 'superadmin'::text])),
   super_admin BOOLEAN DEFAULT false,
