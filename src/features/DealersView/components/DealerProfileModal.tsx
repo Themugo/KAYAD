@@ -24,14 +24,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
   onStartEscrow,
   onContactSeller
 }) => {
-  if (!dealer) return null;
-
-  const isPrivateSeller = dealer.type === 'Private Seller';
+  const isPrivateSeller = dealer?.type === 'Private Seller';
 
   // State
   const [activeTab, setActiveTab] = useState<'inventory' | 'about' | 'trust' | 'reviews' | 'gallery' | 'location'>('inventory');
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
-  const [followersCount, setFollowersCount] = useState<number>(dealer.followersCount || 1420);
+  const [followersCount, setFollowersCount] = useState<number>(dealer?.followersCount || 1420);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sub-modal States
@@ -71,11 +69,12 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
   // Dealer Vehicles Filter
   const dealerVehicles = useMemo(() => {
+    if (!dealer) return [];
     return vehicles.filter((v) => 
       v.sellerName.toLowerCase().includes(dealer.name.toLowerCase()) || 
       dealer.name.toLowerCase().includes(v.sellerName.toLowerCase())
     );
-  }, [vehicles, dealer.name]);
+  }, [vehicles, dealer?.name]);
 
   // Filtered Inventory
   const filteredDealerVehicles = useMemo(() => {
@@ -113,21 +112,24 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
   // Years on KAYAD calculation
   const yearsOnKayad = useMemo(() => {
+    if (!dealer) return '';
     const startYear = parseInt(dealer.verifiedSince) || 2019;
     const currentYear = new Date().getFullYear();
     const diff = Math.max(1, currentYear - startYear);
     return `${diff} ${diff === 1 ? 'Year' : 'Years'} on KAYAD`;
-  }, [dealer.verifiedSince]);
+  }, [dealer?.verifiedSince]);
 
   // Related Verified Dealers (Same county or Enterprise dealers)
   const relatedDealers = useMemo(() => {
+    if (!dealer) return [];
     return allDealers
       .filter((d) => d.id !== dealer.id && d.type !== 'Private Seller')
       .slice(0, 3);
-  }, [allDealers, dealer.id]);
+  }, [allDealers, dealer?.id]);
 
   // Reviews Data
   const reviewsList = useMemo(() => {
+    if (!dealer) return [];
     const base = dealer.reviews || [
       {
         id: 'r1',
@@ -154,7 +156,20 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
       if (reviewsSortBy === 'lowest') return a.rating - b.rating;
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
-  }, [dealer.reviews, reviewsSortBy]);
+  }, [dealer?.reviews, reviewsSortBy]);
+
+  // Rules of Hooks: every hook above this line must run unconditionally
+  // on every render (this modal is always mounted by DealersView.tsx -
+  // open/closed is controlled via the `dealer` prop being null or not,
+  // not by conditionally rendering the whole component). The guard used
+  // to sit at the very top of the component, before any hook, which
+  // meant going from closed (dealer=null, 0 hooks reached) to open
+  // (dealer set, 30 hooks reached) was a hooks-count mismatch between
+  // renders of the same instance - exactly the same bug, and exact same
+  // crash ("Minified React error #310"), found and fixed in
+  // VehicleDetailModal.tsx. Moved here, after every hook, and made each
+  // hook above null-safe so they're harmless no-ops when dealer is null.
+  if (!dealer) return null;
 
   // Handlers
   const handleToggleFollow = () => {
