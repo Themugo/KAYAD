@@ -22,13 +22,15 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
   cars: {
-    brand: "make",
-    fuel: "fuel_type",
+    // brand, fuel, engine need no translation - confirmed via
+    // seed_demo_vehicles.sql.sql and update_car_bid_stats.sql.sql that
+    // these ARE the real column names (previously mapped to make/
+    // fuel_type/engine_capacity, which don't exist in the real schema -
+    // see the schema-repair migrations for the full evidence trail).
     drivetrain: "drive_type",
-    engine: "engine_capacity",
     isAuction: "has_auction",
     dealer: "dealer_id",
-    city: "location",
+    city: "location_city",
     highestBidder: "highest_bidder_id",
   },
   users: {
@@ -90,7 +92,7 @@ export const REVERSE_FIELD_ALIASES = Object.fromEntries(
 // table. Tables not listed here don't support `$text` — we skip the
 // filter rather than guess at column names that may not exist.
 export const SEARCHABLE_FIELDS = {
-  cars: ["title", "make", "model", "description"],
+  cars: ["title", "brand", "model", "description"],
 };
 
 export function mapKeyOut(table, key) {
