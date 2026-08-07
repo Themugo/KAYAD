@@ -15,7 +15,7 @@ import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { addNotificationJob } from "../queues/notificationQueue.js";
 import { STATES } from "./escrowStateMachine.js";
-import { findAll, findOne, create } from "../db/index.js";
+import { findAll, create } from "../db/index.js";
 import { autoReleaseEscrow } from "./escrow.service.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 
@@ -36,6 +36,29 @@ const notify = async (userId, title, message, type = "escrow") => {
   }
 };
 
+// Batch-fetches the cars, sellers, and buyers referenced by a set of
+// escrows in 2 queries total instead of up to 3 per escrow. Both
+// runAutoRelease and runDisputeWarnings used to call findOne("cars", ...)
+// and findOne("users", ...) individually inside their per-escrow loop -
+// harmless at the small scale this has run at so far, but real N+1
+// query fan-out that would slow this hourly cron (and add unnecessary
+// database load) as escrow volume grows. Returns { carsById, usersById }
+// Maps for O(1) lookup inside the loop.
+const batchFetchRelated = async (escrows) => {
+  const carIds = [...new Set(escrows.map((e) => e.car).filter(Boolean))];
+  const userIds = [...new Set(escrows.flatMap((e) => [e.seller, e.buyer]).filter(Boolean))];
+
+  const [cars, users] = await Promise.all([
+    carIds.length ? findAll("cars", { filters: { id: { $in: carIds } } }) : Promise.resolve([]),
+    userIds.length ? findAll("users", { filters: { id: { $in: userIds } } }) : Promise.resolve([]),
+  ]);
+
+  return {
+    carsById: new Map(cars.map((c) => [c.id, c])),
+    usersById: new Map(users.map((u) => [u.id, u])),
+  };
+};
+
 // ── AUTO-RELEASE ────────────────────────────────────────────
 const runAutoRelease = async () => {
   const cutoff = new Date(Date.now() - RELEASE_DAYS * 86_400_000).toISOString();
@@ -53,15 +76,17 @@ const runAutoRelease = async () => {
 
   logInfo("EscrowCron: stale escrows", { count: stale.length, days: RELEASE_DAYS });
 
+  const { carsById, usersById } = await batchFetchRelated(stale);
+
   for (const escrow of stale) {
     try {
       // Auto-release logic: transition to released if possible
       if (escrow.status !== STATES.FUNDED && escrow.status !== STATES.VEHICLE_CONFIRMED && escrow.status !== STATES.DELIVERED) continue;
-      const car = escrow.car ? await findOne("cars", { id: escrow.car }) : null;
+      const car = escrow.car ? carsById.get(escrow.car) : null;
       const carTitle = car?.title || "the vehicle";
 
-      const seller = escrow.seller ? await findOne("users", { id: escrow.seller }) : null;
-      const buyer = escrow.buyer ? await findOne("users", { id: escrow.buyer }) : null;
+      const seller = escrow.seller ? usersById.get(escrow.seller) : null;
+      const buyer = escrow.buyer ? usersById.get(escrow.buyer) : null;
 
       await autoReleaseEscrow(escrow.id);
 
@@ -95,13 +120,15 @@ const runDisputeWarnings = async () => {
   });
   const approaching = [...funded, ...delivered];
 
+  const { carsById, usersById } = await batchFetchRelated(approaching);
+
   for (const escrow of approaching) {
     try {
       await update("escrows", escrow.id, { warningSent: true });
-      const car = escrow.car ? await findOne("cars", { id: escrow.car }) : null;
+      const car = escrow.car ? carsById.get(escrow.car) : null;
       const carTitle = car?.title || "a vehicle";
-      const buyer = escrow.buyer ? await findOne("users", { id: escrow.buyer }) : null;
-      const seller = escrow.seller ? await findOne("users", { id: escrow.seller }) : null;
+      const buyer = escrow.buyer ? usersById.get(escrow.buyer) : null;
+      const seller = escrow.seller ? usersById.get(escrow.seller) : null;
 
       if (escrow.status === STATES.DELIVERED) {
         if (buyer) {
