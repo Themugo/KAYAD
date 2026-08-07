@@ -478,6 +478,22 @@ if (NODE_ENV !== "production") {
   );
 }
 
+// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
+// Must be registered before any route mount, not just the unversioned
+// ones below - otherwise it silently never runs for /api/v1, /api/v2,
+// or the analytics dashboard routes, since Express only continues past
+// a middleware to routes registered AFTER it, and those route groups
+// respond directly without calling next(). Confirmed this was
+// unintentional, not a deliberate versioned/unversioned split: this
+// middleware's own comment says "ensures every JSON response", and the
+// system-status check below says "global middleware for protected
+// routes" - neither was true for roughly a third of the API surface
+// (v1 alone is 31 sub-routers) before this fix.
+app.use(responseWrapper);
+
+// ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
+app.use("/api", checkSystemStatus);
+
 // ─── API ROUTES (VERSIONED) ───────────────────────────────────
 app.use("/api/v1", checkSystemStatus, v1Routes);
 app.use("/api/v2", v2Routes);
@@ -623,12 +639,6 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-// ─── RESPONSE WRAPPER (ensures every JSON response has `success` field) ──
-app.use(responseWrapper);
-
-// ─── SYSTEM STATUS CHECK (global middleware for protected routes) ──
-app.use("/api", checkSystemStatus);
 
 // ─── API ROUTES ───────────────────────────────────────────────
 app.use("/api/auth/refresh", csrfProtection); // CSRF for cookie-based refresh
