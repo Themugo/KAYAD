@@ -11,3 +11,4 @@ bolt-v5/
 temp_repo/
 e2e/playwright-report/
 e2e/test-results/
+.vercel
