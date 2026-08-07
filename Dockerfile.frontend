@@ -18,7 +18,7 @@ COPY vite.config.ts ./
 COPY tsconfig*.json ./
 COPY vitest.config.ts ./
 COPY src ./src
-COPY public ./public 2>/dev/null || true
+COPY public ./public
 
 # Build the app
 RUN npm run build
