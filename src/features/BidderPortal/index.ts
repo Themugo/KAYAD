@@ -1,1 +1,0 @@
-export { BidderPortal } from './BidderPortal';
