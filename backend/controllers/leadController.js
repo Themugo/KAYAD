@@ -20,6 +20,7 @@ import {
 import { getLeadTimeline } from "../services/leadTimelineService.js";
 import { protect } from "../middleware/auth.js";
 import { logInfo, logError } from "../utils/logger.js";
+import { isAtLeast } from "../config/roles.js";
 
 // =============================
 // 📋 GET DEALER LEADS
@@ -62,7 +63,7 @@ export const getLead = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to view this lead",
@@ -137,7 +138,7 @@ export const updateStage = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this lead",
@@ -170,7 +171,7 @@ export const archiveLeadHandler = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to archive this lead",
@@ -203,7 +204,7 @@ export const markAsHot = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this lead",
@@ -244,7 +245,7 @@ export const addNote = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to update this lead",
@@ -283,7 +284,7 @@ export const getTimeline = async (req, res) => {
     const lead = await getLeadById(leadId);
 
     // Check if user is authorized (dealer or admin)
-    if (lead.dealer._id.toString() !== req.user.id && req.user.role !== "admin") {
+    if (lead.dealer._id.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
       return res.status(403).json({
         success: false,
         message: "Not authorized to view this lead",

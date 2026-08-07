@@ -2,6 +2,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import TransactionLedger from "../models/TransactionLedger.js";
 import Escrow from "../models/Escrow.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { isAtLeast } from "../config/roles.js";
 
 // =============================
 // 📋 GET USER'S TRANSACTIONS
@@ -62,7 +63,7 @@ export const getTransactionByHash = asyncHandler(async (req, res) => {
 
   // Check authorization
   const isOwner = [transaction.from?._id?.toString(), transaction.to?._id?.toString()].includes(req.user.id);
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = isAtLeast(req.user.role, "admin"); // includes superadmin - was previously role === "admin" only, wrongly denying superadmins
 
   if (!isOwner && !isAdmin) {
     return res.status(403).json({
