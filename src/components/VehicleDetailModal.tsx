@@ -44,6 +44,54 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     return Array.from(set);
   }, [vehicle]);
 
+  // Grouped Features Categorization
+  // Moved here (was previously after the early-return guards below) -
+  // a hook called only on some renders but not others is a Rules of
+  // Hooks violation: React requires the exact same hooks, in the same
+  // order, on every render of a given component instance. Since this
+  // modal is always mounted (open/closed is controlled via the
+  // `vehicle` prop being null or not, not by conditionally rendering
+  // the whole component), going from closed (vehicle=null, this hook
+  // never reached) to open (vehicle set, this hook now reached) was a
+  // real hook-count mismatch between renders - which is exactly what
+  // threw "Minified React error #310" on a real click, crashing to
+  // the ErrorBoundary. Fixed by moving it up to always run, with a
+  // null-safe fallback matching the pattern the two hooks above it
+  // already use correctly.
+  const featureGroups = useMemo(() => {
+    const rawFeatures = vehicle?.features || [
+      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
+      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
+      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
+      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
+    ];
+
+    const safety: string[] = [];
+    const comfort: string[] = [];
+    const technology: string[] = [];
+    const utility: string[] = [];
+
+    rawFeatures.forEach(feat => {
+      const lower = feat.toLowerCase();
+      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
+        safety.push(feat);
+      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
+        comfort.push(feat);
+      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
+        technology.push(feat);
+      } else {
+        utility.push(feat);
+      }
+    });
+
+    return {
+      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
+      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
+      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
+      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
+    };
+  }, [vehicle?.features]);
+
   const [activeImage, setActiveImage] = useState<string>(vehicle?.image || '');
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [shareSuccess, setShareSuccess] = useState<boolean>(false);
@@ -175,40 +223,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     setOpenSpecSections(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Grouped Features Categorization
-  const featureGroups = useMemo(() => {
-    const rawFeatures = vehicle.features || [
-      'EyeSight Driver Assist', 'Lane Departure Warning', 'ABS Brakes', 'Multiple Airbags',
-      'Heated Seats', 'Dual Climate Control', 'Leather Interior', 'Sunroof',
-      'Apple CarPlay', 'Bluetooth Connectivity', 'Premium Audio System', 'Reverse Camera',
-      'Roof Rails', 'Power Tailgate', 'Cargo Cover', 'Alloy Wheels'
-    ];
-
-    const safety: string[] = [];
-    const comfort: string[] = [];
-    const technology: string[] = [];
-    const utility: string[] = [];
-
-    rawFeatures.forEach(feat => {
-      const lower = feat.toLowerCase();
-      if (lower.includes('eyesight') || lower.includes('lane') || lower.includes('abs') || lower.includes('airbag') || lower.includes('safety') || lower.includes('brake') || lower.includes('blind')) {
-        safety.push(feat);
-      } else if (lower.includes('heat') || lower.includes('climate') || lower.includes('leather') || lower.includes('seat') || lower.includes('sunroof') || lower.includes('keyless')) {
-        comfort.push(feat);
-      } else if (lower.includes('play') || lower.includes('bluetooth') || lower.includes('audio') || lower.includes('camera') || lower.includes('nav') || lower.includes('screen') || lower.includes('tech')) {
-        technology.push(feat);
-      } else {
-        utility.push(feat);
-      }
-    });
-
-    return {
-      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
-      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
-      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
-      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
-    };
-  }, [vehicle.features]);
 
   // Header Title Component
   const modalTitle = (

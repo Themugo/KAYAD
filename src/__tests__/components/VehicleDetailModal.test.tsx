@@ -78,4 +78,48 @@ describe('VehicleDetailModal', () => {
     );
     expect(container.innerHTML).toBe('');
   });
+
+  it('opens correctly when re-rendered from closed to open on the same instance (the real click path)', () => {
+    // This is the actual sequence that happens in the live app:
+    // VehicleDetailModal is always mounted by App.tsx (its open/closed
+    // state is controlled entirely via the `vehicle` prop going from
+    // null to a real value), so clicking a car re-renders the SAME
+    // component instance rather than mounting a fresh one. The other
+    // tests in this file each call render() once with fixed props,
+    // which creates a new instance every time and can never catch a
+    // Rules-of-Hooks violation - React only throws "rendered more
+    // hooks than during the previous render" when an existing
+    // instance's hook count changes between renders. Regression test
+    // for exactly that bug: a useMemo was previously positioned after
+    // this component's early-return guards, so going from closed (10
+    // hooks reached) to open (11 hooks reached) crashed with a
+    // minified React error #310 on the very first real click.
+    const vehicle = INITIAL_VEHICLES[0];
+    const props = {
+      allVehicles: INITIAL_VEHICLES,
+      onClose: () => {},
+      onStartEscrow: () => {},
+      onContactSeller: () => {},
+      onRequestInspection: () => {},
+      isSaved: false,
+      onToggleSave: () => {},
+      onSelectVehicle: () => {},
+    };
+
+    const { rerender } = render(
+      <VehicleDetailModal vehicle={null} notFoundId={null} {...props} />
+    );
+
+    expect(() => {
+      rerender(<VehicleDetailModal vehicle={vehicle} notFoundId={null} {...props} />);
+    }).not.toThrow();
+
+    expect(screen.getByText(vehicle.title)).toBeTruthy();
+
+    // And closing it again (open -> closed on the same instance) must
+    // also not throw, for the same reason in reverse.
+    expect(() => {
+      rerender(<VehicleDetailModal vehicle={null} notFoundId={null} {...props} />);
+    }).not.toThrow();
+  });
 });
