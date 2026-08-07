@@ -2,7 +2,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import BidLog from "../models/BidLog.js";
 import Bid from "../models/Bid.js";
 import crypto from "crypto";
-import { isAtLeast } from "../config/roles.js";
+import { isAdminOrAbove } from "../config/roles.js";
 
 // =============================
 // 📊 GET ACTIVE BID LOGS FOR CAR
@@ -190,7 +190,7 @@ export const getBidLogDetail = asyncHandler(async (req, res) => {
 
   // Check authorization
   const isOwner = log.user._id.toString() === req.user.id;
-  const isAdmin = isAtLeast(req.user.role, "admin"); // includes superadmin - was previously role === "admin" only, wrongly denying superadmins
+  const isAdmin = isAdminOrAbove(req.user); // includes superadmin - was previously role === "admin" only, wrongly denying superadmins
 
   if (!isOwner && !isAdmin) {
     return res.status(403).json({

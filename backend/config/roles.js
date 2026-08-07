@@ -124,6 +124,24 @@ export const isAtLeast = (role, minRole) => {
   return getRoleLevel(role) >= getRoleLevel(minRole);
 };
 
+/**
+ * Admin-tier check that also honours the webhoist bypass, for call sites
+ * that check req.user.role directly instead of going through the
+ * adminOnly middleware (which already does this correctly). webhoist is
+ * a runtime-computed bypass (middleware/auth.js's protect sets
+ * req.user.effectiveRole = "webhoist" for the platform owner's email,
+ * layered on top of whatever role is actually stored in the database
+ * for that account) - it is not in ROLE_HIERARCHY and is never the
+ * value of user.role itself, so isAtLeast(user.role, "admin") alone
+ * cannot see it. Takes the full user object (matching this file's own
+ * getEffectivePermissions/userHasPermission style) rather than a bare
+ * role string, since it needs both role and effectiveRole.
+ */
+export const isAdminOrAbove = (user) => {
+  if (user?.effectiveRole === WEBHOIST) return true;
+  return isAtLeast(user?.role, "admin");
+};
+
 // ============================================================
 //  ASSIGNABLE PERMISSIONS (superadmin grants/revokes per user)
 // ============================================================

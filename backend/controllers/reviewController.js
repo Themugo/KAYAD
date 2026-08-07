@@ -3,7 +3,7 @@ import { startSession } from "../utils/supabaseSession.js";
 import Review from "../models/Review.js";
 import User from "../models/User.js";
 import { logError } from '../infrastructure/logging/index.js';
-import { isAtLeast } from '../config/roles.js';
+import { isAdminOrAbove } from '../config/roles.js';
 
 // POST /api/reviews (Phase 2 Transaction Support)
 export const createReview = async (req, res) => {
@@ -87,7 +87,7 @@ export const deleteReview = async (req, res) => {
     if (!review) return res.status(404).json({ success: false, message: "Review not found" });
 
     const isOwner = review.user.toString() === req.user.id;
-    const isAdmin = isAtLeast(req.user.role, "admin"); // includes superadmin - was previously role === "admin" only, wrongly denying superadmins
+    const isAdmin = isAdminOrAbove(req.user); // includes superadmin - was previously role === "admin" only, wrongly denying superadmins
 
     if (!isOwner && !isAdmin) {
       return res.status(403).json({ success: false, message: "Not authorized" });

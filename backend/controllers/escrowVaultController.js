@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { isAtLeast } from "../config/roles.js";
+import { isAdminOrAbove } from "../config/roles.js";
 import { startSession } from "../utils/supabaseSession.js";
 import Car from "../models/Car.js";
 import EscrowVault from "../models/EscrowVault.js";
@@ -486,7 +486,7 @@ export const getVaultById = async (req, res) => {
       .populate("seller", "name phone");
     if (!vault) return res.status(404).json({ success: false, message: "Vault not found" });
     const userId = req.user.id;
-    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAtLeast(req.user.role, "admin")) {
+    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAdminOrAbove(req.user)) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
     res.json({ success: true, vault });
@@ -527,7 +527,7 @@ export const getVaultForCar = async (req, res) => {
       .populate("seller", "name");
     if (!vault) return res.json({ success: true, vault: null });
     const userId = req.user.id;
-    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAtLeast(req.user.role, "admin")) {
+    if (vault.buyer._id.toString() !== userId && vault.seller._id.toString() !== userId && !isAdminOrAbove(req.user)) {
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
     res.json({ success: true, vault });

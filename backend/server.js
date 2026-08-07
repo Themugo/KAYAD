@@ -29,7 +29,7 @@ import { checkSystemStatus } from "./middleware/systemCheck.js";
 import { csrfProtection, csrfToken } from "./middleware/csrf.js";
 import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
-import { isAtLeast } from "./config/roles.js";
+import { isAdminOrAbove } from "./config/roles.js";
 import responseWrapper from "./middleware/responseWrapper.js";
 import { performanceMonitor, memoryMonitor, cpuMonitor } from "./middleware/performanceMonitor.js";
 import sliMiddleware from "./middleware/sliMiddleware.js";
@@ -627,7 +627,7 @@ io.on("connection", (socket) => {
     // wrongly excluded superadmin (the platform's highest-privilege
     // role, strictly above admin in config/roles.js's ROLE_HIERARCHY)
     // from the real-time admin dashboard/alert feed.
-    if (isAtLeast(socket.user?.role, "admin")) socket.join("admins");
+    if (isAdminOrAbove(socket.user)) socket.join("admins");
   });
   socket.on("joinShowroom", () => {
     if (!isRateLimited("joinShowroom")) socket.join("showroom");

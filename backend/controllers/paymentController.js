@@ -3,7 +3,7 @@
 import { findOne, findById } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import { isValidId } from "../utils/validateId.js";
-import { isAtLeast } from "../config/roles.js";
+import { isAdminOrAbove } from "../config/roles.js";
 import { initiatePayment as initiate } from "../services/paymentService.js";
 import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
@@ -172,7 +172,7 @@ export const checkPaymentStatus = async (req, res) => {
     }
 
     // 🔒 SECURITY CHECK
-    if (req.user && payment.user && payment.user.toString() !== req.user.id && !isAtLeast(req.user.role, "admin")) {
+    if (req.user && payment.user && payment.user.toString() !== req.user.id && !isAdminOrAbove(req.user)) {
       return res.status(403).json({
         success: false,
         message: "Not authorized",
