@@ -30,7 +30,7 @@ jobs:
       - name: Check if secrets are configured
         id: secrets-check
         run: |
-          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" ]; then
             echo "secrets_status=configured" >> $GITHUB_OUTPUT
           else
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
@@ -41,7 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Build for production (without secrets - preview mode)
         if: steps.secrets-check.outputs.secrets_status == 'missing'
@@ -50,7 +50,7 @@ jobs:
           npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY || 'placeholder-key' }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || 'placeholder-key' }}
 
       - name: Validate dist output
         run: |
@@ -144,7 +144,7 @@ jobs:
       - name: Check if secrets are configured
         id: secrets-check
         run: |
-          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
+          if [ -n "${{ secrets.VITE_SUPABASE_URL }}" ] && [ -n "${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" ]; then
             echo "secrets_status=configured" >> $GITHUB_OUTPUT
           else
             echo "secrets_status=missing" >> $GITHUB_OUTPUT
@@ -158,7 +158,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
 
       - name: Build Project for Production (without secrets)
         if: steps.secrets-check.outputs.secrets_status == 'missing'
@@ -168,7 +168,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VITE_SUPABASE_URL: https://placeholder.supabase.co
-          VITE_SUPABASE_ANON_KEY: placeholder-key
+          VITE_SUPABASE_PUBLISHABLE_KEY: placeholder-key
 
       - name: Deploy to Vercel (Production)
         run: vercel deploy --prod
