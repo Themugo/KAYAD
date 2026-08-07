@@ -70,6 +70,14 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS credits NUMERIC DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS dealer_rating NUMERIC(2,1) DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT false;
+-- Found later in this same session, while checking the registration/
+-- onboarding flow: controllers/authController.js's demoLogin() queries
+-- User.findOne({ email: demo.email, isDemo: true }) - a real, live
+-- entry point (used to sign in with a pre-seeded demo account), with
+-- no backing column at all. Without it, demo login would fail with an
+-- unknown-column error the same way bids/favorites/reviews did before
+-- their fieldMap fixes earlier this session.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_demo BOOLEAN DEFAULT false;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_count INTEGER DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_earnings NUMERIC DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS review_count INTEGER DEFAULT 0;

@@ -88,7 +88,28 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   role TEXT NOT NULL DEFAULT 'user'
-    CHECK (role = ANY (ARRAY['user'::text, 'dealer'::text, 'broker'::text, 'admin'::text, 'superadmin'::text])),
+    -- Must match config/roles.js's ROLE_HIERARCHY exactly - that file's
+    -- own docstring calls it "Single source of truth. All middleware
+    -- imports from here." This constraint previously only had
+    -- ['user','dealer','broker','admin','superadmin'] (copied from the
+    -- already-applied gari_motors_full_schema.sql.sql migration's own
+    -- profiles_role_check, itself apparently written before
+    -- individual_seller and the 8 staff sub-roles existed in the
+    -- application code) - which meant User.create() in
+    -- controllers/authController.js's real registration flow would
+    -- have failed with a CHECK constraint violation the moment anyone
+    -- registered as an individual/private seller (role:
+    -- "individual_seller"), a core, everyday signup path, not an edge
+    -- case. "broker" is kept even though it isn't in ROLE_HIERARCHY -
+    -- confirmed unused anywhere in real application code, but harmless
+    -- to keep allowed (a superset here costs nothing; the bug was the
+    -- list being too narrow, not too wide).
+    CHECK (role = ANY (ARRAY[
+      'user'::text, 'individual_seller'::text, 'dealer'::text, 'broker'::text,
+      'ghost_checker'::text, 'moderator'::text, 'ad_manager'::text, 'marketing'::text,
+      'escrow_officer'::text, 'technical_support'::text, 'hr'::text, 'accounts'::text,
+      'admin'::text, 'superadmin'::text
+    ])),
   super_admin BOOLEAN DEFAULT false,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending','approved','suspended','rejected')),
   phone TEXT,
@@ -125,6 +146,26 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 -- ═══════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  -- role must exist here too: the already-applied gari_motors_full_schema.sql.sql
+  -- migration (cannot be edited, may already be applied to a real
+  -- database) does `ALTER TABLE profiles ADD CONSTRAINT
+  -- profiles_role_check CHECK (role = ...)` - it only updates the
+  -- constraint, it never adds the role column itself, meaning it
+  -- assumes the column already exists (the same "already created in a
+  -- prior migration" assumption documented at the top of this file for
+  -- the 5 originally-missing tables). Without this column, that ALTER
+  -- would fail with "column role does not exist" and the whole
+  -- migration chain would break at that statement. Kept in sync with
+  -- users.role via the trigger below rather than being independently
+  -- writable, since users.role remains the one real, authoritative
+  -- value the application actually reads and writes.
+  role TEXT NOT NULL DEFAULT 'user'
+    CHECK (role = ANY (ARRAY[
+      'user'::text, 'individual_seller'::text, 'dealer'::text, 'broker'::text,
+      'ghost_checker'::text, 'moderator'::text, 'ad_manager'::text, 'marketing'::text,
+      'escrow_officer'::text, 'technical_support'::text, 'hr'::text, 'accounts'::text,
+      'admin'::text, 'superadmin'::text
+    ])),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
