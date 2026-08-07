@@ -21,6 +21,42 @@ export const snakeToCamel = (s) => s.replace(/_([a-z0-9])/g, (_, c) => c.toUpper
 // can't fix. Add to this as more mismatches are found in other
 // tables — do not duplicate this map elsewhere.
 export const FIELD_ALIASES = {
+  // bids and favorites had no entry here at all, meaning Bid.create({ user })
+  // and Favorite.create({ user, car }) were writing literal columns
+  // "user"/"car" (camelToSnake of a single word is a no-op) - but the real
+  // columns are user_id/car_id. Every bid placement and every favorite
+  // would have failed with an unknown-column error. Found by auditing
+  // every write call across the backend against the real schema - see
+  // the migration this was added alongside for the full trail.
+  bids: {
+    user: "user_id",
+    carId: "car_id",
+    checkoutRequestID: "checkout_request_id",
+  },
+  favorites: {
+    user: "user_id",
+    car: "car_id",
+    carSnapshot: "car_snapshot",
+  },
+  notifications: {
+    user: "user_id",
+  },
+  audit_logs: {
+    actor: "actor_id",
+    target: "entity_id",
+    targetModel: "entity_type",
+  },
+  // reviews had no entry here at all - Review.create({ user, dealer, car })
+  // wrote those 3 keys literally, but the real columns are reviewer_id/
+  // dealer_id/car_id (not a plain camelToSnake conversion for user/dealer,
+  // since neither word naturally becomes its *_id-suffixed real name).
+  // Every review submission (controllers/reviewController.js, the only
+  // real write path) would have failed with an unknown-column error.
+  reviews: {
+    user: "reviewer_id",
+    dealer: "dealer_id",
+    car: "car_id",
+  },
   cars: {
     // brand, fuel, engine need no translation - confirmed via
     // seed_demo_vehicles.sql.sql and update_car_bid_stats.sql.sql that
