@@ -19,7 +19,13 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Logging the URL alongside the error, since this app supports
+    // URL-encoded state (deep-linked vehicles via ?vehicleId=<id>, see
+    // utils/navigation.ts) that can be a factor in what triggered a
+    // given crash - knowing the URL narrows down "which page/state"
+    // immediately instead of requiring that back-and-forth separately.
     console.error('[KAYAD] Uncaught error:', error, errorInfo);
+    console.error('[KAYAD] URL at time of crash:', window.location.href);
   }
 
   render() {
@@ -40,7 +46,21 @@ class ErrorBoundary extends Component<
               {this.state.error?.message || 'An unexpected error occurred'}
             </p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                // Plain window.location.reload() re-requests the exact
+                // same URL. If a crash is ever tied to URL-encoded state
+                // (e.g. a deep-linked vehicle - see utils/navigation.ts's
+                // VEHICLE_PARAM - this app supports ?vehicleId=<id> links
+                // that reopen a specific vehicle's detail modal on load),
+                // reloading the same URL reopens the same state and can
+                // reproduce the same crash immediately, trapping the user
+                // in a loop with no way out except manually editing the
+                // address bar. Navigating to the site root first clears
+                // any such state unconditionally, so this button is a
+                // real escape hatch for any future crash tied to URL
+                // state, not just the one that motivated this fix.
+                window.location.href = window.location.origin;
+              }}
               style={{
                 padding: '10px 20px',
                 backgroundColor: '#17244B',
