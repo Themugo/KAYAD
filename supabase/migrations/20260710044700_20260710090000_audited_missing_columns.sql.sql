@@ -85,7 +85,13 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_started_at TIMESTAMPTZ;
 
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS favorites_count INTEGER DEFAULT 0;
 ALTER TABLE cars ADD COLUMN IF NOT EXISTS payment_status TEXT;
-ALTER TABLE cars ADD COLUMN IF NOT EXISTS winner UUID REFERENCES users(id);
+-- JSONB, not a bare UUID FK: found later this session that both real
+-- consumers (bidController.js's endAuction, escrowVaultController.js)
+-- treat winner as an object - car.winner.user / car.winner.amount -
+-- not a scalar. The original UUID type here was a misread; fixed once
+-- the conflict was directly confirmed against both usage sites rather
+-- than trusting the first one read.
+ALTER TABLE cars ADD COLUMN IF NOT EXISTS winner JSONB;
 
 ALTER TABLE bids ADD COLUMN IF NOT EXISTS max_bid NUMERIC;
 ALTER TABLE bids ADD COLUMN IF NOT EXISTS is_auto BOOLEAN DEFAULT false;
@@ -107,4 +113,7 @@ ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference_id UUID;
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference_model TEXT;
 ALTER TABLE payments ADD COLUMN IF NOT EXISTS mode TEXT;
 
-CREATE INDEX IF NOT EXISTS idx_cars_winner ON cars(winner);
+-- No idx_cars_winner here anymore: winner is JSONB now (see the
+-- ALTER above), not the scalar UUID a plain B-tree index assumed.
+-- Not indexed - nothing queries/filters on it directly, only reads
+-- car.winner.user/car.winner.amount for a single already-fetched row.
