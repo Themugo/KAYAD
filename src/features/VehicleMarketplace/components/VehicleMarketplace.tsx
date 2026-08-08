@@ -478,14 +478,46 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
           {/* Quick Selects & Controls */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
-            {/* Make Selector */}
+            {/* Make Selector - hidden only at the lg: breakpoint when
+                the sidebar is also showing, not hidden outright. Found
+                this was rendered unconditionally alongside the
+                sidebar's own Make dropdown (both bound to the same
+                selectedMake state, confirmed via grep) - on desktop
+                with the sidebar open (the default), 2 physical
+                dropdowns for the identical filter were visible at
+                once, real wasted space, not just a visual redundancy.
+
+                First attempt at this fix used a plain JS conditional
+                ({!showDesktopSidebar && (...)}) that removed this
+                element from the DOM entirely whenever showDesktopSidebar
+                was true - but that state is just a boolean, not
+                screen-size-aware, and defaults to true regardless of
+                viewport. The desktop sidebar itself is `hidden
+                lg:block` (confirmed directly on the <aside> below) -
+                CSS-hidden below the lg: breakpoint no matter what the
+                state says. That first attempt would have hidden this
+                selector on mobile/tablet too, where there was never
+                any duplication to begin with (the sidebar physically
+                can't render there) - trading one real bug (wasted
+                desktop space) for a different one (unreachable Make
+                filter below lg: whenever the boolean happened to be
+                true, its default).
+
+                Corrected to a CSS class driven by the same state
+                instead of a JS conditional: lg:hidden only gets added
+                when showDesktopSidebar is true, so this selector is
+                hidden ONLY at the exact breakpoint and exact state
+                where the sidebar's own copy is actually visible -
+                always visible below lg: regardless of the toggle,
+                and visible at lg: specifically when the sidebar is
+                toggled off. */}
             <select
               value={selectedMake}
               onChange={(e) => {
                 setSelectedMake(e.target.value);
                 setSelectedModel('All');
               }}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+              className={`px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none cursor-pointer ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
               <option value="All">All Makes</option>
               {makes.filter((m) => m !== 'All').map((m) => (

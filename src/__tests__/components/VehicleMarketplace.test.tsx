@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
@@ -130,5 +130,70 @@ describe('VehicleMarketplace - Featured Picks (home page redesign)', () => {
     render(<VehicleMarketplace {...baseProps} />);
     const select = screen.getByDisplayValue('24');
     expect(select).toBeTruthy();
+  });
+});
+
+describe('VehicleMarketplace - consolidated Make selector (space audit)', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  // Found a real duplicate: the sticky top bar and the desktop filter
+  // sidebar each had their own physical <select> for the same
+  // selectedMake state - both visible simultaneously on desktop with
+  // the sidebar open (its default state), pure wasted space, not just
+  // a visual redundancy. First fix attempt used a plain JS conditional
+  // to remove the sticky-bar copy from the DOM whenever
+  // showDesktopSidebar was true - caught before shipping that this
+  // state isn't screen-size-aware and defaults to true regardless of
+  // viewport, so that fix would have made the Make filter completely
+  // unreachable below the lg: breakpoint (where the sidebar is always
+  // CSS-hidden via `hidden lg:block` no matter what the state says).
+  // Corrected to a CSS class driven by the same state, verified
+  // directly here across both toggle states rather than re-trusting
+  // the same reasoning that got it wrong once already.
+  it('hides the sticky-bar Make selector via lg:hidden only when the sidebar is showing, not via JS removal', async () => {
+    const { container } = render(<VehicleMarketplace {...baseProps} />);
+    await waitFor(() => {
+      const selects = container.querySelectorAll('select');
+      expect(selects.length).toBeGreaterThan(0);
+    });
+
+    // Sidebar defaults to open - the sticky bar's own Make <select>
+    // must still be IN THE DOM (never JS-removed, so it's reachable
+    // below lg: where the sidebar can't render), just carrying the
+    // lg:hidden class so it's only actually hidden at that breakpoint.
+    const makeSelects = Array.from(container.querySelectorAll('select')).filter((s) =>
+      Array.from(s.options).some((o) => o.textContent === 'All Makes')
+    );
+    expect(makeSelects.length).toBe(2);
+    const stickyBarMakeSelect = makeSelects.find((s) => s.className.includes('bg-slate-50'));
+    expect(stickyBarMakeSelect?.className).toMatch(/lg:hidden/);
+
+    // Toggle the sidebar closed - the sticky bar's Make selector must
+    // no longer carry lg:hidden, since with the sidebar gone it's the
+    // only Make control left at any screen size.
+    fireEvent.click(screen.getByTitle('Toggle filter sidebar'));
+    await waitFor(() => {
+      const selectsAfter = Array.from(container.querySelectorAll('select')).filter((s) =>
+        Array.from(s.options).some((o) => o.textContent === 'All Makes')
+      );
+      expect(selectsAfter.length).toBe(1);
+    });
+    const selectsAfter = Array.from(container.querySelectorAll('select')).filter((s) =>
+      Array.from(s.options).some((o) => o.textContent === 'All Makes')
+    );
+    expect(selectsAfter[0].className).not.toMatch(/lg:hidden/);
   });
 });
