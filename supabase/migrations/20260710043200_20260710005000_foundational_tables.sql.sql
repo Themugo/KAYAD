@@ -193,7 +193,16 @@ CREATE TABLE IF NOT EXISTS cars (
   condition TEXT,
   description TEXT,
   features TEXT[] DEFAULT '{}',
-  images TEXT[] DEFAULT '{}',
+  -- JSONB, not TEXT[]: confirmed via controllers/carController.js's real
+  -- createCar()/updateCar() flow that images are stored as an array of
+  -- objects ({url, thumb, public_id, _pending}, later replaced with
+  -- Cloudinary's own {url, public_id, ...} shape by a background job),
+  -- not plain URL strings - both the initial insert and the follow-up
+  -- Cloudinary-upload update write this richer shape. seed_demo_vehicles.sql.sql's
+  -- images values were rewritten from ARRAY['url1','url2'] to
+  -- '[{"url":"url1"},{"url":"url2"}]'::jsonb to match, rather than
+  -- leaving the seed data internally inconsistent with the real app.
+  images JSONB DEFAULT '[]',
   location_city TEXT,
   vin TEXT,
   chassis_number TEXT,
