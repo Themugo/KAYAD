@@ -14,6 +14,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { Badge, LazyImage } from './ui';
+import { useCountdown } from '../hooks/useCountdown';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -54,8 +55,34 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
 
   const marketTag = getMarketPriceTag();
 
-  // 2. Maximum Three Dynamic Trust Badges Rule
-  const getDynamicBadges = () => {
+  // 2. Badge placement rule: ONLY the auction indicator belongs on the
+  // image - it's the one genuinely time-sensitive signal (a live
+  // auction or one ending soon), the kind of thing worth interrupting
+  // the photo for. Dealer/Verified, Certified, Escrow, and Finance are
+  // all static trust facts about the listing, not urgent - they belong
+  // in the card's own details area, not stacked over a car photo that's
+  // already only 128-144px tall. Split what used to be a single
+  // getDynamicBadges() into 2 separate, purpose-specific functions
+  // rather than one list arbitrarily capped at a badge count.
+  const getAuctionBadge = () => {
+    if (!vehicle.isAuction) return null;
+    return { key: 'auction', icon: Gavel };
+  };
+
+  const auctionBadge = getAuctionBadge();
+  // Countdown only matters when there's an actual end time to count
+  // down to - a live auction with no known end time just shows "LIVE"
+  // via the hook's own "no target" fallback (hasEnded/isEndingSoon both
+  // false, empty label), handled in the render below.
+  const countdown = useCountdown(vehicle.isAuction ? vehicle.auctionEndsAt : null);
+
+  // Trust badges - relocated from the image to the card body. Same
+  // priority logic as before (dealer/verified, then certified, then
+  // escrow-or-finance), but no longer needs as tight a cap since the
+  // body has real room, unlike the small image overlay these used to
+  // compete for space in - capped at 3 here, matching the original
+  // "up to 3" intent before it was reduced to 2 purely to fit the image.
+  const getTrustBadges = () => {
     const badges: Array<{
       key: string;
       label: string;
@@ -63,38 +90,40 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       icon: React.ElementType;
     }> = [];
 
-    // Priority 1: Auction Status
-    if (vehicle.isAuction) {
-      badges.push({
-        key: 'auction',
-        label: 'LIVE AUCTION',
-        variant: 'live',
-        icon: Gavel
-      });
-    }
-
-    // Priority 2: Seller Verification
-    if (vehicle.sellerType === 'Verified Dealer' || vehicle.verified) {
+    // Seller Verification. The dealer branch trusts
+    // sellerType === 'Verified Dealer' alone (confirmed against the
+    // type definition - 'Verified Dealer' | 'Private Seller' are the
+    // only 2 values, so verification is baked into the dealer value's
+    // name itself). Deliberately does NOT also check `|| vehicle.verified`
+    // here - caught via a real rendered-output test that doing so
+    // caused a verified PRIVATE seller (verified: true is independent
+    // of sellerType) to be misclassified as "Dealer", since the OR
+    // would short-circuit true on the verified flag alone regardless of
+    // which seller type it actually was. The private-seller branch is
+    // its own explicit check instead: 'Private Seller' does NOT
+    // inherently mean verified - those are genuinely separate facts for
+    // that seller type - so it only shows "Verified" when
+    // vehicle.verified is actually true for that specific listing.
+    if (vehicle.sellerType === 'Verified Dealer') {
       badges.push({
         key: 'dealer',
-        label: '✓ Verified Dealer',
+        label: 'Dealer',
         variant: 'verified',
         icon: ShieldCheck
       });
-    } else if (vehicle.sellerType === 'Private Seller') {
+    } else if (vehicle.sellerType === 'Private Seller' && vehicle.verified) {
       badges.push({
         key: 'private',
-        label: '✓ Verified Seller',
+        label: 'Verified',
         variant: 'neutral',
         icon: UserCheck
       });
     }
 
-    // Priority 3: Inspection or Escrow or Finance (up to 3 total)
     if (vehicle.inspectionPassed && badges.length < 3) {
       badges.push({
         key: 'inspected',
-        label: '✓ 150-Pt Certified',
+        label: 'Certified',
         variant: 'inspected',
         icon: CheckCircle2
       });
@@ -103,14 +132,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
     if (isEscrowApplicable(vehicle) && badges.length < 3) {
       badges.push({
         key: 'escrow',
-        label: '✓ Escrow Protected',
+        label: 'Escrow',
         variant: 'escrow',
         icon: Lock
       });
     } else if (vehicle.financeAvailable && badges.length < 3) {
       badges.push({
         key: 'finance',
-        label: '✓ Finance',
+        label: 'Finance',
         variant: 'success',
         icon: Landmark
       });
@@ -119,7 +148,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
     return badges.slice(0, 3);
   };
 
-  const dynamicBadges = getDynamicBadges();
+  const trustBadges = getTrustBadges();
 
   // Seller display text
   const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Verified Dealer');
@@ -154,15 +183,27 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
         />
 
-        {/* Dynamic Top Overlay Badges (Max 3) */}
-        <div className="absolute top-2 left-2 flex flex-wrap gap-1 max-w-[78%] pointer-events-none z-10">
-          {dynamicBadges.map((b) => (
-            <Badge key={b.key} variant={b.variant} size="sm">
-              {React.createElement(b.icon, { className: 'w-3 h-3 shrink-0' })}
-              <span>{b.label}</span>
+        {/* Image overlay - auction status ONLY. Everything else (Dealer,
+            Certified, Escrow, Finance) moved to the card body below -
+            those are static trust facts, not urgent, and don't belong
+            competing for space on a car photo. Shows a calm "LIVE" pill
+            normally; once inside the countdown hook's urgency window
+            (default 30 min of an actual auctionEndsAt), switches to a
+            live ticking countdown with warmer, more attention-grabbing
+            styling - the only thing genuinely time-sensitive enough to
+            justify sitting on the image itself. */}
+        {auctionBadge && (
+          <div className="absolute top-2 left-2 z-10">
+            <Badge variant="live" size="sm">
+              <Gavel className="w-2.5 h-2.5 shrink-0" />
+              {countdown.label && countdown.isEndingSoon ? (
+                <span className="tabular-nums">{countdown.label}</span>
+              ) : (
+                <span>LIVE</span>
+              )}
             </Badge>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* Action Controls (Save & Compare) */}
         <div className="absolute top-2 right-2 flex flex-col gap-1 z-10" onClick={(e) => e.stopPropagation()}>
@@ -233,6 +274,21 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               </span>
             )}
           </div>
+
+          {/* Trust badges - relocated here from the image overlay (see
+              getTrustBadges' own comment for why). Own row, wraps
+              naturally if needed since the body has real vertical room,
+              unlike the image it used to compete with. */}
+          {trustBadges.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              {trustBadges.map((b) => (
+                <Badge key={b.key} variant={b.variant} size="sm">
+                  {React.createElement(b.icon, { className: 'w-2.5 h-2.5 shrink-0' })}
+                  <span>{b.label}</span>
+                </Badge>
+              ))}
+            </div>
+          )}
 
           {/* Compact metadata line - merged into the same zone as price/
               title rather than its own separately-bordered section.

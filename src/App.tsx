@@ -9,6 +9,7 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
 import { Vehicle, ChatMessage, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
+import { isEscrowApplicable } from './utils/escrow';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
 // user navigates there, instead of all being bundled into the initial load.
@@ -51,6 +52,12 @@ export function App() {
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
   const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
+  // Separate from selectedChatVehicle on purpose - that state is shared
+  // with the unrelated chat feature (handleContactSeller also sets it),
+  // so reusing it here would mean EscrowView could show stale prefill
+  // data from whichever vehicle chat was most recently opened for,
+  // rather than the vehicle escrow was actually started for.
+  const [escrowPrefillVehicle, setEscrowPrefillVehicle] = useState<Vehicle | null>(null);
 
   // Views that require a signed-in user. Attempting to navigate to one of
   // these while anonymous opens the auth modal instead of the view itself -
@@ -156,9 +163,24 @@ export function App() {
   }, []);
 
   // Escrow CTA Handler
+  // Guards on isEscrowApplicable before navigating anywhere - the
+  // primary trigger (VehicleDetailModal's "Start Secure Escrow
+  // Purchase" button) is already conditionally rendered based on this
+  // same check, so in normal use this guard is a defense-in-depth
+  // backstop, not the only thing standing between a user and an
+  // ineligible vehicle's escrow flow - but "make the routing respect
+  // that" means this handler itself shouldn't blindly trust that
+  // whatever called it already checked. Silently doesn't navigate if
+  // the vehicle isn't eligible, rather than presenting a UI message -
+  // there's no existing app-wide toast/alert system to hook into here
+  // (checked before assuming one existed), and this path realistically
+  // shouldn't be reachable for an ineligible vehicle given the upstream
+  // gate, so a hard block without new UI infrastructure is the
+  // proportionate fix.
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
+    if (!isEscrowApplicable(vehicle)) return;
     setQuickViewVehicle(null);
-    setSelectedChatVehicle(vehicle);
+    setEscrowPrefillVehicle(vehicle);
     navigateTo('escrow');
   }, [navigateTo]);
 
@@ -259,6 +281,7 @@ export function App() {
           {activeNav === 'escrow' && (
             <EscrowView
               deals={MOCK_ESCROW_DEALS}
+              prefillVehicle={escrowPrefillVehicle}
             />
           )}
 

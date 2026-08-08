@@ -41,3 +41,95 @@ describe('VehicleCard - size reduction (scale/density pass)', () => {
     expect(onQuickView).toHaveBeenCalledWith(vehicle);
   });
 });
+
+describe('VehicleCard - trust badges (professional/compact pass)', () => {
+  const baseProps = {
+    isSaved: false,
+    isCompared: false,
+    onToggleSave: vi.fn(),
+    onToggleCompare: vi.fn(),
+    onQuickView: vi.fn(),
+    onStartEscrow: vi.fn(),
+  };
+
+  // Rule (explicit direction): only the auction indicator belongs on the
+  // image - Dealer, Certified, Escrow, Finance are static trust facts,
+  // not urgent, and moved to the card body. Replaces the old "max 2
+  // badges on the image" test, which stopped meaningfully testing
+  // anything once the image badge system became auction-only (it still
+  // technically passed - at most 1 auction badge is always <= 2 - but
+  // wasn't verifying the actual current rule anymore).
+  it('the image overlay never shows Dealer/Certified/Escrow/Finance - only ever the auction badge, if any', () => {
+    // Picks whichever real mock vehicle would trigger the most trust-
+    // badge conditions at once (verified + inspected + escrow/finance)
+    // to actually stress this, not just check an already-empty overlay.
+    const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
+      const score = (v: typeof a) =>
+        Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
+      return score(b) - score(a);
+    })[0];
+    const { container } = render(<VehicleCard {...baseProps} vehicle={busiest} />);
+    const imageOverlay = container.querySelector('.absolute.top-2.left-2');
+    const overlayText = imageOverlay?.textContent || '';
+    expect(overlayText).not.toMatch(/Dealer|Certified|Escrow|Finance/);
+  });
+
+  it('relocates Dealer/Certified/Escrow/Finance trust badges to the card body, not the image', () => {
+    const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
+      const score = (v: typeof a) =>
+        Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
+      return score(b) - score(a);
+    })[0];
+    render(<VehicleCard {...baseProps} vehicle={busiest} />);
+    // At least one real trust fact about this specific vehicle should
+    // appear somewhere in the rendered card body now.
+    const hasAnyTrustBadge = ['Dealer', 'Verified', 'Certified', 'Escrow', 'Finance'].some(
+      (label) => screen.queryByText(label) !== null
+    );
+    expect(hasAnyTrustBadge).toBe(true);
+  });
+
+  it('shows a calm "LIVE" badge for an auction vehicle with no imminent end time', () => {
+    const auctionVehicle = INITIAL_VEHICLES.find((v) => v.isAuction);
+    if (!auctionVehicle) return; // no auction vehicle in current mock data - nothing to verify
+    const farFuture = { ...auctionVehicle, auctionEndsAt: new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString() };
+    render(<VehicleCard {...baseProps} vehicle={farFuture} />);
+    expect(screen.getByText('LIVE')).toBeTruthy();
+  });
+
+  it('switches to a live countdown once an auction is genuinely ending soon', () => {
+    const auctionVehicle = INITIAL_VEHICLES.find((v) => v.isAuction) || INITIAL_VEHICLES[0];
+    const endingSoon = { ...auctionVehicle, isAuction: true, auctionEndsAt: new Date(Date.now() + 5 * 60 * 1000).toISOString() };
+    render(<VehicleCard {...baseProps} vehicle={endingSoon} />);
+    // 5 minutes remaining is inside the 30-minute urgency window - the
+    // badge should show a live mm:ss countdown, not the calm "LIVE" text.
+    expect(screen.queryByText('LIVE')).toBeNull();
+    expect(screen.getByText(/^\d+:\d{2}$/)).toBeTruthy();
+  });
+
+  it('does not claim "Verified" for a private seller whose listing data does not actually say verified', () => {
+    // Confirmed via a direct data dump that every real vehicle in
+    // INITIAL_VEHICLES happens to have verified: true, including the
+    // one private seller - meaning this specific case (an unverified
+    // private seller) isn't reproducible from real fixture data alone.
+    // Constructed as a minimal override of a real vehicle (only
+    // sellerType/verified changed) rather than a fully synthetic
+    // object, to stay grounded in real data everywhere else.
+    const realPrivateSeller = INITIAL_VEHICLES.find((v) => v.sellerType === 'Private Seller')!;
+    const unverifiedPrivateSeller = { ...realPrivateSeller, verified: false };
+    render(<VehicleCard {...baseProps} vehicle={unverifiedPrivateSeller} />);
+    // Previously this showed a "Verified" badge unconditionally for
+    // any private seller, regardless of the verified field - a claim
+    // the listing's own data didn't support.
+    expect(screen.queryByText('Verified')).toBeNull();
+  });
+
+  it('still shows "Verified" for a private seller whose listing data actually confirms it', () => {
+    const realVerifiedPrivateSeller = INITIAL_VEHICLES.find(
+      (v) => v.sellerType === 'Private Seller' && v.verified
+    );
+    expect(realVerifiedPrivateSeller).toBeTruthy();
+    render(<VehicleCard {...baseProps} vehicle={realVerifiedPrivateSeller!} />);
+    expect(screen.getByText('Verified')).toBeTruthy();
+  });
+});

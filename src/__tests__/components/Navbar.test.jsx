@@ -82,3 +82,33 @@ describe('Navbar', () => {
     expect(screen.getAllByText('Sign In').length).toBe(1);
   });
 });
+
+describe('Navbar - color consistency with the footer', () => {
+  const baseProps = {
+    user: null,
+    savedCount: 0,
+    activeNav: 'marketplace',
+    onNavClick: vi.fn(),
+    selectedCounty: 'All East Africa',
+    onCountyChange: vi.fn(),
+    onOpenAuth: vi.fn(),
+    onOpenAlerts: vi.fn(),
+    onLogout: vi.fn(),
+    unreadCount: 0,
+  };
+
+  // The footer (App.tsx) uses bg-amber-400 text-[#17244B] as its accent
+  // throughout. The navbar's own primary CTA previously used a
+  // different, competing color (#C85A32, a muted terracotta, per its
+  // own removed comment) - a real, visible header-vs-footer
+  // inconsistency, not just a subjective preference. Verifies the CTA
+  // now uses the same amber accent the footer already established,
+  // rather than trusting the source edit alone.
+  it('the Sell Vehicle CTA uses the footer\'s amber accent, not the old competing terracotta', () => {
+    const { container } = render(<Navbar {...baseProps} />);
+    const cta = container.querySelector('#cta-sell-car');
+    expect(cta).toBeTruthy();
+    expect(cta?.className).toMatch(/amber-400/);
+    expect(cta?.className).not.toMatch(/C85A32/);
+  });
+});

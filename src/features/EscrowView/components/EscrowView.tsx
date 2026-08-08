@@ -1,13 +1,21 @@
-import React, { useState, useMemo } from 'react';
-import { EscrowTransaction, EscrowLogEntry, EscrowDispute } from '../../../types';
+import React, { useState, useMemo, useEffect } from 'react';
+import { EscrowTransaction, EscrowLogEntry, EscrowDispute, Vehicle } from '../../../types';
 import { Lock, CheckCircle2, Landmark, Clock, Search, ShieldCheck, FileCheck, UserCheck, Building2, Sparkles, ChevronRight, Info, PlusCircle, AlertTriangle, History, Car, FileText, MessageSquare, RefreshCw, Eye, Check, User, ShieldAlert, Download, Upload, PhoneCall } from 'lucide-react';
 import { PageHeader, StatWidget, Card, CardHeader, CardTitle, Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Button, Input, Modal } from '../../../components/ui';
 
 interface EscrowViewProps {
   deals: EscrowTransaction[];
+  /** When a specific vehicle is provided (e.g. from clicking "Start
+   * Secure Escrow Purchase" on a vehicle's own detail view), the create
+   * form is pre-filled from that vehicle's real data and shown
+   * immediately, instead of defaulting to deals[0] - an arbitrary mock
+   * deal completely unrelated to whatever the user actually clicked.
+   * Optional and defaults to null so this view still works standalone
+   * (e.g. reached directly from nav, not from a specific vehicle). */
+  prefillVehicle?: Vehicle | null;
 }
 
-export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) => {
+export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals, prefillVehicle }) => {
   const [dealsList, setDealsList] = useState<EscrowTransaction[]>(initialDeals);
   const [dealSearch, setDealSearch] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'journey' | 'deals' | 'create'>('journey');
@@ -29,6 +37,25 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ deals: initialDeals }) =
   const [newBuyerName, setNewBuyerName] = useState<string>('');
   const [newSellerName, setNewSellerName] = useState<string>('');
   const [formSuccess, setFormSuccess] = useState<boolean>(false);
+
+  // Pre-fills the create form from a specific vehicle and switches to
+  // that tab immediately, rather than silently ignoring prefillVehicle
+  // and leaving the user looking at an unrelated deals[0]. Only
+  // newBuyerName is deliberately left blank - this component has no
+  // access to the actual signed-in user's name (no user prop is passed
+  // to EscrowView), and fabricating a placeholder name here would be
+  // exactly the kind of hardcoded/mock data this fix is meant to
+  // remove, not add.
+  useEffect(() => {
+    if (!prefillVehicle) return;
+    setActiveTab('create');
+    setNewVehicleTitle(prefillVehicle.title);
+    setNewAmount(String(prefillVehicle.price));
+    setNewSellerName(prefillVehicle.sellerName);
+    setNewSellerType(prefillVehicle.sellerType === 'Verified Dealer' ? 'Verified Dealer' : 'Private Seller');
+    triggerToast(`Escrow details pre-filled from ${prefillVehicle.title}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefillVehicle]);
 
   // Auto-clear Toast
   const triggerToast = (msg: string) => {

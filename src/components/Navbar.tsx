@@ -177,16 +177,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
               {savedCount > 0 && (
-                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-[#C85A32] text-white shadow-2xs">
+                <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
                   {savedCount}
                 </span>
               )}
             </button>
 
-            {/* List Vehicle Button (Primary CTA: Muted Terracotta) */}
+            {/* List Vehicle Button (Primary CTA) - matches the footer's
+                own accent (bg-amber-400 text-[#17244B], confirmed
+                directly in App.tsx's footer markup) instead of the
+                terracotta (#C85A32) this used before, which was a
+                second, competing accent color not used in the footer at
+                all. Also better contrast than the old white-on-terracotta -
+                navy-on-amber is the same high-contrast pairing the
+                footer already uses successfully. */}
             <button
               onClick={() => handleNavSelect('seller-platform')}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-[#C85A32] hover:bg-[#B34E28] text-white transition-all shadow-2xs active:scale-[0.98] shrink-0"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl font-bold text-xs bg-amber-400 hover:bg-amber-500 text-[#17244B] transition-all shadow-2xs active:scale-[0.98] shrink-0"
               id="cta-sell-car"
             >
               <PlusCircle className="w-4 h-4 stroke-[2]" />
@@ -483,7 +490,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onOpenAuth();
                   setMobileMenuOpen(false);
                 }}
-                className="px-3 py-1.5 bg-[#C85A32] text-white font-bold rounded-xl text-xs"
+                className="px-3 py-1.5 bg-amber-400 text-[#17244B] font-bold rounded-xl text-xs"
               >
                 Sign In
               </button>

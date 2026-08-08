@@ -619,15 +619,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {featuredPicks.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-2.5 px-0.5">
-            <LayoutGrid className="w-3.5 h-3.5 text-[#C85A32]" />
+            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
             <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {featuredPicks.map(({ vehicle: v, reason }) => (
               <div key={v.id}>
                 <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C85A32]" />
-                  <span className="text-[10px] font-bold text-[#C85A32] uppercase tracking-wide">{reason}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">{reason}</span>
                 </div>
                 <VehicleCard
                   vehicle={v}
@@ -952,7 +952,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onChange={(e) => setOnlyAuction(e.target.checked)}
                   className="rounded border-slate-300 text-[#1E3063] focus:ring-[#1E3063] accent-[#1E3063]"
                 />
-                <Gavel className="w-3.5 h-3.5 text-[#C85A32]" />
+                <Gavel className="w-3.5 h-3.5 text-amber-500" />
                 <span>Live Auction Listings</span>
               </label>
             </div>
@@ -1179,7 +1179,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               variant="accent"
               size="sm"
               onClick={onOpenCompareModal}
-              className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-bold text-xs"
+              className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-bold text-xs"
             >
               Compare Matrix
             </Button>
