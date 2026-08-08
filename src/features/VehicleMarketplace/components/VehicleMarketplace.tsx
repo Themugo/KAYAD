@@ -451,9 +451,24 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       )}
 
-      {/* 1. STICKY TOP SEARCH BAR */}
-      <div className="sticky top-16 z-30 bg-[#F5F2EB]/95 backdrop-blur-md pb-3 pt-1 border-b border-slate-200/60 transition-all">
-        <div className="bg-white rounded-2xl p-2.5 sm:p-3 border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-center gap-2.5">
+      {/* 1. UNIFIED SEARCH + TRUST CARD — search bar and trust strip were
+          2 separate cards stacked on top of each other (their own
+          padding, border, rounded corners, shadow each), and the search
+          bar was ALSO position: sticky, meaning it permanently occupied
+          viewport space while scrolling through results - a sticky
+          element is exactly the kind of thing that reads as "wasted
+          space" even when it's technically useful, since it's real
+          estate a user can never scroll past. Combined into one card,
+          dropped sticky entirely (functionality preserved - search and
+          filters are still right at the top of the page, just no longer
+          pinned there while browsing), and picked the trust strip's dark
+          navy gradient as the shared background (it read as a stronger
+          brand/identity statement - "the 3 things that make KAYAD a
+          marketplace, not a listings board" - than plain white chrome),
+          adapting the search/filter controls to it rather than the
+          other way around. */}
+      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+        <div className="flex flex-col md:flex-row items-center gap-2.5">
           {/* Instant Keyword Input */}
           <div className="relative flex-1 w-full flex items-center">
             <Search className="w-4 h-4 absolute left-3.5 text-slate-400 pointer-events-none" />
@@ -462,7 +477,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Instant search (e.g. Toyota Prado, Leather, Turbo, Nairobi...)"
-              className="w-full pl-10 pr-9 py-2 bg-slate-50 text-slate-900 placeholder-slate-400 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:bg-white transition-all"
+              className="w-full pl-10 pr-9 py-2 bg-white text-slate-900 placeholder-slate-400 border border-white/20 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all"
             />
             {searchQuery && (
               <button
@@ -479,49 +494,22 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           {/* Quick Selects & Controls */}
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-between md:justify-end">
             {/* Make Selector - hidden only at the lg: breakpoint when
-                the sidebar is also showing, not hidden outright. Found
-                this was rendered unconditionally alongside the
-                sidebar's own Make dropdown (both bound to the same
-                selectedMake state, confirmed via grep) - on desktop
-                with the sidebar open (the default), 2 physical
-                dropdowns for the identical filter were visible at
-                once, real wasted space, not just a visual redundancy.
-
-                First attempt at this fix used a plain JS conditional
-                ({!showDesktopSidebar && (...)}) that removed this
-                element from the DOM entirely whenever showDesktopSidebar
-                was true - but that state is just a boolean, not
-                screen-size-aware, and defaults to true regardless of
-                viewport. The desktop sidebar itself is `hidden
-                lg:block` (confirmed directly on the <aside> below) -
-                CSS-hidden below the lg: breakpoint no matter what the
-                state says. That first attempt would have hidden this
-                selector on mobile/tablet too, where there was never
-                any duplication to begin with (the sidebar physically
-                can't render there) - trading one real bug (wasted
-                desktop space) for a different one (unreachable Make
-                filter below lg: whenever the boolean happened to be
-                true, its default).
-
-                Corrected to a CSS class driven by the same state
-                instead of a JS conditional: lg:hidden only gets added
-                when showDesktopSidebar is true, so this selector is
-                hidden ONLY at the exact breakpoint and exact state
-                where the sidebar's own copy is actually visible -
-                always visible below lg: regardless of the toggle,
-                and visible at lg: specifically when the sidebar is
-                toggled off. */}
+                the sidebar is also showing, not hidden outright. See
+                the git history on this exact selector for the full
+                reasoning (a JS-conditional first attempt would have
+                broken it below lg: entirely) - unchanged by this merge,
+                just restyled for the dark card background. */}
             <select
               value={selectedMake}
               onChange={(e) => {
                 setSelectedMake(e.target.value);
                 setSelectedModel('All');
               }}
-              className={`px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none cursor-pointer ${showDesktopSidebar ? 'lg:hidden' : ''}`}
+              className={`px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none cursor-pointer ${showDesktopSidebar ? 'lg:hidden' : ''}`}
             >
-              <option value="All">All Makes</option>
+              <option value="All" className="text-slate-900">All Makes</option>
               {makes.filter((m) => m !== 'All').map((m) => (
-                <option key={m} value={m}>{m}</option>
+                <option key={m} value={m} className="text-slate-900">{m}</option>
               ))}
             </select>
 
@@ -529,10 +517,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <select
               value={selectedCounty}
               onChange={(e) => onCountyChange(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-[#1E3063] focus:outline-none cursor-pointer"
+              className="px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-xs font-bold text-white focus:outline-none cursor-pointer"
             >
               {locations.map((loc) => (
-                <option key={loc} value={loc}>{loc}</option>
+                <option key={loc} value={loc} className="text-slate-900">{loc}</option>
               ))}
             </select>
 
@@ -541,15 +529,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               onClick={() => setShowDesktopSidebar(!showDesktopSidebar)}
               className={`hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
                 showDesktopSidebar
-                  ? 'bg-[#1E3063] text-white border-[#1E3063]'
-                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                  ? 'bg-amber-400 text-[#17244B] border-amber-400'
+                  : 'bg-white/10 text-white border-white/20 hover:bg-white/15'
               }`}
               title="Toggle filter sidebar"
             >
-              {showDesktopSidebar ? <PanelLeftClose className="w-4 h-4 text-amber-400" /> : <PanelLeftOpen className="w-4 h-4" />}
+              {showDesktopSidebar ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4 text-amber-400" />}
               <span>Filters</span>
               {activeFilters.length > 0 && (
-                <span className="bg-amber-400 text-[#17244B] text-[10px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
+                <span className="bg-[#17244B] text-amber-400 text-[10px] font-black px-1.5 py-0.2 rounded-full ml-0.5">
                   {activeFilters.length}
                 </span>
               )}
@@ -558,12 +546,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             {/* Mobile Filter Drawer Button */}
             <button
               onClick={() => setShowMobileFilterDrawer(true)}
-              className="lg:hidden flex items-center gap-1.5 px-3.5 py-2 bg-[#1E3063] text-white rounded-xl text-xs font-bold shadow-sm"
+              className="lg:hidden flex items-center gap-1.5 px-3.5 py-2 bg-amber-400 text-[#17244B] rounded-xl text-xs font-bold shadow-sm"
             >
-              <SlidersHorizontal className="w-4 h-4 text-amber-400" />
+              <SlidersHorizontal className="w-4 h-4" />
               <span>Filters</span>
               {activeFilters.length > 0 && (
-                <span className="bg-amber-400 text-[#17244B] text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                <span className="bg-[#17244B] text-amber-400 text-[10px] font-black px-1.5 py-0.2 rounded-full">
                   {activeFilters.length}
                 </span>
               )}
@@ -572,19 +560,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             {/* Save Search Button */}
             <button
               onClick={() => setShowSaveSearchModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-amber-100 text-[#1E3063] hover:bg-amber-200 rounded-xl text-xs font-bold border border-amber-300 transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/10 text-amber-400 hover:bg-white/15 rounded-xl text-xs font-bold border border-white/20 transition-all"
               title="Save search alert"
             >
-              <Bookmark className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+              <Bookmark className="w-3.5 h-3.5 fill-amber-400" />
               <span className="hidden sm:inline">Save Search</span>
             </button>
           </div>
         </div>
-      </div>
 
-      {/* 1.5 TRUST STRIP — the three things that make KAYAD a marketplace, not a listings board */}
-      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl px-4 py-3.5 sm:px-6 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10">
+        {/* Trust pillars - same 3 as before, now the lower half of one
+            card instead of a fully separate one, divided by a subtle
+            border rather than a card-boundary gap. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10 pt-4 border-t border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
               <Lock className="w-4 h-4 text-amber-400" />
