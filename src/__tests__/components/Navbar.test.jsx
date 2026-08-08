@@ -36,38 +36,20 @@ describe('Navbar', () => {
     expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
   });
 
-  // Home-page/navbar redesign: verifies the actual reduction, not just
-  // that the component renders. Previously KAYAD LIVE and Watch Live were
-  // each their own permanent top-level button; they should no longer be
-  // visible until the chevron on the consolidated "Live Auctions" pill
-  // is clicked to open its dropdown.
-  it('consolidates KAYAD LIVE and Watch Live behind a dropdown, opened via the chevron button specifically', () => {
+  // Second, more aggressive nav reduction, per explicit direction: every
+  // one of Live Auctions/Finance's underlying functions (auction bidding,
+  // escrow, pre-purchase inspection, financing) is already fully
+  // contextual per-vehicle in VehicleDetailModal - confirmed directly
+  // before making this change, not assumed (isAuction/isEscrowActive/
+  // isInspectionActive/isFinanceActive all gate real UI there). The top
+  // nav should show only Marketplace; a car's own rules/functions belong
+  // on that car, not as competing global destinations.
+  it('reduces the desktop primary nav to just Marketplace - no separate Live Auctions or Finance destinations', () => {
     render(<Navbar {...baseProps} />);
-    expect(screen.getByText('Live Auctions')).toBeTruthy();
+    expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Live Auctions')).toBeNull();
+    expect(screen.queryByText('Finance')).toBeNull();
     expect(screen.queryByText('KAYAD LIVE')).toBeNull();
-    expect(screen.queryByText('Watch Live Broadcast')).toBeNull();
-
-    // "Live Auctions" and its dropdown toggle are 2 separate sibling
-    // buttons (not one button with a nested fake-button span, which
-    // would be invalid HTML) - the chevron has its own aria-label
-    // specifically so this dropdown can be opened without triggering
-    // the navigation click next to it.
-    fireEvent.click(screen.getByLabelText('More live auction destinations'));
-    expect(screen.getByText('KAYAD LIVE')).toBeTruthy();
-    expect(screen.getByText('Watch Live Broadcast')).toBeTruthy();
-  });
-
-  // Found while working on this exact button: 'auctions' (AuctionsView -
-  // the real bidding/browsing page with actual vehicle data, filtering,
-  // and escrow integration) had no path to it from navigation at all,
-  // separate from the 3 auction-adjacent pages already in the dropdown.
-  // Clicking "Live Auctions" itself (not the chevron) must navigate
-  // there directly, not just toggle the dropdown menu open.
-  it('clicking "Live Auctions" itself navigates to the real auctions page, not just the dropdown toggle', () => {
-    const onNavClick = vi.fn();
-    render(<Navbar {...baseProps} onNavClick={onNavClick} />);
-    fireEvent.click(screen.getByText('Live Auctions'));
-    expect(onNavClick).toHaveBeenCalledWith('auctions');
   });
 
   // The top utility bar (rotating trust messages, region selector, "Price

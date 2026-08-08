@@ -122,4 +122,39 @@ describe('VehicleDetailModal', () => {
       rerender(<VehicleDetailModal vehicle={null} notFoundId={null} {...props} />);
     }).not.toThrow();
   });
+
+  // The navbar was reduced to just "Marketplace" on the explicit premise
+  // that auction bidding, escrow, and inspection (financing has its own
+  // coverage below) are already fully contextual per-vehicle here, not
+  // separate destinations a visitor needs a global nav item for. This is
+  // the test that actually grounds that premise in real mock data rather
+  // than just trusting the grep that found isAuction/isEscrowActive
+  // gates in the source - confirms the auction CTA appears for a real
+  // vehicle with isAuction: true, and does NOT appear for a real vehicle
+  // without it.
+  it('shows the auction bidding CTA only for vehicles that are actually mid-auction', () => {
+    const auctionVehicle = INITIAL_VEHICLES.find((v) => v.isAuction === true);
+    const nonAuctionVehicle = INITIAL_VEHICLES.find((v) => !v.isAuction);
+    expect(auctionVehicle).toBeTruthy();
+    expect(nonAuctionVehicle).toBeTruthy();
+
+    const baseProps = {
+      allVehicles: INITIAL_VEHICLES,
+      onClose: () => {},
+      onStartEscrow: () => {},
+      onContactSeller: () => {},
+      onRequestInspection: () => {},
+      isSaved: false,
+      onToggleSave: () => {},
+      onSelectVehicle: () => {},
+      notFoundId: null,
+    };
+
+    const { unmount } = render(<VehicleDetailModal vehicle={auctionVehicle!} {...baseProps} />);
+    expect(screen.getByText(/Place Bid|Submit Auction Offer/)).toBeTruthy();
+    unmount();
+
+    render(<VehicleDetailModal vehicle={nonAuctionVehicle!} {...baseProps} />);
+    expect(screen.queryByText(/Place Bid|Submit Auction Offer/)).toBeNull();
+  });
 });

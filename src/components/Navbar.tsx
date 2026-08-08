@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, Gavel, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark, Radio, Play } from 'lucide-react';
+import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface NavbarProps {
@@ -29,19 +29,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showLiveDropdown, setShowLiveDropdown] = useState(false);
 
   const userRef = useRef<HTMLDivElement>(null);
-  const liveRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false);
-      }
-      if (liveRef.current && !liveRef.current.contains(e.target as Node)) {
-        setShowLiveDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-18 gap-4">
           
-          {/* LEFT SECTION: Logo, Marketplace, Live Auctions, Finance */}
+          {/* LEFT SECTION: Logo, Marketplace */}
           <div className="flex items-center space-x-6 md:space-x-8">
             {/* KAYAD Logo */}
             <button 
@@ -85,29 +80,38 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </button>
 
-            {/* Desktop Primary Nav - reduced from 7 items to 3: Marketplace,
-                Live Auctions, and Finance. My Garage, Pre-Purchase
-                Inspection, and Support moved out of the persistent global
-                nav - My Garage only means anything once signed in
-                (belongs with account, not global chrome), Pre-Purchase
-                Inspection is a specific service better surfaced
-                contextually, and Support is one click away via the
-                account menu / footer rather than competing for top-level
-                space every visitor sees on every page.
+            {/* Desktop Primary Nav - reduced to just Marketplace. Live
+                Auctions and Finance (previously top-level nav items,
+                pointing to standalone browsing pages) removed at the
+                user's explicit direction: every one of the 4 functions
+                this redesign is centered on - auction bidding, escrow,
+                pre-purchase inspection, and financing - is already fully
+                built as a contextual, per-vehicle action inside
+                VehicleDetailModal (isAuction/isEscrowActive/
+                isInspectionActive/isFinanceActive all gate real UI
+                there: "Place Bid / Submit Auction Offer", "Start Secure
+                Escrow Purchase", "Book Inspection & Reserve", a real
+                Financing Marketplace Estimator with a monthly-payment
+                calculator) - confirmed directly before making this
+                change, not assumed. A car's own rules/functions belong
+                on that car, not as a competing set of global destinations
+                a visitor has to choose between before they've even
+                picked a vehicle. My Garage, Pre-Purchase Inspection, and
+                Support were already moved out in an earlier pass for
+                similar reasons.
 
-                "Live Auctions" itself navigates straight to 'auctions'
-                (AuctionsView - the real bidding/browsing page with actual
-                vehicle data, filtering, and escrow integration). Its
-                chevron opens a small dropdown for 3 complementary
-                destinations (KAYAD LIVE, Watch Live Broadcast, Auction
-                Schedule & Discovery) so all 4 auction-related pages stay
-                reachable without each claiming its own permanent nav
-                slot. Originally this button's own click just toggled the
-                dropdown and 'auctions' wasn't included anywhere in it -
-                found while working on this exact button that 'auctions'
-                was the most functionally real of the 4 (1786 lines, real
-                vehicle/escrow props) and had no path to it at all, before
-                or after the original consolidation here. */}
+                The underlying pages this removes direct nav access to
+                (AuctionsView/'auctions', FinanceMarketplace/'finance',
+                AuctionDiscoveryNetwork/'discovery', KAYADLive/
+                'kayadlive', LiveAuctionBroadcastPage/'broadcast') are
+                real, substantial features and were NOT deleted - just
+                no longer competing for top-level nav space now that
+                their core functions are reachable through any vehicle
+                that needs them. The marketplace's own filter sidebar
+                already has a "Live Auction Listings" checkbox to browse
+                specifically to auction vehicles within the same grid,
+                so auction browsing itself isn't lost, just no longer a
+                separate destination from browsing any other car. */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
@@ -118,81 +122,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 Marketplace
-              </button>
-
-              <div className="relative flex items-center" ref={liveRef}>
-                {/* Two sibling buttons, not one button with a nested
-                    fake-button span - nesting an interactive element
-                    inside a real <button> is invalid HTML and breaks
-                    assistive tech, so the main destination click and the
-                    dropdown toggle are separate controls sharing one
-                    visual pill via negative margin, not one element
-                    doing two different things depending on which pixel
-                    you hit. */}
-                <button
-                  onClick={() => handleNavSelect('auctions')}
-                  className={`flex items-center gap-1.5 pl-3.5 pr-1.5 py-2 rounded-l-lg transition-all ${
-                    ['auctions', 'discovery', 'kayadlive', 'broadcast'].includes(activeNav)
-                      ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                      : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-                  }`}
-                >
-                  <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                  <span>Live Auctions</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" title="Live now" />
-                </button>
-                <button
-                  onClick={() => setShowLiveDropdown(!showLiveDropdown)}
-                  aria-label="More live auction destinations"
-                  className={`p-2 rounded-r-lg transition-all ${
-                    ['auctions', 'discovery', 'kayadlive', 'broadcast'].includes(activeNav)
-                      ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                      : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-                  }`}
-                >
-                  <ChevronDown className={`w-3 h-3 transition-transform ${showLiveDropdown ? 'rotate-180' : ''}`} />
-                </button>
-
-                {showLiveDropdown && (
-                  <div className="absolute left-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs animate-fade-in">
-                    <button
-                      onClick={() => { handleNavSelect('discovery'); setShowLiveDropdown(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold text-slate-700"
-                    >
-                      <Gavel className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                      <span>Auction Schedule & Discovery</span>
-                    </button>
-                    <button
-                      onClick={() => { handleNavSelect('kayadlive'); setShowLiveDropdown(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold text-slate-700"
-                    >
-                      <Radio className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                      <span>KAYAD LIVE</span>
-                    </button>
-                    <button
-                      onClick={() => { handleNavSelect('broadcast'); setShowLiveDropdown(false); }}
-                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center justify-between font-semibold text-slate-700"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Play className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                        <span>Watch Live Broadcast</span>
-                      </div>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">NOW</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <button
-                onClick={() => handleNavSelect('finance')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'finance'
-                    ? 'bg-emerald-500 text-white font-bold shadow-2xs'
-                    : 'hover:text-emerald-600 hover:bg-emerald-50'
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[1.75]" />
-                <span>Finance</span>
               </button>
             </nav>
           </div>
@@ -536,66 +465,30 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Group 1: Public Services */}
+          {/* Group 1: Public Services - reduced to just Marketplace,
+              matching the desktop nav. The other 4 tiles that used to be
+              here (KAYAD LIVE, Auction Discovery, Watch Live, Finance)
+              pointed to standalone pages whose functions are already
+              fully contextual per-vehicle in VehicleDetailModal (real
+              bidding, escrow, inspection, and financing UI, all gated on
+              that vehicle's own isAuction/isEscrowActive/
+              isFinanceActive) - confirmed directly before removing
+              these, not assumed. Support kept below as its own secondary
+              row, unchanged. */}
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
               Public Marketplace
             </span>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => handleNavSelect('marketplace')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'marketplace' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Car className="w-4 h-4" />
-                <span>Marketplace</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('kayadlive')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'kayadlive' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Radio className="w-4 h-4" />
-                <span>KAYAD LIVE</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('discovery')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'discovery' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <Gavel className="w-4 h-4" />
-                <span>Auction Discovery</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('broadcast')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center justify-between ${
-                  activeNav === 'broadcast' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Play className="w-4 h-4" />
-                  <span>Watch Live</span>
-                </div>
-                <span className="text-[8px] bg-rose-600 text-white px-1 py-0.2 rounded font-bold">LIVE</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('finance')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'finance' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <CreditCard className="w-4 h-4 text-slate-400" />
-                <span>Finance</span>
-              </button>
-            </div>
+            <button
+              onClick={() => handleNavSelect('marketplace')}
+              className={`w-full p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                activeNav === 'marketplace' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+              }`}
+            >
+              <Car className="w-4 h-4" />
+              <span>Marketplace</span>
+            </button>
 
             <button
               onClick={() => handleNavSelect('support')}
