@@ -39,16 +39,35 @@ describe('Navbar', () => {
   // Home-page/navbar redesign: verifies the actual reduction, not just
   // that the component renders. Previously KAYAD LIVE and Watch Live were
   // each their own permanent top-level button; they should no longer be
-  // visible until the consolidated "Live Auctions" dropdown is opened.
-  it('consolidates KAYAD LIVE and Watch Live behind a Live Auctions dropdown instead of showing them as separate permanent buttons', () => {
+  // visible until the chevron on the consolidated "Live Auctions" pill
+  // is clicked to open its dropdown.
+  it('consolidates KAYAD LIVE and Watch Live behind a dropdown, opened via the chevron button specifically', () => {
     render(<Navbar {...baseProps} />);
     expect(screen.getByText('Live Auctions')).toBeTruthy();
     expect(screen.queryByText('KAYAD LIVE')).toBeNull();
-    expect(screen.queryByText('Watch Live')).toBeNull();
+    expect(screen.queryByText('Watch Live Broadcast')).toBeNull();
 
-    fireEvent.click(screen.getByText('Live Auctions'));
+    // "Live Auctions" and its dropdown toggle are 2 separate sibling
+    // buttons (not one button with a nested fake-button span, which
+    // would be invalid HTML) - the chevron has its own aria-label
+    // specifically so this dropdown can be opened without triggering
+    // the navigation click next to it.
+    fireEvent.click(screen.getByLabelText('More live auction destinations'));
     expect(screen.getByText('KAYAD LIVE')).toBeTruthy();
     expect(screen.getByText('Watch Live Broadcast')).toBeTruthy();
+  });
+
+  // Found while working on this exact button: 'auctions' (AuctionsView -
+  // the real bidding/browsing page with actual vehicle data, filtering,
+  // and escrow integration) had no path to it from navigation at all,
+  // separate from the 3 auction-adjacent pages already in the dropdown.
+  // Clicking "Live Auctions" itself (not the chevron) must navigate
+  // there directly, not just toggle the dropdown menu open.
+  it('clicking "Live Auctions" itself navigates to the real auctions page, not just the dropdown toggle', () => {
+    const onNavClick = vi.fn();
+    render(<Navbar {...baseProps} onNavClick={onNavClick} />);
+    fireEvent.click(screen.getByText('Live Auctions'));
+    expect(onNavClick).toHaveBeenCalledWith('auctions');
   });
 
   // The top utility bar (rotating trust messages, region selector, "Price

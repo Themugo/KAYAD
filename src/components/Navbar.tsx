@@ -86,16 +86,28 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             {/* Desktop Primary Nav - reduced from 7 items to 3: Marketplace,
-                Live Auctions (KAYAD LIVE/Auctions/Watch Live consolidated
-                into one dropdown so all 3 stay reachable without each
-                claiming its own permanent slot), and Finance. My Garage,
-                Pre-Purchase Inspection, and Support moved out of the
-                persistent global nav - My Garage only means anything once
-                signed in (belongs with account, not global chrome),
-                Pre-Purchase Inspection is a specific service better
-                surfaced contextually, and Support is one click away via
-                the account menu / footer rather than competing for
-                top-level space every visitor sees on every page. */}
+                Live Auctions, and Finance. My Garage, Pre-Purchase
+                Inspection, and Support moved out of the persistent global
+                nav - My Garage only means anything once signed in
+                (belongs with account, not global chrome), Pre-Purchase
+                Inspection is a specific service better surfaced
+                contextually, and Support is one click away via the
+                account menu / footer rather than competing for top-level
+                space every visitor sees on every page.
+
+                "Live Auctions" itself navigates straight to 'auctions'
+                (AuctionsView - the real bidding/browsing page with actual
+                vehicle data, filtering, and escrow integration). Its
+                chevron opens a small dropdown for 3 complementary
+                destinations (KAYAD LIVE, Watch Live Broadcast, Auction
+                Schedule & Discovery) so all 4 auction-related pages stay
+                reachable without each claiming its own permanent nav
+                slot. Originally this button's own click just toggled the
+                dropdown and 'auctions' wasn't included anywhere in it -
+                found while working on this exact button that 'auctions'
+                was the most functionally real of the 4 (1786 lines, real
+                vehicle/escrow props) and had no path to it at all, before
+                or after the original consolidation here. */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
@@ -108,11 +120,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Marketplace
               </button>
 
-              <div className="relative" ref={liveRef}>
+              <div className="relative flex items-center" ref={liveRef}>
+                {/* Two sibling buttons, not one button with a nested
+                    fake-button span - nesting an interactive element
+                    inside a real <button> is invalid HTML and breaks
+                    assistive tech, so the main destination click and the
+                    dropdown toggle are separate controls sharing one
+                    visual pill via negative margin, not one element
+                    doing two different things depending on which pixel
+                    you hit. */}
                 <button
-                  onClick={() => setShowLiveDropdown(!showLiveDropdown)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                    ['discovery', 'kayadlive', 'broadcast'].includes(activeNav)
+                  onClick={() => handleNavSelect('auctions')}
+                  className={`flex items-center gap-1.5 pl-3.5 pr-1.5 py-2 rounded-l-lg transition-all ${
+                    ['auctions', 'discovery', 'kayadlive', 'broadcast'].includes(activeNav)
                       ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
                       : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
                   }`}
@@ -120,17 +140,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
                   <span>Live Auctions</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" title="Live now" />
+                </button>
+                <button
+                  onClick={() => setShowLiveDropdown(!showLiveDropdown)}
+                  aria-label="More live auction destinations"
+                  className={`p-2 rounded-r-lg transition-all ${
+                    ['auctions', 'discovery', 'kayadlive', 'broadcast'].includes(activeNav)
+                      ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                      : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                  }`}
+                >
                   <ChevronDown className={`w-3 h-3 transition-transform ${showLiveDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showLiveDropdown && (
-                  <div className="absolute left-0 mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs animate-fade-in">
+                  <div className="absolute left-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs animate-fade-in">
                     <button
                       onClick={() => { handleNavSelect('discovery'); setShowLiveDropdown(false); }}
                       className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold text-slate-700"
                     >
                       <Gavel className="w-4 h-4 text-slate-500 stroke-[1.75]" />
-                      <span>Browse Auctions</span>
+                      <span>Auction Schedule & Discovery</span>
                     </button>
                     <button
                       onClick={() => { handleNavSelect('kayadlive'); setShowLiveDropdown(false); }}

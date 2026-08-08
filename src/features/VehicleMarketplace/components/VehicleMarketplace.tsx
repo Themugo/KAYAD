@@ -71,7 +71,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [onlyNewArrivals, setOnlyNewArrivals] = useState<boolean>(false);
 
   // Layout & Navigation States
-  const [viewMode, setViewMode] = useState<'grid' | 'compact' | 'list'>('grid');
+  // Defaults to 'compact' rather than 'grid' - at a 10,000-vehicle
+  // scale, the denser layout should be what every visitor sees without
+  // needing to discover and click the view-mode toggle first. 'grid'
+  // (more whitespace, fewer columns) stays available via the toggle for
+  // anyone who prefers it.
+  const [viewMode, setViewMode] = useState<'grid' | 'compact' | 'list'>('compact');
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'recently-reduced' | 'most-viewed' | 'auction-ending'
   >('newest');
@@ -83,7 +88,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Pagination States
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(12);
+  // Defaults to 24 rather than 12 - now that compact mode (also the new
+  // default view) fits up to 5 per row on large screens, 12 would only
+  // fill ~2.4 rows per page. 24 uses the space better and halves how
+  // often visitors need to paginate at real scale.
+  const [pageSize, setPageSize] = useState<number>(24);
 
   // Loading Simulation for fast feedback
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -949,11 +958,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </Card>
           ) : (
             <div className={
+              // Cards are now meaningfully more compact (image height cut
+              // from 208px to 144px, body padding/spacing tightened) - at
+              // 10,000-listing scale, using that freed space to show more
+              // per screen matters more than generous whitespace. Added an
+              // xl tier to both modes rather than just shrinking gaps.
+              // Kept the mobile (base) breakpoint at 1 column though -
+              // the card still carries a fair amount of text (title,
+              // price, metadata line, seller row), and going to 2-up on
+              // the smallest phone screens risks cramming that without
+              // being able to see it rendered on an actual device.
               viewMode === 'compact'
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                ? "grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3"
                 : viewMode === 'list'
                 ? "space-y-4"
-                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
             }>
               {paginatedVehicles.map((v) => (
                 <VehicleCard
