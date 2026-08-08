@@ -74,19 +74,32 @@ describe('VehicleCard - trust badges (professional/compact pass)', () => {
     expect(overlayText).not.toMatch(/Dealer|Certified|Escrow|Finance/);
   });
 
-  it('relocates Dealer/Certified/Escrow/Finance trust badges to the card body, not the image', () => {
+  it('no longer shows Dealer/Certified/Escrow/Finance as visible badges anywhere on the card - removed per explicit direction to free up further per-card space; the underlying trust info is preserved via aria-label instead of discarded, verified separately below', () => {
     const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
       const score = (v: typeof a) =>
         Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
       return score(b) - score(a);
     })[0];
     render(<VehicleCard {...baseProps} vehicle={busiest} />);
-    // At least one real trust fact about this specific vehicle should
-    // appear somewhere in the rendered card body now.
-    const hasAnyTrustBadge = ['Dealer', 'Verified', 'Certified', 'Escrow', 'Finance'].some(
+    const hasAnyVisibleTrustBadge = ['Dealer', 'Verified', 'Certified', 'Escrow', 'Finance'].some(
       (label) => screen.queryByText(label) !== null
     );
-    expect(hasAnyTrustBadge).toBe(true);
+    expect(hasAnyVisibleTrustBadge).toBe(false);
+  });
+
+  it('preserves trust info for screen readers via aria-label even though it is no longer shown visually', () => {
+    const busiest = [...INITIAL_VEHICLES].sort((a, b) => {
+      const score = (v: typeof a) =>
+        Number(!!v.verified) + Number(!!v.inspectionPassed) + Number(!!v.financeAvailable);
+      return score(b) - score(a);
+    })[0];
+    const { container } = render(<VehicleCard {...baseProps} vehicle={busiest} />);
+    const cardEl = container.querySelector('[role="button"][aria-label]');
+    const ariaLabel = cardEl?.getAttribute('aria-label') || '';
+    const hasAnyTrustFactInLabel = ['Dealer', 'Verified', 'Certified', 'Escrow', 'Finance'].some((label) =>
+      ariaLabel.includes(label)
+    );
+    expect(hasAnyTrustFactInLabel).toBe(true);
   });
 
   it('shows a calm "LIVE" badge for an auction vehicle with no imminent end time', () => {
@@ -124,12 +137,14 @@ describe('VehicleCard - trust badges (professional/compact pass)', () => {
     expect(screen.queryByText('Verified')).toBeNull();
   });
 
-  it('still shows "Verified" for a private seller whose listing data actually confirms it', () => {
+  it('still includes "Verified" in the aria-label for a private seller whose listing data actually confirms it, even though no visible badge renders', () => {
     const realVerifiedPrivateSeller = INITIAL_VEHICLES.find(
       (v) => v.sellerType === 'Private Seller' && v.verified
     );
     expect(realVerifiedPrivateSeller).toBeTruthy();
-    render(<VehicleCard {...baseProps} vehicle={realVerifiedPrivateSeller!} />);
-    expect(screen.getByText('Verified')).toBeTruthy();
+    const { container } = render(<VehicleCard {...baseProps} vehicle={realVerifiedPrivateSeller!} />);
+    const cardEl = container.querySelector('[role="button"][aria-label]');
+    expect(cardEl?.getAttribute('aria-label')).toMatch(/Verified/);
+    expect(screen.queryByText('Verified')).toBeNull();
   });
 });

@@ -76,12 +76,14 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   // false, empty label), handled in the render below.
   const countdown = useCountdown(vehicle.isAuction ? vehicle.auctionEndsAt : null);
 
-  // Trust badges - relocated from the image to the card body. Same
-  // priority logic as before (dealer/verified, then certified, then
-  // escrow-or-finance), but no longer needs as tight a cap since the
-  // body has real room, unlike the small image overlay these used to
-  // compete for space in - capped at 3 here, matching the original
-  // "up to 3" intent before it was reduced to 2 purely to fit the image.
+  // Trust badges - previously rendered as visible chips in the card
+  // body; removed from view per explicit direction to free up further
+  // per-card space (this logic still has real value though - reusing
+  // its output for the card's aria-label below instead of discarding it
+  // outright, so this trust information isn't lost for screen-reader
+  // users just because it's no longer shown visually). Same priority
+  // logic as before (dealer/verified, then certified, then
+  // escrow-or-finance), capped at 3.
   const getTrustBadges = () => {
     const badges: Array<{
       key: string;
@@ -169,7 +171,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       }}
       tabIndex={0}
       role="button"
-      aria-label={`View details for ${vehicle.title}`}
+      aria-label={`View details for ${vehicle.title}${trustBadges.length > 0 ? `. ${trustBadges.map((b) => b.label).join(', ')}` : ''}`}
       className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-md hover:border-[#1E3063]/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1E3063] focus:ring-offset-2"
     >
       {/* 1. VEHICLE IMAGE CONTAINER — reduced from h-48/h-52: at scale
@@ -274,21 +276,6 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               </span>
             )}
           </div>
-
-          {/* Trust badges - relocated here from the image overlay (see
-              getTrustBadges' own comment for why). Own row, wraps
-              naturally if needed since the body has real vertical room,
-              unlike the image it used to compete with. */}
-          {trustBadges.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1">
-              {trustBadges.map((b) => (
-                <Badge key={b.key} variant={b.variant} size="sm">
-                  {React.createElement(b.icon, { className: 'w-2.5 h-2.5 shrink-0' })}
-                  <span>{b.label}</span>
-                </Badge>
-              ))}
-            </div>
-          )}
 
           {/* Compact metadata line - merged into the same zone as price/
               title rather than its own separately-bordered section.

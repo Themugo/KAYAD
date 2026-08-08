@@ -467,7 +467,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           marketplace, not a listings board" - than plain white chrome),
           adapting the search/filter controls to it rather than the
           other way around. */}
-      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+      <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row items-center gap-2.5">
           {/* Instant Keyword Input */}
           <div className="relative flex-1 w-full flex items-center">
@@ -569,35 +569,46 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
         </div>
 
-        {/* Trust pillars - same 3 as before, now the lower half of one
-            card instead of a fully separate one, divided by a subtle
-            border rather than a card-boundary gap. */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10 pt-4 border-t border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <Lock className="w-4 h-4 text-amber-400" />
+        {/* Trust pillars - copy corrected for accuracy, sizing tightened
+            further. Previously read as blanket, universal claims about
+            every listing on the marketplace - checked against real mock
+            data before rewriting anything (confirmed via a direct
+            count: only 3 of 6 vehicles are actually inspected, only 2
+            of 6 are auctions, escrow is mandatory for private sellers
+            specifically but only optional/available for dealers, not
+            an automatic guarantee on every transaction). "Every
+            inspected listing checked before it's live" was technically
+            true in isolation but the heading + subtext together read as
+            "every listing is inspected", which isn't the case - fixed
+            to describe these as available features/rules rather than
+            universal facts. Icon boxes reduced w-9->w-7, padding
+            tightened pt-4->pt-3. */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10 pt-3 border-t border-white/10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <Lock className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">Escrow-Protected Payments</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">Funds held safely until you confirm handover</p>
+              <p className="text-xs font-black text-white leading-tight">Escrow Protection</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">Required for private sellers, available for dealers</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 sm:pl-6">
-            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2.5 sm:pl-6">
+            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">150-Point Certified</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">Every inspected listing checked before it's live</p>
+              <p className="text-xs font-black text-white leading-tight">150-Point Inspection</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">On certified listings only - look for the badge</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 sm:pl-6">
-            <div className="w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <Gavel className="w-4 h-4 text-amber-400" />
+          <div className="flex items-center gap-2.5 sm:pl-6">
+            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
+              <Gavel className="w-3.5 h-3.5 text-amber-400" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">Live Vehicle Auctions</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">Bid in real time on verified stock</p>
+              <p className="text-xs font-black text-white leading-tight">Live Auctions</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">Bid live on select auction vehicles</p>
             </div>
           </div>
         </div>

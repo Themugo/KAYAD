@@ -231,14 +231,16 @@ describe('VehicleMarketplace - unified search/trust card (space audit)', () => {
   it('renders the search bar and all 3 trust pillars inside one shared card, not two', () => {
     render(<VehicleMarketplace {...baseProps} />);
     expect(screen.getByPlaceholderText(/Instant search/)).toBeTruthy();
-    expect(screen.getByText('Escrow-Protected Payments')).toBeTruthy();
-    // "150-Point Certified" also appears as a filter checkbox label in
-    // the sidebar's "Verified Guarantees" section - getByText would
-    // throw on the resulting multiple matches. getAllByText confirms
-    // it appears at least once (the trust-strip heading specifically)
-    // without assuming it's the only instance on the page.
-    expect(screen.getAllByText('150-Point Certified').length).toBeGreaterThan(0);
-    expect(screen.getByText('Live Vehicle Auctions')).toBeTruthy();
+    expect(screen.getByText('Escrow Protection')).toBeTruthy();
+    // "150-Point Inspection" (the trust strip's current heading, after
+    // the accuracy-focused copy rewrite) is checked with getAllByText
+    // rather than getByText - the sidebar's own "Verified Guarantees"
+    // filter section has a similarly-worded but distinct checkbox
+    // label ("150-Point Certified"), and a bare getByText would throw
+    // on ambiguous matches if the 2 ever happened to say the exact same
+    // thing again.
+    expect(screen.getAllByText('150-Point Inspection').length).toBeGreaterThan(0);
+    expect(screen.getByText('Live Auctions')).toBeTruthy();
   });
 
   it('the merged search/trust card itself does not use position: sticky (the filter sidebar and modal headers have their own unrelated, legitimate sticky uses elsewhere on the page, not touched by this)', () => {
@@ -323,5 +325,48 @@ describe('VehicleMarketplace - merged Saved Searches + result header card', () =
     expect(screen.getByText('Show:')).toBeTruthy();
     expect(screen.getByText('Sort:')).toBeTruthy();
     expect(screen.getByDisplayValue('Newest First')).toBeTruthy();
+  });
+});
+
+describe('VehicleMarketplace - trust strip accuracy', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  // The trust strip previously made blanket claims ("Every inspected
+  // listing checked before it's live", "Bid in real time on verified
+  // stock") that read as if every single listing has these properties.
+  // Checked real mock data directly before rewriting anything: only 3
+  // of 6 vehicles are actually inspected, only 2 of 6 are auctions, and
+  // escrow is mandatory for private sellers specifically but only
+  // optional for dealers - not a blanket guarantee. Verifies the
+  // corrected copy no longer makes those universal claims.
+  it('no longer claims escrow protects every payment universally', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.queryByText(/Funds held safely until you confirm handover/)).toBeNull();
+    expect(screen.getByText(/Required for private sellers, available for dealers/)).toBeTruthy();
+  });
+
+  it('no longer implies every listing is inspected', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.queryByText(/Every inspected listing checked before it's live/)).toBeNull();
+    expect(screen.getByText(/On certified listings only/)).toBeTruthy();
+  });
+
+  it('no longer implies all stock is available for live bidding', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.queryByText(/Bid in real time on verified stock/)).toBeNull();
+    expect(screen.getByText(/Bid live on select auction vehicles/)).toBeTruthy();
   });
 });
