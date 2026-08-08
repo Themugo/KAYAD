@@ -28,39 +28,20 @@ export const Navbar: React.FC<NavbarProps> = ({
   unreadCount = 0
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [trustIndex, setTrustIndex] = useState(0);
+  const [showLiveDropdown, setShowLiveDropdown] = useState(false);
 
-  const countyRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
-
-  const counties = ['All East Africa', 'Nairobi', 'Mombasa', 'Nakuru', 'Kiambu', 'Eldoret', 'Kisumu'];
-
-  const trustMessages = [
-    "Verified Dealers Across East Africa",
-    "Secure Private Sales with Escrow",
-    "150-Point Certified Vehicles",
-    "Live Vehicle Auctions",
-    "Trusted Automotive Marketplace"
-  ];
-
-  // Rotate trust messages slowly every 5 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTrustIndex((prev) => (prev + 1) % trustMessages.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [trustMessages.length]);
+  const liveRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (countyRef.current && !countyRef.current.contains(e.target as Node)) {
-        setShowCountyDropdown(false);
-      }
       if (userRef.current && !userRef.current.contains(e.target as Node)) {
         setShowUserDropdown(false);
+      }
+      if (liveRef.current && !liveRef.current.contains(e.target as Node)) {
+        setShowLiveDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -78,87 +59,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200/70 shadow-2xs text-slate-800">
-      {/* Top Utility Bar - Slim Brand Identity & Rotating Trust Strip */}
-      <div className="bg-[#101935] border-b border-slate-800/80 text-[11px] py-1 px-4 sm:px-6 lg:px-8 text-slate-300">
-        <div className="max-w-7xl mx-auto flex justify-between items-center gap-4">
-          {/* Left: Rotating Brand Trust Message */}
-          <div className="flex items-center space-x-2.5 min-w-0 overflow-hidden">
-            <span className="text-[#E0D8CB] font-bold text-[10px] uppercase tracking-wider shrink-0 bg-white/10 px-2 py-0.5 rounded border border-white/15">
-              KAYAD EA
-            </span>
-            <div className="flex items-center gap-1.5 font-medium text-slate-200 truncate transition-opacity duration-700 ease-in-out">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-              <span className="truncate text-slate-200 font-medium">{trustMessages[trustIndex]}</span>
-            </div>
-          </div>
-
-          {/* Right: Region Selector & Account/Alerts */}
-          <div className="flex items-center space-x-3 shrink-0">
-            <div className="relative hidden md:block" ref={countyRef}>
-              <button 
-                onClick={() => setShowCountyDropdown(!showCountyDropdown)}
-                className="flex items-center gap-1.5 hover:text-white transition-colors py-0.5 px-2.5 rounded bg-slate-800/80 border border-slate-700/60"
-                id="county-selector-top"
-              >
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                <span>Region: <strong className="text-white font-semibold">{selectedCounty}</strong></span>
-                <ChevronDown className="w-3 h-3 text-slate-400" />
-              </button>
-
-              {showCountyDropdown && (
-                <div className="absolute right-0 mt-1 w-48 bg-white text-slate-800 rounded-xl shadow-lg border border-slate-200 py-1 z-50 text-xs animate-fade-in">
-                  {counties.map((county) => (
-                    <button
-                      key={county}
-                      onClick={() => {
-                        onCountyChange(county);
-                        setShowCountyDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 hover:bg-[#F5F2EB] flex items-center justify-between transition-colors ${
-                        selectedCounty === county ? 'font-bold text-[#1E3063] bg-[#F5F2EB]' : ''
-                      }`}
-                    >
-                      {county}
-                      {selectedCounty === county && <span className="w-1.5 h-1.5 rounded-full bg-[#1E3063]"></span>}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={onOpenAlerts}
-              className="flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors font-medium hidden sm:flex"
-            >
-              <Bell className="w-3.5 h-3.5 text-slate-400" />
-              <span>Price Alerts</span>
-            </button>
-
-            <span className="text-slate-700 hidden sm:inline">|</span>
-
-            {user ? (
-              <span className="text-slate-300 flex items-center gap-1.5 font-medium text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span className="hidden sm:inline">Signed in as</span> <strong className="text-white truncate max-w-[110px]">{user.name}</strong>
-              </span>
-            ) : (
-              <button
-                onClick={onOpenAuth}
-                className="flex items-center gap-1 hover:text-white transition-colors font-semibold text-slate-200"
-              >
-                <User className="w-3.5 h-3.5 text-slate-400" />
-                <span>Sign In</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Main Navigation Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-18 gap-4">
           
-          {/* LEFT SECTION: Logo, Marketplace, Auctions */}
+          {/* LEFT SECTION: Logo, Marketplace, Live Auctions, Finance */}
           <div className="flex items-center space-x-6 md:space-x-8">
             {/* KAYAD Logo */}
             <button 
@@ -180,7 +85,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </button>
 
-            {/* Desktop Left Nav Items */}
+            {/* Desktop Primary Nav - reduced from 7 items to 3: Marketplace,
+                Live Auctions (KAYAD LIVE/Auctions/Watch Live consolidated
+                into one dropdown so all 3 stay reachable without each
+                claiming its own permanent slot), and Finance. My Garage,
+                Pre-Purchase Inspection, and Support moved out of the
+                persistent global nav - My Garage only means anything once
+                signed in (belongs with account, not global chrome),
+                Pre-Purchase Inspection is a specific service better
+                surfaced contextually, and Support is one click away via
+                the account menu / footer rather than competing for
+                top-level space every visitor sees on every page. */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
@@ -193,97 +108,64 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Marketplace
               </button>
 
-              <button
-                onClick={() => handleNavSelect('kayadlive')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'kayadlive'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-                }`}
-              >
-                <Radio className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>KAYAD LIVE</span>
-              </button>
+              <div className="relative" ref={liveRef}>
+                <button
+                  onClick={() => setShowLiveDropdown(!showLiveDropdown)}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                    ['discovery', 'kayadlive', 'broadcast'].includes(activeNav)
+                      ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                      : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                  }`}
+                >
+                  <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                  <span>Live Auctions</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" title="Live now" />
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showLiveDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showLiveDropdown && (
+                  <div className="absolute left-0 mt-1.5 w-56 bg-white rounded-xl shadow-lg border border-slate-200 py-1.5 z-50 text-xs animate-fade-in">
+                    <button
+                      onClick={() => { handleNavSelect('discovery'); setShowLiveDropdown(false); }}
+                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold text-slate-700"
+                    >
+                      <Gavel className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                      <span>Browse Auctions</span>
+                    </button>
+                    <button
+                      onClick={() => { handleNavSelect('kayadlive'); setShowLiveDropdown(false); }}
+                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center gap-2.5 font-semibold text-slate-700"
+                    >
+                      <Radio className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                      <span>KAYAD LIVE</span>
+                    </button>
+                    <button
+                      onClick={() => { handleNavSelect('broadcast'); setShowLiveDropdown(false); }}
+                      className="w-full text-left px-3.5 py-2 hover:bg-[#F5F2EB] flex items-center justify-between font-semibold text-slate-700"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <Play className="w-4 h-4 text-slate-500 stroke-[1.75]" />
+                        <span>Watch Live Broadcast</span>
+                      </div>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">NOW</span>
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <button
-                onClick={() => handleNavSelect('discovery')}
+                onClick={() => handleNavSelect('finance')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'discovery'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                  activeNav === 'finance'
+                    ? 'bg-emerald-500 text-white font-bold shadow-2xs'
+                    : 'hover:text-emerald-600 hover:bg-emerald-50'
                 }`}
               >
-                <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Auctions</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('broadcast')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                  activeNav === 'broadcast'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-                }`}
-              >
-                <Play className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
-                <span>Watch Live</span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-600 text-white font-bold">
-                  NOW
-                </span>
+                <CreditCard className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[1.75]" />
+                <span>Finance</span>
               </button>
             </nav>
           </div>
-
-          {/* CENTER SECTION: My Garage, Pre-Purchase Inspection, Financing, Support */}
-          <nav className="hidden lg:flex items-center space-x-2 text-xs font-semibold text-slate-600">
-            <button
-              onClick={() => handleNavSelect('buyer-platform')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                activeNav === 'buyer-platform'
-                  ? 'bg-[#D4AF37] text-[#0A1628] font-bold shadow-2xs'
-                  : 'hover:text-[#0A1628] hover:bg-[#F5F2EB]'
-              }`}
-            >
-              <LayoutDashboard className="w-3.5 h-3.5 text-amber-500 shrink-0 stroke-[1.75]" />
-              <span>My Garage</span>
-            </button>
-
-            <button
-              onClick={() => handleNavSelect('inspections')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                activeNav === 'inspections'
-                  ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                  : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-              }`}
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
-              <span>Pre-Purchase Inspection</span>
-            </button>
-
-            <button
-              onClick={() => handleNavSelect('finance')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                activeNav === 'finance'
-                  ? 'bg-emerald-500 text-white font-bold shadow-2xs'
-                  : 'hover:text-emerald-600 hover:bg-emerald-50'
-              }`}
-            >
-              <CreditCard className="w-3.5 h-3.5 text-emerald-500 shrink-0 stroke-[1.75]" />
-              <span>Finance</span>
-            </button>
-
-            <button
-              onClick={() => handleNavSelect('support')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
-                activeNav === 'support'
-                  ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                  : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
-              }`}
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
-              <span>Support</span>
-            </button>
-          </nav>
 
           {/* RIGHT SECTION: List Vehicle & Login/Register OR User Profile Dropdown */}
           <div className="flex items-center space-x-3">
@@ -675,23 +557,13 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               <button
-                onClick={() => handleNavSelect('inspections')}
+                onClick={() => handleNavSelect('finance')}
                 className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'inspections' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Mechanic</span>
-              </button>
-
-              <button
-                onClick={() => handleNavSelect('financing')}
-                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                  activeNav === 'financing' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                  activeNav === 'finance' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
                 }`}
               >
                 <CreditCard className="w-4 h-4 text-slate-400" />
-                <span>Financing</span>
+                <span>Finance</span>
               </button>
             </div>
 

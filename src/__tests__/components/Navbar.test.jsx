@@ -1,51 +1,67 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
-
-vi.mock('../../context/AuthContext', () => ({
-  useAuth: () => ({
-    user: { _id: 'u1', name: 'TestUser', role: 'dealer' },
-    isAuth: true,
-    isAdmin: false,
-    logout: vi.fn(),
-  }),
-}));
-vi.mock('../../context/SocketContext', () => ({
-  useSocket: () => ({ connected: true }),
-}));
-vi.mock('../../context/NotificationContext', () => ({
-  useNotifications: () => ({ unreadCount: 3 }),
-}));
-vi.mock('../../context/BrandingContext', () => ({
-  useBranding: () => ({
-    branding: { logoType: 'icon', logoText: 'KAYAD' },
-    loading: false,
-    hydrated: true,
-  }),
-}));
-vi.mock('../../api/api', () => ({
-  carsAPI: { list: vi.fn().mockResolvedValue({ data: [] }) },
-  notifAPI: { list: vi.fn().mockResolvedValue({ notifications: [] }) },
-}));
-vi.mock('../../utils/helpers', () => ({ initials: () => 'TU' }));
-vi.mock('../../utils/authRoutes', () => ({ isSellerRole: () => false }));
-vi.mock('../../components/features/common/NotificationCenter', () => ({ default: () => null }));
-vi.mock('framer-motion', () => ({
-  motion: { div: ({ children, ...p }) => <div {...p}>{children}</div> },
-  AnimatePresence: ({ children }) => children,
-}));
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { Navbar } from '../../components/Navbar';
 
 describe('Navbar', () => {
   afterEach(() => { cleanup(); });
 
+  const baseProps = {
+    user: null,
+    savedCount: 0,
+    activeNav: 'marketplace',
+    onNavClick: vi.fn(),
+    selectedCounty: 'All East Africa',
+    onCountyChange: vi.fn(),
+    onOpenAuth: vi.fn(),
+    onOpenAlerts: vi.fn(),
+    onLogout: vi.fn(),
+    unreadCount: 0,
+  };
+
+  // This test file previously used a completely different prop shape
+  // (currentPage/authUser/onSignOut, mocked AuthContext/SocketContext/etc.)
+  // that doesn't match this component's real props at all - confirmed via
+  // Navbar.tsx directly. It "passed" only because React silently ignores
+  // unknown props and fills missing ones with defaults, so it happened to
+  // render the logged-out state by accident rather than actually exercising
+  // real behavior. Rewritten against the real NavbarProps interface.
+
   it('renders KAYAD branding', () => {
-    render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
+    render(<Navbar {...baseProps} />);
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
-  it('renders nav links', () => {
-    render(<MemoryRouter><Navbar currentPage="home" setPage={vi.fn()} authUser={null} onSignOut={vi.fn()} /></MemoryRouter>);
+  it('renders the Marketplace nav link', () => {
+    render(<Navbar {...baseProps} />);
     expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
+  });
+
+  // Home-page/navbar redesign: verifies the actual reduction, not just
+  // that the component renders. Previously KAYAD LIVE and Watch Live were
+  // each their own permanent top-level button; they should no longer be
+  // visible until the consolidated "Live Auctions" dropdown is opened.
+  it('consolidates KAYAD LIVE and Watch Live behind a Live Auctions dropdown instead of showing them as separate permanent buttons', () => {
+    render(<Navbar {...baseProps} />);
+    expect(screen.getByText('Live Auctions')).toBeTruthy();
+    expect(screen.queryByText('KAYAD LIVE')).toBeNull();
+    expect(screen.queryByText('Watch Live')).toBeNull();
+
+    fireEvent.click(screen.getByText('Live Auctions'));
+    expect(screen.getByText('KAYAD LIVE')).toBeTruthy();
+    expect(screen.getByText('Watch Live Broadcast')).toBeTruthy();
+  });
+
+  // The top utility bar (rotating trust messages, region selector, "Price
+  // Alerts | Sign In") was removed as redundant chrome - region selection
+  // already lives on the marketplace page itself, and "Sign In" was
+  // duplicated between this bar and the main nav's own auth button.
+  it('does not render the removed top utility bar region selector', () => {
+    render(<Navbar {...baseProps} />);
+    expect(screen.queryByText(/Region:/)).toBeNull();
+  });
+
+  it('shows Sign In exactly once for a logged-out visitor, not duplicated', () => {
+    render(<Navbar {...baseProps} />);
+    expect(screen.getAllByText('Sign In').length).toBe(1);
   });
 });
