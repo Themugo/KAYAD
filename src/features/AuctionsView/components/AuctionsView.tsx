@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../../../types';
 import { INITIAL_AUCTION_SESSIONS } from '../../../data/mockAuctions';
-import { CreateAuctionModal } from './CreateAuctionModal';
+// CreateAuctionModal import removed - its only usage in this file was
+// the dead, unreachable modal instance removed above. The component
+// itself still lives on and is used by DealerBusinessView.tsx.
 import { AuctionCreationForm } from './AuctionCreationForm';
 import { BidderRegistrationModal, VerifiedBidderProfile } from './BidderRegistrationModal';
 import { PreAuctionInspectionModal } from './PreAuctionInspectionModal';
@@ -11,6 +13,7 @@ import { OrganizerManagementConsole } from './OrganizerManagementConsole';
 import { AuctionOrganizerDashboard } from './AuctionOrganizerDashboard';
 import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, LazyImage, Input } from '../../../components/ui';
+import { isEscrowApplicable } from '../../../utils/escrow';
 
 interface AuctionsViewProps {
   vehicles: Vehicle[];
@@ -63,6 +66,22 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 }) => {
   // Auction sessions state initialized from mock service
   const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
+
+  // Organizer-capable roles - auctions are organized by institutions
+  // (banks doing repossessions, dealers doing clearance sales, fleet
+  // companies), not individual buyers. Found the 3 hero buttons
+  // (Organizer Dashboard/Portal/Organize Auction Event) were shown
+  // unconditionally to every visitor regardless of role, including
+  // completely logged-out ones - business/seller-side tooling mixed
+  // into a page whose whole job is buyer browsing and bidding. Also
+  // found a related, more concerning issue: the inline creation form
+  // was passed `userRole={user?.role || 'dealer'}`, defaulting to
+  // dealer-level auction-creation permissions for a NULL (logged-out)
+  // user rather than denying access - fixed by gating the form's own
+  // reachability on this same check instead of just hiding its trigger
+  // button, so there's no path to it left for a non-organizer even if
+  // they knew the button existed.
+  const isOrganizerCapable = user?.role === 'dealer' || user?.role === 'bank_officer' || user?.role === 'admin';
 
   // Watched Auctions state
   const [watchedIds, setWatchedIds] = useState<string[]>(['AUC-2026-8801']);
@@ -147,7 +166,18 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   };
 
   // Create Auction Modal & Form State
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  // Confirmed dead and removed: isCreateModalOpen/setIsCreateModalOpen
+  // and the <CreateAuctionModal> instance that used it - grepped every
+  // reference before removing and found setIsCreateModalOpen(true) had
+  // zero call sites anywhere, meaning that modal could never actually
+  // open for a real user. The working "create an auction" path is
+  // showInlineCreateForm (toggled by the real "Organize Auction Event"
+  // button below), which was clearly built as the newer replacement -
+  // the modal was orphaned, not a second, intentional entry point.
+  // handleAuctionCreated itself stays (the inline form also calls it),
+  // and CreateAuctionModal the component stays too (still legitimately
+  // used by DealerBusinessView.tsx) - only this specific, unreachable
+  // instance within this file was dead.
   const [showInlineCreateForm, setShowInlineCreateForm] = useState<boolean>(false);
   const [isOrganizerConsoleOpen, setIsOrganizerConsoleOpen] = useState<boolean>(false);
   const [isOrganizerDashboardOpen, setIsOrganizerDashboardOpen] = useState<boolean>(false);
@@ -177,6 +207,52 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
       setSecondsTick((prev) => prev + 1);
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Auto-concludes Live auctions once their countdown reaches zero -
+  // this was genuinely missing before. Found while checking the
+  // advertised "How KAYAD Vehicle Auctions Work" process against the
+  // real implementation: step 3, "Win Auction - Highest bidder at timer
+  // zero", had no backing logic anywhere. The countdown text would
+  // eventually show "Auction Closed" (a pure display computation with
+  // no state change behind it), but the session's own status field
+  // stayed 'Live' forever - no winner was ever determined, no
+  // transition to 'Awaiting Settlement' ever happened, and the
+  // Recently Sold section (which filters for status === 'Ended' ||
+  // 'Awaiting Settlement') would never pick it up no matter how long
+  // past its end time it sat. Confirmed by tracing every path that
+  // touches session.status: the only ones that exist are for
+  // NEW-auction creation and manual organizer actions - nothing reacts
+  // to time passing.
+  //
+  // Reuses the same 1-second tick above rather than a second interval -
+  // on each tick, checks every currently-Live session's real end time
+  // (not a cached value, so this stays correct even if endsAt is
+  // updated elsewhere) and transitions any that have just passed to
+  // 'Awaiting Settlement' (the correct intermediate status per the
+  // type's own enum - matching "won, but escrow/settlement hasn't
+  // happened yet", not the same as 'Ended' which the mock data already
+  // uses for a fully historical, settled record). Guarded on
+  // `s.status === 'Live'` specifically, so once a session transitions
+  // it naturally stops matching on subsequent ticks - no duplicate
+  // transitions, no duplicate toasts.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSessions((prev) => {
+        let anyChanged = false;
+        const next = prev.map((s) => {
+          if (s.status !== 'Live') return s;
+          const msRemaining = new Date(s.endsAt).getTime() - Date.now();
+          if (msRemaining > 0) return s;
+          anyChanged = true;
+          showToast(`Auction ended: "${s.vehicleTitle}" - winning bid Ksh ${(s.currentBid ?? 0).toLocaleString()}`, 'success');
+          return { ...s, status: 'Awaiting Settlement' as const };
+        });
+        return anyChanged ? next : prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showToast = (message: string, type: 'success' | 'info' = 'success') => {
@@ -376,60 +452,70 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
       {/* Clean Buyer-Focused Page Header */}
       <PageHeader
         variant="navy"
-        badgeIcon={<Gavel className="w-4 h-4 text-[#C85A32]" />}
+        badgeIcon={<Gavel className="w-4 h-4 text-amber-400" />}
         badgeText="Live Automotive Marketplace"
         title="KAYAD Vehicle Auctions"
-        description="Discover active vehicle auctions, compare listings, place real-time bids, and track ending times. All purchases feature 100% Escrow Vault protection."
+        description="Discover active vehicle auctions, compare listings, place real-time bids, and track ending times. Escrow Vault protection is available on eligible listings - look for the badge on each auction."
         rightElement={
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 bg-[#101935]/60 px-3.5 py-2 rounded-xl border border-white/10 text-white text-xs">
               <span className="relative flex h-2.5 w-2.5 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C85A32] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#C85A32]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400"></span>
               </span>
               <span className="font-bold">{filteredLiveSessions.length} Active Auctions</span>
             </div>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => setIsOrganizerDashboardOpen(true)}
-              className="border-amber-400/50 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2 bg-[#101935]/80"
-            >
-              <BarChart2 className="w-4 h-4 text-amber-300" />
-              <span>Organizer Dashboard</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              onClick={() => setIsOrganizerConsoleOpen(true)}
-              className="border-white/20 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
-            >
-              <Building2 className="w-4 h-4 text-amber-400" />
-              <span>Organizer Portal</span>
-            </Button>
-            <Button
-              variant={showInlineCreateForm ? 'primary' : 'accent'}
-              size="md"
-              onClick={() => setShowInlineCreateForm(prev => !prev)}
-              className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
-            >
-              <Gavel className="w-4 h-4 text-amber-300" />
-              <span>{showInlineCreateForm ? 'Hide Creation Form' : 'Organize Auction Event'}</span>
-            </Button>
+            {isOrganizerCapable && (
+              <>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => setIsOrganizerDashboardOpen(true)}
+                  className="border-amber-400/50 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2 bg-[#101935]/80"
+                >
+                  <BarChart2 className="w-4 h-4 text-amber-300" />
+                  <span>Organizer Dashboard</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => setIsOrganizerConsoleOpen(true)}
+                  className="border-white/20 hover:bg-white/10 text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
+                >
+                  <Building2 className="w-4 h-4 text-amber-400" />
+                  <span>Organizer Portal</span>
+                </Button>
+                <Button
+                  variant={showInlineCreateForm ? 'primary' : 'accent'}
+                  size="md"
+                  onClick={() => setShowInlineCreateForm(prev => !prev)}
+                  className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-extrabold text-xs px-4 py-2 rounded-xl shadow-md cursor-pointer flex items-center gap-2"
+                >
+                  <Gavel className="w-4 h-4 text-[#17244B]" />
+                  <span>{showInlineCreateForm ? 'Hide Creation Form' : 'Organize Auction Event'}</span>
+                </Button>
+              </>
+            )}
           </div>
         }
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
 
-        {/* INLINE AUCTION CREATION FORM COMPONENT */}
-        {showInlineCreateForm && (
+        {/* INLINE AUCTION CREATION FORM COMPONENT - gated on
+            isOrganizerCapable, not just its trigger button being hidden.
+            showInlineCreateForm could theoretically still be true from a
+            prior render (e.g. an admin toggled it, then something
+            changed their session), so this is a real guard, not
+            decoration - a non-organizer has no path to this form even
+            if the state says it should show. */}
+        {isOrganizerCapable && showInlineCreateForm && (
           <section id="auction-creation-form-section" className="animate-fade-in">
             <AuctionCreationForm
               availableVehicles={vehicles}
               onAuctionCreated={handleAuctionCreated}
               onCancel={() => setShowInlineCreateForm(false)}
-              userRole={user?.role || 'dealer'}
+              userRole={user?.role === 'admin' ? 'admin' : 'dealer'}
               isUserVerified={user?.isVerified ?? true}
             />
           </section>
@@ -441,13 +527,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         <section id="auction-search" className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-extrabold text-[#1E3063] uppercase tracking-wider flex items-center gap-2">
-              <Search className="w-4 h-4 text-[#C85A32]" />
+              <Search className="w-4 h-4 text-amber-600" />
               <span>Auction Vehicle Search & Filters</span>
             </h2>
             {hasActiveFilters && (
               <button
                 onClick={resetFilters}
-                className="text-xs font-bold text-[#C85A32] hover:text-[#B34E28] flex items-center gap-1 transition-colors cursor-pointer"
+                className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset Filters</span>
@@ -527,7 +613,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
               onClick={() => setFilterEndingSoon(!filterEndingSoon)}
               className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                 filterEndingSoon
-                  ? 'bg-[#C85A32] text-white shadow-2xs'
+                  ? 'bg-amber-400 text-[#17244B] shadow-2xs'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -568,7 +654,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         <section id="auction-categories" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-              <Tag className="w-4 h-4 text-[#C85A32]" />
+              <Tag className="w-4 h-4 text-amber-600" />
               <span>Auction Categories</span>
             </h2>
             <span className="text-xs text-slate-500 font-medium">Select a category to filter listings</span>
@@ -619,8 +705,8 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C85A32] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-[#C85A32]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-400"></span>
               </span>
               <h2 className="text-lg font-black text-[#1E3063] font-display flex items-center gap-2">
                 Live Bidding Events
@@ -661,7 +747,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
                           <div className="flex flex-wrap items-center gap-1.5">
                             {/* Badge 1: Live Status in Coral Red */}
-                            <Badge variant="live" size="sm" className="bg-[#C85A32] text-white border-none font-bold">
+                            <Badge variant="live" size="sm" className="bg-amber-400 text-[#17244B] border-none font-bold">
                               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
                               <span>LIVE</span>
                             </Badge>
@@ -689,8 +775,8 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                             onClick={(e) => toggleWatchSession(session.id, session.vehicleTitle, e)}
                             className={`p-2 rounded-full backdrop-blur-md transition-all pointer-events-auto cursor-pointer shadow-sm ${
                               isWatched
-                                ? 'bg-[#C85A32] text-white'
-                                : 'bg-white/90 text-slate-700 hover:text-[#C85A32] hover:bg-white'
+                                ? 'bg-amber-400 text-[#17244B]'
+                                : 'bg-white/90 text-slate-700 hover:text-amber-600 hover:bg-white'
                             }`}
                             title={isWatched ? 'Remove from Watchlist' : 'Watch Auction'}
                           >
@@ -701,10 +787,10 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         {/* Dynamic Time Remaining Bar */}
                         <div className="absolute bottom-3 left-3 right-3 bg-[#101935]/85 backdrop-blur-md px-3.5 py-2 rounded-xl text-white flex items-center justify-between text-xs pointer-events-none z-10">
                           <span className="text-slate-300 text-[11px] font-medium flex items-center gap-1.5">
-                            <Clock className={`w-3.5 h-3.5 ${timeObj.isUrgent ? 'text-[#C85A32]' : 'text-slate-300'}`} />
+                            <Clock className={`w-3.5 h-3.5 ${timeObj.isUrgent ? 'text-rose-400' : 'text-slate-300'}`} />
                             Time Remaining:
                           </span>
-                          <span className={`font-mono font-bold text-xs ${timeObj.isUrgent ? 'text-[#C85A32] animate-pulse' : 'text-white'}`}>
+                          <span className={`font-mono font-bold text-xs ${timeObj.isUrgent ? 'text-rose-400 animate-pulse' : 'text-white'}`}>
                             {timeObj.formatted}
                           </span>
                         </div>
@@ -717,8 +803,26 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                             <span>{session.sellerType} • {vehicle.county}</span>
                             <span className="text-slate-700 font-extrabold">{session.totalBidsCount} Bids</span>
                           </div>
+                          {/* Escrow eligibility - added per the same rule
+                              already established for VehicleCard: not
+                              time-sensitive, so it belongs in the card
+                              body, not competing for space on the image
+                              (which already caps at 3 status badges).
+                              Uses the same isEscrowApplicable check as
+                              the rest of the app (mandatory for private
+                              sellers, only when explicitly enabled for
+                              dealers) rather than a blanket claim - the
+                              hero copy above now says "look for the
+                              badge on each auction", so this needed to
+                              actually exist, not just be implied. */}
+                          {isEscrowApplicable(vehicle) && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Lock className="w-3 h-3 text-emerald-600" />
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide">Escrow Protected</span>
+                            </div>
+                          )}
                           <h3 
-                            className="text-lg font-black text-[#1E3063] font-display mt-1 hover:text-[#C85A32] cursor-pointer transition-colors line-clamp-1"
+                            className="text-lg font-black text-[#1E3063] font-display mt-1 hover:text-amber-600 cursor-pointer transition-colors line-clamp-1"
                             onClick={() => setSelectedSession(session)}
                           >
                             {session.vehicleTitle}
@@ -763,7 +867,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           <button
                             type="button"
                             onClick={(e) => handleOpenRegistration(session, e)}
-                            className="text-[10px] font-bold text-[#C85A32] hover:underline"
+                            className="text-[10px] font-bold text-amber-600 hover:underline"
                           >
                             Register Deposit →
                           </button>
@@ -778,7 +882,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           className="text-xs font-bold border-slate-300 text-[#1E3063] hover:bg-[#F5F2EB]"
                           title="View physical inspection details or book mechanic"
                         >
-                          <FileText className="w-3.5 h-3.5 text-[#C85A32]" />
+                          <FileText className="w-3.5 h-3.5 text-amber-600" />
                           <span>Inspect</span>
                         </Button>
 
@@ -816,7 +920,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             <div className="space-y-6">
               <Card className="p-8 text-center bg-white space-y-4 border border-slate-200/90 shadow-xs rounded-2xl">
                 <div className="w-14 h-14 rounded-full bg-[#F5F2EB] text-[#1E3063] flex items-center justify-center mx-auto">
-                  <Gavel className="w-7 h-7 stroke-[1.75] text-[#C85A32]" />
+                  <Gavel className="w-7 h-7 stroke-[1.75] text-amber-600" />
                 </div>
                 <div className="max-w-md mx-auto space-y-1">
                   <h3 className="text-xl font-black text-[#1E3063]">No Live Auctions Active Right Now</h3>
@@ -827,7 +931,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 
                 {/* Next Auction Date Banner */}
                 <div className="inline-flex items-center gap-2 bg-[#F5F2EB] px-4 py-2 rounded-xl text-xs font-bold text-[#1E3063] border border-slate-200">
-                  <Calendar className="w-4 h-4 text-[#C85A32]" />
+                  <Calendar className="w-4 h-4 text-amber-600" />
                   <span>Next Live Event: Wednesday, Aug 5, 2026 at 09:00 EAT</span>
                 </div>
 
@@ -844,7 +948,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                     type="submit"
                     variant="accent"
                     size="md"
-                    className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-bold text-xs shrink-0"
+                    className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-bold text-xs shrink-0"
                   >
                     <Bell className="w-3.5 h-3.5" />
                     <span>Notify Me</span>
@@ -868,12 +972,12 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#C85A32]" />
+                <Zap className="w-4 h-4 text-rose-500" />
                 <span>Ending Soon</span>
               </h2>
               <p className="text-xs text-slate-500 font-medium">Auctions ending within the next 24 hours — sorted automatically by remaining time</p>
             </div>
-            <span className="text-xs font-bold text-[#C85A32] bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+            <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
               {endingSoonSessions.length} Closing Soon
             </span>
           </div>
@@ -895,7 +999,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         <Badge variant="neutral" size="sm" className="bg-[#F5F2EB] text-[#1E3063] font-bold">
                           {session.category}
                         </Badge>
-                        <span className="font-mono font-extrabold text-[#C85A32] animate-pulse flex items-center gap-1">
+                        <span className="font-mono font-extrabold text-rose-500 animate-pulse flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {timeObj.formatted}
                         </span>
@@ -992,9 +1096,6 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
               </h2>
               <p className="text-xs text-slate-500 font-medium">Verified winning bids and completed logbook transfers</p>
             </div>
-            <Badge variant="success" size="sm" className="bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-              100% Escrow Protected
-            </Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1008,9 +1109,40 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                 />
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                      ✓ SOLD & SETTLED
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {/* Branches on the real status now that
+                          'Awaiting Settlement' sessions are actually
+                          reachable at runtime (the new auto-conclude
+                          effect above produces them) - this badge
+                          previously hardcoded "SOLD & SETTLED" for
+                          every session in this list regardless of
+                          status, which would have been directly wrong
+                          the moment a live auction's timer expired and
+                          landed here still awaiting escrow/settlement,
+                          not yet actually settled. */}
+                      {session.status === 'Ended' ? (
+                        <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                          ✓ SOLD & SETTLED
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                          ⏳ Awaiting Settlement
+                        </span>
+                      )}
+                      {/* Was a single, blanket "100% Escrow Protected"
+                          badge for the whole section - found it was
+                          actually wrong for this specific vehicle
+                          (Coastline Auto Ltd's Subaru, escrowEligible:
+                          false in the underlying data). A section-level
+                          claim can't be accurate once the list has more
+                          than one vehicle with different eligibility,
+                          so moved to a real per-card check instead. */}
+                      {isEscrowApplicable(session.vehicle) && (
+                        <span className="text-[9px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded flex items-center gap-0.5">
+                          <Lock className="w-2.5 h-2.5" /> Escrow
+                        </span>
+                      )}
+                    </div>
                     <h3 className="text-sm font-bold text-[#1E3063] line-clamp-1 mt-1">{session.vehicleTitle}</h3>
                     <p className="text-xs font-black text-emerald-700 mt-0.5">Winning Bid: Ksh {(session.currentBid ?? 0).toLocaleString()}</p>
                   </div>
@@ -1101,7 +1233,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             {/* Modal Header */}
             <div>
               <div className="flex items-center gap-2">
-                <Badge variant="live" size="sm" className="bg-[#C85A32] text-white border-none font-bold">
+                <Badge variant="live" size="sm" className="bg-amber-400 text-[#17244B] border-none font-bold">
                   {selectedSession.status === 'Live' ? 'LIVE AUCTION' : selectedSession.status.toUpperCase()}
                 </Badge>
                 <Badge variant="neutral" size="sm" className="bg-[#F5F2EB] text-[#1E3063] font-semibold">
@@ -1169,11 +1301,11 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                       <ShieldCheck className="w-8 h-8 text-emerald-600 shrink-0 mt-0.5" />
                     </div>
                   ) : (
-                    <div className="p-5 bg-[#101935] text-white rounded-2xl border border-[#C85A32]/40 shadow-md space-y-4">
+                    <div className="p-5 bg-[#101935] text-white rounded-2xl border border-amber-400/40 shadow-md space-y-4">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-black text-[#C85A32] uppercase tracking-wider">Accreditation Required</span>
+                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-wider">Accreditation Required</span>
                             <Badge variant="neutral" size="sm" className="bg-white/10 text-slate-200 text-[10px]">
                               Deposit: Ksh {depositAmount.toLocaleString()}
                             </Badge>
@@ -1203,7 +1335,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         size="md"
                         fullWidth
                         onClick={(e) => handleOpenRegistration(selectedSession, e)}
-                        className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-black text-xs py-3 rounded-xl cursor-pointer"
+                        className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-black text-xs py-3 rounded-xl cursor-pointer"
                       >
                         <UserPlus className="w-4 h-4 mr-2 text-amber-200" />
                         <span>Start Bidder Registration & Access Pass</span>
@@ -1355,7 +1487,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           size="md"
                           fullWidth
                           onClick={() => handleOpenRegistration(selectedSession)}
-                          className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-bold"
+                          className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-bold"
                         >
                           <UserPlus className="w-4 h-4 mr-1.5" />
                           <span>Complete Registration to Bid</span>
@@ -1422,7 +1554,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                     className="p-3.5 bg-[#1E3063]/5 hover:bg-[#1E3063]/10 border border-[#1E3063]/20 rounded-xl text-left space-y-1 transition-all cursor-pointer"
                   >
                     <span className="font-black text-[#1E3063] flex items-center gap-1.5">
-                      <Calendar className="w-4 h-4 text-[#C85A32]" />
+                      <Calendar className="w-4 h-4 text-amber-600" />
                       1. Physical Viewing
                     </span>
                     <p className="text-[11px] text-slate-600">
@@ -1436,7 +1568,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                     className="p-3.5 bg-[#1E3063]/5 hover:bg-[#1E3063]/10 border border-[#1E3063]/20 rounded-xl text-left space-y-1 transition-all cursor-pointer"
                   >
                     <span className="font-black text-[#1E3063] flex items-center gap-1.5">
-                      <Wrench className="w-4 h-4 text-[#C85A32]" />
+                      <Wrench className="w-4 h-4 text-amber-600" />
                       2. Book Mechanic
                     </span>
                     <p className="text-[11px] text-slate-600">
@@ -1517,7 +1649,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                 <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-black text-[#1E3063] flex items-center gap-1.5">
-                      <Building2 className="w-4 h-4 text-[#C85A32]" /> Event Organizer & Custodian
+                      <Building2 className="w-4 h-4 text-amber-600" /> Event Organizer & Custodian
                     </span>
                     <Badge variant="neutral" size="sm" className="bg-[#1E3063] text-white font-bold">
                       {selectedSession.organizerType || selectedSession.sellerType}
@@ -1591,15 +1723,6 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
           </Card>
         </div>
       )}
-
-      {/* CREATE AUCTION MODAL FOR VERIFIED ORGANIZERS */}
-      <CreateAuctionModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        availableVehicles={vehicles}
-        onAuctionCreated={handleAuctionCreated}
-        currentUserRole={user?.role || 'dealer'}
-      />
 
       {/* BIDDER REGISTRATION & ACCREDITATION MODAL */}
       {registeringSession && (
@@ -1684,12 +1807,20 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
           winningAmount={completionWinningAmount}
           verifiedPass={verifiedBiddersMap[completionSession.id]}
           showToast={showToast}
+          onStartEscrow={onStartEscrow}
         />
       )}
 
-      {/* ORGANIZER MANAGEMENT CONSOLE & KAYAD REVENUE PORTAL */}
+      {/* ORGANIZER MANAGEMENT CONSOLE & KAYAD REVENUE PORTAL - isOpen
+          combines the state with isOrganizerCapable directly (not just
+          relying on the trigger button being hidden and the state
+          therefore never becoming true), same defense-in-depth
+          reasoning as the inline creation form above: this component is
+          always mounted (controlled via its own isOpen prop, not
+          conditional rendering), so its actual open/closed state should
+          never trust a single gated entry point alone. */}
       <OrganizerManagementConsole
-        isOpen={isOrganizerConsoleOpen}
+        isOpen={isOrganizerCapable && isOrganizerConsoleOpen}
         onClose={() => setIsOrganizerConsoleOpen(false)}
         sessions={sessions}
         verifiedBiddersMap={verifiedBiddersMap}
@@ -1703,9 +1834,10 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         showToast={showToast}
       />
 
-      {/* DEDICATED AUCTION ORGANIZER DASHBOARD */}
+      {/* DEDICATED AUCTION ORGANIZER DASHBOARD - same defense-in-depth
+          isOpen combination as the console above. */}
       <AuctionOrganizerDashboard
-        isOpen={isOrganizerDashboardOpen}
+        isOpen={isOrganizerCapable && isOrganizerDashboardOpen}
         onClose={() => setIsOrganizerDashboardOpen(false)}
         sessions={sessions}
         onOpenLiveRoom={(sess) => handleOpenLiveRoom(sess)}

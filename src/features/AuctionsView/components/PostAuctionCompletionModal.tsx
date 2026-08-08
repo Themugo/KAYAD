@@ -3,6 +3,7 @@ import { AuctionSession } from '../../../types';
 import { VerifiedBidderProfile } from './BidderRegistrationModal';
 import { Award, CheckCircle2, FileText, Download, Printer, Copy, Check, Building2, Phone, Mail, MapPin, AlertCircle, QrCode, X, Car, CreditCard, Truck, ArrowRight } from 'lucide-react';
 import { Card, Badge, Button } from '../../../components/ui';
+import { isEscrowApplicable } from '../../../utils/escrow';
 
 interface PostAuctionCompletionModalProps {
   isOpen: boolean;
@@ -12,6 +13,18 @@ interface PostAuctionCompletionModalProps {
   winningAmount?: number;
   verifiedPass?: VerifiedBidderProfile;
   showToast?: (msg: string) => void;
+  /** Optional so this modal keeps working exactly as before for any
+   * call site that doesn't pass it. When provided, and when the won
+   * vehicle is actually escrow-eligible (isEscrowApplicable), the
+   * payment tab leads with a real "Secure via Escrow Vault" path
+   * instead of only ever showing direct-bank-wire-to-organizer
+   * instructions - found this was the ONLY payment path this modal
+   * ever offered, directly contradicting step 4 of the app's own
+   * advertised 6-step process ("Escrow Payment - Funds secured in
+   * Escrow Vault"). Kept the direct-payment instructions as a
+   * fallback (for non-eligible auctions, or organizers who don't
+   * support escrow) rather than removing them outright. */
+  onStartEscrow?: (vehicle: AuctionSession['vehicle']) => void;
 }
 
 export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProps> = ({
@@ -21,7 +34,8 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
   winnerAlias,
   winningAmount,
   verifiedPass,
-  showToast
+  showToast,
+  onStartEscrow
 }) => {
   const [activeTab, setActiveTab] = useState<'certificate' | 'payment' | 'collection'>('certificate');
   const [copiedRef, setCopiedRef] = useState(false);
@@ -119,7 +133,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
               }`}
             >
               <CreditCard className="w-4 h-4 text-emerald-400" />
-              <span>2. Direct Payment Instructions</span>
+              <span>2. Payment Instructions</span>
             </button>
 
             <button
@@ -184,7 +198,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                 <div className="p-4 bg-amber-500/10 rounded-xl border border-amber-300/60 text-center space-y-1">
                   <span className="text-[10px] uppercase font-black text-amber-800 tracking-wider">OFFICIAL WINNER AWARD</span>
                   <h3 className="text-lg font-black text-[#1E3063] font-display">
-                    This certifies that <span className="text-[#C85A32] underline decoration-amber-400 decoration-2">{winner}</span> is the confirmed highest bidder.
+                    This certifies that <span className="text-amber-700 underline decoration-amber-400 decoration-2">{winner}</span> is the confirmed highest bidder.
                   </h3>
                 </div>
 
@@ -194,7 +208,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                   {/* VEHICLE SPECIFICATIONS */}
                   <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2.5">
                     <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                      <Car className="w-3.5 h-3.5 text-[#C85A32]" />
+                      <Car className="w-3.5 h-3.5 text-amber-600" />
                       Vehicle Specifications
                     </span>
 
@@ -213,7 +227,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                   {/* FINANCIAL & ORGANIZER SUMMARY */}
                   <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2.5">
                     <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                      <Building2 className="w-3.5 h-3.5 text-[#C85A32]" />
+                      <Building2 className="w-3.5 h-3.5 text-amber-600" />
                       Winning Settlement & Organizer
                     </span>
 
@@ -292,9 +306,9 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                     type="button"
                     variant="accent"
                     onClick={() => setActiveTab('payment')}
-                    className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-extrabold text-xs"
+                    className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-extrabold text-xs"
                   >
-                    <span>Proceed to Direct Payment Instructions</span>
+                    <span>Proceed to Payment Instructions</span>
                     <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </div>
@@ -306,18 +320,65 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
           {/* TAB 2: PAYMENT INSTRUCTIONS (DIRECT WITH ORGANIZER DISCLAIMER) */}
           {activeTab === 'payment' && (
             <div className="space-y-6 animate-fade-in">
-              
+
+              {/* Escrow path - leads here now, ahead of the direct-wire
+                  fallback below. Only shown when the won vehicle is
+                  actually escrow-eligible (same rule used everywhere
+                  else in the app: mandatory for private sellers, only
+                  when explicitly enabled for dealers) - an ineligible
+                  auction correctly falls straight to the direct-payment
+                  instructions with no escrow option shown at all. */}
+              {onStartEscrow && isEscrowApplicable(session.vehicle) && (
+                <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-300 flex items-start gap-3 shadow-2xs">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                  <div className="space-y-2 text-xs flex-1">
+                    <p className="font-black text-emerald-900">Recommended: Pay via KAYAD Escrow Vault</p>
+                    <p className="text-emerald-800 text-[11px] leading-relaxed">
+                      This vehicle is escrow-eligible. Funds are held securely until you confirm handover, rather than wired directly to the organizer.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="primary"
+                      onClick={() => onStartEscrow(session.vehicle)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs mt-1"
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                      <span>Secure Payment via Escrow Vault</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* CRITICAL MANDATORY PAYMENT DISCLAIMER */}
               <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 flex items-start gap-3 shadow-2xs">
                 <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
                 <div className="space-y-1 text-xs">
-                  <p className="font-black text-amber-900">Direct Organizer Vehicle Payment Requirement</p>
-                  <p className="text-amber-800 text-[11px] leading-relaxed font-bold">
-                    Vehicle payment is completed directly with the auction organizer according to the published auction terms.
-                  </p>
-                  <p className="text-amber-700 text-[10px] leading-relaxed">
-                    KAYAD provides the digital auction platform but does not receive bid security deposits or vehicle purchase payments. All vehicle settlements must be paid directly to {organizerName}.
-                  </p>
+                  {/* Wording now branches on real escrow eligibility -
+                      previously this was an unconditional "KAYAD does
+                      not receive payments" statement, which directly
+                      contradicted the escrow option shown above it for
+                      eligible vehicles. */}
+                  {onStartEscrow && isEscrowApplicable(session.vehicle) ? (
+                    <>
+                      <p className="font-black text-amber-900">Alternative: Direct Organizer Payment</p>
+                      <p className="text-amber-800 text-[11px] leading-relaxed font-bold">
+                        If you prefer not to use Escrow Vault, vehicle payment can instead be completed directly with the auction organizer according to the published auction terms.
+                      </p>
+                      <p className="text-amber-700 text-[10px] leading-relaxed">
+                        Funds sent this way go directly to {organizerName}, without KAYAD's Escrow Vault protection.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-black text-amber-900">Direct Organizer Vehicle Payment Requirement</p>
+                      <p className="text-amber-800 text-[11px] leading-relaxed font-bold">
+                        Vehicle payment is completed directly with the auction organizer according to the published auction terms.
+                      </p>
+                      <p className="text-amber-700 text-[10px] leading-relaxed">
+                        KAYAD provides the digital auction platform but does not receive bid security deposits or vehicle purchase payments. All vehicle settlements must be paid directly to {organizerName}.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -327,7 +388,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                 {/* STEP-BY-STEP PAYMENT PROCEDURE */}
                 <Card className="p-5 bg-white border-slate-200 space-y-4">
                   <div className="flex items-center gap-2 text-[#1E3063] font-black border-b border-slate-100 pb-3">
-                    <CreditCard className="w-4.5 h-4.5 text-[#C85A32]" />
+                    <CreditCard className="w-4.5 h-4.5 text-amber-600" />
                     <span>Payment Procedure & Timeline</span>
                   </div>
 
@@ -428,7 +489,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                 {/* REQUIRED MANDATORY DOCUMENTS FOR YARD RELEASE */}
                 <Card className="p-5 bg-white border-slate-200 space-y-4">
                   <div className="flex items-center gap-2 text-[#1E3063] font-black border-b border-slate-100 pb-3">
-                    <FileText className="w-4.5 h-4.5 text-[#C85A32]" />
+                    <FileText className="w-4.5 h-4.5 text-amber-600" />
                     <span>Mandatory Release Documents</span>
                   </div>
 
@@ -451,7 +512,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                 {/* HOLDING YARD LOCATION & GRACE PERIOD */}
                 <Card className="p-5 bg-white border-slate-200 space-y-4">
                   <div className="flex items-center gap-2 text-[#1E3063] font-black border-b border-slate-100 pb-3">
-                    <MapPin className="w-4.5 h-4.5 text-[#C85A32]" />
+                    <MapPin className="w-4.5 h-4.5 text-amber-600" />
                     <span>Holding Yard & Free Storage Period</span>
                   </div>
 
@@ -485,7 +546,7 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                     type="button"
                     variant="accent"
                     onClick={handleDownloadCertificate}
-                    className="bg-[#C85A32] hover:bg-[#B34E28] text-white font-extrabold text-xs"
+                    className="bg-amber-400 hover:bg-amber-500 text-[#17244B] font-extrabold text-xs"
                   >
                     <Download className="w-4 h-4 mr-1.5" />
                     <span>Download Certificate PDF</span>
