@@ -367,6 +367,36 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return `Ksh ${(val / 1000).toFixed(0)}K`;
   };
 
+  // FEATURED PICKS — a small, curated strip shown above the full
+  // filterable inventory grid. Home-page redesign pass: the page
+  // previously went straight from the trust strip into "browse
+  // everything," with no editorial moment giving a first-time visitor
+  // 2-3 reasons to trust what they're looking at before committing to
+  // filtering through the full catalog. Reuses real, already-computed
+  // fields (marketPriceAvg, viewsCount, auctionEndsAt) rather than
+  // introducing new data - each pick is drawn from the actual vehicles
+  // prop, not separately curated/mocked content.
+  const featuredPicks = useMemo(() => {
+    const picks: { vehicle: Vehicle; reason: string }[] = [];
+
+    const biggestSaving = [...vehicles]
+      .filter((v) => v.marketPriceAvg && v.price < v.marketPriceAvg)
+      .sort((a, b) => (b.marketPriceAvg! - b.price) - (a.marketPriceAvg! - a.price))[0];
+    if (biggestSaving) picks.push({ vehicle: biggestSaving, reason: 'Biggest Saving' });
+
+    const mostViewed = [...vehicles]
+      .filter((v) => v.id !== biggestSaving?.id && (v.viewsCount || 0) > 0)
+      .sort((a, b) => (b.viewsCount || 0) - (a.viewsCount || 0))[0];
+    if (mostViewed) picks.push({ vehicle: mostViewed, reason: 'Most Viewed' });
+
+    const endingSoon = [...vehicles]
+      .filter((v) => v.isAuction && v.auctionEndsAt && !picks.some((p) => p.vehicle.id === v.id))
+      .sort((a, b) => new Date(a.auctionEndsAt!).getTime() - new Date(b.auctionEndsAt!).getTime())[0];
+    if (endingSoon) picks.push({ vehicle: endingSoon, reason: 'Auction Ending Soon' });
+
+    return picks;
+  }, [vehicles]);
+
   return (
     <div className="space-y-5 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
@@ -508,6 +538,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 1.6 FEATURED PICKS — curated highlights before the full grid */}
+      {featuredPicks.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2.5 px-0.5">
+            <LayoutGrid className="w-3.5 h-3.5 text-[#C85A32]" />
+            <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {featuredPicks.map(({ vehicle: v, reason }) => (
+              <div key={v.id}>
+                <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C85A32]" />
+                  <span className="text-[10px] font-bold text-[#C85A32] uppercase tracking-wide">{reason}</span>
+                </div>
+                <VehicleCard
+                  vehicle={v}
+                  isSaved={savedVehicles.includes(v.id)}
+                  isCompared={comparedVehicles.includes(v.id)}
+                  onToggleSave={onToggleSave}
+                  onToggleCompare={onToggleCompare}
+                  onQuickView={handleVehicleSelect}
+                  onStartEscrow={onStartEscrow}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 2. FILTER SUMMARY (Removable Chips) */}
       {activeFilters.length > 0 && (
