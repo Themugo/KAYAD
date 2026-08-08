@@ -112,3 +112,37 @@ describe('Navbar - color consistency with the footer', () => {
     expect(cta?.className).not.toMatch(/C85A32/);
   });
 });
+
+describe('Navbar - primary color background with white text', () => {
+  const baseProps = {
+    user: null,
+    savedCount: 0,
+    activeNav: 'marketplace',
+    onNavClick: vi.fn(),
+    selectedCounty: 'All East Africa',
+    onCountyChange: vi.fn(),
+    onOpenAuth: vi.fn(),
+    onOpenAlerts: vi.fn(),
+    onLogout: vi.fn(),
+    unreadCount: 0,
+  };
+
+  // Explicit direction: navbar in the brand's primary colors, text in
+  // white. Previously a white header with navy text - inverted to the
+  // same navy gradient (from-[#17244B] to-[#1E3063]) already
+  // established for the footer/trust strip, with white as the base
+  // text color.
+  it('uses the navy brand gradient as the header background, not white', () => {
+    const { container } = render(<Navbar {...baseProps} />);
+    const header = container.querySelector('header');
+    expect(header?.className).toMatch(/from-\[#17244B\]/);
+    expect(header?.className).toMatch(/to-\[#1E3063\]/);
+    expect(header?.className).not.toMatch(/bg-white\b/);
+  });
+
+  it('the header sets white as its base text color', () => {
+    const { container } = render(<Navbar {...baseProps} />);
+    const header = container.querySelector('header');
+    expect(header?.className).toMatch(/text-white/);
+  });
+});

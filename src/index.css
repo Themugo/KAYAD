@@ -53,3 +53,20 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* .scrollbar-none was already used 12 times across the codebase (saved
+   search presets, this file's own new featured-picks slider, etc.)
+   under the assumption it hides the scrollbar - it doesn't; there was
+   no such Tailwind utility or custom rule defined anywhere, confirmed
+   directly via grep before adding this. Every existing usage was
+   silently showing the default (or the custom-styled, per the rules
+   above) scrollbar the whole time. Defining it properly here fixes all
+   12 existing usages at once, not just the new slider that surfaced
+   the gap. */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Webkit */
+}

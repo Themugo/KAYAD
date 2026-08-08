@@ -370,3 +370,50 @@ describe('VehicleMarketplace - trust strip accuracy', () => {
     expect(screen.getByText(/Bid live on select auction vehicles/)).toBeTruthy();
   });
 });
+
+describe('VehicleMarketplace - Featured Picks as a trust hero slider', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  // Explicit direction: convert Featured Picks from a static 3-column
+  // grid into a "trust hero card" with a fit-to-screen slider, and make
+  // the cards themselves smaller. Verifies the actual structural change
+  // - a branded hero card background wraps a horizontally-scrollable
+  // container - rather than just checking the section still renders.
+  it('wraps Featured Picks in a branded hero card with a horizontal scroll-snap slider', () => {
+    const { container } = render(<VehicleMarketplace {...baseProps} />);
+    const heading = screen.getByText('Featured Picks');
+    let heroCard: HTMLElement | null = heading.parentElement;
+    for (let i = 0; i < 4 && heroCard; i++) {
+      if (heroCard.className.includes('bg-gradient-to-r') && heroCard.className.includes('from-[#17244B]')) break;
+      heroCard = heroCard.parentElement;
+    }
+    expect(heroCard?.className).toMatch(/bg-gradient-to-r/);
+    expect(heroCard?.className).toMatch(/from-\[#17244B\]/);
+
+    const slider = container.querySelector('.snap-x');
+    expect(slider).toBeTruthy();
+    expect(slider?.className).toMatch(/overflow-x-auto/);
+  });
+
+  it('constrains each featured card to a fixed, smaller width within the slider', () => {
+    const { container } = render(<VehicleMarketplace {...baseProps} />);
+    const slideItems = container.querySelectorAll('.snap-start');
+    expect(slideItems.length).toBeGreaterThan(0);
+    slideItems.forEach((item) => {
+      expect(item.className).toMatch(/w-52/);
+    });
+  });
+});

@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = (user?.unreadNotificationsCount ?? 0) > 0 || effectiveUnread > 0;
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-200/70 shadow-2xs text-slate-800">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-[#17244B] to-[#1E3063] border-b border-white/10 shadow-sm text-white">
       {/* Main Navigation Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-18 gap-4">
@@ -66,17 +66,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2.5 group focus:outline-none shrink-0"
               id="brand-logo"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#1E3063] text-white flex items-center justify-center font-black shadow-2xs group-hover:bg-[#17244B] transition-colors">
+              <div className="w-9 h-9 rounded-lg bg-amber-400 text-[#17244B] flex items-center justify-center font-black shadow-2xs group-hover:bg-amber-300 transition-colors">
                 <Car className="w-5 h-5 stroke-[2]" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="font-black text-2xl tracking-tight text-[#1E3063] font-display leading-none flex items-center gap-1.5">
+                <span className="font-black text-2xl tracking-tight text-white font-display leading-none flex items-center gap-1.5">
                   KAYAD
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F5F2EB] text-[#1E3063] border border-[#E5E0D8] font-sans font-bold">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-amber-400 border border-white/20 font-sans font-bold">
                     EA
                   </span>
                 </span>
-                <span className="text-[9px] text-slate-500 font-semibold tracking-wider uppercase mt-0.5">Automotive Marketplace</span>
+                <span className="text-[9px] text-slate-300 font-semibold tracking-wider uppercase mt-0.5">Automotive Marketplace</span>
               </div>
             </button>
 
@@ -101,13 +101,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 escrow integration; 1786 lines) while AuctionDiscoveryNetwork
                 is more of a schedule/education hub with no comparable
                 vehicle-data integration. */}
-            <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
+            <nav className="hidden lg:flex items-center space-x-2 border-l border-white/15 pl-6 text-xs font-semibold text-slate-200">
               <button
                 onClick={() => handleNavSelect('marketplace')}
                 className={`px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'marketplace'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
+                    : 'hover:text-amber-400 hover:bg-white/10'
                 }`}
               >
                 Marketplace
@@ -117,8 +117,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('auctions')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'auctions'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
+                    : 'hover:text-amber-400 hover:bg-white/10'
                 }`}
               >
                 <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
@@ -129,11 +129,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('inspections')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'inspections'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
+                    : 'hover:text-amber-400 hover:bg-white/10'
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0 stroke-[1.75]" />
                 <span>Pre-Purchase Inspection</span>
               </button>
 
@@ -141,11 +141,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => handleNavSelect('support')}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
                   activeNav === 'support'
-                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
-                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                    ? 'bg-amber-400 text-[#17244B] font-bold shadow-2xs'
+                    : 'hover:text-amber-400 hover:bg-white/10'
                 }`}
               >
-                <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
+                <HelpCircle className="w-3.5 h-3.5 text-slate-300 shrink-0 stroke-[1.75]" />
                 <span>Support</span>
               </button>
             </nav>
@@ -156,12 +156,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Communication Hub Button */}
             <button
               onClick={() => handleNavSelect('chat')}
-              className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
-                activeNav === 'chat' ? 'bg-[#1E3063] text-white' : ''
+              className={`p-2 rounded-xl text-slate-200 hover:text-amber-400 hover:bg-white/10 transition-colors relative ${
+                activeNav === 'chat' ? 'bg-amber-400 text-[#17244B]' : ''
               }`}
               title="Unified Communication Hub"
             >
-              <MessageSquare className={`w-5 h-5 stroke-[1.75] ${activeNav === 'chat' ? 'text-white' : 'text-slate-600'}`} />
+              <MessageSquare className={`w-5 h-5 stroke-[1.75] ${activeNav === 'chat' ? 'text-[#17244B]' : 'text-slate-200'}`} />
               <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[9px] font-black rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
                 3
               </span>
@@ -170,12 +170,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Favorites Icon */}
             <button
               onClick={() => handleNavSelect('saved')}
-              className={`p-2 rounded-xl text-slate-600 hover:text-[#1E3063] hover:bg-[#F5F2EB] transition-colors relative ${
-                activeNav === 'saved' ? 'bg-[#F5F2EB] text-[#1E3063]' : ''
+              className={`p-2 rounded-xl text-slate-200 hover:text-amber-400 hover:bg-white/10 transition-colors relative ${
+                activeNav === 'saved' ? 'bg-white/10 text-amber-400' : ''
               }`}
               title="Saved Vehicles"
             >
-              <Heart className="w-5 h-5 text-slate-600 stroke-[1.75]" />
+              <Heart className="w-5 h-5 text-slate-200 stroke-[1.75]" />
               {savedCount > 0 && (
                 <span className="absolute -top-1 -right-1 px-1.5 py-0.2 text-[10px] font-bold rounded-full bg-amber-400 text-[#17244B] shadow-2xs">
                   {savedCount}
@@ -205,24 +205,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative" ref={userRef}>
                 <button
                   onClick={() => setShowUserDropdown(!showUserDropdown)}
-                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-[#F5F2EB] border border-slate-200 transition-all focus:outline-none"
+                  className="flex items-center gap-2 p-1.5 pr-2.5 rounded-xl hover:bg-white/10 border border-white/20 transition-all focus:outline-none"
                   id="user-profile-menu-button"
                 >
                   <div className="relative">
                     <img 
                       src={user.avatar} 
                       alt={user.name} 
-                      className="w-7 h-7 rounded-full object-cover border border-[#1E3063]/30 shadow-2xs"
+                      className="w-7 h-7 rounded-full object-cover border border-amber-400/40 shadow-2xs"
                     />
                     {hasNotifications && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
                     )}
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
-                    <span className="text-xs font-bold text-[#1E3063] leading-none">{user.name}</span>
-                    <span className="text-[10px] text-slate-500 capitalize">{user.role}</span>
+                    <span className="text-xs font-bold text-white leading-none">{user.name}</span>
+                    <span className="text-[10px] text-slate-300 capitalize">{user.role}</span>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-300 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Authenticated Dropdown Menu */}
@@ -444,10 +444,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-700 hover:bg-[#F5F2EB] rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6 text-[#1E3063]" /> : <Menu className="w-6 h-6 text-[#1E3063]" />}
+              {mobileMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
             </button>
           </div>
 

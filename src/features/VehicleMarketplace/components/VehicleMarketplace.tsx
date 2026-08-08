@@ -614,19 +614,34 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       </div>
 
-      {/* 1.6 FEATURED PICKS — curated highlights before the full grid */}
+      {/* 1.6 FEATURED PICKS — converted from a static 3-column grid into
+          a "trust hero card": a branded navy/amber container (matching
+          the search+trust card's own gradient identity, for visual
+          consistency between the 2 major hero-weight sections on this
+          page) housing a horizontal, fit-to-screen slider instead of a
+          fixed grid. Uses native CSS scroll-snap (overflow-x-auto +
+          snap-x/snap-start) rather than a JS carousel library or adding
+          autoplay/dot-indicators/etc - explicitly asked for no new
+          features, and native scroll-snap achieves "sliding" (swipe on
+          touch, click-drag or arrow-key scroll on desktop) without any
+          of that. Cards themselves are smaller: constrained to a fixed
+          w-52 within the slider (vs. filling a full grid column before),
+          relying on VehicleCard's own responsive internal sizing to
+          naturally compact further in a narrower container rather than
+          building a second, separate "small card" component or risking
+          transform:scale() breaking click-target alignment. */}
       {featuredPicks.length > 0 && (
-        <div>
+        <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-2.5 px-0.5">
-            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
-            <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
+            <LayoutGrid className="w-3.5 h-3.5 text-amber-400" />
+            <h2 className="text-xs font-black text-white uppercase tracking-wide">Featured Picks</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-2.5 pb-1 scrollbar-none">
             {featuredPicks.map(({ vehicle: v, reason }) => (
-              <div key={v.id}>
+              <div key={v.id} className="shrink-0 snap-start w-52">
                 <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">{reason}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wide">{reason}</span>
                 </div>
                 <VehicleCard
                   vehicle={v}
