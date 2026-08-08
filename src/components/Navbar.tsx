@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark } from 'lucide-react';
+import { Car, PlusCircle, Menu, X, MapPin, ShieldCheck, User, ChevronDown, Gavel, CreditCard, HelpCircle, Heart, Bell, LogOut, LayoutDashboard, MessageSquare, Building2, Lock, Settings, Bookmark, BarChart3, Layers, Calendar, FileText, Sliders, CheckCircle2, Landmark } from 'lucide-react';
 import { UserProfile } from '../types';
 
 interface NavbarProps {
@@ -80,38 +80,27 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             </button>
 
-            {/* Desktop Primary Nav - reduced to just Marketplace. Live
-                Auctions and Finance (previously top-level nav items,
-                pointing to standalone browsing pages) removed at the
-                user's explicit direction: every one of the 4 functions
-                this redesign is centered on - auction bidding, escrow,
-                pre-purchase inspection, and financing - is already fully
-                built as a contextual, per-vehicle action inside
-                VehicleDetailModal (isAuction/isEscrowActive/
-                isInspectionActive/isFinanceActive all gate real UI
-                there: "Place Bid / Submit Auction Offer", "Start Secure
-                Escrow Purchase", "Book Inspection & Reserve", a real
-                Financing Marketplace Estimator with a monthly-payment
-                calculator) - confirmed directly before making this
-                change, not assumed. A car's own rules/functions belong
-                on that car, not as a competing set of global destinations
-                a visitor has to choose between before they've even
-                picked a vehicle. My Garage, Pre-Purchase Inspection, and
-                Support were already moved out in an earlier pass for
-                similar reasons.
+            {/* Desktop Primary Nav - 4 items per explicit direction:
+                Marketplace, Auction, Pre-Purchase Inspection, Support.
+                A revision of the previous "just Marketplace" pass - that
+                one was also a direct, explicit instruction, so this
+                isn't overriding a judgment call, it's implementing a
+                changed decision. Escrow and Finance are not in this list
+                and stay contextual-only (VehicleDetailModal's "Start
+                Secure Escrow Purchase" / Financing Marketplace
+                Estimator), matching what was actually asked for both
+                times - the 4 requested here are the same 4 named in the
+                original "every car has its own rules functions" request,
+                just now as their own nav items rather than folded
+                entirely into per-vehicle-only access.
 
-                The underlying pages this removes direct nav access to
-                (AuctionsView/'auctions', FinanceMarketplace/'finance',
-                AuctionDiscoveryNetwork/'discovery', KAYADLive/
-                'kayadlive', LiveAuctionBroadcastPage/'broadcast') are
-                real, substantial features and were NOT deleted - just
-                no longer competing for top-level nav space now that
-                their core functions are reachable through any vehicle
-                that needs them. The marketplace's own filter sidebar
-                already has a "Live Auction Listings" checkbox to browse
-                specifically to auction vehicles within the same grid,
-                so auction browsing itself isn't lost, just no longer a
-                separate destination from browsing any other car. */}
+                "Auction" links to 'auctions' (AuctionsView) specifically,
+                not 'discovery' (AuctionDiscoveryNetwork) - confirmed in
+                an earlier pass that AuctionsView is the functionally
+                real bidding/browsing page (real vehicle data, filtering,
+                escrow integration; 1786 lines) while AuctionDiscoveryNetwork
+                is more of a schedule/education hub with no comparable
+                vehicle-data integration. */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-slate-200/60 pl-6 text-xs font-semibold text-slate-600">
               <button
                 onClick={() => handleNavSelect('marketplace')}
@@ -122,6 +111,42 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }`}
               >
                 Marketplace
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('auctions')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'auctions'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <Gavel className="w-3.5 h-3.5 shrink-0 stroke-[1.75]" />
+                <span>Auction</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('inspections')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'inspections'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 stroke-[1.75]" />
+                <span>Pre-Purchase Inspection</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('support')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg transition-all ${
+                  activeNav === 'support'
+                    ? 'bg-[#1E3063] text-white font-bold shadow-2xs'
+                    : 'hover:text-[#1E3063] hover:bg-[#F5F2EB]'
+                }`}
+              >
+                <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0 stroke-[1.75]" />
+                <span>Support</span>
               </button>
             </nav>
           </div>
@@ -465,38 +490,58 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           )}
 
-          {/* Group 1: Public Services - reduced to just Marketplace,
-              matching the desktop nav. The other 4 tiles that used to be
-              here (KAYAD LIVE, Auction Discovery, Watch Live, Finance)
-              pointed to standalone pages whose functions are already
-              fully contextual per-vehicle in VehicleDetailModal (real
-              bidding, escrow, inspection, and financing UI, all gated on
-              that vehicle's own isAuction/isEscrowActive/
-              isFinanceActive) - confirmed directly before removing
-              these, not assumed. Support kept below as its own secondary
-              row, unchanged. */}
+          {/* Group 1: Public Services - 4 items matching the desktop nav:
+              Marketplace, Auction, Pre-Purchase Inspection, Support.
+              Escrow and Finance stay contextual-only (VehicleDetailModal),
+              matching what was actually requested both times this nav
+              was revised - these 4 are the ones asked for as their own
+              destinations. */}
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block px-1">
               Public Marketplace
             </span>
 
-            <button
-              onClick={() => handleNavSelect('marketplace')}
-              className={`w-full p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
-                activeNav === 'marketplace' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
-              }`}
-            >
-              <Car className="w-4 h-4" />
-              <span>Marketplace</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => handleNavSelect('marketplace')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'marketplace' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Car className="w-4 h-4" />
+                <span>Marketplace</span>
+              </button>
 
-            <button
-              onClick={() => handleNavSelect('support')}
-              className="w-full p-2.5 bg-slate-800/80 rounded-xl font-bold text-xs text-left flex items-center gap-2 text-slate-300"
-            >
-              <HelpCircle className="w-4 h-4 text-slate-400" />
-              <span>Support & Disputes</span>
-            </button>
+              <button
+                onClick={() => handleNavSelect('auctions')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'auctions' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <Gavel className="w-4 h-4" />
+                <span>Auction</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('inspections')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'inspections' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Inspection</span>
+              </button>
+
+              <button
+                onClick={() => handleNavSelect('support')}
+                className={`p-3 rounded-xl font-bold text-xs text-left flex items-center gap-2 ${
+                  activeNav === 'support' ? 'bg-[#1E3063] text-white' : 'bg-slate-800/80 text-slate-200'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 text-slate-400" />
+                <span>Support</span>
+              </button>
+            </div>
           </div>
 
           {/* Group 2: Authenticated Account & Role Links */}

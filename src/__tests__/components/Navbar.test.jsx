@@ -36,20 +36,36 @@ describe('Navbar', () => {
     expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
   });
 
-  // Second, more aggressive nav reduction, per explicit direction: every
-  // one of Live Auctions/Finance's underlying functions (auction bidding,
-  // escrow, pre-purchase inspection, financing) is already fully
-  // contextual per-vehicle in VehicleDetailModal - confirmed directly
-  // before making this change, not assumed (isAuction/isEscrowActive/
-  // isInspectionActive/isFinanceActive all gate real UI there). The top
-  // nav should show only Marketplace; a car's own rules/functions belong
-  // on that car, not as competing global destinations.
-  it('reduces the desktop primary nav to just Marketplace - no separate Live Auctions or Finance destinations', () => {
+  // Revised nav structure per explicit direction, after an intermediate
+  // "just Marketplace" pass (previous commit) that was itself a direct
+  // instruction, not a judgment call being overridden. Escrow and
+  // Finance still stay contextual-only (VehicleDetailModal), matching
+  // both requests - these 4 are specifically the ones asked for as
+  // their own nav destinations.
+  it('shows exactly 4 desktop nav destinations: Marketplace, Auction, Pre-Purchase Inspection, Support', () => {
     render(<Navbar {...baseProps} />);
     expect(screen.getAllByText('Marketplace').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Live Auctions')).toBeNull();
+    expect(screen.getByText('Auction')).toBeTruthy();
+    expect(screen.getByText('Pre-Purchase Inspection')).toBeTruthy();
+    expect(screen.getByText('Support')).toBeTruthy();
+    // Escrow and Finance are deliberately absent as nav destinations -
+    // not requested as their own items either time this nav was revised.
     expect(screen.queryByText('Finance')).toBeNull();
-    expect(screen.queryByText('KAYAD LIVE')).toBeNull();
+    expect(screen.queryByText('Escrow')).toBeNull();
+  });
+
+  it('clicking Auction navigates to the real auctions page (\'auctions\', not \'discovery\')', () => {
+    const onNavClick = vi.fn();
+    render(<Navbar {...baseProps} onNavClick={onNavClick} />);
+    fireEvent.click(screen.getByText('Auction'));
+    expect(onNavClick).toHaveBeenCalledWith('auctions');
+  });
+
+  it('clicking Pre-Purchase Inspection navigates to \'inspections\'', () => {
+    const onNavClick = vi.fn();
+    render(<Navbar {...baseProps} onNavClick={onNavClick} />);
+    fireEvent.click(screen.getByText('Pre-Purchase Inspection'));
+    expect(onNavClick).toHaveBeenCalledWith('inspections');
   });
 
   // The top utility bar (rotating trust messages, region selector, "Price
