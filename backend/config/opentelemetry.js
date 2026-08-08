@@ -48,9 +48,10 @@ export const initOpenTelemetry = () => {
         "@opentelemetry/instrumentation-express": {
           enabled: true,
         },
-        "@opentelemetry/instrumentation-mongodb": {
-          enabled: true,
-        },
+        // No MongoDB instrumentation - this app talks to Supabase over
+        // HTTP (its REST API), which instrumentation-http above already
+        // covers. There's no direct Postgres driver connection to
+        // instrument separately.
         "@opentelemetry/instrumentation-redis": {
           enabled: true,
         },

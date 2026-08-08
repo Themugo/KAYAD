@@ -2,25 +2,22 @@
 title: TESTING
 owner: @qa-lead
 team: qa
-last-reviewed: 2026-06-23
+last-reviewed: 2026-08-08
 review-frequency: monthly
 status: active
 tags: [testing]
 ---
 # Running the backend tests
 
-The backend test suite uses **Jest + Supertest** against a MongoDB database.
+The backend test suite uses **Jest**, and does not require a database
+connection at all - it exercises pure utility functions and validation
+logic (see `tests/utils/` and `tests/validation/`), not live database
+calls. There is nothing to install, start, or configure before running
+it.
 
 ## Requirements
 
-- **Node 20** (see `../.nvmrc`). This is what CI uses.
-  On Node 22+ the bundled `mongodb-memory-server` binary fails to start
-  (`spawn EFTYPE` / `Instance failed to start`), which makes every
-  DB-dependent test fail. Use Node 20:
-
-  ```bash
-  nvm install 20 && nvm use 20
-  ```
+- **Node 22** (see `../.nvmrc`) - this is what CI uses.
 
 ## Run
 
@@ -30,26 +27,18 @@ npm install
 npm test
 ```
 
-On Node 20 this auto-starts an in-memory MongoDB — no external DB needed.
-
-## If you can't use Node 20 (or the in-memory binary won't run)
-
-Point the suite at a real database instead. With `MONGO_URI` set, the
-in-memory binary is never used:
-
-```bash
-# Windows (cmd)
-set MONGO_URI=mongodb://127.0.0.1:27017/kayad-test
-npm test
-
-# macOS/Linux, or a free MongoDB Atlas cluster
-export MONGO_URI=mongodb+srv://<your-atlas-uri>/kayad-test
-npm test
-```
+That's it. No environment variables, no database, no external services.
 
 ## Notes
 
-- CI provides its own `MONGO_URI` (a real `mongo:7` service), so CI never
-  depends on the bundled binary or your local Node version.
-- If no database is reachable, the suite prints a clear banner and the
-  DB-dependent tests fail fast (they don't hang).
+- This file previously described a MongoDB-based setup
+  (`mongodb-memory-server`, `MONGO_URI`, a Node 20 requirement) - that
+  reflected an earlier architecture. The backend has since moved to
+  Supabase/Postgres (see `../supabase/migrations/`), and the test
+  suite itself never depended on a live database connection - confirmed
+  directly: `mongodb-memory-server` isn't in `package.json`, and every
+  file under `tests/` is a self-contained unit test.
+- If you're looking for a way to test against real data, that's a
+  different concern from this suite - point the app at a real Supabase
+  project via `SUPABASE_URL`/`SUPABASE_SERVICE_KEY` in `.env` and use
+  the app directly (`npm run dev`), rather than through `npm test`.

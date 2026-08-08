@@ -79,3 +79,67 @@ CREATE INDEX IF NOT EXISTS idx_cars_demo_edited_by ON cars(demo_edited_by);
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS packages JSONB DEFAULT '[]';
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS free_market BOOLEAN DEFAULT true;
 ALTER TABLE platform_config ADD COLUMN IF NOT EXISTS waive_payments BOOLEAN DEFAULT false;
+
+-- Found via a final comprehensive FK-index audit across the whole
+-- schema: escrows.disputedBy/refundedBy/releasedBy (added in
+-- 20260710044600_..._chats_escrows_userauth_real_tables.sql.sql) had
+-- no matching index, unlike every other FK column in the schema.
+CREATE INDEX IF NOT EXISTS idx_escrows_disputed_by ON escrows("disputedBy");
+CREATE INDEX IF NOT EXISTS idx_escrows_refunded_by ON escrows("refundedBy");
+CREATE INDEX IF NOT EXISTS idx_escrows_released_by ON escrows("releasedBy");
+
+-- updated_at auto-update triggers for every real table that has an
+-- updated_at/"updatedAt" column but wasn't covered by the existing
+-- update_updated_at() trigger (that one only covers the original 11
+-- tables from gari_motors_full_schema.sql.sql - notably it covers
+-- `profiles` and `escrow_transactions`, the minimal-shim/decoy tables,
+-- not `users`/`escrows`, the real ones actually written to). Without
+-- this, updated_at would be set once at row creation by its DEFAULT
+-- now() and never actually change again on any subsequent UPDATE -
+-- defeating its entire purpose as a "last modified" timestamp.
+--
+-- Two functions because the tables use two different naming
+-- conventions in this schema (see each table's own migration for why):
+-- snake_case updated_at for tables that go through the standard
+-- field-mapping model layer (users, leads, user_auth, platform_config),
+-- and quoted camelCase "updatedAt" for chats/escrows, which bypass that
+-- layer with raw sb.from() calls.
+CREATE OR REPLACE FUNCTION update_updated_at_snake()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_updated_at_camel()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW."updatedAt" = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_users_updated_at ON users;
+CREATE TRIGGER trg_users_updated_at BEFORE UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_snake();
+
+DROP TRIGGER IF EXISTS trg_leads_updated_at ON leads;
+CREATE TRIGGER trg_leads_updated_at BEFORE UPDATE ON leads
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_snake();
+
+DROP TRIGGER IF EXISTS trg_user_auth_updated_at ON user_auth;
+CREATE TRIGGER trg_user_auth_updated_at BEFORE UPDATE ON user_auth
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_snake();
+
+DROP TRIGGER IF EXISTS trg_platform_config_updated_at ON platform_config;
+CREATE TRIGGER trg_platform_config_updated_at BEFORE UPDATE ON platform_config
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_snake();
+
+DROP TRIGGER IF EXISTS trg_chats_updated_at ON chats;
+CREATE TRIGGER trg_chats_updated_at BEFORE UPDATE ON chats
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_camel();
+
+DROP TRIGGER IF EXISTS trg_escrows_updated_at ON escrows;
+CREATE TRIGGER trg_escrows_updated_at BEFORE UPDATE ON escrows
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_camel();

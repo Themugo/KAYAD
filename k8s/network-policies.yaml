@@ -30,14 +30,19 @@ spec:
     - protocol: TCP
       port: 5000
   egress:
-  # Allow egress to MongoDB
+  # Allow egress to Supabase (REST API over HTTPS, port 443 - not
+  # MongoDB's 27017. The podSelector below was already updated to
+  # target Supabase at some point, but the port and this comment
+  # weren't - as written, this policy would have blocked the backend
+  # from actually reaching Supabase's REST API if ever applied to a
+  # real cluster.)
   - to:
     - podSelector:
         matchLabels:
           app: supabase
     ports:
     - protocol: TCP
-      port: 27017
+      port: 443
   # Allow egress to Redis
   - to:
     - podSelector:
