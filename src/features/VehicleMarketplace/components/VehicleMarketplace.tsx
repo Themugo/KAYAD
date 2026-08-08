@@ -665,26 +665,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       )}
 
-      {/* SAVED SEARCH PRESETS BAR (Quick 1-click preset execution) */}
-      {savedPresets.length > 0 && activeFilters.length === 0 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap shrink-0 flex items-center gap-1">
-            <Bookmark className="w-3.5 h-3.5 text-amber-500" /> Saved Searches:
-          </span>
-          {savedPresets.map((preset) => (
-            <button
-              key={preset.id}
-              onClick={() => applyPreset(preset)}
-              className="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 hover:border-amber-300 whitespace-nowrap transition-all shadow-2xs"
-            >
-              ⚡ {preset.name}
-            </button>
-          ))}
-        </div>
-      )}
+      {/* 3. RESULT HEADER & CONTROLS — merged with the Saved Search
+          Presets row above it, same reasoning as the earlier search-bar
+          + trust-strip merge: 2 stacked cards (well, one bare row plus
+          one actual white card) with their own spacing between them,
+          for content that's really one continuous "here's what you're
+          looking at and how to adjust it" unit. The presets row is
+          still conditional (only shown when savedPresets.length > 0 &&
+          activeFilters.length === 0, unchanged) - just as the top,
+          bordered-off sub-section of this card instead of its own
+          separate, cardless row floating above it. */}
+      <div className="bg-white/80 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+        {savedPresets.length > 0 && activeFilters.length === 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-slate-200/80 scrollbar-none">
+            <span className="text-[11px] font-bold text-slate-500 whitespace-nowrap shrink-0 flex items-center gap-1">
+              <Bookmark className="w-3.5 h-3.5 text-amber-500" /> Saved Searches:
+            </span>
+            {savedPresets.map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => applyPreset(preset)}
+                className="px-3 py-1.5 bg-white hover:bg-amber-50 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 hover:border-amber-300 whitespace-nowrap transition-all shadow-2xs"
+              >
+                ⚡ {preset.name}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* 3. RESULT HEADER & CONTROLS */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/80 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-black text-[#1E3063] font-display flex items-center gap-2">
             Vehicle Inventory
@@ -751,6 +760,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <ListIcon className="w-4 h-4" />
             </button>
           </div>
+        </div>
         </div>
       </div>
 

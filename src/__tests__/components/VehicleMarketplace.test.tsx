@@ -263,3 +263,65 @@ describe('VehicleMarketplace - unified search/trust card (space audit)', () => {
     expect(foundCard?.className).not.toMatch(/sticky/);
   });
 });
+
+describe('VehicleMarketplace - merged Saved Searches + result header card', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  // Previously the Saved Searches row (a bare, cardless horizontal
+  // scroll strip) sat above the Result Header & Controls card (its own
+  // separate white card with the Vehicle Inventory count and Show/Sort
+  // controls) as 2 stacked pieces with their own spacing between them.
+  // Merged into one card, matching the same pattern as the earlier
+  // search-bar + trust-strip merge. Verifies against real default data
+  // (the 3 built-in saved presets, not a synthetic fixture) that both
+  // halves render inside the same shared card element.
+  it('renders Saved Searches and the Vehicle Inventory header inside one shared card', () => {
+    const { container } = render(<VehicleMarketplace {...baseProps} />);
+    const savedSearchesLabel = screen.getByText('Saved Searches:');
+    const inventoryHeading = screen.getByText('Vehicle Inventory');
+
+    // Walk up from each to find their nearest shared ancestor card
+    // (bg-white/80 rounded-2xl) - confirms they're both inside the SAME
+    // card element, not just visually adjacent siblings.
+    const findCard = (el: HTMLElement | null): HTMLElement | null => {
+      let cur = el;
+      for (let i = 0; i < 6 && cur; i++) {
+        if (cur.className?.includes('bg-white/80') && cur.className?.includes('rounded-2xl')) return cur;
+        cur = cur.parentElement;
+      }
+      return null;
+    };
+    const savedSearchesCard = findCard(savedSearchesLabel.parentElement);
+    const inventoryCard = findCard(inventoryHeading.parentElement);
+    expect(savedSearchesCard).toBeTruthy();
+    expect(inventoryCard).toBeTruthy();
+    expect(savedSearchesCard).toBe(inventoryCard);
+  });
+
+  it('still shows all 3 real default saved search presets by name', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.getByText(/Under Ksh 3\.5M SUVs/)).toBeTruthy();
+    expect(screen.getByText(/Toyota Land Cruisers/)).toBeTruthy();
+    expect(screen.getByText(/Low-Mileage Hybrids/)).toBeTruthy();
+  });
+
+  it('Show and Sort controls still work correctly inside the merged card', () => {
+    render(<VehicleMarketplace {...baseProps} />);
+    expect(screen.getByText('Show:')).toBeTruthy();
+    expect(screen.getByText('Sort:')).toBeTruthy();
+    expect(screen.getByDisplayValue('Newest First')).toBeTruthy();
+  });
+});
