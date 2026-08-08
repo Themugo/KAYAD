@@ -588,7 +588,7 @@ router.put(
   adminOrSuper,
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne();
-    if (!config) config = new PlatformConfig();
+    if (!config) config = await PlatformConfig.create({});
 
     const allowed = [
       "platformName",
@@ -652,7 +652,7 @@ router.put(
   adminOrSuper,
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne();
-    if (!config) config = new PlatformConfig();
+    if (!config) config = await PlatformConfig.create({});
 
     const { packages } = req.body;
     if (!Array.isArray(packages)) return res.status(400).json({ success: false, message: "packages must be an array" });
@@ -1405,7 +1405,7 @@ router.post(
       preserveOriginal: true,
     });
     let config = await PlatformConfig.findOne();
-    if (!config) config = new PlatformConfig();
+    if (!config) config = await PlatformConfig.create({});
     config.branding.logoType = "image";
     config.branding.logoUrl = result.url;
     await config.save();

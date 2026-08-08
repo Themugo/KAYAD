@@ -20,7 +20,7 @@ export const trackView = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
@@ -59,7 +59,7 @@ export const trackFavorite = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
@@ -103,7 +103,7 @@ export const trackChat = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
@@ -150,7 +150,7 @@ export const trackOffer = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
@@ -196,7 +196,7 @@ export const trackEscrow = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
@@ -241,7 +241,7 @@ export const trackSale = async (req, res) => {
 
     if (!funnel) {
       const car = await Car.findById(carId).select("dealer");
-      funnel = new ConversionFunnel({
+      funnel = await ConversionFunnel.create({
         car: carId,
         dealer: car?.dealer,
         user: userId,
