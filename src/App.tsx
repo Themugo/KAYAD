@@ -264,6 +264,8 @@ export function App() {
               onOpenCompareModal={() => setShowCompareModal(true)}
               onNavigate={(nav) => navigateTo(nav)}
               onOpenAuth={() => setShowAuthModal(true)}
+              user={user}
+              isHomePage
             />
           )}
 

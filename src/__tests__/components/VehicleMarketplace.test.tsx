@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
@@ -392,16 +392,21 @@ describe('VehicleMarketplace - Featured Picks as a trust hero slider', () => {
   // the cards themselves smaller. Verifies the actual structural change
   // - a branded hero card background wraps a horizontally-scrollable
   // container - rather than just checking the section still renders.
-  it('wraps Featured Picks in a branded hero card with a horizontal scroll-snap slider', () => {
+  // Navy background reverted per explicit follow-up direction ("remove
+  // the navy from hero card, let the cars stay independent") - the
+  // slider structure and its neutral, light card wrapper stay (space
+  // management is still the point), but it's no longer navy-branded.
+  it('wraps Featured Picks in a neutral, light card (not navy) with a horizontal scroll-snap slider', () => {
     const { container } = render(<VehicleMarketplace {...baseProps} />);
     const heading = screen.getByText('Featured Picks');
     let heroCard: HTMLElement | null = heading.parentElement;
     for (let i = 0; i < 4 && heroCard; i++) {
-      if (heroCard.className.includes('bg-gradient-to-r') && heroCard.className.includes('from-[#17244B]')) break;
+      if (heroCard.className.includes('bg-white/80')) break;
       heroCard = heroCard.parentElement;
     }
-    expect(heroCard?.className).toMatch(/bg-gradient-to-r/);
-    expect(heroCard?.className).toMatch(/from-\[#17244B\]/);
+    expect(heroCard?.className).toMatch(/bg-white\/80/);
+    expect(heroCard?.className).not.toMatch(/from-\[#17244B\]/);
+    expect(heroCard?.className).not.toMatch(/bg-gradient-to-r/);
 
     const slider = container.querySelector('.snap-x');
     expect(slider).toBeTruthy();
@@ -414,6 +419,107 @@ describe('VehicleMarketplace - Featured Picks as a trust hero slider', () => {
     expect(slideItems.length).toBeGreaterThan(0);
     slideItems.forEach((item) => {
       expect(item.className).toMatch(/w-52/);
+    });
+  });
+});
+
+describe('VehicleMarketplace - admin home page customization', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  const adminUser = {
+    id: 'usr-admin-1',
+    name: 'System Admin (Amina Hassan)',
+    email: 'admin@kayad.co.ke',
+    phone: '+254 700 000 000',
+    role: 'admin' as const,
+    avatar: 'https://example.com/avatar.jpg',
+  };
+
+  const buyerUser = { ...adminUser, role: 'buyer' as const };
+
+  beforeEach(() => {
+    // The config hook reads/writes localStorage - clear it between
+    // tests so one test's changes (section toggles, text edits, accent
+    // theme) can't leak into another's assertions.
+    localStorage.clear();
+  });
+
+  it('does not show the Customize button for a non-admin user, even on the real home page', () => {
+    render(<VehicleMarketplace {...baseProps} user={buyerUser} isHomePage />);
+    expect(screen.queryByText('Customize Home Page')).toBeNull();
+  });
+
+  it('does not show the Customize button for an admin user when this is NOT the real home page (the reused "saved vehicles" view)', () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage={false} />);
+    expect(screen.queryByText('Customize Home Page')).toBeNull();
+  });
+
+  it('shows the Customize button only for an admin user on the real home page, and opens the panel on click', () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    const button = screen.getByText('Customize Home Page');
+    expect(button).toBeTruthy();
+    fireEvent.click(button);
+    expect(screen.getByText('Customize Home Page (Admin)')).toBeTruthy();
+  });
+
+  it('toggling a section off in the admin panel actually hides that section on the page', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+    // Featured Picks is visible by default with this mock data.
+    await waitFor(() => expect(screen.getByText('Featured Picks')).toBeTruthy());
+    fireEvent.click(screen.getByText('Featured Picks Slider'));
+    await waitFor(() => {
+      expect(screen.queryByText('Featured Picks')).toBeNull();
+    });
+  });
+
+  it('editing trust pillar text in the admin panel updates the actual rendered heading', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    expect(screen.getByText('Escrow Protection')).toBeTruthy();
+    fireEvent.click(screen.getByText('Customize Home Page'));
+    const headingInput = screen.getByDisplayValue('Escrow Protection');
+    fireEvent.change(headingInput, { target: { value: 'Buyer Protection Program' } });
+    await waitFor(() => {
+      expect(screen.getByText('Buyer Protection Program')).toBeTruthy();
+    });
+    expect(screen.queryByText('Escrow Protection')).toBeNull();
+  });
+
+  it('persists the config to localStorage so a page reload (a fresh render) keeps the admin\'s changes', async () => {
+    const { unmount } = render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+    fireEvent.click(screen.getByText('Featured Picks Slider'));
+    await waitFor(() => expect(screen.queryByText('Featured Picks')).toBeNull());
+    unmount();
+
+    // Fresh render, simulating a reload - reads from the same
+    // localStorage the first render just wrote to.
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    expect(screen.queryByText('Featured Picks')).toBeNull();
+  });
+
+  it('Reset to Defaults in the admin panel restores hidden sections and edited text', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+    fireEvent.click(screen.getByText('Featured Picks Slider'));
+    await waitFor(() => expect(screen.queryByText('Featured Picks')).toBeNull());
+
+    fireEvent.click(screen.getByText('Reset to Defaults'));
+    await waitFor(() => {
+      expect(screen.getByText('Featured Picks')).toBeTruthy();
     });
   });
 });

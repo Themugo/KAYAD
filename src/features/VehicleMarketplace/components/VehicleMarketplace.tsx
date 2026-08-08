@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Vehicle } from '../../../types';
+import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid, Settings } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import MarketingCard from '../../../components/MarketingCard';
 import { MOCK_SPONSOR_CARDS } from '../../../data/mockSponsors';
+import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
+import HomePageAdminPanel from './HomePageAdminPanel';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -21,6 +23,17 @@ interface VehicleMarketplaceProps {
   onOpenCompareModal: () => void;
   onNavigate?: (navId: string) => void;
   onOpenAuth?: () => void;
+  /** The currently signed-in user, if any - used only to gate the
+   * admin home-page customization panel (user?.role === 'admin').
+   * Optional and defaults to undefined so every existing call site
+   * (including the 'saved' vehicles reuse of this same component)
+   * keeps working exactly as before without passing it. */
+  user?: UserProfile | null;
+  /** True only for the actual home/marketplace page invocation, not the
+   * 'saved' vehicles reuse of this same component - the admin
+   * customization panel and its effects (section visibility, accent
+   * theme, trust-pillar text) are scoped to the real home page only. */
+  isHomePage?: boolean;
 }
 
 interface SavedSearchPreset {
@@ -49,8 +62,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   onSearchChange,
   onOpenCompareModal,
   onNavigate = () => {},
-  onOpenAuth
+  onOpenAuth,
+  user,
+  isHomePage = false
 }) => {
+  // Home page admin customization - scoped to the real home page only
+  // (isHomePage), and its UI only rendered/reachable for admins
+  // (user?.role === 'admin'), but the config itself always loads so the
+  // page renders correctly regardless of who's viewing it.
+  const { config: homeConfig, updateConfig: updateHomeConfig, resetConfig: resetHomeConfig } = useHomePageConfig();
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const isAdmin = isHomePage && user?.role === 'admin';
+  const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
+
   // Filter States
   const [selectedMake, setSelectedMake] = useState<string>('All');
   const [selectedModel, setSelectedModel] = useState<string>('All');
@@ -432,14 +456,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     const items: ({ type: 'vehicle'; vehicle: Vehicle } | { type: 'sponsor'; sponsor: typeof MOCK_SPONSOR_CARDS[number] })[] = [];
     let sponsorIndex = 0;
     paginatedVehicles.forEach((v, i) => {
-      if (i > 0 && i % 4 === 0 && MOCK_SPONSOR_CARDS.length > 0) {
+      if (homeConfig.sectionVisibility.sponsorCardsInGrid && i > 0 && i % 4 === 0 && MOCK_SPONSOR_CARDS.length > 0) {
         items.push({ type: 'sponsor', sponsor: MOCK_SPONSOR_CARDS[sponsorIndex % MOCK_SPONSOR_CARDS.length] });
         sponsorIndex += 1;
       }
       items.push({ type: 'vehicle', vehicle: v });
     });
     return items;
-  }, [paginatedVehicles]);
+  }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid]);
 
   return (
     <div className="space-y-5 pb-16">
@@ -467,6 +491,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           marketplace, not a listings board" - than plain white chrome),
           adapting the search/filter controls to it rather than the
           other way around. */}
+      {isAdmin && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowAdminPanel(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#1E3063] hover:bg-[#17244B] text-white rounded-xl text-xs font-bold shadow-sm"
+          >
+            <Settings className="w-3.5 h-3.5" />
+            <span>Customize Home Page</span>
+          </button>
+        </div>
+      )}
+
+      {homeConfig.sectionVisibility.searchTrustCard && (
       <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm space-y-3">
         <div className="flex flex-col md:flex-row items-center gap-2.5">
           {/* Instant Keyword Input */}
@@ -585,63 +622,61 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             tightened pt-4->pt-3. */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 sm:divide-x sm:divide-white/10 pt-3 border-t border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
+              <Lock className={`w-3.5 h-3.5 ${accent.text400}`} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">Escrow Protection</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">Required for private sellers, available for dealers</p>
+              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.escrow.heading}</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.escrow.subtext}</p>
             </div>
           </div>
           <div className="flex items-center gap-2.5 sm:pl-6">
-            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
+              <CheckCircle2 className={`w-3.5 h-3.5 ${accent.text400}`} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">150-Point Inspection</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">On certified listings only - look for the badge</p>
+              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.inspection.heading}</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.inspection.subtext}</p>
             </div>
           </div>
           <div className="flex items-center gap-2.5 sm:pl-6">
-            <div className="w-7 h-7 rounded-lg bg-amber-400/15 border border-amber-400/25 flex items-center justify-center shrink-0">
-              <Gavel className="w-3.5 h-3.5 text-amber-400" />
+            <div className={`w-7 h-7 rounded-lg ${accent.bg400Subtle} border ${accent.border400} flex items-center justify-center shrink-0`}>
+              <Gavel className={`w-3.5 h-3.5 ${accent.text400}`} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-black text-white leading-tight">Live Auctions</p>
-              <p className="text-[11px] text-slate-300 leading-tight truncate">Bid live on select auction vehicles</p>
+              <p className="text-xs font-black text-white leading-tight">{homeConfig.trustPillars.auctions.heading}</p>
+              <p className="text-[11px] text-slate-300 leading-tight truncate">{homeConfig.trustPillars.auctions.subtext}</p>
             </div>
           </div>
         </div>
       </div>
+      )}
 
-      {/* 1.6 FEATURED PICKS — converted from a static 3-column grid into
-          a "trust hero card": a branded navy/amber container (matching
-          the search+trust card's own gradient identity, for visual
-          consistency between the 2 major hero-weight sections on this
-          page) housing a horizontal, fit-to-screen slider instead of a
-          fixed grid. Uses native CSS scroll-snap (overflow-x-auto +
-          snap-x/snap-start) rather than a JS carousel library or adding
-          autoplay/dot-indicators/etc - explicitly asked for no new
-          features, and native scroll-snap achieves "sliding" (swipe on
-          touch, click-drag or arrow-key scroll on desktop) without any
-          of that. Cards themselves are smaller: constrained to a fixed
-          w-52 within the slider (vs. filling a full grid column before),
-          relying on VehicleCard's own responsive internal sizing to
-          naturally compact further in a narrower container rather than
-          building a second, separate "small card" component or risking
-          transform:scale() breaking click-target alignment. */}
-      {featuredPicks.length > 0 && (
-        <div className="bg-gradient-to-r from-[#17244B] to-[#1E3063] rounded-2xl p-3 sm:p-4 shadow-sm">
+      {/* 1.6 FEATURED PICKS — a horizontal, fit-to-screen slider (native
+          CSS scroll-snap: overflow-x-auto + snap-x/snap-start, not a JS
+          carousel library or added autoplay/dots/arrows - no new
+          features) inside a neutral, light card whose only job is
+          space management (padding/boundary/heading for the slider),
+          not branding. Previously used the same navy gradient as the
+          search+trust card - reverted per explicit direction ("remove
+          the navy") so the vehicle cards inside stay visually
+          independent, standing on their own white/bordered styling
+          rather than looking adapted to sit on a colored background.
+          Cards themselves stay smaller: constrained to a fixed w-52
+          within the slider, relying on VehicleCard's own responsive
+          internal sizing to compact further in a narrower container. */}
+      {homeConfig.sectionVisibility.featuredPicks && featuredPicks.length > 0 && (
+        <div className="bg-white/80 rounded-2xl p-3 sm:p-4 border border-slate-200/80 shadow-2xs">
           <div className="flex items-center gap-2 mb-2.5 px-0.5">
-            <LayoutGrid className="w-3.5 h-3.5 text-amber-400" />
-            <h2 className="text-xs font-black text-white uppercase tracking-wide">Featured Picks</h2>
+            <LayoutGrid className="w-3.5 h-3.5 text-amber-500" />
+            <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
           </div>
           <div className="flex overflow-x-auto snap-x snap-mandatory gap-2.5 pb-1 scrollbar-none">
             {featuredPicks.map(({ vehicle: v, reason }) => (
               <div key={v.id} className="shrink-0 snap-start w-52">
                 <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wide">{reason}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">{reason}</span>
                 </div>
                 <VehicleCard
                   vehicle={v}
@@ -701,6 +736,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           activeFilters.length === 0, unchanged) - just as the top,
           bordered-off sub-section of this card instead of its own
           separate, cardless row floating above it. */}
+      {homeConfig.sectionVisibility.savedSearchesAndInventoryHeader && (
       <div className="bg-white/80 p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
         {savedPresets.length > 0 && activeFilters.length === 0 && (
           <div className="flex items-center gap-2 overflow-x-auto pb-3 border-b border-slate-200/80 scrollbar-none">
@@ -789,6 +825,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
         </div>
       </div>
+      )}
 
       {/* 4. MAIN INVENTORY SECTION: SIDEBAR + RESULTS GRID */}
       <div className="flex items-start gap-6">
@@ -1140,7 +1177,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
 
       {/* 6. RECENTLY VIEWED VEHICLES CAROUSEL */}
-      {recentlyViewedVehicles.length > 0 && (
+      {homeConfig.sectionVisibility.recentlyViewed && recentlyViewedVehicles.length > 0 && (
         <div className="pt-8 border-t border-slate-200/80 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
@@ -1388,6 +1425,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {isAdmin && showAdminPanel && (
+        <HomePageAdminPanel
+          config={homeConfig}
+          onUpdate={updateHomeConfig}
+          onReset={resetHomeConfig}
+          onClose={() => setShowAdminPanel(false)}
+        />
       )}
     </div>
   );
