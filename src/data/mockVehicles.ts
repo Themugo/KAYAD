@@ -1,5 +1,17 @@
 import { Vehicle, Dealer, EscrowTransaction, ChatMessage } from '../types';
 
+// Computes a future ISO timestamp relative to whenever this module
+// actually loads, rather than a hardcoded calendar date. The auction
+// vehicles below previously used fixed dates (2026-08-01, 2026-07-30)
+// that were already in the past by the time this was actually tested
+// (confirmed directly - the app's real countdown logic correctly
+// computed "Auction Closed" for both, contradicting the "Live Bidding
+// Events" section they were shown under with real bid counts and
+// active "Ready to Bid" CTAs). A relative offset can't go stale the
+// same way - these auctions will always appear to be ending in the
+// near future no matter when the app is actually loaded.
+export const hoursFromNow = (hours: number) => new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+
 // Default values for required Vehicle properties
 const defaultVehicleProps = {
   vin: 'UNKNOWN',
@@ -152,7 +164,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     escrowEligible: true,
     financeAvailable: true,
     isAuction: true, // LIVE AUCTION enabled -> MUST display auction badge
-    auctionEndsAt: '2026-08-01T15:00:00Z',
+    auctionEndsAt: hoursFromNow(18), // urgent (<24h) - also verifies "Ending Soon" surfaces this correctly
     currentBid: 2300000,
     image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800',
     description: 'Fuel efficient hybrid SUV with intelligent 4x4 lock. Includes panaromic sunroof and zero accident record.',
@@ -220,7 +232,7 @@ export const INITIAL_VEHICLES: Vehicle[] = [
     escrowEligible: true, // Escrow enabled
     financeAvailable: true,
     isAuction: true, // LIVE AUCTION enabled
-    auctionEndsAt: '2026-07-30T18:00:00Z',
+    auctionEndsAt: hoursFromNow(72), // 3 days out - normal (non-urgent) countdown
     currentBid: 4100000,
     image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=800',
     description: 'Executive sedan with AMG body styling, widescreen cockpit digital display, ambient lighting, ambient fragrance.',
