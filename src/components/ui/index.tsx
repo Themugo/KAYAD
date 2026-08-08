@@ -353,25 +353,35 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
 // --- SKELETON LOADING PLACEHOLDERS ---
 export const SkeletonCard: React.FC = () => (
-  <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm animate-pulse space-y-4">
-    <div className="h-52 bg-slate-200/80 w-full relative" />
-    <div className="p-5 space-y-4">
-      <div className="space-y-2">
-        <div className="h-3 bg-slate-200 rounded w-1/3" />
-        <div className="h-5 bg-slate-200 rounded w-3/4" />
-        <div className="h-7 bg-slate-200 rounded w-1/2" />
+  // Matches VehicleCard's actual current dimensions (image h-32 sm:h-36,
+  // body p-2.5 space-y-1.5) rather than the card's old, larger size
+  // (h-52, p-5 space-y-4) - was still showing a taller, more spacious
+  // placeholder than the real compact card that replaces it once
+  // loading finishes, an even more jarring mismatch than SkeletonGrid's
+  // own wrong column count (fixed alongside this).
+  <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm animate-pulse space-y-1.5">
+    <div className="h-32 sm:h-36 bg-slate-200/80 w-full relative" />
+    <div className="p-2.5 space-y-1.5">
+      <div className="space-y-1">
+        <div className="h-2.5 bg-slate-200 rounded w-1/3" />
+        <div className="h-3.5 bg-slate-200 rounded w-3/4" />
+        <div className="h-5 bg-slate-200 rounded w-1/2" />
       </div>
-      <div className="grid grid-cols-3 gap-2 bg-slate-100 p-2.5 rounded-xl h-12" />
-      <div className="flex gap-2 pt-1">
-        <div className="h-9 bg-slate-200 rounded-xl flex-1" />
-        <div className="h-9 bg-slate-200 rounded-xl w-28" />
-      </div>
+      <div className="h-8 bg-slate-100 rounded-xl" />
     </div>
   </div>
 );
 
 export const SkeletonGrid: React.FC<{ count?: number }> = ({ count = 6 }) => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  // Matches VehicleMarketplace's real inventory grid exactly (grid-cols-1
+  // sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5) - this was
+  // previously grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6, a
+  // different column count AND a much larger gap, causing a visible
+  // layout jump the moment loading finished and the real grid replaced
+  // it. Only used by VehicleMarketplace (confirmed via grep before
+  // changing this shared component's default), so safe to match its
+  // specific grid rather than keep a generic, mismatched one.
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5">
     {Array.from({ length: count }).map((_, i) => (
       <SkeletonCard key={i} />
     ))}

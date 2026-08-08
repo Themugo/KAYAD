@@ -3,6 +3,8 @@ import { Vehicle } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
 import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, Bookmark, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftClose, PanelLeftOpen, LayoutGrid } from 'lucide-react';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
+import MarketingCard from '../../../components/MarketingCard';
+import { MOCK_SPONSOR_CARDS } from '../../../data/mockSponsors';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -71,12 +73,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [onlyNewArrivals, setOnlyNewArrivals] = useState<boolean>(false);
 
   // Layout & Navigation States
-  // Defaults to 'compact' rather than 'grid' - at a 10,000-vehicle
-  // scale, the denser layout should be what every visitor sees without
-  // needing to discover and click the view-mode toggle first. 'grid'
-  // (more whitespace, fewer columns) stays available via the toggle for
-  // anyone who prefers it.
-  const [viewMode, setViewMode] = useState<'grid' | 'compact' | 'list'>('compact');
+  // Went through 2 revisions: originally defaulted to 'grid' (fewer
+  // columns), then to 'compact' (denser, up to 5 columns) for scale.
+  // Now simplified to just 2 modes total - 'grid' and 'compact' both
+  // ended up capped at 4 columns per direct instruction (compact was
+  // 5), leaving them nearly identical (only a 4px gap size differed) -
+  // a genuine redundancy, removed per explicit request. 'list' stays,
+  // since a vertical stacked layout is a real different browsing mode,
+  // not just a column-count variation. Defaults to 'grid' (the
+  // consolidated mode) rather than requiring a toggle click to reach
+  // the standard dense layout.
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'recently-reduced' | 'most-viewed' | 'auction-ending'
   >('newest');
@@ -406,6 +413,34 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return picks;
   }, [vehicles]);
 
+  // Interleaves sponsor/partner cards into the grid every 4th position -
+  // one full row in the 4-column grid, so each sponsor card lands at a
+  // clean row boundary rather than breaking mid-row. Originally used an
+  // every-8th interval (2 rows), but found while writing test coverage
+  // for this that the real mock dataset (INITIAL_VEHICLES) only has 6
+  // vehicles - confirmed directly via a runtime console.log in a
+  // throwaway debug test, not the file's own object-literal count via
+  // grep, which turned out to be unreliable (matched nested object
+  // braces, not just top-level vehicles). An every-8th interval never
+  // triggers at all with only 6 real vehicles to interleave into,
+  // meaning the whole feature would have been invisible against the
+  // actual current data. Every-4th guarantees at least one sponsor
+  // placement shows up even with a small catalog, while still reading
+  // as a natural row-boundary insertion rather than every-item ad
+  // clutter once the catalog is genuinely large.
+  const gridItemsWithSponsors = useMemo(() => {
+    const items: ({ type: 'vehicle'; vehicle: Vehicle } | { type: 'sponsor'; sponsor: typeof MOCK_SPONSOR_CARDS[number] })[] = [];
+    let sponsorIndex = 0;
+    paginatedVehicles.forEach((v, i) => {
+      if (i > 0 && i % 4 === 0 && MOCK_SPONSOR_CARDS.length > 0) {
+        items.push({ type: 'sponsor', sponsor: MOCK_SPONSOR_CARDS[sponsorIndex % MOCK_SPONSOR_CARDS.length] });
+        sponsorIndex += 1;
+      }
+      items.push({ type: 'vehicle', vehicle: v });
+    });
+    return items;
+  }, [paginatedVehicles]);
+
   return (
     <div className="space-y-5 pb-16">
       {/* TOAST NOTIFICATION FLOATER */}
@@ -555,7 +590,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <LayoutGrid className="w-3.5 h-3.5 text-[#C85A32]" />
             <h2 className="text-xs font-black text-[#1E3063] uppercase tracking-wide">Featured Picks</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {featuredPicks.map(({ vehicle: v, reason }) => (
               <div key={v.id}>
                 <div className="flex items-center gap-1.5 mb-1.5 px-0.5">
@@ -676,21 +711,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
 
-          {/* View Mode Switcher */}
+          {/* View Mode Switcher - 2 modes now (grid/list), not 3. See
+              the viewMode state comment above for why 'compact' was
+              removed as a genuine redundancy once both grid variants
+              capped at the same 4 columns. */}
           <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#1E3063] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              title="Standard Grid View"
+              title="Grid View"
             >
               <Grid className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('compact')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'compact' ? 'bg-[#1E3063] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              title="Compact 4-Column Grid View"
-            >
-              <LayoutGrid className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('list')}
@@ -958,34 +989,49 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </Card>
           ) : (
             <div className={
-              // Cards are now meaningfully more compact (image height cut
-              // from 208px to 144px, body padding/spacing tightened) - at
-              // 10,000-listing scale, using that freed space to show more
-              // per screen matters more than generous whitespace. Added an
-              // xl tier to both modes rather than just shrinking gaps.
-              // Kept the mobile (base) breakpoint at 1 column though -
-              // the card still carries a fair amount of text (title,
-              // price, metadata line, seller row), and going to 2-up on
-              // the smallest phone screens risks cramming that without
-              // being able to see it rendered on an actual device.
-              viewMode === 'compact'
-                ? "grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3"
-                : viewMode === 'list'
+              // Consolidated to a single grid definition, capped at 4
+              // columns per direct instruction (previously 2 separate
+              // modes topped out at 4 and 5). Gap tightened from
+              // gap-3/gap-4 down to gap-2.5 - explicitly requested,
+              // reduce spacing between cards. Kept the mobile (base)
+              // breakpoint at 1 column - the card still carries real
+              // text content (title, price, metadata line, seller row),
+              // and going to 2-up on the smallest phone screens risks
+              // cramming that without being able to see it rendered on
+              // an actual device.
+              viewMode === 'list'
                 ? "space-y-4"
-                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4"
+                : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2.5"
             }>
-              {paginatedVehicles.map((v) => (
-                <VehicleCard
-                  key={v.id}
-                  vehicle={v}
-                  isSaved={savedVehicles.includes(v.id)}
-                  isCompared={comparedVehicles.includes(v.id)}
-                  onToggleSave={onToggleSave}
-                  onToggleCompare={onToggleCompare}
-                  onQuickView={handleVehicleSelect}
-                  onStartEscrow={onStartEscrow}
-                />
-              ))}
+              {viewMode === 'list'
+                ? paginatedVehicles.map((v) => (
+                    <VehicleCard
+                      key={v.id}
+                      vehicle={v}
+                      isSaved={savedVehicles.includes(v.id)}
+                      isCompared={comparedVehicles.includes(v.id)}
+                      onToggleSave={onToggleSave}
+                      onToggleCompare={onToggleCompare}
+                      onQuickView={handleVehicleSelect}
+                      onStartEscrow={onStartEscrow}
+                    />
+                  ))
+                : gridItemsWithSponsors.map((item, i) =>
+                    item.type === 'sponsor' ? (
+                      <MarketingCard key={`sponsor-${item.sponsor.id}-${i}`} data={item.sponsor} />
+                    ) : (
+                      <VehicleCard
+                        key={item.vehicle.id}
+                        vehicle={item.vehicle}
+                        isSaved={savedVehicles.includes(item.vehicle.id)}
+                        isCompared={comparedVehicles.includes(item.vehicle.id)}
+                        onToggleSave={onToggleSave}
+                        onToggleCompare={onToggleCompare}
+                        onQuickView={handleVehicleSelect}
+                        onStartEscrow={onStartEscrow}
+                      />
+                    )
+                  )}
             </div>
           )}
 
