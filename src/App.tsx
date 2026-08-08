@@ -160,7 +160,7 @@ export function App() {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
     navigateTo('escrow');
-  }, []);
+  }, [navigateTo]);
 
   // Update Vehicle Auction Status Handler
   const handleUpdateVehicleAuctionStatus = useCallback((vehicleId: string, isAuction: boolean) => {
@@ -174,7 +174,7 @@ export function App() {
     setQuickViewVehicle(null);
     setSelectedChatVehicle(vehicle);
     navigateTo('chat');
-  }, []);
+  }, [navigateTo]);
 
   // Send Chat Message
   const handleSendMessage = useCallback((text: string) => {
@@ -192,7 +192,7 @@ export function App() {
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
     setSearchQuery(dealerName);
     navigateTo('marketplace');
-  }, []);
+  }, [navigateTo]);
 
   const savedVehiclesList = useMemo(() => {
     return vehicles.filter((v) => savedVehicles.includes(v.id));

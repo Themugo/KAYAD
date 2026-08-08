@@ -40,6 +40,13 @@ CREATE TABLE IF NOT EXISTS leads (
   source_reference TEXT,
   estimated_value NUMERIC DEFAULT 0,
   stage TEXT DEFAULT 'new',
+  -- is_hot/archived found later this session, alongside
+  -- models/Lead.js's getDealerLeads/getLeadPipeline implementation -
+  -- both are real filter fields in controllers/leadController.js's
+  -- getLeads endpoint (?isHot=true/false, ?archived=true/false query
+  -- params) that weren't on this table when it was first added.
+  is_hot BOOLEAN DEFAULT false,
+  archived BOOLEAN DEFAULT false,
   last_activity_at TIMESTAMPTZ DEFAULT now(),
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
