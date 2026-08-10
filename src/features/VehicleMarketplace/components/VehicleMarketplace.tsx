@@ -1433,6 +1433,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           onUpdate={updateHomeConfig}
           onReset={resetHomeConfig}
           onClose={() => setShowAdminPanel(false)}
+          adminUser={{ id: user!.id, name: user!.name }}
         />
       )}
     </div>

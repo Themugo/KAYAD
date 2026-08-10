@@ -77,9 +77,23 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
   // Physical Viewing Contact State
   const [copiedLocation, setCopiedLocation] = useState(false);
 
-  // Professional Inspection Booking State
+  // Professional Inspection Booking State. bookingDate previously
+  // defaulted to a hardcoded '2026-07-31' - already in the past by the
+  // time this was actually tested (confirmed directly - the current
+  // date is well past that), the same stale-date bug class found and
+  // fixed elsewhere in the auction ecosystem this session. A user who
+  // didn't actively change this date field before submitting would get
+  // a confirmation message confidently stating an inspection had been
+  // booked for a date that had already passed. Computed relative to
+  // "now" instead (3 days out) so it can't go stale the same way again,
+  // and added a real min= constraint on the date input below so the
+  // browser's own native picker prevents selecting any past date at
+  // all, regardless of what the default happens to be.
   const [selectedInspector, setSelectedInspector] = useState<InspectorOption | null>(MOCK_INSPECTORS[0]);
-  const [bookingDate, setBookingDate] = useState('2026-07-31');
+  const todayIso = new Date().toISOString().split('T')[0];
+  const [bookingDate, setBookingDate] = useState(
+    new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  );
   const [bookingTime, setBookingTime] = useState('10:00 AM');
   const [buyerNotes, setBuyerNotes] = useState('');
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'booking' | 'confirmed'>('idle');
@@ -468,6 +482,7 @@ export const PreAuctionInspectionModal: React.FC<PreAuctionInspectionModalProps>
                             type="date"
                             value={bookingDate}
                             onChange={(e) => setBookingDate(e.target.value)}
+                            min={todayIso}
                             required
                           />
                         </div>

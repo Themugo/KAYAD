@@ -11,9 +11,16 @@ import { LiveAuctionRoomModal } from './LiveAuctionRoomModal';
 import { PostAuctionCompletionModal } from './PostAuctionCompletionModal';
 import { OrganizerManagementConsole } from './OrganizerManagementConsole';
 import { AuctionOrganizerDashboard } from './AuctionOrganizerDashboard';
-import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench } from 'lucide-react';
+import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench, Settings } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, LazyImage, Input } from '../../../components/ui';
 import { isEscrowApplicable } from '../../../utils/escrow';
+import { useAuctionPageConfig } from '../hooks/useAuctionPageConfig';
+import AuctionPageAdminPanel from './AuctionPageAdminPanel';
+import MarketingCard from '../../../components/MarketingCard';
+
+function isValidAdvertLabel(label: string): label is 'Sponsored' | 'Partner' | 'Featured Dealer' {
+  return label === 'Sponsored' || label === 'Partner' || label === 'Featured Dealer';
+}
 
 interface AuctionsViewProps {
   vehicles: Vehicle[];
@@ -82,6 +89,14 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   // button, so there's no path to it left for a non-organizer even if
   // they knew the button existed.
   const isOrganizerCapable = user?.role === 'dealer' || user?.role === 'bank_officer' || user?.role === 'admin';
+
+  // Auction page admin customization - separate concern from
+  // isOrganizerCapable (dealers/bank officers organize auctions, but
+  // don't get page-layout/text editing rights - that's admin-only).
+  const isPageAdmin = user?.role === 'admin';
+  const { config: auctionConfig, updateConfig: updateAuctionConfig, resetConfig: resetAuctionConfig } =
+    useAuctionPageConfig(isPageAdmin && user ? { id: user.id, name: user.name } : null);
+  const [showAuctionAdminPanel, setShowAuctionAdminPanel] = useState(false);
 
   // Watched Auctions state
   const [watchedIds, setWatchedIds] = useState<string[]>(['AUC-2026-8801']);
@@ -454,10 +469,19 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         variant="navy"
         badgeIcon={<Gavel className="w-4 h-4 text-amber-400" />}
         badgeText="Live Automotive Marketplace"
-        title="KAYAD Vehicle Auctions"
-        description="Discover active vehicle auctions, compare listings, place real-time bids, and track ending times. Escrow Vault protection is available on eligible listings - look for the badge on each auction."
+        title={auctionConfig.heroTitle}
+        description={auctionConfig.heroDescription}
         rightElement={
           <div className="flex flex-wrap items-center gap-3">
+            {isPageAdmin && (
+              <button
+                onClick={() => setShowAuctionAdminPanel(true)}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs font-bold border border-white/20"
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Customize Auction Page</span>
+              </button>
+            )}
             <div className="flex items-center gap-2 bg-[#101935]/60 px-3.5 py-2 rounded-xl border border-white/10 text-white text-xs">
               <span className="relative flex h-2.5 w-2.5 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -524,6 +548,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         {/* ==================================================
             1. DEDICATED AUCTION SEARCH
             ================================================== */}
+        {auctionConfig.sectionVisibility.searchFilters && (
         <section id="auction-search" className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/90 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-extrabold text-[#1E3063] uppercase tracking-wider flex items-center gap-2">
@@ -646,11 +671,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             </button>
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
             2. AUCTION CATEGORIES
             ================================================== */}
+        {auctionConfig.sectionVisibility.categories && (
         <section id="auction-categories" className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-black text-[#1E3063] font-display flex items-center gap-2">
@@ -696,11 +723,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             })}
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
             3. LIVE AUCTIONS (only when active)
             ================================================== */}
+        {auctionConfig.sectionVisibility.liveBidding && (
         <section id="live-auctions" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-3">
             <div className="flex items-center gap-3">
@@ -963,11 +992,36 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             </div>
           )}
         </section>
+        )}
 
+        {/* Admin-configured advert/sponsor card - reuses the same
+            MarketingCard component built for the home page grid, for
+            visual consistency between the 2 places sponsor content
+            appears. Its label/icon/accentColor aren't part of the
+            admin-editable config (kept simple: name/tagline/CTA only) -
+            fixed here to a Gavel icon and the established navy accent,
+            matching this page's own auction theme. */}
+        {auctionConfig.sectionVisibility.advertCard && (
+          <div className="max-w-sm">
+            <MarketingCard
+              data={{
+                id: 'auction-page-advert',
+                label: isValidAdvertLabel(auctionConfig.advertCard.label) ? auctionConfig.advertCard.label : 'Sponsored',
+                category: 'Auction Partner',
+                name: auctionConfig.advertCard.name,
+                tagline: auctionConfig.advertCard.tagline,
+                ctaLabel: auctionConfig.advertCard.ctaLabel,
+                icon: Gavel,
+                accentColor: '#1E3063',
+              }}
+            />
+          </div>
+        )}
 
         {/* ==================================================
             4. ENDING SOON (< 24 Hours)
             ================================================== */}
+        {auctionConfig.sectionVisibility.endingSoon && (
         <section id="ending-soon" className="space-y-4 pt-4 border-t border-slate-200/80">
           <div className="flex items-center justify-between">
             <div>
@@ -1030,11 +1084,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             })}
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
             5. UPCOMING AUCTIONS
             ================================================== */}
+        {auctionConfig.sectionVisibility.upcoming && (
         <section id="upcoming-auctions" className="space-y-4 pt-4 border-t border-slate-200/80">
           <div className="flex items-center justify-between">
             <div>
@@ -1082,11 +1138,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             ))}
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
             6. RECENTLY SOLD
             ================================================== */}
+        {auctionConfig.sectionVisibility.recentlySold && (
         <section id="recently-sold" className="space-y-4 pt-4 border-t border-slate-200/80">
           <div className="flex items-center justify-between">
             <div>
@@ -1163,11 +1221,13 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             ))}
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
             7. AUCTION PROCESS (SIMPLE VISUAL TIMELINE)
             ================================================== */}
+        {auctionConfig.sectionVisibility.howItWorks && (
         <section id="auction-process" className="bg-white rounded-2xl p-6 shadow-xs border border-slate-200/90 space-y-6">
           <div className="text-center max-w-xl mx-auto space-y-1">
             <h2 className="text-lg font-black text-[#1E3063] font-display">
@@ -1204,6 +1264,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
             })}
           </div>
         </section>
+        )}
 
 
         {/* ==================================================
@@ -1846,6 +1907,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         }}
         showToast={showToast}
       />
+
+      {isPageAdmin && showAuctionAdminPanel && (
+        <AuctionPageAdminPanel
+          config={auctionConfig}
+          onUpdate={updateAuctionConfig}
+          onReset={resetAuctionConfig}
+          onClose={() => setShowAuctionAdminPanel(false)}
+        />
+      )}
     </div>
   );
 };

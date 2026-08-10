@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuctionsView } from '../../features/AuctionsView/components/AuctionsView';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
@@ -116,5 +116,89 @@ describe('AuctionsView - organizer tooling is role-gated', () => {
       role: 'bank_officer', avatar: 'https://example.com/avatar.jpg',
     }} />);
     expect(screen.getByText('Organizer Dashboard')).toBeTruthy();
+  });
+});
+
+describe('AuctionsView - auction ecosystem admin customization', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    user: null,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  const adminUser = {
+    id: 'usr-admin-1', name: 'System Admin (Amina Hassan)', email: 'admin@kayad.co.ke',
+    phone: '+254 700 000 000', role: 'admin' as const, avatar: 'https://example.com/avatar.jpg',
+  };
+  const dealerUser = { ...adminUser, role: 'dealer' as const };
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('does not show the Customize Auction Page button for a non-admin, even an organizer-capable dealer', () => {
+    render(<AuctionsView {...baseProps} user={dealerUser} />);
+    expect(screen.queryByText('Customize Auction Page')).toBeNull();
+  });
+
+  it('shows the Customize button for an admin and opens the real panel on click', () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    fireEvent.click(screen.getByText('Customize Auction Page'));
+    expect(screen.getByText('Customize Auction Page (Admin)')).toBeTruthy();
+  });
+
+  it('toggling a section off in the real panel actually hides it on the page', async () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    expect(screen.getByText('How KAYAD Vehicle Auctions Work')).toBeTruthy();
+    fireEvent.click(screen.getByText('Customize Auction Page'));
+    // "How KAYAD Vehicle Auctions Work" now matches twice - the real
+    // page heading (an <h2>) and the admin panel's own section toggle
+    // button using the identical label. Disambiguates by finding the
+    // one that's actually a <button>, rather than assuming DOM order.
+    const matches = screen.getAllByText('How KAYAD Vehicle Auctions Work');
+    const toggleButton = matches.find((el) => el.closest('button'));
+    expect(toggleButton).toBeTruthy();
+    fireEvent.click(toggleButton!);
+    await waitFor(() => {
+      // The admin panel's own toggle button keeps showing this label
+      // (it doesn't disappear when a section is hidden - just its icon
+      // changes from Eye to EyeOff), so exactly 1 match should remain
+      // (the panel's toggle), not 0 - the real page heading specifically
+      // is what should be gone.
+      expect(screen.getAllByText('How KAYAD Vehicle Auctions Work').length).toBe(1);
+    });
+  });
+
+  it('editing the hero title in the real panel updates the actual rendered heading', async () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    expect(screen.getByText('KAYAD Vehicle Auctions')).toBeTruthy();
+    fireEvent.click(screen.getByText('Customize Auction Page'));
+    const titleInput = screen.getByDisplayValue('KAYAD Vehicle Auctions');
+    fireEvent.change(titleInput, { target: { value: 'KAYAD Premium Auctions' } });
+    await waitFor(() => {
+      expect(screen.getByText('KAYAD Premium Auctions')).toBeTruthy();
+    });
+    expect(screen.queryByText('KAYAD Vehicle Auctions')).toBeNull();
+  });
+
+  it('the advert card is hidden by default, and enabling it in the real panel shows the real configured content', async () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    expect(screen.queryByText('NCBA Bank Kenya')).toBeNull();
+    fireEvent.click(screen.getByText('Customize Auction Page'));
+    fireEvent.click(screen.getByText('Advert/Sponsor Card'));
+    await waitFor(() => {
+      expect(screen.getByText('NCBA Bank Kenya')).toBeTruthy();
+    });
+  });
+
+  it('changes made through this panel are attributed to the real admin in the shared audit log', async () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    fireEvent.click(screen.getByText('Customize Auction Page'));
+    fireEvent.click(screen.getByText('Advert/Sponsor Card'));
+    fireEvent.click(screen.getByText('Auction Page Change Log (Immutable)'));
+    await waitFor(() => {
+      expect(screen.getByText(/System Admin \(Amina Hassan\)/)).toBeTruthy();
+    });
   });
 });

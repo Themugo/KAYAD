@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
@@ -520,6 +521,66 @@ describe('VehicleMarketplace - admin home page customization', () => {
     fireEvent.click(screen.getByText('Reset to Defaults'));
     await waitFor(() => {
       expect(screen.getByText('Featured Picks')).toBeTruthy();
+    });
+  });
+});
+
+describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end through the real panel)', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    savedVehicles: [],
+    comparedVehicles: [],
+    onToggleSave: () => {},
+    onToggleCompare: () => {},
+    onQuickView: () => {},
+    onStartEscrow: () => {},
+    selectedCounty: 'All East Africa',
+    onCountyChange: () => {},
+    searchQuery: '',
+    onSearchChange: () => {},
+    onOpenCompareModal: () => {},
+  };
+
+  const adminUser = {
+    id: 'usr-admin-1',
+    name: 'System Admin (Amina Hassan)',
+    email: 'admin@kayad.co.ke',
+    phone: '+254 700 000 000',
+    role: 'admin' as const,
+    avatar: 'https://example.com/avatar.jpg',
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('clicking the Escrow Live Mode toggle in the real panel flips it from OFF to ON and logs the change', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+    expect(screen.getByText('OFF')).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Escrow Live Mode'));
+    await waitFor(() => {
+      expect(screen.getByText('ON')).toBeTruthy();
+    });
+
+    // Confirms the audit log viewer, once opened, shows a real entry
+    // for this exact change - not just that the toggle visually moved.
+    fireEvent.click(screen.getByText('Admin Change Log (Immutable)'));
+    await waitFor(() => {
+      expect(screen.getByText(/Escrow Live Mode: OFF -> ON/)).toBeTruthy();
+    });
+  });
+
+  it('changing the Private Sellers requirement dropdown in the real panel updates the config that isEscrowApplicable reads', async () => {
+    render(<VehicleMarketplace {...baseProps} user={adminUser} isHomePage />);
+    fireEvent.click(screen.getByText('Customize Home Page'));
+
+    const dropdown = screen.getByDisplayValue('Mandatory');
+    fireEvent.change(dropdown, { target: { value: 'disabled' } });
+
+    await waitFor(() => {
+      expect(readEscrowRulesConfig().privateSellerRequirement).toBe('disabled');
     });
   });
 });
