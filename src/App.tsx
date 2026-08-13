@@ -386,7 +386,34 @@ export function App() {
             />
           )}
 
-          {activeNav === 'admin' && (
+          {/* Admin route guard added (Phase 2 consolidation): previously
+              activeNav === 'admin' rendered AdminView with zero role
+              check at this level - the only protection was the Navbar's
+              own button being conditionally hidden for non-admins
+              (confirmed: `{user.role === 'admin' && (...)}` gates the
+              button correctly), but nothing stopped AdminView from
+              actually rendering if activeNav ever became 'admin' by any
+              other means (devtools state manipulation, a future bug
+              elsewhere setting it, etc.) - exactly the "frontend state
+              must not grant access on its own" gap this consolidation
+              phase asks to verify. This app has no connected backend
+              (confirmed throughout this project's history), so this
+              client-side check is not a real security boundary against
+              a determined attacker - true admin protection requires
+              server-side authorization, which doesn't exist yet and is
+              out of scope to build here (explicitly prohibited: "do not
+              introduce a new authentication provider"). This guard is
+              still worth adding as defense-in-depth and correct default
+              behavior: it prevents accidental/unintended admin access
+              (e.g. stale state after a role change) without requiring a
+              new auth system, and it doesn't regress anything - the
+              real, current entry point (the gated Navbar button) is
+              unaffected. Falls through to the existing VALID_VIEWS-style
+              reset behavior (no explicit error UI) since a non-admin
+              reaching this state happens only via direct manipulation,
+              not normal navigation - consistent with how invalid views
+              already silently fall back elsewhere in this file. */}
+          {activeNav === 'admin' && user?.role === 'admin' && (
             <AdminView
               vehicles={vehicles}
               onQuickViewVehicle={handleOpenVehicleDetails}
