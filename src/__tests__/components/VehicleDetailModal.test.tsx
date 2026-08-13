@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { VehicleDetailModal } from '../../components/VehicleDetailModal';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
 
 describe('VehicleDetailModal', () => {
   it('renders without throwing when given a real vehicle from mock data', () => {
@@ -282,5 +283,52 @@ describe('VehicleDetailModal', () => {
     fireEvent.click(screen.getByText('View Showroom'));
     expect(onViewShowroom).toHaveBeenCalledWith(anyVehicle.sellerName);
     expect(onContactSeller).not.toHaveBeenCalled();
+  });
+});
+
+describe('VehicleDetailModal - price consistency with the real, live auction session (Phase 4 data-consistency audit)', () => {
+  const baseProps = {
+    allVehicles: INITIAL_VEHICLES,
+    onClose: () => {},
+    onStartEscrow: () => {},
+    onContactSeller: () => {},
+    isSaved: false,
+    onToggleSave: () => {},
+    notFoundId: null,
+  };
+
+  // Same fix and reasoning as VehicleCard's own price display (see that
+  // file's test comment): this panel labels its number "Current
+  // Highest Bid" for auction vehicles but was displaying vehicle.price
+  // directly - a stale field that visibly disagreed with the real
+  // auction page's own currentBid for the exact same vehicle. Fixed
+  // both the desktop price panel and the separate mobile sticky
+  // purchase bar (which had its own copy of this same bug, plus a
+  // second bug: a hardcoded "Listed Price" label that never switched
+  // to "Current Highest Bid" for auction vehicles at all).
+  it('shows the real, live auction currentBid, not the stale vehicle.price, for a vehicle with an actual auction session', () => {
+    const nissan = INITIAL_VEHICLES.find((v) => v.id === 'v4')!;
+    const session = INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === 'v4')!;
+    expect(session.currentBid).not.toBe(nissan.price);
+
+    render(<VehicleDetailModal vehicle={nissan} {...baseProps} />);
+    // Both the desktop panel and the mobile sticky bar render the same
+    // live value - getAllByText confirms it appears (at least once)
+    // rather than assuming exactly one location shows it.
+    expect(screen.getAllByText(`Ksh ${session.currentBid.toLocaleString()}`).length).toBeGreaterThan(0);
+    expect(screen.queryByText(`Ksh ${nissan.price.toLocaleString()}`)).toBeNull();
+  });
+
+  it('the mobile sticky bar label switches to "Current Highest Bid" for an auction vehicle, not hardcoded "Listed Price"', () => {
+    const nissan = INITIAL_VEHICLES.find((v) => v.id === 'v4')!;
+    render(<VehicleDetailModal vehicle={nissan} {...baseProps} />);
+    expect(screen.getAllByText('Current Highest Bid').length).toBeGreaterThan(0);
+  });
+
+  it('non-auction vehicles still correctly show "Listed Price" and vehicle.price directly', () => {
+    const nonAuction = INITIAL_VEHICLES.find((v) => !v.isAuction)!;
+    render(<VehicleDetailModal vehicle={nonAuction} {...baseProps} />);
+    expect(screen.getAllByText('Listed Price').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(`Ksh ${nonAuction.price.toLocaleString()}`).length).toBeGreaterThan(0);
   });
 });

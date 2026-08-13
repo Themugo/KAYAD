@@ -1,6 +1,7 @@
 import React from 'react';
 import { Vehicle } from '../types';
 import { isEscrowApplicable } from '../utils/escrow';
+import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { 
   ShieldCheck, 
   CheckCircle2, 
@@ -35,6 +36,21 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   onQuickView,
   onStartEscrow
 }) => {
+  // Real, live current bid for this vehicle's auction, if it has one -
+  // same fix and reasoning as VehicleDetailModal's own price panel
+  // (see that file's comment): vehicle.price does not get updated when
+  // a bid is placed (AuctionsView's executeBid updates its own local
+  // sessions state, not this vehicles array), so displaying it
+  // unlabeled for an auction vehicle both shows a stale number and, on
+  // this specific card, doesn't even distinguish "listed price" from
+  // "current bid" at all - confirmed directly, this card had no such
+  // label distinction anywhere, unlike VehicleDetailModal which at
+  // least had the label right while showing the wrong value.
+  const liveAuctionSession = vehicle.isAuction
+    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
+    : undefined;
+  const displayPrice = liveAuctionSession?.currentBid ?? vehicle.price;
+
   // 1. Calculate Market Price Comparison Tag (Concise Labels)
   const getMarketPriceTag = () => {
     if (!vehicle.marketPriceAvg) {
@@ -252,9 +268,9 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
               <Badge variant={marketTag.variant} size="sm">
                 {marketTag.label}
               </Badge>
-              {vehicle.marketPriceAvg && vehicle.price < vehicle.marketPriceAvg && (
+              {vehicle.marketPriceAvg && displayPrice < vehicle.marketPriceAvg && (
                 <span className="text-[10px] font-extrabold text-emerald-700">
-                  Save Ksh {((vehicle.marketPriceAvg - vehicle.price) / 1000).toFixed(0)}K
+                  Save Ksh {((vehicle.marketPriceAvg - displayPrice) / 1000).toFixed(0)}K
                 </span>
               )}
             </div>
@@ -268,7 +284,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           {/* Primary Price Focal Point */}
           <div className="flex items-baseline gap-1.5">
             <span className="text-base sm:text-lg font-black text-[#1E3063] font-display tracking-tight">
-              Ksh {vehicle.price.toLocaleString()}
+              Ksh {displayPrice.toLocaleString()}
             </span>
             {vehicle.marketPriceAvg && (
               <span className="text-[10px] text-slate-400 line-through font-medium">

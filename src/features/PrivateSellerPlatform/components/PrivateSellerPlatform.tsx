@@ -258,8 +258,8 @@ const SAMPLE_ENQUIRIES: Enquiry[] = [
     vehicleId: 'l1',
     vehicleTitle: '2019 Toyota Corolla',
     type: 'offer',
-    subject: 'Offer: KES 1,700,000',
-    message: 'I would like to make an offer of KES 1,700,000. I can pay cash and complete the transaction within 3 days.',
+    subject: 'Offer: Ksh 1,700,000',
+    message: 'I would like to make an offer of Ksh 1,700,000. I can pay cash and complete the transaction within 3 days.',
     budget: 1700000,
     status: 'replied',
     date: '2024-03-14',
@@ -730,7 +730,7 @@ function ListingCard({ listing, delay }: { listing: Listing; delay: number }) {
               {listing.status}
             </span>
           </div>
-          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {(listing.price / 1000000).toFixed(1)}M</p>
+          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>Ksh {(listing.price / 1000000).toFixed(1)}M</p>
           <div className="flex flex-wrap gap-3 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
             <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views}</span>
             <span className="flex items-center gap-1"><HeartIcon size={14} /> {listing.favorites}</span>
@@ -840,7 +840,7 @@ function PricingAssistantSection() {
       <div className="rounded-xl p-6" style={{ background: `linear-gradient(135deg, ${KAYAD_THEME.gold}20 0%, ${KAYAD_THEME.gold}5 100%)` }}>
         <h2 className="text-lg font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Price Recommendations</h2>
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Suggested</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>KES {(g.suggestedPrice / 1000000).toFixed(2)}M</p></div>
+          <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Suggested</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Ksh {(g.suggestedPrice / 1000000).toFixed(2)}M</p></div>
           <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Market Range</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>{(g.marketRange.min / 1000000).toFixed(1)}M - {(g.marketRange.max / 1000000).toFixed(1)}M</p></div>
           <div className="p-4 rounded-xl text-center bg-white"><p className="text-sm mb-1" style={{ color: KAYAD_THEME.slate[500] }}>Confidence</p><p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>{g.confidenceScore}%</p></div>
         </div>
@@ -980,7 +980,7 @@ function EscrowCenterSection({ transactions }: { transactions: EscrowTransaction
         <div key={t.id} className="rounded-xl p-6 bg-white">
           <h3 className="font-bold mb-2" style={{ color: KAYAD_THEME.navy }}>{t.vehicleTitle}</h3>
           <p className="text-sm mb-4" style={{ color: KAYAD_THEME.slate[500] }}>Buyer: {t.buyerName}</p>
-          <p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>KES {(t.salePrice / 1000000).toFixed(2)}M</p>
+          <p className="text-2xl font-bold" style={{ color: KAYAD_THEME.gold }}>Ksh {(t.salePrice / 1000000).toFixed(2)}M</p>
         </div>
       ))}
     </div>

@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { VehicleCard } from '../../components/VehicleCard';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
+import { INITIAL_AUCTION_SESSIONS } from '../../data/mockAuctions';
 
 describe('VehicleCard - size reduction (scale/density pass)', () => {
   const vehicle = INITIAL_VEHICLES[0];
@@ -146,5 +147,54 @@ describe('VehicleCard - trust badges (professional/compact pass)', () => {
     const cardEl = container.querySelector('[role="button"][aria-label]');
     expect(cardEl?.getAttribute('aria-label')).toMatch(/Verified/);
     expect(screen.queryByText('Verified')).toBeNull();
+  });
+});
+
+describe('VehicleCard - price consistency with the real, live auction session (Phase 4 data-consistency audit)', () => {
+  const baseProps = {
+    isSaved: false,
+    isCompared: false,
+    onToggleSave: vi.fn(),
+    onToggleCompare: vi.fn(),
+    onQuickView: vi.fn(),
+    onStartEscrow: vi.fn(),
+  };
+
+  // Found a real, user-visible contradiction while auditing cross-page
+  // price consistency: this card showed vehicle.price unconditionally
+  // for every vehicle, with no distinction at all for auction vehicles
+  // - not even a wrong label, just no acknowledgment that the number
+  // could represent a live bid rather than a fixed price. vehicle.price
+  // does not update when a bid is placed (AuctionsView's executeBid
+  // only updates its own local sessions state), so for a real vehicle
+  // with an actual auction session, this card was showing a stale
+  // number that visibly disagreed with the true current bid shown on
+  // the real auction page for the exact same vehicle.
+  it('shows the real, live auction currentBid for a vehicle with an actual auction session, not the stale vehicle.price', () => {
+    const nissan = INITIAL_VEHICLES.find((v) => v.id === 'v4')!;
+    const session = INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === 'v4')!;
+    expect(session).toBeTruthy();
+    // Confirms the two really do differ in the real mock data - this
+    // test would be meaningless if they happened to already match.
+    expect(session.currentBid).not.toBe(nissan.price);
+
+    render(<VehicleCard {...baseProps} vehicle={nissan} />);
+    expect(screen.getByText(`Ksh ${session.currentBid.toLocaleString()}`)).toBeTruthy();
+    expect(screen.queryByText(`Ksh ${nissan.price.toLocaleString()}`)).toBeNull();
+  });
+
+  it('falls back to vehicle.price for an auction vehicle with no matching session record', () => {
+    const auctionVehicleNoSession = INITIAL_VEHICLES.find(
+      (v) => v.isAuction && !INITIAL_AUCTION_SESSIONS.some((s) => s.vehicleId === v.id)
+    );
+    if (!auctionVehicleNoSession) return; // no such vehicle in current mock data - nothing to verify against
+    render(<VehicleCard {...baseProps} vehicle={auctionVehicleNoSession} />);
+    expect(screen.getByText(`Ksh ${auctionVehicleNoSession.price.toLocaleString()}`)).toBeTruthy();
+  });
+
+  it('non-auction vehicles are unaffected - still show vehicle.price directly', () => {
+    const nonAuction = INITIAL_VEHICLES.find((v) => !v.isAuction)!;
+    render(<VehicleCard {...baseProps} vehicle={nonAuction} />);
+    expect(screen.getByText(`Ksh ${nonAuction.price.toLocaleString()}`)).toBeTruthy();
   });
 });

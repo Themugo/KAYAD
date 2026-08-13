@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Vehicle } from '../types';
 import { isEscrowApplicable } from '../utils/escrow';
+import { INITIAL_AUCTION_SESSIONS } from '../data/mockAuctions';
 import { CheckCircle2, MapPin, Lock, MessageSquare, Heart, FileCheck, ShieldCheck, Landmark, Calculator, Gauge, Fuel, Sliders, Sparkles, Zap, ChevronRight, ChevronLeft, Award, ArrowRight, SearchX, AlertCircle, Gavel, Maximize2, ChevronDown, ChevronUp, Check, Building2, Car, Wrench, Share2, Calendar, Layers, PlayCircle, RotateCw, Compass, CheckSquare } from 'lucide-react';
 import { Modal, Badge, Button, Card, LazyImage } from './ui';
 
@@ -205,6 +206,22 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
   const isPrivateSeller = vehicle.sellerType === 'Private Seller';
   const isAuction = Boolean(vehicle.isAuction);
+  // Looks up the real, live AuctionSession for this vehicle (if one
+  // exists) so the price panel can show its actual currentBid instead
+  // of vehicle.price. Found a real, user-visible contradiction while
+  // auditing data consistency: this panel labels its number "Current
+  // Highest Bid" for auction vehicles but was displaying vehicle.price
+  // directly - a field that does NOT get updated when a bid is placed
+  // (AuctionsView's executeBid updates its own local `sessions` state
+  // and that session's own nested vehicle copy, not the vehicles array
+  // this modal reads from). Confirmed directly against real mock data
+  // before fixing: for the Nissan X-Trail specifically, this would have
+  // shown "Ksh 2,450,000" here while the real auction lot correctly
+  // shows "Ksh 2,300,000" for the exact same vehicle - the kind of
+  // cross-page contradiction this consolidation phase exists to find.
+  const liveAuctionSession = isAuction
+    ? INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id)
+    : undefined;
   const isEscrowActive = isEscrowApplicable(vehicle);
   const isInspectionActive = Boolean(vehicle.inspectionPassed);
   const isFinanceActive = Boolean(vehicle.financeAvailable);
@@ -421,7 +438,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         {isAuction ? 'Current Highest Bid' : 'Listed Price'}
                       </p>
                       <span className="text-3xl font-black text-[#1E3063] font-display tracking-tight">
-                        Ksh {vehicle.price.toLocaleString()}
+                        Ksh {(liveAuctionSession?.currentBid ?? vehicle.price).toLocaleString()}
                       </span>
                     </div>
 
@@ -960,9 +977,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           ========================================== */}
       <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Listed Price</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">
+            {isAuction ? 'Current Highest Bid' : 'Listed Price'}
+          </p>
           <p className="text-base font-black text-[#1E3063] font-display">
-            Ksh {vehicle.price.toLocaleString()}
+            Ksh {(liveAuctionSession?.currentBid ?? vehicle.price).toLocaleString()}
           </p>
         </div>
 
