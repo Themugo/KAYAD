@@ -8,7 +8,8 @@ import PriceAlertsModal from './components/PriceAlertsModal';
 
 import { INITIAL_VEHICLES, MOCK_DEALERS, MOCK_ESCROW_DEALS, MOCK_MESSAGES } from './data/mockVehicles';
 import { Vehicle, ChatMessage, UserProfile } from './types';
-import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
+import { getVehicleIdFromUrl, setVehicleDetailUrl, setAuctionDetailUrl } from './utils/navigation';
+import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
 import { isEscrowApplicable } from './utils/escrow';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
@@ -182,6 +183,28 @@ export function App() {
     setQuickViewVehicle(null);
     setEscrowPrefillVehicle(vehicle);
     navigateTo('escrow');
+  }, [navigateTo]);
+
+  // View Auction Lot Handler - "Place Bid / Submit Auction Offer" on
+  // VehicleDetailModal previously called onContactSeller (opening a
+  // chat with the seller) for auction vehicles - a real, confirmed bug:
+  // the button's own label promised bidding, but its action opened
+  // chat instead, with no route to the actual auction lot at all.
+  // Finds the specific auction session for this vehicle (by vehicleId,
+  // not just navigating to the bare /auctions directory and making the
+  // user search again) and deep-links directly to it using the same
+  // getAuctionIdFromUrl/setAuctionDetailUrl mechanism built for auction
+  // lot deep-linking - AuctionsView's own URL-sync effect (added in
+  // that same change) picks up the param on mount and opens the
+  // correct lot automatically, so no additional wiring is needed on
+  // the AuctionsView side.
+  const handleViewAuctionLot = useCallback((vehicle: Vehicle) => {
+    const session = INITIAL_AUCTION_SESSIONS.find((s) => s.vehicleId === vehicle.id);
+    setQuickViewVehicle(null);
+    if (session) {
+      setAuctionDetailUrl(session.id);
+    }
+    navigateTo('auctions');
   }, [navigateTo]);
 
   // Update Vehicle Auction Status Handler
@@ -441,6 +464,9 @@ export function App() {
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
         onRequestInspection={() => navigateTo('inspections')}
+        onViewAuctionLot={handleViewAuctionLot}
+        onNavigateToFinancing={() => navigateTo('financing')}
+        onViewShowroom={handleSelectDealerVehicles}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { VehicleDetailModal } from '../../components/VehicleDetailModal';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
 
@@ -156,5 +156,131 @@ describe('VehicleDetailModal', () => {
 
     render(<VehicleDetailModal vehicle={nonAuctionVehicle!} {...baseProps} />);
     expect(screen.queryByText(/Place Bid|Submit Auction Offer/)).toBeNull();
+  });
+
+  // Found a real, confirmed bug while auditing cross-page navigation:
+  // clicking "Place Bid / Submit Auction Offer" called onContactSeller
+  // (opening a chat with the seller) - the button's own label promised
+  // bidding, but its actual action opened chat instead, with no route
+  // to the auction lot at all. Added onViewAuctionLot specifically for
+  // this button; confirms it's actually used when provided, and that
+  // the old onContactSeller behavior only remains as a fallback for
+  // any caller that hasn't been updated to pass the new prop.
+  it('clicking "Place Bid" calls onViewAuctionLot when provided, not onContactSeller', () => {
+    const auctionVehicle = INITIAL_VEHICLES.find((v) => v.isAuction === true)!;
+    const onViewAuctionLot = vi.fn();
+    const onContactSeller = vi.fn();
+    render(
+      <VehicleDetailModal
+        vehicle={auctionVehicle}
+        allVehicles={INITIAL_VEHICLES}
+        onClose={() => {}}
+        onStartEscrow={() => {}}
+        onContactSeller={onContactSeller}
+        onViewAuctionLot={onViewAuctionLot}
+        isSaved={false}
+        onToggleSave={() => {}}
+        notFoundId={null}
+      />
+    );
+    fireEvent.click(screen.getByText(/Place Bid|Submit Auction Offer/));
+    expect(onViewAuctionLot).toHaveBeenCalledWith(auctionVehicle);
+    expect(onContactSeller).not.toHaveBeenCalled();
+  });
+
+  it('falls back to onContactSeller only when onViewAuctionLot is not provided at all', () => {
+    const auctionVehicle = INITIAL_VEHICLES.find((v) => v.isAuction === true)!;
+    const onContactSeller = vi.fn();
+    render(
+      <VehicleDetailModal
+        vehicle={auctionVehicle}
+        allVehicles={INITIAL_VEHICLES}
+        onClose={() => {}}
+        onStartEscrow={() => {}}
+        onContactSeller={onContactSeller}
+        isSaved={false}
+        onToggleSave={() => {}}
+        notFoundId={null}
+      />
+    );
+    fireEvent.click(screen.getByText(/Place Bid|Submit Auction Offer/));
+    expect(onContactSeller).toHaveBeenCalledWith(auctionVehicle);
+  });
+
+  // Found while verifying the Place Bid fix above: the exact same
+  // wrong-action bug existed on 2 more buttons in this file -
+  // "Book Inspection & Reserve" and "Compare Bank Rates for this
+  // Vehicle" both called onContactSeller (opening chat) despite their
+  // labels promising something else entirely. "Book Inspection &
+  // Reserve" only renders for the non-auction/non-private-seller/
+  // non-escrow-active fallback case, so picks a real vehicle matching
+  // that specifically rather than assuming any vehicle works.
+  it('clicking "Book Inspection & Reserve" calls onRequestInspection, not onContactSeller', () => {
+    const dealerVehicleNoEscrow = INITIAL_VEHICLES.find(
+      (v) => !v.isAuction && v.sellerType !== 'Private Seller' && !v.escrowEligible
+    );
+    expect(dealerVehicleNoEscrow).toBeTruthy();
+    const onRequestInspection = vi.fn();
+    const onContactSeller = vi.fn();
+    render(
+      <VehicleDetailModal
+        vehicle={dealerVehicleNoEscrow!}
+        allVehicles={INITIAL_VEHICLES}
+        onClose={() => {}}
+        onStartEscrow={() => {}}
+        onContactSeller={onContactSeller}
+        onRequestInspection={onRequestInspection}
+        isSaved={false}
+        onToggleSave={() => {}}
+        notFoundId={null}
+      />
+    );
+    fireEvent.click(screen.getByText('Book Inspection & Reserve'));
+    expect(onRequestInspection).toHaveBeenCalledWith(dealerVehicleNoEscrow);
+    expect(onContactSeller).not.toHaveBeenCalled();
+  });
+
+  it('clicking "Compare Bank Rates for this Vehicle" calls onNavigateToFinancing, not onContactSeller', () => {
+    const anyVehicle = INITIAL_VEHICLES[0];
+    const onNavigateToFinancing = vi.fn();
+    const onContactSeller = vi.fn();
+    render(
+      <VehicleDetailModal
+        vehicle={anyVehicle}
+        allVehicles={INITIAL_VEHICLES}
+        onClose={() => {}}
+        onStartEscrow={() => {}}
+        onContactSeller={onContactSeller}
+        onNavigateToFinancing={onNavigateToFinancing}
+        isSaved={false}
+        onToggleSave={() => {}}
+        notFoundId={null}
+      />
+    );
+    fireEvent.click(screen.getByText('Compare Bank Rates for this Vehicle'));
+    expect(onNavigateToFinancing).toHaveBeenCalled();
+    expect(onContactSeller).not.toHaveBeenCalled();
+  });
+
+  it('clicking "View Showroom" calls onViewShowroom with the real seller name, not onContactSeller', () => {
+    const anyVehicle = INITIAL_VEHICLES[0];
+    const onViewShowroom = vi.fn();
+    const onContactSeller = vi.fn();
+    render(
+      <VehicleDetailModal
+        vehicle={anyVehicle}
+        allVehicles={INITIAL_VEHICLES}
+        onClose={() => {}}
+        onStartEscrow={() => {}}
+        onContactSeller={onContactSeller}
+        onViewShowroom={onViewShowroom}
+        isSaved={false}
+        onToggleSave={() => {}}
+        notFoundId={null}
+      />
+    );
+    fireEvent.click(screen.getByText('View Showroom'));
+    expect(onViewShowroom).toHaveBeenCalledWith(anyVehicle.sellerName);
+    expect(onContactSeller).not.toHaveBeenCalled();
   });
 });

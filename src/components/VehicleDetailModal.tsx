@@ -12,6 +12,27 @@ interface VehicleDetailModalProps {
   onStartEscrow: (vehicle: Vehicle) => void;
   onContactSeller: (vehicle: Vehicle) => void;
   onRequestInspection?: (vehicle: Vehicle) => void;
+  /** Navigates to the specific auction lot for this vehicle, if one
+   * exists. Optional and defaults to falling back to onContactSeller
+   * (the previous, incorrect behavior) only if not provided - kept
+   * optional so any other, untouched call site of this modal doesn't
+   * break, though the one real call site (App.tsx) now always
+   * provides it. */
+  onViewAuctionLot?: (vehicle: Vehicle) => void;
+  /** Navigates to the Financing page. Reuses the exact same
+   * navigateTo('financing') call already proven working elsewhere in
+   * App.tsx (ChatView's onNavigateToFinancing) - just extended to this
+   * modal's own "Compare Bank Rates" button, which previously called
+   * onContactSeller instead (opening chat, not financing) despite its
+   * label. Optional so this stays a non-breaking addition. */
+  onNavigateToFinancing?: () => void;
+  /** Navigates to the seller's other listings via the marketplace
+   * search - reuses App.tsx's existing handleSelectDealerVehicles
+   * (already used elsewhere for the same "browse this seller's
+   * inventory" purpose), not a new mechanism. Previously "View
+   * Showroom" called onContactSeller instead (opening chat), despite
+   * its label promising to show the seller's inventory. */
+  onViewShowroom?: (sellerName: string) => void;
   isSaved: boolean;
   onToggleSave: (id: string) => void;
   onSelectVehicle?: (vehicle: Vehicle) => void;
@@ -25,6 +46,9 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onStartEscrow,
   onContactSeller,
   onRequestInspection,
+  onViewAuctionLot,
+  onNavigateToFinancing,
+  onViewShowroom,
   isSaved,
   onToggleSave,
   onSelectVehicle
@@ -451,7 +475,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => onContactSeller(vehicle)}
+                      onClick={() => (onViewShowroom ? onViewShowroom(vehicle.sellerName) : onContactSeller(vehicle))}
                     >
                       <Building2 className="w-3.5 h-3.5 text-amber-400" />
                       <span>View Showroom</span>
@@ -477,7 +501,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="accent"
                     size="lg"
                     fullWidth
-                    onClick={() => onContactSeller(vehicle)}
+                    onClick={() => (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))}
                     className="shadow-md font-black text-sm"
                   >
                     <Gavel className="w-5 h-5 text-[#17244B]" />
@@ -499,7 +523,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="primary"
                     size="lg"
                     fullWidth
-                    onClick={() => onContactSeller(vehicle)}
+                    onClick={() => (onRequestInspection ? onRequestInspection(vehicle) : onContactSeller(vehicle))}
                     className="shadow-md font-black text-sm"
                   >
                     <MessageSquare className="w-5 h-5 text-white" />
@@ -849,7 +873,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <Button
                   variant="accent"
                   size="md"
-                  onClick={() => onContactSeller(vehicle)}
+                  onClick={() => (onNavigateToFinancing ? onNavigateToFinancing() : onContactSeller(vehicle))}
                   fullWidth
                 >
                   <span>Compare Bank Rates for this Vehicle</span>
