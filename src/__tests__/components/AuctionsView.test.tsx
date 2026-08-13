@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuctionsView } from '../../features/AuctionsView/components/AuctionsView';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
@@ -350,5 +350,66 @@ describe('AuctionsView - responsive: no fixed multi-column grids that could over
     // it wraps (a real mistake caught and fixed while making this
     // exact change) - not just that some matching div exists somewhere.
     expect(screen.getByPlaceholderText('Public Bidding Identity')).toBeTruthy();
+  });
+});
+
+describe('AuctionsView - auction lot deep linking (Phase 2 hardening)', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    user: null,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  // Found via a direct code check that zero URL/history mechanism
+  // existed for auction lots at all - copying a lot's URL, opening it
+  // in a new tab, or refreshing the page while a lot was open all lost
+  // the selection and fell back to the bare directory. Extended the
+  // exact same pattern already used for vehicle-detail deep linking in
+  // App.tsx (a query param + pushState/popstate), applied here since
+  // AuctionsView manages its own local selectedSession state.
+  afterEach(() => {
+    // Reset the URL between tests - these tests deliberately manipulate
+    // window.location.search/history, which would otherwise leak into
+    // later tests in this same file.
+    window.history.pushState({}, '', '/');
+  });
+
+  it('opens the correct lot directly from a URL auctionId param, with no prior directory visit', () => {
+    window.history.pushState({}, '', '/?auctionId=AUC-2026-8801');
+    render(<AuctionsView {...baseProps} />);
+    // The detail modal's own "Bid Log" tab only exists once a specific
+    // session is open - confirms the real detail view opened, not just
+    // that the page rendered without crashing.
+    expect(screen.getByText(/Bid Log/)).toBeTruthy();
+  });
+
+  it('does not open any lot when the URL has no auctionId param (the normal directory view)', () => {
+    render(<AuctionsView {...baseProps} />);
+    expect(screen.queryByText(/Bid Log/)).toBeNull();
+  });
+
+  it('clicking into a lot updates the real browser URL with that lot\'s ID', () => {
+    render(<AuctionsView {...baseProps} />);
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    expect(window.location.search).toContain('auctionId=AUC-2026-8801');
+  });
+
+  it('closing the lot removes the auctionId param from the real browser URL', () => {
+    window.history.pushState({}, '', '/?auctionId=AUC-2026-8801');
+    render(<AuctionsView {...baseProps} />);
+    expect(screen.getByText(/Bid Log/)).toBeTruthy();
+    // The modal's close (X) button.
+    const closeButtons = screen.getAllByRole('button').filter((b) => b.querySelector('svg.lucide-x'));
+    expect(closeButtons.length).toBeGreaterThan(0);
+    fireEvent.click(closeButtons[0]);
+    expect(window.location.search).not.toContain('auctionId');
+  });
+
+  it('an invalid/unknown auctionId in the URL falls back cleanly to the directory view, not a crash', () => {
+    window.history.pushState({}, '', '/?auctionId=NONEXISTENT-999');
+    expect(() => render(<AuctionsView {...baseProps} />)).not.toThrow();
+    expect(screen.queryByText(/Bid Log/)).toBeNull();
   });
 });

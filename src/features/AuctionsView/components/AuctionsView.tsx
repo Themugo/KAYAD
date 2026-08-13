@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Vehicle, AuctionSession, BidRecord, UserProfile } from '../../../types';
 import { INITIAL_AUCTION_SESSIONS } from '../../../data/mockAuctions';
+import { getAuctionIdFromUrl, setAuctionDetailUrl } from '../../../utils/navigation';
 // CreateAuctionModal import removed - its only usage in this file was
 // the dead, unreachable modal instance removed above. The component
 // itself still lives on and is used by DealerBusinessView.tsx.
@@ -138,6 +139,52 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   
   // Detail & Bid Modal State
   const [selectedSession, setSelectedSession] = useState<AuctionSession | null>(null);
+
+  // Deep-linking: opening/closing a lot goes through these wrappers
+  // (not raw setSelectedSession calls scattered across the file) so the
+  // URL and the state can never drift out of sync with each other -
+  // confirmed there were 10 raw setSelectedSession call sites before
+  // this, and updating each independently would risk missing one.
+  const openLot = useCallback((session: AuctionSession) => {
+    setSelectedSession(session);
+    setAuctionDetailUrl(session.id);
+  }, []);
+
+  const closeLot = useCallback(() => {
+    setSelectedSession(null);
+    setAuctionDetailUrl(null);
+  }, []);
+
+  // Reads the auctionId URL param on mount and on browser back/forward
+  // (popstate) - the exact same pattern already used for vehicle-detail
+  // deep linking in App.tsx, applied here since AuctionsView manages
+  // selectedSession as its own local state rather than lifted state.
+  // This is what makes a copied lot URL, a page refresh while a lot is
+  // open, and the browser back button all actually work correctly -
+  // none of them did before, confirmed via a direct code check (zero
+  // references to any URL/history API anywhere in this file).
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const urlAuctionId = getAuctionIdFromUrl();
+      if (urlAuctionId) {
+        const found = sessions.find((s) => s.id === urlAuctionId);
+        setSelectedSession(found ?? null);
+      } else {
+        setSelectedSession(null);
+      }
+    };
+    syncFromUrl();
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
+    // sessions is a real dependency, not omitted: syncFromUrl looks up
+    // against it, and sessions changes on every bid (see executeBid).
+    // The vehicle-detail version of this exact pattern in App.tsx
+    // correctly includes its own data dependency ([vehicles]) for the
+    // identical reason - an empty array here would capture a stale
+    // sessions snapshot in the closure, so a later popstate/refresh
+    // could resolve a lot's CURRENT bid state incorrectly. Re-attaching
+    // a popstate listener on every bid is a trivial cost next to that.
+  }, [sessions]);
   const [modalTab, setModalTab] = useState<'bid' | 'history' | 'inspection' | 'terms'>('bid');
 
   // Bidder Registration State (Only verified bidders may enter an auction room and place bids)
@@ -812,11 +859,11 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                       {/* Vehicle Image Container */}
                       <div 
                         className="relative h-60 cursor-pointer overflow-hidden bg-slate-100 group"
-                        onClick={() => setSelectedSession(session)}
+                        onClick={() => openLot(session)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
                             e.preventDefault();
-                            setSelectedSession(session);
+                            openLot(session);
                           }
                         }}
                         role="button"
@@ -910,11 +957,11 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           )}
                           <h3 
                             className="text-lg font-black text-[#1E3063] font-display mt-1 hover:text-amber-600 cursor-pointer transition-colors line-clamp-1"
-                            onClick={() => setSelectedSession(session)}
+                            onClick={() => openLot(session)}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
-                                setSelectedSession(session);
+                                openLot(session);
                               }
                             }}
                             role="button"
@@ -1153,7 +1200,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         variant="primary"
                         size="sm"
                         onClick={() => {
-                          setSelectedSession(session);
+                          openLot(session);
                           setModalTab('bid');
                         }}
                         className="bg-[#1E3063] hover:bg-[#17244B] text-white font-bold text-xs py-1.5 px-3"
@@ -1209,7 +1256,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setSelectedSession(session);
+                      openLot(session);
                       setModalTab('bid');
                     }}
                     className="text-xs font-bold text-[#1E3063] border-slate-200 self-start py-1 px-3 h-auto"
@@ -1370,7 +1417,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
         <div className="fixed inset-0 z-50 bg-[#101935]/70 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
           <Card className="max-w-3xl w-full p-6 space-y-5 bg-white relative max-h-[92vh] overflow-y-auto rounded-2xl border-none shadow-2xl">
             <button
-              onClick={() => setSelectedSession(null)}
+              onClick={() => closeLot()}
               className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             >
               <X className="w-5 h-5" />
@@ -1518,7 +1565,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           variant="accent"
                           size="sm"
                           onClick={() => {
-                            setSelectedSession(null);
+                            closeLot();
                             onStartEscrow(selectedSession.vehicle);
                           }}
                           className="mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-1.5 px-3 w-full"
@@ -1870,7 +1917,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
               <Button
                 variant="outline"
                 size="md"
-                onClick={() => setSelectedSession(null)}
+                onClick={() => closeLot()}
                 className="text-xs font-bold"
               >
                 Close Details

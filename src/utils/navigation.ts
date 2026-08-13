@@ -58,3 +58,44 @@ export function setVehicleDetailUrl(vehicleId: string | null, pushState: boolean
     }
   }
 }
+
+// Auction lot deep-linking - same pattern as the vehicle-detail
+// functions above (query param + pushState/popstate), extended for
+// auction sessions rather than duplicated inline in AuctionsView.tsx.
+// Found via a direct code check that no such mechanism existed at all
+// for auctions before this: copying a specific lot's URL and opening
+// it in a new tab, or refreshing the page while a lot was open, lost
+// the selection entirely and fell back to the bare auction directory -
+// exactly the gap a "Direct URL Test" section in a hardening spec
+// would catch. A separate param name (auctionId, not vehicleId) avoids
+// collision with the existing vehicle-detail deep link, since a page
+// could in principle need to represent both independently.
+
+export const AUCTION_PARAM = 'auctionId';
+
+export function getAuctionIdFromUrl(): string | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const auctionId = params.get(AUCTION_PARAM);
+  return auctionId ? auctionId.trim() : null;
+}
+
+export function setAuctionDetailUrl(auctionId: string | null, pushState: boolean = true): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+
+  if (auctionId) {
+    url.searchParams.set(AUCTION_PARAM, auctionId);
+  } else {
+    url.searchParams.delete(AUCTION_PARAM);
+  }
+
+  const newUrl = url.toString();
+  if (newUrl !== window.location.href) {
+    if (pushState) {
+      window.history.pushState({ auctionId }, '', newUrl);
+    } else {
+      window.history.replaceState({ auctionId }, '', newUrl);
+    }
+  }
+}
