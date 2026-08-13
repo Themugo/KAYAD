@@ -79,11 +79,23 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'CBK Escrow Vault',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'How does KAYAD Escrow protect buyer funds in Kenya?',
-    answer: 'Your purchase money is locked securely inside Tier-1 Central Bank of Kenya (CBK) regulated bank trustee vaults (NCBA Bank & Standard Chartered). Neither KAYAD nor the seller can access these funds until you physically receive the car, confirm inspection, and sign off NTSA TIMS logbook transfer.',
+    // Previously stated as unconditional current fact ("Your purchase
+    // money IS locked securely inside Tier-1 CBK regulated bank
+    // trustee vaults (NCBA Bank & Standard Chartered)"), naming
+    // specific banks and CBK regulation as already-confirmed - directly
+    // contradicts what's actually true of this business (confirmed
+    // directly by the person building it, in an earlier request: not
+    // yet CBK-certified, with an admin-facing activation toggle built
+    // specifically for that reason - see escrowRulesConfig.ts). Removed
+    // the specific bank names (no way to verify those partnerships are
+    // real/confirmed) and the definitive "is" framing, describing the
+    // system's actual design/intent instead of claiming it's already
+    // operating under confirmed regulatory and banking partnerships.
+    answer: 'KAYAD\'s Escrow Vault is designed so your purchase money is held by a regulated banking trustee, separate from KAYAD and the seller, and only released once you confirm you\'ve received the car, completed inspection, and the NTSA TIMS logbook transfer is signed off.',
     keyPoints: [
-      'Funds held in NCBA & Standard Chartered Trustee Accounts',
+      'Funds held by an independent banking trustee, not KAYAD or the seller directly',
       'Neither seller nor dealer can withdraw funds unilaterally',
-      '100% money-back guarantee if logbook verification fails'
+      'Release is tied to your confirmed receipt and logbook verification'
     ],
     popular: true
   },
@@ -93,7 +105,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'CBK Escrow Vault',
     categoryIcon: <Lock className="w-4 h-4 text-amber-500" />,
     question: 'What payment methods are accepted for Escrow deposits?',
-    answer: 'We accept Safaricom M-Pesa Express (up to Ksh 250,000 per transaction), Real-Time Gross Settlement (RTGS), Electronic Funds Transfer (EFT), and certified Banker’s Cheques directly to NCBA Escrow Account.',
+    answer: 'We accept Safaricom M-Pesa Express (up to Ksh 250,000 per transaction), Real-Time Gross Settlement (RTGS), Electronic Funds Transfer (EFT), and certified Banker\u2019s Cheques directly to your Escrow Vault account.',
     keyPoints: [
       'Instant M-Pesa C2B payment integration',
       'RTGS & EFT bank transfer verification within 30 minutes',
