@@ -30,7 +30,26 @@ const AuctionDiscoveryNetwork = lazy(() => import('./features/AuctionDiscoveryNe
 const KAYADLive = lazy(() => import('./features/KAYADLive'));
 const BuyerPlatform = lazy(() => import('./features/OwnershipPlatform').then(m => ({ default: m.BuyerPlatform })));
 const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatform').then(m => ({ default: m.PrivateSellerPlatform })));
-const FinanceMarketplace = lazy(() => import('./features/FinancePlatform').then(m => ({ default: m.FinanceMarketplace })));
+// FinanceMarketplace lazy import removed - the 'finance' route it backed
+// was confirmed genuinely unreachable (Phase 1 consolidation): zero
+// callers anywhere in the codebase via navigateTo, handleNavSelect, or
+// any other navigation prop pattern checked. FinancingView (route
+// 'financing') is the actively-used, functionally superset
+// implementation of the same business function (5 tabs vs
+// FinanceMarketplace's fewer equivalent sections, plus a "Compare
+// Offers" capability FinanceMarketplace doesn't have), and uses the
+// established Tailwind-class styling convention consistently used
+// everywhere else in this app, where FinanceMarketplace instead used
+// its own inline KAYAD_THEME object and a hardcoded internal "KAYAD"
+// header - architecturally inconsistent with the rest of the codebase.
+// Only the dead ROUTE was removed here (VALID_VIEWS entry, render
+// block, this import) - the component file itself
+// (features/FinancePlatform/components/FinanceMarketplace.tsx) was
+// deliberately left in place rather than deleted, per this
+// consolidation phase's explicit caution against removing files "simply
+// because they appear unused" - full file removal is a separate,
+// more consequential decision documented in KAYAD_CURRENT_STATE.md,
+// not made unilaterally here.
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -81,7 +100,7 @@ export function App() {
   const VALID_VIEWS = useMemo(() => new Set([
     'marketplace', 'saved', 'auctions', 'escrow', 'inspections', 'financing',
     'dealers', 'dashboard', 'chat', 'admin', 'support', 'broadcast',
-    'discovery', 'kayadlive', 'buyer-platform', 'seller-platform', 'finance',
+    'discovery', 'kayadlive', 'buyer-platform', 'seller-platform',
     'sell', 'seller', 'seller-dashboard',
   ]), []);
   useEffect(() => {
@@ -396,10 +415,6 @@ export function App() {
 
           {activeNav === 'seller-platform' && (
             <PrivateSellerPlatform user={user} />
-          )}
-
-          {activeNav === 'finance' && (
-            <FinanceMarketplace />
           )}
 
           {activeNav === 'saved' && (
