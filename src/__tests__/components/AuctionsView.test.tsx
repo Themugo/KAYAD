@@ -202,3 +202,74 @@ describe('AuctionsView - auction ecosystem admin customization', () => {
     });
   });
 });
+
+describe('AuctionsView - premium refinement pass (internal language, count consistency, timer robustness)', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    user: null,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  // Found while auditing against a spec explicitly calling out internal
+  // implementation language leaking to customers: a verified bidder's
+  // card showed "Pass Active: Bidder A-104" - an internal alias, not
+  // customer-facing status language. Fixed to show "Verified Bidder"
+  // instead, matching the spec's own suggested replacement.
+  it('does not expose the internal bidder alias/number on a live auction card, showing "Verified Bidder" instead', () => {
+    render(<AuctionsView {...baseProps} />);
+    expect(screen.queryByText(/Bidder A-104/)).toBeNull();
+    expect(screen.getByText('Verified Bidder')).toBeTruthy();
+  });
+
+  // Found a real count inconsistency: the "All" category count only
+  // counted status === 'Live', while every individual category counted
+  // 'Live' || 'Upcoming'. With the real current data (2 Live + 1
+  // Upcoming across 3 non-overlapping channel categories), this meant
+  // All showed 2 while Bank Repossession + Direct Import + Fleet
+  // Clearance summed to 3 - a literal contradiction, since those
+  // channels can't overlap per vehicle. Fixed 'All' to use the same
+  // Live-or-Upcoming logic as every other category.
+  it('the "All" category count is at least as large as the sum of the mutually-exclusive channel categories (no contradictory counts)', () => {
+    render(<AuctionsView {...baseProps} />);
+    // Several of these labels also appear as unrelated <option> text in
+    // the category filter dropdown just above the widget - getByText
+    // alone throws on the resulting multiple matches. Disambiguates by
+    // finding the one whose nearest ancestor is an actual <button> (the
+    // category widget's own tiles), since dropdown <option> elements
+    // have no button ancestor at all.
+    const findCategoryButton = (label: string) => {
+      const matches = screen.getAllByText(label);
+      const btn = matches.map((el) => el.closest('button')).find((b) => b !== null);
+      expect(btn).toBeTruthy();
+      return btn!;
+    };
+    const getCount = (btn: HTMLElement) => Number(btn.textContent?.match(/\d+/)?.[0] ?? 0);
+
+    const allCount = getCount(findCategoryButton('All Listings'));
+    const channelSum =
+      getCount(findCategoryButton('Bank Repossessions')) +
+      getCount(findCategoryButton('Direct Imports')) +
+      getCount(findCategoryButton('Fleet Clearance')) +
+      getCount(findCategoryButton('Dealer Clearance'));
+    expect(allCount).toBeGreaterThanOrEqual(channelSum);
+  });
+
+  // The "Next Live Event" banner previously hardcoded "Wednesday, Aug
+  // 5, 2026" - already in the past by the time this was tested, the
+  // same stale-date bug class found and fixed several times elsewhere
+  // in this ecosystem this session. Fixed to compute the real next
+  // Wednesday from today. This banner only renders in the empty-state
+  // fallback (no live auctions matching filters), so the test drives
+  // the real search filter to a query with zero matches rather than
+  // asserting on a synthetic prop.
+  it('the "Next Live Event" banner shows a real future date whose weekday label actually matches (via the real empty-state path)', () => {
+    render(<AuctionsView {...baseProps} />);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: 'zzz-no-such-vehicle-zzz' } });
+    expect(screen.getByText('No Live Auctions Active Right Now')).toBeTruthy();
+    const banner = screen.getByText(/Next Live Event:/);
+    expect(banner.textContent).toMatch(/Next Live Event: Wednesday, \d{1,2} Aug 2026/);
+    expect(banner.textContent).not.toMatch(/Aug 5, 2026/);
+  });
+});

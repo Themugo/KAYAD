@@ -42,7 +42,17 @@ function formatTimeRemaining(endsAt: string): {
   formatted: string;
 } {
   const totalMs = new Date(endsAt).getTime() - Date.now();
-  if (totalMs <= 0) {
+  // Guards against NaN specifically, not just totalMs <= 0: an
+  // invalid/malformed endsAt string produces NaN from new Date(), and
+  // NaN <= 0 evaluates to false (NaN comparisons are always false) -
+  // so a totalMs <= 0 check alone would let a bad date slip through
+  // and render "NaNd NaNh NaNm NaNs" instead of a clean closed state.
+  // Not currently reachable with today's mock data (verified elsewhere
+  // this session that every real auctionEndsAt/endsAt is a valid,
+  // computed ISO string), but a real robustness gap worth closing
+  // regardless, since a future data source (real backend, admin-entered
+  // auction) isn't guaranteed to always supply a well-formed date.
+  if (Number.isNaN(totalMs) || totalMs <= 0) {
     return { days: 0, hours: 0, minutes: 0, seconds: 0, isUrgent: false, isExpired: true, formatted: 'Auction Closed' };
   }
   const days = Math.floor(totalMs / (1000 * 60 * 60 * 24));
@@ -73,6 +83,21 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 }) => {
   // Auction sessions state initialized from mock service
   const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
+
+  // Computed once per render, not per-second like the live countdowns -
+  // this banner only needs to be accurate to the day, not the second.
+  // Finds the real next Wednesday from today (today itself if today IS
+  // Wednesday, matching "next occurrence including today" - the more
+  // useful interpretation for an event announcement banner) so the
+  // weekday label and date can never drift out of sync with each other.
+  const nextWednesdayLabel = useMemo(() => {
+    const WEDNESDAY = 3; // JS Date.getDay(): 0=Sun, 1=Mon, 2=Tue, 3=Wed
+    const today = new Date();
+    const daysUntilWednesday = (WEDNESDAY - today.getDay() + 7) % 7;
+    const nextWednesday = new Date(today);
+    nextWednesday.setDate(today.getDate() + daysUntilWednesday);
+    return nextWednesday.toLocaleDateString('en-KE', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+  }, []);
 
   // Organizer-capable roles - auctions are organized by institutions
   // (banks doing repossessions, dealers doing clearance sales, fleet
@@ -384,7 +409,16 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   // Category summary counts
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {
-      'All': sessions.filter(s => s.status === 'Live').length,
+      // 'All' previously counted status === 'Live' only, while every
+      // other category counted 'Live' || 'Upcoming' - an inconsistency
+      // that produced literally contradictory numbers with the real
+      // current data: All showed 2, but the mutually-exclusive channel
+      // categories (Bank Repossession + Direct Import + Fleet Clearance
+      // + Dealer Clearance, which by definition can't overlap per
+      // vehicle) summed to 3. Fixed to use the same Live-or-Upcoming
+      // logic as every other category, so "All" is consistently the
+      // superset again.
+      'All': sessions.filter(s => s.status === 'Live' || s.status === 'Upcoming').length,
       'Bank Repossession': sessions.filter(s => s.category === 'Bank Repossession' && (s.status === 'Live' || s.status === 'Upcoming')).length,
       'Direct Import': sessions.filter(s => s.category === 'Direct Import' && (s.status === 'Live' || s.status === 'Upcoming')).length,
       'Fleet Clearance': sessions.filter(s => s.category === 'Fleet Clearance' && (s.status === 'Live' || s.status === 'Upcoming')).length,
@@ -883,7 +917,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                         <div className="flex items-center justify-between text-[11px] p-2 bg-emerald-50 rounded-lg border border-emerald-200 text-emerald-900 font-bold">
                           <span className="flex items-center gap-1.5">
                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                            Pass Active: <span className="font-mono">{verifiedBiddersMap[session.id].bidderNumber}</span>
+                            Verified Bidder
                           </span>
                           <span className="text-[10px] text-emerald-700">Ready to Bid</span>
                         </div>
@@ -958,10 +992,19 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                   </p>
                 </div>
 
-                {/* Next Auction Date Banner */}
+                {/* Next Auction Date Banner - previously a hardcoded
+                    "Wednesday, Aug 5, 2026", already in the past by the
+                    time this was actually tested (the same stale-date
+                    bug class found and fixed several times elsewhere in
+                    this auction ecosystem this session). Computed as
+                    the real next Wednesday from today instead, so the
+                    weekday label and the date always genuinely match
+                    each other (not just a fixed day-offset, which could
+                    drift the two out of sync) and this can't go stale
+                    regardless of when the app is loaded. */}
                 <div className="inline-flex items-center gap-2 bg-[#F5F2EB] px-4 py-2 rounded-xl text-xs font-bold text-[#1E3063] border border-slate-200">
                   <Calendar className="w-4 h-4 text-amber-600" />
-                  <span>Next Live Event: Wednesday, Aug 5, 2026 at 09:00 EAT</span>
+                  <span>Next Live Event: {nextWednesdayLabel} at 09:00 EAT</span>
                 </div>
 
                 {/* Notify Me Subscription Form */}
