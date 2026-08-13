@@ -313,3 +313,42 @@ describe('AuctionsView - accessibility: live card details reachable via keyboard
     expect(screen.getByText(/Bid Log/)).toBeTruthy();
   });
 });
+
+describe('AuctionsView - responsive: no fixed multi-column grids that could overflow on mobile', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    user: null,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  // Found while auditing responsive behavior (spec section 31, "No
+  // overflow, no clipped text"): the quick-bid-increment buttons (each
+  // showing a full 7-digit "Ksh 2,325,000" amount) and the bidder
+  // identity/location inputs were both in grids with NO responsive
+  // breakpoint at all - fixed at 3 and 2 columns respectively on every
+  // screen size, including the narrowest phones. Fixed both to stack
+  // to 1 column below the sm: breakpoint, matching the same pattern
+  // already used consistently elsewhere in this file. Verifies the
+  // real rendered className carries the mobile-first override, not
+  // just that the page renders.
+  it('the quick-bid-increment grid stacks to 1 column on mobile, not fixed at 3', () => {
+    const { container } = render(<AuctionsView {...baseProps} />);
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    const incrementGrid = container.querySelector('.grid.grid-cols-1.sm\\:grid-cols-3');
+    expect(incrementGrid).toBeTruthy();
+  });
+
+  it('the bidder identity/location input grid stacks to 1 column on mobile, not fixed at 2', () => {
+    const { container } = render(<AuctionsView {...baseProps} />);
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    const identityGrid = container.querySelector('.grid.grid-cols-1.sm\\:grid-cols-2');
+    expect(identityGrid).toBeTruthy();
+    // Confirms the fix didn't accidentally drop the actual input field
+    // it wraps (a real mistake caught and fixed while making this
+    // exact change) - not just that some matching div exists somewhere.
+    expect(screen.getByPlaceholderText('Public Bidding Identity')).toBeTruthy();
+  });
+});
