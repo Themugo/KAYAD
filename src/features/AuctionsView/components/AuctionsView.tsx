@@ -11,7 +11,7 @@ import { LiveAuctionRoomModal } from './LiveAuctionRoomModal';
 import { PostAuctionCompletionModal } from './PostAuctionCompletionModal';
 import { OrganizerManagementConsole } from './OrganizerManagementConsole';
 import { AuctionOrganizerDashboard } from './AuctionOrganizerDashboard';
-import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench, Settings } from 'lucide-react';
+import { Gavel, Clock, Lock, CheckCircle2, ShieldCheck, History, X, Bell, Calendar, FileText, Check, Search, Heart, TrendingUp, Tag, RotateCcw, Sparkles, Zap, DollarSign, UserCheck, Building2, BarChart2, Info, Award, EyeOff, UserPlus, Wrench, Settings, AlertTriangle, ChevronRight } from 'lucide-react';
 import { PageHeader, Card, Badge, Button, LazyImage, Input } from '../../../components/ui';
 import { isEscrowApplicable } from '../../../utils/escrow';
 import { useAuctionPageConfig } from '../hooks/useAuctionPageConfig';
@@ -168,7 +168,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
       ...prev,
       [profile.sessionId]: profile
     }));
-    showToast(`✅ Bidder Pass Activated! You are ${profile.bidderNumber} with verified deposit.`);
+    showToast(`Bidder Pass Activated! You are ${profile.bidderNumber} with verified deposit.`);
   };
 
   // Pre-Auction Inspection State (Physical Viewing, Mechanic Marketplace Booking, Digital Report)
@@ -490,10 +490,25 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 
   return (
     <div className="space-y-10 relative bg-[#F5F2EB]/50 min-h-screen pb-16 font-sans">
-      {/* Toast Notification Banner */}
+      {/* Toast Notification Banner - icon and accent now branch on
+          toast.type, which was already being passed in (3 call sites
+          use 'info': removing a watchlist item, and 2 bid-validation
+          rejections) but was never actually used - every toast
+          unconditionally showed a green CheckCircle2, including for
+          "Bid must be higher than current bid" and "Minimum bid
+          increment is..." messages. A green success checkmark on a
+          rejected-bid message is actively misleading, not just
+          inconsistent - directly contradicts the spec's own concern
+          about ambiguous bid-state messaging. */}
       {toast && (
-        <div className="fixed top-20 right-4 z-50 bg-[#1E3063] text-white px-5 py-3 rounded-2xl shadow-xl border border-emerald-400/30 flex items-center gap-3 animate-fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+        <div className={`fixed top-20 right-4 z-50 text-white px-5 py-3 rounded-2xl shadow-xl border flex items-center gap-3 animate-fade-in ${
+          toast.type === 'info' ? 'bg-[#1E3063] border-amber-400/30' : 'bg-[#1E3063] border-emerald-400/30'
+        }`}>
+          {toast.type === 'info' ? (
+            <Info className="w-5 h-5 text-amber-400 shrink-0" />
+          ) : (
+            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          )}
           <span className="text-xs font-bold">{toast.message}</span>
         </div>
       )}
@@ -798,6 +813,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                       <div 
                         className="relative h-60 cursor-pointer overflow-hidden bg-slate-100 group"
                         onClick={() => setSelectedSession(session)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            setSelectedSession(session);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`View full details for ${session.vehicleTitle}`}
                       >
                         <LazyImage 
                           src={vehicle.image} 
@@ -887,6 +911,14 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           <h3 
                             className="text-lg font-black text-[#1E3063] font-display mt-1 hover:text-amber-600 cursor-pointer transition-colors line-clamp-1"
                             onClick={() => setSelectedSession(session)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setSelectedSession(session);
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
                           >
                             {session.vehicleTitle}
                           </h3>
@@ -902,8 +934,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           </div>
                           <div className="text-right">
                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Reserve Status</p>
-                            <p className={`text-xs font-extrabold mt-1 ${session.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
-                              {session.reserveMet ? '✓ Reserve Met' : `Reserve: Ksh ${(session.reservePrice ?? 0).toLocaleString()}`}
+                            <p className={`text-xs font-extrabold mt-1 flex items-center justify-end gap-1 ${session.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
+                              {session.reserveMet ? (
+                                <>
+                                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                  <span>Reserve Met</span>
+                                </>
+                              ) : (
+                                <span>Reserve: Ksh {(session.reservePrice ?? 0).toLocaleString()}</span>
+                              )}
                             </p>
                           </div>
                         </div>
@@ -930,9 +969,10 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           <button
                             type="button"
                             onClick={(e) => handleOpenRegistration(session, e)}
-                            className="text-[10px] font-bold text-amber-600 hover:underline"
+                            className="text-[10px] font-bold text-amber-600 hover:underline flex items-center gap-0.5"
                           >
-                            Register Deposit →
+                            <span>Register Deposit</span>
+                            <ChevronRight className="w-3 h-3 shrink-0" />
                           </button>
                         </div>
                       )}
@@ -1222,12 +1262,14 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                           landed here still awaiting escrow/settlement,
                           not yet actually settled. */}
                       {session.status === 'Ended' ? (
-                        <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                          ✓ SOLD & SETTLED
+                        <span className="text-[9px] font-extrabold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded flex items-center gap-0.5 w-fit">
+                          <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
+                          <span>SOLD & SETTLED</span>
                         </span>
                       ) : (
-                        <span className="text-[9px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                          ⏳ Awaiting Settlement
+                        <span className="text-[9px] font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded flex items-center gap-0.5 w-fit">
+                          <Clock className="w-2.5 h-2.5 shrink-0" />
+                          <span>Awaiting Settlement</span>
                         </span>
                       )}
                       {/* Was a single, blanket "100% Escrow Protected"
@@ -1454,8 +1496,15 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                       <p className="text-3xl font-black text-[#1E3063] font-display mt-0.5">
                         Ksh {(selectedSession.currentBid ?? 0).toLocaleString()}
                       </p>
-                      <p className={`text-xs font-extrabold mt-1 ${selectedSession.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
-                        {selectedSession.reserveMet ? '✓ Reserve Met (Highest Bid Wins)' : `Reserve Price: Ksh ${(selectedSession.reservePrice ?? 0).toLocaleString()}`}
+                      <p className={`text-xs font-extrabold mt-1 flex items-center gap-1 ${selectedSession.reserveMet ? 'text-emerald-700' : 'text-slate-600'}`}>
+                        {selectedSession.reserveMet ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                            <span>Reserve Met (Highest Bid Wins)</span>
+                          </>
+                        ) : (
+                          <span>Reserve Price: Ksh {(selectedSession.reservePrice ?? 0).toLocaleString()}</span>
+                        )}
                       </p>
                     </div>
 
@@ -1486,7 +1535,10 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
                       <div className="flex items-center justify-between">
                         <p className="font-bold text-slate-700">Quick Bid Increments:</p>
                         {!verifiedPass && (
-                          <span className="text-[10px] font-bold text-amber-700">⚠️ Requires Bidder Registration</span>
+                          <span className="text-[10px] font-bold text-amber-700 flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3 shrink-0" />
+                            <span>Requires Bidder Registration</span>
+                          </span>
                         )}
                       </div>
                       <div className="grid grid-cols-3 gap-2">

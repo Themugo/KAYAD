@@ -37,8 +37,12 @@ describe('AuctionsView - escrow accuracy (first test coverage for this component
     // The one real Ended/recently-sold vehicle in mock data
     // (Coastline Auto Ltd's Subaru Outback) is confirmed
     // escrowEligible: false - its card should show "SOLD & SETTLED"
-    // but no "Escrow" chip next to it.
-    const soldLabel = screen.getByText('✓ SOLD & SETTLED');
+    // but no "Escrow" chip next to it. Text updated from the old
+    // '✓ SOLD & SETTLED' (a raw checkmark glyph baked into the string)
+    // to plain 'SOLD & SETTLED' now that the checkmark is a real
+    // CheckCircle2 icon component rendered alongside the text, not
+    // part of the string itself - part of the icon-consistency pass.
+    const soldLabel = screen.getByText('SOLD & SETTLED');
     const card = soldLabel.closest('div')?.parentElement;
     expect(card?.textContent).not.toMatch(/Escrow/);
   });
@@ -271,5 +275,41 @@ describe('AuctionsView - premium refinement pass (internal language, count consi
     const banner = screen.getByText(/Next Live Event:/);
     expect(banner.textContent).toMatch(/Next Live Event: Wednesday, \d{1,2} Aug 2026/);
     expect(banner.textContent).not.toMatch(/Aug 5, 2026/);
+  });
+});
+
+describe('AuctionsView - accessibility: live card details reachable via keyboard', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    user: null,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  // Found while auditing keyboard navigation (spec explicitly requires
+  // it): the vehicle image and vehicle title on a live auction card
+  // both opened the full detail modal via onClick on a <div>/<h3>
+  // respectively, with no role="button", tabIndex, or onKeyDown - a
+  // keyboard-only or screen-reader user had no way to reach this
+  // specific destination (the full detail modal, not just the "Live
+  // Auction Room" button elsewhere on the same card, which leads
+  // somewhere different). Fixed both to be real keyboard targets.
+  it('the vehicle title on a live card opens the detail modal via Enter key, not just mouse click', () => {
+    render(<AuctionsView {...baseProps} />);
+    const titles = screen.getAllByRole('button', { name: /Nissan X-Trail|Mercedes-Benz E-Class/ });
+    expect(titles.length).toBeGreaterThan(0);
+    fireEvent.keyDown(titles[0], { key: 'Enter' });
+    // Opening the detail modal renders its own "Bid Log" tab, which
+    // only exists inside that modal - a reliable signal it actually
+    // opened, not just that the keydown handler fired without error.
+    expect(screen.getByText(/Bid Log/)).toBeTruthy();
+  });
+
+  it('the vehicle image on a live card has an accessible label and opens the detail modal via keyboard', () => {
+    render(<AuctionsView {...baseProps} />);
+    const imageButtons = screen.getAllByLabelText(/View full details for/);
+    expect(imageButtons.length).toBeGreaterThan(0);
+    fireEvent.keyDown(imageButtons[0], { key: 'Enter' });
+    expect(screen.getByText(/Bid Log/)).toBeTruthy();
   });
 });
