@@ -25,10 +25,7 @@ const PrivateSellerDashboardView = lazy(() => import('./features/PrivateSellerDa
 const ChatView = lazy(() => import('./features/ChatView'));
 const AdminView = lazy(() => import('./features/AdminView'));
 const SupportView = lazy(() => import('./features/SupportView'));
-const LiveAuctionBroadcastPage = lazy(() => import('./features/LiveAuctionBroadcastPage'));
-const AuctionDiscoveryNetwork = lazy(() => import('./features/AuctionDiscoveryNetwork'));
-const KAYADLive = lazy(() => import('./features/KAYADLive'));
-const BuyerPlatform = lazy(() => import('./features/OwnershipPlatform').then(m => ({ default: m.BuyerPlatform })));
+
 const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatform').then(m => ({ default: m.PrivateSellerPlatform })));
 // FinanceMarketplace lazy import removed - the 'finance' route it backed
 // was confirmed genuinely unreachable (Phase 1 consolidation): zero
@@ -42,14 +39,16 @@ const PrivateSellerPlatform = lazy(() => import('./features/PrivateSellerPlatfor
 // everywhere else in this app, where FinanceMarketplace instead used
 // its own inline KAYAD_THEME object and a hardcoded internal "KAYAD"
 // header - architecturally inconsistent with the rest of the codebase.
-// Only the dead ROUTE was removed here (VALID_VIEWS entry, render
-// block, this import) - the component file itself
+// Initially only the dead route was removed (VALID_VIEWS entry, render
+// block, this import), with the component file itself deliberately left
+// in place per that phase's caution against removing files "simply
+// because they appear unused". The full file
 // (features/FinancePlatform/components/FinanceMarketplace.tsx) was
-// deliberately left in place rather than deleted, per this
-// consolidation phase's explicit caution against removing files "simply
-// because they appear unused" - full file removal is a separate,
-// more consequential decision documented in KAYAD_CURRENT_STATE.md,
-// not made unilaterally here.
+// subsequently deleted entirely in a later, explicitly-requested
+// frontend-cleanup pass, alongside 4 other confirmed-orphaned
+// components (BuyerPlatform, OwnerGarage, LiveAuctionBroadcastPage,
+// AuctionDiscoveryNetwork, KAYADLive) - see KAYAD_CURRENT_STATE.md for
+// the full list and verification method.
 
 export function App() {
   const [activeNav, setActiveNav] = useState<string>('marketplace');
@@ -99,9 +98,8 @@ export function App() {
   // screen with no way forward.
   const VALID_VIEWS = useMemo(() => new Set([
     'marketplace', 'saved', 'auctions', 'escrow', 'inspections', 'financing',
-    'dealers', 'dashboard', 'chat', 'admin', 'support', 'broadcast',
-    'discovery', 'kayadlive', 'buyer-platform', 'seller-platform',
-    'sell', 'seller', 'seller-dashboard',
+    'dealers', 'dashboard', 'chat', 'admin', 'support', 'seller-platform',
+    'seller-dashboard',
   ]), []);
   useEffect(() => {
     if (!VALID_VIEWS.has(activeNav)) {
@@ -447,21 +445,19 @@ export function App() {
             <SupportView />
           )}
 
-          {activeNav === 'broadcast' && (
-            <LiveAuctionBroadcastPage onNavigate={navigateTo} onOpenAuth={() => setShowAuthModal(true)} />
-          )}
-
-          {activeNav === 'discovery' && (
-            <AuctionDiscoveryNetwork />
-          )}
-
-          {activeNav === 'kayadlive' && (
-            <KAYADLive />
-          )}
-
-          {activeNav === 'buyer-platform' && (
-            <BuyerPlatform onNavigate={navigateTo} user={user} />
-          )}
+          {/* broadcast/discovery/kayadlive/buyer-platform routes removed
+              during frontend cleanup - all 4 were confirmed genuinely
+              orphaned (zero callers under every navigation pattern
+              checked: direct navigateTo, indirect handleNavSelect/
+              onNavigate prop chains, and named-prop callbacks) across
+              multiple consolidation-phase audits this project's
+              history. The only 3 references found outside their own
+              component folders were code comments (historical notes in
+              Navbar.tsx, mockSponsors.ts, PrivateSellerPlatform.tsx),
+              not actual imports or calls - confirmed individually
+              before deleting anything. Their component files and
+              folders have been deleted entirely as part of this same
+              cleanup, not just this route wiring. */}
 
           {activeNav === 'seller-platform' && (
             <PrivateSellerPlatform user={user} />
@@ -484,7 +480,13 @@ export function App() {
             />
           )}
 
-          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard') && (
+          {/* 'sell' and 'seller' aliases removed - confirmed zero
+              callers under every navigation pattern checked
+              (consolidation-phase audit, re-verified fresh here before
+              removing). 'seller-dashboard' is the sole real, actively-
+              used route to this component (Navbar.tsx and
+              DashboardView.tsx both call it), kept as-is. */}
+          {activeNav === 'seller-dashboard' && (
             <PrivateSellerDashboardView
               vehicles={vehicles}
               user={user}

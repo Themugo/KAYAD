@@ -403,7 +403,11 @@ export default function PrivateSellerPlatform({ user }: { user?: UserProfile | n
 
   // Merge the real authenticated user (if signed in) over the demo seller
   // profile - SAMPLE_SELLER previously stood alone as a second, conflicting
-  // source of "who is the current user", same issue as BuyerPlatform had.
+  // source of "who is the current user", the same issue BuyerPlatform had
+  // (that component was later confirmed genuinely orphaned - zero
+  // navigation callers anywhere - and deleted entirely in a subsequent
+  // frontend-cleanup pass; referenced here only as historical context for
+  // why this merge pattern exists).
   const displaySeller = {
     ...SAMPLE_SELLER,
     name: user?.name || SAMPLE_SELLER.name,

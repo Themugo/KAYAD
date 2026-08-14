@@ -3,8 +3,11 @@ import { MarketingCardData } from '../components/MarketingCard';
 
 // Realistic sponsor/partner set for the marketplace grid. Draws on
 // partner names already established elsewhere in the app (NCBA Bank,
-// AutoSure EA - listed as an "Inspection Partner" in KAYADLive's mock
-// data, used here as a motor insurance angle instead since 150-point
+// AutoSure EA - was listed as an "Inspection Partner" in KAYADLive's
+// mock data before that page was confirmed orphaned and deleted in a
+// later frontend-cleanup pass; kept as a naming-continuity note, not a
+// pointer to a file that still exists), used here as a motor insurance
+// angle instead since 150-point
 // inspection is already KAYAD's own core service) rather than inventing
 // unrelated placeholder brands, so this reads as part of the same
 // marketplace rather than disconnected filler content. The featured-

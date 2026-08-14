@@ -100,7 +100,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 real bidding/browsing page (real vehicle data, filtering,
                 escrow integration; 1786 lines) while AuctionDiscoveryNetwork
                 is more of a schedule/education hub with no comparable
-                vehicle-data integration. */}
+                vehicle-data integration. (AuctionDiscoveryNetwork was
+                later confirmed genuinely orphaned - zero navigation
+                callers anywhere - and deleted entirely in a subsequent
+                frontend-cleanup pass; this comment is kept as the
+                historical reasoning for why 'auctions' was chosen as
+                the canonical link, not as a pointer to a file that still
+                exists.) */}
             <nav className="hidden lg:flex items-center space-x-2 border-l border-white/15 pl-6 text-xs font-semibold text-slate-200">
               <button
                 onClick={() => handleNavSelect('marketplace')}
