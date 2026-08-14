@@ -2,10 +2,11 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
 
 /**
- * KAYAD Fusion Phase 4 tests - first coverage for vehicleApi.ts.
- * Every test mocks fetch() and asserts on the actual request/response
- * handling, matching the same verification standard used for
- * authApi.ts in Phase 3 (see AuthModal.test.tsx).
+ * KAYAD Fusion Phase 4/5 tests. Updated in Phase 5 to match the
+ * corrected real schema (brand not make, fuel not fuel_type,
+ * location_city not location, images as JSONB objects not URL
+ * strings, and real denormalized auction fields on the car row) -
+ * see vehicleApi.ts's file header for the full correction story.
  */
 
 function mockFetchOnce(body: unknown, ok = true, status = ok ? 200 : 404) {
@@ -73,7 +74,7 @@ describe('vehicleApi.getCarById', () => {
   it('calls the correct real endpoint for a specific ID', async () => {
     const fetchMock = mockFetchOnce({
       success: true,
-      data: { id: 'car-1', title: 'Test', make: 'Toyota', model: 'Corolla', year: 2020, price: 1000000 },
+      data: { id: 'car-1', title: 'Test', brand: 'Toyota', model: 'Corolla', year: 2020, price: 1000000 },
     });
     global.fetch = fetchMock;
 
@@ -89,47 +90,65 @@ describe('vehicleApi.getCarById', () => {
   });
 });
 
-describe('mapBackendCarToVehicle - honest about what the backend does and does not provide', () => {
+describe('mapBackendCarToVehicle - matches the real, corrected schema (Phase 5)', () => {
   const realCar: BackendCar = {
     id: 'car-42',
     dealer_id: 'dealer-7',
     title: '2021 Toyota Land Cruiser Prado',
-    make: 'Toyota',
+    brand: 'Toyota', // real column name - NOT "make"
     model: 'Land Cruiser Prado',
     year: 2021,
     price: 8500000,
     mileage: 45000,
-    fuel_type: 'Diesel',
+    fuel: 'Diesel', // real column name - NOT "fuel_type"
     transmission: 'Automatic',
     body_type: 'SUV',
     condition: 'Foreign Used',
-    images: ['https://example.com/1.jpg', 'https://example.com/2.jpg'],
-    location: 'Nairobi',
+    images: [{ url: 'https://example.com/1.jpg' }, { url: 'https://example.com/2.jpg' }], // real shape - JSONB objects, not plain strings
+    location_city: 'Nairobi', // real column name - NOT "location"
     vin: 'JT3HP10V5X7123456',
     features: ['Sunroof', 'Leather Seats'],
     has_auction: true,
+    // Real, denormalized auction fields - corrected in Phase 5 to
+    // actually exist and be mapped, not defaulted to undefined.
+    current_bid: 8200000,
+    bids_count: 14,
+    auction_end: '2026-09-01T12:00:00Z',
+    is_verified_dealer: true,
   };
 
-  it('correctly maps every field that genuinely exists on the backend car row', () => {
+  it('correctly maps every field that genuinely exists on the backend car row, using the real column names', () => {
     const mapped = mapBackendCarToVehicle(realCar);
     expect(mapped.id).toBe('car-42');
     expect(mapped.title).toBe('2021 Toyota Land Cruiser Prado');
-    expect(mapped.make).toBe('Toyota');
+    expect(mapped.make).toBe('Toyota'); // mapped from the real "brand" column
     expect(mapped.year).toBe(2021);
     expect(mapped.price).toBe(8500000);
     expect(mapped.mileage).toBe(45000);
-    expect(mapped.fuelType).toBe('Diesel');
+    expect(mapped.fuelType).toBe('Diesel'); // mapped from the real "fuel" column
     expect(mapped.bodyStyle).toBe('SUV');
     expect(mapped.vin).toBe('JT3HP10V5X7123456');
+    expect(mapped.location).toBe('Nairobi'); // mapped from the real "location_city" column
+    // Real JSONB image objects correctly unwrapped to plain URL strings
     expect(mapped.images).toEqual(['https://example.com/1.jpg', 'https://example.com/2.jpg']);
     expect(mapped.isAuction).toBe(true);
   });
 
-  it('does NOT fabricate a real seller name - explicitly marks it as unknown rather than inventing one', () => {
+  it('Phase 5 correction: auction data is now genuinely populated from real, denormalized car-row fields, not defaulted', () => {
     const mapped = mapBackendCarToVehicle(realCar);
-    // The backend row has no seller name field at all (only dealer_id,
-    // a foreign key) - confirmed the mapping does not silently invent
-    // a plausible-looking name for it.
+    expect(mapped.currentBid).toBe(8200000);
+    expect(mapped.bidsCount).toBe(14);
+    expect(mapped.auctionEndsAt).toBe('2026-09-01T12:00:00Z');
+  });
+
+  it('Phase 5 correction: is_verified_dealer maps to real verified/isDealerCertified signals', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
+    expect(mapped.verified).toBe(true);
+    expect(mapped.isDealerCertified).toBe(true);
+  });
+
+  it('does NOT fabricate a real seller name - a genuine gap not present anywhere on the cars row', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
     expect(mapped.sellerName).toBe('Unknown Seller');
     expect(mapped.sellerId).toBe('dealer-7');
   });
@@ -141,11 +160,20 @@ describe('mapBackendCarToVehicle - honest about what the backend does and does n
     expect(mapped.sellerId).toBe('');
   });
 
+  it('a non-auction car correctly has no bid/auction data, not zeroed-out fake values', () => {
+    const nonAuctionCar: BackendCar = { ...realCar, has_auction: false, current_bid: null, bids_count: null, auction_end: null };
+    const mapped = mapBackendCarToVehicle(nonAuctionCar);
+    expect(mapped.isAuction).toBe(false);
+    expect(mapped.currentBid).toBeUndefined();
+    expect(mapped.bidsCount).toBeUndefined();
+    expect(mapped.auctionEndsAt).toBeUndefined();
+  });
+
   it('handles missing optional fields gracefully without throwing', () => {
     const sparseCar: BackendCar = {
       id: 'car-99',
       title: 'Bare Minimum Car',
-      make: 'Honda',
+      brand: 'Honda',
       model: 'Civic',
       year: 2019,
       price: 1200000,

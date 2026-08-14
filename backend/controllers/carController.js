@@ -121,10 +121,22 @@ export const getCars = async (req, res) => {
     }
     if (drivetrain) query.drivetrain = exactText(drivetrain);
     if (dealerType === "dealer") {
-      const dealerIds = await User.find({ role: "dealer" }).distinct("_id").lean();
+      // Found and fixed during Fusion Phase 5: distinct("_id") returns
+      // a Promise directly (see backend/models/_base.js's query-builder
+      // distinct() - it's `this._executor().then(rows => [...])`, not
+      // a chainable query object), so the previous
+      // .distinct("_id").lean() call would throw
+      // "TypeError: ...lean is not a function" at runtime for any
+      // request using ?dealerType=dealer or ?dealerType=private -
+      // confirmed directly by reading the actual method implementation,
+      // not assumed. distinct() already returns the final, deduplicated
+      // plain array (not Mongoose documents needing .lean()'s
+      // conversion), so the fix is simply removing the erroneous call
+      // rather than replacing it with anything.
+      const dealerIds = await User.find({ role: "dealer" }).distinct("_id");
       query.dealer = { $in: dealerIds };
     } else if (dealerType === "private") {
-      const sellerIds = await User.find({ role: "individual_seller" }).distinct("_id").lean();
+      const sellerIds = await User.find({ role: "individual_seller" }).distinct("_id");
       query.dealer = { $in: sellerIds };
     }
 
