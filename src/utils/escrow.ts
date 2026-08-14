@@ -23,6 +23,16 @@ import { readEscrowRulesConfig } from '../features/Admin/hooks/escrowRulesConfig
  */
 export function isEscrowApplicable(vehicle: Vehicle | null | undefined): boolean {
   if (!vehicle) return false;
+
+  // Per-vehicle admin override takes precedence over the global
+  // seller-type rule - this is the actual fix for "escrow shouldn't be
+  // mandatory for every private-seller sale unconditionally, admin
+  // needs to enforce or revoke it per individual sale". Checked before
+  // the global rule below, not after, so an override always wins
+  // regardless of what the blanket seller-type setting is.
+  if (vehicle.escrowOverride === 'enforce') return true;
+  if (vehicle.escrowOverride === 'revoke') return false;
+
   const rules = readEscrowRulesConfig();
   const requirement =
     vehicle.sellerType === 'Private Seller' ? rules.privateSellerRequirement :
@@ -58,6 +68,15 @@ export function isEscrowLive(): boolean {
  */
 export function getEscrowBadgeLabel(vehicle: Vehicle): string {
   const live = isEscrowLive();
-  const base = vehicle.sellerType === 'Private Seller' ? 'Escrow Mandatory' : 'Escrow Vault Enabled';
+  // Wording now reflects the actual effective requirement (accounting
+  // for a per-vehicle override), not just raw sellerType - if an admin
+  // has enforced escrow on a dealer vehicle, or revoked it on a private
+  // seller's, the badge should say so accurately rather than assuming
+  // seller type alone still determines "Mandatory" vs "Enabled".
+  const isMandatory =
+    vehicle.escrowOverride === 'enforce' ? true :
+    vehicle.escrowOverride === 'revoke' ? false :
+    vehicle.sellerType === 'Private Seller';
+  const base = isMandatory ? 'Escrow Mandatory' : 'Escrow Vault Enabled';
   return live ? base : `${base} (Preview)`;
 }

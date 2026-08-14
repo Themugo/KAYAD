@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AuctionsView } from '../../features/AuctionsView/components/AuctionsView';
 import { INITIAL_VEHICLES } from '../../data/mockVehicles';
@@ -411,5 +411,83 @@ describe('AuctionsView - auction lot deep linking (Phase 2 hardening)', () => {
     window.history.pushState({}, '', '/?auctionId=NONEXISTENT-999');
     expect(() => render(<AuctionsView {...baseProps} />)).not.toThrow();
     expect(screen.queryByText(/Bid Log/)).toBeNull();
+  });
+});
+
+describe('AuctionsView - per-sale escrow override (admin control)', () => {
+  const baseProps = {
+    vehicles: INITIAL_VEHICLES,
+    onOpenAuth: () => {},
+    onStartEscrow: () => {},
+  };
+
+  const adminUser = {
+    id: 'admin-1',
+    email: 'admin@kayad.co.ke',
+    name: 'Admin User',
+    role: 'admin' as const,
+    isVerified: true,
+    createdAt: new Date().toISOString(),
+    phone: '+254700000000',
+    avatar: '',
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  // Added per explicit direction: escrow shouldn't be unconditionally
+  // mandatory for every private-seller sale via the blanket global rule
+  // alone - an admin needs to be able to enforce or revoke escrow on a
+  // specific individual sale, independent of that global rule.
+  it('does not show the admin escrow override control to a non-admin user', () => {
+    render(<AuctionsView {...baseProps} user={null} />);
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    expect(screen.queryByText('Admin: Per-Sale Escrow Override')).toBeNull();
+  });
+
+  it('shows the admin escrow override control to an admin user, defaulting to "Using default rule"', () => {
+    render(<AuctionsView {...baseProps} user={adminUser} />);
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    expect(screen.getByText('Admin: Per-Sale Escrow Override')).toBeTruthy();
+    expect(screen.getByText('Using default rule')).toBeTruthy();
+  });
+
+  it('clicking "Enforce Escrow" calls onUpdateVehicleEscrowOverride with the correct vehicle ID and "enforce"', () => {
+    const onUpdateVehicleEscrowOverride = vi.fn();
+    render(
+      <AuctionsView
+        {...baseProps}
+        user={adminUser}
+        onUpdateVehicleEscrowOverride={onUpdateVehicleEscrowOverride}
+      />
+    );
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    fireEvent.click(screen.getByText('Enforce Escrow'));
+    expect(onUpdateVehicleEscrowOverride).toHaveBeenCalledWith('v4', 'enforce');
+    // Local display updates immediately too, not just the callback.
+    expect(screen.getByText('Enforced for this sale')).toBeTruthy();
+  });
+
+  it('clicking "Revoke Escrow" calls onUpdateVehicleEscrowOverride with "revoke", and a Reset button appears', () => {
+    const onUpdateVehicleEscrowOverride = vi.fn();
+    render(
+      <AuctionsView
+        {...baseProps}
+        user={adminUser}
+        onUpdateVehicleEscrowOverride={onUpdateVehicleEscrowOverride}
+      />
+    );
+    const [nissanTitle] = screen.getAllByRole('button', { name: /Nissan X-Trail/ });
+    fireEvent.click(nissanTitle);
+    fireEvent.click(screen.getByText('Revoke Escrow'));
+    expect(onUpdateVehicleEscrowOverride).toHaveBeenCalledWith('v4', 'revoke');
+    expect(screen.getByText('Revoked for this sale')).toBeTruthy();
+    fireEvent.click(screen.getByText('Reset'));
+    expect(onUpdateVehicleEscrowOverride).toHaveBeenCalledWith('v4', null);
+    expect(screen.getByText('Using default rule')).toBeTruthy();
   });
 });

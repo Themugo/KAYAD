@@ -339,7 +339,27 @@ export const PostAuctionCompletionModal: React.FC<PostAuctionCompletionModalProp
                     <Button
                       type="button"
                       variant="primary"
-                      onClick={() => onStartEscrow(session.vehicle)}
+                      onClick={() => {
+                        // Found a real, critical bug while auditing the
+                        // auction-to-escrow handoff: session.vehicle.price
+                        // is never updated by executeBid (it only sets
+                        // .currentBid on the nested vehicle copy, not
+                        // .price - confirmed directly in AuctionsView.tsx),
+                        // so passing session.vehicle as-is would carry the
+                        // vehicle's STALE, ORIGINAL LISTING PRICE into
+                        // escrow instead of the actual amount this auction
+                        // was won for. winningAmount (passed in correctly
+                        // by every caller as session.currentBid at the
+                        // moment of completion) is the real, correct
+                        // amount - used here to correct vehicle.price
+                        // before handing off, rather than trusting the
+                        // vehicle object's own stale field for what is a
+                        // financial-transaction-amount handoff.
+                        const correctedVehicle = winningAmount
+                          ? { ...session.vehicle, price: winningAmount }
+                          : session.vehicle;
+                        onStartEscrow(correctedVehicle);
+                      }}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs mt-1"
                     >
                       <CheckCircle2 className="w-4 h-4 mr-1.5" />

@@ -233,6 +233,28 @@ export function App() {
     );
   }, []);
 
+  // Per-sale escrow override handler - added per explicit direction:
+  // escrow shouldn't be unconditionally mandatory for every
+  // private-seller sale, an admin needs to enforce or revoke it per
+  // individual sale rather than only being able to change the blanket
+  // seller-type rule for everyone at once (that global rule already
+  // existed - see escrowRulesConfig.ts). Updates the app-level vehicles
+  // array specifically (not just AuctionsView's own local session
+  // state) so the override is reflected consistently everywhere a
+  // vehicle's escrow status is shown - VehicleCard, VehicleDetailModal,
+  // the auction lot itself - not just within the auction page. This is
+  // the same vehicles-vs-sessions dual-state consideration already
+  // found and fixed for price in this project's history; deliberately
+  // avoiding reintroducing that same class of gap here.
+  const handleUpdateVehicleEscrowOverride = useCallback(
+    (vehicleId: string, override: 'enforce' | 'revoke' | null) => {
+      setVehicles((prev) =>
+        prev.map((v) => (v.id === vehicleId ? { ...v, escrowOverride: override } : v))
+      );
+    },
+    []
+  );
+
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
     setQuickViewVehicle(null);
@@ -319,6 +341,7 @@ export function App() {
               onStartEscrow={handleStartEscrow}
               onQuickViewVehicle={handleOpenVehicleDetails}
               onUpdateVehicleAuctionStatus={handleUpdateVehicleAuctionStatus}
+              onUpdateVehicleEscrowOverride={handleUpdateVehicleEscrowOverride}
             />
           )}
 

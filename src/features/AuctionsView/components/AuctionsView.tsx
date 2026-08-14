@@ -30,6 +30,7 @@ interface AuctionsViewProps {
   onStartEscrow: (vehicle: Vehicle) => void;
   onQuickViewVehicle?: (vehicle: Vehicle) => void;
   onUpdateVehicleAuctionStatus?: (vehicleId: string, isAuction: boolean) => void;
+  onUpdateVehicleEscrowOverride?: (vehicleId: string, override: 'enforce' | 'revoke' | null) => void;
 }
 
 // Time remaining formatter helper
@@ -80,7 +81,8 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   onOpenAuth,
   onStartEscrow, 
   onQuickViewVehicle,
-  onUpdateVehicleAuctionStatus
+  onUpdateVehicleAuctionStatus,
+  onUpdateVehicleEscrowOverride
 }) => {
   // Auction sessions state initialized from mock service
   const [sessions, setSessions] = useState<AuctionSession[]>(INITIAL_AUCTION_SESSIONS);
@@ -477,6 +479,30 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
   }, [sessions]);
 
   // Execute a bid function
+  // Per-sale escrow override - sets/clears escrowOverride on this
+  // specific session's vehicle. Updates BOTH the local sessions state
+  // (so this page's own display reflects it immediately - the escrow
+  // badges shown on cards and in this detail modal both read from
+  // session.vehicle) AND calls onUpdateVehicleEscrowOverride to update
+  // the app-level vehicles array (so VehicleCard/VehicleDetailModal
+  // elsewhere in the app stay consistent too) - the same dual-update
+  // consideration already necessary for price consistency between
+  // these two independently-mutable state trees, applied here
+  // deliberately rather than only fixing the local display.
+  const handleSetEscrowOverride = (session: AuctionSession, override: 'enforce' | 'revoke' | null) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === session.id ? { ...s, vehicle: { ...s.vehicle, escrowOverride: override } } : s
+      )
+    );
+    if (selectedSession?.id === session.id) {
+      setSelectedSession({ ...session, vehicle: { ...session.vehicle, escrowOverride: override } });
+    }
+    onUpdateVehicleEscrowOverride?.(session.vehicle.id, override);
+    const label = override === 'enforce' ? 'enforced' : override === 'revoke' ? 'revoked' : 'reset to default';
+    showToast(`Escrow ${label} for "${session.vehicleTitle}"`, 'success');
+  };
+
   const executeBid = (session: AuctionSession, amount: number, bidder: string = 'Verified Bidder', location: string = 'Nairobi') => {
     if (amount <= session.currentBid) {
       showToast(`Bid must be higher than current bid of Ksh ${session.currentBid.toLocaleString()}`, 'info');
@@ -1473,6 +1499,66 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({
 
               return (
                 <div className="space-y-5 text-xs">
+                  {/* Per-sale escrow override - admin only. Escrow
+                      shouldn't be unconditionally mandatory for every
+                      private-seller sale by blanket rule alone; this
+                      lets an admin enforce or revoke it for this
+                      specific vehicle/sale, independent of (and taking
+                      precedence over) the global seller-type rule in
+                      Escrow Rules Config. Shows the vehicle's actual
+                      current seller type and its resulting DEFAULT
+                      requirement (from the global config) alongside the
+                      override controls, so an admin isn't guessing what
+                      they're overriding away from. */}
+                  {isPageAdmin && (
+                    <div className="p-3 bg-[#F5F2EB] rounded-xl border border-slate-300 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#1E3063]" />
+                          Admin: Per-Sale Escrow Override
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-500">
+                          {selectedSession.vehicle.escrowOverride === 'enforce' ? 'Enforced for this sale' :
+                           selectedSession.vehicle.escrowOverride === 'revoke' ? 'Revoked for this sale' :
+                           'Using default rule'}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSetEscrowOverride(selectedSession, 'enforce')}
+                          className={`flex-1 py-1.5 rounded-lg text-[10px] font-extrabold transition-all ${
+                            selectedSession.vehicle.escrowOverride === 'enforce'
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-white text-emerald-700 border border-emerald-300 hover:bg-emerald-50'
+                          }`}
+                        >
+                          Enforce Escrow
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleSetEscrowOverride(selectedSession, 'revoke')}
+                          className={`flex-1 py-1.5 rounded-lg text-[10px] font-extrabold transition-all ${
+                            selectedSession.vehicle.escrowOverride === 'revoke'
+                              ? 'bg-rose-600 text-white'
+                              : 'bg-white text-rose-700 border border-rose-300 hover:bg-rose-50'
+                          }`}
+                        >
+                          Revoke Escrow
+                        </button>
+                        {selectedSession.vehicle.escrowOverride && (
+                          <button
+                            type="button"
+                            onClick={() => handleSetEscrowOverride(selectedSession, null)}
+                            className="px-3 py-1.5 rounded-lg text-[10px] font-extrabold bg-white text-slate-600 border border-slate-300 hover:bg-slate-50"
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {/* VERIFICATION PASS BANNER OR REGISTRATION GATE */}
                   {verifiedPass ? (
                     <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-300 flex items-start justify-between gap-3 shadow-2xs">

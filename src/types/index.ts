@@ -328,6 +328,17 @@ export interface Vehicle {
   inspectionPassed?: boolean;
   inspectionReportId?: string;
   escrowEligible?: boolean;
+  /** Per-vehicle admin override for escrow requirement on this specific
+   * sale, independent of the global EscrowRulesConfig seller-type rule.
+   * 'enforce' = escrow required for this vehicle regardless of the
+   * global rule. 'revoke' = escrow not offered for this vehicle
+   * regardless of the global rule. undefined/null = no override, falls
+   * through to the global rule as before. Added per explicit direction:
+   * escrow shouldn't be mandatory for every private-seller sale
+   * unconditionally - an admin needs to be able to enforce or revoke it
+   * per individual sale, not just change the blanket seller-type rule
+   * for everyone at once. */
+  escrowOverride?: 'enforce' | 'revoke' | null;
   financeAvailable?: boolean;
   inspectionBookingAvailable?: boolean;
   responseTime?: string;
