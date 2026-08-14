@@ -5,7 +5,7 @@
 
 ## 0. Headline Result, Stated Plainly
 
-**No code was deleted in this pass.** Every candidate identified across `docs/fusion/01`, `04`, `06`, and `07` was run through the required 9-step verification process. The evidence that emerged does not support deletion for any of them under this project's own rules ("do not delete anything before proving it is obsolete," "prefer the smallest safe correction," "do not create replacement architecture unless the existing architecture is demonstrably broken"). This is a legitimate outcome of a rigorous audit, not a failure to do the work — forcing deletions the evidence doesn't support would violate the same rules this phase exists to uphold. Every classification below explains exactly why.
+**Round 1 of this phase found no code meeting the bar for deletion.** Round 2 (this update) found one: `backend/services/auction.service.js`, a genuine duplicate of the actively-used `realtime/auctionEngine.js`, was deleted after full 9-step verification — including a documentation reference that initially looked like it might overturn the conclusion, and was checked directly rather than trusted at face value (see §3.5). Everything else identified across `docs/fusion/01`, `04`, `06`, and `07` still does not meet this project's own bar for deletion ("do not delete anything before proving it is obsolete," "prefer the smallest safe correction"). One real, evidence-backed deletion plus several honest KEEP/DEPRECATE/MERGE-deferred classifications is the actual, complete result of this phase — not padded with unjustified removals, and not artificially limited to zero just because the first pass found none.
 
 ---
 
@@ -74,6 +74,8 @@ These are three separate filesystem-level git clones/checkouts, not files tracke
 
 ## 2. Verification Run This Phase
 
+**Round 2 addition:** after deleting `auction.service.js`, `node --check` was re-run across every remaining backend `.js` file (not just the deleted file's former importers) — 0 syntax errors. Frontend was untouched this round (the deletion was backend-only) but re-confirmed clean regardless, not assumed unaffected.
+
 | Check | Result |
 |---|---|
 | Backend syntax validation (`node --check` on every `.js` file under `backend/`, excluding `node_modules`/`coverage`) | **0 syntax errors**, all files |
@@ -91,6 +93,8 @@ These are three separate filesystem-level git clones/checkouts, not files tracke
 
 | Candidate | Classification | Action Taken |
 |---|---|---|
+| `backend/services/auction.service.js` | DELETE | **Removed.** Duplicate of `realtime/auctionEngine.js` (identical exported function names), confirmed the weaker/unused side via full 9-step verification, including checking and disproving a documentation claim that initially suggested the opposite conclusion |
+| `/api/new-admin/auction-integrity` naming | KEEP | Cosmetic naming inconsistency only; not a duplicate system, not acted on |
 | `inspectionBusinessCenter/` | DEPRECATE | Documented; code and Dockerfile references left untouched |
 | `digitalInspection/` | DEPRECATE | Documented; code and Dockerfile references left untouched |
 | Governance schema/model mismatch | MERGE (deferred) | Documented; confirmed same pattern in AI domain; full per-domain audit needed before any code change |
@@ -101,6 +105,32 @@ These are three separate filesystem-level git clones/checkouts, not files tracke
 
 ---
 
-## 4. What This Phase Deliberately Did Not Attempt
+## 3.5 Round 2 — A Genuine Deletion, Found and Verified This Pass
+
+### `backend/services/auction.service.js`
+**Classification: DELETE (executed this pass)**
+
+While checking the "duplicate auction systems" item from this task's own attention list, found that `services/auction.service.js` and `realtime/auctionEngine.js` export **identical function names** (`startAuction`, `endAuction`, `placeBid`) — a genuine duplicate implementation, not two files that happen to share a naming convention.
+
+**9-step verification, all clean except one — and that one nearly changed the conclusion:**
+1. Imports (backend-wide): zero
+2. Dynamic references: zero
+3. Route references: zero
+4. Test references: zero
+5. Broadest backend consumer search: zero
+6. Frontend consumers: zero
+7. **Documentation references: one — `RC1_ENGINEERING_REPORT.md`**, which describes `auction.service.js` as "Auction state management with Redis" and references a "Redis migration" applied to it
+8. Build configuration: zero
+9. Deployment configuration: zero
+
+Step 7 was taken seriously rather than dismissed — a documentation hit describing Redis integration and a recent migration effort looked like strong evidence this file might actually be the *intended, newer* implementation, with `realtime/auctionEngine.js` as the one that should be considered legacy. Before concluding anything, this was checked directly rather than trusted from the doc's wording alone: **`auction.service.js` contains zero Redis code.** `realtime/auctionEngine.js`, by contrast, has extensive real Redis usage (distributed locking with `NX`/`PX` flags, and a specific anti-sniping feature via `applyRedisSnipingProtection`), is more than twice the size (463 vs. 200 lines), is the file actually imported by `server.js` plus two route files, and was committed more recently (2026-07-16 vs. 2026-07-13). The engineering report's description doesn't match the file it's attached to — it's stale or was written aspirationally, not an accurate account of the current state of `auction.service.js`.
+
+**This reversed nothing in the end, but the reversal was checked for directly, not assumed away** — exactly the kind of verification this phase's own required process exists to force before an irreversible action.
+
+**Action taken:** `backend/services/auction.service.js` deleted. Backend syntax validation re-run across every remaining `.js` file (`node --check`) immediately after deletion: 0 errors. `realtime/auctionEngine.js` — confirmed the stronger, genuinely-used implementation — was not touched.
+
+**Also checked this pass, no action needed:** "duplicate admin implementations" — `/api/new-admin/auction-integrity` is a single, inconsistently-named route path within the existing admin route structure, not a second competing admin system. `supportTicketAdminController`, `bulkAdminController`, and `auctionAdminRoutes` are each genuinely distinct admin sub-domains, not duplicates of `adminRoutes.js`. No consolidation action warranted; the `/api/new-admin/` naming inconsistency is cosmetic and noted here rather than acted on, since renaming a live, working route path is out of scope for a "do not rename everything unnecessarily" phase.
+
+
 
 Per this task's explicit "do not proceed into feature development" instruction, and given the evidence above didn't support any safe deletion: no frontend-backend connection work, no schema reconciliation, no Dockerfile changes, no new route wiring. Phase 2 (whenever undertaken) should likely start with the deferred governance/AI schema question (§1.2) — specifically, completing the per-domain schema audit that only 2 of ~11 clusters have received — since that's the highest-value next step this phase's evidence points to, not a database migration or connection attempt made blindly.
