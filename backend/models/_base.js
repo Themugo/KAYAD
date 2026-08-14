@@ -25,6 +25,15 @@ const TABLE_MAP = {
   SearchAnalytics: "search_analytics", ListingQuality: "listing_quality",
   MarketplaceHealth: "marketplace_health", FraudDetection: "fraud_detection",
   ConversionFunnel: "conversion_funnels", Organization: "organizations",
+  // Role added (fusion Phase 2): backend/db/identity.schema.sql defines
+  // a real, complete `roles` table (role_code, role_name, scope,
+  // organization_id FK, permissions JSONB, is_active/is_system flags) -
+  // confirmed no model anywhere in this file referenced it, the
+  // opposite of this codebase's more common "model expects a table
+  // that doesn't exist" pattern. Purely additive: no existing entry
+  // changed, no existing caller affected, since nothing previously
+  // referenced a Role model at all.
+  Role: "roles",
   LedgerAccount: "ledger_accounts",
   LedgerEntry: "ledger_entries",
   ReconciliationRecord: "reconciliation_records",
