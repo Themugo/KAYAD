@@ -2,6 +2,7 @@ import React, { Component, type ReactNode, type ErrorInfo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
+import { AuthProvider } from './context/AuthContext';
 import './index.css';
 
 // Simple error boundary for the entire app
@@ -87,7 +88,13 @@ if (root) {
     <React.StrictMode>
       <ErrorBoundary>
         <BrowserRouter>
-          <App />
+          {/* AuthProvider wraps the whole app (KAYAD Fusion Phase 3) -
+              real backend-authoritative auth state now lives here,
+              above App itself, so App.tsx's own user state can be
+              replaced with useAuth() rather than a local useState. */}
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </ErrorBoundary>
     </React.StrictMode>

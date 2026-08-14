@@ -11,6 +11,7 @@ import { Vehicle, ChatMessage, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl, setAuctionDetailUrl } from './utils/navigation';
 import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
 import { isEscrowApplicable } from './utils/escrow';
+import { useAuth } from './context/AuthContext';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
 // user navigates there, instead of all being bundled into the initial load.
@@ -55,8 +56,14 @@ export function App() {
   const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Authenticated User State (null = anonymous public visitor)
-  const [user, setUser] = useState<UserProfile | null>(null);
+  // Authenticated User State - now backend-authoritative (KAYAD Fusion
+  // Phase 3), sourced from AuthContext (wrapping the whole app in
+  // main.tsx) instead of local component state. Previously this was a
+  // bare `useState<UserProfile | null>(null)` that AuthModal set
+  // directly by picking a role from a local demo list, with zero
+  // backend involvement - confirmed in this project's own earlier
+  // audit phases (docs/fusion/01, 05) to be the actual prior behavior.
+  const { user, logout: authLogout, isRestoringSession } = useAuth();
 
   // Interactive States
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES);
@@ -298,7 +305,7 @@ export function App() {
         onCountyChange={(c) => setSelectedCounty(c)}
         onOpenAuth={() => setShowAuthModal(true)}
         onOpenAlerts={() => setShowAlertsModal(true)}
-        onLogout={() => setUser(null)}
+        onLogout={() => authLogout()}
       />
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
@@ -552,7 +559,6 @@ export function App() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onLogin={(loggedInUser) => setUser(loggedInUser)}
       />
 
       <PriceAlertsModal

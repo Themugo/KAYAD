@@ -34,6 +34,7 @@ vi.mock('../context/BrandingContext', () => ({
 }));
 
 import App from '../App';
+import { AuthProvider } from '../context/AuthContext';
 
 describe('App', () => {
   afterEach(() => {
@@ -41,7 +42,21 @@ describe('App', () => {
   });
 
   it('renders without crashing', () => {
-    const { container } = render(<App />);
+    // App now calls useAuth() internally (KAYAD Fusion Phase 3), so it
+    // must be wrapped in AuthProvider here the same way main.tsx wraps
+    // it for real - matches the actual app's provider tree rather than
+    // testing App in isolation from a provider it now genuinely depends
+    // on. AuthProvider's own session-restoration fetch() call is
+    // expected to fail in this test environment (no backend reachable,
+    // no fetch mock provided) - confirmed this is handled gracefully
+    // (caught, logged via console.warn, user set to null) rather than
+    // thrown further, so this remains a true smoke test, not one that
+    // requires mocking the auth network call to pass.
+    const { container } = render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    );
     // App renders Suspense fallback while pages are loading. Either way,
     // the tree commits without throwing — that is the smoke-test contract.
     expect(container.firstChild).toBeTruthy();
