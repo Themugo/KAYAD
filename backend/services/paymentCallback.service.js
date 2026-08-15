@@ -3,6 +3,7 @@ import { sendNotification } from "../services/notification.service.js";
 import { sendDigitalReceipt } from "../services/receiptService.js";
 import { getIO } from "../utils/io.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
@@ -174,10 +175,43 @@ export const handleMpesaCallback = async (callbackData) => {
           const car = await findById("cars", bid.carId);
 
           if (car) {
-            await update("cars", car.id, {
-              currentBid: bid.amount,
-              highestBidder: bid.user,
-            });
+            // Fixed (Phase 8): this was an unconditional
+            // update("cars", ...) with no protection against a
+            // concurrent M-Pesa callback for a different bid on the
+            // same car overwriting a genuinely higher confirmed bid -
+            // the exact race condition already identified and fixed
+            // for the mock-payment path in controllers/bidController.js
+            // (see that file's own detailed comment on this same
+            // issue), but never applied here, in the real production
+            // M-Pesa callback path. Two concurrent successful payments
+            // for different bids on the same car could previously
+            // result in the lower bid's callback executing last and
+            // silently overwriting the car's currentBid/highestBidder
+            // with a lower value than a bid that had already been
+            // confirmed paid - both bids would show status "paid" in
+            // the bids table, but only one (not necessarily the higher
+            // one) would be reflected as the car's actual current
+            // winning bid. Fixed the same way as the proven mock-path
+            // fix: condition the update on currentBid still being at
+            // or below this bid's amount, so a second confirmed
+            // payment can never regress the car's recorded highest
+            // bid. If the conditional update affects zero rows (a
+            // higher bid was already recorded), this bid's payment is
+            // still correctly marked "paid" above - the buyer isn't
+            // charged incorrectly - but the car's displayed
+            // current-bid state is protected from ever moving
+            // backwards, which is the actual data-integrity property
+            // that matters here.
+            const sb = getSupabase();
+            const { error: raceCheckError } = await sb
+              .from("cars")
+              .update({ current_bid: bid.amount, highest_bidder_id: bid.user })
+              .eq("id", car.id)
+              .lte("current_bid", bid.amount);
+
+            if (raceCheckError) {
+              logWarn("Bid car-state update failed", { carId: car.id, bidId: bid.id, error: raceCheckError.message });
+            }
 
             if (getIO()) {
               getIO().to(`car_${car.id}`).emit("auctionUpdate", {
@@ -187,6 +221,21 @@ export const handleMpesaCallback = async (callbackData) => {
             }
           }
 
+          // Note (Phase 8, found while fixing the race condition above,
+          // not addressed here): this queries an "auctions" table that
+          // does not exist in the real, authoritative schema
+          // (supabase/migrations/..._foundational_tables.sql.sql -
+          // auction state is denormalized directly onto cars, per
+          // docs/fusion/phase-05-schema-correction.md). This findOne
+          // call would return null against a real database (no error,
+          // since findOne on a genuinely missing table would fail
+          // differently - but no live database exists to confirm the
+          // exact failure mode), meaning the subsequent
+          // update("auctions", ...) branch is presently unreachable in
+          // practice. Not fixed this phase - flagged for the same
+          // schema-reconciliation work already tracked elsewhere in
+          // this program's documentation, rather than patched in
+          // isolation here.
           const auction = await findOne("auctions", { carId: bid.carId, status: "pending_payment" });
           if (auction) {
             await update("auctions", auction.id, { status: "completed", paidAt: new Date() });
