@@ -39,6 +39,7 @@ import { AuthProvider } from '../context/AuthContext';
 describe('App', () => {
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it('renders without crashing', () => {
@@ -60,5 +61,30 @@ describe('App', () => {
     // App renders Suspense fallback while pages are loading. Either way,
     // the tree commits without throwing — that is the smoke-test contract.
     expect(container.firstChild).toBeTruthy();
+  });
+
+  it('Phase 7: attempts to load real vehicle data from GET /api/cars on mount', () => {
+    // Confirms App.tsx's new hybrid data-loading effect genuinely calls
+    // the real backend endpoint - not asserting on deep UI content
+    // (fragile given this component's size), just that the real
+    // network call this phase added is actually made, matching the
+    // same verification standard used throughout this program's other
+    // API client tests (assert on the real call, not just "doesn't
+    // crash").
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ success: false }),
+    });
+    global.fetch = fetchMock;
+
+    render(
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    );
+
+    const carsCall = fetchMock.mock.calls.find(([url]) => String(url).includes('/api/cars'));
+    expect(carsCall).toBeTruthy();
   });
 });

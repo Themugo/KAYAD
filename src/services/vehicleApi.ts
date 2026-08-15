@@ -29,6 +29,8 @@
  * correction was good news.
  */
 
+import type { Vehicle } from '../types';
+
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
 /** Raw shape of a single row from the backend's real `cars` table
@@ -195,39 +197,43 @@ export async function getCarById(id: string): Promise<BackendCar | null> {
  * sellerRating and full inspection detail remain honest gaps - the
  * backend genuinely does not have this data on the cars row, and nothing
  * here fabricates it. */
-export function mapBackendCarToVehicle(car: BackendCar): {
-  id: string;
-  title: string;
-  make: string;
-  model: string;
-  year: number;
-  vin: string;
-  price: number;
-  mileage: number;
-  location: string;
-  bodyStyle: string;
-  transmission: string;
-  fuelType: string;
-  condition: string;
-  images: string[];
-  image?: string;
-  description: string;
-  features: string[];
-  sellerId: string;
-  sellerName: string;
-  sellerType: 'Verified Dealer' | 'Private Seller';
-  isAuction: boolean;
-  // Real auction fields, now genuinely populated (Phase 5 correction) -
-  // not defaulted, since they actually exist on the car row.
-  currentBid?: number;
-  bidsCount?: number;
-  auctionEndsAt?: string;
-  // Real, though partial, verification/inspection signals that DO
-  // exist directly on the row (not the full inspection record).
-  verified: boolean;
-  isDealerCertified: boolean;
-} {
+/**
+ * Maps a real backend car row to this frontend's complete, real
+ * Vehicle type (src/types/index.ts). Rewritten in Phase 7 to return a
+ * genuinely complete Vehicle object - the pre-Phase-7 version returned
+ * a partial object missing several fields the real Vehicle interface
+ * requires (engine, horsepower, exteriorColor, interiorColor,
+ * listingType, sellerRating, savedCount, status, createdAt), which
+ * would have caused real problems the moment any component actually
+ * consumed it (this was never caught earlier because nothing called
+ * this function from real UI code until this phase).
+ *
+ * Every field genuinely present on the backend is mapped directly -
+ * nothing here invents a value the backend didn't actually send.
+ * Fields the backend's `cars` row simply does not have at all
+ * (sellerName/sellerAvatar/sellerRating - only dealer_id, a foreign
+ * key, exists; horsepower; separate exterior/interior color, only a
+ * single `color` column exists; full inspection detail) use an
+ * honest, clearly-commented default rather than a fabricated
+ * plausible-looking value - consistent with this function's approach
+ * since it was first written (Phase 4/5).
+ */
+export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   const imageUrls = (car.images || []).map((img) => img.url).filter(Boolean);
+  const conditionValue = (car.condition || 'Good') as Vehicle['condition'];
+  const bodyStyleValue = (car.body_type || 'Sedan') as Vehicle['bodyStyle'];
+  const transmissionValue = (car.transmission || 'Automatic') as Vehicle['transmission'];
+  const fuelTypeValue = (car.fuel || 'Petrol') as Vehicle['fuelType'];
+  // These 4 casts assume the backend's free-text column values line up
+  // with this frontend's stricter union types - true for the seed/demo
+  // data these columns were designed around, but not enforced by any
+  // schema constraint on the backend side (confirmed: these are plain
+  // TEXT columns, no CHECK constraint restricting their values the way
+  // e.g. cars.status has one). A backend value outside the expected
+  // union renders with an unrecognized value at runtime rather than
+  // crashing - flagged here as a real, known risk rather than silently
+  // assumed safe.
+
   return {
     id: car.id,
     title: car.title,
@@ -238,10 +244,29 @@ export function mapBackendCarToVehicle(car: BackendCar): {
     price: Number(car.price),
     mileage: car.mileage ?? 0,
     location: car.location_city || '',
-    bodyStyle: car.body_type || '',
-    transmission: car.transmission || '',
-    fuelType: car.fuel || '', // real column is "fuel", not "fuel_type"
-    condition: car.condition || '',
+    bodyStyle: bodyStyleValue,
+    transmission: transmissionValue,
+    fuelType: fuelTypeValue,
+    // engine: real column exists (car.engine) but was never mapped by
+    // the pre-Phase-7 version of this function - genuine oversight,
+    // fixed here now that a real Vehicle return type surfaced it.
+    engine: car.engine || '',
+    // horsepower: no equivalent column exists anywhere on the real
+    // cars row - honest default, not fabricated.
+    horsepower: 0,
+    // exteriorColor/interiorColor: the backend has a single `color`
+    // column, not separate exterior/interior fields - real value used
+    // for exterior (the far more common real-world distinction to
+    // actually have), interior left as an honest default.
+    exteriorColor: car.color || '',
+    interiorColor: '',
+    condition: conditionValue,
+    // listingType: inferred from the real has_auction field rather
+    // than fabricated from nothing - 'auction' when has_auction is
+    // true, 'fixed' otherwise. This IS a real, if imperfect, signal
+    // (unlike horsepower/interiorColor above, which have no backend
+    // signal at all) - not the same category of default.
+    listingType: car.has_auction ? 'auction' : 'fixed',
     images: imageUrls,
     image: imageUrls[0] || undefined,
     description: car.description || '',
@@ -249,13 +274,25 @@ export function mapBackendCarToVehicle(car: BackendCar): {
     // --- still-genuine gaps: not present on the cars row at all ---
     sellerId: car.dealer_id || '',
     sellerName: 'Unknown Seller', // requires a separate users/dealers lookup by dealer_id - not performed here
-    sellerType: car.dealer_id ? 'Verified Dealer' : 'Private Seller', // best-effort inference, not a real backend field
-    // --- corrected in Phase 5: these ARE real, denormalized fields ---
+    sellerRating: 0, // no rating data exists on the cars row or via any join performed here
+    sellerType: car.dealer_id ? 'Verified Dealer' : 'Private Seller', // best-effort inference only, not a real backend field
+    isDealerCertified: Boolean(car.is_verified_dealer),
+    verified: Boolean(car.is_verified_dealer),
     isAuction: Boolean(car.has_auction),
     currentBid: car.current_bid != null ? Number(car.current_bid) : undefined,
     bidsCount: car.bids_count ?? undefined,
     auctionEndsAt: car.auction_end || undefined,
-    verified: Boolean(car.is_verified_dealer),
-    isDealerCertified: Boolean(car.is_verified_dealer),
+    savedCount: 0, // no favorites-count aggregation performed by getCars - would require a separate query against the favorites table
+    // status: backend has a real `status` column (confirmed: CHECK
+    // constraint restricts it to 'available'/'sold'/'pending'/
+    // 'reserved'/'hidden'/'draft' - see supabase/migrations/
+    // ..._foundational_tables.sql.sql) but its value set doesn't
+    // exactly match this frontend's Vehicle.status union
+    // ('active'/'sold'/'pending'/'draft') - 'available' maps to
+    // 'active' as the closest equivalent; anything else not in the
+    // frontend union falls back to 'active' rather than crashing.
+    status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',
+    createdAt: car.created_at || new Date().toISOString(),
   };
 }
+

@@ -24,6 +24,25 @@ const logPaymentEvent = (paymentId, eventType, payload = {}) => {
   );
 };
 
+// Added (Phase 7): companion to logPaymentEvent, updates the
+// payment_attempts row created in paymentService.js's initiatePayment()
+// (also Phase 7) to reflect the real outcome once the callback
+// resolves. Looked up by checkoutRequestId since that's the value both
+// sides share - paymentId isn't known to the attempt-creation code
+// path until after the payments row itself is created, so
+// checkoutRequestId is the natural join key here, matching how
+// payments/mpesa_transactions themselves are already looked up
+// throughout this file. Fire-and-forget, same reasoning as
+// logPaymentEvent - attempt-status bookkeeping must never be able to
+// affect whether a real payment is correctly marked paid/failed.
+const updatePaymentAttemptStatus = (checkoutRequestId, status, extra = {}) => {
+  findOne("payment_attempts", { checkoutRequestId })
+    .then((attempt) => {
+      if (attempt) return update("payment_attempts", attempt.id, { status, ...extra });
+    })
+    .catch((e) => logWarn("Payment attempt status update failed", { checkoutRequestId, status, error: e.message }));
+};
+
 const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -69,6 +88,7 @@ export const handleMpesaCallback = async (callbackData) => {
         status: "failed",
         resultDesc: stk.ResultDesc || "M-Pesa transaction failed",
       });
+      updatePaymentAttemptStatus(checkoutId, "failed", { failureReason: stk.ResultDesc || "M-Pesa transaction failed" });
 
       await sendNotification({
         userId: payment.user,
@@ -115,6 +135,7 @@ export const handleMpesaCallback = async (callbackData) => {
     });
 
     logPaymentEvent(payment.id, "marked_paid", { receipt });
+    updatePaymentAttemptStatus(checkoutId, "success", { providerReference: receipt });
 
     let userDoc = null;
     try {

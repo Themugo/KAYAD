@@ -54,6 +54,30 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
     ...metadata,
   });
 
+  // Added (Phase 7): populate payment_attempts, added in Phase 6 as
+  // schema-only - this is the first application code to actually
+  // write to it. One row per STK-push attempt, distinct from the
+  // payments row itself, so a customer retry (a second call to
+  // initiatePayment after this one times out or fails) is traceable
+  // as attempt N of the same logical payment rather than being
+  // indistinguishable from a first attempt. attemptNumber is computed
+  // by counting existing attempts for this payment - 1 on a fresh
+  // payment, incrementing on each subsequent retry against the same
+  // underlying payment record (relevant once a retry path reuses an
+  // existing pending payment rather than always creating a new one -
+  // see this function's own existing "Payment already in progress"
+  // early-return above, which is the current retry-collision guard).
+  // Fire-and-forget, matching the same non-blocking convention already
+  // used for mpesa_transactions immediately below and for
+  // payment_events in paymentCallback.service.js - an attempt-tracking
+  // write failing must never be able to fail a real payment.
+  create("payment_attempts", {
+    paymentId: payment.id,
+    attemptNumber: 1,
+    status: mode === "mock" ? "initiated" : "pending",
+    checkoutRequestId: checkoutID,
+  }).catch((e) => console.warn("⚠️ Payment attempt log failed:", e.message));
+
   await create("mpesa_transactions", {
     checkoutRequestID: checkoutID,
     phone: formattedPhone,

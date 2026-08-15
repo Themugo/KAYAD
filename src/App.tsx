@@ -12,6 +12,7 @@ import { getVehicleIdFromUrl, setVehicleDetailUrl, setAuctionDetailUrl } from '.
 import { INITIAL_AUCTION_SESSIONS } from './data/mockAuctions';
 import { isEscrowApplicable } from './utils/escrow';
 import { useAuth } from './context/AuthContext';
+import { getCars, mapBackendCarToVehicle } from './services/vehicleApi';
 
 // Views — lazy-loaded so each is its own chunk, downloaded only when the
 // user navigates there, instead of all being bundled into the initial load.
@@ -67,6 +68,13 @@ export function App() {
 
   // Interactive States
   const [vehicles, setVehicles] = useState<Vehicle[]>(INITIAL_VEHICLES);
+  // Phase 7: tracks which data source vehicles actually came from -
+  // exposed (not hidden) so a future UI indicator can show it if
+  // desired, and so this isn't a silent swap that misrepresents demo
+  // data as live. Starts 'demo' (matching the initial useState above)
+  // and flips to 'live' only if the real backend call below genuinely
+  // succeeds with at least one real vehicle.
+  const [vehicleDataSource, setVehicleDataSource] = useState<'live' | 'demo'>('demo');
   const [savedVehicles, setSavedVehicles] = useState<string[]>(['v1', 'v2']);
   const [comparedVehicles, setComparedVehicles] = useState<string[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
@@ -108,6 +116,49 @@ export function App() {
     'dealers', 'dashboard', 'chat', 'admin', 'support', 'seller-platform',
     'seller-dashboard',
   ]), []);
+
+  // Phase 7: attempt to load real vehicle data from the backend on
+  // mount. This is a hybrid, honest-fallback approach, not a full
+  // replacement of mock data - given no live backend is reachable
+  // anywhere in this program's current environment (the standing
+  // constraint across every phase), a network failure here is the
+  // expected, common case, not an edge case to alarm about. On
+  // success, real vehicles replace the initial mock set and
+  // vehicleDataSource flips to 'live'. On any failure (network error,
+  // empty result), the existing INITIAL_VEHICLES mock data - already
+  // set as this state's initial value - is left in place unchanged,
+  // and vehicleDataSource stays 'demo'. Per this program's established
+  // principle (Phase 6: "never fake successful payments in fallback
+  // mode"), applied here to data rather than payments: this never
+  // silently presents mock data as if it were real - the
+  // vehicleDataSource flag exists specifically so that distinction
+  // remains visible to the rest of the app, even though no UI
+  // component surfaces it yet (a natural next step, not built this
+  // phase).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await getCars({ limit: 50 });
+        const rawCars = res.data && res.data.length > 0 ? res.data : res.cars;
+        if (!cancelled && rawCars && rawCars.length > 0) {
+          setVehicles(rawCars.map(mapBackendCarToVehicle));
+          setVehicleDataSource('live');
+        }
+      } catch (err) {
+        // Expected in this project's current state (no deployed
+        // backend) - logged for visibility during development/
+        // debugging, not surfaced as a user-facing error, since the
+        // mock-data experience remains fully functional as a fallback.
+        console.warn('KAYAD vehicles: falling back to demo data', err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (!VALID_VIEWS.has(activeNav)) {
       setActiveNav('marketplace');
