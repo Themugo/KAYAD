@@ -67,6 +67,28 @@ export const FIELD_ALIASES = {
     isAuction: "has_auction",
     dealer: "dealer_id",
     city: "location_city",
+    // Added (Fusion Phase 6): carController.js's getCars/createCar/
+    // updateCar all reference a plain "location" field directly
+    // (select("...location...") in getCars; body.location in create/
+    // update) - confirmed no alias existed for it, meaning every one
+    // of those calls was translating "location" via generic
+    // camelToSnake("location") = "location" (a no-op, since it's a
+    // single lowercase word) rather than to the real column. The real
+    // column, per supabase/migrations/..._foundational_tables.sql.sql
+    // (the authoritative source established in Phase 5's schema
+    // correction, cross-referenced against 3 independent sources), is
+    // location_city - there is no column literally named "location" on
+    // the real cars table. A comment inside carController.js itself
+    // claims "location is a flat TEXT column", but no migration
+    // (including every one after foundational_tables) ever defines or
+    // renames a column to that name - that comment was almost
+    // certainly written against the same stale backend/db/
+    // schema_clean.sql source Phase 5 already found and corrected.
+    // Fixed as a single alias entry (not by rewriting every call site
+    // individually) since mapKeyOut is the shared translation function
+    // used by both the read path (select/where/sort) and the write
+    // path (create/update) - one change corrects both.
+    location: "location_city",
     highestBidder: "highest_bidder_id",
   },
   users: {
