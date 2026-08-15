@@ -7,6 +7,23 @@ import { logInfo, logWarn, logError } from "../utils/logger.js";
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 2000;
 
+// Added (Phase 6, payment architecture): append-only audit trail via
+// the new payment_events table (supabase/migrations/
+// 20260815060000_payment_architecture_extension.sql.sql). Deliberately
+// fire-and-forget (caught, never awaited-and-thrown) - this is
+// observability, not control flow. A failure to write an audit event
+// must never be able to fail a real payment callback, the same
+// reasoning already applied throughout this file to notifications and
+// receipts (see the existing .catch((e) => logWarn(...)) pattern on
+// sendNotification/sendDigitalReceipt calls below - this function
+// follows that same established convention rather than introducing a
+// new one).
+const logPaymentEvent = (paymentId, eventType, payload = {}) => {
+  create("payment_events", { paymentId, eventType, payload }).catch((e) =>
+    logWarn("Payment event log failed", { paymentId, eventType, error: e.message }),
+  );
+};
+
 const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -28,6 +45,8 @@ export const handleMpesaCallback = async (callbackData) => {
     const checkoutId = stk.CheckoutRequestID;
     const success = stk.ResultCode === 0;
 
+    logPaymentEvent(null, "callback_received", { checkoutId, resultCode: stk.ResultCode });
+
     // ── Claim payment ──
     const payment = await findOne("payments", { checkoutRequestId: checkoutId, processed: false });
 
@@ -35,6 +54,7 @@ export const handleMpesaCallback = async (callbackData) => {
       const existing = await findOne("payments", { checkoutRequestId: checkoutId });
       if (existing && existing.status === "success") {
         logInfo("Callback idempotent: payment already succeeded", { checkoutId });
+        logPaymentEvent(existing.id, "duplicate_callback_ignored", { checkoutId });
         return existing;
       }
       logWarn("Payment not found or already claimed", { checkoutId });
@@ -82,14 +102,19 @@ export const handleMpesaCallback = async (callbackData) => {
     }
 
     if (Number(amount) !== Number(payment.amount)) {
+      logPaymentEvent(payment.id, "amount_mismatch_rejected", { expected: payment.amount, received: amount });
       throw new Error("Amount mismatch");
     }
+
+    logPaymentEvent(payment.id, "amount_verified", { amount });
 
     await update("payments", payment.id, {
       status: "success",
       mpesaReceipt: receipt,
       paidAt: new Date(),
     });
+
+    logPaymentEvent(payment.id, "marked_paid", { receipt });
 
     let userDoc = null;
     try {
@@ -196,6 +221,8 @@ export const handleMpesaCallback = async (callbackData) => {
         timeline: { depositReceived: true, depositReceivedAt: new Date() },
         history: [{ action: "Escrow created and funded", at: new Date() }],
       });
+
+      logPaymentEvent(payment.id, "escrow_funded", { escrowId: newEscrow?.id });
     }
 
     await sendNotification({

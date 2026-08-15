@@ -43,6 +43,12 @@ const TABLE_MAP = {
   AuctionIntegrityFlag: "auction_integrity_flags",
   AuctionRiskProfile: "auction_risk_profiles",
   MpesaTransaction: "mpesa_transactions", SmsBidder: "sms_bidders",
+  // Added (Phase 6, payment architecture): all 5 backed by real tables
+  // created in this same phase's migration
+  // (20260815060000_payment_architecture_extension.sql.sql) - purely
+  // additive, no existing entry changed.
+  PaymentProvider: "payment_providers", PaymentAttempt: "payment_attempts",
+  PaymentEvent: "payment_events", Refund: "refunds", WebhookEvent: "webhook_events",
   Contact: "contacts",
   NotificationAudit: "notification_audit",
   NtsaVerificationRequest: "ntsa_verification_requests",
