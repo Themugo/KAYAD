@@ -76,6 +76,25 @@ export function App() {
   // and flips to 'live' only if the real backend call below genuinely
   // succeeds with at least one real vehicle.
   const [vehicleDataSource, setVehicleDataSource] = useState<'live' | 'demo'>('demo');
+  // Phase 1 hardening, continued: exposes whether the initial real
+  // vehicle fetch (below) is still in flight - previously this effect
+  // had no loading state at all, only the eventual success/fallback
+  // result. Wired into VehicleMarketplace's own pre-existing
+  // isLoading/SkeletonGrid mechanism (see that component's
+  // isFetchingVehicles prop) rather than building a new loading UI
+  // from scratch.
+  //
+  // Defaults to false, not true, deliberately: mock data is already
+  // available instantly on first render (vehicles starts as
+  // INITIAL_VEHICLES, never empty) - showing a loading skeleton before
+  // content that's already ready to display would be a UX regression,
+  // not an improvement, especially since a network failure (this
+  // project's current common case) means the fetch never succeeds at
+  // all. This flag exists so a future refinement CAN show a small,
+  // non-blocking "checking for live listings" indicator without
+  // hiding the already-available demo content - not to gate content
+  // that doesn't need gating.
+  const [isFetchingVehicles, setIsFetchingVehicles] = useState<boolean>(false);
   // Phase 1 hardening: savedVehicles/comparedVehicles state and their
   // toggle handlers/derived lists moved into useVehicleCollections()
   // (src/hooks/useVehicleCollections.ts) - was previously 2 useState
@@ -149,6 +168,7 @@ export function App() {
   // phase).
   useEffect(() => {
     let cancelled = false;
+    setIsFetchingVehicles(true);
     (async () => {
       try {
         const res = await getCars({ limit: 50 });
@@ -163,6 +183,8 @@ export function App() {
         // debugging, not surfaced as a user-facing error, since the
         // mock-data experience remains fully functional as a fallback.
         console.warn('KAYAD vehicles: falling back to demo data', err);
+      } finally {
+        if (!cancelled) setIsFetchingVehicles(false);
       }
     })();
     return () => {
@@ -380,6 +402,7 @@ export function App() {
               onOpenAuth={() => setShowAuthModal(true)}
               user={user}
               isHomePage
+              isFetchingVehicles={isFetchingVehicles}
             />
           )}
 

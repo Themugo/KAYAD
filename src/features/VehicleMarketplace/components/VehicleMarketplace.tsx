@@ -34,6 +34,19 @@ interface VehicleMarketplaceProps {
    * customization panel and its effects (section visibility, accent
    * theme, trust-pillar text) are scoped to the real home page only. */
   isHomePage?: boolean;
+  /** True while the initial real vehicle-data fetch (App.tsx's
+   * GET /api/cars attempt, Fusion Phase 7) is still in flight.
+   * Accepted here but deliberately NOT wired to gate this component's
+   * own isLoading/SkeletonGrid mechanism (Phase 1 hardening,
+   * continued: an earlier version of this change did wire it in, then
+   * reconsidered - mock data is already valid and displayed instantly
+   * on first render, so blocking it behind a skeleton while a
+   * near-instant, usually-failing network call resolves would be a
+   * UX regression, not an improvement). Kept as an accepted prop so a
+   * future, non-blocking indicator (e.g. a small "checking for live
+   * listings" badge elsewhere in this component) can use it without
+   * needing a second round of prop-plumbing through App.tsx. */
+  isFetchingVehicles?: boolean;
 }
 
 interface SavedSearchPreset {
@@ -64,7 +77,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   onNavigate = () => {},
   onOpenAuth,
   user,
-  isHomePage = false
+  isHomePage = false,
+  isFetchingVehicles = false
 }) => {
   // Home page admin customization - scoped to the real home page only
   // (isHomePage), and its UI only rendered/reachable for admins

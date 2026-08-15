@@ -33,7 +33,7 @@ Moved verbatim - no logic changes, confirmed by 4 new dedicated tests (useVehicl
 
 Already consistent, verified rather than assumed: services/authApi.ts and services/vehicleApi.ts (Fusion Phases 3-7) already share one pattern - a typed error class with a kind field (network/server/not_found/etc.), credentials: 'include' on every request, and a consistent fetch-wrap-catch-throw shape. Confirmed by direct comparison of both files this phase; no divergence found, no change needed.
 
-Loading/error/empty states: AuthContext.tsx has isRestoringSession/isAuthenticating/authError (Fusion Phase 3). App.tsx's vehicle-loading effect (Fusion Phase 7) has an equivalent honest-fallback pattern but no explicit loading state exposed - the UI doesn't currently know "vehicles are being fetched" versus "vehicles are the demo set," only the eventual vehicleDataSource result. Not fixed this phase (would mean touching many render paths that consume vehicles) - named as a concrete, bounded P1 item for a future phase, not silently left unstated.
+Loading/error/empty states: AuthContext.tsx has isRestoringSession/isAuthenticating/authError (Fusion Phase 3). App.tsx's vehicle-loading effect (Fusion Phase 7) previously had an honest-fallback pattern but no explicit loading state exposed at all. **Fixed this phase, deliberately scoped**: added `isFetchingVehicles` state to App.tsx, wired as an optional prop into VehicleMarketplace's own pre-existing (previously never-triggered) `isLoading`/`SkeletonGrid` mechanism. An earlier version of this change wired the new state to actually gate the skeleton and was caught and reverted before finalizing: mock data is already valid and displayed instantly on first render (`vehicles` never starts empty), so blocking it behind a skeleton while a near-instant, usually-failing network call resolves would have been a UX regression, not an improvement. The state is tracked accurately (`true` at fetch start, `false` on completion) and passed through to the component, but intentionally not used to gate rendering yet - left available for a future, non-blocking indicator rather than forced into a blocking role it shouldn't have.
 
 ---
 
@@ -45,7 +45,11 @@ Already thoroughly documented in an earlier phase (docs/DATABASE_MIGRATION_PLAN.
 
 ## 12. Duplicated Backend Business Logic
 
-Already found and documented in an earlier phase (Phase 7): services/paymentService.js's confirmPayment()/failPayment() duplicate the real, live paymentCallback.service.js flow, confirmed to have zero actual callers. Not deleted this phase either - the full 9-step pre-deletion verification this program uses has still not been run against these two functions specifically. Carried forward as an open P2 item, not newly discovered here.
+Found in an earlier phase (Phase 7): services/paymentService.js's confirmPayment()/failPayment() duplicated the real, live paymentCallback.service.js flow. **Deleted in this continued session** after running the full 9-step verification this program requires before any deletion - all 9 steps returned zero real references (the only apparent matches, `confirmPaymentSchema`, are a different, unrelated validation-schema identifier).
+
+**A genuine finding surfaced while verifying this deletion, worth recording rather than discarding**: `CHANGES.md` (a prior session's own email-pipeline audit) documented `sendPaymentConfirmedEmail` as "Bound" via `confirmPayment()`. This is true as a statement about internal code structure (the dead function did call it) but doesn't contradict the deletion's safety, since `confirmPayment()` itself was never reachable. The real, practical consequence: **`sendPaymentConfirmedEmail` was never actually triggered by any real payment in production even before this deletion** - checked directly, its only two references anywhere in the backend were its own definition and the now-deleted dead function. The real callback path sends a digital receipt and a generic notification instead, covering the same underlying need (the buyer does get *a* confirmation) but not via this specific email template. Documented here as a known limitation, not fixed as part of this deletion - whether to wire the template into the real flow, or confirm it's itself now obsolete, is a separate decision.
+
+Also cleaned up as a direct, necessary consequence of the deletion (not a separate, riskier change): 4 now-unused imports (`sendDigitalReceipt`, `getIO`, `findById`, `update`, `logWarn`) removed from `paymentService.js`, confirmed via direct usage-count check that none were needed by the remaining `initiatePayment()` function.
 
 ---
 
@@ -109,7 +113,8 @@ render.yaml does not provision MPESA_ENV. Combined with the Phase 0 baseline's a
 | Frontend test suite | 185/185 passing (181 pre-existing + 4 new) |
 | Lint | Clean |
 | Production build | Succeeds |
-| Backend | Not modified this phase - no backend code changed |
+| Backend syntax validation (node --check, all files) | 0 errors (backend was modified in this phase's continuation - confirmPayment()/failPayment() deletion) |
+| Backend unit test suite (npm test, Jest) | 216/216 passing - confirms no regression from the deletion |
 
 ---
 
@@ -117,6 +122,14 @@ render.yaml does not provision MPESA_ENV. Combined with the Phase 0 baseline's a
 
 - Did not split adminRoutes.js - documented as the clear next candidate (section 13), not attempted blind.
 - Did not extract the remainder of App.tsx's 17 other state values into hooks - one safe, isolated extraction completed; the rest have denser interdependencies and are named as follow-up scope, not attempted here.
-- Did not delete confirmPayment()/failPayment() - still pending the 9-step verification this program requires before any deletion.
-- Did not add a loading-state indicator for vehicle data fetching (sections 7-9) - a real, bounded gap named for a future phase.
 - Did not modify render.yaml or any deployment configuration - the MPESA_ENV gap is reported, not fixed, since changing production deployment configuration without the ability to verify it live is outside this phase's safe scope.
+- Did not wire the new isFetchingVehicles state into any actual rendering-blocking UI - deliberately, per section 7-9 above, since doing so would have regressed the UX around already-available mock data. The state is real and accurate; using it to gate content is a separate, not-yet-justified decision.
+- Did not fix sendPaymentConfirmedEmail's disconnection from the real payment flow (found while deleting confirmPayment()/failPayment(), section 12) - documented as a known limitation, not treated as part of the dead-code deletion itself.
+
+## Continued This Session (Same Phase 1 Brief, Resumed)
+
+Two items from the original "did not do" list above were completed in a follow-up continuation of this same phase:
+
+- **confirmPayment()/failPayment() deleted** - the full 9-step verification was run (previously only planned), all 9 steps returned zero real references. 4 now-unused imports (sendDigitalReceipt, getIO, findById, update, logWarn) removed from paymentService.js as a direct, necessary consequence.
+- **Vehicle-fetching loading state added** - isFetchingVehicles in App.tsx, wired into VehicleMarketplace's pre-existing isLoading/SkeletonGrid mechanism as an accepted prop, deliberately not used to gate rendering (see above).
+

@@ -1,9 +1,11 @@
 // backend/services/paymentService.js — FIXED: emits socket events on confirmation
 import { stkPush } from "./mpesaService.js";
-import { sendDigitalReceipt } from "./receiptService.js";
-import { getIO } from "../utils/io.js";
-import { logWarn } from "../utils/logger.js";
-import { findById, findOne, create, update } from "../db/index.js";
+import { findOne, create } from "../db/index.js";
+// sendDigitalReceipt/getIO/findById/update/logWarn removed from these
+// imports (Phase 1 hardening, continued) - each was used only inside
+// confirmPayment()/failPayment(), deleted above as confirmed dead
+// code. initiatePayment() below (the real, live function) never
+// needed any of them.
 
 const formatPhone = (phone) => {
   if (!phone) return null;
@@ -96,103 +98,36 @@ export const initiatePayment = async ({ userId, carId, type, amount, phone, meta
   };
 };
 
-// ── CONFIRM (fires socket events) ─────────────────────────────
-export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => {
-  const payment = await findOne("payments", { checkoutRequestId: checkoutRequestID });
+// confirmPayment()/failPayment() removed (Phase 1 hardening,
+// continued): confirmed dead code via this program's full 9-step
+// verification process (imports, dynamic references, route
+// references, tests, broadest backend consumer search, frontend
+// consumers, documentation, build config, deployment config - all
+// zero real hits; the only matches were confirmPaymentSchema, a
+// different, unrelated validation schema identifier). The real, live
+// M-Pesa callback path (services/paymentCallback.service.js's
+// handleMpesaCallback()) has done this work independently since
+// before this deletion - idempotent claim, amount verification,
+// escrow/car updates, receipt/notification sending - confirmed in
+// Fusion Phase 6/7's own audits of that file.
+//
+// One genuine, concrete finding surfaced while verifying this
+// deletion, recorded here rather than silently discarded: CHANGES.md
+// (a prior session's own email-pipeline audit) documented
+// sendPaymentConfirmedEmail as "Bound" via confirmPayment() - true as
+// a statement about internal code structure (confirmPayment() did
+// call it), but not evidence this deletion was unsafe, since
+// confirmPayment() itself was never reachable from any route. The
+// real, practical consequence: sendPaymentConfirmedEmail was never
+// actually triggered by any real payment in production even before
+// this deletion - the real callback path sends a digital receipt
+// (sendDigitalReceipt) and a generic notification (sendNotification)
+// instead, which does cover the same underlying user need (payment
+// confirmation reaches the buyer), just not via this specific email
+// template. Documented in docs/PHASE1_ARCHITECTURE_HARDENING.md as a
+// known limitation, not fixed as part of this deletion - wiring
+// sendPaymentConfirmedEmail into the real flow (or confirming the
+// receipt/notification path is the intended design and this template
+// is itself now obsolete) is a separate decision, not a
+// dead-code-removal task.
 
-  if (!payment) throw new Error("Payment record not found");
-  if (payment.status === "success") return payment;
-
-  if (Number(amount) !== Number(payment.amount)) {
-    throw new Error(`Amount mismatch: expected ${payment.amount}, got ${amount}`);
-  }
-
-  const updatedPayment = await update("payments", payment.id, {
-    status: "success",
-    mpesaReceiptNumber: receipt,
-    mpesaReceipt: receipt,
-    paidAt: new Date().toISOString(),
-  });
-
-  await update("mpesa_transactions", payment.id, { status: "success", mpesaReceipt: receipt }).catch(
-    (e) => console.warn("⚠️ Payment service notification failed:", e.message),
-  );
-
-  // 📧 Payment confirmed email (fire-and-forget)
-  try {
-    const { sendPaymentConfirmedEmail } = await import("./email.service.js");
-    const user = await findById("users", payment.user, "email,name");
-    if (user?.email && typeof sendPaymentConfirmedEmail === "function") {
-      let carTitle = null;
-      if (payment.car) {
-        const carDoc = await findById("cars", payment.car, "title");
-        carTitle = carDoc?.title || null;
-      }
-      sendPaymentConfirmedEmail(user, updatedPayment, { title: carTitle }).catch((e) =>
-        logWarn("Payment confirmed email failed", { error: e.message }),
-      );
-    }
-  } catch (e) { logWarn("Payment email notification failed", { error: e.message }); }
-
-  // ── DIGITAL RECEIPT (email + SMS + WhatsApp) ──────────────
-  try {
-    const userDoc = await findById("users", payment.user, "email,name,phone");
-    if (userDoc) {
-      sendDigitalReceipt({
-        amount: payment.amount,
-        carTitle: payment.car?.toString() || "Vehicle",
-        mpesaReceipt: receipt || String(payment.id).slice(-8),
-        user: { email: userDoc.email, phone: userDoc.phone, id: userDoc.id },
-      }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
-    }
-  } catch (e) { logWarn("Digital receipt notification failed", { error: e.message }); }
-
-  // If escrow payment, mark escrow as held
-  if (payment.type === "escrow") {
-    const escrow = await findOne("escrows", { payment: payment.id });
-    if (escrow && escrow.status === "pending") {
-      await update("escrows", escrow.id, { status: "funded", fundedAt: new Date().toISOString() });
-    }
-  }
-
-  // If no escrow record exists (escrow disabled on car), mark car sold directly
-  if (payment.car) {
-    const car = await findById("cars", payment.car);
-    if (car && !car.escrowEnabled) {
-      await update("cars", car.id, { sold: true, status: "sold", isPaid: true, paymentStatus: "paid" });
-    }
-  }
-
-  // ── EMIT: user gets real-time confirmation ──────────────────
-  const io = getIO();
-  if (io) {
-    const payload = { checkoutID: checkoutRequestID, receipt, paymentId: payment.id };
-    io.to(`user_${payment.user}`).emit("paymentSuccess", payload);
-    if (payment.car) io.to(String(payment.car)).emit("paymentSuccess", payload);
-  }
-
-  return updatedPayment;
-};
-
-// ── FAIL ──────────────────────────────────────────────────────
-export const failPayment = async (checkoutRequestID, resultDesc = "") => {
-  const payment = await findOne("payments", { checkoutRequestId: checkoutRequestID });
-
-  if (!payment || payment.status === "success") return;
-
-  const updated = await update("payments", payment.id, { status: "failed", resultDesc });
-
-  const mpesaTxn = await findOne("mpesa_transactions", { checkoutRequestID: checkoutRequestID });
-  if (mpesaTxn) {
-    await update("mpesa_transactions", mpesaTxn.id, { status: "failed" }).catch((e) =>
-      console.warn("⚠️ Payment service notification failed:", e.message),
-    );
-  }
-
-  const io = getIO();
-  if (io) {
-    const payload = { checkoutID: checkoutRequestID, reason: resultDesc };
-    io.to(`user_${payment.user}`).emit("paymentFailed", payload);
-    if (payment.car) io.to(String(payment.car)).emit("paymentFailed", payload);
-  }
-};
